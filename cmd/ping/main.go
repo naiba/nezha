@@ -10,4 +10,9 @@ func main() {
 	output, err := cmd.Output()
 	log.Println("output:", string(output))
 	log.Println("err:", err)
+
+	cmd = exec.Command("ping", "qiongbi", "-c5")
+	output, err = cmd.Output()
+	log.Println("output:", string(output))
+	log.Println("err:", err)
 }
