@@ -1,2 +1,5 @@
-# NBackup
-Server backup platform
+# 哪吒面板
+
+服务器备份、探针、站点管理（反代、CGI、CDN）
+
+正在开发中
