@@ -17,7 +17,7 @@ import (
 func main() {
 	// Host info
 	hi, _ := host.Info()
-	fmt.Printf("「HostInfo」 platform:%v platformVersion:%v kernelArch:%v virtualizationSystem:%v\n", hi.OS, hi.PlatformVersion, hi.KernelArch, hi.VirtualizationSystem)
+	fmt.Printf("「HostInfo」 platform:%v platformVersion:%v kernelArch:%v virtualizationSystem:%v uptime:%v boottime:%v\n", hi.OS, hi.PlatformVersion, hi.KernelArch, hi.VirtualizationSystem, hi.Uptime, hi.BootTime)
 	// Memory
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
