@@ -4,8 +4,9 @@ import (
 	"context"
 	"log"
 
-	pb "github.com/EDDYCJY/go-grpc-example/proto"
 	"google.golang.org/grpc"
+
+	pb "github.com/p14yground/nezha/proto"
 )
 
 // Auth ..
@@ -27,20 +28,21 @@ func (a *Auth) RequireTransportSecurity() bool {
 func main() {
 	auth := Auth{
 		AppKey:    "naiba",
-		AppSecret: "nbsecret0",
+		AppSecret: "nbsecret",
 	}
 	conn, err := grpc.Dial(":5555", grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 	if err != nil {
 		panic(err)
 	}
 	defer conn.Close()
-	client := pb.NewSearchServiceClient(conn)
-	resp, err := client.Search(context.Background(), &pb.SearchRequest{
-		Request: "gRPC",
-	})
-	if err != nil {
-		log.Fatalf("client.Search err: %v", err)
-	}
+	client := pb.NewNezhaServiceClient(conn)
 
-	log.Printf("resp: %s", resp.GetResponse())
+	for i := 0; i < 3; i++ {
+		resp, err := client.ReportState(context.Background(), &pb.State{})
+		if err != nil {
+			log.Fatalf("client.Search err: %v", err)
+		}
+
+		log.Printf("resp: %s", resp)
+	}
 }

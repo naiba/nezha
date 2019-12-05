@@ -2,31 +2,34 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 
-	pb "github.com/EDDYCJY/go-grpc-example/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
+
+	pb "github.com/p14yground/nezha/proto"
 )
 
-// SearchService ..
-type SearchService struct {
+// NezhaService ..
+type NezhaService struct {
 	auth *Auth
 }
 
-// Search ..
-func (s *SearchService) Search(ctx context.Context, r *pb.SearchRequest) (*pb.SearchResponse, error) {
+// ReportState ..
+func (s *NezhaService) ReportState(ctx context.Context, r *pb.State) (*pb.Receipt, error) {
 	if err := s.auth.Check(ctx); err != nil {
 		return nil, err
 	}
-	return &pb.SearchResponse{Response: r.GetRequest() + " Token Server"}, nil
+	fmt.Printf("receive: %s\n", r)
+	return &pb.Receipt{}, nil
 }
 
 func main() {
 	server := grpc.NewServer()
-	pb.RegisterSearchServiceServer(server, &SearchService{})
+	pb.RegisterNezhaServiceServer(server, &NezhaService{})
 
 	lis, err := net.Listen("tcp", ":5555")
 	if err != nil {

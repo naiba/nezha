@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package proto;
+
+service NezhaService {
+    rpc ReportState(State)returns(Receipt){}
+}
+
+message State {
+}
+
+message Receipt{
+}
