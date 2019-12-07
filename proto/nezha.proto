@@ -3,11 +3,43 @@ syntax = "proto3";
 package proto;
 
 service NezhaService {
+    rpc Heartbeat(Beat)returns(stream Command){}
     rpc ReportState(State)returns(Receipt){}
+    rpc Register(Host)returns(Receipt){}
+}
+
+message Host {
+    string platform = 1;
+    string platform_version = 2;
+    repeated string cpu = 3;
+    string arch = 4;
+    string virtualization = 5;
+    string uptime = 6;
+    string boot_time = 7;
+    string version = 8;
 }
 
 message State {
+    double cpu = 1;
+    uint64 mem_total = 2;
+    uint64 mem_used = 3;
+    uint64 swap_total = 4;
+    uint64 swap_used = 5;
+    uint64 disk_total = 6;
+    uint64 disk_used = 7;
+    uint64 net_in = 8;
+    uint64 net_out = 9;
 }
 
 message Receipt{
+    bool proced = 1;
+}
+
+message Beat {
+    string timestamp = 1;
+}
+
+message Command {
+    uint64 type = 1;
+    string data = 2;
 }
