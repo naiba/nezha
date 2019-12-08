@@ -1,0 +1,31 @@
+{{define "common/menu"}}
+<div class="ui large top fixed menu nb-menu">
+    <div class="ui container">
+        <div class="item">
+            <img src="/static/logo.png">
+        </div>
+        <a class="item{{if eq .MatchedPath "/"}} active{{end}}" href="/">首页</a>
+        <div class="right menu">
+            <a class="item" href="https://github.com/p14yground/nezha/issues" target="_blank">反馈</a>
+            <div class="item">
+                {{if .Admin}}
+                <div class="ui simple dropdown">
+                    <div class="text">
+                        <img class="ui avatar image" src="{{.Admin.AvatarURL}}"> {{.Admin.Name}}
+                    </div>
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <button class="item" onclick="showConfirm('确认注销？','注销后您必须重新登录才能使用',logout,{{.Admin.ID}})">
+                            <i class="logout icon"></i>注销登录
+                        </button>
+                    </div>
+                </div>
+                {{else}}
+                <a href="/login" class="ui large teal button">登录</a>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+{{template "component/confirm" .}}
+{{end}}

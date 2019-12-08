@@ -9,12 +9,12 @@ import (
 	"google.golang.org/grpc"
 
 	pb "github.com/p14yground/nezha/proto"
-	"github.com/p14yground/nezha/service/handler"
 	"github.com/p14yground/nezha/service/monitor"
+	"github.com/p14yground/nezha/service/rpc"
 )
 
 func main() {
-	auth := handler.AuthHandler{
+	auth := rpc.AuthHandler{
 		AppKey:    "naiba",
 		AppSecret: "123456",
 	}
