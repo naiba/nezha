@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
+	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
 	pb "github.com/p14yground/nezha/proto"
@@ -13,10 +15,33 @@ import (
 	"github.com/p14yground/nezha/service/rpc"
 )
 
+var (
+	rootCmd = &cobra.Command{
+		Use:   "nezha-agent",
+		Short: "「哪吒面板」监控、备份、站点管理一站式服务",
+		Long: `哪吒面板
+================================
+监控、备份、站点管理一站式服务
+啦啦啦，啦啦啦，我是 mjj 小行家`,
+		Run: run,
+	}
+	appKey    string
+	appSecret string
+)
+
 func main() {
+	rootCmd.PersistentFlags().StringVarP(&appKey, "id", "i", "", "客户端ID")
+	rootCmd.PersistentFlags().StringVarP(&appSecret, "secret", "p", "", "客户端Secret")
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func run(cmd *cobra.Command, args []string) {
 	auth := rpc.AuthHandler{
-		AppKey:    "naiba",
-		AppSecret: "123456",
+		AppKey:    appKey,
+		AppSecret: appSecret,
 	}
 	conn, err := grpc.Dial(":5555", grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 	if err != nil {
