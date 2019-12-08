@@ -1,0 +1,30 @@
+{{define "page/server"}}
+{{template "common/header" .}}
+{{template "common/menu" .}}
+<div class="nb-container">
+    <div class="ui container">
+        <button class="ui right labeled positive icon button" onclick="addServer()"><i class="add icon"></i> 添加服务器
+        </button>
+        <table class="ui very basic table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>备注</th>
+                    <th>密钥</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $server := .Servers}}
+                <tr>
+                    <td>{{$server.ID}}</td>
+                    <td>{{$server.Name}}</td>
+                    <td>{{$server.Secret}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{template "component/server"}}
+{{template "common/footer" .}}
+{{end}}

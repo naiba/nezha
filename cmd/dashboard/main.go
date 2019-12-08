@@ -26,7 +26,16 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	if dao.Conf.Debug {
+		dao.DB = dao.DB.Debug()
+	}
 	dao.Cache = cache.New(5*time.Minute, 10*time.Minute)
+
+	initDB()
+}
+
+func initDB() {
+	dao.DB.AutoMigrate(model.Server{})
 }
 
 func main() {

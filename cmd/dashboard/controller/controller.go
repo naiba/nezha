@@ -13,6 +13,10 @@ import (
 
 // ServeWeb ..
 func ServeWeb() {
+	gin.SetMode(gin.ReleaseMode)
+	if dao.Conf.Debug {
+		gin.SetMode(gin.DebugMode)
+	}
 	r := gin.Default()
 	r.Use(mygin.RecordPath)
 	r.SetFuncMap(template.FuncMap{

@@ -3,7 +3,23 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        {{.Admin}}
+        <div class="ui four cards">
+            {{range $server := .Servers}}
+            <div class="card">
+                <div class="content">
+                    <div class="header">{{.Name}}</div>
+                    <div class="description">
+                        <div class="ui active progress">
+                            <div class="bar">
+                                <div class="progress"></div>
+                            </div>
+                            <div class="label">CPU</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
     </div>
 </div>
 {{template "common/footer" .}}

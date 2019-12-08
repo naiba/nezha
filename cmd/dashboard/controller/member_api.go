@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/naiba/com"
 
 	"github.com/p14yground/nezha/model"
 	"github.com/p14yground/nezha/pkg/mygin"
@@ -27,6 +28,33 @@ func (ma *memberAPI) serve() {
 	}))
 
 	mr.POST("/logout", ma.logout)
+	mr.POST("/server", ma.addServer)
+}
+
+type serverForm struct {
+	Name string `binding:"required"`
+}
+
+func (ma *memberAPI) addServer(c *gin.Context) {
+	var sf serverForm
+	err := c.ShouldBindJSON(&sf)
+	if err == nil {
+		var s model.Server
+		s.Name = sf.Name
+		s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, dao.Admin.ID))
+		s.Secret = s.Secret[:10]
+		err = dao.DB.Create(&s).Error
+	}
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
 }
 
 type logoutForm struct {

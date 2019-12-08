@@ -5,6 +5,9 @@
             <img src="/static/logo.png">
         </div>
         <a class="item{{if eq .MatchedPath "/"}} active{{end}}" href="/">首页</a>
+        {{if .Admin}}
+        <a class="item{{if eq .MatchedPath "/server"}} active{{end}}" href="/server">服务器</a>
+        {{end}}
         <div class="right menu">
             <a class="item" href="https://github.com/p14yground/nezha/issues" target="_blank">反馈</a>
             <div class="item">

@@ -26,7 +26,10 @@ func (cp *commonPage) home(c *gin.Context) {
 	if ok && isLogin.(bool) {
 		admin = dao.Admin
 	}
+	var servers []model.Server
+	dao.DB.Find(&servers)
 	c.HTML(http.StatusOK, "page/home", mygin.CommonEnvironment(c, gin.H{
-		"Admin": admin,
+		"Admin":   admin,
+		"Servers": servers,
 	}))
 }

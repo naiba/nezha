@@ -20,38 +20,8 @@
     margin-top: 75px;
 }
 
-.avatar-list img {
-    width: 2.6rem !important;
-    height: 2.6rem !important;
-    background-color: white;
-}
-
-.card-list {
-    width: 100% !important;
-    padding-right: unset !important;
-}
-
-.card-list .card {
-    width: calc(33.33333333% - 1.1em) !important;
-    margin-right: unset !important;
-    margin-top: unset !important;
-
-}
-
-.card-list .card:nth-child(1) {
-    margin-top: 0.875em !important;
-}
-
-.card-list .card:nth-child(2) {
-    margin-top: 0.875em !important;
-}
-
-.card-list .card:nth-child(3) {
-    margin-top: 0.875em !important;
-}
-
-.grid-list>.grid>.row {
-    border-bottom: solid gainsboro 2px;
-    padding-bottom: .6em;
-    margin-bottom: .6em;
+.footer.segment {
+    margin-top: 40px !important;
+    padding-top: 40px;
+    padding-bottom: 40px;
 }

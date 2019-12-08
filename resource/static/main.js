@@ -1,5 +1,4 @@
 $('.ui.checkbox').checkbox();
-$('.ui.dropdown').dropdown();
 
 const confirmBtn = $('.mini.confirm.modal .positive.button')
 function showConfirm(title, content, callFn, extData) {
@@ -32,7 +31,7 @@ function showFormModal(modelSelector, formID, URL, getData) {
             form.children('.message').remove()
             btn.toggleClass('loading')
             const data = getData ? getData() : $(formID).serializeArray().reduce(function (obj, item) {
-                obj[item.name] = (item.name.endsWith('_id') || item.name === 'id' || item.name === 'permission') ? parseInt(item.value) : item.value;
+                obj[item.name] = (item.name.endsWith('_id') || item.name === 'id') ? parseInt(item.value) : item.value;
                 return obj;
             }, {});
             $.post(URL, JSON.stringify(data)).done(function (resp) {
@@ -52,6 +51,10 @@ function showFormModal(modelSelector, formID, URL, getData) {
             return success
         }
     }).modal('show')
+}
+
+function addServer() {
+    showFormModal('.server.modal', '#serverForm', '/api/server')
 }
 
 function logout(id) {
