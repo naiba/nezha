@@ -11,8 +11,14 @@
                             class="{{$server.Host.CountryCode}} flag"></i>{{end}}{{$server.Name}}
                         <i data-html="
                         <div class='content'>
-                                {{$server.Host}}
-                                {{$server.State}}
+                                系统：{{$server.Host.Platform}}-{{$server.Host.PlatformVersion}} [{{if $server.Host.Virtualization}}{{$server.Host.Virtualization}}:{{end}}{{$server.Host.Arch}}]<br>
+                                CPU：{{$server.Host.CPU}}<br>
+                                硬盘：{{$server.State.DiskUsed|bf}}/{{$server.State.DiskTotal|bf}}<br>
+                                内存：{{$server.State.MemUsed|bf}}/{{$server.State.MemTotal|bf}}<br>
+                                交换：{{$server.State.SwapUsed|bf}}/{{$server.State.SwapTotal|bf}}<br>
+                                流量：<i class='arrow alternate circle down outline icon'></i>{{$server.State.NetInTransfer|bf}} <i class='arrow alternate circle up outline icon'></i>{{$server.State.NetOutTransfer|bf}}<br>
+                                启动：{{$server.Host.BootTime|stf}}<br>
+                                版本：v{{$server.Host.Version}}<br>
                         </div>" class="yellow info circle icon"></i>
                     </div>
                     <div class="description">
@@ -20,15 +26,6 @@
                             <div class="three wide column">CPU</div>
                             <div class="thirteen wide column">
                                 <div class="ui active progress" data-value="{{$server.State.CPU}}" data-total="100">
-                                    <div class="bar">
-                                        <div class="progress"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="three wide column">硬盘</div>
-                            <div class="thirteen wide column">
-                                <div class="ui active progress" data-value="{{$server.State.DiskUsed}}"
-                                    data-total="{{$server.State.DiskTotal}}">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -43,10 +40,33 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="three wide column">交换</div>
+                            <div class="thirteen wide column">
+                                <div class="ui active progress" data-value="{{$server.State.SwapUsed}}"
+                                    data-total="{{$server.State.SwapTotal}}">
+                                    <div class="bar">
+                                        <div class="progress"></div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="three wide column">网络</div>
                             <div class="thirteen wide column">
-                                <i class="arrow alternate circle down outline icon"></i>{{$server.State.NetIn|bf}}
-                                <i class="arrow alternate circle up outline icon"></i>{{$server.State.NetOut|bf}}
+                                <i
+                                    class="arrow alternate circle down outline icon"></i>{{$server.State.NetInSpeed|bf}}/s
+                                <i class="arrow alternate circle up outline icon"></i>{{$server.State.NetOutSpeed|bf}}/s
+                            </div>
+                            <div class="three wide column">硬盘</div>
+                            <div class="thirteen wide column">
+                                <div class="ui active progress" data-value="{{$server.State.DiskUsed}}"
+                                    data-total="{{$server.State.DiskTotal}}">
+                                    <div class="bar">
+                                        <div class="progress"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide column">在线</div>
+                            <div class="thirteen wide column">
+                                <i class="clock icon"></i>{{$server.State.Uptime|sf}}
                             </div>
                         </div>
                     </div>

@@ -26,3 +26,6 @@ var ServerList map[string]*model.Server
 
 // ServerLock ..
 var ServerLock sync.RWMutex
+
+// Version ..
+var Version = "debug"

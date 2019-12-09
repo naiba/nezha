@@ -29,11 +29,13 @@ var (
 		Run: run,
 	}
 	clientID     string
+	server       string
 	clientSecret string
 	debug        bool
 )
 
 func main() {
+	rootCmd.PersistentFlags().StringVarP(&server, "server", "s", "localhost:5555", "客户端ID")
 	rootCmd.PersistentFlags().StringVarP(&clientID, "id", "i", "", "客户端ID")
 	rootCmd.PersistentFlags().StringVarP(&clientSecret, "secret", "p", "", "客户端Secret")
 	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "开启Debug")
@@ -48,7 +50,6 @@ var reporting bool
 var client pb.NezhaServiceClient
 var ctx = context.Background()
 var delayWhenError = time.Second * 10
-var delayWhenReport = time.Second
 
 func run(cmd *cobra.Command, args []string) {
 	dao.Conf = &model.Config{
@@ -67,7 +68,7 @@ func run(cmd *cobra.Command, args []string) {
 		log.Println("Try to reconnect ...")
 	}
 	for {
-		conn, err = grpc.Dial(":5555", grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+		conn, err = grpc.Dial(server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
 			log.Printf("grpc.Dial err: %v", err)
 			retry()
@@ -121,12 +122,12 @@ func reportState() {
 	defer log.Printf("reportState exit %v %v => %v", endReport, time.Now(), err)
 	for {
 		if endReport.After(time.Now()) {
-			_, err = client.ReportState(ctx, monitor.GetState(0).PB())
+			monitor.TrackNetworkSpeed()
+			_, err = client.ReportState(ctx, monitor.GetState(1).PB())
 			if err != nil {
 				log.Printf("reportState error %v", err)
 				time.Sleep(delayWhenError)
 			}
 		}
-		time.Sleep(delayWhenReport)
 	}
 }

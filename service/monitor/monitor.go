@@ -15,12 +15,15 @@ import (
 	"github.com/shirou/gopsutil/net"
 
 	"github.com/p14yground/nezha/model"
+	"github.com/p14yground/nezha/service/dao"
 )
 
 type ipDotSbGeoIP struct {
 	CountryCode string
 	IP          string
 }
+
+var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
 
 // GetHost ..
 func GetHost() *model.Host {
@@ -46,49 +49,80 @@ func GetHost() *model.Host {
 		CPU:             cpus,
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
-		Uptime:          fmt.Sprintf("%v", hi.Uptime),
-		BootTime:        fmt.Sprintf("%v", hi.BootTime),
+		BootTime:        hi.BootTime,
 		IP:              ip.IP,
 		CountryCode:     strings.ToLower(ip.CountryCode),
+		Version:         dao.Version,
 	}
 }
 
 // GetState ..
-func GetState(delay uint64) *model.State {
+func GetState(delay int64) *model.State {
+	hi, _ := host.Info()
 	// Memory
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
-	// Disk
-	var diskTotal, diskUsed uint64
-	dparts, _ := disk.Partitions(true)
-	for _, part := range dparts {
-		u, _ := disk.Usage(part.Mountpoint)
-		diskTotal += u.Total
-		diskUsed += u.Used
-	}
 	// CPU
 	var cpuPercent float64
 	cp, err := cpu.Percent(time.Second*time.Duration(delay), false)
 	if err == nil {
 		cpuPercent = cp[0]
+	}
+	// Disk
+	var diskTotal, diskUsed uint64
+	dparts, _ := disk.Partitions(true)
+	var lastDevice string
+	for _, part := range dparts {
+		u, _ := disk.Usage(part.Mountpoint)
+		if lastDevice != part.Device {
+			diskTotal += u.Total
+			lastDevice = part.Device
+		}
+		diskUsed += u.Used
+	}
 
-	}
-	// Network
-	var netIn, netOut uint64
-	nc, err := net.IOCounters(false)
-	if err == nil {
-		netIn = nc[0].BytesRecv
-		netOut = nc[0].BytesSent
-	}
 	return &model.State{
-		CPU:       cpuPercent,
-		MemTotal:  mv.Total,
-		MemUsed:   mv.Used,
-		SwapTotal: ms.Total,
-		SwapUsed:  ms.Used,
-		DiskTotal: diskTotal,
-		DiskUsed:  diskUsed,
-		NetIn:     netIn,
-		NetOut:    netOut,
+		CPU:            cpuPercent,
+		MemTotal:       mv.Total,
+		MemUsed:        mv.Used,
+		SwapTotal:      ms.Total,
+		SwapUsed:       ms.Used,
+		DiskTotal:      diskTotal,
+		DiskUsed:       diskUsed,
+		NetInTransfer:  netInTransfer,
+		NetOutTransfer: netOutTransfer,
+		NetInSpeed:     netInSpeed,
+		NetOutSpeed:    netOutSpeed,
+		Uptime:         hi.Uptime,
+	}
+}
+
+// TrackNetworkSpeed ..
+func TrackNetworkSpeed() {
+	var innerNetInTransfer, innerNetOutTransfer uint64
+	nc, err := net.IOCounters(true)
+	if err == nil {
+		for i := 0; i < len(nc); i++ {
+			if strings.HasPrefix(nc[i].Name, "e") {
+				innerNetInTransfer += nc[i].BytesRecv
+				innerNetOutTransfer += nc[i].BytesSent
+			}
+		}
+		if netInTransfer == 0 {
+			netInTransfer = innerNetInTransfer
+		}
+		if netOutTransfer == 0 {
+			netOutTransfer = innerNetOutTransfer
+		}
+		diff := uint64(time.Now().Unix())
+		if lastUpdate == 0 {
+			lastUpdate = diff
+			return
+		}
+		diff -= lastUpdate
+		if diff > 0 {
+			netInSpeed = (innerNetInTransfer - netInTransfer) / diff
+			netOutSpeed = (innerNetOutTransfer - netOutTransfer) / diff
+		}
 	}
 }

@@ -13,6 +13,7 @@ import (
 // CommonEnvironment ..
 func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	data["MatchedPath"] = c.MustGet("MatchedPath")
+	data["Version"] = dao.Version
 	// 站点标题
 	if t, has := data["Title"]; !has {
 		data["Title"] = dao.Conf.Site.Brand

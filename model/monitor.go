@@ -10,44 +10,53 @@ const (
 
 // State ..
 type State struct {
-	CPU       float64
-	MemTotal  uint64
-	MemUsed   uint64
-	SwapTotal uint64
-	SwapUsed  uint64
-	DiskTotal uint64
-	DiskUsed  uint64
-	NetIn     uint64
-	NetOut    uint64
+	CPU            float64
+	MemTotal       uint64
+	MemUsed        uint64
+	SwapTotal      uint64
+	SwapUsed       uint64
+	DiskTotal      uint64
+	DiskUsed       uint64
+	NetInTransfer  uint64
+	NetOutTransfer uint64
+	NetInSpeed     uint64
+	NetOutSpeed    uint64
+	Uptime         uint64
 }
 
 // PB ..
 func (s *State) PB() *pb.State {
 	return &pb.State{
-		Cpu:       s.CPU,
-		MemTotal:  s.MemTotal,
-		MemUsed:   s.MemUsed,
-		SwapTotal: s.SwapTotal,
-		SwapUsed:  s.SwapUsed,
-		DiskTotal: s.DiskTotal,
-		DiskUsed:  s.DiskUsed,
-		NetIn:     s.NetIn,
-		NetOut:    s.NetOut,
+		Cpu:            s.CPU,
+		MemTotal:       s.MemTotal,
+		MemUsed:        s.MemUsed,
+		SwapTotal:      s.SwapTotal,
+		SwapUsed:       s.SwapUsed,
+		DiskTotal:      s.DiskTotal,
+		DiskUsed:       s.DiskUsed,
+		NetInTransfer:  s.NetInTransfer,
+		NetOutTransfer: s.NetOutTransfer,
+		NetInSpeed:     s.NetInSpeed,
+		NetOutSpeed:    s.NetOutSpeed,
+		Uptime:         s.Uptime,
 	}
 }
 
 // PB2State ..
 func PB2State(s *pb.State) State {
 	return State{
-		CPU:       s.GetCpu(),
-		MemTotal:  s.GetMemTotal(),
-		MemUsed:   s.GetMemUsed(),
-		SwapTotal: s.GetSwapTotal(),
-		SwapUsed:  s.GetSwapUsed(),
-		DiskTotal: s.GetDiskTotal(),
-		DiskUsed:  s.GetDiskUsed(),
-		NetIn:     s.GetNetIn(),
-		NetOut:    s.GetNetOut(),
+		CPU:            s.GetCpu(),
+		MemTotal:       s.GetMemTotal(),
+		MemUsed:        s.GetMemUsed(),
+		SwapTotal:      s.GetSwapTotal(),
+		SwapUsed:       s.GetSwapUsed(),
+		DiskTotal:      s.GetDiskTotal(),
+		DiskUsed:       s.GetDiskUsed(),
+		NetInTransfer:  s.GetNetInTransfer(),
+		NetOutTransfer: s.GetNetOutTransfer(),
+		NetInSpeed:     s.GetNetInSpeed(),
+		NetOutSpeed:    s.GetNetOutSpeed(),
+		Uptime:         s.GetUptime(),
 	}
 }
 
@@ -58,8 +67,7 @@ type Host struct {
 	CPU             []string
 	Arch            string
 	Virtualization  string
-	Uptime          string
-	BootTime        string
+	BootTime        uint64
 	IP              string
 	CountryCode     string
 	Version         string
@@ -73,7 +81,6 @@ func (h *Host) PB() *pb.Host {
 		Cpu:             h.CPU,
 		Arch:            h.Arch,
 		Virtualization:  h.Virtualization,
-		Uptime:          h.Uptime,
 		BootTime:        h.BootTime,
 		Ip:              h.IP,
 		CountryCode:     h.CountryCode,
@@ -89,7 +96,6 @@ func PB2Host(h *pb.Host) Host {
 		CPU:             h.GetCpu(),
 		Arch:            h.GetArch(),
 		Virtualization:  h.GetVirtualization(),
-		Uptime:          h.GetUptime(),
 		BootTime:        h.GetBootTime(),
 		IP:              h.GetIp(),
 		CountryCode:     h.GetCountryCode(),
