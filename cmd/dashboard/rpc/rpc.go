@@ -13,10 +13,7 @@ import (
 func ServeRPC() {
 	server := grpc.NewServer()
 	pb.RegisterNezhaServiceServer(server, &rpcService.NezhaHandler{
-		Auth: &rpcService.AuthHandler{
-			ClientID:     "naiba",
-			ClientSecret: "123456",
-		},
+		Auth: &rpcService.AuthHandler{},
 	})
 	listen, err := net.Listen("tcp", ":5555")
 	if err != nil {

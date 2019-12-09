@@ -47,6 +47,8 @@ var endReport time.Time
 var reporting bool
 var client pb.NezhaServiceClient
 var ctx = context.Background()
+var delayWhenError = time.Second * 10
+var delayWhenReport = time.Second
 
 func run(cmd *cobra.Command, args []string) {
 	dao.Conf = &model.Config{
@@ -60,26 +62,36 @@ func run(cmd *cobra.Command, args []string) {
 	var err error
 	var conn *grpc.ClientConn
 	var hc pb.NezhaService_HeartbeatClient
-	for {
+	retry := func() {
+		time.Sleep(delayWhenError)
 		log.Println("Try to reconnect ...")
-		time.Sleep(time.Second * 5)
+	}
+	for {
 		conn, err = grpc.Dial(":5555", grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
 			log.Printf("grpc.Dial err: %v", err)
+			retry()
 			continue
 		}
 		client = pb.NewNezhaServiceClient(conn)
 		// 第一步注册
-		client.Register(ctx, monitor.GetHost().PB())
+		_, err = client.Register(ctx, monitor.GetHost().PB())
+		if err != nil {
+			log.Printf("client.Register err: %v", err)
+			retry()
+			continue
+		}
 		hc, err = client.Heartbeat(ctx, &pb.Beat{
 			Timestamp: fmt.Sprintf("%v", time.Now()),
 		})
 		if err != nil {
-			log.Printf("client.Register err: %v", err)
+			log.Printf("client.Heartbeat err: %v", err)
+			retry()
 			continue
 		}
 		err = receiveCommand(hc)
 		log.Printf("receiveCommand exit to main: %v", err)
+		retry()
 	}
 }
 
@@ -97,7 +109,7 @@ func receiveCommand(hc pb.NezhaService_HeartbeatClient) error {
 		}
 		switch action.GetType() {
 		case model.MTReportState:
-			endReport = time.Now().Add(time.Second * 10)
+			endReport = time.Now().Add(time.Minute * 10)
 		default:
 			log.Printf("Unknown action: %v", action)
 		}
@@ -110,7 +122,11 @@ func reportState() {
 	for {
 		if endReport.After(time.Now()) {
 			_, err = client.ReportState(ctx, monitor.GetState(0).PB())
+			if err != nil {
+				log.Printf("reportState error %v", err)
+				time.Sleep(delayWhenError)
+			}
 		}
-		time.Sleep(time.Second)
+		time.Sleep(delayWhenReport)
 	}
 }

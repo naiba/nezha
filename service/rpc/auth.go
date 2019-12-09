@@ -2,9 +2,7 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/p14yground/nezha/model"
 	"github.com/p14yground/nezha/service/dao"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -19,7 +17,7 @@ type AuthHandler struct {
 
 // GetRequestMetadata ..
 func (a *AuthHandler) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{"app_key": a.ClientID, "app_secret": a.ClientSecret}, nil
+	return map[string]string{"client_id": a.ClientID, "client_secret": a.ClientSecret}, nil
 }
 
 // RequireTransportSecurity ..
@@ -28,26 +26,27 @@ func (a *AuthHandler) RequireTransportSecurity() bool {
 }
 
 // Check ..
-func (a *AuthHandler) Check(ctx context.Context) error {
+func (a *AuthHandler) Check(ctx context.Context) (clientID string, err error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
-		return status.Errorf(codes.Unauthenticated, "获取 metaData 失败")
+		err = status.Errorf(codes.Unauthenticated, "获取 metaData 失败")
+		return
 	}
 
 	var (
-		ClientID     string
-		ClientSecret string
+		clientSecret string
 	)
-	if value, ok := md["app_key"]; ok {
-		ClientID = value[0]
+	if value, ok := md["client_id"]; ok {
+		clientID = value[0]
 	}
-	if value, ok := md["app_secret"]; ok {
-		ClientSecret = value[0]
-	}
-
-	if _, ok := dao.Cache.Get(fmt.Sprintf("%s%s%s", model.CtxKeyServer, ClientID, ClientSecret)); !ok {
-		return status.Errorf(codes.Unauthenticated, "客户端认证失败")
+	if value, ok := md["client_secret"]; ok {
+		clientSecret = value[0]
 	}
 
-	return nil
+	dao.ServerLock.RLock()
+	defer dao.ServerLock.RUnlock()
+	if server, has := dao.ServerList[clientID]; !has || server.Secret != clientSecret {
+		err = status.Errorf(codes.Unauthenticated, "客户端认证失败")
+	}
+	return
 }

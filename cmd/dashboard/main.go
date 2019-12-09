@@ -16,6 +16,7 @@ import (
 
 func init() {
 	var err error
+	dao.ServerList = make(map[string]*model.Server)
 	dao.Conf, err = model.ReadInConfig("data/config.yaml")
 	if err != nil {
 		panic(err)
@@ -31,7 +32,6 @@ func init() {
 		dao.DB = dao.DB.Debug()
 	}
 	dao.Cache = cache.New(5*time.Minute, 10*time.Minute)
-
 	initDB()
 }
 
@@ -41,7 +41,8 @@ func initDB() {
 	var servers []model.Server
 	dao.DB.Find(&servers)
 	for _, s := range servers {
-		dao.Cache.Set(fmt.Sprintf("%s%d%s", model.CtxKeyServer, s.ID, s.Secret), s, cache.NoExpiration)
+		innerS := s
+		dao.ServerList[fmt.Sprintf("%d", innerS.ID)] = &innerS
 	}
 }
 

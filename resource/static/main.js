@@ -1,12 +1,10 @@
-$('.ui.checkbox').checkbox();
-$('.yellow.info.circle.icon').popup();
-
 const confirmBtn = $('.mini.confirm.modal .positive.button')
+
 function showConfirm(title, content, callFn, extData) {
     const modal = $('.mini.confirm.modal')
     modal.children('.header').text(title)
     modal.children('.content').text(content)
-    if (confirmBtn.hasCslass('loading')) {
+    if (confirmBtn.hasClass('loading')) {
         return false
     }
     modal.modal({

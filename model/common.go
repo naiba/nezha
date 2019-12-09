@@ -7,8 +7,6 @@ const CtxKeyIsUserLogin = "ckiul"
 
 // CtxKeyOauth2State ..
 const CtxKeyOauth2State = "cko2s"
-// CtxKeyServer ..
-const CtxKeyServer = "cks"
 
 // Common ..
 type Common struct {

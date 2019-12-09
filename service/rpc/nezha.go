@@ -2,11 +2,11 @@ package rpc
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/p14yground/nezha/model"
 	pb "github.com/p14yground/nezha/proto"
+	"github.com/p14yground/nezha/service/dao"
 )
 
 // NezhaHandler ..
@@ -16,20 +16,26 @@ type NezhaHandler struct {
 
 // ReportState ..
 func (s *NezhaHandler) ReportState(c context.Context, r *pb.State) (*pb.Receipt, error) {
-	if err := s.Auth.Check(c); err != nil {
+	var clientID string
+	var err error
+	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
-	fmt.Printf("ReportState receive: %s\n", r)
+	dao.ServerLock.Lock()
+	defer dao.ServerLock.Unlock()
+	dao.ServerList[clientID].State = model.PB2State(r)
 	return &pb.Receipt{Proced: true}, nil
 }
 
 // Heartbeat ..
 func (s *NezhaHandler) Heartbeat(r *pb.Beat, stream pb.NezhaService_HeartbeatServer) error {
-	defer log.Println("Heartbeat exit")
-	if err := s.Auth.Check(stream.Context()); err != nil {
+	var clientID string
+	var err error
+	defer log.Printf("Heartbeat exit server:%v err:%v", clientID, err)
+	if clientID, err = s.Auth.Check(stream.Context()); err != nil {
 		return err
 	}
-	err := stream.Send(&pb.Command{
+	err = stream.Send(&pb.Command{
 		Type: model.MTReportState,
 	})
 	if err != nil {
@@ -40,9 +46,13 @@ func (s *NezhaHandler) Heartbeat(r *pb.Beat, stream pb.NezhaService_HeartbeatSer
 
 // Register ..
 func (s *NezhaHandler) Register(c context.Context, r *pb.Host) (*pb.Receipt, error) {
-	if err := s.Auth.Check(c); err != nil {
+	var clientID string
+	var err error
+	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
-	fmt.Printf("Register receive: %s\n", r)
+	dao.ServerLock.Lock()
+	defer dao.ServerLock.Unlock()
+	dao.ServerList[clientID].Host = model.PB2Host(r)
 	return &pb.Receipt{Proced: true}, nil
 }

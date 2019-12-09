@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/com"
-	"github.com/patrickmn/go-cache"
 
 	"github.com/p14yground/nezha/model"
 	"github.com/p14yground/nezha/pkg/mygin"
@@ -53,7 +52,9 @@ func (ma *memberAPI) addServer(c *gin.Context) {
 		})
 		return
 	}
-	dao.Cache.Set(fmt.Sprintf("%s%d%s", model.CtxKeyServer, s.ID, s.Secret), s, cache.NoExpiration)
+	dao.ServerLock.Lock()
+	defer dao.ServerLock.Unlock()
+	dao.ServerList[fmt.Sprintf("%d", s.ID)] = &s
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

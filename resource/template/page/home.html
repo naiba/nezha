@@ -7,15 +7,19 @@
             {{range $server := .Servers}}
             <div class="card">
                 <div class="content">
-                    <div class="header"><i class="ae flag"></i>{{.Name}}
-                        <i data-html="<div class='header'>User Rating</div><div class='content'><div class='ui star rating'><i class='active icon'></i><i class='active icon'></i><i class='active icon'></i><i class='active icon'></i><i class='active icon'></i></div></div>"
-                            class="yellow info circle icon"></i>
+                    <div class="header">{{if $server.Host.CountryCode}}<i
+                            class="{{$server.Host.CountryCode}} flag"></i>{{end}}{{$server.Name}}
+                        <i data-html="
+                        <div class='content'>
+                                {{$server.Host}}
+                                {{$server.State}}
+                        </div>" class="yellow info circle icon"></i>
                     </div>
                     <div class="description">
                         <div class="ui grid">
                             <div class="three wide column">CPU</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress">
+                                <div class="ui active progress" data-value="{{$server.State.CPU}}" data-total="100">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -23,7 +27,8 @@
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress">
+                                <div class="ui active progress" data-value="{{$server.State.DiskUsed}}"
+                                    data-total="{{$server.State.DiskTotal}}">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -31,11 +36,17 @@
                             </div>
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress">
+                                <div class="ui active progress" data-value="{{$server.State.MemUsed}}"
+                                    data-total="{{$server.State.MemTotal}}">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
                                 </div>
+                            </div>
+                            <div class="three wide column">网络</div>
+                            <div class="thirteen wide column">
+                                <i class="arrow alternate circle down outline icon"></i>{{$server.State.NetIn|bf}}
+                                <i class="arrow alternate circle up outline icon"></i>{{$server.State.NetOut|bf}}
                             </div>
                         </div>
                     </div>
@@ -46,4 +57,8 @@
     </div>
 </div>
 {{template "common/footer" .}}
+<script>
+    $('.yellow.info.circle.icon').popup();
+    $('.progress').progress();
+</script>
 {{end}}

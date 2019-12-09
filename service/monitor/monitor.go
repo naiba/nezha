@@ -82,8 +82,8 @@ func GetState(delay uint64) *model.State {
 	}
 	return &model.State{
 		CPU:       cpuPercent,
-		MEMTotal:  mv.Total,
-		MEMUsed:   mv.Used,
+		MemTotal:  mv.Total,
+		MemUsed:   mv.Used,
 		SwapTotal: ms.Total,
 		SwapUsed:  ms.Used,
 		DiskTotal: diskTotal,

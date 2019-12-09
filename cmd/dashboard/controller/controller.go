@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"time"
 
+	"code.cloudfoundry.org/bytefmt"
 	"github.com/gin-gonic/gin"
 
 	"github.com/p14yground/nezha/pkg/mygin"
@@ -28,6 +29,9 @@ func ServeWeb() {
 				return ""
 			}
 			return fmt.Sprintf("%d", time.Now().UnixNano())
+		},
+		"bf": func(b uint64) string {
+			return bytefmt.ByteSize(b)
 		},
 	})
 	r.Static("/static", "resource/static")

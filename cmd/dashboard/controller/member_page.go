@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/p14yground/nezha/model"
 	"github.com/p14yground/nezha/pkg/mygin"
 	"github.com/p14yground/nezha/service/dao"
 )
@@ -26,10 +25,10 @@ func (mp *memberPage) serve() {
 }
 
 func (mp *memberPage) server(c *gin.Context) {
-	var servers []model.Server
-	dao.DB.Find(&servers)
+	dao.ServerLock.RLock()
+	defer dao.ServerLock.RUnlock()
 	c.HTML(http.StatusOK, "page/server", mygin.CommonEnvironment(c, gin.H{
 		"Title":   "服务器管理",
-		"Servers": servers,
+		"Servers": dao.ServerList,
 	}))
 }
