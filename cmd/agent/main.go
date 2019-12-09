@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"time"
@@ -10,7 +11,9 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
+	"github.com/p14yground/nezha/model"
 	pb "github.com/p14yground/nezha/proto"
+	"github.com/p14yground/nezha/service/dao"
 	"github.com/p14yground/nezha/service/monitor"
 	"github.com/p14yground/nezha/service/rpc"
 )
@@ -25,51 +28,89 @@ var (
 啦啦啦，啦啦啦，我是 mjj 小行家`,
 		Run: run,
 	}
-	appKey    string
-	appSecret string
+	clientID     string
+	clientSecret string
+	debug        bool
 )
 
 func main() {
-	rootCmd.PersistentFlags().StringVarP(&appKey, "id", "i", "", "客户端ID")
-	rootCmd.PersistentFlags().StringVarP(&appSecret, "secret", "p", "", "客户端Secret")
+	rootCmd.PersistentFlags().StringVarP(&clientID, "id", "i", "", "客户端ID")
+	rootCmd.PersistentFlags().StringVarP(&clientSecret, "secret", "p", "", "客户端Secret")
+	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "开启Debug")
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 }
 
+var endReport time.Time
+var reporting bool
+var client pb.NezhaServiceClient
+var ctx = context.Background()
+
 func run(cmd *cobra.Command, args []string) {
+	dao.Conf = &model.Config{
+		Debug: debug,
+	}
 	auth := rpc.AuthHandler{
-		AppKey:    appKey,
-		AppSecret: appSecret,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
 	}
-	conn, err := grpc.Dial(":5555", grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
-	if err != nil {
-		panic(err)
-	}
-	defer conn.Close()
-	client := pb.NewNezhaServiceClient(conn)
-	ctx := context.Background()
-
-	resp, err := client.Register(ctx, monitor.GetHost().PB())
-	if err != nil {
-		log.Printf("client.Register err: %v", err)
-	}
-	log.Printf("Register resp: %s", resp)
-
-	hc, err := client.Heartbeat(ctx, &pb.Beat{
-		Timestamp: fmt.Sprintf("%v", time.Now()),
-	})
-	if err != nil {
-		log.Printf("client.Register err: %v", err)
-	}
-	log.Printf("Register resp: %s", hc)
-
-	for i := 0; i < 3; i++ {
-		resp, err := client.ReportState(ctx, monitor.GetState(3).PB())
+	go reportState()
+	var err error
+	var conn *grpc.ClientConn
+	var hc pb.NezhaService_HeartbeatClient
+	for {
+		log.Println("Try to reconnect ...")
+		time.Sleep(time.Second * 5)
+		conn, err = grpc.Dial(":5555", grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
-			log.Printf("client.ReportState err: %v", err)
+			log.Printf("grpc.Dial err: %v", err)
+			continue
 		}
-		log.Printf("ReportState resp: %s", resp)
+		client = pb.NewNezhaServiceClient(conn)
+		// 第一步注册
+		client.Register(ctx, monitor.GetHost().PB())
+		hc, err = client.Heartbeat(ctx, &pb.Beat{
+			Timestamp: fmt.Sprintf("%v", time.Now()),
+		})
+		if err != nil {
+			log.Printf("client.Register err: %v", err)
+			continue
+		}
+		err = receiveCommand(hc)
+		log.Printf("receiveCommand exit to main: %v", err)
+	}
+}
+
+func receiveCommand(hc pb.NezhaService_HeartbeatClient) error {
+	var err error
+	var action *pb.Command
+	defer log.Printf("receiveCommand exit %v %v => %v", time.Now(), action, err)
+	for {
+		action, err = hc.Recv()
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		switch action.GetType() {
+		case model.MTReportState:
+			endReport = time.Now().Add(time.Second * 10)
+		default:
+			log.Printf("Unknown action: %v", action)
+		}
+	}
+}
+
+func reportState() {
+	var err error
+	defer log.Printf("reportState exit %v %v => %v", endReport, time.Now(), err)
+	for {
+		if endReport.After(time.Now()) {
+			_, err = client.ReportState(ctx, monitor.GetState(0).PB())
+		}
+		time.Sleep(time.Second)
 	}
 }

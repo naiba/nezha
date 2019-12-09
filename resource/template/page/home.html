@@ -3,17 +3,40 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <div class="ui four cards">
+        <div class="ui four status cards">
             {{range $server := .Servers}}
             <div class="card">
                 <div class="content">
-                    <div class="header">{{.Name}}</div>
+                    <div class="header"><i class="ae flag"></i>{{.Name}}
+                        <i data-html="<div class='header'>User Rating</div><div class='content'><div class='ui star rating'><i class='active icon'></i><i class='active icon'></i><i class='active icon'></i><i class='active icon'></i><i class='active icon'></i></div></div>"
+                            class="yellow info circle icon"></i>
+                    </div>
                     <div class="description">
-                        <div class="ui active progress">
-                            <div class="bar">
-                                <div class="progress"></div>
+                        <div class="ui grid">
+                            <div class="three wide column">CPU</div>
+                            <div class="thirteen wide column">
+                                <div class="ui active progress">
+                                    <div class="bar">
+                                        <div class="progress"></div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="label">CPU</div>
+                            <div class="three wide column">硬盘</div>
+                            <div class="thirteen wide column">
+                                <div class="ui active progress">
+                                    <div class="bar">
+                                        <div class="progress"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="three wide column">内存</div>
+                            <div class="thirteen wide column">
+                                <div class="ui active progress">
+                                    <div class="bar">
+                                        <div class="progress"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

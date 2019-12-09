@@ -2,6 +2,12 @@ package model
 
 import pb "github.com/p14yground/nezha/proto"
 
+const (
+	_ = iota
+	// MTReportState ..
+	MTReportState
+)
+
 // State ..
 type State struct {
 	CPU       float64
@@ -39,6 +45,8 @@ type Host struct {
 	Virtualization  string
 	Uptime          string
 	BootTime        string
+	IP              string
+	CountryCode     string
 	Version         string
 }
 
@@ -52,6 +60,8 @@ func (h *Host) PB() *pb.Host {
 		Virtualization:  h.Virtualization,
 		Uptime:          h.Uptime,
 		BootTime:        h.BootTime,
+		Ip:              h.IP,
+		CountryCode:     h.CountryCode,
 		Version:         h.Version,
 	}
 }

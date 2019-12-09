@@ -1,7 +1,11 @@
 package monitor
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -13,6 +17,11 @@ import (
 	"github.com/p14yground/nezha/model"
 )
 
+type ipDotSbGeoIP struct {
+	CountryCode string
+	IP          string
+}
+
 // GetHost ..
 func GetHost() *model.Host {
 	hi, _ := host.Info()
@@ -20,6 +29,16 @@ func GetHost() *model.Host {
 	ci, _ := cpu.Info()
 	for i := 0; i < len(ci); i++ {
 		cpus = append(cpus, fmt.Sprintf("%v-%vC%vT", ci[i].ModelName, ci[i].Cores, ci[i].Stepping))
+	}
+	ip := ipDotSbGeoIP{
+		IP:          "127.0.0.1",
+		CountryCode: "cn",
+	}
+	resp, err := http.Get("https://api.ip.sb/geoip")
+	if err == nil {
+		defer resp.Body.Close()
+		body, _ := ioutil.ReadAll(resp.Body)
+		json.Unmarshal(body, &ip)
 	}
 	return &model.Host{
 		Platform:        hi.OS,
@@ -29,6 +48,8 @@ func GetHost() *model.Host {
 		Virtualization:  hi.VirtualizationSystem,
 		Uptime:          fmt.Sprintf("%v", hi.Uptime),
 		BootTime:        fmt.Sprintf("%v", hi.BootTime),
+		IP:              ip.IP,
+		CountryCode:     strings.ToLower(ip.CountryCode),
 	}
 }
 

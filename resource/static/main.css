@@ -4,8 +4,19 @@
     }
 }
 
+.nb-container {
+    padding-top: 75px;
+    min-height: 80%;
+}
+
+.footer.segment {
+    margin-top: 40px !important;
+    padding-top: 40px;
+    padding-bottom: 40px;
+}
+
 .login-form {
-    height: 100%;
+    height: 82%;
 }
 
 .login-form .column {
@@ -16,12 +27,29 @@
     height: 100%;
 }
 
-.nb-container {
-    margin-top: 75px;
+.status.cards .header>.icon {
+    float: right;
+    margin-right: 0;
 }
 
-.footer.segment {
-    margin-top: 40px !important;
-    padding-top: 40px;
-    padding-bottom: 40px;
+.status.cards .wide.column {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    height: 2rem !important;
+}
+
+.status.cards .three.wide.column {
+    padding-right: 0 !important;
+}
+
+.status.cards .wide.column:nth-child(1) {
+    margin-top: 1rem !important;
+}
+
+.status.cards .wide.column:nth-child(2) {
+    margin-top: 1rem !important;
+}
+
+.status.cards .description {
+    padding-bottom: 1rem !important;
 }

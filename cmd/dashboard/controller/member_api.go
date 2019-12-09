@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/com"
+	"github.com/patrickmn/go-cache"
 
 	"github.com/p14yground/nezha/model"
 	"github.com/p14yground/nezha/pkg/mygin"
@@ -37,9 +38,9 @@ type serverForm struct {
 
 func (ma *memberAPI) addServer(c *gin.Context) {
 	var sf serverForm
+	var s model.Server
 	err := c.ShouldBindJSON(&sf)
 	if err == nil {
-		var s model.Server
 		s.Name = sf.Name
 		s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, dao.Admin.ID))
 		s.Secret = s.Secret[:10]
@@ -52,6 +53,7 @@ func (ma *memberAPI) addServer(c *gin.Context) {
 		})
 		return
 	}
+	dao.Cache.Set(fmt.Sprintf("%s%d%s", model.CtxKeyServer, s.ID, s.Secret), s, cache.NoExpiration)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

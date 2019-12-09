@@ -14,8 +14,8 @@ func ServeRPC() {
 	server := grpc.NewServer()
 	pb.RegisterNezhaServiceServer(server, &rpcService.NezhaHandler{
 		Auth: &rpcService.AuthHandler{
-			AppKey:    "naiba",
-			AppSecret: "123456",
+			ClientID:     "naiba",
+			ClientSecret: "123456",
 		},
 	})
 	listen, err := net.Listen("tcp", ":5555")

@@ -3,7 +3,9 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"log"
 
+	"github.com/p14yground/nezha/model"
 	pb "github.com/p14yground/nezha/proto"
 )
 
@@ -23,11 +25,17 @@ func (s *NezhaHandler) ReportState(c context.Context, r *pb.State) (*pb.Receipt,
 
 // Heartbeat ..
 func (s *NezhaHandler) Heartbeat(r *pb.Beat, stream pb.NezhaService_HeartbeatServer) error {
+	defer log.Println("Heartbeat exit")
 	if err := s.Auth.Check(stream.Context()); err != nil {
 		return err
 	}
-	fmt.Printf("ReportState receive: %s\n", r)
-	return nil
+	err := stream.Send(&pb.Command{
+		Type: model.MTReportState,
+	})
+	if err != nil {
+		log.Printf("Heartbeat stream.Send err:%v", err)
+	}
+	select {}
 }
 
 // Register ..

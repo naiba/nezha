@@ -16,7 +16,9 @@ message Host {
     string virtualization = 5;
     string uptime = 6;
     string boot_time = 7;
-    string version = 8;
+    string ip = 8;
+    string country_code = 9;
+    string version = 10;
 }
 
 message State {

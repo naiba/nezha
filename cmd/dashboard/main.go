@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -36,6 +37,12 @@ func init() {
 
 func initDB() {
 	dao.DB.AutoMigrate(model.Server{})
+	// load cache
+	var servers []model.Server
+	dao.DB.Find(&servers)
+	for _, s := range servers {
+		dao.Cache.Set(fmt.Sprintf("%s%d%s", model.CtxKeyServer, s.ID, s.Secret), s, cache.NoExpiration)
+	}
 }
 
 func main() {
