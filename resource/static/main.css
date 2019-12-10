@@ -27,7 +27,11 @@
     height: 100%;
 }
 
-.status.cards .header>.icon {
+.status.cards .flag {
+    margin-right: 0 !important;
+}
+
+.status.cards .header>.info.icon {
     float: right;
     margin-right: 0;
 }

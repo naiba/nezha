@@ -7,7 +7,10 @@
             <div v-for='server in servers' :id="server.ID" class="card">
                 <div class="content">
                     <div class="header"><i v-if='server.Host.CountryCode'
-                            :class="server.Host.CountryCode + ' flag'"></i> @#server.Name#@
+                            :class="server.Host.CountryCode + ' flag'"></i><i v-if='server.Host.Platform == "darwin"'
+                            class="apple icon"></i><i v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
+                            v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
+                            v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name#@
                         <i class="yellow info circle icon"></i>
                         <div class='ui content popup'>
                             系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
