@@ -4,28 +4,43 @@
 <div class="nb-container">
     <div class="ui container">
         <div class="ui four status cards">
-            {{range $server := .Servers}}
-            <div class="card">
+            <div v-for='server in servers' class="card">
                 <div class="content">
-                    <div class="header">{{if $server.Host.CountryCode}}<i
-                            class="{{$server.Host.CountryCode}} flag"></i>{{end}}{{$server.Name}}
-                        <i data-html="
-                        <div class='content'>
-                                系统：{{$server.Host.Platform}}-{{$server.Host.PlatformVersion}} [{{if $server.Host.Virtualization}}{{$server.Host.Virtualization}}:{{end}}{{$server.Host.Arch}}]<br>
-                                CPU：{{$server.Host.CPU}}<br>
-                                硬盘：{{$server.State.DiskUsed|bf}}/{{$server.State.DiskTotal|bf}}<br>
-                                内存：{{$server.State.MemUsed|bf}}/{{$server.State.MemTotal|bf}}<br>
-                                交换：{{$server.State.SwapUsed|bf}}/{{$server.State.SwapTotal|bf}}<br>
-                                流量：<i class='arrow alternate circle down outline icon'></i>{{$server.State.NetInTransfer|bf}} <i class='arrow alternate circle up outline icon'></i>{{$server.State.NetOutTransfer|bf}}<br>
-                                启动：{{$server.Host.BootTime|stf}}<br>
-                                版本：v{{$server.Host.Version}}<br>
-                        </div>" class="yellow info circle icon"></i>
+                    <div class="header"><i v-if='server.Host.CountryCode'
+                            :class="server.Host.CountryCode + ' flag'"></i>
+                        <?server.Name?>
+                        <i class="yellow info circle icon"></i>
+                        <div class='ui content popup'>
+                            系统：
+                            <?server.Host.Platform?>-
+                            <?server.Host.PlatformVersion?> [<span v-if='server.Host.Virtualization'>
+                                <?server.Host.Virtualization?>:</span>
+                            <?server.Host.Arch?>]<br>
+                            CPU：
+                            <?server.Host.CPU?><br>
+                            硬盘：
+                            <?server.State.DiskUsed?>/
+                            <?server.State.DiskTotal?><br>
+                            内存：
+                            <?server.State.MemUsed?>/
+                            <?server.State.MemTotal?><br>
+                            交换：
+                            <?server.State.SwapUsed?>/
+                            <?server.State.SwapTotal?><br>
+                            流量：<i class='arrow alternate circle down outline icon'></i>
+                            <?server.State.NetInTransfer?> <i class='arrow alternate circle up outline icon'></i>
+                            <?server.State.NetOutTransfer?><br>
+                            启动：
+                            <?server.Host.BootTime?><br>
+                            版本：v
+                            <?server.Host.Version?><br>
+                        </div>
                     </div>
                     <div class="description">
                         <div class="ui grid">
                             <div class="three wide column">CPU</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" data-value="{{$server.State.CPU}}" data-total="100">
+                                <div class="ui active progress" :data-value="server.State.CPU" data-total="100">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -33,8 +48,8 @@
                             </div>
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" data-value="{{$server.State.MemUsed}}"
-                                    data-total="{{$server.State.MemTotal}}">
+                                <div class="ui active progress" :data-value="server.State.MemUsed"
+                                    :data-total="server.State.MemTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -42,8 +57,8 @@
                             </div>
                             <div class="three wide column">交换</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" data-value="{{$server.State.SwapUsed}}"
-                                    data-total="{{$server.State.SwapTotal}}">
+                                <div class="ui active progress" :data-value="server.State.SwapUsed"
+                                    :data-total="server.State.SwapTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -51,14 +66,15 @@
                             </div>
                             <div class="three wide column">网络</div>
                             <div class="thirteen wide column">
-                                <i
-                                    class="arrow alternate circle down outline icon"></i>{{$server.State.NetInSpeed|bf}}/s
-                                <i class="arrow alternate circle up outline icon"></i>{{$server.State.NetOutSpeed|bf}}/s
+                                <i class="arrow alternate circle down outline icon"></i>
+                                <?server.State.NetInSpeed?>/s
+                                <i class="arrow alternate circle up outline icon"></i>
+                                <?server.State.NetOutSpeed?>/s
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" data-value="{{$server.State.DiskUsed}}"
-                                    data-total="{{$server.State.DiskTotal}}">
+                                <div class="ui active progress" :data-value="server.State.DiskUsed"
+                                    :data-total="server.State.DiskTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -66,19 +82,33 @@
                             </div>
                             <div class="three wide column">在线</div>
                             <div class="thirteen wide column">
-                                <i class="clock icon"></i>{{$server.State.Uptime|sf}}
+                                <i class="clock icon"></i>
+                                <?server.State.Uptime?>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {{end}}
         </div>
     </div>
 </div>
 {{template "common/footer" .}}
 <script>
-    $('.yellow.info.circle.icon').popup();
-    $('.progress').progress();
+    const servers = {{.Servers }};
+    var statusCards = new Vue({
+        el: 'div.status.cards',
+        delimiters: ['<?', '?>'],
+        data: {
+            servers,
+        },
+        mounted() {
+            $('.progress').progress();
+            $('.yellow.info.icon').popup({
+                popup: '.ui.content.popup'
+            });
+        },
+        methods: {
+        }
+    });
 </script>
 {{end}}

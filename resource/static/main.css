@@ -53,3 +53,7 @@
 .status.cards .description {
     padding-bottom: 1rem !important;
 }
+
+.status.cards .ui.content.popup {
+    min-width: 250px;
+}

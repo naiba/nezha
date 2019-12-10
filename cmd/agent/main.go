@@ -123,11 +123,13 @@ func reportState() {
 	for {
 		if endReport.After(time.Now()) {
 			monitor.TrackNetworkSpeed()
-			_, err = client.ReportState(ctx, monitor.GetState(1).PB())
+			_, err = client.ReportState(ctx, monitor.GetState(2).PB())
 			if err != nil {
 				log.Printf("reportState error %v", err)
 				time.Sleep(delayWhenError)
 			}
+		} else {
+			time.Sleep(time.Second * 1)
 		}
 	}
 }
