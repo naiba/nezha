@@ -68,7 +68,7 @@ type Host struct {
 	Arch            string
 	Virtualization  string
 	BootTime        uint64
-	IP              string
+	IP              string `json:"-"`
 	CountryCode     string
 	Version         string
 }

@@ -4,7 +4,7 @@
 <div class="nb-container">
     <div class="ui container">
         <div class="ui four status cards">
-            <div v-for='server in servers' class="card">
+            <div v-for='server in servers' :id="server.ID" class="card">
                 <div class="content">
                     <div class="header"><i v-if='server.Host.CountryCode'
                             :class="server.Host.CountryCode + ' flag'"></i> @#server.Name#@
@@ -13,12 +13,14 @@
                             系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
                                 v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
                             CPU：@#server.Host.CPU#@<br>
-                            硬盘：@#server.State.DiskUsed#@/@#server.State.DiskTotal#@<br>
-                            内存：@#server.State.MemUsed#@/@#server.State.MemTotal#@<br>
-                            交换：@#server.State.SwapUsed#@/@#server.State.SwapTotal#@<br>
-                            流量：<i class='arrow alternate circle down outline icon'></i>@#server.State.NetInTransfer#@ <i
-                                class='arrow alternate circle up outline icon'></i>@#server.State.NetOutTransfer#@<br>
-                            启动：@#server.Host.BootTime#@<br>
+                            硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.State.DiskTotal)#@<br>
+                            内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.State.MemTotal)#@<br>
+                            交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.State.SwapTotal)#@<br>
+                            流量：<i
+                                class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@
+                            <i
+                                class='arrow alternate circle up outline icon'></i>@#formatByteSize(server.State.NetOutTransfer)#@<br>
+                            启动：@# formatTimestamp(server.Host.BootTime) #@<br>
                             版本：@#'v'+server.Host.Version#@<br>
                         </div>
                     </div>
@@ -26,7 +28,7 @@
                         <div class="ui grid">
                             <div class="three wide column">CPU</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" :data-value="server.State.CPU" data-total="100">
+                                <div class="ui cpu progress" :data-value="server.State.CPU" data-total="100">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -34,7 +36,7 @@
                             </div>
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" :data-value="server.State.MemUsed"
+                                <div class="ui mem progress" :data-value="server.State.MemUsed"
                                     :data-total="server.State.MemTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
@@ -43,7 +45,7 @@
                             </div>
                             <div class="three wide column">交换</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" :data-value="server.State.SwapUsed"
+                                <div class="ui swap progress" :data-value="server.State.SwapUsed"
                                     :data-total="server.State.SwapTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
@@ -53,13 +55,13 @@
                             <div class="three wide column">网络</div>
                             <div class="thirteen wide column">
                                 <i class="arrow alternate circle down outline icon"></i>
-                                @#server.State.NetInSpeed#@/s
+                                @#formatByteSize(server.State.NetInSpeed)#@/s
                                 <i class="arrow alternate circle up outline icon"></i>
-                                @#server.State.NetOutSpeed#@/s
+                                @#formatByteSize(server.State.NetOutSpeed)#@/s
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
-                                <div class="ui active progress" :data-value="server.State.DiskUsed"
+                                <div class="ui disk progress" :data-value="server.State.DiskUsed"
                                     :data-total="server.State.DiskTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
@@ -68,7 +70,7 @@
                             </div>
                             <div class="three wide column">在线</div>
                             <div class="thirteen wide column">
-                                <i class="clock icon"></i>@#server.State.Uptime#@
+                                <i class="clock icon"></i>@#secondToDate(server.State.Uptime)#@
                             </div>
                         </div>
                     </div>
@@ -79,12 +81,12 @@
 </div>
 {{template "common/footer" .}}
 <script>
-    const servers = {{.Servers }};
+    const initData = {{.Servers }};
     var statusCards = new Vue({
         el: 'div.status.cards',
         delimiters: ['@#', '#@'],
         data: {
-            servers,
+            servers: initData,
         },
         mounted() {
             $('.progress').progress();
@@ -93,7 +95,71 @@
             });
         },
         methods: {
+            secondToDate(s) {
+                var d = Math.floor(s / 3600 / 24);
+                var h = Math.floor(s / 3600);
+                var m = Math.floor((s / 60 % 60));
+                var s = Math.floor((s % 60));
+                return result = d + "天" + h + "小时" + m + "分钟" + s + "秒";
+            },
+            formatTimestamp(t) {
+                return new Date(t * 1000).toLocaleString()
+            },
+            formatByteSize(bs) {
+                const x = readableBytes(bs)
+                return x != "NaN undefined" ? x : '0 KB'
+            }
         }
-    });
+    })
+    const ws = new WebSocket('ws://localhost:8080/ws');
+    ws.onopen = function (evt) {
+        $.suiAlert({
+            title: '实时通道建立',
+            description: '可以实时获取最新监控数据啦',
+            type: 'success',
+            time: '2',
+            position: 'top-center',
+        });
+        ws.send('track');
+        setInterval(() => {
+            ws.send('track');
+            console.log('追加监控时间')
+        }, 1000 * 60 * 6);
+    }
+    ws.onmessage = function (evt) {
+        const oldServers = statusCards.servers
+        statusCards.servers = JSON.parse(evt.data)
+        const keys = Object.keys(statusCards.servers)
+        for (let i = 0; i < keys.length; i++) {
+            const ns = statusCards.servers[keys[i]];
+            for (let j = 0; j < oldServers.length; j++) {
+                const os = oldServers[j];
+                if (ns.ID == os.ID) {
+                    break
+                }
+                // 新加入的仔
+                $('#' + ns.ID + ' .yellow.info.icon').popup({
+                    popup: '.ui.content.popup'
+                });
+            }
+            // 刷新进度条
+            const bars = [$('#' + ns.ID + ' .cpu.progress'),
+            $('#' + ns.ID + ' .mem.progress'),
+            $('#' + ns.ID + ' .swap.progress'),
+            $('#' + ns.ID + ' .disk.progress')]
+            bars.forEach(b => {
+                b.progress('update progress', b[0].dataset.value);
+            })
+        }
+    }
+    ws.onclose = function () {
+        $.suiAlert({
+            title: '实时通道断开',
+            description: '无法实时获取最新监控数据咯',
+            type: 'warning',
+            time: '2',
+            position: 'top-center',
+        });
+    }
 </script>
 {{end}}

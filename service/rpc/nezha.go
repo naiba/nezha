@@ -21,8 +21,8 @@ func (s *NezhaHandler) ReportState(c context.Context, r *pb.State) (*pb.Receipt,
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
-	dao.ServerLock.Lock()
-	defer dao.ServerLock.Unlock()
+	dao.ServerLock.RLock()
+	defer dao.ServerLock.RUnlock()
 	dao.ServerList[clientID].State = model.PB2State(r)
 	return &pb.Receipt{Proced: true}, nil
 }
@@ -35,13 +35,15 @@ func (s *NezhaHandler) Heartbeat(r *pb.Beat, stream pb.NezhaService_HeartbeatSer
 	if clientID, err = s.Auth.Check(stream.Context()); err != nil {
 		return err
 	}
-	err = stream.Send(&pb.Command{
-		Type: model.MTReportState,
-	})
-	if err != nil {
-		log.Printf("Heartbeat stream.Send err:%v", err)
+	dao.ServerLock.RLock()
+	defer dao.ServerLock.RUnlock()
+	closeCh := make(chan error)
+	dao.ServerList[clientID].StreamClose = closeCh
+	dao.ServerList[clientID].Stream = stream
+	select {
+	case err = <-closeCh:
+		return err
 	}
-	select {}
 }
 
 // Register ..
@@ -51,8 +53,8 @@ func (s *NezhaHandler) Register(c context.Context, r *pb.Host) (*pb.Receipt, err
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
-	dao.ServerLock.Lock()
-	defer dao.ServerLock.Unlock()
+	dao.ServerLock.RLock()
+	defer dao.ServerLock.RUnlock()
 	dao.ServerList[clientID].Host = model.PB2Host(r)
 	return &pb.Receipt{Proced: true}, nil
 }

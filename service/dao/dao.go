@@ -7,6 +7,7 @@ import (
 	"github.com/patrickmn/go-cache"
 
 	"github.com/p14yground/nezha/model"
+	pb "github.com/p14yground/nezha/proto"
 )
 
 // Conf ..
@@ -29,3 +30,19 @@ var ServerLock sync.RWMutex
 
 // Version ..
 var Version = "debug"
+
+// SendCommand ..
+func SendCommand(cmd *pb.Command) {
+	ServerLock.RLock()
+	defer ServerLock.RUnlock()
+	var err error
+	for _, server := range ServerList {
+		if server.Stream != nil {
+			err = server.Stream.Send(cmd)
+			if err != nil {
+				close(server.StreamClose)
+				server.Stream = nil
+			}
+		}
+	}
+}

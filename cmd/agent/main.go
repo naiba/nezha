@@ -59,14 +59,18 @@ func run(cmd *cobra.Command, args []string) {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 	}
-	go reportState()
-	var err error
-	var conn *grpc.ClientConn
-	var hc pb.NezhaService_HeartbeatClient
 	retry := func() {
 		time.Sleep(delayWhenError)
 		log.Println("Try to reconnect ...")
 	}
+
+	// 上报服务器信息
+	go reportState()
+
+	var err error
+	var conn *grpc.ClientConn
+	var hc pb.NezhaService_HeartbeatClient
+
 	for {
 		conn, err = grpc.Dial(server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
@@ -82,6 +86,7 @@ func run(cmd *cobra.Command, args []string) {
 			retry()
 			continue
 		}
+		// 心跳接收控制命令
 		hc, err = client.Heartbeat(ctx, &pb.Beat{
 			Timestamp: fmt.Sprintf("%v", time.Now()),
 		})
