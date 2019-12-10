@@ -13,7 +13,7 @@ import (
 )
 
 // ServeWeb ..
-func ServeWeb() {
+func ServeWeb(port uint) {
 	gin.SetMode(gin.ReleaseMode)
 	if dao.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
@@ -43,7 +43,7 @@ func ServeWeb() {
 	r.Static("/static", "resource/static")
 	r.LoadHTMLGlob("resource/template/**/*")
 	routers(r)
-	r.Run()
+	r.Run(fmt.Sprintf(":%d", port))
 }
 
 func routers(r *gin.Engine) {

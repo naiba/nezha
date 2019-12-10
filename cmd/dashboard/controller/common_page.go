@@ -35,6 +35,7 @@ func (cp *commonPage) home(c *gin.Context) {
 	defer dao.ServerLock.RUnlock()
 	c.HTML(http.StatusOK, "page/home", mygin.CommonEnvironment(c, gin.H{
 		"Admin":   admin,
+		"Domain":  dao.Conf.Site.Domain,
 		"Servers": dao.ServerList,
 	}))
 }

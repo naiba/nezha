@@ -47,7 +47,7 @@ func initDB() {
 }
 
 func main() {
-	go controller.ServeWeb()
-	go rpc.ServeRPC()
+	go controller.ServeWeb(80)
+	go rpc.ServeRPC(5555)
 	select {}
 }

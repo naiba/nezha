@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"fmt"
 	"net"
 
 	"google.golang.org/grpc"
@@ -10,12 +11,12 @@ import (
 )
 
 // ServeRPC ...
-func ServeRPC() {
+func ServeRPC(port uint) {
 	server := grpc.NewServer()
 	pb.RegisterNezhaServiceServer(server, &rpcService.NezhaHandler{
 		Auth: &rpcService.AuthHandler{},
 	})
-	listen, err := net.Listen("tcp", ":5555")
+	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		panic(err)
 	}

@@ -111,7 +111,7 @@
             }
         }
     })
-    const ws = new WebSocket('ws://localhost:8080/ws');
+    const ws = new WebSocket('{{if eq .Domain "localhost"}}ws{{else}}wss{{end}}://{{.Domain}}/ws');
     ws.onopen = function (evt) {
         $.suiAlert({
             title: '实时通道建立',
