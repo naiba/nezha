@@ -7,33 +7,19 @@
             <div v-for='server in servers' class="card">
                 <div class="content">
                     <div class="header"><i v-if='server.Host.CountryCode'
-                            :class="server.Host.CountryCode + ' flag'"></i>
-                        <?server.Name?>
+                            :class="server.Host.CountryCode + ' flag'"></i> @#server.Name#@
                         <i class="yellow info circle icon"></i>
                         <div class='ui content popup'>
-                            系统：
-                            <?server.Host.Platform?>-
-                            <?server.Host.PlatformVersion?> [<span v-if='server.Host.Virtualization'>
-                                <?server.Host.Virtualization?>:</span>
-                            <?server.Host.Arch?>]<br>
-                            CPU：
-                            <?server.Host.CPU?><br>
-                            硬盘：
-                            <?server.State.DiskUsed?>/
-                            <?server.State.DiskTotal?><br>
-                            内存：
-                            <?server.State.MemUsed?>/
-                            <?server.State.MemTotal?><br>
-                            交换：
-                            <?server.State.SwapUsed?>/
-                            <?server.State.SwapTotal?><br>
-                            流量：<i class='arrow alternate circle down outline icon'></i>
-                            <?server.State.NetInTransfer?> <i class='arrow alternate circle up outline icon'></i>
-                            <?server.State.NetOutTransfer?><br>
-                            启动：
-                            <?server.Host.BootTime?><br>
-                            版本：v
-                            <?server.Host.Version?><br>
+                            系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
+                                v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
+                            CPU：@#server.Host.CPU#@<br>
+                            硬盘：@#server.State.DiskUsed#@/@#server.State.DiskTotal#@<br>
+                            内存：@#server.State.MemUsed#@/@#server.State.MemTotal#@<br>
+                            交换：@#server.State.SwapUsed#@/@#server.State.SwapTotal#@<br>
+                            流量：<i class='arrow alternate circle down outline icon'></i>@#server.State.NetInTransfer#@ <i
+                                class='arrow alternate circle up outline icon'></i>@#server.State.NetOutTransfer#@<br>
+                            启动：@#server.Host.BootTime#@<br>
+                            版本：@#'v'+server.Host.Version#@<br>
                         </div>
                     </div>
                     <div class="description">
@@ -67,9 +53,9 @@
                             <div class="three wide column">网络</div>
                             <div class="thirteen wide column">
                                 <i class="arrow alternate circle down outline icon"></i>
-                                <?server.State.NetInSpeed?>/s
+                                @#server.State.NetInSpeed#@/s
                                 <i class="arrow alternate circle up outline icon"></i>
-                                <?server.State.NetOutSpeed?>/s
+                                @#server.State.NetOutSpeed#@/s
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
@@ -82,8 +68,7 @@
                             </div>
                             <div class="three wide column">在线</div>
                             <div class="thirteen wide column">
-                                <i class="clock icon"></i>
-                                <?server.State.Uptime?>
+                                <i class="clock icon"></i>@#server.State.Uptime#@
                             </div>
                         </div>
                     </div>
@@ -97,7 +82,7 @@
     const servers = {{.Servers }};
     var statusCards = new Vue({
         el: 'div.status.cards',
-        delimiters: ['<?', '?>'],
+        delimiters: ['@#', '#@'],
         data: {
             servers,
         },
