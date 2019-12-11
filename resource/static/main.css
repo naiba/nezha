@@ -61,3 +61,7 @@
 .status.cards .ui.content.popup {
     min-width: 250px;
 }
+
+.status.cards .outline.icon {
+    margin-right: 0 !important;
+}

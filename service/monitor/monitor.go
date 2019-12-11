@@ -19,8 +19,8 @@ import (
 )
 
 type ipDotSbGeoIP struct {
-	CountryCode string
-	IP          string
+	CountryCode string `json:"country_code,omitempty"`
+	IP          string `json:"ip,omitempty"`
 }
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
@@ -33,10 +33,7 @@ func GetHost() *model.Host {
 	for i := 0; i < len(ci); i++ {
 		cpus = append(cpus, fmt.Sprintf("%v-%vC%vT", ci[i].ModelName, ci[i].Cores, ci[i].Stepping))
 	}
-	ip := ipDotSbGeoIP{
-		IP:          "127.0.0.1",
-		CountryCode: "cn",
-	}
+	var ip ipDotSbGeoIP
 	resp, err := http.Get("https://api.ip.sb/geoip")
 	if err == nil {
 		defer resp.Body.Close()

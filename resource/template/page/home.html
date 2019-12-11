@@ -20,8 +20,7 @@
                             内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.State.MemTotal)#@<br>
                             交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.State.SwapTotal)#@<br>
                             流量：<i
-                                class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@
-                            <i
+                                class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@<i
                                 class='arrow alternate circle up outline icon'></i>@#formatByteSize(server.State.NetOutTransfer)#@<br>
                             启动：@# formatTimestamp(server.Host.BootTime) #@<br>
                             版本：@#'v'+server.Host.Version#@<br>
