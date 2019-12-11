@@ -48,7 +48,13 @@ function showFormModal(modelSelector, formID, URL, getData) {
             $.post(URL, JSON.stringify(data)).done(function (resp) {
                 if (resp.code == 200) {
                     if (resp.message) {
-                        alert(resp.message)
+                        $.suiAlert({
+                            title: '操作成功',
+                            type: 'success',
+                            description: resp.message,
+                            time: '3',
+                            position: 'top-center',
+                        });
                     }
                     window.location.reload()
                 } else {
@@ -74,6 +80,7 @@ function logout(id) {
             $.suiAlert({
                 title: '注销成功',
                 type: 'success',
+                description: '如需继续访问请使用 GitHub 再次登录',
                 time: '3',
                 position: 'top-center',
             });
@@ -88,6 +95,12 @@ function logout(id) {
             });
         }
     }).fail(function (err) {
-        alert('网络错误：' + err.responseText)
+        $.suiAlert({
+            title: '网络错误',
+            description: err.responseText,
+            type: 'error',
+            time: '3',
+            position: 'top-center',
+        });
     })
 }

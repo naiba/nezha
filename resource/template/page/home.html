@@ -99,7 +99,7 @@
         methods: {
             secondToDate(s) {
                 var d = Math.floor(s / 3600 / 24);
-                var h = Math.floor(s / 3600);
+                var h = Math.floor(s / 3600 % 24);
                 var m = Math.floor((s / 60 % 60));
                 var s = Math.floor((s % 60));
                 return result = d + "天" + h + "小时" + m + "分钟" + s + "秒";
