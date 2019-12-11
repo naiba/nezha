@@ -3,7 +3,7 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <div class="ui four status cards">
+        <div class="ui four stackable status cards">
             <div v-for='server in servers' :id="server.ID" class="card">
                 <div class="content">
                     <div class="header"><i v-if='server.Host.CountryCode'
