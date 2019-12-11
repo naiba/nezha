@@ -16,9 +16,9 @@
                             系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
                                 v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
                             CPU：@#server.Host.CPU#@<br>
-                            硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.State.DiskTotal)#@<br>
-                            内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.State.MemTotal)#@<br>
-                            交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.State.SwapTotal)#@<br>
+                            硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br>
+                            内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br>
+                            交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br>
                             流量：<i
                                 class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@<i
                                 class='arrow alternate circle up outline icon'></i>@#formatByteSize(server.State.NetOutTransfer)#@<br>
@@ -39,7 +39,7 @@
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
                                 <div class="ui mem progress" :data-value="server.State.MemUsed"
-                                    :data-total="server.State.MemTotal">
+                                    :data-total="server.Host.MemTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -48,7 +48,7 @@
                             <div class="three wide column">交换</div>
                             <div class="thirteen wide column">
                                 <div class="ui swap progress" :data-value="server.State.SwapUsed"
-                                    :data-total="server.State.SwapTotal">
+                                    :data-total="server.Host.SwapTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -64,7 +64,7 @@
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
                                 <div class="ui disk progress" :data-value="server.State.DiskUsed"
-                                    :data-total="server.State.DiskTotal">
+                                    :data-total="server.Host.DiskTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>

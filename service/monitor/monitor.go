@@ -33,6 +33,14 @@ func GetHost() *model.Host {
 	for i := 0; i < len(ci); i++ {
 		cpus = append(cpus, fmt.Sprintf("%v-%vC%vT", ci[i].ModelName, ci[i].Cores, ci[i].Stepping))
 	}
+	mv, _ := mem.VirtualMemory()
+	ms, _ := mem.SwapMemory()
+	var diskTotal uint64
+	dparts, _ := disk.Partitions(true)
+	for _, part := range dparts {
+		u, _ := disk.Usage(part.Mountpoint)
+		diskTotal += u.Total
+	}
 	var ip ipDotSbGeoIP
 	resp, err := http.Get("https://api.ip.sb/geoip")
 	if err == nil {
@@ -44,6 +52,9 @@ func GetHost() *model.Host {
 		Platform:        hi.OS,
 		PlatformVersion: hi.PlatformVersion,
 		CPU:             cpus,
+		MemTotal:        mv.Total,
+		DiskTotal:       diskTotal,
+		SwapTotal:       ms.Total,
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
 		BootTime:        hi.BootTime,
@@ -66,25 +77,17 @@ func GetState(delay int64) *model.State {
 		cpuPercent = cp[0]
 	}
 	// Disk
-	var diskTotal, diskUsed uint64
+	var diskUsed uint64
 	dparts, _ := disk.Partitions(true)
-	var lastDevice string
 	for _, part := range dparts {
 		u, _ := disk.Usage(part.Mountpoint)
-		if lastDevice != part.Device {
-			diskTotal += u.Total
-			lastDevice = part.Device
-		}
 		diskUsed += u.Used
 	}
 
 	return &model.State{
 		CPU:            cpuPercent,
-		MemTotal:       mv.Total,
 		MemUsed:        mv.Used,
-		SwapTotal:      ms.Total,
 		SwapUsed:       ms.Used,
-		DiskTotal:      diskTotal,
 		DiskUsed:       diskUsed,
 		NetInTransfer:  netInTransfer,
 		NetOutTransfer: netOutTransfer,
@@ -97,14 +100,10 @@ func GetState(delay int64) *model.State {
 // TrackNetworkSpeed ..
 func TrackNetworkSpeed() {
 	var innerNetInTransfer, innerNetOutTransfer uint64
-	nc, err := net.IOCounters(true)
+	nc, err := net.IOCounters(false)
 	if err == nil {
-		for i := 0; i < len(nc); i++ {
-			if strings.HasPrefix(nc[i].Name, "e") {
-				innerNetInTransfer += nc[i].BytesRecv
-				innerNetOutTransfer += nc[i].BytesSent
-			}
-		}
+		innerNetInTransfer += nc[0].BytesRecv
+		innerNetOutTransfer += nc[0].BytesSent
 		if netInTransfer == 0 {
 			netInTransfer = innerNetInTransfer
 		}

@@ -12,27 +12,27 @@ message Host {
     string platform = 1;
     string platform_version = 2;
     repeated string cpu = 3;
-    string arch = 4;
-    string virtualization = 5;
-    uint64 boot_time = 6;
-    string ip = 7;
-    string country_code = 8;
-    string version = 9;
+    uint64 mem_total = 4;
+    uint64 disk_total = 5;
+    uint64 swap_total = 6;
+    string arch = 7;
+    string virtualization = 8;
+    uint64 boot_time = 9;
+    string ip = 10;
+    string country_code = 11;
+    string version = 12;
 }
 
 message State {
     double cpu = 1;
-    uint64 mem_total = 2;
     uint64 mem_used = 3;
-    uint64 swap_total = 4;
-    uint64 swap_used = 5;
-    uint64 disk_total = 6;
-    uint64 disk_used = 7;
-    uint64 net_in_transfer = 8;
-    uint64 net_out_transfer = 9;
-    uint64 net_in_speed = 10;
-    uint64 net_out_speed = 11;
-    uint64 uptime = 12;
+    uint64 swap_used = 4;
+    uint64 disk_used = 5;
+    uint64 net_in_transfer = 6;
+    uint64 net_out_transfer = 7;
+    uint64 net_in_speed = 8;
+    uint64 net_out_speed = 9;
+    uint64 uptime = 10;
 }
 
 message Receipt{
