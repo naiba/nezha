@@ -36,10 +36,10 @@ func (s *NezhaHandler) Heartbeat(r *pb.Beat, stream pb.NezhaService_HeartbeatSer
 		return err
 	}
 	dao.ServerLock.RLock()
-	defer dao.ServerLock.RUnlock()
 	closeCh := make(chan error)
 	dao.ServerList[clientID].StreamClose = closeCh
 	dao.ServerList[clientID].Stream = stream
+	dao.ServerLock.RUnlock()
 	select {
 	case err = <-closeCh:
 		return err

@@ -40,6 +40,8 @@ func (ma *memberAPI) addServer(c *gin.Context) {
 	var s model.Server
 	err := c.ShouldBindJSON(&sf)
 	if err == nil {
+		dao.ServerLock.Lock()
+		defer dao.ServerLock.Unlock()
 		s.Name = sf.Name
 		s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, dao.Admin.ID))
 		s.Secret = s.Secret[:10]
@@ -52,8 +54,6 @@ func (ma *memberAPI) addServer(c *gin.Context) {
 		})
 		return
 	}
-	dao.ServerLock.Lock()
-	defer dao.ServerLock.Unlock()
 	dao.ServerList[fmt.Sprintf("%d", s.ID)] = &s
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
