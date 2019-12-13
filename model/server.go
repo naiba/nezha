@@ -10,8 +10,8 @@ type Server struct {
 	Name   string
 	Secret string
 
-	Host  Host
-	State State
+	Host  *Host
+	State *State
 
 	Stream      pb.NezhaService_HeartbeatServer `gorm:"-" json:"-"`
 	StreamClose chan<- error                    `gorm:"-" json:"-"`

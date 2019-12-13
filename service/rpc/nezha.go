@@ -21,9 +21,10 @@ func (s *NezhaHandler) ReportState(c context.Context, r *pb.State) (*pb.Receipt,
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
+	state := model.PB2State(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	dao.ServerList[clientID].State = model.PB2State(r)
+	dao.ServerList[clientID].State = &state
 	return &pb.Receipt{Proced: true}, nil
 }
 
@@ -61,8 +62,9 @@ func (s *NezhaHandler) Register(c context.Context, r *pb.Host) (*pb.Receipt, err
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
+	host := model.PB2Host(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	dao.ServerList[clientID].Host = model.PB2Host(r)
+	dao.ServerList[clientID].Host = &host
 	return &pb.Receipt{Proced: true}, nil
 }
