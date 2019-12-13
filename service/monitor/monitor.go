@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/shirou/gopsutil/cpu"
@@ -35,12 +36,7 @@ func GetHost() *model.Host {
 	}
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
-	var diskTotal uint64
-	dparts, _ := disk.Partitions(true)
-	for _, part := range dparts {
-		u, _ := disk.Usage(part.Mountpoint)
-		diskTotal += u.Total
-	}
+	u, _ := disk.Usage("/")
 	var ip ipDotSbGeoIP
 	resp, err := http.Get("https://api.ip.sb/geoip")
 	if err == nil {
@@ -53,7 +49,7 @@ func GetHost() *model.Host {
 		PlatformVersion: hi.PlatformVersion,
 		CPU:             cpus,
 		MemTotal:        mv.Total,
-		DiskTotal:       diskTotal,
+		DiskTotal:       u.Total,
 		SwapTotal:       ms.Total,
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
@@ -77,22 +73,17 @@ func GetState(delay int64) *model.State {
 		cpuPercent = cp[0]
 	}
 	// Disk
-	var diskUsed uint64
-	dparts, _ := disk.Partitions(true)
-	for _, part := range dparts {
-		u, _ := disk.Usage(part.Mountpoint)
-		diskUsed += u.Used
-	}
+	u, _ := disk.Usage("/")
 
 	return &model.State{
 		CPU:            cpuPercent,
 		MemUsed:        mv.Used,
 		SwapUsed:       ms.Used,
-		DiskUsed:       diskUsed,
-		NetInTransfer:  netInTransfer,
-		NetOutTransfer: netOutTransfer,
-		NetInSpeed:     netInSpeed,
-		NetOutSpeed:    netOutSpeed,
+		DiskUsed:       u.Used,
+		NetInTransfer:  atomic.LoadUint64(&netInTransfer),
+		NetOutTransfer: atomic.LoadUint64(&netOutTransfer),
+		NetInSpeed:     atomic.LoadUint64(&netInSpeed),
+		NetOutSpeed:    atomic.LoadUint64(&netOutSpeed),
 		Uptime:         hi.Uptime,
 	}
 }
@@ -104,21 +95,14 @@ func TrackNetworkSpeed() {
 	if err == nil {
 		innerNetInTransfer += nc[0].BytesRecv
 		innerNetOutTransfer += nc[0].BytesSent
-		if netInTransfer == 0 {
-			netInTransfer = innerNetInTransfer
-		}
-		if netOutTransfer == 0 {
-			netOutTransfer = innerNetOutTransfer
-		}
-		diff := uint64(time.Now().Unix())
-		if lastUpdate == 0 {
-			lastUpdate = diff
-			return
-		}
-		diff -= lastUpdate
+		now := uint64(time.Now().Unix())
+		diff := now - atomic.LoadUint64(&lastUpdate)
 		if diff > 0 {
-			netInSpeed = (innerNetInTransfer - netInTransfer) / diff
-			netOutSpeed = (innerNetOutTransfer - netOutTransfer) / diff
+			atomic.StoreUint64(&netInSpeed, (innerNetInTransfer-atomic.LoadUint64(&netInTransfer))/diff)
+			atomic.StoreUint64(&netOutSpeed, (innerNetOutTransfer-atomic.LoadUint64(&netOutTransfer))/diff)
 		}
+		atomic.StoreUint64(&netInTransfer, innerNetInTransfer)
+		atomic.StoreUint64(&netOutTransfer, innerNetOutTransfer)
+		atomic.StoreUint64(&lastUpdate, now)
 	}
 }
