@@ -26,18 +26,17 @@ func (cp *commonPage) serve() {
 }
 
 func (cp *commonPage) home(c *gin.Context) {
-	var admin *model.User
-	isLogin, ok := c.Get(model.CtxKeyIsUserLogin)
-	if ok && isLogin.(bool) {
-		admin = dao.Admin
-	}
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	c.HTML(http.StatusOK, "page/home", mygin.CommonEnvironment(c, gin.H{
-		"Admin":   admin,
+	data := gin.H{
 		"Domain":  dao.Conf.Site.Domain,
 		"Servers": dao.ServerList,
-	}))
+	}
+	u, ok := c.Get(model.CtxKeyAuthorizedUser)
+	if ok {
+		data["Admin"] = u
+	}
+	c.HTML(http.StatusOK, "page/home", mygin.CommonEnvironment(c, data))
 }
 
 var upgrader = websocket.Upgrader{}

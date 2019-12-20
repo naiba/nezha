@@ -19,9 +19,6 @@ var Cache *cache.Cache
 // DB ..
 var DB *gorm.DB
 
-// Admin ..
-var Admin *model.User
-
 // ServerList ..
 var ServerList map[string]*model.Server
 

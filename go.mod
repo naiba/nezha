@@ -22,7 +22,5 @@ require (
 	github.com/spf13/viper v1.6.1
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
-	golang.org/x/tools v0.0.0-20190524140312-2c0ae7006135 // indirect
 	google.golang.org/grpc v1.25.1
-	honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc // indirect
 )

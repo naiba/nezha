@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
@@ -18,26 +20,29 @@ type Config struct {
 		ClientID     string
 		ClientSecret string
 	}
+
+	v *viper.Viper
 }
 
 // ReadInConfig ..
-func ReadInConfig(path string) (*Config, error) {
-	viper.SetConfigFile(path)
-	err := viper.ReadInConfig()
+func (c *Config) Read(path string) error {
+	c.v = viper.New()
+	c.v.SetConfigFile(path)
+	err := c.v.ReadInConfig()
 	if err != nil {
-		return nil, err
-	}
-	var c Config
-
-	err = viper.Unmarshal(&c)
-	if err != nil {
-		return nil, err
+		return err
 	}
 
-	viper.OnConfigChange(func(in fsnotify.Event) {
-		viper.Unmarshal(&c)
+	err = c.v.Unmarshal(c)
+	if err != nil {
+		return err
+	}
+
+	c.v.OnConfigChange(func(in fsnotify.Event) {
+		fmt.Println("配置文件更新，重载配置")
+		c.v.Unmarshal(c)
 	})
 
-	go viper.WatchConfig()
-	return &c, nil
+	go c.v.WatchConfig()
+	return nil
 }

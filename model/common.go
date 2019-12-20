@@ -2,8 +2,8 @@ package model
 
 import "time"
 
-// CtxKeyIsUserLogin ..
-const CtxKeyIsUserLogin = "ckiul"
+// CtxKeyAuthorizedUser ..
+const CtxKeyAuthorizedUser = "ckau"
 
 // CtxKeyOauth2State ..
 const CtxKeyOauth2State = "cko2s"

@@ -75,9 +75,9 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 		return
 	}
 	user := model.NewUserFromGitHub(gu)
-	dao.Admin = &user
-	dao.Admin.IssueNewToken()
-	c.SetCookie(dao.Conf.Site.CookieName, dao.Admin.Token, 60*60*24*14, "", "", false, false)
+	user.IssueNewToken()
+	dao.DB.Save(&user)
+	c.SetCookie(dao.Conf.Site.CookieName, user.Token, 60*60*24*14, "", "", false, false)
 	c.Status(http.StatusOK)
 	c.Writer.WriteString("<script>window.location.href='/'</script>")
 }

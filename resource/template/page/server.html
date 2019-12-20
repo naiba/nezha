@@ -3,7 +3,7 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <button class="ui right labeled positive icon button" onclick="addServer()"><i class="add icon"></i> 添加服务器
+        <button class="ui right labeled positive icon button" onclick="addOrEditServer()"><i class="add icon"></i> 添加服务器
         </button>
         <table class="ui very basic table">
             <thead>
@@ -11,6 +11,7 @@
                     <th>ID</th>
                     <th>备注</th>
                     <th>密钥</th>
+                    <th>管理</th>
                 </tr>
             </thead>
             <tbody>
@@ -19,6 +20,16 @@
                     <td>{{$server.ID}}</td>
                     <td>{{$server.Name}}</td>
                     <td>{{$server.Secret}}</td>
+                    <td>
+                        <div class="ui mini icon buttons">
+                            <button class="ui button" onclick="addOrEditServer({{$server}})">
+                                <i class="edit icon"></i>
+                            </button>
+                            <button class="ui button">
+                                <i class="delete icon"></i>
+                            </button>
+                        </div>
+                    </td>
                 </tr>
                 {{end}}
             </tbody>

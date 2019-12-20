@@ -20,9 +20,9 @@ func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	} else {
 		data["Title"] = fmt.Sprintf("%s - %s", t, dao.Conf.Site.Brand)
 	}
-	isLogin, ok := c.Get(model.CtxKeyIsUserLogin)
-	if ok && isLogin.(bool) {
-		data["Admin"] = dao.Admin
+	u, ok := c.Get(model.CtxKeyAuthorizedUser)
+	if ok {
+		data["Admin"] = u
 	}
 	return data
 }

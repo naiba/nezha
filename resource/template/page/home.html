@@ -153,8 +153,10 @@
             }
             // 刷新进度条
             bars.forEach((b, i) => {
-                b.progress('set total', i == 0 ? 100 : b[0].dataset.total);
-                b.progress('update progress', b[0].dataset.value);
+                if (b[0] && b[0].dataset) {
+                    b.progress('set total', i == 0 ? 100 : b[0].dataset.total);
+                    b.progress('update progress', b[0].dataset.value);
+                }
             })
         }
     }

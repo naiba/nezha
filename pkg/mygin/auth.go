@@ -2,6 +2,7 @@ package mygin
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +25,7 @@ type AuthorizeOption struct {
 func Authorize(opt AuthorizeOption) func(*gin.Context) {
 	return func(c *gin.Context) {
 		token, err := c.Cookie(dao.Conf.Site.CookieName)
+		token = strings.TrimSpace(token)
 		var code uint64 = http.StatusForbidden
 		if opt.Guest {
 			code = http.StatusBadRequest
@@ -35,12 +37,18 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 			Link:  opt.Redirect,
 			Btn:   opt.Btn,
 		}
-		var isLogin bool
-		if err == nil {
-			isLogin = token == dao.Admin.Token && dao.Admin.Token != "" &&
-				dao.Admin.TokenExpired.After(time.Now())
+		if token != "" {
+
 		}
-		c.Set(model.CtxKeyIsUserLogin, isLogin)
+		var isLogin bool
+		var u model.User
+		err = dao.DB.Where("token = ?", token).First(&u).Error
+		if err == nil {
+			isLogin = u.TokenExpired.After(time.Now())
+		}
+		if isLogin {
+			c.Set(model.CtxKeyAuthorizedUser, &u)
+		}
 		// 已登录且只能游客访问
 		if isLogin && opt.Guest {
 			ShowErrorPage(c, commonErr, opt.IsPage)

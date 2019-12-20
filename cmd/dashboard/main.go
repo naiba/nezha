@@ -17,12 +17,10 @@ import (
 func init() {
 	var err error
 	dao.ServerList = make(map[string]*model.Server)
-	dao.Conf, err = model.ReadInConfig("data/config.yaml")
+	dao.Conf = &model.Config{}
+	err = dao.Conf.Read("data/config.yaml")
 	if err != nil {
 		panic(err)
-	}
-	dao.Admin = &model.User{
-		Login: dao.Conf.GitHub.Admin,
 	}
 	dao.DB, err = gorm.Open("sqlite3", "data/sqlite.db")
 	if err != nil {
@@ -36,7 +34,7 @@ func init() {
 }
 
 func initDB() {
-	dao.DB.AutoMigrate(model.Server{})
+	dao.DB.AutoMigrate(model.Server{}, model.User{})
 	// load cache
 	var servers []model.Server
 	dao.DB.Find(&servers)
