@@ -59,10 +59,6 @@ func run(cmd *cobra.Command, args []string) {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 	}
-	retry := func() {
-		time.Sleep(delayWhenError)
-		log.Println("Try to reconnect ...")
-	}
 
 	// 上报服务器信息
 	go reportState()
@@ -70,6 +66,15 @@ func run(cmd *cobra.Command, args []string) {
 	var err error
 	var conn *grpc.ClientConn
 	var hc pb.NezhaService_HeartbeatClient
+
+	retry := func() {
+		log.Println("Error to close connection ...")
+		if conn != nil {
+			conn.Close()
+		}
+		time.Sleep(delayWhenError)
+		log.Println("Try to reconnect ...")
+	}
 
 	for {
 		conn, err = grpc.Dial(server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
