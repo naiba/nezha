@@ -5,10 +5,10 @@
     <div class="ui container">
         <div class="ui four stackable status cards">
             <div v-for='server in servers' :id="server.ID" class="card">
-                <div class="content">
-                    <div class="header"><i v-if='server.Host.CountryCode'
-                            :class="server.Host.CountryCode + ' flag'"></i><i v-if='server.Host.Platform == "darwin"'
-                            class="apple icon"></i><i v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
+                <div class="content" v-if='server.Host'>
+                    <div class="header"><i :class="server.Host.CountryCode + ' flag'"></i><i
+                            v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
+                            v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
                             v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
                             v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name#@
                         <i class="yellow info circle icon"></i>
@@ -76,6 +76,10 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="content" v-if='!server.Host'>
+                    <p>@#server.Name#@</p>
+                    <p>节点已离线</p>
                 </div>
             </div>
         </div>
