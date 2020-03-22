@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -29,11 +30,37 @@ func (ma *memberAPI) serve() {
 
 	mr.POST("/logout", ma.logout)
 	mr.POST("/server", ma.addOrEditServer)
+	mr.DELETE("/server/:id", ma.delete)
+}
+
+func (ma *memberAPI) delete(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	if id < 1 {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: "错误的 Server ID",
+		})
+		return
+	}
+	dao.ServerLock.Lock()
+	defer dao.ServerLock.Unlock()
+	if err := dao.DB.Delete(&model.Server{}, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("数据库错误：%s", err),
+		})
+		return
+	}
+	delete(dao.ServerList, strconv.FormatUint(id, 10))
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
 }
 
 type serverForm struct {
-	ID   uint64
-	Name string `binding:"required"`
+	ID     uint64
+	Name   string `binding:"required"`
+	Secret string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -45,6 +72,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		dao.ServerLock.Lock()
 		defer dao.ServerLock.Unlock()
 		s.Name = sf.Name
+		s.Secret = sf.Secret
+		s.ID = sf.ID
 	}
 	if sf.ID == 0 {
 		s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))

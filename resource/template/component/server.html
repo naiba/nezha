@@ -3,13 +3,18 @@
     <div class="header">添加服务器</div>
     <div class="content">
         <form id="serverForm" class="ui form">
+            <input type="hidden" name="id">
             <div class="field">
                 <label>备注</label>
                 <input type="text" name="name" placeholder="爱因斯坦-光速1号">
             </div>
+            <div class="secret field">
+                <label>密钥</label>
+                <input type="text" name="secret">
+            </div>
         </form>
     </div>
-    <div class="actions">
+    <div class=" actions">
         <div class="ui negative button">取消</div>
         <button class="ui positive right labeled icon button">绑定<i class="checkmark icon"></i>
         </button>

@@ -3,8 +3,13 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <button class="ui right labeled positive icon button" onclick="addOrEditServer()"><i class="add icon"></i> 添加服务器
-        </button>
+        <div class="ui grid">
+            <div class="right floated right aligned twelve wide column">
+                <button class="ui right labeled positive icon button" onclick="addOrEditServer()"><i
+                        class="add icon"></i> 添加服务器
+                </button>
+            </div>
+        </div>
         <table class="ui very basic table">
             <thead>
                 <tr>
@@ -25,7 +30,8 @@
                             <button class="ui button" onclick="addOrEditServer({{$server}})">
                                 <i class="edit icon"></i>
                             </button>
-                            <button class="ui button">
+                            <button class="ui button"
+                                onclick="showConfirm('删除节点','确认删除此监控节点？',deleteRequest,'/api/server/'+{{$server.ID}})">
                                 <i class="delete icon"></i>
                             </button>
                         </div>

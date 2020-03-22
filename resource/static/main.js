@@ -70,8 +70,41 @@ function showFormModal(modelSelector, formID, URL, getData) {
     }).modal('show')
 }
 
-function addServer() {
+function addOrEditServer(server) {
+    const modal = $('.server.modal')
+    modal.children('.header').text((server ? '修改' : '添加') + '服务器')
+    modal.find('.positive.button').html(server ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>')
+    modal.find('input[name=id]').val(server ? server.ID : null)
+    modal.find('input[name=name]').val(server ? server.Name : null)
+    if (server) {
+        modal.find('.secret.field').attr('style', '')
+        modal.find('input[name=secret]').val(server.Secret)
+    } else {
+        modal.find('.secret.field').attr('style', 'display:none')
+        modal.find('input[name=secret]').val('')
+    }
     showFormModal('.server.modal', '#serverForm', '/api/server')
+}
+
+function deleteRequest(api) {
+    $.ajax({
+        url: api,
+        type: 'DELETE',
+    }).done(resp => {
+        if (resp.code == 200) {
+            if (resp.message) {
+                alert(resp.message)
+            } else {
+                alert('删除成功')
+            }
+            window.location.reload()
+        } else {
+            alert('删除失败 ' + resp.code + '：' + resp.message)
+            confirmBtn.toggleClass('loading')
+        }
+    }).fail(err => {
+        alert('网络错误：' + err.responseText)
+    });
 }
 
 function logout(id) {
