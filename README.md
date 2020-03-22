@@ -16,3 +16,18 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
 - 首次连接：上报基本信息（系统、CPU基本信息），后面管理员可从客户端主动拉取更新。
 - 监控上报：每隔 3s 向服务器上报系统信息
+
+配置文件参考：
+
+```yaml
+debug: true
+github:
+  admin:
+    - 用户 ID，看自己 GitHub 头像链接后面那一串数字
+  clientid: GitHub Oauth App clientID
+  clientsecret: client secret
+site:
+  brand: 站点标题
+  domain: localhost
+  cookiename: tulong #Cookie 名
+```

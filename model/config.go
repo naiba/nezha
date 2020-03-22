@@ -16,7 +16,7 @@ type Config struct {
 		CookieName string // 浏览器 Cookie 名称
 	}
 	GitHub struct {
-		Admin        string // 管理员登录名
+		Admin        []int64 // 管理员ID列表
 		ClientID     string
 		ClientSecret string
 	}

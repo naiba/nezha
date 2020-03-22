@@ -66,7 +66,16 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 		}, true)
 		return
 	}
-	if gu.GetLogin() != dao.Conf.GitHub.Admin {
+	var isAdmin bool
+	if gu.GetID() > 0 {
+		for i := 0; i < len(dao.Conf.GitHub.Admin); i++ {
+			if gu.GetID() == dao.Conf.GitHub.Admin[i] {
+				isAdmin = true
+				break
+			}
+		}
+	}
+	if !isAdmin {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code:  http.StatusBadRequest,
 			Title: "登录失败",
@@ -77,7 +86,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	user := model.NewUserFromGitHub(gu)
 	user.IssueNewToken()
 	dao.DB.Save(&user)
-	c.SetCookie(dao.Conf.Site.CookieName, user.Token, 60*60*24*14, "", "", false, false)
+	c.SetCookie(dao.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, false)
 	c.Status(http.StatusOK)
 	c.Writer.WriteString("<script>window.location.href='/'</script>")
 }
