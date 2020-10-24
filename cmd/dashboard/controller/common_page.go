@@ -29,7 +29,6 @@ func (cp *commonPage) home(c *gin.Context) {
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
 	data := gin.H{
-		"Domain":  dao.Conf.Site.Domain,
 		"Servers": dao.ServerList,
 	}
 	u, ok := c.Get(model.CtxKeyAuthorizedUser)

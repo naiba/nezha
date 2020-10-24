@@ -12,7 +12,6 @@ type Config struct {
 	Debug bool
 	Site  struct {
 		Brand      string // 站点名称
-		Domain     string // 站点域名
 		CookieName string // 浏览器 Cookie 名称
 	}
 	GitHub struct {

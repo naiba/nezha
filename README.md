@@ -28,6 +28,5 @@ github:
   clientsecret: client secret
 site:
   brand: 站点标题
-  domain: localhost
   cookiename: tulong #Cookie 名
 ```

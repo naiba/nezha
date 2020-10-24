@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/p14yground/nezha/model"
 	pb "github.com/p14yground/nezha/proto"
@@ -24,6 +25,7 @@ func (s *NezhaHandler) ReportState(c context.Context, r *pb.State) (*pb.Receipt,
 	state := model.PB2State(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
+	dao.ServerList[clientID].LastActive = time.Now()
 	dao.ServerList[clientID].State = &state
 	return &pb.Receipt{Proced: true}, nil
 }

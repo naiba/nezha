@@ -1,2 +1,2 @@
 # !/bin/sh
-xgo -v -targets=linux/amd64 -dest release -out nezha-$1 -pkg cmd/$1/main.go .
+GOOS=linux CGO_ENABLED=1 GOARCH=amd64 go build -o ./release/nezha-$1 cmd/$1/main.go

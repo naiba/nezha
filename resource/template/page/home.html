@@ -5,7 +5,7 @@
     <div class="ui container">
         <div class="ui four stackable status cards">
             <div v-for='server in servers' :id="server.ID" class="card">
-                <div class="content" v-if='server.Host'>
+                <div class="content" v-if='isAlive(server)'>
                     <div class="header"><i :class="server.Host.CountryCode + ' flag'"></i><i
                             v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
                             v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
@@ -77,7 +77,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="content" v-if='!server.Host'>
+                <div class="content" v-else>
                     <p>@#server.Name#@</p>
                     <p>节点已离线</p>
                 </div>
@@ -93,6 +93,7 @@
         delimiters: ['@#', '#@'],
         data: {
             servers: initData,
+            pulled: false,
         },
         mounted() {
             $('.progress').progress();
@@ -101,6 +102,14 @@
             });
         },
         methods: {
+            isAlive(s) {
+                if (!s.Host) return false
+                const lastActive = new Date(s.LastActive).getTime()
+                if (this.pulled > 10 && Date.now() - lastActive > 20 * 1000) {
+                    return false
+                }
+                return true
+            },
             secondToDate(s) {
                 var d = Math.floor(s / 3600 / 24);
                 var h = Math.floor(s / 3600 % 24);
@@ -117,7 +126,8 @@
             }
         }
     })
-    const ws = new WebSocket('{{if eq .Domain "localhost"}}ws{{else}}wss{{end}}://{{.Domain}}/ws');
+    const wsProtocol = window.location.protocol == "https" ? "wss" : "ws"
+    const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
     ws.onopen = function (evt) {
         $.suiAlert({
             title: '实时通道建立',
@@ -135,6 +145,7 @@
     ws.onmessage = function (evt) {
         const oldServers = statusCards.servers
         statusCards.servers = JSON.parse(evt.data)
+        statusCards.pulled++
         const keys = Object.keys(statusCards.servers)
         for (let i = 0; i < keys.length; i++) {
             const ns = statusCards.servers[keys[i]];
