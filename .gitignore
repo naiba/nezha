@@ -12,6 +12,5 @@
 *.out
 
 .DS_Store
-*.pb.go
 /data
 /release
