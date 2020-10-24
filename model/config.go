@@ -19,6 +19,7 @@ type Config struct {
 		ClientID     string
 		ClientSecret string
 	}
+	HTTPPort uint
 
 	v *viper.Viper
 }

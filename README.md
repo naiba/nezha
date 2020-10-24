@@ -21,6 +21,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
 ```yaml
 debug: true
+httpport: 80
 github:
   admin:
     - 用户 ID，看自己 GitHub 头像链接后面那一串数字

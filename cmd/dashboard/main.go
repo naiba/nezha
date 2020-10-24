@@ -45,7 +45,7 @@ func initDB() {
 }
 
 func main() {
-	go controller.ServeWeb(80)
+	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(5555)
 	select {}
 }
