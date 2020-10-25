@@ -31,3 +31,7 @@ site:
   brand: 站点标题
   cookiename: tulong #Cookie 名
 ```
+
+## 教程文章
+
+ - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html)
