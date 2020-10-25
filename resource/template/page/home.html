@@ -126,7 +126,7 @@
             }
         }
     })
-    const wsProtocol = window.location.protocol == "https" ? "wss" : "ws"
+    const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
     const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
     ws.onopen = function (evt) {
         $.suiAlert({
