@@ -32,6 +32,12 @@ site:
   cookiename: tulong #Cookie 名
 ```
 
+## Docker
+
+```shell
+docker pull docker.pkg.github.com/p14yground/nezha/dashboard #面板
+```
+
 ## 教程文章
 
  - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html)
