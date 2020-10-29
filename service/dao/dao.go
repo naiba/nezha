@@ -28,6 +28,12 @@ var ServerLock sync.RWMutex
 // Version ..
 var Version = "debug"
 
+func init() {
+	if len(Version) > 7 {
+		Version = Version[:7]
+	}
+}
+
 // SendCommand ..
 func SendCommand(cmd *pb.Command) {
 	ServerLock.RLock()

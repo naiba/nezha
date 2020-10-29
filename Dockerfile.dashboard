@@ -1,11 +1,10 @@
 FROM golang:alpine AS binarybuilder
 RUN apk --no-cache --no-progress add \
-    gcc \
-    musl-dev
+    gcc git musl-dev
 WORKDIR /dashboard
 COPY . .
 RUN cd cmd/dashboard \
-    && go build -o app -ldflags="-s -w"
+    && go build -o app -ldflags="-s -w -X github.com/p14yground/nezha/service/dao.Version=`git rev-parse HEAD`"
 
 FROM alpine:latest
 RUN apk --no-cache --no-progress add \
