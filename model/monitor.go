@@ -1,6 +1,10 @@
 package model
 
-import pb "github.com/p14yground/nezha/proto"
+import (
+	"fmt"
+
+	pb "github.com/p14yground/nezha/proto"
+)
 
 const (
 	_ = iota
@@ -56,9 +60,9 @@ type Host struct {
 	Platform        string
 	PlatformVersion string
 	CPU             []string
-	MemTotal       uint64
-	DiskTotal      uint64
-	SwapTotal      uint64
+	MemTotal        uint64
+	DiskTotal       uint64
+	SwapTotal       uint64
 	Arch            string
 	Virtualization  string
 	BootTime        uint64
@@ -73,9 +77,9 @@ func (h *Host) PB() *pb.Host {
 		Platform:        h.Platform,
 		PlatformVersion: h.PlatformVersion,
 		Cpu:             h.CPU,
-		MemTotal:       h.MemTotal,
-		DiskTotal:      h.DiskTotal,
-		SwapTotal:      h.SwapTotal,
+		MemTotal:        h.MemTotal,
+		DiskTotal:       h.DiskTotal,
+		SwapTotal:       h.SwapTotal,
 		Arch:            h.Arch,
 		Virtualization:  h.Virtualization,
 		BootTime:        h.BootTime,
@@ -85,16 +89,27 @@ func (h *Host) PB() *pb.Host {
 	}
 }
 
-
 // PB2Host ...
 func PB2Host(h *pb.Host) Host {
+
+	cpuCount := make(map[string]int, 0)
+	cpus := h.GetCpu()
+	for _, u := range cpus {
+		cpuCount[u]++
+	}
+
+	var distCpu []string
+	for u, num := range cpuCount {
+		distCpu = append(distCpu, fmt.Sprintf("%sx%d", u, num))
+	}
+
 	return Host{
 		Platform:        h.GetPlatform(),
 		PlatformVersion: h.GetPlatformVersion(),
-		CPU:             h.GetCpu(),
-		MemTotal:       h.GetMemTotal(),
-		DiskTotal:      h.GetDiskTotal(),
-		SwapTotal:      h.GetSwapTotal(),
+		CPU:             distCpu,
+		MemTotal:        h.GetMemTotal(),
+		DiskTotal:       h.GetDiskTotal(),
+		SwapTotal:       h.GetSwapTotal(),
 		Arch:            h.GetArch(),
 		Virtualization:  h.GetVirtualization(),
 		BootTime:        h.GetBootTime(),
@@ -103,6 +118,3 @@ func PB2Host(h *pb.Host) Host {
 		Version:         h.GetVersion(),
 	}
 }
-
-
-
