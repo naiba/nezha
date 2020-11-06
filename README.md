@@ -74,7 +74,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
       admin: # 多管理员
         - 1 #管理员 GitHub ID，复制自己GitHub头像图片地址，/[ID].png
         - 2
-      clientid: GitHub Oauth App clientID # 在 https://github.com/settings/developers 创建，无需审核
+      clientid: GitHub Oauth App clientID # 在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback
       clientsecret: client secret
     site:
       brand: 站点标题
