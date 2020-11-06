@@ -3,8 +3,7 @@ RUN apk --no-cache --no-progress add \
     gcc git musl-dev
 WORKDIR /dashboard
 COPY . .
-RUN cd cmd/dashboard \
-    && go build -o app -ldflags="-s -w -X github.com/p14yground/nezha/service/dao.Version=`git rev-parse HEAD`"
+RUN cd cmd/dashboard && go build -o app -ldflags="-s -w -X github.com/p14yground/nezha/service/dao.Version=$(git rev-parse HEAD)"
 
 FROM alpine:latest
 RUN apk --no-cache --no-progress add \
@@ -15,5 +14,5 @@ COPY ./resource ./resource
 COPY --from=binarybuilder /dashboard/cmd/dashboard/app ./app
 
 VOLUME ["/dashboard/data"]
-EXPOSE 3000
+EXPOSE [3000, 5555]
 CMD ["/dashboard/app"]

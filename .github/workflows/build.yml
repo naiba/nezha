@@ -1,0 +1,18 @@
+name: Build Docker Image
+
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: docker
+        env:
+          DockerPassword: ${{ secrets.PACKAGE_TOKEN }}
+        run: |
+          docker build --no-cache -t docker.pkg.github.com/p14yground/nezha/agent -f Dockerfile.agent .
+          docker build --no-cache -t docker.pkg.github.com/p14yground/nezha/dashboard -f Dockerfile.dashboard .
+          docker login -u naiba -p $DockerPassword docker.pkg.github.com
+          docker push docker.pkg.github.com/p14yground/nezha/agent
+          docker push docker.pkg.github.com/p14yground/nezha/dashboard
