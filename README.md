@@ -43,6 +43,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
           - 5555:5555
       agent:
         image: docker.pkg.github.com/p14yground/nezha/agent
+        restart: always
         depends_on:
           - dashboard
         environment:
@@ -123,6 +124,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
     services:
       agent:
         image: docker.pkg.github.com/p14yground/nezha/agent
+        restart: always
         environment:
           - ID=1 #节点ID，启动后在管理后台添加后显示
           - SECRET=secret #节点密钥，启动后在管理后台添加后显示
