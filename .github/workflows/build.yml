@@ -7,12 +7,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
       - name: docker
         env:
           DockerPassword: ${{ secrets.PACKAGE_TOKEN }}
         run: |
-          docker build --no-cache -t docker.pkg.github.com/naiba/nezha/agent -f Dockerfile.agent .
-          docker build --no-cache -t docker.pkg.github.com/naiba/nezha/dashboard -f Dockerfile.dashboard .
-          docker login -u naiba -p $DockerPassword docker.pkg.github.com
+          docker build -t docker.pkg.github.com/naiba/nezha/agent -f Dockerfile.agent .
+          docker build -t docker.pkg.github.com/naiba/nezha/dashboard -f Dockerfile.dashboard .
           docker push docker.pkg.github.com/naiba/nezha/agent
           docker push docker.pkg.github.com/naiba/nezha/dashboard
