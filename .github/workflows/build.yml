@@ -15,7 +15,7 @@ jobs:
         env:
           DockerPassword: ${{ secrets.PACKAGE_TOKEN }}
         run: |
-          docker build -t docker.pkg.github.com/naiba/nezha/agent -f Dockerfile.agent .
-          docker build -t docker.pkg.github.com/naiba/nezha/dashboard -f Dockerfile.dashboard .
-          docker push docker.pkg.github.com/naiba/nezha/agent
-          docker push docker.pkg.github.com/naiba/nezha/dashboard
+          docker build -t docker.pkg.github.com/${{ github.repository }}/agent -f Dockerfile.agent .
+          docker build -t docker.pkg.github.com/${{ github.repository }}/dashboard -f Dockerfile.dashboard .
+          docker push docker.pkg.github.com/${{ github.repository }}/agent
+          docker push docker.pkg.github.com/${{ github.repository }}/dashboard
