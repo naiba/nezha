@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/p14yground/nezha/model"
-	pb "github.com/p14yground/nezha/proto"
-	"github.com/p14yground/nezha/service/dao"
+	"github.com/naiba/nezha/model"
+	pb "github.com/naiba/nezha/proto"
+	"github.com/naiba/nezha/service/dao"
 )
 
 // NezhaHandler ..

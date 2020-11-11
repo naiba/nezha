@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/p14yground/nezha/model"
+	"github.com/naiba/nezha/model"
 )
 
 // ErrInfo ..

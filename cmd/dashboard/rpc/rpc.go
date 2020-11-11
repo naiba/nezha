@@ -6,8 +6,8 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "github.com/p14yground/nezha/proto"
-	rpcService "github.com/p14yground/nezha/service/rpc"
+	pb "github.com/naiba/nezha/proto"
+	rpcService "github.com/naiba/nezha/service/rpc"
 )
 
 // ServeRPC ...

@@ -11,11 +11,11 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
-	"github.com/p14yground/nezha/model"
-	pb "github.com/p14yground/nezha/proto"
-	"github.com/p14yground/nezha/service/dao"
-	"github.com/p14yground/nezha/service/monitor"
-	"github.com/p14yground/nezha/service/rpc"
+	"github.com/naiba/nezha/model"
+	pb "github.com/naiba/nezha/proto"
+	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/monitor"
+	"github.com/naiba/nezha/service/rpc"
 )
 
 var (

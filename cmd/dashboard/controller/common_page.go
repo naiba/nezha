@@ -8,10 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 
-	"github.com/p14yground/nezha/model"
-	"github.com/p14yground/nezha/pkg/mygin"
-	pb "github.com/p14yground/nezha/proto"
-	"github.com/p14yground/nezha/service/dao"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/mygin"
+	pb "github.com/naiba/nezha/proto"
+	"github.com/naiba/nezha/service/dao"
 )
 
 type commonPage struct {

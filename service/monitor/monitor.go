@@ -15,8 +15,8 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 
-	"github.com/p14yground/nezha/model"
-	"github.com/p14yground/nezha/service/dao"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/service/dao"
 )
 
 type ipDotSbGeoIP struct {

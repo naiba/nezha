@@ -3,7 +3,7 @@ RUN apk --no-cache --no-progress add \
     gcc git musl-dev
 WORKDIR /agent
 COPY . .
-RUN cd cmd/agent && go build -o app -ldflags="-s -w -X github.com/p14yground/nezha/service/dao.Version=$(git rev-parse HEAD)"
+RUN cd cmd/agent && go build -o app -ldflags="-s -w -X github.com/naiba/nezha/service/dao.Version=$(git rev-parse HEAD)"
 
 FROM alpine:latest
 RUN apk --no-cache --no-progress add \

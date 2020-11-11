@@ -11,9 +11,9 @@ import (
 	GitHubAPI "github.com/google/go-github/v28/github"
 	"golang.org/x/oauth2"
 
-	"github.com/p14yground/nezha/model"
-	"github.com/p14yground/nezha/pkg/mygin"
-	"github.com/p14yground/nezha/service/dao"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/service/dao"
 )
 
 type oauth2controller struct {

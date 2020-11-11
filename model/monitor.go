@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	pb "github.com/p14yground/nezha/proto"
+	pb "github.com/naiba/nezha/proto"
 )
 
 const (

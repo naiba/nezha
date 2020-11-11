@@ -1,4 +1,4 @@
-module github.com/p14yground/nezha
+module github.com/naiba/nezha
 
 go 1.13
 

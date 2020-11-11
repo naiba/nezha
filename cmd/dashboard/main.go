@@ -8,10 +8,10 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/patrickmn/go-cache"
 
-	"github.com/p14yground/nezha/cmd/dashboard/controller"
-	"github.com/p14yground/nezha/cmd/dashboard/rpc"
-	"github.com/p14yground/nezha/model"
-	"github.com/p14yground/nezha/service/dao"
+	"github.com/naiba/nezha/cmd/dashboard/controller"
+	"github.com/naiba/nezha/cmd/dashboard/rpc"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/service/dao"
 )
 
 func init() {

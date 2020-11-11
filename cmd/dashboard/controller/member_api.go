@@ -9,9 +9,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/com"
 
-	"github.com/p14yground/nezha/model"
-	"github.com/p14yground/nezha/pkg/mygin"
-	"github.com/p14yground/nezha/service/dao"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/service/dao"
 )
 
 type memberAPI struct {

@@ -6,8 +6,8 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/patrickmn/go-cache"
 
-	"github.com/p14yground/nezha/model"
-	pb "github.com/p14yground/nezha/proto"
+	"github.com/naiba/nezha/model"
+	pb "github.com/naiba/nezha/proto"
 )
 
 // Conf ..
