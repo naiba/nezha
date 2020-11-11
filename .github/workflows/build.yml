@@ -12,8 +12,6 @@ jobs:
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: docker
-        env:
-          DockerPassword: ${{ secrets.PACKAGE_TOKEN }}
         run: |
           docker build -t docker.pkg.github.com/${{ github.repository }}/agent -f Dockerfile.agent .
           docker build -t docker.pkg.github.com/${{ github.repository }}/dashboard -f Dockerfile.dashboard .
