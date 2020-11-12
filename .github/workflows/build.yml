@@ -9,11 +9,11 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
       - name: docker
         run: |
-          docker build -t docker.pkg.github.com/${{ github.repository }}/agent -f Dockerfile.agent .
-          docker build -t docker.pkg.github.com/${{ github.repository }}/dashboard -f Dockerfile.dashboard .
-          docker push docker.pkg.github.com/${{ github.repository }}/agent
-          docker push docker.pkg.github.com/${{ github.repository }}/dashboard
+          docker build -t ghcr.io/${{ github.repository_owner }}/nezha-agent -f Dockerfile.agent .
+          docker build -t ghcr.io/${{ github.repository_owner }}/nezha-dashboard -f Dockerfile.dashboard .
+          docker push ghcr.io/${{ github.repository_owner }}/nezha-agent
+          docker push ghcr.io/${{ github.repository_owner }}/nezha-dashboard

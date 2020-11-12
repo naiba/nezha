@@ -34,7 +34,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
     services:
       dashboard:
-        image: docker.pkg.github.com/naiba/nezha/dashboard
+        image: ghcr.io/naiba/nezha-dashboard
         restart: always
         volumes:
           - ./data:/dashboard/data
@@ -42,7 +42,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
           - 8008:80
           - 5555:5555
       agent:
-        image: docker.pkg.github.com/naiba/nezha/agent
+        image: ghcr.io/naiba/nezha-agent
         restart: always
         depends_on:
           - dashboard
@@ -123,7 +123,7 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
     services:
       agent:
-        image: docker.pkg.github.com/naiba/nezha/agent
+        image: ghcr.io/naiba/nezha-agent
         restart: always
         environment:
           - ID=1 #节点ID，启动后在管理后台添加后显示
