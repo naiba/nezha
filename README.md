@@ -155,4 +155,4 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
 ## 教程文章
 
- - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html)*（已过时）*
+ - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) *（已过时）*

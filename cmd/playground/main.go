@@ -4,15 +4,16 @@ import (
 	"log"
 	"os/exec"
 
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 func main() {
 	dparts, _ := disk.Partitions(false)
 	for _, part := range dparts {
 		u, _ := disk.Usage(part.Mountpoint)
-		log.Printf("Part:%v", part)
-		log.Printf("Usage:%v", u)
+		if u != nil {
+			log.Printf("%s %d %d", part.Device, u.Total, u.Used)
+		}
 	}
 }
 
