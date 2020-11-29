@@ -21,7 +21,7 @@ sudo nezha.sh
 ```
 ## FAQ
 
-- 反代后打开面板提示「实时通道断开」：[https://www.google.com/search?q=nginx+%E5%8F%8D%E4%BB%A3+websocket](Nginx 反代 WebSocket)
+- 反代后打开面板提示「实时通道断开」：[Nginx 反代 WebSocket](https://www.google.com/search?q=nginx+%E5%8F%8D%E4%BB%A3+websocket)
 
 ## 社区文章
 

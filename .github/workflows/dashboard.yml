@@ -1,4 +1,4 @@
-name: Build Dashboard Image
+name: Dashboard image
 
 on:
   push:
