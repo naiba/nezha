@@ -10,12 +10,13 @@ builds:
       - windows
       - darwin
     main: ./cmd/agent
-release:
-  name_template: "nezha-agent_{{.Os}}_{{.Arch}}"
+    binary: nezha-agent
 checksum:
   name_template: "checksums.txt"
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  name_template: "{{.ProjectName}}"
+archives:
+  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
 changelog:
   sort: asc
   filters:
