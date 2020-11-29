@@ -10,6 +10,8 @@ builds:
       - windows
       - darwin
     main: ./cmd/agent
+release:
+  name_template: "nezha-agent_{{.Os}}_{{.Arch}}"
 checksum:
   name_template: "checksums.txt"
 snapshot:

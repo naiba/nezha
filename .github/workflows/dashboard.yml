@@ -10,6 +10,7 @@ on:
       - "README.md"
       - "cmd/agent/**"
       - ".github/agent.yaml"
+      - ".goreleaser.yml"
 
 jobs:
   deploy:
