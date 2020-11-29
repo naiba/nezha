@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/naiba/com"
 
@@ -68,8 +69,8 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	}
 	var isAdmin bool
 	if gu.GetID() > 0 {
-		for i := 0; i < len(dao.Conf.GitHub.Admin); i++ {
-			if gu.GetID() == dao.Conf.GitHub.Admin[i] {
+		for _, admin := range strings.Split(dao.Conf.GitHub.Admin, ",") {
+			if fmt.Sprintf("%d", gu.GetID()) == admin {
 				isAdmin = true
 				break
 			}

@@ -2,7 +2,7 @@
 Description=Nezha Agent
 After=syslog.target
 After=network.target
-After=nezha-dashboard.service
+#After=nezha-dashboard.service
 
 [Service]
 # Modify these two values and uncomment them if you have
@@ -12,10 +12,10 @@ After=nezha-dashboard.service
 #LimitMEMLOCK=infinity
 #LimitNOFILE=65535
 Type=simple
-#User=root
-#Group=root
-WorkingDirectory=/root/nezha/agent/
-ExecStart=/root/nezha/agent/nezha-agent-linux-amd64 -d -s server_addr -i client_id -p client_secret
+User=root
+Group=root
+WorkingDirectory=/opt/nezha/agent/
+ExecStart=/opt/nezha/agent/nezha-agent-linux-amd64 -d -s nezha_server_addr -i nezha_client_id -p nezha_client_secret
 Restart=always
 #Environment=DEBUG=true
 

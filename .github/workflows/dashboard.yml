@@ -1,6 +1,13 @@
-name: Build Docker Image
+name: Build Dashboard Image
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - "script/**"
+      - ".gitignore"
+      - "README.md"
+      - "cmd/agent/**"
+      - ".github/agent.yaml"
 
 jobs:
   deploy:
@@ -11,9 +18,7 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
 
-      - name: docker
+      - name: Build and push dasbboard image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/nezha-agent -f Dockerfile.agent .
           docker build -t ghcr.io/${{ github.repository_owner }}/nezha-dashboard -f Dockerfile.dashboard .
-          docker push ghcr.io/${{ github.repository_owner }}/nezha-agent
           docker push ghcr.io/${{ github.repository_owner }}/nezha-dashboard
