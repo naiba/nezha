@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/blang/semver"
+	"github.com/rhysd/go-github-selfupdate/selfupdate"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
@@ -19,6 +21,12 @@ import (
 )
 
 var (
+	clientID     string
+	server       string
+	clientSecret string
+	debug        bool
+	version      string
+
 	rootCmd = &cobra.Command{
 		Use:   "nezha-agent",
 		Short: "「哪吒面板」监控、备份、站点管理一站式服务",
@@ -26,13 +34,30 @@ var (
 ================================
 监控、备份、站点管理一站式服务
 啦啦啦，啦啦啦，我是 mjj 小行家`,
-		Run: run,
+		Run:     run,
+		Version: version,
 	}
-	clientID     string
-	server       string
-	clientSecret string
-	debug        bool
 )
+
+func doSelfUpdate() {
+	defer func() {
+		time.Sleep(time.Minute * 20)
+		updateCh <- struct{}{}
+	}()
+	v := semver.MustParse(version)
+	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
+	if err != nil {
+		log.Println("Binary update failed:", err)
+		return
+	}
+	if latest.Version.Equals(v) {
+		// latest version is the same as current version. It means current binary is up to date.
+		log.Println("Current binary is the latest version", version)
+	} else {
+		log.Println("Successfully updated to version", latest.Version)
+		log.Println("Release note:\n", latest.ReleaseNotes)
+	}
+}
 
 func main() {
 	rootCmd.PersistentFlags().StringVarP(&server, "server", "s", "localhost:5555", "客户端ID")
@@ -50,6 +75,7 @@ var reporting bool
 var client pb.NezhaServiceClient
 var ctx = context.Background()
 var delayWhenError = time.Second * 10
+var updateCh = make(chan struct{}, 0)
 
 func run(cmd *cobra.Command, args []string) {
 	dao.Conf = &model.Config{
@@ -62,6 +88,15 @@ func run(cmd *cobra.Command, args []string) {
 
 	// 上报服务器信息
 	go reportState()
+
+	go func() {
+		for range updateCh {
+			log.Println("check update", version)
+			doSelfUpdate()
+		}
+	}()
+
+	updateCh <- struct{}{}
 
 	var err error
 	var conn *grpc.ClientConn

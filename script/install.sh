@@ -9,6 +9,7 @@
 NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
+NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_VERSION="v1.0.0"
 
 red='\033[0;31m'
@@ -20,6 +21,12 @@ os_version=""
 os_arch=""
 
 pre_check() {
+    command -v systemctl >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo "不支持此系统：未找到 systemctl 命令"
+        exit 1
+    fi
+
     # check root
     [[ $EUID -ne 0 ]] && echo -e "${red}错误: ${plain} 必须使用root用户运行此脚本！\n" && exit 1
 
@@ -150,6 +157,8 @@ install_dashboard() {
 
     modify_dashboard_config 0
 
+    echo "默认管理面板地址：域名:8008"
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -167,14 +176,52 @@ install_agent() {
     if [[ $? != 0 ]]; then
         echo -e "正在下载监控端"
         cd $NZ_DASHBOARD_PATH
-        curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/docker-compose.yaml -o docker-compose.yaml >/dev/null 2>&1
+        curl -L https://github.com/naiba/nezha/releases/latest/download/nezha-agent_linux_${os_arch}.tar.gz -o nezha-agent_linux_${os_arch}.tar.gz >/dev/null 2>&1
         if [[ $? != 0 ]]; then
-            echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+            echo -e "${red}Release 下载失败，请检查本机能否连接 github.com${plain}"
             return 0
         fi
+        tar xf nezha-agent_linux_${os_arch}.tar.gz &&
+            mv nezha-agent_linux_${os_arch}/nezha-agent $NZ_AGENT_PATH &&
+            rm -rf nezha-agent_linux_${os_arch}*
     fi
 
-    modify_dashboard_config 0
+    modify_agent_config 0
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+modify_agent_config() {
+    echo -e "> 修改Agent配置"
+
+    cd $NZ_DASHBOARD_PATH
+    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/nezha-agent.service -o $NZ_AGENT_SERVICE >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo -e "${red}文件下载失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+        return 0
+    fi
+
+    echo "请先在管理面板上添加服务器，获取到ID和密钥" &&
+        read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nezha_server_addr &&
+        read -p "请输入Agent ID: " nezha_client_id &&
+        read -p "请输入Agent 密钥: " nezha_client_secret
+    if [[ -z "${nezha_server_addr}" || -z "${nezha_client_id}" || -z "${nezha_client_secret}" ]]; then
+        echo -e "${red}所有选项都不能为空${plain}"
+        before_show_menu
+        return 1
+    fi
+
+    sed -i "s/^nezha_server_addr/${nezha_server_addr}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/^nezha_client_id/${nezha_client_id}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/^nezha_client_secret/${nezha_client_secret}/" ${NZ_AGENT_SERVICE}
+
+    echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
+
+    systemctl daemon-reload
+    systemctl enable nezha-agent
+    systemctl restart nezha-agent
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -280,7 +327,9 @@ show_usage() {
     echo "./nbdomain.sh stop_dashboard           - 停止面板"
     echo "./nbdomain.sh restart_dashboard        - 重启面板"
     echo "./nbdomain.sh show_dashboard_log       - 查看面板日志"
+    echo "------------------------------------------"
     echo "./nbdomain.sh install_agent            - 安装监控Agent"
+    echo "./nbdomain.sh modify_agent_config      - 修改Agent配置"
     echo "------------------------------------------"
 }
 
@@ -298,6 +347,7 @@ show_menu() {
     ${green}6.${plain} 查看面板日志
     ————————————————
     ${green}7.${plain} 安装监控Agent
+    ${green}8.${plain} 修改Agent配置
     "
     echo && read -p "请输入选择 [0-14]: " num
 
@@ -356,6 +406,9 @@ if [[ $# > 0 ]]; then
         ;;
     "install_agent")
         install_agent 0
+        ;;
+    "modify_agent_config")
+        modify_agent_config 0
         ;;
     *) show_usage ;;
     esac

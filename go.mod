@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
+	github.com/blang/semver v3.5.1+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/protobuf v1.4.2
@@ -14,6 +15,7 @@ require (
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/rhysd/go-github-selfupdate v1.2.2
 	github.com/shirou/gopsutil/v3 v3.20.10
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.7.1

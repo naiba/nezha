@@ -16,7 +16,7 @@ checksum:
 snapshot:
   name_template: "{{.ProjectName}}"
 archives:
-  - name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  - name_template: "nezha-agent_{{ .Os }}_{{ .Arch }}"
 changelog:
   sort: asc
   filters:
