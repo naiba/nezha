@@ -25,7 +25,7 @@ var (
 	server       string
 	clientSecret string
 	debug        bool
-	version      string = "0.1.4"
+	version      string
 
 	rootCmd = &cobra.Command{
 		Use:   "nezha-agent",
@@ -37,6 +37,15 @@ var (
 		Run:     run,
 		Version: version,
 	}
+)
+
+var (
+	endReport      time.Time
+	reporting      bool
+	client         pb.NezhaServiceClient
+	ctx            = context.Background()
+	delayWhenError = time.Second * 10
+	updateCh       = make(chan struct{}, 0)
 )
 
 func doSelfUpdate() {
@@ -55,6 +64,7 @@ func doSelfUpdate() {
 		// latest version is the same as current version. It means current binary is up to date.
 		log.Println("Current binary is the latest version", version)
 	} else {
+		client.Register(ctx, monitor.GetHost().PB())
 		log.Println("Successfully updated to version", latest.Version)
 		log.Println("Release note:\n", latest.ReleaseNotes)
 	}
@@ -73,13 +83,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-var endReport time.Time
-var reporting bool
-var client pb.NezhaServiceClient
-var ctx = context.Background()
-var delayWhenError = time.Second * 10
-var updateCh = make(chan struct{}, 0)
 
 func run(cmd *cobra.Command, args []string) {
 	dao.Conf = &model.Config{
