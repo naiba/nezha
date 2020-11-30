@@ -25,7 +25,7 @@ var (
 	server       string
 	clientSecret string
 	debug        bool
-	version      string
+	version      string = "0.1.4"
 
 	rootCmd = &cobra.Command{
 		Use:   "nezha-agent",
@@ -41,10 +41,11 @@ var (
 
 func doSelfUpdate() {
 	defer func() {
-		time.Sleep(time.Minute * 20)
+		time.Sleep(time.Second * 3)
 		updateCh <- struct{}{}
 	}()
 	v := semver.MustParse(version)
+	log.Println("check update", v)
 	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
 	if err != nil {
 		log.Println("Binary update failed:", err)
@@ -94,8 +95,7 @@ func run(cmd *cobra.Command, args []string) {
 
 	go func() {
 		for range updateCh {
-			log.Println("check update", version)
-			doSelfUpdate()
+			go doSelfUpdate()
 		}
 	}()
 
