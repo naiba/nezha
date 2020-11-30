@@ -13,15 +13,13 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
 ## 一键脚本
 
-WIP，尚未完成，还在做监控端安装
-
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
 sudo nezha.sh
 ```
 ## FAQ
 
-- 反代后打开面板提示「实时通道断开」：[Nginx 反代 WebSocket](https://www.google.com/search?q=nginx+%E5%8F%8D%E4%BB%A3+websocket)
+- 反代后 **实时通道断开**：[Nginx 反代 WebSocket](https://www.google.com/search?q=nginx+%E5%8F%8D%E4%BB%A3+websocket)
 
 ## 社区文章
 

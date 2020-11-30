@@ -72,7 +72,7 @@ pre_check() {
     fi
 
     ## os_arch
-    if $(uname -m | grep '64'); then
+    if [ $(uname -m | grep '64') != "" ]; then
         os_arch="amd64"
     else
         os_arch="386"
@@ -145,14 +145,12 @@ install_dashboard() {
         echo -e "${green}Docker Compose${plain} 安装成功"
     fi
 
+    echo -e "正在下载 Docker 脚本"
+    cd $NZ_DASHBOARD_PATH
+    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/docker-compose.yaml -o docker-compose.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
-        echo -e "正在下载 Docker 脚本"
-        cd $NZ_DASHBOARD_PATH
-        curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/docker-compose.yaml -o docker-compose.yaml >/dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
-            return 0
-        fi
+        echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+        return 0
     fi
 
     modify_dashboard_config 0
@@ -173,18 +171,16 @@ install_agent() {
     mkdir -p $NZ_AGENT_PATH
     chmod 777 -R $NZ_AGENT_PATH
 
+    echo -e "正在下载监控端"
+    cd $NZ_DASHBOARD_PATH
+    curl -L https://github.com/naiba/nezha/releases/latest/download/nezha-agent_linux_${os_arch}.tar.gz -o nezha-agent_linux_${os_arch}.tar.gz >/dev/null 2>&1
     if [[ $? != 0 ]]; then
-        echo -e "正在下载监控端"
-        cd $NZ_DASHBOARD_PATH
-        curl -L https://github.com/naiba/nezha/releases/latest/download/nezha-agent_linux_${os_arch}.tar.gz -o nezha-agent_linux_${os_arch}.tar.gz >/dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echo -e "${red}Release 下载失败，请检查本机能否连接 github.com${plain}"
-            return 0
-        fi
-        tar xf nezha-agent_linux_${os_arch}.tar.gz &&
-            mv nezha-agent_linux_${os_arch}/nezha-agent $NZ_AGENT_PATH &&
-            rm -rf nezha-agent_linux_${os_arch}*
+        echo -e "${red}Release 下载失败，请检查本机能否连接 github.com${plain}"
+        return 0
     fi
+    tar xf nezha-agent_linux_${os_arch}.tar.gz &&
+        mv nezha-agent $NZ_AGENT_PATH &&
+        rm -rf nezha-agent*
 
     modify_agent_config 0
 
@@ -213,9 +209,9 @@ modify_agent_config() {
         return 1
     fi
 
-    sed -i "s/^nezha_server_addr/${nezha_server_addr}/" ${NZ_AGENT_SERVICE}
-    sed -i "s/^nezha_client_id/${nezha_client_id}/" ${NZ_AGENT_SERVICE}
-    sed -i "s/^nezha_client_secret/${nezha_client_secret}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/nezha_server_addr/${nezha_server_addr}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/nezha_client_id/${nezha_client_id}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/nezha_client_secret/${nezha_client_secret}/" ${NZ_AGENT_SERVICE}
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
 
@@ -231,28 +227,30 @@ modify_agent_config() {
 modify_dashboard_config() {
     echo -e "> 修改面板配置"
 
-    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/config.yaml -o config.yaml >/dev/null 2>&1
+    mkdir -p $NZ_DASHBOARD_PATH/data
+
+    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/config.yaml -o ${NZ_DASHBOARD_PATH}/data/config.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
         return 0
     fi
 
     echo "关于管理员 GitHub ID：复制自己GitHub头像图片地址，/[ID].png 多个用英文逗号隔开 id1,id2,id3" &&
-        read -p "请输入 ID 列表: " admin_list &&
+        read -p "请输入 ID 列表: " nz_admin_ids &&
         echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback" &&
         read -p "请输入 GitHub Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
         read -p "请输入 GitHub Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
         read -p "请输入站点标题: " nz_site_title
-    if [[ -z "${admin_list}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
+    if [[ -z "${nz_admin_ids}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
         return 1
     fi
 
-    sed -i "s/^admin_list/${admin_list}/" ${NZ_DASHBOARD_PATH}/config.yaml
-    sed -i "s/^nz_github_oauth_client_id/${nz_github_oauth_client_id}/" ${NZ_DASHBOARD_PATH}/config.yaml
-    sed -i "s/^nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" ${NZ_DASHBOARD_PATH}/config.yaml
-    sed -i "s/^nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/config.yaml
+    sed -i "s/nz_admin_ids/${nz_admin_ids}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
+    sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
+    sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
+    sed -i "s/nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 
@@ -264,7 +262,9 @@ modify_dashboard_config() {
 }
 
 restart_dashboard() {
-    cd $NZ_DASHBOARD_PATH && docker-compose restart
+    cd $NZ_DASHBOARD_PATH
+    docker-compose down
+    docker-compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒面板 重启成功${plain}"
     else
@@ -310,13 +310,6 @@ show_dashboard_log() {
     fi
 }
 
-check_install() {
-    command -v docker >/dev/null 2>&1 && command -v docker-compose >/dev/null 2>&1 && command -v git >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        install_base
-    fi
-}
-
 show_usage() {
     echo "哪吒面板 管理脚本使用方法: "
     echo "------------------------------------------"
@@ -349,32 +342,35 @@ show_menu() {
     ${green}7.${plain} 安装监控Agent
     ${green}8.${plain} 修改Agent配置
     "
-    echo && read -p "请输入选择 [0-14]: " num
+    echo && read -p "请输入选择 [0-8]: " num
 
     case "${num}" in
     0)
         exit 0
         ;;
     1)
-        check_install && install_dashboard
+        install_dashboard
         ;;
     2)
-        check_install && modify_dashboard_config
+        modify_dashboard_config
         ;;
     3)
-        check_install && start_dashboard
+        start_dashboard
         ;;
     4)
-        check_install && stop_dashboard
+        stop_dashboard
         ;;
     5)
-        check_install && restart_dashboard
+        restart_dashboard
         ;;
     6)
-        check_install && show_dashboard_log
+        show_dashboard_log
         ;;
     7)
         install_agent
+        ;;
+    8)
+        modify_agent_config
         ;;
     *)
         echo -e "${red}请输入正确的数字 [0-7]${plain}"
@@ -387,22 +383,22 @@ pre_check
 if [[ $# > 0 ]]; then
     case $1 in
     "install_dashboard")
-        check_install 0 && install_dashboard 0
+        install_dashboard 0
         ;;
     "modify_dashboard_config")
-        check_install 0 && modify_dashboard_config 0
+        modify_dashboard_config 0
         ;;
     "start_dashboard")
-        check_install 0 && start_dashboard 0
+        start_dashboard 0
         ;;
     "stop_dashboard")
-        check_install 0 && stop_dashboard 0
+        stop_dashboard 0
         ;;
     "restart_dashboard")
-        check_install 0 && restart_dashboard 0
+        restart_dashboard 0
         ;;
     "show_dashboard_log")
-        check_install 0 && show_dashboard_log 0
+        show_dashboard_log 0
         ;;
     "install_agent")
         install_agent 0
