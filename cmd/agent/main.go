@@ -48,6 +48,8 @@ var (
 	updateCh       = make(chan struct{}, 0)
 )
 
+const AGENT_UPGRADE = 55
+
 func doSelfUpdate() {
 	defer func() {
 		time.Sleep(time.Minute * 20)
@@ -64,10 +66,8 @@ func doSelfUpdate() {
 		// latest version is the same as current version. It means current binary is up to date.
 		log.Println("Current binary is the latest version", version)
 	} else {
-		log.Println("Prev version", dao.Version)
-		dao.Version = latest.Version.String()
-		client.Register(ctx, monitor.GetHost().PB())
 		log.Println("Successfully updated to version", latest.Version)
+		os.Exit(AGENT_UPGRADE)
 	}
 }
 
