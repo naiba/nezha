@@ -156,8 +156,6 @@ install_dashboard() {
 
     modify_dashboard_config 0
 
-    echo "默认管理面板地址：域名:8008"
-
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -268,6 +266,7 @@ restart_dashboard() {
     docker-compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒面板 重启成功${plain}"
+        echo -e "默认管理面板地址：${yellow}域名:8008${plain}"
     else
         echo -e "${red}重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
     fi
