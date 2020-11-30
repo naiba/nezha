@@ -64,9 +64,10 @@ func doSelfUpdate() {
 		// latest version is the same as current version. It means current binary is up to date.
 		log.Println("Current binary is the latest version", version)
 	} else {
+		log.Println("Prev version", dao.Version)
+		dao.Version = latest.Version.String()
 		client.Register(ctx, monitor.GetHost().PB())
 		log.Println("Successfully updated to version", latest.Version)
-		log.Println("Release note:\n", latest.ReleaseNotes)
 	}
 }
 
