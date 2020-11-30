@@ -171,7 +171,6 @@ install_agent() {
     chmod 777 -R $NZ_AGENT_PATH
 
     echo -e "正在下载监控端"
-    cd $NZ_AGENT_PATH
     curl -L https://github.com/naiba/nezha/releases/latest/download/nezha-agent_linux_${os_arch}.tar.gz -o nezha-agent_linux_${os_arch}.tar.gz >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Release 下载失败，请检查本机能否连接 github.com${plain}"
@@ -191,7 +190,7 @@ install_agent() {
 modify_agent_config() {
     echo -e "> 修改Agent配置"
 
-    cd $NZ_DASHBOARD_PATH
+    cd $NZ_AGENT_PATH
     curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/nezha-agent.service -o $NZ_AGENT_SERVICE >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}文件下载失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
