@@ -41,7 +41,7 @@ var (
 
 func doSelfUpdate() {
 	defer func() {
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Minute * 20)
 		updateCh <- struct{}{}
 	}()
 	v := semver.MustParse(version)
