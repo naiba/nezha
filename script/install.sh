@@ -234,7 +234,7 @@ modify_dashboard_config() {
         return 0
     fi
 
-    echo "关于管理员 GitHub ID：复制自己GitHub头像图片地址，/[ID].png 多个用英文逗号隔开 id1,id2,id3" &&
+    echo "关于管理员 GitHub ID：复制自己GitHub头像图片地址里面的数字，/87123.png 多个用英文逗号隔开 87123,id2,id3" &&
         read -p "请输入 ID 列表: " nz_admin_ids &&
         echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback" &&
         read -p "请输入 GitHub Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
@@ -262,6 +262,7 @@ modify_dashboard_config() {
 
 restart_dashboard() {
     cd $NZ_DASHBOARD_PATH
+    docker-compose pull
     docker-compose down
     docker-compose up -d
     if [[ $? == 0 ]]; then

@@ -60,6 +60,9 @@ func doSelfUpdate() {
 }
 
 func main() {
+	// 来自于 GoReleaser 的版本号
+	dao.Version = version
+
 	rootCmd.PersistentFlags().StringVarP(&server, "server", "s", "localhost:5555", "客户端ID")
 	rootCmd.PersistentFlags().StringVarP(&clientID, "id", "i", "", "客户端ID")
 	rootCmd.PersistentFlags().StringVarP(&clientSecret, "secret", "p", "", "客户端Secret")
