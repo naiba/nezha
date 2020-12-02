@@ -1,7 +1,5 @@
 # 哪吒面板
 
-阶段： *alpha*
-
 服务期状态监控，被动接收（非 node-exporter 那种主动拉取的方式。）
 
 ## 一键脚本
@@ -14,7 +12,7 @@ sudo ./nezha.sh
 
 使用反向代理时需要针对 `/ws` 路径的 WebSocket 进行特别配置以支持实时更新服务器状态。
 
-- [Nginx（宝塔）](https://www.google.com/search?q=nginx+%E5%8F%8D%E4%BB%A3+websocket)：在你的 nginx 配置文件中加入以下代码
+- Nginx(宝塔)：在你的 nginx 配置文件中加入以下代码
 
     ```nginx
     server{
