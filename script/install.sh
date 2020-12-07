@@ -200,7 +200,7 @@ modify_agent_config() {
     fi
 
     if [[ -z "${nz_rpc_port}" ]]; then
-        $nz_rpc_port=5555
+        nz_rpc_port=5555
     fi
 
     sed -i "s/nz_rpc_host/${nz_rpc_host}/" ${NZ_AGENT_SERVICE}
@@ -252,10 +252,10 @@ modify_dashboard_config() {
     fi
 
     if [[ -z "${nz_site_port}" ]]; then
-        $nz_site_port=8008
+        nz_site_port=8008
     fi
     if [[ -z "${nz_rpc_port}" ]]; then
-        $nz_rpc_port=5555
+        nz_rpc_port=5555
     fi
 
     sed -i "s/nz_admin_ids/${nz_admin_ids}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
