@@ -267,14 +267,14 @@ modify_dashboard_config() {
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 
-    restart_dashboard
+    restart_and_update
 
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
-restart_dashboard() {
+restart_and_update() {
     cd $NZ_DASHBOARD_PATH
     docker-compose pull
     docker-compose down
@@ -327,18 +327,18 @@ show_dashboard_log() {
 
 show_usage() {
     echo "哪吒面板 管理脚本使用方法: "
-    echo "------------------------------------------"
-    echo "./nbdomain.sh                          - 显示管理菜单"
-    echo "./nbdomain.sh install_dashboard        - 安装面板端"
-    echo "./nbdomain.sh modify_dashboard_config  - 修改面板配置"
-    echo "./nbdomain.sh start_dashboard          - 启动面板"
-    echo "./nbdomain.sh stop_dashboard           - 停止面板"
-    echo "./nbdomain.sh restart_dashboard        - 重启/更新 面板"
-    echo "./nbdomain.sh show_dashboard_log       - 查看面板日志"
-    echo "------------------------------------------"
-    echo "./nbdomain.sh install_agent            - 安装监控Agent"
-    echo "./nbdomain.sh modify_agent_config      - 修改Agent配置"
-    echo "------------------------------------------"
+    echo "--------------------------------------------------------"
+    echo "./nbdomain.sh                            - 显示管理菜单"
+    echo "./nbdomain.sh install_dashboard          - 安装面板端"
+    echo "./nbdomain.sh modify_dashboard_config    - 修改面板配置"
+    echo "./nbdomain.sh start_dashboard            - 启动面板"
+    echo "./nbdomain.sh stop_dashboard             - 停止面板"
+    echo "./nbdomain.sh restart_and_update         - 重启并更新面板"
+    echo "./nbdomain.sh show_dashboard_log         - 查看面板日志"
+    echo "--------------------------------------------------------"
+    echo "./nbdomain.sh install_agent              - 安装监控Agent"
+    echo "./nbdomain.sh modify_agent_config        - 修改Agent配置"
+    echo "--------------------------------------------------------"
 }
 
 show_menu() {
@@ -351,7 +351,7 @@ show_menu() {
     ${green}2.${plain} 修改面板配置
     ${green}3.${plain} 启动面板
     ${green}4.${plain} 停止面板
-    ${green}5.${plain} 重启面板
+    ${green}5.${plain} 重启并更新面板
     ${green}6.${plain} 查看面板日志
     ————————————————
     ${green}7.${plain} 安装监控Agent
@@ -376,7 +376,7 @@ show_menu() {
         stop_dashboard
         ;;
     5)
-        restart_dashboard
+        restart_and_update
         ;;
     6)
         show_dashboard_log
@@ -409,8 +409,8 @@ if [[ $# > 0 ]]; then
     "stop_dashboard")
         stop_dashboard 0
         ;;
-    "restart_dashboard")
-        restart_dashboard 0
+    "restart_and_update")
+        restart_and_update 0
         ;;
     "show_dashboard_log")
         show_dashboard_log 0
