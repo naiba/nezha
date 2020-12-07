@@ -190,7 +190,7 @@ modify_agent_config() {
 
     echo "请先在管理面板上添加服务器，获取到ID和密钥" &&
         read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_rpc_host &&
-        read -p "请输入面板RPC端口: (5555)" nz_rpc_host &&
+        read -p "请输入面板RPC端口: (5555)" nz_rpc_port &&
         read -p "请输入Agent ID: " nezha_client_id &&
         read -p "请输入Agent 密钥: " nezha_client_secret
     if [[ -z "${nz_rpc_host}" || -z "${nezha_client_id}" || -z "${nezha_client_secret}" ]]; then
