@@ -20,7 +20,7 @@ sudo ./nezha.sh
         #server_name blablabla...
 
         location /ws {
-            proxy_pass http://ip:8008;
+            proxy_pass http://ip:站点访问端口;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";

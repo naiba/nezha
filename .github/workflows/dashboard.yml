@@ -7,7 +7,7 @@ on:
     paths-ignore:
       - "script/**"
       - ".gitignore"
-      - "README.md"
+      - "*.md"
       - "cmd/agent/**"
       - ".github/agent.yaml"
       - ".goreleaser.yml"

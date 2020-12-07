@@ -146,14 +146,6 @@ install_dashboard() {
         echo -e "${green}Docker Compose${plain} 安装成功"
     fi
 
-    echo -e "正在下载 Docker 脚本"
-    cd $NZ_DASHBOARD_PATH
-    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/docker-compose.yaml -o docker-compose.yaml >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
-        return 0
-    fi
-
     modify_dashboard_config 0
 
     if [[ $# == 0 ]]; then
@@ -197,16 +189,22 @@ modify_agent_config() {
     fi
 
     echo "请先在管理面板上添加服务器，获取到ID和密钥" &&
-        read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nezha_server_addr &&
+        read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_rpc_host &&
+        read -p "请输入面板RPC端口: (5555)" nz_rpc_host &&
         read -p "请输入Agent ID: " nezha_client_id &&
         read -p "请输入Agent 密钥: " nezha_client_secret
-    if [[ -z "${nezha_server_addr}" || -z "${nezha_client_id}" || -z "${nezha_client_secret}" ]]; then
+    if [[ -z "${nz_rpc_host}" || -z "${nezha_client_id}" || -z "${nezha_client_secret}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
         return 1
     fi
 
-    sed -i "s/nezha_server_addr/${nezha_server_addr}/" ${NZ_AGENT_SERVICE}
+    if [[ -z "${nz_rpc_port}" ]]; then
+        $nz_rpc_port=5555
+    fi
+
+    sed -i "s/nz_rpc_host/${nz_rpc_host}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/nz_rpc_port/${nz_rpc_port}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nezha_client_id/${nezha_client_id}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nezha_client_secret/${nezha_client_secret}/" ${NZ_AGENT_SERVICE}
 
@@ -224,6 +222,13 @@ modify_agent_config() {
 modify_dashboard_config() {
     echo -e "> 修改面板配置"
 
+    echo -e "正在下载 Docker 脚本"
+    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/docker-compose.yaml -o ${NZ_DASHBOARD_PATH}/docker-compose.yaml >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+        return 0
+    fi
+
     mkdir -p $NZ_DASHBOARD_PATH/data
 
     curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/config.yaml -o ${NZ_DASHBOARD_PATH}/data/config.yaml >/dev/null 2>&1
@@ -237,17 +242,28 @@ modify_dashboard_config() {
         echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback" &&
         read -p "请输入 GitHub Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
         read -p "请输入 GitHub Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
-        read -p "请输入站点标题: " nz_site_title
+        read -p "请输入站点标题: " nz_site_title &&
+        read -p "请输入站点访问端口: (8008)" nz_site_port &&
+        read -p "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_rpc_port
     if [[ -z "${nz_admin_ids}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
         return 1
     fi
 
+    if [[ -z "${nz_site_port}" ]]; then
+        $nz_site_port=8008
+    fi
+    if [[ -z "${nz_rpc_port}" ]]; then
+        $nz_site_port=5555
+    fi
+
     sed -i "s/nz_admin_ids/${nz_admin_ids}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
+    sed -i "s/nz_site_port/${nz_site_port}/" ${NZ_DASHBOARD_PATH}/docker-composer.yaml
+    sed -i "s/nz_rpc_port/${nz_rpc_port}/" ${NZ_DASHBOARD_PATH}/docker-composer.yaml
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 
@@ -265,7 +281,7 @@ restart_dashboard() {
     docker-compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒面板 重启成功${plain}"
-        echo -e "默认管理面板地址：${yellow}域名:8008${plain}"
+        echo -e "默认管理面板地址：${yellow}域名:站点访问端口${plain}"
     else
         echo -e "${red}重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
     fi

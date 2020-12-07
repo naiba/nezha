@@ -7,5 +7,5 @@ services:
     volumes:
       - ./data:/dashboard/data
     ports:
-      - 8008:80
-      - 5555:5555
+      - nz_site_port:80
+      - nz_rpc_port:5555
