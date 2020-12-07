@@ -333,7 +333,7 @@ show_usage() {
     echo "./nbdomain.sh modify_dashboard_config  - 修改面板配置"
     echo "./nbdomain.sh start_dashboard          - 启动面板"
     echo "./nbdomain.sh stop_dashboard           - 停止面板"
-    echo "./nbdomain.sh restart_dashboard        - 重启面板"
+    echo "./nbdomain.sh restart_dashboard        - 重启/更新 面板"
     echo "./nbdomain.sh show_dashboard_log       - 查看面板日志"
     echo "------------------------------------------"
     echo "./nbdomain.sh install_agent            - 安装监控Agent"
