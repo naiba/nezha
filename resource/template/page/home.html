@@ -30,7 +30,7 @@
                         <div class="ui grid">
                             <div class="three wide column">CPU</div>
                             <div class="thirteen wide column">
-                                <div class="ui cpu progress" :data-value="server.State.CPU" data-total="100">
+                                <div class="ui cpu green progress" :data-value="server.State.CPU" data-total="100">
                                     <div class="bar">
                                         <div class="progress"></div>
                                     </div>
@@ -38,7 +38,7 @@
                             </div>
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
-                                <div class="ui mem progress" :data-value="server.State.MemUsed"
+                                <div class="ui mem green progress" :data-value="server.State.MemUsed"
                                     :data-total="server.Host.MemTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
@@ -63,7 +63,7 @@
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
-                                <div class="ui disk progress" :data-value="server.State.DiskUsed"
+                                <div class="ui disk green progress" :data-value="server.State.DiskUsed"
                                     :data-total="server.Host.DiskTotal">
                                     <div class="bar">
                                         <div class="progress"></div>
