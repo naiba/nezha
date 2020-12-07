@@ -255,7 +255,7 @@ modify_dashboard_config() {
         $nz_site_port=8008
     fi
     if [[ -z "${nz_rpc_port}" ]]; then
-        $nz_site_port=5555
+        $nz_rpc_port=5555
     fi
 
     sed -i "s/nz_admin_ids/${nz_admin_ids}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
