@@ -7,12 +7,15 @@
 .nb-container {
     padding-top: 75px;
     min-height: 80%;
+    padding-bottom: 75px;
 }
 
 .footer.segment {
-    margin-top: 40px !important;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .login-form {
