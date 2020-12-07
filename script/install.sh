@@ -262,8 +262,8 @@ modify_dashboard_config() {
     sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
-    sed -i "s/nz_site_port/${nz_site_port}/" ${NZ_DASHBOARD_PATH}/docker-composer.yaml
-    sed -i "s/nz_rpc_port/${nz_rpc_port}/" ${NZ_DASHBOARD_PATH}/docker-composer.yaml
+    sed -i "s/nz_site_port/${nz_site_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
+    sed -i "s/nz_rpc_port/${nz_rpc_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 
