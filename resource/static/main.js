@@ -72,6 +72,9 @@ function showFormModal(modelSelector, formID, URL, getData) {
 
 function addOrEditServer(server) {
     const modal = $('.server.modal')
+    if (server) {
+        server = JSON.parse(server)
+    }
     modal.children('.header').text((server ? '修改' : '添加') + '服务器')
     modal.find('.positive.button').html(server ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>')
     modal.find('input[name=id]').val(server ? server.ID : null)

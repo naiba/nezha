@@ -27,12 +27,6 @@ func ServeWeb(port uint) {
 		"stf": func(s uint64) string {
 			return time.Unix(int64(s), 0).Format("2006年1月2号 15:04")
 		},
-		"fs": func() string {
-			if !dao.Conf.Debug {
-				return ""
-			}
-			return fmt.Sprintf("%d", time.Now().UnixNano())
-		},
 		"sf": func(duration uint64) string {
 			return time.Duration(time.Duration(duration) * time.Second).String()
 		},

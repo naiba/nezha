@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
 	pb "github.com/naiba/nezha/proto"
@@ -18,4 +19,8 @@ type Server struct {
 
 	Stream      pb.NezhaService_HeartbeatServer `gorm:"-" json:"-"`
 	StreamClose chan<- error                    `gorm:"-" json:"-"`
+}
+
+func (s Server) Marshal() string {
+	return fmt.Sprintf(`{"ID":%d,"Name":"%s","Secret":"%s"}`, s.ID, s.Name, s.Secret)
 }
