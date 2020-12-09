@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v1.0.1"
+NZ_VERSION="v1.0.2"
 GITHUB_RAW_URL="raw.githubusercontent.com"
 GITHUB_URL="github.com"
 
@@ -283,6 +283,8 @@ modify_dashboard_config() {
 }
 
 restart_and_update() {
+    echo -e "> 重启并更新面板"
+
     cd $NZ_DASHBOARD_PATH
     docker-compose pull
     docker-compose down
@@ -300,6 +302,8 @@ restart_and_update() {
 }
 
 start_dashboard() {
+    echo -e "> 启动面板"
+
     cd $NZ_DASHBOARD_PATH && docker-compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒面板 启动成功${plain}"
@@ -313,6 +317,8 @@ start_dashboard() {
 }
 
 stop_dashboard() {
+    echo -e "> 停止面板"
+
     cd $NZ_DASHBOARD_PATH && docker-compose down
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒面板 停止成功${plain}"
@@ -326,10 +332,47 @@ stop_dashboard() {
 }
 
 show_dashboard_log() {
+    echo -e "> 获取面板日志"
+
     cd $NZ_DASHBOARD_PATH && docker-compose logs -f
 
     if [[ $# == 0 ]]; then
         before_show_menu
+    fi
+}
+
+uninstall_dashboard() {
+    echo -e "> 卸载管理面板"
+
+    cd $NZ_DASHBOARD_PATH &&
+        docker-compose down
+    rm -rf $NZ_DASHBOARD_PATH
+    clean_all
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+uninstall_agent() {
+    echo -e "> 卸载Agent"
+
+    systemctl disable nezha-agent.service
+    systemctl stop nezha-agent.service
+    rm -rf $NZ_AGENT_SERVICE
+    systemctl daemon-reload
+
+    rm -rf $NZ_AGENT_PATH
+    clean_all
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+clean_all() {
+    if [ -z "$(ls -A ${NZ_BASE_PATH})" ]; then
+        rm -rf ${NZ_BASE_PATH}
     fi
 }
 
@@ -343,9 +386,11 @@ show_usage() {
     echo "./nbdomain.sh stop_dashboard             - 停止面板"
     echo "./nbdomain.sh restart_and_update         - 重启并更新面板"
     echo "./nbdomain.sh show_dashboard_log         - 查看面板日志"
+    echo "./nbdomain.sh uninstall_dashboard        - 卸载管理面板"
     echo "--------------------------------------------------------"
     echo "./nbdomain.sh install_agent              - 安装监控Agent"
     echo "./nbdomain.sh modify_agent_config        - 修改Agent配置"
+    echo "./nbdomain.sh uninstall_agent            - 卸载Agen"
     echo "--------------------------------------------------------"
 }
 
@@ -353,17 +398,19 @@ show_menu() {
     echo -e "
     ${green}哪吒面板管理脚本${plain} ${red}${NZ_VERSION}${plain}
     --- https://github.com/naiba/nezha ---
-    ${green}0.${plain} 退出脚本
-    ————————————————
-    ${green}1.${plain} 安装面板端
-    ${green}2.${plain} 修改面板配置
-    ${green}3.${plain} 启动面板
-    ${green}4.${plain} 停止面板
-    ${green}5.${plain} 重启并更新面板
-    ${green}6.${plain} 查看面板日志
-    ————————————————
-    ${green}7.${plain} 安装监控Agent
-    ${green}8.${plain} 修改Agent配置
+    ${green}0.${plain}  退出脚本
+    ————————————————-
+    ${green}1.${plain}  安装面板端
+    ${green}2.${plain}  修改面板配置
+    ${green}3.${plain}  启动面板
+    ${green}4.${plain}  停止面板
+    ${green}5.${plain}  重启并更新面板
+    ${green}6.${plain}  查看面板日志
+    ${green}7.${plain}  卸载管理面板
+    ————————————————-
+    ${green}8.${plain}  安装监控Agent
+    ${green}9.${plain}  修改Agent配置
+    ${green}10.${plain} 卸载Agent
     "
     echo && read -p "请输入选择 [0-8]: " num
 
@@ -393,7 +440,13 @@ show_menu() {
         install_agent
         ;;
     8)
+        uninstall_dashboard
+        ;;
+    9)
         modify_agent_config
+        ;;
+    10)
+        uninstall_agent
         ;;
     *)
         echo -e "${red}请输入正确的数字 [0-7]${plain}"
@@ -423,11 +476,17 @@ if [[ $# > 0 ]]; then
     "show_dashboard_log")
         show_dashboard_log 0
         ;;
+    "uninstall_dashboard")
+        uninstall_dashboard 0
+        ;;
     "install_agent")
         install_agent 0
         ;;
     "modify_agent_config")
         modify_agent_config 0
+        ;;
+    "uninstall_agent")
+        uninstall_agent 0
         ;;
     *) show_usage ;;
     esac
