@@ -143,13 +143,6 @@ h1 {
 }
 
 @media only screen and (max-width: 992px) {
-
-    #location,
-    tr td:nth-child(4) {
-        display: none;
-        visibility: hidden;
-    }
-
     .hotaru-cover {
         background: url(../img/tenshi_l.png) center no-repeat;
         background-size: 100%;
@@ -157,25 +150,6 @@ h1 {
 }
 
 @media only screen and (max-width: 720px) {
-
-    #type,
-    tr td:nth-child(3) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #location,
-    tr td:nth-child(4) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #uptime,
-    tr td:nth-child(5) {
-        display: none;
-        visibility: hidden;
-    }
-
     .hotaru-cover {
         background: url(../img/tenshi.png) no-repeat;
         background-size: 100%;
@@ -183,31 +157,6 @@ h1 {
 }
 
 @media only screen and (max-width: 600px) {
-
-    #type,
-    tr td:nth-child(3) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #location,
-    tr td:nth-child(4) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #uptime,
-    tr td:nth-child(5) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #load,
-    tr td:nth-child(6) {
-        display: none;
-        visibility: hidden;
-    }
-
     .hotaru-cover {
         background: url(../img/tenshi.png) no-repeat;
         background-size: 100%;
@@ -215,37 +164,6 @@ h1 {
 }
 
 @media only screen and (max-width: 533px) {
-
-    #type,
-    tr td:nth-child(3) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #location,
-    tr td:nth-child(4) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #uptime,
-    tr td:nth-child(5) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #traffic,
-    tr td:nth-child(8) {
-        display: none;
-        visibility: hidden;
-    }
-
-    #load,
-    tr td:nth-child(6) {
-        display: none;
-        visibility: hidden;
-    }
-
     .hotaru-cover {
         background: url(../img/tenshi.png) no-repeat;
         background-size: 100%;
@@ -260,53 +178,9 @@ h1 {
             padding: 0;
         }
 
-        #name,
-        tr td:nth-child(2) {
-            min-width: 20px;
-            max-width: 60px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-
-        #type,
-        tr td:nth-child(3) {
-            display: none;
-            visibility: hidden;
-        }
-
-        #location,
-        tr td:nth-child(4) {
-            display: none;
-            visibility: hidden;
-        }
-
-        #uptime,
-        tr td:nth-child(5) {
-            display: none;
-            visibility: hidden;
-        }
-
-        #traffic,
-        tr td:nth-child(8) {
-            display: none;
-            visibility: hidden;
-        }
-
-        #hdd,
-        tr td:nth-child(11) {
-            display: none;
-            visibility: hidden;
-        }
-
-        #cpu,
-        #ram {
-            min-width: 20px;
-            max-width: 40px;
-        }
-
         .hotaru-cover {
             background: url(../img/tenshi.png) no-repeat;
             background-size: 100%;
         }
     }
+}

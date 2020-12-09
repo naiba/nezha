@@ -16,9 +16,9 @@
     <!-- Styles -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="/static/semantic-ui-alerts.min.css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/core.css" type="text/css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/main.css" type="text/css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/core.css?v202012092025" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/main.css?v202012092025" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css?v202012092025" type="text/css">
 </head>
 
 <body>
@@ -80,17 +80,17 @@
                         </td>
                         <td>
                             <div class="progress progress-striped active">
-                                <div :style="'width: '+parseInt(server.State?server.State.MemUsed/server.Host.MemTotal:0)+'%;'"
+                                <div :style="'width: '+parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)+'%;'"
                                     :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')">
-                                    <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal:0)#@%</small>
+                                    <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
                                 </div>
                             </div>
                         </td>
                         <td>
                             <div class="progress progress-striped active">
-                                <div :style="'width: '+(server.State?server.State.DiskUsed/server.Host.DiskTotal:0)+'%;'"
+                                <div :style="'width: '+(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)+'%;'"
                                     :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')">
-                                    <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal:0)#@%</small>
+                                    <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small>
                                 </div>
                             </div>
                         </td>

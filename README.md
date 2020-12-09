@@ -1,10 +1,10 @@
 # 哪吒面板
 
-![哪吒面板](https://s3.ax1x.com/2020/12/08/DzHv6A.jpg)
-
 服务期状态监控，被动接收，极省资源 128M 小鸡也能装 Agent（非 node-exporter 那种主动拉取的方式。）
 
-![首页截图](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)
+|  哪吒面板    |   首页截图1   |   首页截图2   |
+| ---- | ---- | ---- |
+|   ![哪吒面板](https://s3.ax1x.com/2020/12/08/DzHv6A.jpg)   | ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)     | ![首页截图2](https://s3.ax1x.com/2020/12/09/rPF4xJ.png) |
 
 ## 一键脚本
 
