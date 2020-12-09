@@ -20,7 +20,7 @@ type ErrInfo struct {
 // ShowErrorPage ..
 func ShowErrorPage(c *gin.Context, i ErrInfo, isPage bool) {
 	if isPage {
-		c.HTML(http.StatusOK, "page/error", CommonEnvironment(c, gin.H{
+		c.HTML(http.StatusOK, "dashboard/error", CommonEnvironment(c, gin.H{
 			"Code":  i.Code,
 			"Title": i.Title,
 			"Msg":   i.Msg,

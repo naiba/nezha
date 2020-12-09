@@ -1,0 +1,22 @@
+{{define "dashboard/error"}}
+{{template "common/header" .}}
+<div class="login-form">
+    <div class="ui middle aligned center aligned grid">
+        <div class="column">
+            <h2 class="ui teal image header">
+                <img src="/static/logo.png" class="image">
+                <div class="content">
+                    访问受限
+                </div>
+            </h2>
+            <div class="ui message">
+                <p>
+                    {{.Msg}}
+                </p>
+                <a href="{{.Link}}">{{.Btn}}</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "common/footer" .}}
+{{end}}

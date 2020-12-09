@@ -1,0 +1,40 @@
+{{define "dashboard/setting"}}
+{{template "common/header" .}}
+{{template "common/menu" .}}
+<div class="nb-container">
+    <div class="ui container">
+        <form id="settingForm" class="ui large form" onsubmit="return false;">
+            <div class="field">
+                <label>站点标题</label>
+                <input type="text" name="Title" placeholder="哪吒面板" value="{{.Conf.Site.Brand}}">
+            </div>
+            <div class="field">
+                <label>管理员列表</label>
+                <input type="text" name="Admin" placeholder="1010,2020" value="{{.Conf.GitHub.Admin}}">
+            </div>
+            <div class="field">
+                <select name="Theme">
+                    <option value="default">默认主题</option>
+                    <option value="hotaru">CakeMine-Hotaru</option>
+                </select>
+            </div>
+            <button class="ui button" type="submit">保存</button>
+        </form>
+    </div>
+</div>
+{{template "common/footer" .}}
+<script>
+    $('#settingForm').submit(function () {
+        $.post('/api/setting', $('#settingForm').serialize()).then((resp) => {
+            if (resp.code == 200) {
+                alert("保存成功")
+            } else {
+                alert(resp.message)
+            }
+        }).error(err => {
+            alert(err)
+        })
+        return false;
+    })
+</script>
+{{end}}

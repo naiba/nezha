@@ -35,7 +35,7 @@ func (cp *commonPage) home(c *gin.Context) {
 	if ok {
 		data["Admin"] = u
 	}
-	c.HTML(http.StatusOK, "page/home", mygin.CommonEnvironment(c, data))
+	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, data))
 }
 
 var upgrader = websocket.Upgrader{}

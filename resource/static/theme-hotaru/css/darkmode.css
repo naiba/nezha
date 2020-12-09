@@ -1,0 +1,47 @@
+/* Dark mode */
+
+#darkmodeButton {
+    background-color: black;
+    width: 3rem;
+    height: 3rem;
+    position: fixed;
+    bottom: 2rem;
+    right: 0.5rem;
+    z-index: 9999;
+    border-radius: 50%;
+    outline: 0;
+}
+
+body.dark #darkmodeButton {
+    background-color: white;
+}
+
+body.dark {
+    background: #263236;
+    color: #aaa;
+}
+
+body.dark table.table-striped tr.even {
+    background-color: #212f36;
+}
+
+body.dark table.table-striped tr.odd {
+    background-color: #2f3c42;
+}
+
+body.dark tr.expandRow {
+    background-color: #263238 !important;
+}
+
+body.dark .panel {
+    background-color: #384d58;
+    color: #aaa;
+}
+
+body.dark .panel h3, body.dark .panel span {
+    color: #aaa;
+}
+
+body.dark .page-section {
+    border-bottom: 1px solid #212f36;
+}

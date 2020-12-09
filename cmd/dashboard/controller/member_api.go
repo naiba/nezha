@@ -30,6 +30,7 @@ func (ma *memberAPI) serve() {
 
 	mr.POST("/logout", ma.logout)
 	mr.POST("/server", ma.addOrEditServer)
+	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/server/:id", ma.delete)
 }
 
@@ -120,6 +121,36 @@ func (ma *memberAPI) logout(c *gin.Context) {
 		Token:        "",
 		TokenExpired: time.Now(),
 	})
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type settingForm struct {
+	Title string
+	Admin string
+	Theme string
+}
+
+func (ma *memberAPI) updateSetting(c *gin.Context) {
+	var sf settingForm
+	if err := c.ShouldBind(&sf); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+	dao.Conf.Site.Brand = sf.Title
+	dao.Conf.Site.Theme = sf.Theme
+	dao.Conf.GitHub.Admin = sf.Admin
+	if err := dao.Conf.Save(); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

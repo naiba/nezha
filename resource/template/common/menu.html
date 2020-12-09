@@ -7,6 +7,7 @@
         <a class="item{{if eq .MatchedPath "/"}} active{{end}}" href="/">首页</a>
         {{if .Admin}}
         <a class="item{{if eq .MatchedPath "/server"}} active{{end}}" href="/server">服务器</a>
+        <a class="item{{if eq .MatchedPath "/setting"}} active{{end}}" href="/setting">设置</a>
         {{end}}
         <div class="right menu">
             <a class="item" href="https://github.com/naiba/nezha/issues" target="_blank">反馈</a>

@@ -39,7 +39,7 @@ func (gp *guestPage) serve() {
 }
 
 func (gp *guestPage) login(c *gin.Context) {
-	c.HTML(http.StatusOK, "page/login", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "dashboard/login", mygin.CommonEnvironment(c, gin.H{
 		"Title": "登录",
 	}))
 }
