@@ -10,7 +10,9 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v1.0.0"
+NZ_VERSION="v1.0.1"
+GITHUB_RAW_URL="raw.githubusercontent.com"
+GITHUB_URL="github.com"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -78,6 +80,12 @@ pre_check() {
     else
         os_arch="386"
     fi
+
+    ## server location
+    if curl api.myip.la/json | grep -q 'China'; then
+        GITHUB_RAW_URL="raw.staticdn.net"
+        GITHUB_URL="hub.fastgit.org"
+    fi
 }
 
 confirm() {
@@ -137,10 +145,10 @@ install_dashboard() {
     command -v docker-compose >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "正在安装 Docker Compose"
-        curl -L "https://github.com/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose >/dev/null 2>&1 &&
+        wget -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1 &&
             chmod +x /usr/local/bin/docker-compose
         if [[ $? != 0 ]]; then
-            echo -e "${red}下载脚本失败，请检查本机能否连接 github.com${plain}"
+            echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
             return 0
         fi
         echo -e "${green}Docker Compose${plain} 安装成功"
@@ -163,9 +171,9 @@ install_agent() {
     chmod 777 -R $NZ_AGENT_PATH
 
     echo -e "正在下载监控端"
-    curl -L https://github.com/naiba/nezha/releases/latest/download/nezha-agent_linux_${os_arch}.tar.gz -o nezha-agent_linux_${os_arch}.tar.gz >/dev/null 2>&1
+    wget -O nezha-agent_linux_${os_arch}.tar.gz https://${GITHUB_URL}/naiba/nezha/releases/latest/download/nezha-agent_linux_${os_arch}.tar.gz >/dev/null 2>&1
     if [[ $? != 0 ]]; then
-        echo -e "${red}Release 下载失败，请检查本机能否连接 github.com${plain}"
+        echo -e "${red}Release 下载失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
         return 0
     fi
     tar xf nezha-agent_linux_${os_arch}.tar.gz &&
@@ -182,9 +190,9 @@ install_agent() {
 modify_agent_config() {
     echo -e "> 修改Agent配置"
 
-    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/nezha-agent.service -o $NZ_AGENT_SERVICE >/dev/null 2>&1
+    wget -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/naiba/nezha/master/script/nezha-agent.service >/dev/null 2>&1
     if [[ $? != 0 ]]; then
-        echo -e "${red}文件下载失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+        echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
 
@@ -223,17 +231,17 @@ modify_dashboard_config() {
     echo -e "> 修改面板配置"
 
     echo -e "正在下载 Docker 脚本"
-    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/docker-compose.yaml -o ${NZ_DASHBOARD_PATH}/docker-compose.yaml >/dev/null 2>&1
+    wget -O ${NZ_DASHBOARD_PATH}/docker-compose.yaml https://${GITHUB_RAW_URL}/naiba/nezha/master/script/docker-compose.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
-        echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+        echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
 
     mkdir -p $NZ_DASHBOARD_PATH/data
 
-    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/config.yaml -o ${NZ_DASHBOARD_PATH}/data/config.yaml >/dev/null 2>&1
+    wget -O ${NZ_DASHBOARD_PATH}/data/config.yaml https://${GITHUB_RAW_URL}/naiba/nezha/master/script/config.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
-        echo -e "${red}下载脚本失败，请检查本机能否连接 raw.githubusercontent.com${plain}"
+        echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
 
