@@ -82,7 +82,7 @@ pre_check() {
     fi
 
     ## server location
-    if curl api.myip.la/json | grep -q 'China'; then
+    if curl -s api.myip.la/json | grep -q 'China'; then
         GITHUB_RAW_URL="raw.staticdn.net"
         GITHUB_URL="hub.fastgit.org"
     fi
@@ -437,10 +437,10 @@ show_menu() {
         show_dashboard_log
         ;;
     7)
-        install_agent
+        uninstall_dashboard
         ;;
     8)
-        uninstall_dashboard
+        install_agent
         ;;
     9)
         modify_agent_config
