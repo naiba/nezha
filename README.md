@@ -53,6 +53,26 @@ sudo ./nezha.sh
     }
     ```
 
+### 服务器位于大陆常见问题
+
+- Failed to connect to raw.githubusercontent.com
+    将以下内容写入hosts文件
+    ```
+    199.232.68.133 raw.githubusercontent.com
+    ```
+
+- 监控端下载慢
+    
+    监控端主要涉及github域名有github.com及raw.githubusercontent.com，将这两个源替换为国内加速源即可
+    
+    - github.com源替换方案
+    
+    > sed -i 's/github.com/hub.fastgit.org/g' ./nezha.sh
+    
+    - raw.githubusercontent.com源替换方案
+    
+    > sed -i 's/raw.githubusercontent.com/raw.staticdn.net/g' ./nezha.sh
+
 ## 系统设计
 
 C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报监控信息。因为不会做成多用户的，上报信息会储存到内存中，暂不提供历史数据统计。
@@ -62,4 +82,4 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
 ## 社区文章
 
- - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) *（已过时）*
+- [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) *（已过时）*
