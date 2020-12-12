@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	"github.com/rhysd/go-github-selfupdate/selfupdate"
+	"github.com/p14yground/go-github-selfupdate/selfupdate"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 

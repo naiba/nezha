@@ -14,8 +14,8 @@ require (
 	github.com/naiba/com v0.0.0-20191104074000-318339dc72a5
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
+	github.com/p14yground/go-github-selfupdate v0.0.0-20201212172144-81a03b17860d
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/rhysd/go-github-selfupdate v1.2.2
 	github.com/shirou/gopsutil/v3 v3.20.10
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.7.1
