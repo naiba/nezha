@@ -24,9 +24,11 @@ jobs:
           mkdir -p /home/runner/go/src/github.com/StackExchange/
           cd /home/runner/go/src/github.com/StackExchange/
           git clone https://github.com/StackExchange/wmi.git
+          cd wmi && go get -v -d ./...
           mkdir -p /home/runner/go/src/github.com/inconshreveable/
           cd /home/runner/go/src/github.com/inconshreveable/
           git clone https://github.com/inconshreveable/mousetrap.git
+          cd mousetrap && go get -v -d ./...
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         if: startsWith(github.ref, 'refs/tags/')
