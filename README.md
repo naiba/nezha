@@ -8,10 +8,20 @@
 
 ## 一键脚本
 
-```shell
-curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
-sudo ./nezha.sh
-```
+- 海外：
+
+    ```shell
+    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+    sudo ./nezha.sh
+    ```
+
+- 国内加速：
+
+    ```shell
+    curl -L https://raw.staticdn.net/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+    sudo ./nezha.sh
+    ```
+
 ## 常见问题
 
 ### 启用 HTTPS
