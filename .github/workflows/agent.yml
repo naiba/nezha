@@ -7,7 +7,7 @@ on:
       - ".gitignore"
       - "*.md"
       - "cmd/dashboard/**"
-      - ".github/workflows/dashboard.yaml"
+      - ".github/workflows/dashboard.yml"
     tags:
       - "v*"
 

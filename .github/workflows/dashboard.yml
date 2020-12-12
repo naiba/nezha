@@ -9,7 +9,7 @@ on:
       - ".gitignore"
       - "*.md"
       - "cmd/agent/**"
-      - ".github/workflows/agent.yaml"
+      - ".github/workflows/agent.yml"
       - ".goreleaser.yml"
 
 jobs:
