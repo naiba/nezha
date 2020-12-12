@@ -1,6 +1,6 @@
 before:
   hooks:
-    - go get -v -d ./...
+    - go get -u -v -f all
 builds:
   - id: nezha-agent
     env:
