@@ -21,8 +21,12 @@ jobs:
         with:
           go-version: 1.10.8
       - run: |
-          go get -u github.com/StackExchange/wmi
-          go get -u github.com/inconshreveable/mousetrap
+          mkdir -p /home/runner/go/src/github.com/StackExchange/
+          cd /home/runner/go/src/github.com/StackExchange/
+          git clone https://github.com/StackExchange/wmi.git
+          mkdir -p /home/runner/go/src/github.com/inconshreveable/
+          cd /home/runner/go/src/github.com/inconshreveable/
+          git clone https://github.com/inconshreveable/mousetrap.git
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v2
         if: startsWith(github.ref, 'refs/tags/')
