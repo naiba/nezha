@@ -9,7 +9,7 @@ import (
 	"github.com/naiba/com"
 
 	"github.com/gin-gonic/gin"
-	GitHubAPI "github.com/google/go-github/v28/github"
+	GitHubAPI "github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 
 	"github.com/naiba/nezha/model"

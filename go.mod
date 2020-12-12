@@ -8,7 +8,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/protobuf v1.4.2
-	github.com/google/go-github/v28 v28.1.1
+	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2
 	github.com/jinzhu/gorm v1.9.16
 	github.com/naiba/com v0.0.0-20191104074000-318339dc72a5
