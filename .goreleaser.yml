@@ -1,6 +1,8 @@
 before:
   hooks:
     - go get -v -d ./...
+    - go get -u github.com/StackExchange/wmi
+    - go get -u github.com/inconshreveable/mousetrap
 builds:
   - id: nezha-agent
     env:
