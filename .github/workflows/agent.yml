@@ -25,6 +25,7 @@ jobs:
           git checkout .
           mkdir -p /home/runner/go/src/github.com/naiba/nezha
           cp -r ../nezha /home/runner/go/src/github.com/naiba/
+          find /home/runner/go/src/github.com/shirou/gopsutil/ -name "riscv" -exec rm -rf {} \;
       - name: Set up Go 1.10.8
         uses: actions/setup-go@v2
         with:
