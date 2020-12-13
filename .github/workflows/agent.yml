@@ -20,6 +20,8 @@ jobs:
         uses: actions/setup-go@v2
       - run: |
           go mod vendor
+          git add .
+          git commit -a -m "vendor"
       - name: Set up Go 1.10.8
         uses: actions/setup-go@v2
         with:
