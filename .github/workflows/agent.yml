@@ -20,10 +20,8 @@ jobs:
         uses: actions/setup-go@v2
       - run: |
           go mod vendor
-          git config --global user.email "you@example.com"
-          git config --global user.name "Your Name"
-          git add .
-          git commit -a -m "vendor"
+          mv ./vendor/* /home/runner/go/src/
+          git checkout .
       - name: Set up Go 1.10.8
         uses: actions/setup-go@v2
         with:
