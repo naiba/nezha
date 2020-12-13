@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-go@v2
       - run: |
           go mod vendor
+          mkdir -p /home/runner/go/src/
           mv ./vendor/* /home/runner/go/src/
           git checkout .
       - name: Set up Go 1.10.8
