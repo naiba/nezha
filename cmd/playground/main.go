@@ -4,7 +4,7 @@ import (
 	"log"
 	"os/exec"
 
-	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/v3/disk"
 )
 
 func main() {
