@@ -23,6 +23,8 @@ jobs:
           mkdir -p /home/runner/go/src/
           mv ./vendor/* /home/runner/go/src/
           git checkout .
+          mkdir -p /home/runner/go/src/github.com/naiba/nezha
+          cp -r ../nezha /home/runner/go/src/github.com/naiba/
       - name: Set up Go 1.10.8
         uses: actions/setup-go@v2
         with:
