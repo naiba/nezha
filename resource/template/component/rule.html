@@ -1,0 +1,29 @@
+{{define "component/rule"}}
+<div class="ui tiny notification modal transition hidden">
+    <div class="header">添加通知规则</div>
+    <div class="content">
+        <form id="notificationForm" class="ui form">
+            <input type="hidden" name="ID">
+            <div class="field">
+                <label>备注</label>
+                <input type="text" name="Name">
+            </div>
+            <div class="secret field">
+                <label>规则</label>
+                <textarea name="RequestBody"></textarea>
+            </div>
+            <div class="field">
+                <div class="ui checkbox">
+                    <input name="VerifySSL" type="checkbox" tabindex="0" class="hidden">
+                    <label>启用</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="actions">
+        <div class="ui negative button">取消</div>
+        <button class="ui positive right labeled icon button">确认<i class="checkmark icon"></i>
+        </button>
+    </div>
+</div>
+{{end}}

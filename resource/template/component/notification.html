@@ -1,0 +1,47 @@
+{{define "component/notification"}}
+<div class="ui tiny notification modal transition hidden">
+    <div class="header">添加通知方式</div>
+    <div class="content">
+        <form id="notificationForm" class="ui form">
+            <input type="hidden" name="ID">
+            <div class="field">
+                <label>备注</label>
+                <input type="text" name="Name">
+            </div>
+            <div class="field">
+                <label>URL</label>
+                <input type="text" name="URL">
+            </div>
+            <div class="field">
+                <label>请求方式</label>
+                <select name="RequestMethod" class="ui fluid dropdown">
+                    <option value="1">GET</option>
+                    <option value="2">POST</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>请求类型</label>
+                <select name="RequestType" class="ui fluid dropdown">
+                    <option value="1">JSON</option>
+                    <option value="2">FORM</option>
+                </select>
+            </div>
+            <div class="secret field">
+                <label>Body</label>
+                <textarea name="RequestBody"></textarea>
+            </div>
+            <div class="field">
+                <div class="ui checkbox">
+                    <input name="VerifySSL" type="checkbox" tabindex="0" class="hidden">
+                    <label>验证SSL</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="actions">
+        <div class="ui negative button">取消</div>
+        <button class="ui positive right labeled icon button">确认<i class="checkmark icon"></i>
+        </button>
+    </div>
+</div>
+{{end}}

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -30,8 +31,10 @@ func (ma *memberAPI) serve() {
 
 	mr.POST("/logout", ma.logout)
 	mr.POST("/server", ma.addOrEditServer)
+	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/server/:id", ma.delete)
+	mr.DELETE("/notification/:id", ma.deleteNotification)
 }
 
 func (ma *memberAPI) delete(c *gin.Context) {
@@ -53,6 +56,27 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		return
 	}
 	delete(dao.ServerList, strconv.FormatUint(id, 10))
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+func (ma *memberAPI) deleteNotification(c *gin.Context) {
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
+	if id < 1 {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: "错误的 Notification ID",
+		})
+		return
+	}
+	if err := dao.DB.Delete(&model.Notification{}, "id = ?", id).Error; err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("数据库错误：%s", err),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
@@ -91,6 +115,51 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		return
 	}
 	dao.ServerList[fmt.Sprintf("%d", s.ID)] = &s
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type notificationForm struct {
+	ID            uint64
+	Name          string
+	URL           string
+	RequestMethod int
+	RequestType   int
+	RequestBody   string
+	VerifySSL     string
+}
+
+func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
+	var nf notificationForm
+	var n model.Notification
+	err := c.ShouldBindJSON(&nf)
+	if err == nil {
+		var data map[string]string
+		err = json.Unmarshal([]byte(nf.RequestBody), &data)
+	}
+	if err == nil {
+		n.Name = nf.Name
+		n.RequestMethod = nf.RequestMethod
+		n.RequestType = nf.RequestType
+		n.RequestBody = nf.RequestBody
+		n.URL = nf.URL
+		verifySSL := nf.VerifySSL == "on"
+		n.VerifySSL = &verifySSL
+		n.ID = nf.ID
+		if n.ID == 0 {
+			err = dao.DB.Create(&n).Error
+		} else {
+			err = dao.DB.Save(&n).Error
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

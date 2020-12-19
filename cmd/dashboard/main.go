@@ -34,7 +34,7 @@ func init() {
 }
 
 func initDB() {
-	dao.DB.AutoMigrate(model.Server{}, model.User{})
+	dao.DB.AutoMigrate(model.Server{}, model.User{}, model.Notification{})
 	// load cache
 	var servers []model.Server
 	dao.DB.Find(&servers)

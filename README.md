@@ -24,7 +24,8 @@
     sudo ./nezha.sh
     ```
 
-## 主题自定义
+## 使用说明
+### 自定义 CSS
 
 - 默认主题更改进度条颜色示例
 
@@ -41,6 +42,10 @@
         background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
     }
     ```
+
+### 通知
+
+
 
 ## 常见问题
 

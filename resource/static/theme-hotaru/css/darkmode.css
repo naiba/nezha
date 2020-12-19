@@ -1,21 +1,3 @@
-/* Dark mode */
-
-#darkmodeButton {
-    background-color: black;
-    width: 3rem;
-    height: 3rem;
-    position: fixed;
-    bottom: 2rem;
-    right: 0.5rem;
-    z-index: 9999;
-    border-radius: 50%;
-    outline: 0;
-}
-
-body.dark #darkmodeButton {
-    background-color: white;
-}
-
 body.dark {
     background: #263236;
     color: #aaa;
@@ -38,7 +20,8 @@ body.dark .panel {
     color: #aaa;
 }
 
-body.dark .panel h3, body.dark .panel span {
+body.dark .panel h3,
+body.dark .panel span {
     color: #aaa;
 }
 

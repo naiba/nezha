@@ -134,8 +134,6 @@
             </div>
         </div>
     </div>
-
-    <button id="darkmodeButton"></button>
     <footer>
         <p style="text-align:center;padding: 15px;">Powered by <a href="https://github.com/naiba/nezha">哪吒面板</a> build ·
             {{.Version}}
@@ -201,30 +199,6 @@
                     const hour = new Date(Date.now()).getHours()
                     if (hour > 17 || hour < 4) {
                         document.body.classList.add('dark');
-                    }
-                    return
-                    //darkmode
-                    if (document.getElementById("darkmodeButton")) {
-                        var night = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)dark\s*=\s*([^;]*).*$)|^.*$/, "$1") || '0');
-                        if (night) {
-                            document.body.classList.add('dark');
-                            console.log('Dark mode on', night);
-                        }
-                        document.getElementById("darkmodeButton").onclick = function () {
-                            night = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)dark\s*=\s*([^;]*).*$)|^.*$/, "$1") || '0');
-                            if (!night) {
-                                document.body.classList.add('dark');
-                                document.cookie = "dark=1";
-                                console.log('Dark mode on', night);
-                            } else {
-                                document.body.classList.remove('dark');
-                                document.cookie = "dark=0";
-                                console.log('Dark mode off', night);
-                            }
-                        }
-                    } else {
-                        document.cookie && (document.cookie = "");
-                        console.log('Darkmode not Support');
                     }
                 },
                 secondToDate(s) {
