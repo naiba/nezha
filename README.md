@@ -22,6 +22,24 @@
     sudo ./nezha.sh
     ```
 
+## 主题自定义
+
+- 默认主题更改进度条颜色示例
+
+    ```
+    .ui.green.progress> .bar {
+        background-color: pink !important;
+    }
+    ```
+
+- hotaru 主题更改背景图片示例
+
+    ```
+    .hotaru-cover {
+        background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
+    }
+    ```
+
 ## 常见问题
 
 ### 启用 HTTPS

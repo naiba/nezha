@@ -25,7 +25,7 @@ var (
 	server       string
 	clientSecret string
 	debug        bool
-	version      string
+	version      = "v9.9.9"
 
 	rootCmd = &cobra.Command{
 		Use:   "nezha-agent",

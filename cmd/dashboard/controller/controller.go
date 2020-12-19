@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"html/template"
+	"strings"
 	"time"
 
 	"code.cloudfoundry.org/bytefmt"
@@ -24,6 +25,9 @@ func ServeWeb(port uint) {
 		"tf": func(t time.Time) string {
 			return t.Format("2006年1月2号")
 		},
+		"css": func(s string) template.CSS {
+			return template.CSS(s)
+		},
 		"stf": func(s uint64) string {
 			return time.Unix(int64(s), 0).Format("2006年1月2号 15:04")
 		},
@@ -32,6 +36,9 @@ func ServeWeb(port uint) {
 		},
 		"bf": func(b uint64) string {
 			return bytefmt.ByteSize(b)
+		},
+		"ts": func(s string) string {
+			return strings.TrimSpace(s)
 		},
 	})
 	r.Static("/static", "resource/static")

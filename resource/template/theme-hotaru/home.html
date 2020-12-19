@@ -19,6 +19,11 @@
     <link rel="stylesheet" href="/static/theme-hotaru/css/core.css?v202012092025" type="text/css">
     <link rel="stylesheet" href="/static/theme-hotaru/css/main.css?v202012092025" type="text/css">
     <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css?v202012092025" type="text/css">
+    {{if ts .CustomCSS}}
+    <style>
+    {{.CustomCSS|css}}
+    </style>
+    {{end}}
 </head>
 
 <body>

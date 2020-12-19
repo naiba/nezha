@@ -17,6 +17,7 @@ type Config struct {
 		Brand      string // 站点名称
 		CookieName string // 浏览器 Cookie 名称
 		Theme      string
+		CustomCSS  string
 	}
 	GitHub struct {
 		Admin        string // 管理员ID列表

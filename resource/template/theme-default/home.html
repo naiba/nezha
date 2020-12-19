@@ -1,5 +1,10 @@
 {{define "theme-default/home"}}
 {{template "common/header" .}}
+{{if ts .CustomCSS}}
+<style>
+{{.CustomCSS|css}}
+</style>
+{{end}}
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
