@@ -16,13 +16,13 @@
     <!-- Styles -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="/static/semantic-ui-alerts.min.css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/core.css?v202012092025" type="text/css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/main.css?v202012092025" type="text/css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css?v202012092025" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/core.css?v202012121912" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/main.css?v202012121912" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css?v202012121912" type="text/css">
     {{if ts .CustomCSS}}
-    <style>
+    {{tag "style"}}
     {{.CustomCSS|css}}
-    </style>
+    {{tag "/style"}}
     {{end}}
 </head>
 
@@ -62,8 +62,8 @@
                         <td>
                             <div class="progress">
                                 <div style="width: 100%;"
-                                    :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')">
-                                    <small>@#isAlive(server)?'运行中':pulled>3?'已离线':'……'#@</small>
+                                    :class="'progress-bar progress-bar-'+ (server.live?'success':pulled>3?'danger':'warning')">
+                                    <small>@#server.live?'运行中':pulled>3?'已离线':'……'#@</small>
                                 </div>
                             </div>
                         </td>
@@ -76,25 +76,26 @@
                         <td>@#server.State?formatByteSize(server.State.NetInTransfer)+'|'+formatByteSize(server.State.NetOutTransfer):'-'#@
                         </td>
                         <td>
-                            <div class="progress progress-striped active">
-                                <div :style="'width: '+parseInt(server.State?server.State.CPU:0)+'%;'"
-                                    :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')">
-                                    <small>@#parseInt(server.State?server.State.CPU:0)#@%</small>
+                            <div v-if="server.State" :class="formatPercent(server.live,server.State.CPU, 100).class">
+                                <div class="bar" :style="formatPercent(server.live,server.State.CPU, 100).style">
+                                    <small>@#formatPercent(server.State.CPU, 100).percent#@%</small>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="progress progress-striped active">
-                                <div :style="'width: '+parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)+'%;'"
-                                    :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')">
+                            <div v-if="server.State"
+                                :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
+                                <div class="bar"
+                                    :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
                                     <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
                                 </div>
                             </div>
                         </td>
                         <td>
-                            <div class="progress progress-striped active">
-                                <div :style="'width: '+(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)+'%;'"
-                                    :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')">
+                            <div v-if="server.State"
+                                :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
+                                <div
+                                    :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
                                     <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small>
                                 </div>
                             </div>
@@ -116,9 +117,9 @@
                                 <i class="zmdi zmdi-check-circle text-success"></i>
                             </div>
                             <div class="location-progress">
-                                <div class="progress progress-sm">
-                                    <div :class="'progress-bar progress-bar-'+ (isAlive(server)?'success':pulled>3?'danger':'warning')"
-                                        :style="'width:'+parseInt(server.State?server.State.CPU:0)+'%;'">
+                                <div :class="formatPercent(server.live,server.State?server.State.CPU:0, 100).class">
+                                    <div class="bar"
+                                        :style="formatPercent(server.live,server.State?server.State.CPU:0, 100).style">
                                     </div>
                                 </div>
                             </div>
@@ -153,11 +154,43 @@
             data: {
                 servers: initData,
                 pulled: false,
+                cache: [],
             },
             mounted() {
                 this.troggleDarkMode();
             },
             methods: {
+                formatPercent(live, used, total) {
+                    const percent = live ? (parseInt(used / total * 100) || 0) : -1
+                    if (!this.cache[percent]) {
+                        this.cache[percent] = {
+                            class: {
+                                ui: true,
+                                progress: true,
+                            },
+                            style: {
+                                'transition-duration': '300ms',
+                                'min-width': 'unset',
+                                width: percent + '% !important',
+                            },
+                            percent,
+                        }
+                        if (percent < 0) {
+                            this.cache[percent].style['background-color'] = 'slategray'
+                            this.cache[percent].class.offline = true
+                        } else if (percent < 51) {
+                            this.cache[percent].style['background-color'] = 'lime'
+                            this.cache[percent].class.fine = true
+                        } else if (percent < 81) {
+                            this.cache[percent].style['background-color'] = 'orange'
+                            this.cache[percent].class.warning = true
+                        } else {
+                            this.cache[percent].style['background-color'] = 'crimson'
+                            this.cache[percent].class.error = true
+                        }
+                    }
+                    return this.cache[percent]
+                },
                 readableBytes(bytes) {
                     var i = Math.floor(Math.log(bytes) / Math.log(1024)),
                         sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
@@ -165,6 +198,11 @@
                     return (bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + sizes[i];
                 },
                 troggleDarkMode() {
+                    const hour = new Date(Date.now()).getHours()
+                    if (hour > 17 || hour < 4) {
+                        document.body.classList.add('dark');
+                    }
+                    return
                     //darkmode
                     if (document.getElementById("darkmodeButton")) {
                         var night = parseInt(document.cookie.replace(/(?:(?:^|.*;\s*)dark\s*=\s*([^;]*).*$)|^.*$/, "$1") || '0');
@@ -188,14 +226,6 @@
                         document.cookie && (document.cookie = "");
                         console.log('Darkmode not Support');
                     }
-                },
-                isAlive(s) {
-                    if (!s.Host) return false
-                    const lastActive = new Date(s.LastActive).getTime()
-                    if (this.pulled > 10 && Date.now() - lastActive > 20 * 1000) {
-                        return false
-                    }
-                    return true
                 },
                 secondToDate(s) {
                     var d = Math.floor(s / 3600 / 24);
@@ -230,36 +260,20 @@
             }, 1000 * 60 * 6);
         }
         ws.onmessage = function (evt) {
-            const oldServers = statusCards.servers
             statusCards.servers = JSON.parse(evt.data)
             statusCards.pulled++
             const keys = Object.keys(statusCards.servers)
             for (let i = 0; i < keys.length; i++) {
                 const ns = statusCards.servers[keys[i]];
-                // 进度条
-                const bars = [
-                    $('#' + ns.ID + ' .cpu.progress'),
-                    $('#' + ns.ID + ' .mem.progress'),
-                    $('#' + ns.ID + ' .swap.progress'),
-                    $('#' + ns.ID + ' .disk.progress')
-                ]
-                for (let j = 0; j < oldServers.length; j++) {
-                    const os = oldServers[j];
-                    if (ns.ID == os.ID) {
-                        break
+                if (!ns.Host) ns.live = false
+                else {
+                    const lastActive = new Date(ns.LastActive).getTime()
+                    if (statusCards.pulled > 3 && Date.now() - lastActive > 5 * 1000) {
+                        ns.live = false
+                    } else {
+                        ns.live = true
                     }
-                    // 新加入的仔
-                    $('#' + ns.ID + ' .yellow.info.icon').popup({
-                        popup: '.ui.content.popup'
-                    });
                 }
-                // 刷新进度条
-                bars.forEach((b, i) => {
-                    if (b[0] && b[0].dataset) {
-                        b.progress('set total', i == 0 ? 100 : b[0].dataset.total);
-                        b.progress('update progress', b[0].dataset.value);
-                    }
-                })
             }
         }
         ws.onclose = function () {

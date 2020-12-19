@@ -1,21 +1,21 @@
 {{define "theme-default/home"}}
 {{template "common/header" .}}
 {{if ts .CustomCSS}}
-<style>
+{{tag "style"}}
 {{.CustomCSS|css}}
-</style>
+{{tag "/style"}}
 {{end}}
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
         <div class="ui four stackable status cards">
             <div v-for='server in servers' :id="server.ID" class="card">
-                <div class="content" v-if='isAlive(server)'>
+                <div class="content" v-if='server.Host'>
                     <div class="header"><i :class="server.Host.CountryCode + ' flag'"></i><i
                             v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
                             v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
                             v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
-                            v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name#@
+                            v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name + (server.live?'':' [已离线]')#@
                         <i class="yellow info circle icon"></i>
                         <div class='ui content popup'>
                             系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
@@ -35,26 +35,26 @@
                         <div class="ui grid">
                             <div class="three wide column">CPU</div>
                             <div class="thirteen wide column">
-                                <div class="ui cpu green progress" :data-value="server.State.CPU" data-total="100">
-                                    <div class="bar">
+                                <div :class="formatPercent(server.live,server.State.CPU, 100).class">
+                                    <div class="bar" :style="formatPercent(server.live,server.State.CPU, 100).style">
                                         <div class="progress"></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
-                                <div class="ui mem green progress" :data-value="server.State.MemUsed"
-                                    :data-total="server.Host.MemTotal">
-                                    <div class="bar">
+                                <div :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
+                                    <div class="bar"
+                                        :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
                                         <div class="progress"></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="three wide column">交换</div>
                             <div class="thirteen wide column">
-                                <div class="ui swap green progress" :data-value="server.State.SwapUsed"
-                                    :data-total="server.Host.SwapTotal">
-                                    <div class="bar">
+                                <div :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
+                                    <div class="bar"
+                                        :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style">
                                         <div class="progress"></div>
                                     </div>
                                 </div>
@@ -68,9 +68,9 @@
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
-                                <div class="ui disk green progress" :data-value="server.State.DiskUsed"
-                                    :data-total="server.Host.DiskTotal">
-                                    <div class="bar">
+                                <div :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
+                                    <div class="bar"
+                                        :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
                                         <div class="progress"></div>
                                     </div>
                                 </div>
@@ -99,21 +99,44 @@
         data: {
             servers: initData,
             pulled: false,
+            cache: [],
         },
         mounted() {
-            $('.progress').progress();
             $('.yellow.info.icon').popup({
                 popup: '.ui.content.popup'
             });
         },
         methods: {
-            isAlive(s) {
-                if (!s.Host) return false
-                const lastActive = new Date(s.LastActive).getTime()
-                if (this.pulled > 10 && Date.now() - lastActive > 20 * 1000) {
-                    return false
+            formatPercent(live, used, total) {
+                const percent = live ? (parseInt(used / total * 100) || 0) : -1
+                if (!this.cache[percent]) {
+                    this.cache[percent] = {
+                        class: {
+                            ui: true,
+                            progress: true,
+                        },
+                        style: {
+                            'transition-duration': '300ms',
+                            'min-width': 'unset',
+                            width: percent + '% !important',
+                        },
+                        percent,
+                    }
+                    if (percent < 0) {
+                        this.cache[percent].style['background-color'] = 'slategray'
+                        this.cache[percent].class.offline = true
+                    } else if (percent < 51) {
+                        this.cache[percent].style['background-color'] = 'lime'
+                        this.cache[percent].class.fine = true
+                    } else if (percent < 81) {
+                        this.cache[percent].style['background-color'] = 'orange'
+                        this.cache[percent].class.warning = true
+                    } else {
+                        this.cache[percent].style['background-color'] = 'crimson'
+                        this.cache[percent].class.error = true
+                    }
                 }
-                return true
+                return this.cache[percent]
             },
             secondToDate(s) {
                 var d = Math.floor(s / 3600 / 24);
@@ -154,13 +177,15 @@
         const keys = Object.keys(statusCards.servers)
         for (let i = 0; i < keys.length; i++) {
             const ns = statusCards.servers[keys[i]];
-            // 进度条
-            const bars = [
-                $('#' + ns.ID + ' .cpu.progress'),
-                $('#' + ns.ID + ' .mem.progress'),
-                $('#' + ns.ID + ' .swap.progress'),
-                $('#' + ns.ID + ' .disk.progress')
-            ]
+            if (!ns.Host) ns.live = false
+            else {
+                const lastActive = new Date(ns.LastActive).getTime()
+                if (statusCards.pulled > 3 && Date.now() - lastActive > 5 * 1000) {
+                    ns.live = false
+                } else {
+                    ns.live = true
+                }
+            }
             for (let j = 0; j < oldServers.length; j++) {
                 const os = oldServers[j];
                 if (ns.ID == os.ID) {
@@ -171,13 +196,6 @@
                     popup: '.ui.content.popup'
                 });
             }
-            // 刷新进度条
-            bars.forEach((b, i) => {
-                if (b[0] && b[0].dataset) {
-                    b.progress('set total', i == 0 ? 100 : b[0].dataset.total);
-                    b.progress('update progress', b[0].dataset.value);
-                }
-            })
         }
     }
     ws.onclose = function () {

@@ -28,6 +28,9 @@ func ServeWeb(port uint) {
 		"css": func(s string) template.CSS {
 			return template.CSS(s)
 		},
+		"tag": func(s string) template.HTML {
+			return template.HTML(`<` + s + `>`)
+		},
 		"stf": func(s uint64) string {
 			return time.Unix(int64(s), 0).Format("2006年1月2号 15:04")
 		},
