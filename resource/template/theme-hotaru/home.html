@@ -78,7 +78,7 @@
                         <td>
                             <div v-if="server.State" :class="formatPercent(server.live,server.State.CPU, 100).class">
                                 <div class="bar" :style="formatPercent(server.live,server.State.CPU, 100).style">
-                                    <small>@#formatPercent(server.State.CPU, 100).percent#@%</small>
+                                    <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
                                 </div>
                             </div>
                         </td>
