@@ -14,8 +14,8 @@ type Server struct {
 	Name   string
 	Secret string `json:"-"`
 
-	Host       *Host
-	State      *State
+	Host       *Host  `gorm:"-"`
+	State      *State `gorm:"-"`
 	LastActive time.Time
 
 	Stream      pb.NezhaService_HeartbeatServer `gorm:"-" json:"-"`

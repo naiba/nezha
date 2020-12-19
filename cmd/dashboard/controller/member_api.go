@@ -32,9 +32,9 @@ func (ma *memberAPI) serve() {
 	mr.POST("/logout", ma.logout)
 	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/notification", ma.addOrEditNotification)
+	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
-	mr.DELETE("/server/:id", ma.delete)
-	mr.DELETE("/notification/:id", ma.deleteNotification)
+	mr.DELETE("/:model/:id", ma.delete)
 }
 
 func (ma *memberAPI) delete(c *gin.Context) {
@@ -46,31 +46,22 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		})
 		return
 	}
-	dao.ServerLock.Lock()
-	defer dao.ServerLock.Unlock()
-	if err := dao.DB.Delete(&model.Server{}, "id = ?", id).Error; err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("数据库错误：%s", err),
-		})
-		return
-	}
-	delete(dao.ServerList, strconv.FormatUint(id, 10))
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-}
 
-func (ma *memberAPI) deleteNotification(c *gin.Context) {
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 64)
-	if id < 1 {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: "错误的 Notification ID",
-		})
-		return
+	var err error
+	switch c.Param("model") {
+	case "server":
+		dao.ServerLock.Lock()
+		defer dao.ServerLock.Unlock()
+		err = dao.DB.Delete(&model.Server{}, "id = ?", id).Error
+		if err == nil {
+			delete(dao.ServerList, strconv.FormatUint(id, 10))
+		}
+	case "notification":
+		err = dao.DB.Delete(&model.Notification{}, "id = ?", id).Error
+	case "alert-rule":
+		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
 	}
-	if err := dao.DB.Delete(&model.Notification{}, "id = ?", id).Error; err != nil {
+	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("数据库错误：%s", err),
@@ -151,6 +142,51 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 			err = dao.DB.Create(&n).Error
 		} else {
 			err = dao.DB.Save(&n).Error
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type alertRuleForm struct {
+	ID       uint64
+	Name     string
+	RulesRaw string
+	Enable   string
+}
+
+func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
+	var arf alertRuleForm
+	var r model.AlertRule
+	err := c.ShouldBindJSON(&arf)
+	if err == nil {
+		err = json.Unmarshal([]byte(arf.RulesRaw), &r.Rules)
+		if err == nil && len(r.Rules) == 0 {
+			c.JSON(http.StatusOK, model.Response{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Sprintf("请求错误：%s", "至少定义一条规则"),
+			})
+			return
+		}
+	}
+	if err == nil {
+		r.Name = arf.Name
+		r.RulesRaw = arf.RulesRaw
+		enable := arf.Enable == "on"
+		r.Enable = &enable
+		r.ID = arf.ID
+		if r.ID == 0 {
+			err = dao.DB.Create(&r).Error
+		} else {
+			err = dao.DB.Save(&r).Error
 		}
 	}
 	if err != nil {

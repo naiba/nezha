@@ -10,7 +10,6 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2
-	github.com/jinzhu/gorm v1.9.16
 	github.com/naiba/com v0.0.0-20191104074000-318339dc72a5
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
@@ -23,4 +22,6 @@ require (
 	google.golang.org/grpc v1.33.1
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.2.8
+	gorm.io/driver/sqlite v1.1.4
+	gorm.io/gorm v1.20.8
 )

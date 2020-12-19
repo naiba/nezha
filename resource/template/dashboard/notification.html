@@ -16,6 +16,7 @@
                     <th>ID</th>
                     <th>备注</th>
                     <th>URL</th>
+                    <th>验证SSL</th>
                     <th>管理</th>
                 </tr>
             </thead>
@@ -25,6 +26,7 @@
                     <td>{{$notification.ID}}</td>
                     <td>{{$notification.Name}}</td>
                     <td>{{$notification.URL}}</td>
+                    <td>{{$notification.VerifySSL}}</td>
                     <td>
                         <div class="ui mini icon buttons">
                             <button class="ui button" onclick="addOrEditNotification({{$notification}})">
@@ -42,8 +44,9 @@
         </table>
         <div class="ui grid">
             <div class="right floated right aligned twelve wide column">
-                <button class="ui right labeled positive icon button" onclick="addOrEditNotification()"><i
-                        class="add icon"></i> 添加报警规则
+                <button class="ui right labeled positive icon button" onclick="addOrEditAlertRule()"><i
+                        class="add icon"></i>
+                    添加报警规则
                 </button>
             </div>
         </div>
@@ -52,23 +55,25 @@
                 <tr>
                     <th>ID</th>
                     <th>备注</th>
-                    <th>URL</th>
+                    <th>规则</th>
+                    <th>启用</th>
                     <th>管理</th>
                 </tr>
             </thead>
             <tbody>
-                {{range $notification := .Notifications}}
+                {{range $rule := .AlertRules}}
                 <tr>
-                    <td>{{$notification.ID}}</td>
-                    <td>{{$notification.Name}}</td>
-                    <td>{{$notification.URL}}</td>
+                    <td>{{$rule.ID}}</td>
+                    <td>{{$rule.Name}}</td>
+                    <td>{{$rule.RulesRaw}}</td>
+                    <td>{{$rule.Enable}}</td>
                     <td>
                         <div class="ui mini icon buttons">
-                            <button class="ui button" onclick="addOrEditNotification({{$notification}})">
+                            <button class="ui button" onclick="addOrEditAlertRule({{$rule}})">
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('删除通知方式','确认删除此通知方式？',deleteRequest,'/api/notification/'+{{$notification.ID}})">
+                                onclick="showConfirm('删除通知方式','确认删除此通知方式？',deleteRequest,'/api/alert-rule/'+{{$rule.ID}})">
                                 <i class="delete icon"></i>
                             </button>
                         </div>
@@ -78,9 +83,9 @@
             </tbody>
         </table>
     </div>
-
 </div>
 {{template "component/notification"}}
+{{template "component/rule"}}
 {{template "common/footer" .}}
 <script>
     $('.checkbox').checkbox()

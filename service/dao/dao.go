@@ -3,8 +3,8 @@ package dao
 import (
 	"sync"
 
-	"github.com/jinzhu/gorm"
 	"github.com/patrickmn/go-cache"
+	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"

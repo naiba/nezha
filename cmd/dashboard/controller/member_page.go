@@ -39,9 +39,12 @@ func (mp *memberPage) server(c *gin.Context) {
 func (mp *memberPage) notification(c *gin.Context) {
 	var nf []model.Notification
 	dao.DB.Find(&nf)
+	var ar []model.AlertRule
+	dao.DB.Find(&ar)
 	c.HTML(http.StatusOK, "dashboard/notification", mygin.CommonEnvironment(c, gin.H{
 		"Title":         "通知管理",
 		"Notifications": nf,
+		"AlertRules":    ar,
 	}))
 }
 

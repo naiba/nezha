@@ -70,6 +70,21 @@ function showFormModal(modelSelector, formID, URL, getData) {
     }).modal('show')
 }
 
+function addOrEditAlertRule(rule) {
+    const modal = $('.rule.modal')
+    modal.children('.header').text((rule ? '修改' : '添加') + '报警规则')
+    modal.find('.positive.button').html(rule ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>')
+    modal.find('input[name=ID]').val(rule ? rule.ID : null)
+    modal.find('input[name=Name]').val(rule ? rule.Name : null)
+    modal.find('textarea[name=RulesRaw]').val(rule ? rule.RulesRaw : null)
+    if (rule && rule.Enable) {
+        modal.find('.ui.rule-enable.checkbox').checkbox('set checked')
+    } else {
+        modal.find('.ui.rule-enable.checkbox').checkbox('set unchecked')
+    }
+    showFormModal('.rule.modal', '#ruleForm', '/api/alert-rule')
+}
+
 function addOrEditNotification(notification) {
     const modal = $('.notification.modal')
     modal.children('.header').text((notification ? '修改' : '添加') + '通知方式')
@@ -81,9 +96,9 @@ function addOrEditNotification(notification) {
     modal.find('select[name=RequestMethod]').val(notification ? notification.RequestMethod : 1)
     modal.find('select[name=RequestType]').val(notification ? notification.RequestType : 1)
     if (notification && notification.VerifySSL) {
-        modal.find('.ui.checkbox').checkbox('set checked')
+        modal.find('.ui.nf-ssl.checkbox').checkbox('set checked')
     } else {
-        modal.find('.ui.checkbox').checkbox('set unchecked')
+        modal.find('.ui.nf-ssl.checkbox').checkbox('set unchecked')
     }
     showFormModal('.notification.modal', '#notificationForm', '/api/notification')
 }

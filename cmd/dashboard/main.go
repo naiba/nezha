@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/patrickmn/go-cache"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
@@ -22,7 +22,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	dao.DB, err = gorm.Open("sqlite3", "data/sqlite.db")
+	dao.DB, err = gorm.Open(sqlite.Open("data/sqlite.db"), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
@@ -34,7 +34,7 @@ func init() {
 }
 
 func initDB() {
-	dao.DB.AutoMigrate(model.Server{}, model.User{}, model.Notification{})
+	dao.DB.AutoMigrate(model.Server{}, model.User{}, model.Notification{}, model.AlertRule{})
 	// load cache
 	var servers []model.Server
 	dao.DB.Find(&servers)

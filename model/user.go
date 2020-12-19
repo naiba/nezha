@@ -10,7 +10,7 @@ import (
 
 // User ...
 type User struct {
-	Common    `json:"common,omitempty"`
+	Common
 	Login     string `gorm:"UNIQUE_INDEX" json:"login,omitempty"` // 登录名
 	AvatarURL string `json:"avatar_url,omitempty"`                // 头像地址
 	Name      string `json:"name,omitempty"`                      // 昵称
