@@ -89,4 +89,5 @@ C/S 采用 gRPC 通信，客户端通过添加主机生成的单独 Token 上报
 
 ## 社区文章
 
+- [哪吒探针 - Windows 客户端安装](https://nyko.me/2020/12/13/nezha-windows-client.html)
 - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) *（已过时）*
