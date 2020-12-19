@@ -38,13 +38,6 @@ func (s *NezhaHandler) Heartbeat(r *pb.Beat, stream pb.NezhaService_HeartbeatSer
 	if clientID, err = s.Auth.Check(stream.Context()); err != nil {
 		return err
 	}
-	// 默认连接后先上报10分钟
-	err = stream.Send(&pb.Command{
-		Type: model.MTReportState,
-	})
-	if err != nil {
-		return err
-	}
 	// 放入在线服务器列表
 	dao.ServerLock.RLock()
 	closeCh := make(chan error)

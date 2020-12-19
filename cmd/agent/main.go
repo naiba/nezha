@@ -40,7 +40,6 @@ var (
 )
 
 var (
-	endReport      time.Time
 	reporting      bool
 	client         pb.NezhaServiceClient
 	ctx            = context.Background()
@@ -97,13 +96,14 @@ func run(cmd *cobra.Command, args []string) {
 	// 上报服务器信息
 	go reportState()
 
-	go func() {
-		for range updateCh {
-			go doSelfUpdate()
-		}
-	}()
-
-	updateCh <- struct{}{}
+	if version != "" {
+		go func() {
+			for range updateCh {
+				go doSelfUpdate()
+			}
+		}()
+		updateCh <- struct{}{}
+	}
 
 	var err error
 	var conn *grpc.ClientConn
@@ -161,8 +161,6 @@ func receiveCommand(hc pb.NezhaService_HeartbeatClient) error {
 			return err
 		}
 		switch action.GetType() {
-		case model.MTReportState:
-			endReport = time.Now().Add(time.Minute * 10)
 		default:
 			log.Printf("Unknown action: %v", action)
 		}
@@ -171,17 +169,15 @@ func receiveCommand(hc pb.NezhaService_HeartbeatClient) error {
 
 func reportState() {
 	var err error
-	defer log.Printf("reportState exit %v %v => %v", endReport, time.Now(), err)
+	defer log.Printf("reportState exit %v => %v", time.Now(), err)
 	for {
-		if endReport.After(time.Now()) {
+		if client != nil {
 			monitor.TrackNetworkSpeed()
 			_, err = client.ReportState(ctx, monitor.GetState(2).PB())
 			if err != nil {
 				log.Printf("reportState error %v", err)
 				time.Sleep(delayWhenError)
 			}
-		} else {
-			time.Sleep(time.Second * 1)
 		}
 	}
 }

@@ -164,11 +164,6 @@
             time: '2',
             position: 'top-center',
         });
-        ws.send('track');
-        setInterval(() => {
-            ws.send('track');
-            console.log('追加监控时间')
-        }, 1000 * 60 * 6);
     }
     ws.onmessage = function (evt) {
         const oldServers = statusCards.servers
