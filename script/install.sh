@@ -83,7 +83,7 @@ pre_check() {
 
     ## server location
     if curl -s api.myip.la/json | grep -q 'China'; then
-        GITHUB_RAW_URL="raw.staticdn.net"
+        GITHUB_RAW_URL="raw.sevencdn.com"
         GITHUB_URL="hub.fastgit.org"
     fi
 }

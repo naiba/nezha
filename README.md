@@ -18,7 +18,7 @@
 - 国内加速：
 
     ```shell
-    curl -L https://raw.staticdn.net/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+    curl -L https://raw.sevencdn.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
     sudo ./nezha.sh
     ```
 

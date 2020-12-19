@@ -48,7 +48,7 @@ var (
 	updateCh       = make(chan struct{}, 0)
 )
 
-const AGENT_UPGRADE = 55
+const agentUpgrade = 55
 
 func doSelfUpdate() {
 	defer func() {
@@ -67,7 +67,7 @@ func doSelfUpdate() {
 		log.Println("Current binary is the latest version", version)
 	} else {
 		log.Println("Successfully updated to version", latest.Version)
-		os.Exit(AGENT_UPGRADE)
+		os.Exit(agentUpgrade)
 	}
 }
 
