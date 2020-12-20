@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css?v202012121912" type="text/css">
     {{if ts .CustomCSS}}
     {{tag "style"}}
-    {{.CustomCSS|css}}
+    {{.CustomCSS|safe}}
     {{tag "/style"}}
     {{end}}
 </head>

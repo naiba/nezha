@@ -25,8 +25,8 @@ func ServeWeb(port uint) {
 		"tf": func(t time.Time) string {
 			return t.Format("2006年1月2号")
 		},
-		"css": func(s string) template.CSS {
-			return template.CSS(s)
+		"safe": func(s string) template.HTML {
+			return template.HTML(s)
 		},
 		"tag": func(s string) template.HTML {
 			return template.HTML(`<` + s + `>`)

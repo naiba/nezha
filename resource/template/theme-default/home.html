@@ -2,7 +2,7 @@
 {{template "common/header" .}}
 {{if ts .CustomCSS}}
 {{tag "style"}}
-{{.CustomCSS|css}}
+{{.CustomCSS|safe}}
 {{tag "/style"}}
 {{end}}
 {{template "common/menu" .}}
