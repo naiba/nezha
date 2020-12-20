@@ -43,9 +43,44 @@
     }
     ```
 
-### 通知
+### 报警通知
 
-正在开发，进度 0%
+#### 通知到 server酱 示例
+
+1. 添加通知方式
+
+    - 备注：server酱
+    
+    - URL：https://sc.ftqq.com/SCUrandomkeys.send
+    
+    - 请求方式: GET
+    
+    - 请求类型: JSON/FORM 都可以，其他接入其他API时要选择其使用的类型
+    
+    - Body: `{"text": "#NEZHA#"}`
+      Body 参数必须是`JSON`，格式是 `key:value` 的形式，`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
+      
+      请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
+    
+2. 添加一个离线报警
+
+    - 备注：离线通知
+    - 规则：`[{"Type":"offline","Min":0,"Max":0,"Duration":10}]`
+    - 启用：√
+
+3. 添加一个监控 CPU 持续 10s 超过 50% **且** 内存持续 20s 占用低于 20% 的报警
+
+    - 备注：CPU+内存
+    - 规则：`[{"Type":"cpu","Min":0,"Max":50,"Duration":10},{"Type":"memory","Min":20,"Max":0,"Duration":20}]`
+    - 启用：√
+
+#### 报警规则说明
+
+- Type
+  - cpu、memory、swap、disk：Min/Max 数值为占用百分比
+  - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024*1024）
+  - offline：不支持 Min/Max 参数
+- Duration：持续秒数，监控比较简陋，取持续时间内的 70 采样结果
 
 ## 常见问题
 

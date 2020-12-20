@@ -22,12 +22,6 @@ const (
 	NotificationRequestMethodPOST
 )
 
-type NotificatonSender struct {
-	Rule   *Rule
-	Server *Server
-	State  *State
-}
-
 type Notification struct {
 	Common
 	Name          string
@@ -38,7 +32,7 @@ type Notification struct {
 	VerifySSL     *bool
 }
 
-func (n *Notification) Send(sender *NotificatonSender, message string) {
+func (n *Notification) Send(message string) error {
 	var verifySSL bool
 
 	if n.VerifySSL != nil && *n.VerifySSL {
@@ -57,36 +51,44 @@ func (n *Notification) Send(sender *NotificatonSender, message string) {
 		err = json.Unmarshal([]byte(n.RequestBody), &data)
 	}
 
+	var resp *http.Response
+
 	if err == nil {
 		if n.RequestMethod == NotificationRequestMethodGET {
+			var queryValue = reqURL.Query()
 			for k, v := range data {
-				reqURL.Query().Set(k, replaceParamsInString(v, sender))
+				queryValue.Set(k, replaceParamsInString(v, message))
 			}
-			client.Get(reqURL.String())
+			reqURL.RawQuery = queryValue.Encode()
+			resp, err = client.Get(reqURL.String())
 		} else {
 			if n.RequestType == NotificationRequestTypeForm {
 				params := url.Values{}
 				for k, v := range data {
-					params.Add(k, replaceParamsInString(v, sender))
+					params.Add(k, replaceParamsInString(v, message))
 				}
-				client.PostForm(reqURL.String(), params)
+				resp, err = client.PostForm(reqURL.String(), params)
 			} else {
-				jsonValue := replaceParamsInJSON(n.RequestBody, sender)
-				if err == nil {
-					client.Post(reqURL.String(), "application/json", strings.NewReader(jsonValue))
-				}
+				jsonValue := replaceParamsInJSON(n.RequestBody, message)
+				resp, err = client.Post(reqURL.String(), "application/json", strings.NewReader(jsonValue))
 			}
 		}
 	}
+
+	if err == nil && (resp.StatusCode < 200 || resp.StatusCode > 299) {
+		err = fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
+	}
+
+	return err
 }
 
-func replaceParamsInString(str string, sender *NotificatonSender) string {
-	str = strings.ReplaceAll(str, "#CPU#", fmt.Sprintf("%2f%%", sender.State.CPU))
+func replaceParamsInString(str string, message string) string {
+	str = strings.ReplaceAll(str, "#NEZHA#", message)
 	return str
 }
 
-func replaceParamsInJSON(str string, sender *NotificatonSender) string {
-	str = strings.ReplaceAll(str, "#CPU#", fmt.Sprintf("%2f%%", sender.State.CPU))
+func replaceParamsInJSON(str string, message string) string {
+	str = strings.ReplaceAll(str, "#NEZHA#", message)
 	return str
 }
 

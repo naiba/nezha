@@ -10,6 +10,11 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
+const (
+	SnapshotDelay = 3
+	ReportDelay   = 2
+)
+
 // Conf ..
 var Conf *model.Config
 

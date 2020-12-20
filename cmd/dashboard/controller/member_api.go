@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -58,8 +60,14 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		}
 	case "notification":
 		err = dao.DB.Delete(&model.Notification{}, "id = ?", id).Error
+		if err == nil {
+			alertmanager.OnDeleteNotification(id)
+		}
 	case "alert-rule":
 		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
+		if err == nil {
+			alertmanager.OnDeleteAlert(id)
+		}
 	}
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
@@ -105,6 +113,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		})
 		return
 	}
+	s.Host = &model.Host{}
+	s.State = &model.State{}
 	dao.ServerList[fmt.Sprintf("%d", s.ID)] = &s
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
@@ -138,6 +148,9 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		verifySSL := nf.VerifySSL == "on"
 		n.VerifySSL = &verifySSL
 		n.ID = nf.ID
+		err = n.Send("这是测试消息")
+	}
+	if err == nil {
 		if n.ID == 0 {
 			err = dao.DB.Create(&n).Error
 		} else {
@@ -151,6 +164,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		})
 		return
 	}
+	alertmanager.OnRefreshOrAddNotification(n)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
@@ -169,12 +183,17 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 	err := c.ShouldBindJSON(&arf)
 	if err == nil {
 		err = json.Unmarshal([]byte(arf.RulesRaw), &r.Rules)
-		if err == nil && len(r.Rules) == 0 {
-			c.JSON(http.StatusOK, model.Response{
-				Code:    http.StatusBadRequest,
-				Message: fmt.Sprintf("请求错误：%s", "至少定义一条规则"),
-			})
-			return
+	}
+	if err == nil {
+		if len(r.Rules) == 0 {
+			err = errors.New("至少定义一条规则")
+		} else {
+			for i := 0; i < len(r.Rules); i++ {
+				if r.Rules[i].Duration < 3 {
+					err = errors.New("Duration 至少为 3")
+					break
+				}
+			}
 		}
 	}
 	if err == nil {
@@ -196,6 +215,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		})
 		return
 	}
+	alertmanager.OnRefreshOrAddAlert(r)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

@@ -1,16 +1,62 @@
 package model
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
 
+const (
+	RuleCheckPass = 1
+	RuleCheckFail = 0
+)
+
 type Rule struct {
-	Type     string // 指标类型，cpu、memory、swap、disk、net_in、net_out、net_all、transfer_in、transfer_out、transfer_all、offline
+	// 指标类型，cpu、memory、swap、disk、net_in_speed、net_out_speed
+	// net_all_speed、transfer_in、transfer_out、transfer_all、offline
+	Type     string
 	Min      uint64 // 最小阈值 (百分比、字节 kb ÷ 1024)
 	Max      uint64 // 最大阈值 (百分比、字节 kb ÷ 1024)
 	Duration uint64 // 持续时间 (秒)
+}
+
+func (u *Rule) Snapshot(server *Server) interface{} {
+	var src uint64
+	switch u.Type {
+	case "cpu":
+		src = uint64(server.State.CPU)
+	case "memory":
+		src = uint64(server.State.MemUsed / server.Host.MemTotal * 100)
+	case "swap":
+		src = uint64(server.State.SwapUsed / server.Host.SwapTotal * 100)
+	case "disk":
+		src = uint64(server.State.DiskUsed / server.Host.DiskTotal * 100)
+	case "net_in_speed":
+		src = server.State.NetInSpeed
+	case "net_out_speed":
+		src = server.State.NetOutSpeed
+	case "net_all_speed":
+		src = server.State.NetOutSpeed + server.State.NetOutSpeed
+	case "transfer_in":
+		src = server.State.NetInTransfer
+	case "transfer_out":
+		src = server.State.NetOutTransfer
+	case "transfer_all":
+		src = server.State.NetOutTransfer + server.State.NetInTransfer
+	case "offline":
+		src = uint64(server.LastActive.Unix())
+	}
+	if u.Type == "offline" {
+		if uint64(time.Now().Unix())-src > 6 {
+			return struct{}{}
+		}
+	} else if (u.Max > 0 && src > u.Max) || (u.Min > 0 && src < u.Min) {
+		return struct{}{}
+	}
+	return nil
 }
 
 type AlertRule struct {
@@ -31,5 +77,39 @@ func (r *AlertRule) BeforeSave(tx *gorm.DB) error {
 }
 
 func (r *AlertRule) AfterFind(tx *gorm.DB) error {
-	return json.Unmarshal([]byte(r.RulesRaw), r.Rules)
+	return json.Unmarshal([]byte(r.RulesRaw), &r.Rules)
+}
+
+func (r *AlertRule) Snapshot(server *Server) []interface{} {
+	var point []interface{}
+	for i := 0; i < len(r.Rules); i++ {
+		point = append(point, r.Rules[i].Snapshot(server))
+	}
+	return point
+}
+
+func (r *AlertRule) Check(points [][]interface{}) (int, string) {
+	var dist bytes.Buffer
+	var max int
+	for i := 0; i < len(r.Rules); i++ {
+		total := 0.0
+		fail := 0.0
+		num := int(r.Rules[i].Duration / 2) // SnapshotDelay
+		if num > max {
+			max = num
+		}
+		if len(points) < num {
+			continue
+		}
+		for j := len(points) - 1; j >= 0; j-- {
+			total++
+			if points[j][i] != nil {
+				fail++
+			}
+		}
+		if fail/total > 0.3 {
+			dist.WriteString(fmt.Sprintf("%+v\n", r.Rules[i]))
+		}
+	}
+	return max, dist.String()
 }

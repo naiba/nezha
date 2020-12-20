@@ -11,6 +11,7 @@ import (
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -40,6 +41,8 @@ func initDB() {
 	dao.DB.Find(&servers)
 	for _, s := range servers {
 		innerS := s
+		innerS.Host = &model.Host{}
+		innerS.State = &model.State{}
 		dao.ServerList[fmt.Sprintf("%d", innerS.ID)] = &innerS
 	}
 }
@@ -47,5 +50,6 @@ func initDB() {
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(5555)
+	go alertmanager.Start()
 	select {}
 }

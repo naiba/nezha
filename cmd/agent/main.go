@@ -173,7 +173,7 @@ func reportState() {
 	for {
 		if client != nil {
 			monitor.TrackNetworkSpeed()
-			_, err = client.ReportState(ctx, monitor.GetState(2).PB())
+			_, err = client.ReportState(ctx, monitor.GetState(dao.ReportDelay).PB())
 			if err != nil {
 				log.Printf("reportState error %v", err)
 				time.Sleep(delayWhenError)
