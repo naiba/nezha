@@ -170,6 +170,7 @@ h1 {
 
 .ui.progress .bar {
     line-height: unset !important;
+    height: unset !important;
 }
 
 table tr {

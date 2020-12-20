@@ -113,14 +113,18 @@ func checkStatus() {
 				var flag bool
 				if cacheN, has := dao.Cache.Get(nID); has {
 					nHistory := cacheN.(NotificationHistory)
-					// 超过一天或者超过上次提醒阈值
-					if time.Now().After(nHistory.Until) || nHistory.Duration >= time.Hour*24 {
+					// 每次提醒都增加一倍等待时间，最后每天最多提醒一次
+					if time.Now().After(nHistory.Until) {
 						flag = true
 						nHistory.Duration *= 2
+						if nHistory.Duration > time.Hour*24 {
+							nHistory.Duration = time.Hour * 24
+						}
 						nHistory.Until = time.Now().Add(nHistory.Duration)
+						dao.Cache.Set(nID, nHistory, nHistory.Duration)
 					}
 				} else {
-					// 新提醒
+					// 新提醒直接通知
 					flag = true
 					dao.Cache.Set(nID, NotificationHistory{
 						Duration: firstNotificationDelay,
