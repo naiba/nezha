@@ -17,7 +17,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
     <link rel="stylesheet" type="text/css" href="/static/semantic-ui-alerts.min.css">
     <link rel="stylesheet" href="/static/theme-hotaru/css/core.css?v202012121912" type="text/css">
-    <link rel="stylesheet" href="/static/theme-hotaru/css/main.css?v202012202117" type="text/css">
+    <link rel="stylesheet" href="/static/theme-hotaru/css/main.css?v202012202136" type="text/css">
     <link rel="stylesheet" href="/static/theme-hotaru/css/darkmode.css?v202012121912" type="text/css">
     {{if ts .CustomCSS}}
     {{tag "style"}}
@@ -61,9 +61,8 @@
                     <tr v-for='server in servers' :id="server.ID">
                         <td>
                             <div class="progress">
-                                <div style="width: 100%;"
-                                    :class="'progress-bar progress-bar-'+ (server.live?'success':pulled>3?'danger':'warning')">
-                                    <small>@#server.live?'运行中':pulled>3?'已离线':'……'#@</small>
+                                <div :class="'state-'+ (server.live?'online':'offline')">
+                                    <small>@#server.live?'运行中':'已离线'#@</small>
                                 </div>
                             </div>
                         </td>
@@ -112,14 +111,15 @@
                         <div class="panel panel-block panel-block-sm panel-location">
                             <div class="location-header">
                                 <h3 class="h4"><img
-                                        :src="'/static/theme-hotaru/img/clients/'+(server.Host?server.Host.CountryCode.toUpperCase():'HK')+'.png'">
+                                        :src="'/static/theme-hotaru/img/clients/'+(server.Host&&server.Host.CountryCode?server.Host.CountryCode.toUpperCase():'CN')+'.png'">
                                     &nbsp;@#server.Name#@</h3>
                                 <i class="zmdi zmdi-check-circle text-success"></i>
                             </div>
                             <div class="location-progress">
-                                <div :class="formatPercent(server.live,server.State?server.State.CPU:0, 100).class">
+                                <div
+                                    :class="formatPercent(server.live,mergeUsage(server.State, server.Host),100).class">
                                     <div class="bar"
-                                        :style="formatPercent(server.live,server.State?server.State.CPU:0, 100).style">
+                                        :style="formatPercent(server.live,mergeUsage(server.State, server.Host),100).style">
                                     </div>
                                 </div>
                             </div>
@@ -151,13 +151,21 @@
             delimiters: ['@#', '#@'],
             data: {
                 servers: initData,
-                pulled: false,
                 cache: [],
             },
             mounted() {
                 this.troggleDarkMode();
             },
             methods: {
+                mergeUsage(state, host) {
+                    if (!state) {
+                        return 0
+                    }
+                    if (!host) {
+                        return state.CPU
+                    }
+                    return (state.CPU + (state.MemUsed / host.MemTotal * 100) + (state.DiskUsed / host.DiskTotal * 100)) / 3
+                },
                 formatPercent(live, used, total) {
                     const percent = live ? (parseInt(used / total * 100) || 0) : -1
                     if (!this.cache[percent]) {
@@ -230,14 +238,13 @@
         }
         ws.onmessage = function (evt) {
             statusCards.servers = JSON.parse(evt.data)
-            statusCards.pulled++
             const keys = Object.keys(statusCards.servers)
             for (let i = 0; i < keys.length; i++) {
                 const ns = statusCards.servers[keys[i]];
                 if (!ns.Host) ns.live = false
                 else {
                     const lastActive = new Date(ns.LastActive).getTime()
-                    if (statusCards.pulled > 3 && Date.now() - lastActive > 5 * 1000) {
+                    if (Date.now() - lastActive > 5 * 1000) {
                         ns.live = false
                     } else {
                         ns.live = true

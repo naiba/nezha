@@ -159,11 +159,6 @@ h1 {
     }
 }
 
-.location-progress .bar {
-    height: 0.5em !important;
-    margin-bottom: 1em !important;
-}
-
 .ui.progress {
     margin: unset !important;
 }
@@ -175,4 +170,21 @@ h1 {
 
 table tr {
     height: 3em !important;
+}
+
+.location-progress>.ui.progress>.bar {
+    height: 0.5em !important;
+    margin-bottom: 1em !important;
+}
+
+.state-online {
+    background-color: rgb(0, 235, 139);
+    border-radius: .3em;
+    margin-left: 1em;
+}
+
+.state-offline {
+    background-color: slategray;
+    border-radius: .3em;
+    margin-left: 1em;
 }
