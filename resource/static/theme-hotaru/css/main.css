@@ -188,3 +188,7 @@ table tr {
     border-radius: .3em;
     margin-left: 1em;
 }
+
+.ui.progress .bar {
+    min-width: .15em !important;
+}

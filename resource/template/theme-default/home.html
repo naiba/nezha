@@ -15,7 +15,8 @@
                             v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
                             v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
                             v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
-                            v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name + (server.live?'':' [已离线]')#@
+                            v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name +
+                        (server.live?'':' [已离线]')#@
                         <i class="yellow info circle icon"></i>
                         <div class='ui content popup'>
                             系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
@@ -37,25 +38,33 @@
                             <div class="thirteen wide column">
                                 <div :class="formatPercent(server.live,server.State.CPU, 100).class">
                                     <div class="bar" :style="formatPercent(server.live,server.State.CPU, 100).style">
-                                        <div class="progress"></div>
+                                        <div class="progress">
+                                            <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="three wide column">内存</div>
                             <div class="thirteen wide column">
-                                <div :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
+                                <div
+                                    :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
                                     <div class="bar"
                                         :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
-                                        <div class="progress"></div>
+                                        <div class="progress">
+                                            <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="three wide column">交换</div>
                             <div class="thirteen wide column">
-                                <div :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
+                                <div
+                                    :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
                                     <div class="bar"
                                         :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style">
-                                        <div class="progress"></div>
+                                        <div class="progress">
+                                            <small>@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -68,10 +77,13 @@
                             </div>
                             <div class="three wide column">硬盘</div>
                             <div class="thirteen wide column">
-                                <div :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
+                                <div
+                                    :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
                                     <div class="bar"
                                         :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
-                                        <div class="progress"></div>
+                                        <div class="progress">
+                                            <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
