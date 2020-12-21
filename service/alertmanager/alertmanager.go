@@ -150,8 +150,12 @@ func checkStatus() {
 				}
 			}
 			// 清理旧数据
-			if max > 0 && max < len(alertsStore[alerts[j].ID][server.ID]) {
-				alertsStore[alerts[j].ID][server.ID] = alertsStore[alerts[j].ID][server.ID][len(alertsStore[alerts[j].ID][server.ID])-max:]
+			if max > 0 {
+				for k := 0; k < len(alertsStore[alerts[j].ID][server.ID]); k++ {
+					if max < len(alertsStore[alerts[j].ID][server.ID][k]) {
+						alertsStore[alerts[j].ID][server.ID][k] = alertsStore[alerts[j].ID][server.ID][k][len(alertsStore[alerts[j].ID][server.ID][k])-max:]
+					}
+				}
 			}
 		}
 	}
