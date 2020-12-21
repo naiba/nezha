@@ -30,17 +30,19 @@ type NotificationHistory struct {
 
 func Start() {
 	alertsStore = make(map[uint64]map[uint64][][]interface{})
+	notificationsLock.Lock()
+	if err := dao.DB.Find(&notifications).Error; err != nil {
+		panic(err)
+	}
+	notificationsLock.Unlock()
 	alertsLock.Lock()
 	if err := dao.DB.Find(&alerts).Error; err != nil {
 		panic(err)
 	}
-	if err := dao.DB.Find(&notifications).Error; err != nil {
-		panic(err)
-	}
-	alertsLock.Unlock()
 	for i := 0; i < len(alerts); i++ {
 		alertsStore[alerts[i].ID] = make(map[uint64][][]interface{})
 	}
+	alertsLock.Unlock()
 
 	time.Sleep(time.Second * 10)
 	go checkStatus()
@@ -50,10 +52,15 @@ func OnRefreshOrAddAlert(alert model.AlertRule) {
 	alertsLock.Lock()
 	defer alertsLock.Unlock()
 	delete(alertsStore, alert.ID)
+	var isEdit bool
 	for i := 0; i < len(alerts); i++ {
 		if alerts[i].ID == alert.ID {
 			alerts[i] = alert
+			isEdit = true
 		}
+	}
+	if !isEdit {
+		alerts = append(alerts, alert)
 	}
 	alertsStore[alert.ID] = make(map[uint64][][]interface{})
 }
@@ -72,10 +79,15 @@ func OnDeleteAlert(id uint64) {
 func OnRefreshOrAddNotification(n model.Notification) {
 	notificationsLock.Lock()
 	defer notificationsLock.Unlock()
+	var isEdit bool
 	for i := 0; i < len(notifications); i++ {
 		if notifications[i].ID == n.ID {
 			notifications[i] = n
+			isEdit = true
 		}
+	}
+	if !isEdit {
+		notifications = append(notifications, n)
 	}
 }
 

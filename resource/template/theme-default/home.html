@@ -151,10 +151,13 @@
             },
             secondToDate(s) {
                 var d = Math.floor(s / 3600 / 24);
+                if (d > 0) {
+                    return d + "天"
+                }
                 var h = Math.floor(s / 3600 % 24);
-                var m = Math.floor((s / 60 % 60));
-                var s = Math.floor((s % 60));
-                return result = d + "天" + h + "小时" + m + "分钟" + s + "秒";
+                var m = Math.floor(s / 60 % 60);
+                var s = Math.floor(s % 60);
+                return h + ":" + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
             },
             formatTimestamp(t) {
                 return new Date(t * 1000).toLocaleString()

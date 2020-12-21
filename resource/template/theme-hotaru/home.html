@@ -48,8 +48,8 @@
                         <th>运行状态</th>
                         <th>节点名</th>
                         <th>系统</th>
-                        <th>服务器位置</th>
-                        <th>在线时间</th>
+                        <th>位置</th>
+                        <th>在线</th>
                         <th>网络(B/s) ↓|↑</th>
                         <th>流量(B) ↓|↑</th>
                         <th>CPU</th>
@@ -200,8 +200,7 @@
                 readableBytes(bytes) {
                     var i = Math.floor(Math.log(bytes) / Math.log(1024)),
                         sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-                    return (bytes / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + sizes[i];
+                    return (bytes / Math.pow(1024, i)).toFixed(0) + ' ' + sizes[i];
                 },
                 troggleDarkMode() {
                     const hour = new Date(Date.now()).getHours()
@@ -211,10 +210,13 @@
                 },
                 secondToDate(s) {
                     var d = Math.floor(s / 3600 / 24);
+                    if (d > 0) {
+                        return d + "天"
+                    }
                     var h = Math.floor(s / 3600 % 24);
-                    var m = Math.floor((s / 60 % 60));
-                    var s = Math.floor((s % 60));
-                    return result = d + "天" + h + "小时" + m + "分钟" + s + "秒";
+                    var m = Math.floor(s / 60 % 60);
+                    var s = Math.floor(s % 60);
+                    return h + ":" + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
                 },
                 formatTimestamp(t) {
                     return new Date(t * 1000).toLocaleString()
