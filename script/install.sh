@@ -75,10 +75,20 @@ pre_check() {
     fi
 
     ## os_arch
-    if [ $(uname -m | grep '64') != "" ]; then
+    if [ $(uname -m | grep 'x86_64') != "" ]; then
         os_arch="amd64"
-    else
+    elif [ $(uname -m | grep 'i686') != "" ]; then
+        os_arch="amd64"
+    elif [ $(uname -m | grep 'i386') != "" ]; then
         os_arch="386"
+    elif [ $(uname -m | grep 'aarch64') != "" ]; then
+        os_arch="arm64"
+    elif [ $(uname -m | grep 'armv8b') != "" ]; then
+        os_arch="arm64"
+    elif [ $(uname -m | grep 'armv8l') != "" ]; then
+        os_arch="arm64"
+    elif [ $(uname -m | grep 'arm') != "" ]; then
+        os_arch="arm"
     fi
 
     ## server location
