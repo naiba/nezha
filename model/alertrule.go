@@ -91,6 +91,7 @@ func (r *AlertRule) Snapshot(server *Server) []interface{} {
 func (r *AlertRule) Check(points [][]interface{}) (int, string) {
 	var dist bytes.Buffer
 	var max int
+	var count int
 	for i := 0; i < len(r.Rules); i++ {
 		total := 0.0
 		fail := 0.0
@@ -108,8 +109,12 @@ func (r *AlertRule) Check(points [][]interface{}) (int, string) {
 			}
 		}
 		if fail/total > 0.3 {
+			count++
 			dist.WriteString(fmt.Sprintf("%+v\n", r.Rules[i]))
 		}
 	}
-	return max, dist.String()
+	if count == len(r.Rules) {
+		return max, dist.String()
+	}
+	return max, ""
 }
