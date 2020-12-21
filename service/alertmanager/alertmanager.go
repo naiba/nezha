@@ -114,6 +114,10 @@ func checkStatus() {
 	defer dao.ServerLock.RUnlock()
 
 	for j := 0; j < len(alerts); j++ {
+		// 跳过未启用
+		if alerts[j].Enable == nil || !*alerts[j].Enable {
+			continue
+		}
 		for _, server := range dao.ServerList {
 			// 监测点
 			alertsStore[alerts[j].ID][server.ID] = append(alertsStore[alerts[j].
