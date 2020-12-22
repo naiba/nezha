@@ -6,7 +6,7 @@
 | ---- | ---- | ---- |
 |   <img src="https://s3.ax1x.com/2020/12/08/DzHv6A.jpg" width="2333px" />   | ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)     | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
 
-\>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22) (Google)
+\>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
 
 ## 一键脚本
 
@@ -128,4 +128,6 @@
 ## 社区文章
 
 - [哪吒探针 - Windows 客户端安装](https://nyko.me/2020/12/13/nezha-windows-client.html)
+- [哪吒面板，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
 - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) *（已过时）*
+- [>>更多教程](https://www.google.com/search?q=%22%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22+%22%E6%95%99%E7%A8%8B%22) (Google)
