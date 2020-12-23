@@ -246,7 +246,7 @@
                 if (!ns.Host) ns.live = false
                 else {
                     const lastActive = new Date(ns.LastActive).getTime()
-                    if (Date.now() - lastActive > 5 * 1000) {
+                    if (Date.now() - lastActive > 10 * 1000) {
                         ns.live = false
                     } else {
                         ns.live = true
