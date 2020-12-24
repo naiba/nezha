@@ -252,10 +252,10 @@ func (ma *memberAPI) logout(c *gin.Context) {
 }
 
 type settingForm struct {
-	Title     string
-	Admin     string
-	Theme     string
-	CustomCSS string
+	Title      string
+	Admin      string
+	Theme      string
+	CustomCode string
 }
 
 func (ma *memberAPI) updateSetting(c *gin.Context) {
@@ -269,7 +269,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	}
 	dao.Conf.Site.Brand = sf.Title
 	dao.Conf.Site.Theme = sf.Theme
-	dao.Conf.Site.CustomCSS = sf.CustomCSS
+	dao.Conf.Site.CustomCode = sf.CustomCode
 	dao.Conf.GitHub.Admin = sf.Admin
 	if err := dao.Conf.Save(); err != nil {
 		c.JSON(http.StatusOK, model.Response{

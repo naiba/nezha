@@ -1,9 +1,7 @@
 {{define "theme-default/home"}}
 {{template "common/header" .}}
-{{if ts .CustomCSS}}
-{{tag "style"}}
-{{.CustomCSS|safe}}
-{{tag "/style"}}
+{{if ts .CustomCode}}
+{{.CustomCode|safe}}
 {{end}}
 {{template "common/menu" .}}
 <div class="nb-container">

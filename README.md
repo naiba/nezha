@@ -10,7 +10,7 @@
 
 ## 一键脚本
 
-**建议使用 WatchTower 自动更新面板，Windows监控可以使用nssm配置自启动**
+**建议使用 WatchTower 自动更新面板，Windows监控可以使用nssm配置自启动** *记得加群获取面板更新通知，避免功能有更新面板自动更新后跟不上出问题*
 
 - 海外：
 
@@ -27,22 +27,50 @@
     ```
 
 ## 使用说明
-### 自定义 CSS
+### 自定义代码
+
+可以去版权、改LOGO、加统计代码等等。
 
 - 默认主题更改进度条颜色示例
 
     ```
+    <style>
     .ui.fine.progress> .bar {
         background-color: pink !important;
     }
+    </style>
+    ```
+- 默认主题修改LOGO、移除版权示例（来自 mehui@hostloc 初版运用了XSS，有一点不足就是可以直接使用 pure JavaScript 实现用了 jQuery，欢迎PR）
+
+    ```
+    <style>
+    .right.menu>a{
+        visibility: hidden;
+    }
+    .footer .is-size-7{
+        visibility: hidden;
+    }
+    .item img{
+        visibility: hidden;
+    }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+    <script>$(function(){ 
+        $("div.is-size-7").html("Powered by 你的名字").css("visibility","visible");
+        $(".item img").attr('src','你的方形logo').css("visibility","visible");
+        $("[rel='shortcut icon']").attr('href','你的方形logo');
+    }); 
+    </script>
     ```
 
 - hotaru 主题更改背景图片示例
 
     ```
+    <style>
     .hotaru-cover {
         background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
     }
+    </style>
     ```
 
 ### 报警通知
