@@ -70,5 +70,10 @@
 }
 
 .ui.progress .bar {
-    min-width: .15em !important;
+    min-width: 1.26em !important;
+    text-align: right;
+    padding-right: .4em;
+    line-height: 1.75em;
+    color: rgba(255, 255, 255, .7);
+    font-weight: 700;
 }
