@@ -90,20 +90,15 @@ Body 内容是`JSON` 格式的，值为 `key:value` 的形式，`#NEZHA#` 是面
 1. 添加通知方式
 
     - server酱示例
-
       - 备注：server酱
-
       - URL：https://sc.ftqq.com/SCUrandomkeys.send
-
       - 请求方式: GET
-
       - 请求类型: JSON/FORM 都可以，其他接入其他API时要选择其使用的类型
-
       - Body: `{"text": "#NEZHA#"}`
       
-- wxpusher示例
-       - 备注: wxpusher
-   - URL：http://wxpusher.zjiecode.com/api/send/message
+    - wxpusher示例
+      - 备注: wxpusher
+      - URL：http://wxpusher.zjiecode.com/api/send/message
       - 请求方式: POST
       - 请求类型: JSON
       - Body: `{"appToken":"你的appToken","content":"#NEZHA#","contentType":"1","uid":"你的uid"}`
