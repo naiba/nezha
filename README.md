@@ -80,10 +80,11 @@
 
 #### 灵活通知方式
 
-Body 内容是`JSON` 格式的，值为 `key:value` 的形式，`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
+`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
 
-- 请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
-- 请求方式为 POST 时会将 `Body` 里面的 `key:value` 拼接到请求体里面
+Body 内容是`JSON` 格式的：**当请求类型为FORM时**，值为 `key:value` 的形式，`value` 里面可放置占位符，通知时会自动替换。**当请求类型为JSON时** 只会简进行字符串替换后直接提交到`URL`。
+
+URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 参考下方的示例，非常灵活。
 
@@ -91,17 +92,17 @@ Body 内容是`JSON` 格式的，值为 `key:value` 的形式，`#NEZHA#` 是面
 
     - server酱示例
       - 备注：server酱
-      - URL：https://sc.ftqq.com/SCUrandomkeys.send
+      - URL：https://sc.ftqq.com/SCUrandomkeys.send?text=#NEZHA#
       - 请求方式: GET
-      - 请求类型: JSON/FORM 都可以，其他接入其他API时要选择其使用的类型
-      - Body: `{"text": "#NEZHA#"}`
+      - 请求类型: 默认
+      - Body: 空
       
     - wxpusher示例
       - 备注: wxpusher
       - URL：http://wxpusher.zjiecode.com/api/send/message
-      - 请求方式: GET
+      - 请求方式: POST
       - 请求类型: JSON
-      - Body: `{"appToken":"你的appToken","content":"#NEZHA#","contentType":"1","uid":"你的uid"}`
+      - Body: `{"appToken":"你的appToken","topicIds":[应用topicID],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
    
 2. 添加一个离线报警
 

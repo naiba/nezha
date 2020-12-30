@@ -136,10 +136,6 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 	var n model.Notification
 	err := c.ShouldBindJSON(&nf)
 	if err == nil {
-		var data map[string]string
-		err = json.Unmarshal([]byte(nf.RequestBody), &data)
-	}
-	if err == nil {
 		n.Name = nf.Name
 		n.RequestMethod = nf.RequestMethod
 		n.RequestType = nf.RequestType
