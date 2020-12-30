@@ -96,6 +96,7 @@
       请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
       
       
+      
     - 备注: wxpusher
     - URL：http://wxpusher.zjiecode.com/api/send/message
     
@@ -109,7 +110,7 @@
               "content":"#NEZHA#",
               "contentType":"1",
               "uid":"你的uid"
-            }````
+            }```
     
 2. 添加一个离线报警
 
