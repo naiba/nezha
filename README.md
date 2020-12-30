@@ -82,6 +82,8 @@
 
 1. 添加通知方式
 
+  - 示例1
+
     - 备注：server酱
     
     - URL：https://sc.ftqq.com/SCUrandomkeys.send
@@ -96,7 +98,8 @@
       请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
       
       
-      
+  - 示例2   
+  
     - 备注: wxpusher
     - URL：http://wxpusher.zjiecode.com/api/send/message
     
