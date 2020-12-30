@@ -64,7 +64,7 @@
     avatar.style.visibility="visible"
     }
     </script>
-    ```
+   ```
 
 - hotaru 主题更改背景图片示例
 
@@ -78,43 +78,36 @@
 
 ### 报警通知
 
-#### 通知到 server酱 示例
+#### 灵活通知方式
+
+Body 内容是`JSON` 格式的，值为 `key:value` 的形式，`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
+
+- 请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
+- 请求方式为 POST 时会将 `Body` 里面的 `key:value` 拼接到请求体里面
+
+参考下方的示例，非常灵活。
 
 1. 添加通知方式
 
-  - 示例1
+    - server酱示例
 
-    - 备注：server酱
-    
-    - URL：https://sc.ftqq.com/SCUrandomkeys.send
-    
-    - 请求方式: GET
-    
-    - 请求类型: JSON/FORM 都可以，其他接入其他API时要选择其使用的类型
-    
-    - Body: `{"text": "#NEZHA#"}`
-      Body 参数必须是`JSON`，格式是 `key:value` 的形式，`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
+      - 备注：server酱
+
+      - URL：https://sc.ftqq.com/SCUrandomkeys.send
+
+      - 请求方式: GET
+
+      - 请求类型: JSON/FORM 都可以，其他接入其他API时要选择其使用的类型
+
+      - Body: `{"text": "#NEZHA#"}`
       
-      请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
-      
-      
-  - 示例2   
-  
-    - 备注: wxpusher
-    - URL：http://wxpusher.zjiecode.com/api/send/message
-    
-    - 请求方式: GET
-    
-    - 请求类型: JSON
-    
-    - Body: ```
-            {
-              "appToken":"你的appToken",
-              "content":"#NEZHA#",
-              "contentType":"1",
-              "uid":"你的uid"
-            }```
-    
+- wxpusher示例
+       - 备注: wxpusher
+   - URL：http://wxpusher.zjiecode.com/api/send/message
+      - 请求方式: POST
+      - 请求类型: JSON
+      - Body: `{"appToken":"你的appToken","content":"#NEZHA#","contentType":"1","uid":"你的uid"}`
+   
 2. 添加一个离线报警
 
     - 备注：离线通知
