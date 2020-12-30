@@ -99,7 +99,7 @@ Body 内容是`JSON` 格式的，值为 `key:value` 的形式，`#NEZHA#` 是面
     - wxpusher示例
       - 备注: wxpusher
       - URL：http://wxpusher.zjiecode.com/api/send/message
-      - 请求方式: POST
+      - 请求方式: GET
       - 请求类型: JSON
       - Body: `{"appToken":"你的appToken","content":"#NEZHA#","contentType":"1","uid":"你的uid"}`
    
