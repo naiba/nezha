@@ -40,7 +40,7 @@
     }
     </style>
     ```
-- 默认主题修改LOGO、移除版权示例（来自 @iLay1678 初版运用了XSS，有一点不足就是可以直接使用 pure JavaScript 实现用了 jQuery，欢迎PR）
+- 默认主题修改LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)，欢迎PR）
 
     ```
    <style>
@@ -94,6 +94,22 @@
       Body 参数必须是`JSON`，格式是 `key:value` 的形式，`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
       
       请求方式为 GET 时面板会将 `Body` 里面的参数拼接到 URL 的 query 里面
+      
+      
+    - 备注: wxpusher
+    - URL：http://wxpusher.zjiecode.com/api/send/message
+    
+    - 请求方式: GET
+    
+    - 请求类型: JSON
+    
+    - Body: ```
+            {
+              "appToken":"你的appToken",
+              "content":"#NEZHA#",
+              "contentType":"1",
+              "uid":"你的uid"
+            }````
     
 2. 添加一个离线报警
 
