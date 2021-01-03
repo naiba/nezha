@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -34,7 +35,9 @@ type Notification struct {
 }
 
 func (n *Notification) reqURL(message string) string {
-	return replaceParamsInString(n.URL, message)
+	return replaceParamsInString(n.URL, message, func(msg string) string {
+		return url.QueryEscape(msg)
+	})
 }
 
 func (n *Notification) reqBody(message string) (string, error) {
@@ -43,7 +46,10 @@ func (n *Notification) reqBody(message string) (string, error) {
 	}
 	switch n.RequestType {
 	case NotificationRequestTypeJSON:
-		return replaceParamsInString(n.RequestBody, message), nil
+		return replaceParamsInString(n.RequestBody, message, func(msg string) string {
+			msgBytes, _ := json.Marshal(msg)
+			return string(msgBytes)[1 : len(msgBytes)-1]
+		}), nil
 	case NotificationRequestTypeForm:
 		var data map[string]string
 		if err := json.Unmarshal([]byte(n.RequestBody), &data); err != nil {
@@ -51,7 +57,9 @@ func (n *Notification) reqBody(message string) (string, error) {
 		}
 		params := url.Values{}
 		for k, v := range data {
-			params.Add(k, replaceParamsInString(v, message))
+			params.Add(k, replaceParamsInString(v, message, func(msg string) string {
+				return url.QueryEscape(msg)
+			}))
 		}
 		return params.Encode(), nil
 	}
@@ -64,9 +72,8 @@ func (n *Notification) reqContentType() string {
 	}
 	if n.RequestType == NotificationRequestTypeForm {
 		return "application/x-www-form-urlencoded"
-	} else {
-		return "application/json"
 	}
+	return "application/json"
 }
 
 func (n *Notification) Send(message string) error {
@@ -97,10 +104,19 @@ func (n *Notification) Send(message string) error {
 		err = fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
 
+	// defer resp.Body.Close()
+	// body, _ := ioutil.ReadAll(resp.Body)
+
+	log.Printf("%s 通知：%s %s %+v\n", n.Name, message, reqBody, err)
+
 	return err
 }
 
-func replaceParamsInString(str string, message string) string {
-	str = strings.ReplaceAll(str, "#NEZHA#", message)
+func replaceParamsInString(str string, message string, mod func(string) string) string {
+	if mod != nil {
+		str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
+	} else {
+		str = strings.ReplaceAll(str, "#NEZHA#", message)
+	}
 	return str
 }

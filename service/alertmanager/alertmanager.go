@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"sync"
 	"time"
 
@@ -149,7 +148,6 @@ func checkStatus() {
 				}
 				if flag {
 					message := fmt.Sprintf("逮到咯，快去看看！服务器：%s(%s)，报警规则：%s，%s", server.Name, server.Host.IP, alerts[j].Name, desc)
-					log.Printf("通知：%s\n", message)
 					go sendNotification(message)
 				}
 			}
