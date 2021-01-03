@@ -57,9 +57,7 @@ func (n *Notification) reqBody(message string) (string, error) {
 		}
 		params := url.Values{}
 		for k, v := range data {
-			params.Add(k, replaceParamsInString(v, message, func(msg string) string {
-				return url.QueryEscape(msg)
-			}))
+			params.Add(k, replaceParamsInString(v, message, nil))
 		}
 		return params.Encode(), nil
 	}
