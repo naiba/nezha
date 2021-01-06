@@ -23,17 +23,24 @@ type Rule struct {
 	Duration uint64 // 持续时间 (秒)
 }
 
+func percentage(used, total uint64) uint64 {
+	if total == 0 {
+		return 0
+	}
+	return used * 100 / total
+}
+
 func (u *Rule) Snapshot(server *Server) interface{} {
 	var src uint64
 	switch u.Type {
 	case "cpu":
 		src = uint64(server.State.CPU)
 	case "memory":
-		src = uint64(server.State.MemUsed / server.Host.MemTotal * 100)
+		src = percentage(server.State.MemUsed, server.Host.MemTotal)
 	case "swap":
-		src = uint64(server.State.SwapUsed / server.Host.SwapTotal * 100)
+		src = percentage(server.State.SwapUsed, server.Host.SwapTotal)
 	case "disk":
-		src = uint64(server.State.DiskUsed / server.Host.DiskTotal * 100)
+		src = percentage(server.State.DiskUsed, server.Host.DiskTotal)
 	case "net_in_speed":
 		src = server.State.NetInSpeed
 	case "net_out_speed":
