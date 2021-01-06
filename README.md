@@ -97,12 +97,12 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
       - 请求类型: 默认
       - Body: 空
       
-    - wxpusher示例
+    - wxpusher示例，需要关注你的应用
       - 备注: wxpusher
       - URL：http://wxpusher.zjiecode.com/api/send/message
       - 请求方式: POST
       - 请求类型: JSON
-      - Body: `{"appToken":"你的appToken","topicIds":[应用topicID],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
+      - Body: `{"appToken":"你的appToken","topicIds":[],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
    
 2. 添加一个离线报警
 
