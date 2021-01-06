@@ -50,6 +50,5 @@ func initDB() {
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(5555)
-	go alertmanager.Start()
-	select {}
+	alertmanager.Start()
 }
