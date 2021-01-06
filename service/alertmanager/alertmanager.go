@@ -84,6 +84,7 @@ func OnDeleteAlert(id uint64) {
 	for i := 0; i < len(alerts); i++ {
 		if alerts[i].ID == id {
 			alerts = append(alerts[:i], alerts[i+1:]...)
+			i--
 		}
 	}
 }
@@ -109,6 +110,7 @@ func OnDeleteNotification(id uint64) {
 	for i := 0; i < len(notifications); i++ {
 		if notifications[i].ID == id {
 			notifications = append(notifications[:i], notifications[i+1:]...)
+			i--
 		}
 	}
 }
@@ -155,17 +157,13 @@ func checkStatus() {
 					}, firstNotificationDelay+time.Minute*10)
 				}
 				if flag {
-					message := fmt.Sprintf("逮到咯，快去看看！服务器：%s(%s)，报警规则：%s，%s", server.Name, server.Host.IP, alert.Name, desc)
+					message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，%s，逮到咯，快去看看！", alert.Name, server.Name, server.Host.IP, desc)
 					go sendNotification(message)
 				}
 			}
 			// 清理旧数据
-			if max > 0 {
-				for k := 0; k < len(alertsStore[alert.ID][server.ID]); k++ {
-					if max < len(alertsStore[alert.ID][server.ID][k]) {
-						alertsStore[alert.ID][server.ID][k] = alertsStore[alert.ID][server.ID][k][len(alertsStore[alert.ID][server.ID][k])-max:]
-					}
-				}
+			if max > 0 && max < len(alertsStore[alert.ID][server.ID]) {
+				alertsStore[alert.ID][server.ID] = alertsStore[alert.ID][server.ID][len(alertsStore[alert.ID][server.ID])-max:]
 			}
 		}
 	}

@@ -54,12 +54,15 @@ func (u *Rule) Snapshot(server *Server) interface{} {
 	case "transfer_all":
 		src = server.State.NetOutTransfer + server.State.NetInTransfer
 	case "offline":
-		src = uint64(server.LastActive.Unix())
-	}
-	if u.Type == "offline" {
-		if uint64(time.Now().Unix())-src > 6 {
-			return struct{}{}
+		if server.LastActive.IsZero() {
+			src = 0
+		} else {
+			src = uint64(server.LastActive.Unix())
 		}
+	}
+
+	if u.Type == "offline" && uint64(time.Now().Unix())-src > 6 {
+		return struct{}{}
 	} else if (u.Max > 0 && src > u.Max) || (u.Min > 0 && src < u.Min) {
 		return struct{}{}
 	}
@@ -109,7 +112,7 @@ func (r *AlertRule) Check(points [][]interface{}) (int, string) {
 		if len(points) < num {
 			continue
 		}
-		for j := len(points) - 1; j >= 0; j-- {
+		for j := len(points) - 1; j >= 0 && len(points)-num <= j; j-- {
 			total++
 			if points[j][i] != nil {
 				fail++
