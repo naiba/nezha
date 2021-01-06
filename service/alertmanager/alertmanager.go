@@ -152,7 +152,7 @@ func checkStatus() {
 					dao.Cache.Set(nID, NotificationHistory{
 						Duration: firstNotificationDelay,
 						Until:    time.Now().Add(firstNotificationDelay),
-					}, firstNotificationDelay)
+					}, firstNotificationDelay+time.Minute*10)
 				}
 				if flag {
 					message := fmt.Sprintf("逮到咯，快去看看！服务器：%s(%s)，报警规则：%s，%s", server.Name, server.Host.IP, alert.Name, desc)
