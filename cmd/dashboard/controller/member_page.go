@@ -32,7 +32,7 @@ func (mp *memberPage) server(c *gin.Context) {
 	defer dao.ServerLock.RUnlock()
 	c.HTML(http.StatusOK, "dashboard/server", mygin.CommonEnvironment(c, gin.H{
 		"Title":   "服务器管理",
-		"Servers": dao.ServerList,
+		"Servers": dao.SortedServerList,
 	}))
 }
 

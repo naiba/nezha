@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/naiba/nezha/service/dao"
 	"google.golang.org/grpc/codes"
@@ -26,18 +27,15 @@ func (a *AuthHandler) RequireTransportSecurity() bool {
 }
 
 // Check ..
-func (a *AuthHandler) Check(ctx context.Context) (clientID string, err error) {
+func (a *AuthHandler) Check(ctx context.Context) (clientID uint64, err error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		err = status.Errorf(codes.Unauthenticated, "获取 metaData 失败")
 		return
 	}
-
-	var (
-		clientSecret string
-	)
+	var clientSecret string
 	if value, ok := md["client_id"]; ok {
-		clientID = value[0]
+		clientID, _ = strconv.ParseUint(value[0], 10, 64)
 	}
 	if value, ok := md["client_secret"]; ok {
 		clientSecret = value[0]

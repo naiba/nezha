@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -17,7 +16,7 @@ import (
 
 func init() {
 	var err error
-	dao.ServerList = make(map[string]*model.Server)
+	dao.ServerList = make(map[uint64]*model.Server)
 	dao.Conf = &model.Config{}
 	err = dao.Conf.Read("data/config.yaml")
 	if err != nil {
@@ -43,8 +42,9 @@ func initDB() {
 		innerS := s
 		innerS.Host = &model.Host{}
 		innerS.State = &model.State{}
-		dao.ServerList[fmt.Sprintf("%d", innerS.ID)] = &innerS
+		dao.ServerList[innerS.ID] = &innerS
 	}
+	dao.ReSortServer()
 }
 
 func main() {

@@ -56,7 +56,8 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		defer dao.ServerLock.Unlock()
 		err = dao.DB.Delete(&model.Server{}, "id = ?", id).Error
 		if err == nil {
-			delete(dao.ServerList, strconv.FormatUint(id, 10))
+			delete(dao.ServerList, id)
+			dao.ReSortServer()
 		}
 	case "notification":
 		err = dao.DB.Delete(&model.Notification{}, "id = ?", id).Error
@@ -82,9 +83,10 @@ func (ma *memberAPI) delete(c *gin.Context) {
 }
 
 type serverForm struct {
-	ID     uint64
-	Name   string `binding:"required"`
-	Secret string
+	ID           uint64
+	Name         string `binding:"required"`
+	DisplayIndex int
+	Secret       string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -97,14 +99,15 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		defer dao.ServerLock.Unlock()
 		s.Name = sf.Name
 		s.Secret = sf.Secret
+		s.DisplayIndex = sf.DisplayIndex
 		s.ID = sf.ID
-	}
-	if sf.ID == 0 {
-		s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
-		s.Secret = s.Secret[:10]
-		err = dao.DB.Create(&s).Error
-	} else {
-		err = dao.DB.Save(&s).Error
+		if sf.ID == 0 {
+			s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
+			s.Secret = s.Secret[:10]
+			err = dao.DB.Create(&s).Error
+		} else {
+			err = dao.DB.Save(&s).Error
+		}
 	}
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
@@ -115,7 +118,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 	}
 	s.Host = &model.Host{}
 	s.State = &model.State{}
-	dao.ServerList[fmt.Sprintf("%d", s.ID)] = &s
+	dao.ServerList[s.ID] = &s
+	dao.ReSortServer()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

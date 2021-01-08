@@ -27,7 +27,7 @@ func (cp *commonPage) home(c *gin.Context) {
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
 	data := gin.H{
-		"Servers":    dao.ServerList,
+		"Servers":    dao.SortedServerList,
 		"CustomCode": dao.Conf.Site.CustomCode,
 	}
 	u, ok := c.Get(model.CtxKeyAuthorizedUser)
@@ -54,7 +54,7 @@ func (cp *commonPage) ws(c *gin.Context) {
 	defer conn.Close()
 	for {
 		dao.ServerLock.RLock()
-		err = conn.WriteJSON(dao.ServerList)
+		err = conn.WriteJSON(dao.SortedServerList)
 		dao.ServerLock.RUnlock()
 		if err != nil {
 			break

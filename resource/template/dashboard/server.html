@@ -13,20 +13,20 @@
         <table class="ui very basic table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>权重</th>
                     <th>备注</th>
+                    <th>IP</th>
                     <th>密钥</th>
-                    <th>最后活跃</th>
                     <th>管理</th>
                 </tr>
             </thead>
             <tbody>
                 {{range $server := .Servers}}
                 <tr>
-                    <td>{{$server.ID}}</td>
+                    <td>{{$server.DisplayIndex}}</td>
                     <td>{{$server.Name}}</td>
+                    <td>{{$server.Host.IP}}</td>
                     <td>{{$server.Secret}}</td>
-                    <td>{{$server.LastActive}}</td>
                     <td>
                         <div class="ui mini icon buttons">
                             <button class="ui button" onclick="addOrEditServer({{$server.Marshal}})">

@@ -36,7 +36,10 @@ function showFormModal(modelSelector, formID, URL, getData) {
             form.children('.message').remove()
             btn.toggleClass('loading')
             const data = getData ? getData() : $(formID).serializeArray().reduce(function (obj, item) {
-                obj[item.name] = (item.name.endsWith('_id') || item.name === 'id' || item.name === 'ID' || item.name === 'RequestType' || item.name === 'RequestMethod') ? parseInt(item.value) : item.value;
+                obj[item.name] = (item.name.endsWith('_id') ||
+                    item.name === 'id' || item.name === 'ID' ||
+                    item.name === 'RequestType' || item.name === 'RequestMethod' ||
+                    item.name === 'DisplayIndex') ? parseInt(item.value) : item.value;
                 return obj;
             }, {});
             $.post(URL, JSON.stringify(data)).done(function (resp) {

@@ -11,8 +11,9 @@ import (
 // Server ..
 type Server struct {
 	Common
-	Name   string
-	Secret string `json:"-"`
+	Name         string
+	DisplayIndex int    // 展示权重，越大越靠前
+	Secret       string `json:"-"`
 
 	Host       *Host  `gorm:"-"`
 	State      *State `gorm:"-"`

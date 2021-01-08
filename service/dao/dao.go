@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"sort"
 	"sync"
 
 	"github.com/patrickmn/go-cache"
@@ -25,7 +26,8 @@ var Cache *cache.Cache
 var DB *gorm.DB
 
 // ServerList ..
-var ServerList map[string]*model.Server
+var ServerList map[uint64]*model.Server
+var SortedServerList []*model.Server
 
 // ServerLock ..
 var ServerLock sync.RWMutex
@@ -37,6 +39,17 @@ func init() {
 	if len(Version) > 7 {
 		Version = Version[:7]
 	}
+}
+
+func ReSortServer() {
+	SortedServerList = []*model.Server{}
+	for _, s := range ServerList {
+		SortedServerList = append(SortedServerList, s)
+	}
+
+	sort.SliceStable(SortedServerList, func(i, j int) bool {
+		return SortedServerList[i].DisplayIndex > SortedServerList[j].DisplayIndex
+	})
 }
 
 // SendCommand ..
