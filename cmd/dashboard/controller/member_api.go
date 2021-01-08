@@ -93,6 +93,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 	admin := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
 	var sf serverForm
 	var s model.Server
+	var isEdit bool
 	err := c.ShouldBindJSON(&sf)
 	if err == nil {
 		dao.ServerLock.Lock()
@@ -106,6 +107,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 			s.Secret = s.Secret[:10]
 			err = dao.DB.Create(&s).Error
 		} else {
+			isEdit = true
 			err = dao.DB.Save(&s).Error
 		}
 	}
@@ -116,8 +118,13 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		})
 		return
 	}
-	s.Host = &model.Host{}
-	s.State = &model.State{}
+	if isEdit {
+		s.Host = dao.ServerList[s.ID].Host
+		s.State = dao.ServerList[s.ID].State
+	} else {
+		s.Host = &model.Host{}
+		s.State = &model.State{}
+	}
 	dao.ServerList[s.ID] = &s
 	dao.ReSortServer()
 	c.JSON(http.StatusOK, model.Response{
