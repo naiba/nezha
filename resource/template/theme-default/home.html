@@ -104,7 +104,8 @@
         },
         mounted() {
             $('.yellow.info.icon').popup({
-                popup: '.ui.content.popup'
+                popup: '.ui.content.popup',
+                exclusive: true,
             });
         },
         methods: {
@@ -172,7 +173,7 @@
     ws.onmessage = function (evt) {
         const oldServers = statusCards.servers
         statusCards.servers = JSON.parse(evt.data)
-        for (let i = 0; i <  statusCards.servers.length; i++) {
+        for (let i = 0; i < statusCards.servers.length; i++) {
             const ns = statusCards.servers[i];
             if (!ns.Host) ns.live = false
             else {
@@ -182,16 +183,6 @@
                 } else {
                     ns.live = true
                 }
-            }
-            for (let j = 0; j < oldServers.length; j++) {
-                const os = oldServers[j];
-                if (ns.ID == os.ID) {
-                    break
-                }
-                // 新加入的仔
-                $('#' + ns.ID + ' .yellow.info.icon').popup({
-                    popup: '.ui.content.popup'
-                });
             }
         }
     }
