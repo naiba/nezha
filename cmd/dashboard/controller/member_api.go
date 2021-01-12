@@ -87,6 +87,7 @@ type serverForm struct {
 	Name         string `binding:"required"`
 	DisplayIndex int
 	Secret       string
+	Tag          string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -102,6 +103,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Secret = sf.Secret
 		s.DisplayIndex = sf.DisplayIndex
 		s.ID = sf.ID
+		s.Tag = sf.Tag
 		if sf.ID == 0 {
 			s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
 			s.Secret = s.Secret[:10]

@@ -6,101 +6,110 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <div class="ui four stackable status cards">
-            <div v-for='server in servers' :id="server.ID" class="card">
-                <div class="content" v-if='server.Host'>
-                    <div class="header"><i :class="server.Host.CountryCode + ' flag'"></i><i
-                            v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
-                            v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
-                            v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
-                            v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name +
-                        (server.live?'':' [已离线]')#@
-                        <i class="yellow info circle icon"></i>
-                        <div class='ui content popup'>
-                            系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
-                                v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
-                            CPU：@#server.Host.CPU#@<br>
-                            硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br>
-                            内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br>
-                            交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br>
-                            流量：<i
-                                class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@<i
-                                class='arrow alternate circle up outline icon'></i>@#formatByteSize(server.State.NetOutTransfer)#@<br>
-                            启动：@# formatTimestamp(server.Host.BootTime) #@<br>
-                            版本：@#server.Host.Version#@<br>
-                        </div>
-                    </div>
-                    <div class="description">
-                        <div class="ui grid">
-                            <div class="three wide column">CPU</div>
-                            <div class="thirteen wide column">
-                                <div :class="formatPercent(server.live,server.State.CPU, 100).class">
-                                    <div class="bar" :style="formatPercent(server.live,server.State.CPU, 100).style">
-                                        <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="three wide column">内存</div>
-                            <div class="thirteen wide column">
-                                <div
-                                    :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
-                                    <div class="bar"
-                                        :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
-                                        <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="three wide column">交换</div>
-                            <div class="thirteen wide column">
-                                <div
-                                    :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
-                                    <div class="bar"
-                                        :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style">
-                                        <small>@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="three wide column">网络</div>
-                            <div class="thirteen wide column">
-                                <i class="arrow alternate circle down outline icon"></i>
-                                @#formatByteSize(server.State.NetInSpeed)#@/s
-                                <i class="arrow alternate circle up outline icon"></i>
-                                @#formatByteSize(server.State.NetOutSpeed)#@/s
-                            </div>
-                            <div class="three wide column">硬盘</div>
-                            <div class="thirteen wide column">
-                                <div
-                                    :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
-                                    <div class="bar"
-                                        :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
-                                        <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="three wide column">在线</div>
-                            <div class="thirteen wide column">
-                                <i class="clock icon"></i>@#secondToDate(server.State.Uptime)#@
+        <div id="app">
+
+            <div class="ui styled fluid accordion" v-for="group in groups">
+                <div class="active title"><i class="dropdown icon"></i>@#(group.Tag!==''?group.Tag:'默认')#@</div>
+                <div class="active content"><div class="ui four stackable status cards"> <div v-for='server in group.data' :id="server.ID" class="card">
+                    <div class="content" v-if='server.Host'>
+                        <div class="header"><i :class="server.Host.CountryCode + ' flag'"></i><i
+                                v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
+                                v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
+                                v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
+                                v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name +
+                            (server.live?'':' [已离线]')#@
+                            <i class="yellow info circle icon"></i>
+                            <div class='ui content popup'>
+                                系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
+                                    v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
+                                CPU：@#server.Host.CPU#@<br>
+                                硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br>
+                                内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br>
+                                交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br>
+                                流量：<i
+                                    class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@<i
+                                    class='arrow alternate circle up outline icon'></i>@#formatByteSize(server.State.NetOutTransfer)#@<br>
+                                启动：@# formatTimestamp(server.Host.BootTime) #@<br>
+                                版本：@#server.Host.Version#@<br>
                             </div>
                         </div>
+                        <div class="description">
+                            <div class="ui grid">
+                                <div class="three wide column">CPU</div>
+                                <div class="thirteen wide column">
+                                    <div :class="formatPercent(server.live,server.State.CPU, 100).class">
+                                        <div class="bar"
+                                             :style="formatPercent(server.live,server.State.CPU, 100).style">
+                                            <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="three wide column">内存</div>
+                                <div class="thirteen wide column">
+                                    <div
+                                            :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
+                                        <div class="bar"
+                                             :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
+                                            <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="three wide column">交换</div>
+                                <div class="thirteen wide column">
+                                    <div
+                                            :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
+                                        <div class="bar"
+                                             :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style">
+                                            <small>@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="three wide column">网络</div>
+                                <div class="thirteen wide column">
+                                    <i class="arrow alternate circle down outline icon"></i>
+                                    @#formatByteSize(server.State.NetInSpeed)#@/s
+                                    <i class="arrow alternate circle up outline icon"></i>
+                                    @#formatByteSize(server.State.NetOutSpeed)#@/s
+                                </div>
+                                <div class="three wide column">硬盘</div>
+                                <div class="thirteen wide column">
+                                    <div
+                                            :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
+                                        <div class="bar"
+                                             :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
+                                            <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="three wide column">在线</div>
+                                <div class="thirteen wide column">
+                                    <i class="clock icon"></i>@#secondToDate(server.State.Uptime)#@
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="content" v-else>
-                    <p>@#server.Name#@</p>
-                    <p>节点已离线</p>
-                </div>
+                    <div class="content" v-else>
+                        <p>@#server.Name#@</p>
+                        <p>节点已离线</p>
+                    </div>
+                </div></div></div>
             </div>
         </div>
     </div>
 </div>
 {{template "common/footer" .}}
 <script>
-    const initData = {{.Servers }};
+    const initData = {{.Servers}};
     var statusCards = new Vue({
-        el: 'div.status.cards',
+        el: '#app',
         delimiters: ['@#', '#@'],
         data: {
-            servers: initData,
+            data: initData,
+            groups:[],
             cache: [],
+        },
+        created() {
+            this.group()
         },
         mounted() {
             $('.yellow.info.icon').popup({
@@ -109,6 +118,10 @@
             });
         },
         methods: {
+            group() {
+                this.groups = groupingData(this.data, "Tag")
+                console.log(this.groups)
+            },
             formatPercent(live, used, total) {
                 const percent = live ? (parseInt(used / total * 100) || 0) : -1
                 if (!this.cache[percent]) {
@@ -159,6 +172,38 @@
             }
         }
     })
+    function groupingData(data, filed){
+        let map = {};
+
+        let dest = [];
+
+        data.forEach(item => {
+            if (!map[item[filed]]) {
+                dest.push({
+                    [filed]: item[filed],
+
+                    data: [item]
+
+                });
+
+                map[item[filed]] = item;
+
+            } else {
+                dest.forEach(dItem => {
+                    if (dItem[filed] == item[filed]) {
+                        dItem.data.push(item);
+
+                    }
+
+                });
+
+            }
+
+        })
+
+        return dest;
+
+    }
     const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
     const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
     ws.onopen = function (evt) {
@@ -185,6 +230,7 @@
                 }
             }
         }
+        statusCards.groups=groupingData(statusCards.servers,"Tag")
     }
     ws.onclose = function () {
         $.suiAlert({
@@ -195,5 +241,8 @@
             position: 'top-center',
         });
     }
+    $('.ui.accordion')
+        .accordion({"exclusive":false})
+    ;
 </script>
 {{end}}

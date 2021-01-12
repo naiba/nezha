@@ -14,10 +14,10 @@ type Server struct {
 	Name         string
 	DisplayIndex int    // 展示权重，越大越靠前
 	Secret       string `json:"-"`
-
-	Host       *Host  `gorm:"-"`
-	State      *State `gorm:"-"`
-	LastActive time.Time
+	Tag          string
+	Host         *Host  `gorm:"-"`
+	State        *State `gorm:"-"`
+	LastActive   time.Time
 
 	Stream      pb.NezhaService_HeartbeatServer `gorm:"-" json:"-"`
 	StreamClose chan<- error                    `gorm:"-" json:"-"`
