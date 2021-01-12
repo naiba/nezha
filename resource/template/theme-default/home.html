@@ -7,13 +7,10 @@
 <div class="nb-container">
     <div class="ui container">
         <div id="app">
-            <div class="ui" v-for="group in groups" >
-                <br>
-                <div class="ui horizontal divider">
-                    @#group.Tag#@
-                </div>
 
-                <div class="ui four stackable status cards"> <div v-for='server in group.data' :id="server.ID" class="card">
+            <div class="ui styled fluid accordion" v-for="group in groups">
+                <div class="active title"><i class="dropdown icon"></i>@#(group.Tag!==''?group.Tag:'默认')#@</div>
+                <div class="active content"><div class="ui four stackable status cards"> <div v-for='server in group.data' :id="server.ID" class="card">
                     <div class="content" v-if='server.Host'>
                         <div class="header"><i :class="server.Host.CountryCode + ' flag'"></i><i
                                 v-if='server.Host.Platform == "darwin"' class="apple icon"></i><i
@@ -95,8 +92,7 @@
                         <p>@#server.Name#@</p>
                         <p>节点已离线</p>
                     </div>
-                </div></div>
-
+                </div></div></div>
             </div>
         </div>
     </div>
@@ -104,7 +100,6 @@
 {{template "common/footer" .}}
 <script>
     const initData = {{.Servers}};
-
     var statusCards = new Vue({
         el: '#app',
         delimiters: ['@#', '#@'],
@@ -124,40 +119,8 @@
         },
         methods: {
             group() {
-                this.groups = this.groupingData(this.data, "Tag")
+                this.groups = groupingData(this.data, "Tag")
                 console.log(this.groups)
-            },
-            groupingData(data, filed) {
-                let map = {};
-
-                let dest = [];
-
-                data.forEach(item => {
-                    if (!map[item[filed]]) {
-                        dest.push({
-                            [filed]: item[filed],
-
-                            data: [item]
-
-                        });
-
-                        map[item[filed]] = item;
-
-                    } else {
-                        dest.forEach(dItem => {
-                            if (dItem[filed] == item[filed]) {
-                                dItem.data.push(item);
-
-                            }
-
-                        });
-
-                    }
-
-                })
-
-                return dest;
-
             },
             formatPercent(live, used, total) {
                 const percent = live ? (parseInt(used / total * 100) || 0) : -1
@@ -209,6 +172,38 @@
             }
         }
     })
+    function groupingData(data, filed){
+        let map = {};
+
+        let dest = [];
+
+        data.forEach(item => {
+            if (!map[item[filed]]) {
+                dest.push({
+                    [filed]: item[filed],
+
+                    data: [item]
+
+                });
+
+                map[item[filed]] = item;
+
+            } else {
+                dest.forEach(dItem => {
+                    if (dItem[filed] == item[filed]) {
+                        dItem.data.push(item);
+
+                    }
+
+                });
+
+            }
+
+        })
+
+        return dest;
+
+    }
     const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
     const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
     ws.onopen = function (evt) {
@@ -235,6 +230,7 @@
                 }
             }
         }
+        statusCards.groups=groupingData(statusCards.servers,"Tag")
     }
     ws.onclose = function () {
         $.suiAlert({
@@ -245,5 +241,8 @@
             position: 'top-center',
         });
     }
+    $('.ui.accordion')
+        .accordion({"exclusive":false})
+    ;
 </script>
 {{end}}
