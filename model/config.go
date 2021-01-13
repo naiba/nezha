@@ -10,7 +10,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// Config ..
 type Config struct {
 	Debug bool
 	Site  struct {
@@ -24,7 +23,8 @@ type Config struct {
 		ClientID     string
 		ClientSecret string
 	}
-	HTTPPort uint
+	HTTPPort                   uint
+	EnableIPChangeNotification bool
 
 	v *viper.Viper
 }

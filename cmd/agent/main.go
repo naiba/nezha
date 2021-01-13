@@ -166,6 +166,7 @@ func receiveCommand(hc pb.NezhaService_HeartbeatClient) error {
 }
 
 func reportState() {
+	var lastReportHostInfo time.Time
 	var err error
 	defer log.Printf("reportState exit %v => %v", time.Now(), err)
 	for {
@@ -175,6 +176,10 @@ func reportState() {
 			if err != nil {
 				log.Printf("reportState error %v", err)
 				time.Sleep(delayWhenError)
+			}
+			if lastReportHostInfo.Before(time.Now().Add(-10 * time.Minute)) {
+				lastReportHostInfo = time.Now()
+				client.Register(ctx, monitor.GetHost().PB())
 			}
 		}
 	}

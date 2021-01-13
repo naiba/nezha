@@ -2,11 +2,13 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
+	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -60,6 +62,14 @@ func (s *NezhaHandler) Register(c context.Context, r *pb.Host) (*pb.Receipt, err
 	host := model.PB2Host(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
+	if dao.ServerList[clientID].Host != nil &&
+		dao.ServerList[clientID].Host.IP != "" &&
+		host.IP != "" &&
+		dao.ServerList[clientID].Host.IP != host.IP {
+		alertmanager.SendNotification(fmt.Sprintf(
+			"服务器：%s IP变更提醒，旧IP：%s，新IP：%s。",
+			dao.ServerList[clientID].Name, dao.ServerList[clientID].Host.IP, host.IP))
+	}
 	dao.ServerList[clientID].Host = &host
 	return &pb.Receipt{Proced: true}, nil
 }

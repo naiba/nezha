@@ -158,7 +158,7 @@ func checkStatus() {
 				}
 				if flag {
 					message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，%s，逮到咯，快去看看！", alert.Name, server.Name, server.Host.IP, desc)
-					go sendNotification(message)
+					go SendNotification(message)
 				}
 			}
 			// 清理旧数据
@@ -169,7 +169,7 @@ func checkStatus() {
 	}
 }
 
-func sendNotification(desc string) {
+func SendNotification(desc string) {
 	notificationsLock.RLock()
 	defer notificationsLock.RUnlock()
 	for i := 0; i < len(notifications); i++ {

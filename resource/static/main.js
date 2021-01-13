@@ -106,6 +106,8 @@ function addOrEditServer(server) {
     modal.find('.positive.button').html(server ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>')
     modal.find('input[name=id]').val(server ? server.ID : null)
     modal.find('input[name=name]').val(server ? server.Name : null)
+    modal.find('input[name=Tag]').val(server ? server.Tag : null)
+    modal.find('input[name=DisplayIndex]').val(server ? server.DisplayIndex : null)
     if (server) {
         modal.find('.secret.field').attr('style', '')
         modal.find('input[name=secret]').val(server.Secret)
