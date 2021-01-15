@@ -118,7 +118,7 @@ func (r *AlertRule) Check(points [][]interface{}) (int, string) {
 				fail++
 			}
 		}
-		if fail/total > 0.3 {
+		if fail/total > 0.5 {
 			count++
 			dist.WriteString(fmt.Sprintf("%+v\n", r.Rules[i]))
 		}

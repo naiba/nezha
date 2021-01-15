@@ -5,13 +5,14 @@
             <img src="/static/logo.png">
         </div>
         <a class="item{{if eq .MatchedPath " /"}} active{{end}}" href="/">首页</a>
+        <a class="item{{if eq .MatchedPath " /service"}} active{{end}}" href="/service">服务状态</a>
         {{if .Admin}}
         <a class="item{{if eq .MatchedPath " /server"}} active{{end}}" href="/server">服务器</a>
+        <a class="item{{if eq .MatchedPath " /monitor"}} active{{end}}" href="/monitor">监控</a>
         <a class="item{{if eq .MatchedPath " /notification"}} active{{end}}" href="/notification">通知</a>
         <a class="item{{if eq .MatchedPath " /setting"}} active{{end}}" href="/setting">设置</a>
         {{end}}
         <div class="right menu">
-            <a class="item" href="https://github.com/naiba/nezha/issues" target="_blank">反馈</a>
             <div class="item">
                 {{if .Admin}}
                 <div class="ui simple dropdown">

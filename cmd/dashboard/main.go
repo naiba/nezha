@@ -34,14 +34,16 @@ func init() {
 }
 
 func initDB() {
-	dao.DB.AutoMigrate(model.Server{}, model.User{}, model.Notification{}, model.AlertRule{})
+	dao.DB.AutoMigrate(model.Server{}, model.User{},
+		model.Notification{}, model.AlertRule{}, model.Monitor{},
+		model.MonitorHistory{})
 	// load cache
 	var servers []model.Server
 	dao.DB.Find(&servers)
 	for _, s := range servers {
 		innerS := s
 		innerS.Host = &model.Host{}
-		innerS.State = &model.State{}
+		innerS.State = &model.HostState{}
 		dao.ServerList[innerS.ID] = &innerS
 	}
 	dao.ReSortServer()
@@ -50,5 +52,6 @@ func initDB() {
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(5555)
+	go rpc.DispatchTask(time.Minute * 10)
 	alertmanager.Start()
 }

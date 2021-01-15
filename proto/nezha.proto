@@ -1,11 +1,13 @@
 syntax = "proto3";
+option go_package = "proto";
 
 package proto;
 
 service NezhaService {
-    rpc Heartbeat(Beat)returns(stream Command){}
-    rpc ReportState(State)returns(Receipt){}
-    rpc Register(Host)returns(Receipt){}
+    rpc ReportSystemState(State)returns(Receipt){}
+    rpc ReportSystemInfo(Host)returns(Receipt){}
+    rpc ReportTask(TaskResult)returns(Receipt){}
+    rpc RequestTask(Host)returns(stream Task){}
 }
 
 message Host {
@@ -35,15 +37,20 @@ message State {
     uint64 uptime = 10;
 }
 
+message Task {
+    uint64 id = 1;
+    uint64 type = 2;
+    string data = 3;
+}
+
+message TaskResult {
+    uint64 id = 1;
+    uint64 type = 2;
+    float delay = 3;
+    string data = 4;
+    bool successful = 5;
+}
+
 message Receipt{
     bool proced = 1;
-}
-
-message Beat {
-    string timestamp = 1;
-}
-
-message Command {
-    uint64 type = 1;
-    string data = 2;
 }

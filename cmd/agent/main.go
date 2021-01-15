@@ -2,13 +2,18 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"io"
 	"log"
+	"net"
+	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/blang/semver"
+	"github.com/genkiroid/cert"
+	"github.com/go-ping/ping"
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
@@ -105,7 +110,6 @@ func run(cmd *cobra.Command, args []string) {
 
 	var err error
 	var conn *grpc.ClientConn
-	var hc pb.NezhaService_HeartbeatClient
 
 	retry := func() {
 		log.Println("Error to close connection ...")
@@ -125,43 +129,90 @@ func run(cmd *cobra.Command, args []string) {
 		}
 		client = pb.NewNezhaServiceClient(conn)
 		// 第一步注册
-		_, err = client.Register(ctx, monitor.GetHost().PB())
+		_, err = client.ReportSystemInfo(ctx, monitor.GetHost().PB())
 		if err != nil {
-			log.Printf("client.Register err: %v", err)
+			log.Printf("client.ReportSystemInfo err: %v", err)
 			retry()
 			continue
 		}
-		// 心跳接收控制命令
-		hc, err = client.Heartbeat(ctx, &pb.Beat{
-			Timestamp: fmt.Sprintf("%v", time.Now()),
-		})
+		// 执行 Task
+		tasks, err := client.RequestTask(ctx, monitor.GetHost().PB())
 		if err != nil {
-			log.Printf("client.Heartbeat err: %v", err)
+			log.Printf("client.RequestTask err: %v", err)
 			retry()
 			continue
 		}
-		err = receiveCommand(hc)
+		err = receiveTasks(tasks)
 		log.Printf("receiveCommand exit to main: %v", err)
 		retry()
 	}
 }
 
-func receiveCommand(hc pb.NezhaService_HeartbeatClient) error {
+func receiveTasks(tasks pb.NezhaService_RequestTaskClient) error {
 	var err error
-	var action *pb.Command
-	defer log.Printf("receiveCommand exit %v %v => %v", time.Now(), action, err)
+	var task *pb.Task
+	defer log.Printf("receiveTasks exit %v %v => %v", time.Now(), task, err)
 	for {
-		action, err = hc.Recv()
-		if err == io.EOF {
-			return nil
-		}
+		task, err = tasks.Recv()
 		if err != nil {
 			return err
 		}
-		switch action.GetType() {
+		var result pb.TaskResult
+		result.Id = task.GetId()
+		switch task.GetType() {
+		case model.MonitorTypeHTTPGET:
+			start := time.Now()
+			resp, err := http.Get(task.GetData())
+			if err == nil {
+				result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+				if resp.StatusCode > 299 || resp.StatusCode < 200 {
+					err = errors.New("\n应用错误：" + resp.Status)
+				}
+			}
+			var certs cert.Certs
+			if err == nil {
+				if strings.HasPrefix(task.GetData(), "https://") {
+					certs, err = cert.NewCerts([]string{task.GetData()})
+				}
+			}
+			if err == nil {
+				if len(certs) == 0 {
+					err = errors.New("\n获取SSL证书错误：未获取到证书")
+				}
+			}
+			if err == nil {
+				result.Data = certs[0].Issuer
+				result.Successful = true
+			} else {
+				result.Data = err.Error()
+			}
+		case model.MonitorTypeICMPPing:
+			pinger, err := ping.NewPinger(task.GetData())
+			if err == nil {
+				pinger.Count = 10
+				err = pinger.Run() // Blocks until finished.
+			}
+			if err == nil {
+				stat := pinger.Statistics()
+				result.Delay = float32(stat.AvgRtt.Microseconds()) / 1000.0
+				result.Successful = true
+			} else {
+				result.Data = err.Error()
+			}
+		case model.MonitorTypeTCPPing:
+			start := time.Now()
+			conn, err := net.DialTimeout("tcp", task.GetData(), time.Second*10)
+			if err == nil {
+				conn.Close()
+				result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+				result.Successful = true
+			} else {
+				result.Data = err.Error()
+			}
 		default:
-			log.Printf("Unknown action: %v", action)
+			log.Printf("Unknown action: %v", task)
 		}
+		client.ReportTask(ctx, &result)
 	}
 }
 
@@ -172,14 +223,14 @@ func reportState() {
 	for {
 		if client != nil {
 			monitor.TrackNetworkSpeed()
-			_, err = client.ReportState(ctx, monitor.GetState(dao.ReportDelay).PB())
+			_, err = client.ReportSystemState(ctx, monitor.GetState(dao.ReportDelay).PB())
 			if err != nil {
 				log.Printf("reportState error %v", err)
 				time.Sleep(delayWhenError)
 			}
 			if lastReportHostInfo.Before(time.Now().Add(-10 * time.Minute)) {
 				lastReportHostInfo = time.Now()
-				client.Register(ctx, monitor.GetHost().PB())
+				client.ReportSystemInfo(ctx, monitor.GetHost().PB())
 			}
 		}
 	}

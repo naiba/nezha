@@ -26,7 +26,6 @@ type ipDotSbGeoIP struct {
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
 
-// GetHost ..
 func GetHost() *model.Host {
 	hi, _ := host.Info()
 	var cpus []string
@@ -60,8 +59,7 @@ func GetHost() *model.Host {
 	}
 }
 
-// GetState ..
-func GetState(delay int64) *model.State {
+func GetState(delay int64) *model.HostState {
 	hi, _ := host.Info()
 	// Memory
 	mv, _ := mem.VirtualMemory()
@@ -75,7 +73,7 @@ func GetState(delay int64) *model.State {
 	// Disk
 	u, _ := disk.Usage("/")
 
-	return &model.State{
+	return &model.HostState{
 		CPU:            cpuPercent,
 		MemUsed:        mv.Used,
 		SwapUsed:       ms.Used,
@@ -88,7 +86,6 @@ func GetState(delay int64) *model.State {
 	}
 }
 
-// TrackNetworkSpeed ..
 func TrackNetworkSpeed() {
 	var innerNetInTransfer, innerNetOutTransfer uint64
 	nc, err := net.IOCounters(false)

@@ -8,7 +8,6 @@ import (
 	"github.com/naiba/nezha/model"
 )
 
-// ErrInfo ..
 type ErrInfo struct {
 	Code  uint64
 	Title string
@@ -17,7 +16,6 @@ type ErrInfo struct {
 	Btn   string
 }
 
-// ShowErrorPage ..
 func ShowErrorPage(c *gin.Context, i ErrInfo, isPage bool) {
 	if isPage {
 		c.HTML(http.StatusOK, "dashboard/error", CommonEnvironment(c, gin.H{

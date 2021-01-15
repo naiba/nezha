@@ -11,7 +11,6 @@ import (
 	"github.com/naiba/nezha/service/dao"
 )
 
-// AuthorizeOption ..
 type AuthorizeOption struct {
 	Guest    bool
 	Member   bool
@@ -21,7 +20,6 @@ type AuthorizeOption struct {
 	Btn      string
 }
 
-// Authorize ..
 func Authorize(opt AuthorizeOption) func(*gin.Context) {
 	return func(c *gin.Context) {
 		token, err := c.Cookie(dao.Conf.Site.CookieName)

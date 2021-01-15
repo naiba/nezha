@@ -10,7 +10,6 @@ import (
 	"github.com/naiba/nezha/service/dao"
 )
 
-// CommonEnvironment ..
 func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	data["MatchedPath"] = c.MustGet("MatchedPath")
 	data["Version"] = dao.Version
@@ -27,7 +26,6 @@ func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	return data
 }
 
-// RecordPath ..
 func RecordPath(c *gin.Context) {
 	url := c.Request.URL.String()
 	for _, p := range c.Params {

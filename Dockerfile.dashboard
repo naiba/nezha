@@ -3,7 +3,7 @@ RUN apk --no-cache --no-progress add \
     gcc git musl-dev
 WORKDIR /dashboard
 COPY . .
-RUN cd cmd/dashboard && go build -o app -ldflags="-s -w -X github.com/naiba/nezha/service/dao.Version=$(git rev-parse HEAD)"
+RUN cd cmd/dashboard && go build -o app -ldflags="-s -w"
 
 FROM alpine:latest
 RUN apk --no-cache --no-progress add \

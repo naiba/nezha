@@ -33,6 +33,7 @@ func (ma *memberAPI) serve() {
 
 	mr.POST("/logout", ma.logout)
 	mr.POST("/server", ma.addOrEditServer)
+	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -64,6 +65,8 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		if err == nil {
 			alertmanager.OnDeleteNotification(id)
 		}
+	case "monitor":
+		err = dao.DB.Delete(&model.Monitor{}, "id = ?", id).Error
 	case "alert-rule":
 		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
 		if err == nil {
@@ -125,10 +128,46 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.State = dao.ServerList[s.ID].State
 	} else {
 		s.Host = &model.Host{}
-		s.State = &model.State{}
+		s.State = &model.HostState{}
 	}
 	dao.ServerList[s.ID] = &s
 	dao.ReSortServer()
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type monitorForm struct {
+	ID     uint64
+	Name   string
+	Target string
+	Type   uint8
+}
+
+func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
+	var mf monitorForm
+	var m model.Monitor
+	err := c.ShouldBindJSON(&mf)
+	if err == nil {
+		m.Name = mf.Name
+		m.Target = mf.Target
+		m.Type = mf.Type
+		m.ID = mf.ID
+	}
+	if err == nil {
+		if m.ID == 0 {
+			err = dao.DB.Create(&m).Error
+		} else {
+			err = dao.DB.Save(&m).Error
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

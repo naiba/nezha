@@ -13,7 +13,6 @@ import (
 	"github.com/naiba/nezha/service/dao"
 )
 
-// ServeWeb ..
 func ServeWeb(port uint) {
 	gin.SetMode(gin.ReleaseMode)
 	if dao.Conf.Debug {
@@ -42,6 +41,35 @@ func ServeWeb(port uint) {
 		},
 		"ts": func(s string) string {
 			return strings.TrimSpace(s)
+		},
+		"divU64": func(a, b uint64) float32 {
+			if b == 0 {
+				if a > 0 {
+					return 100
+				}
+				return 0
+			}
+			return float32(a) / float32(b) * 100
+		},
+		"div": func(a, b int) float32 {
+			if b == 0 {
+				if a > 0 {
+					return 100
+				}
+				return 0
+			}
+			return float32(a) / float32(b) * 100
+		},
+		"addU64": func(a, b uint64) uint64 {
+			return a + b
+		},
+		"add": func(a, b int) int {
+			return a + b
+		},
+		"dayBefore": func(i int) string {
+			year, month, day := time.Now().Date()
+			today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+			return today.AddDate(0, 0, i-29).Format("1月2号")
 		},
 	})
 	r.Static("/static", "resource/static")

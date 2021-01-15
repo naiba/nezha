@@ -20,7 +20,62 @@ func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
 	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
 	cr.GET("/", cp.home)
+	cr.GET("/service", cp.service)
 	cr.GET("/ws", cp.ws)
+}
+
+type ServiceItem struct {
+	Monitor   model.Monitor
+	TotalUp   uint64
+	TotalDown uint64
+	Delay     *[30]float32
+	Up        *[30]int
+	Down      *[30]int
+}
+
+func (p *commonPage) service(c *gin.Context) {
+	var ms []model.Monitor
+	dao.DB.Find(&ms)
+	year, month, day := time.Now().Date()
+	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+	var mhs []model.MonitorHistory
+	dao.DB.Where("created_at >= ?", today.AddDate(0, 0, -29)).Find(&mhs)
+
+	msm := make(map[uint64]*ServiceItem)
+	for i := 0; i < len(ms); i++ {
+		msm[ms[i].ID] = &ServiceItem{
+			Monitor: ms[i],
+			Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}
+	}
+
+	// 整合数据
+	for i := 0; i < len(mhs); i++ {
+		dayIndex := 29
+		if mhs[i].CreatedAt.Before(today) {
+			dayIndex = 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
+		}
+		if mhs[i].Successful {
+			msm[mhs[i].MonitorID].TotalUp++
+			msm[mhs[i].MonitorID].Delay[dayIndex] = (msm[mhs[i].MonitorID].Delay[dayIndex]*float32(msm[mhs[i].MonitorID].Up[dayIndex]) + mhs[i].Delay) / float32(msm[mhs[i].MonitorID].Up[dayIndex]+1)
+			msm[mhs[i].MonitorID].Up[dayIndex]++
+		} else {
+			msm[mhs[i].MonitorID].TotalDown++
+			msm[mhs[i].MonitorID].Down[dayIndex]++
+		}
+	}
+
+	u, ok := c.Get(model.CtxKeyAuthorizedUser)
+	data := mygin.CommonEnvironment(c, gin.H{
+		"Title":    "服务状态",
+		"Services": msm,
+	})
+	if ok {
+		data["Admin"] = u
+	}
+	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", data)
 }
 
 func (cp *commonPage) home(c *gin.Context) {

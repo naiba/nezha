@@ -39,7 +39,7 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 obj[item.name] = (item.name.endsWith('_id') ||
                     item.name === 'id' || item.name === 'ID' ||
                     item.name === 'RequestType' || item.name === 'RequestMethod' ||
-                    item.name === 'DisplayIndex') ? parseInt(item.value) : item.value;
+                    item.name === 'DisplayIndex' || item.name === 'Type') ? parseInt(item.value) : item.value;
                 return obj;
             }, {});
             $.post(URL, JSON.stringify(data)).done(function (resp) {
@@ -116,6 +116,17 @@ function addOrEditServer(server) {
         modal.find('input[name=secret]').val('')
     }
     showFormModal('.server.modal', '#serverForm', '/api/server')
+}
+
+function addOrEditMonitor(monitor) {
+    const modal = $('.monitor.modal')
+    modal.children('.header').text((monitor ? '修改' : '添加') + '监控')
+    modal.find('.positive.button').html(monitor ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>')
+    modal.find('input[name=ID]').val(monitor ? monitor.ID : null)
+    modal.find('input[name=Name]').val(monitor ? monitor.Name : null)
+    modal.find('input[name=Target]').val(monitor ? monitor.Target : null)
+    modal.find('select[name=Type]').val(monitor ? monitor.Type : 1)
+    showFormModal('.monitor.modal', '#monitorForm', '/api/monitor')
 }
 
 function deleteRequest(api) {

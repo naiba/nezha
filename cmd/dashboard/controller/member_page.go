@@ -23,6 +23,7 @@ func (mp *memberPage) serve() {
 		Redirect: "/login",
 	}))
 	mr.GET("/server", mp.server)
+	mr.GET("/monitor", mp.monitor)
 	mr.GET("/notification", mp.notification)
 	mr.GET("/setting", mp.setting)
 }
@@ -33,6 +34,15 @@ func (mp *memberPage) server(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard/server", mygin.CommonEnvironment(c, gin.H{
 		"Title":   "服务器管理",
 		"Servers": dao.SortedServerList,
+	}))
+}
+
+func (mp *memberPage) monitor(c *gin.Context) {
+	var monitors []model.Monitor
+	dao.DB.Find(&monitors)
+	c.HTML(http.StatusOK, "dashboard/monitor", mygin.CommonEnvironment(c, gin.H{
+		"Title":    "服务监控",
+		"Monitors": monitors,
 	}))
 }
 

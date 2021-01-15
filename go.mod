@@ -6,7 +6,9 @@ require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/fsnotify/fsnotify v1.4.9
+	github.com/genkiroid/cert v0.0.0-20191007122723-897560fbbe50
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-ping/ping v0.0.0-20201115131931-3300c582a663
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2

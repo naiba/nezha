@@ -10,23 +10,19 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// AuthHandler ..
 type AuthHandler struct {
 	ClientID     string
 	ClientSecret string
 }
 
-// GetRequestMetadata ..
 func (a *AuthHandler) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	return map[string]string{"client_id": a.ClientID, "client_secret": a.ClientSecret}, nil
 }
 
-// RequireTransportSecurity ..
 func (a *AuthHandler) RequireTransportSecurity() bool {
 	return !dao.Conf.Debug
 }
 
-// Check ..
 func (a *AuthHandler) Check(ctx context.Context) (clientID uint64, err error) {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

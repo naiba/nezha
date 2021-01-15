@@ -29,7 +29,6 @@ type Config struct {
 	v *viper.Viper
 }
 
-// ReadInConfig ..
 func (c *Config) Read(path string) error {
 	c.v = viper.New()
 	c.v.SetConfigFile(path)
