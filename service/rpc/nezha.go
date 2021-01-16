@@ -87,7 +87,8 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	host := model.PB2Host(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	if dao.ServerList[clientID].Host != nil &&
+	if dao.Conf.EnableIPChangeNotification &&
+		dao.ServerList[clientID].Host != nil &&
 		dao.ServerList[clientID].Host.IP != "" &&
 		host.IP != "" &&
 		dao.ServerList[clientID].Host.IP != host.IP {

@@ -71,6 +71,30 @@ func ServeWeb(port uint) {
 			today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
 			return today.AddDate(0, 0, i-29).Format("1月2号")
 		},
+		"className": func(percent float32) string {
+			if percent == 0 {
+				return ""
+			}
+			if percent > 95 {
+				return "good"
+			}
+			if percent > 80 {
+				return "warning"
+			}
+			return "danger"
+		},
+		"statusName": func(percent float32) string {
+			if percent == 0 {
+				return "无数据"
+			}
+			if percent > 95 {
+				return "良好"
+			}
+			if percent > 80 {
+				return "低可用"
+			}
+			return "故障"
+		},
 	})
 	r.Static("/static", "resource/static")
 	r.LoadHTMLGlob("resource/template/**/*")
