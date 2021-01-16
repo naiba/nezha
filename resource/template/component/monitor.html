@@ -10,7 +10,7 @@
             </div>
             <div class="field">
                 <label>目标</label>
-                <input type="text" name="Target" placeholder="https://t.tt,t.tt,t.tt:80">
+                <input type="text" name="Target" placeholder="HTTP(https://t.tt)｜Ping(t.tt)｜TCP(t.tt:80)">
             </div>
             <div class="field">
                 <label>类型</label>
@@ -21,6 +21,13 @@
                 </select>
             </div>
         </form>
+        <div class="ui warning message">
+            <p>
+                类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS 协议的会顺带监控SSL证书)；<br>
+                类型为 <b>ICMP-Ping</b> 时输入主机名/IP，不带端口；<br>
+                类型为 <b>TCP-Ping</b> 时输入主机名/IP + 端口号：example.com:22
+            </p>
+        </div>
     </div>
     <div class=" actions">
         <div class="ui negative button">取消</div>
