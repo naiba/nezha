@@ -1,10 +1,10 @@
 # 哪吒面板
 
-系统状态、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控，报警通知，被动接收，极省资源 64M 小鸡也能装 Agent。
+系统状态监控报警；API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控；极省资源，64M 服务器也能装 agent。
 
-|  哪吒面板    |   首页截图1   |   首页截图2   |
-| ---- | ---- | ---- |
-|   <img src="https://s3.ax1x.com/2020/12/08/DzHv6A.jpg" width="2333px" />   | ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)     | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
+|   首页截图1   |   首页截图2   |
+| ---- | ---- |
+|   ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)     | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
 
 \>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
 
@@ -26,8 +26,10 @@
     sudo ./nezha.sh
     ```
 
-## 使用说明
-### 自定义代码
+## 功能说明
+
+<details>
+  <summary>自定义代码</summary>
 
 可以去版权、改LOGO、加统计代码等等。
 
@@ -75,9 +77,12 @@
     }
     </style>
     ```
+</details>
 
-### 报警通知
 
+<details>
+    <summary>报警通知：CPU、内存、硬盘、带宽、流量实时监控。</summary>
+    
 #### 灵活通知方式
 
 `#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
@@ -132,11 +137,19 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - offline：不支持 Min/Max 参数
 - Duration：持续秒数，监控比较简陋，取持续时间内的 70 采样结果
 - Ignore: `{"1": true, "2":false}` 忽略此规则的服务器ID列表
+</details>
+
+
 ## 常见问题
 
-### 数据备份恢复
+<details>
+    <summary>数据备份恢复：数据迁移、备份恢复。</summary>
 
 数据储存在 `/opt/nezha` 文件夹中，迁移数据时打包这个文件夹，到新环境解压。然后执行一键脚本安装即可
+</details>
+
+<details>
+    <summary>反向代理配置：HTTPS、WebSocket（实时通道断开问题）</summary>
 
 ### 启用 HTTPS
 
@@ -172,6 +185,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
         websocket
     }
     ```
+</details>
 
 ## 社区文章
 
