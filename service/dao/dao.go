@@ -26,7 +26,7 @@ var SortedServerList []*model.Server
 
 var ServerLock sync.RWMutex
 
-var Version = "v0.2.1"
+var Version = "v0.2.2"
 
 func ReSortServer() {
 	SortedServerList = []*model.Server{}

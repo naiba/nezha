@@ -30,9 +30,10 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 				// 证书错误提醒
 				errMsg = r.GetData()
 			} else {
+				var oldSSLCert = strings.Split(last.Data, "|")
 				var splits = strings.Split(r.GetData(), "|")
 				// 证书变更提醒
-				if last.Data != "" && last.Data != splits[0] {
+				if last.Data != "" && oldSSLCert[0] != splits[0] {
 					errMsg = fmt.Sprintf(
 						"SSL证书变更，旧：%s，新：%s。",
 						last.Data, splits[0])
