@@ -3,29 +3,40 @@
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <div class="ui segment service-status">
-            {{range $service := .Services}}
-            <div class="ui grid">
-                <div class="three wide column">
-                    <p>{{$service.Monitor.Name}}</p>
-                    <p>30天在线率{{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%</p>
-                </div>
-                <div class="eleven wide column">
-                    {{range $i,$d := $service.Delay}}
-                    <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"
-                        data-tooltip="{{dayBefore $i}}，平均延迟:{{$d}}ms">
-                        <i class="delay"></i>
-                    </div>
-                    {{end}}
-                </div>
-                <div
-                    class="two wide column round {{className (div (index $service.Up 29) (add (index $service.Up 29) (index $service.Down 29)))}}">
-                    <i></i>
-                    {{statusName (div (index $service.Up 29) (add (index $service.Up 29) (index $service.Down 29)))}}
-                </div>
-            </div>
-            <div class="ui divider"></div>
-            {{end}}
+        <div class="service-status">
+
+            <table class="ui celled table">
+                <thead>
+                    <tr>
+                        <th class="ui center aligned">名称</th>
+                        <th class="ui center aligned">30天在线率</th>
+                        <th class="ui center aligned">详情</th>
+                        <th class="ui center aligned">状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $service := .Services}}
+                    <tr>
+                        <td class="ui center aligned">{{$service.Monitor.Name}}</td>
+                        <td class="ui center aligned">
+                            {{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%
+                        </td>
+                        <td class="ui center aligned">{{range $i,$d := $service.Delay}}
+                            <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"
+                                data-tooltip="{{dayBefore $i}}，平均延迟:{{float32f $d}}ms">
+                                <i class="delay"></i>
+                            </div> {{end}}
+                        </td>
+                        <td class="ui center aligned">
+                            <div
+                                class="round {{className (div (index $service.Up 29) (add (index $service.Up 29) (index $service.Down 29)))}}">
+                                <i></i>
+                                {{statusName (div (index $service.Up 29) (add (index $service.Up 29) (index $service.Down 29)))}}
+                            </div>
+                        </td>
+                    </tr> {{end}}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
