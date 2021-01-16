@@ -67,29 +67,20 @@ func (p *commonPage) service(c *gin.Context) {
 		}
 	}
 
-	u, ok := c.Get(model.CtxKeyAuthorizedUser)
-	data := mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
 		"Title":    "服务状态",
 		"Services": msm,
-	})
-	if ok {
-		data["Admin"] = u
-	}
-	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", data)
+	}))
 }
 
 func (cp *commonPage) home(c *gin.Context) {
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	data := gin.H{
+
+	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
 		"Servers":    dao.SortedServerList,
 		"CustomCode": dao.Conf.Site.CustomCode,
-	}
-	u, ok := c.Get(model.CtxKeyAuthorizedUser)
-	if ok {
-		data["Admin"] = u
-	}
-	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, data))
+	}))
 }
 
 var upgrader = websocket.Upgrader{}
