@@ -22,7 +22,6 @@
                                     +
                                     (server.live?'':' [已离线]')#@
                                     <i class="yellow info circle icon"></i>
-                                    <div class="ui divider" style="margin-bottom: 5px"></div>
                                     <div class='ui content popup' style="margin-bottom: 0">
                                         系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
                                             v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
@@ -36,6 +35,7 @@
                                         启动：@# formatTimestamp(server.Host.BootTime) #@<br>
                                         版本：@#server.Host.Version#@<br>
                                     </div>
+                                    <div class="ui divider" style="margin-bottom: 5px"></div>
                                 </div>
                                 <div class="description">
                                     <div class="ui grid">
