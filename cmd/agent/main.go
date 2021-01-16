@@ -147,79 +147,83 @@ func run(cmd *cobra.Command, args []string) {
 			continue
 		}
 		err = receiveTasks(tasks)
-		log.Printf("receiveCommand exit to main: %v", err)
+		log.Printf("receiveTasks exit to main: %v", err)
 		retry()
 	}
 }
 
 func receiveTasks(tasks pb.NezhaService_RequestTaskClient) error {
 	var err error
-	var task *pb.Task
-
-	defer log.Printf("receiveTasks exit %v %v => %v", time.Now(), task, err)
+	defer log.Printf("receiveTasks exit %v => %v", time.Now(), err)
 	for {
+		var task *pb.Task
 		task, err = tasks.Recv()
 		if err != nil {
 			return err
 		}
-		var result pb.TaskResult
-		result.Id = task.GetId()
-		result.Type = task.GetType()
-		switch task.GetType() {
-		case model.MonitorTypeHTTPGET:
-			start := time.Now()
-			resp, err := httpClient.Get(task.GetData())
-			if err == nil {
-				result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
-				if resp.StatusCode > 299 || resp.StatusCode < 200 {
-					err = errors.New("\n应用错误：" + resp.Status)
-				}
-			}
-			if err == nil {
-				if strings.HasPrefix(task.GetData(), "https://") {
-					c := cert.NewCert(task.GetData()[8:])
-					if c.Error != "" {
-						if strings.Contains(c.Error, "expired") {
-							result.Data = "SSL证书错误：证书已过期"
-						} else {
-							result.Data = "SSL证书错误：" + c.Error
-						}
-					} else {
-						result.Data = c.Issuer + "|" + c.NotAfter
-						result.Successful = true
-					}
-				}
-			} else {
-				result.Data = err.Error()
-			}
-		case model.MonitorTypeICMPPing:
-			pinger, err := ping.NewPinger(task.GetData())
-			if err == nil {
-				pinger.Count = 10
-				err = pinger.Run() // Blocks until finished.
-			}
-			if err == nil {
-				stat := pinger.Statistics()
-				result.Delay = float32(stat.AvgRtt.Microseconds()) / 1000.0
-				result.Successful = true
-			} else {
-				result.Data = err.Error()
-			}
-		case model.MonitorTypeTCPPing:
-			start := time.Now()
-			conn, err := net.DialTimeout("tcp", task.GetData(), time.Second*10)
-			if err == nil {
-				conn.Close()
-				result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
-				result.Successful = true
-			} else {
-				result.Data = err.Error()
-			}
-		default:
-			log.Printf("Unknown action: %v", task)
-		}
-		client.ReportTask(ctx, &result)
+		go doTask(task)
 	}
+}
+
+func doTask(task *pb.Task) {
+	var result pb.TaskResult
+	result.Id = task.GetId()
+	result.Type = task.GetType()
+	switch task.GetType() {
+	case model.MonitorTypeHTTPGET:
+		start := time.Now()
+		resp, err := httpClient.Get(task.GetData())
+		if err == nil {
+			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+			if resp.StatusCode > 299 || resp.StatusCode < 200 {
+				err = errors.New("\n应用错误：" + resp.Status)
+			}
+		}
+		if err == nil {
+			if strings.HasPrefix(task.GetData(), "https://") {
+				c := cert.NewCert(task.GetData()[8:])
+				if c.Error != "" {
+					if strings.Contains(c.Error, "expired") {
+						result.Data = "SSL证书错误：证书已过期"
+					} else {
+						result.Data = "SSL证书错误：" + c.Error
+					}
+				} else {
+					result.Data = c.Issuer + "|" + c.NotAfter
+					result.Successful = true
+				}
+			}
+		} else {
+			result.Data = err.Error()
+		}
+	case model.MonitorTypeICMPPing:
+		pinger, err := ping.NewPinger(task.GetData())
+		if err == nil {
+			pinger.Count = 10
+			pinger.Timeout = time.Second * 20
+			err = pinger.Run() // Blocks until finished.
+		}
+		if err == nil {
+			result.Delay = float32(pinger.Statistics().AvgRtt.Microseconds()) / 1000.0
+			result.Successful = true
+		} else {
+			result.Data = err.Error()
+		}
+	case model.MonitorTypeTCPPing:
+		start := time.Now()
+		conn, err := net.DialTimeout("tcp", task.GetData(), time.Second*10)
+		if err == nil {
+			conn.Write([]byte("ping\n"))
+			conn.Close()
+			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+			result.Successful = true
+		} else {
+			result.Data = err.Error()
+		}
+	default:
+		log.Printf("Unknown action: %v", task)
+	}
+	client.ReportTask(ctx, &result)
 }
 
 func reportState() {

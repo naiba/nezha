@@ -52,6 +52,6 @@ func initDB() {
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(5555)
-	go rpc.DispatchTask(time.Minute * 10)
+	go rpc.DispatchTask(time.Minute * 3)
 	alertmanager.Start()
 }
