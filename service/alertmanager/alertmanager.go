@@ -133,33 +133,8 @@ func checkStatus() {
 			// 发送通知
 			max, desc := alert.Check(alertsStore[alert.ID][server.ID])
 			if desc != "" {
-				nID := getNotificationHash(server, desc)
-				var flag bool
-				if cacheN, has := dao.Cache.Get(nID); has {
-					nHistory := cacheN.(NotificationHistory)
-					// 每次提醒都增加一倍等待时间，最后每天最多提醒一次
-					if time.Now().After(nHistory.Until) {
-						flag = true
-						nHistory.Duration *= 2
-						if nHistory.Duration > time.Hour*24 {
-							nHistory.Duration = time.Hour * 24
-						}
-						nHistory.Until = time.Now().Add(nHistory.Duration)
-						// 缓存有效期加 10 分钟
-						dao.Cache.Set(nID, nHistory, nHistory.Duration+time.Minute*10)
-					}
-				} else {
-					// 新提醒直接通知
-					flag = true
-					dao.Cache.Set(nID, NotificationHistory{
-						Duration: firstNotificationDelay,
-						Until:    time.Now().Add(firstNotificationDelay),
-					}, firstNotificationDelay+time.Minute*10)
-				}
-				if flag {
-					message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，%s，逮到咯，快去看看！", alert.Name, server.Name, server.Host.IP, desc)
-					go SendNotification(message)
-				}
+				message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，%s，逮到咯，快去看看！", alert.Name, server.Name, server.Host.IP, desc)
+				go SendNotification(message)
 			}
 			// 清理旧数据
 			if max > 0 && max < len(alertsStore[alert.ID][server.ID]) {
@@ -170,13 +145,39 @@ func checkStatus() {
 }
 
 func SendNotification(desc string) {
+	// 通知防骚扰策略
+	nID := hex.EncodeToString(md5.New().Sum([]byte(desc)))
+	var flag bool
+	if cacheN, has := dao.Cache.Get(nID); has {
+		nHistory := cacheN.(NotificationHistory)
+		// 每次提醒都增加一倍等待时间，最后每天最多提醒一次
+		if time.Now().After(nHistory.Until) {
+			flag = true
+			nHistory.Duration *= 2
+			if nHistory.Duration > time.Hour*24 {
+				nHistory.Duration = time.Hour * 24
+			}
+			nHistory.Until = time.Now().Add(nHistory.Duration)
+			// 缓存有效期加 10 分钟
+			dao.Cache.Set(nID, nHistory, nHistory.Duration+time.Minute*10)
+		}
+	} else {
+		// 新提醒直接通知
+		flag = true
+		dao.Cache.Set(nID, NotificationHistory{
+			Duration: firstNotificationDelay,
+			Until:    time.Now().Add(firstNotificationDelay),
+		}, firstNotificationDelay+time.Minute*10)
+	}
+
+	if !flag {
+		return
+	}
+
+	// 发出通知
 	notificationsLock.RLock()
 	defer notificationsLock.RUnlock()
 	for i := 0; i < len(notifications); i++ {
 		notifications[i].Send(desc)
 	}
-}
-
-func getNotificationHash(server *model.Server, desc string) string {
-	return hex.EncodeToString(md5.New().Sum([]byte(fmt.Sprintf("%d::%s", server.ID, desc))))
 }

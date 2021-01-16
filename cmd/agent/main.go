@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
@@ -50,6 +51,9 @@ var (
 	ctx            = context.Background()
 	delayWhenError = time.Second * 10
 	updateCh       = make(chan struct{}, 0)
+	httpClient     = &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}}
 )
 
 func doSelfUpdate() {
@@ -151,6 +155,7 @@ func run(cmd *cobra.Command, args []string) {
 func receiveTasks(tasks pb.NezhaService_RequestTaskClient) error {
 	var err error
 	var task *pb.Task
+
 	defer log.Printf("receiveTasks exit %v %v => %v", time.Now(), task, err)
 	for {
 		task, err = tasks.Recv()
@@ -159,30 +164,31 @@ func receiveTasks(tasks pb.NezhaService_RequestTaskClient) error {
 		}
 		var result pb.TaskResult
 		result.Id = task.GetId()
+		result.Type = task.GetType()
 		switch task.GetType() {
 		case model.MonitorTypeHTTPGET:
 			start := time.Now()
-			resp, err := http.Get(task.GetData())
+			resp, err := httpClient.Get(task.GetData())
 			if err == nil {
 				result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
 				if resp.StatusCode > 299 || resp.StatusCode < 200 {
 					err = errors.New("\n应用错误：" + resp.Status)
 				}
 			}
-			var certs cert.Certs
 			if err == nil {
 				if strings.HasPrefix(task.GetData(), "https://") {
-					certs, err = cert.NewCerts([]string{task.GetData()})
+					c := cert.NewCert(task.GetData()[8:])
+					if c.Error != "" {
+						if strings.Contains(c.Error, "expired") {
+							result.Data = "SSL证书错误：证书已过期"
+						} else {
+							result.Data = "SSL证书错误：" + c.Error
+						}
+					} else {
+						result.Data = c.Issuer + "|" + c.NotAfter
+						result.Successful = true
+					}
 				}
-			}
-			if err == nil {
-				if len(certs) == 0 {
-					err = errors.New("\n获取SSL证书错误：未获取到证书")
-				}
-			}
-			if err == nil {
-				result.Data = certs[0].Issuer
-				result.Successful = true
 			} else {
 				result.Data = err.Error()
 			}

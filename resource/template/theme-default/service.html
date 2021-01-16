@@ -8,7 +8,7 @@
             <div class="ui grid">
                 <div class="three wide column">
                     <p>{{$service.Monitor.Name}}</p>
-                    <p>30天在线率{{divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown)}}%</p>
+                    <p>30天在线率{{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%</p>
                 </div>
                 <div class="eleven wide column">
                     {{range $i,$d := $service.Delay}}

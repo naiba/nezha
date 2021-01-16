@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"time"
 
@@ -47,9 +46,7 @@ func DispatchTask(duration time.Duration) {
 				continue
 			}
 			hasAliveAgent = true
-			log.Println("DispatchTask 确认派发 >>>>>", i, index)
 			dao.SortedServerList[index].TaskStream.Send(tasks[i].PB())
-			log.Println("DispatchTask 确认派发 <<<<<", i, index)
 			index++
 		}
 		dao.ServerLock.RUnlock()

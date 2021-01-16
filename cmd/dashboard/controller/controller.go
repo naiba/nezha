@@ -42,12 +42,19 @@ func ServeWeb(port uint) {
 		"ts": func(s string) string {
 			return strings.TrimSpace(s)
 		},
+		"float32f": func(f float32) string {
+			return fmt.Sprintf("%.2f", f)
+		},
 		"divU64": func(a, b uint64) float32 {
 			if b == 0 {
 				if a > 0 {
 					return 100
 				}
 				return 0
+			}
+			if a == 0 {
+				// 这是从未在线的情况
+				return 1 / float32(b) * 100
 			}
 			return float32(a) / float32(b) * 100
 		},
@@ -57,6 +64,10 @@ func ServeWeb(port uint) {
 					return 100
 				}
 				return 0
+			}
+			if a == 0 {
+				// 这是从未在线的情况
+				return 1 / float32(b) * 100
 			}
 			return float32(a) / float32(b) * 100
 		},

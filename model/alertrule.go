@@ -18,9 +18,10 @@ type Rule struct {
 	// 指标类型，cpu、memory、swap、disk、net_in_speed、net_out_speed
 	// net_all_speed、transfer_in、transfer_out、transfer_all、offline
 	Type     string
-	Min      uint64 // 最小阈值 (百分比、字节 kb ÷ 1024)
-	Max      uint64 // 最大阈值 (百分比、字节 kb ÷ 1024)
-	Duration uint64 // 持续时间 (秒)
+	Min      uint64          // 最小阈值 (百分比、字节 kb ÷ 1024)
+	Max      uint64          // 最大阈值 (百分比、字节 kb ÷ 1024)
+	Duration uint64          // 持续时间 (秒)
+	Ignore   map[uint64]bool //忽略此规则的ID列表
 }
 
 func percentage(used, total uint64) uint64 {
@@ -30,7 +31,11 @@ func percentage(used, total uint64) uint64 {
 	return used * 100 / total
 }
 
+// Snapshot 未通过规则返回 struct{}{}, 通过返回 nil
 func (u *Rule) Snapshot(server *Server) interface{} {
+	if u.Ignore[server.ID] {
+		return nil
+	}
 	var src uint64
 	switch u.Type {
 	case "cpu":
@@ -72,9 +77,9 @@ func (u *Rule) Snapshot(server *Server) interface{} {
 type AlertRule struct {
 	Common
 	Name     string
-	Rules    []Rule `gorm:"-" json:"-"`
 	RulesRaw string
 	Enable   *bool
+	Rules    []Rule `gorm:"-" json:"-"`
 }
 
 func (r *AlertRule) BeforeSave(tx *gorm.DB) error {
