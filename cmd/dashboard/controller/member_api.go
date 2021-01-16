@@ -67,6 +67,9 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		}
 	case "monitor":
 		err = dao.DB.Delete(&model.Monitor{}, "id = ?", id).Error
+		if err == nil {
+			err = dao.DB.Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
+		}
 	case "alert-rule":
 		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
 		if err == nil {
