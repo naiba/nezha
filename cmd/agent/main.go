@@ -77,6 +77,10 @@ func doSelfUpdate() {
 	}
 }
 
+func init() {
+	cert.TimeoutSeconds = 30
+}
+
 func main() {
 	// 来自于 GoReleaser 的版本号
 	dao.Version = version
@@ -183,11 +187,7 @@ func doTask(task *pb.Task) {
 			if strings.HasPrefix(task.GetData(), "https://") {
 				c := cert.NewCert(task.GetData()[8:])
 				if c.Error != "" {
-					if strings.Contains(c.Error, "expired") {
-						result.Data = "SSL证书错误：证书已过期"
-					} else {
-						result.Data = "SSL证书错误：" + c.Error
-					}
+					result.Data = "SSL证书错误：" + c.Error
 				} else {
 					result.Data = c.Issuer + "|" + c.NotAfter
 					result.Successful = true

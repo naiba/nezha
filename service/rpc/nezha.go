@@ -23,20 +23,19 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 	}
 	if r.GetType() == model.MonitorTypeHTTPGET {
 		// SSL 证书报警
-		var last model.MonitorHistory
-		if err := dao.DB.Where("monitor_id = ?", r.GetId()).Order("id DESC").First(&last).Error; err == nil {
-			var errMsg string
-			if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
-				// 证书错误提醒
-				errMsg = r.GetData()
-			} else {
-				var oldSSLCert = strings.Split(last.Data, "|")
+		var errMsg string
+		if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
+			// 证书错误提醒
+			errMsg = r.GetData()
+		} else {
+			var last model.MonitorHistory
+			if err := dao.DB.Where("monitor_id = ? AND data NOT LIKE ?", r.GetId(), "SSL证书错误：%").Order("id DESC").First(&last).Error; err == nil {
 				var splits = strings.Split(r.GetData(), "|")
 				// 证书变更提醒
-				if last.Data != "" && oldSSLCert[0] != splits[0] {
+				if last.Data != "" && last.Data != r.GetData() {
 					errMsg = fmt.Sprintf(
-						"SSL证书变更，旧：%s，新：%s。",
-						last.Data, splits[0])
+						"SSL证书变更，旧：%s 过期，新：%s 过期。",
+						last.Data, r.GetData())
 				}
 				expires, err := time.Parse("2006-01-02 15:04:05 -0700 MST", splits[1])
 				// 证书过期提醒
@@ -46,11 +45,11 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 						expires.Format("2006-01-02 15:04:05"))
 				}
 			}
-			if errMsg != "" {
-				var monitor model.Monitor
-				dao.DB.First(&monitor, "id = ?", last.MonitorID)
-				alertmanager.SendNotification(fmt.Sprintf("服务监控：%s %s", monitor.Name, errMsg))
-			}
+		}
+		if errMsg != "" {
+			var monitor model.Monitor
+			dao.DB.First(&monitor, "id = ?", r.GetId())
+			alertmanager.SendNotification(fmt.Sprintf("服务监控：%s %s", monitor.Name, errMsg))
 		}
 	}
 	// 存入历史记录
