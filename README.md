@@ -29,9 +29,7 @@
 ## 功能说明
 
 <details>
-  <summary>自定义代码</summary>
-
-可以去版权、改LOGO、加统计代码等等。
+  <summary>自定义代码：去版权、改LOGO、改色调、加统计代码等。</summary>
 
 - 默认主题更改进度条颜色示例
 
@@ -139,6 +137,11 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 - Ignore: `{"1": true, "2":false}` 忽略此规则的服务器ID列表
 </details>
 
+<details>
+    <summary>服务监控：HTTP、SSL证书、ping、TCP 端口等。</summary>
+
+进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。
+</details>
 
 ## 常见问题
 
