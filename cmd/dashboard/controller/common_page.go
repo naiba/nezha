@@ -25,12 +25,14 @@ func (cp *commonPage) serve() {
 }
 
 type ServiceItem struct {
-	Monitor   model.Monitor
-	TotalUp   uint64
-	TotalDown uint64
-	Delay     *[30]float32
-	Up        *[30]int
-	Down      *[30]int
+	Monitor     model.Monitor
+	TotalUp     uint64
+	TotalDown   uint64
+	CurrentUp   uint64
+	CurrentDown uint64
+	Delay       *[30]float32
+	Up          *[30]int
+	Down        *[30]int
 }
 
 func (p *commonPage) service(c *gin.Context) {
@@ -52,10 +54,13 @@ func (p *commonPage) service(c *gin.Context) {
 	}
 
 	// 整合数据
+	todayStatus := make(map[uint64][]bool)
 	for i := 0; i < len(mhs); i++ {
 		dayIndex := 29
 		if mhs[i].CreatedAt.Before(today) {
 			dayIndex = 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
+		} else {
+			todayStatus[mhs[i].MonitorID] = append(todayStatus[mhs[i].MonitorID], mhs[i].Successful)
 		}
 		if mhs[i].Successful {
 			msm[mhs[i].MonitorID].TotalUp++
@@ -64,6 +69,17 @@ func (p *commonPage) service(c *gin.Context) {
 		} else {
 			msm[mhs[i].MonitorID].TotalDown++
 			msm[mhs[i].MonitorID].Down[dayIndex]++
+		}
+	}
+
+	// 当日最后 20 个采样作为当前状态
+	for _, m := range msm {
+		for i := len(todayStatus[m.Monitor.ID]) - 1; i >= 0 && i >= (len(todayStatus[m.Monitor.ID])-1-20); i-- {
+			if todayStatus[m.Monitor.ID][i] {
+				m.CurrentUp++
+			} else {
+				m.CurrentDown++
+			}
 		}
 	}
 

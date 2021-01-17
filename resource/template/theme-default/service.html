@@ -24,15 +24,11 @@
                         <td class="ui center aligned">{{range $i,$d := $service.Delay}}
                             <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"
                                 data-tooltip="{{dayBefore $i}}，平均延迟:{{float32f $d}}ms">
-                                <i class="delay"></i>
                             </div> {{end}}
                         </td>
-                        <td class="ui center aligned">
-                            <div
-                                class="round {{className (div (index $service.Up 29) (add (index $service.Up 29) (index $service.Down 29)))}}">
-                                <i></i>
-                                {{statusName (div (index $service.Up 29) (add (index $service.Up 29) (index $service.Down 29)))}}
-                            </div>
+                        <td class="ui center aligned delay-today">
+                            <i class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
+                            {{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}
                         </td>
                     </tr> {{end}}
                 </tbody>

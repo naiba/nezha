@@ -78,26 +78,28 @@
     font-weight: 700;
 }
 
-.service-status .danger.button {
-    background-color: crimson;
+.service-status .delay-today {
+    display: flex;
+    align-items: center;
 }
 
-.service-status .good.button {
-    background-color: rgb(0, 235, 139);
+.service-status .delay-today>i {
+    display: inline-block;
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: .6em;
+    background-color: grey;
+    margin-right: .3em;
 }
 
-.service-status .warning.button {
-    background-color: orange;
+.service-status .danger {
+    background-color: crimson !important;
 }
 
-.service-status .danger>i {
-    background-color: crimson;
+.service-status .good {
+    background-color: rgb(0, 235, 139) !important;
 }
 
-.service-status .good>i {
-    background-color: rgb(0, 235, 139);
-}
-
-.service-status .warning>i {
-    background-color: orange;
+.service-status .warning {
+    background-color: orange !important;
 }
