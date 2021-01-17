@@ -152,6 +152,12 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
+    <summary>服务器时间不准确：导致首页服务器随机频繁掉线。</summary>
+
+执行 `ntpdate 0.pool.ntp.org` 同步一下面板部署所在的服务器的时间，ref: [How do I use pool.ntp.org?](https://www.ntppool.org/en/use.html)
+</details>
+
+<details>
     <summary>反向代理配置：HTTPS、WebSocket（实时通道断开问题）</summary>
 
 ### 启用 HTTPS
