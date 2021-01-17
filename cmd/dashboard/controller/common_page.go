@@ -90,8 +90,8 @@ func (p *commonPage) service(c *gin.Context) {
 }
 
 func (cp *commonPage) home(c *gin.Context) {
-	dao.ServerLock.RLock()
-	defer dao.ServerLock.RUnlock()
+	dao.SortedServerLock.RLock()
+	defer dao.SortedServerLock.RUnlock()
 
 	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
 		"Servers":    dao.SortedServerList,
@@ -115,9 +115,9 @@ func (cp *commonPage) ws(c *gin.Context) {
 	}
 	defer conn.Close()
 	for {
-		dao.ServerLock.RLock()
+		dao.SortedServerLock.RLock()
 		err = conn.WriteJSON(dao.SortedServerList)
-		dao.ServerLock.RUnlock()
+		dao.SortedServerLock.RUnlock()
 		if err != nil {
 			break
 		}

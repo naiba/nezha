@@ -29,8 +29,8 @@ func (mp *memberPage) serve() {
 }
 
 func (mp *memberPage) server(c *gin.Context) {
-	dao.ServerLock.RLock()
-	defer dao.ServerLock.RUnlock()
+	dao.SortedServerLock.RLock()
+	defer dao.SortedServerLock.RUnlock()
 	c.HTML(http.StatusOK, "dashboard/server", mygin.CommonEnvironment(c, gin.H{
 		"Title":   "服务器管理",
 		"Servers": dao.SortedServerList,

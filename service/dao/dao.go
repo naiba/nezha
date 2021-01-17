@@ -22,13 +22,19 @@ var Cache *cache.Cache
 var DB *gorm.DB
 
 var ServerList map[uint64]*model.Server
-var SortedServerList []*model.Server
-
 var ServerLock sync.RWMutex
+
+var SortedServerList []*model.Server
+var SortedServerLock sync.RWMutex
 
 var Version = "v0.2.4"
 
 func ReSortServer() {
+	ServerLock.RLock()
+	defer ServerLock.RUnlock()
+	SortedServerLock.Lock()
+	defer SortedServerLock.Unlock()
+
 	SortedServerList = []*model.Server{}
 	for _, s := range ServerList {
 		SortedServerList = append(SortedServerList, s)

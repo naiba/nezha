@@ -53,11 +53,11 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	var err error
 	switch c.Param("model") {
 	case "server":
-		dao.ServerLock.Lock()
-		defer dao.ServerLock.Unlock()
 		err = dao.DB.Delete(&model.Server{}, "id = ?", id).Error
 		if err == nil {
+			dao.ServerLock.Lock()
 			delete(dao.ServerList, id)
+			dao.ServerLock.Unlock()
 			dao.ReSortServer()
 		}
 	case "notification":
@@ -109,14 +109,10 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.ID = sf.ID
 		s.Tag = sf.Tag
 		if sf.ID == 0 {
-			dao.ServerLock.Lock()
-			defer dao.ServerLock.Unlock()
 			s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
 			s.Secret = s.Secret[:10]
 			err = dao.DB.Create(&s).Error
 		} else {
-			dao.ServerLock.RLock()
-			defer dao.ServerLock.RUnlock()
 			isEdit = true
 			err = dao.DB.Save(&s).Error
 		}
@@ -129,13 +125,18 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		return
 	}
 	if isEdit {
+		dao.ServerLock.RLock()
 		s.Host = dao.ServerList[s.ID].Host
 		s.State = dao.ServerList[s.ID].State
+		dao.ServerList[s.ID] = &s
+		dao.ServerLock.RUnlock()
 	} else {
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}
+		dao.ServerLock.Lock()
+		dao.ServerList[s.ID] = &s
+		dao.ServerLock.Unlock()
 	}
-	dao.ServerList[s.ID] = &s
 	dao.ReSortServer()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,

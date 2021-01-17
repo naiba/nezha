@@ -31,7 +31,7 @@ func DispatchTask(duration time.Duration) {
 		var tasks []model.Monitor
 		var hasAliveAgent bool
 		dao.DB.Find(&tasks)
-		dao.ServerLock.RLock()
+		dao.SortedServerLock.RLock()
 		startedAt := time.Now()
 		for i := 0; i < len(tasks); i++ {
 			if index >= uint64(len(dao.SortedServerList)) {
@@ -50,7 +50,7 @@ func DispatchTask(duration time.Duration) {
 			dao.SortedServerList[index].TaskStream.Send(tasks[i].PB())
 			index++
 		}
-		dao.ServerLock.RUnlock()
+		dao.SortedServerLock.RUnlock()
 		time.Sleep(time.Until(startedAt.Add(duration)))
 	}
 }
