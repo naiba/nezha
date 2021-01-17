@@ -30,19 +30,21 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		} else {
 			var last model.MonitorHistory
 			if err := dao.DB.Where("monitor_id = ? AND data NOT LIKE ?", r.GetId(), "SSL证书错误：%").Order("id DESC").First(&last).Error; err == nil {
-				var splits = strings.Split(r.GetData(), "|")
+				var oldCert = strings.Split(last.Data, "|")
+				var newCert = strings.Split(r.GetData(), "|")
+				expiresOld, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
+				expiresNew, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", newCert[1])
 				// 证书变更提醒
-				if last.Data != "" && last.Data != r.GetData() {
+				if last.Data != "" && oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
 					errMsg = fmt.Sprintf(
-						"SSL证书变更，旧：%s 过期，新：%s 过期。",
-						last.Data, r.GetData())
+						"SSL证书变更，旧：%s, %s 过期；新：%s, %s 过期。",
+						oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
 				}
-				expires, err := time.Parse("2006-01-02 15:04:05 -0700 MST", splits[1])
 				// 证书过期提醒
-				if err == nil && expires.Before(time.Now().AddDate(0, 0, 7)) {
+				if err == nil && expiresNew.Before(time.Now().AddDate(0, 0, 7)) {
 					errMsg = fmt.Sprintf(
 						"SSL证书将在七天内过期，过期时间：%s。",
-						expires.Format("2006-01-02 15:04:05"))
+						expiresNew.Format("2006-01-02 15:04:05"))
 				}
 			}
 		}
