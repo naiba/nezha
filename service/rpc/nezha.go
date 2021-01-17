@@ -69,10 +69,10 @@ func (s *NezhaHandler) RequestTask(h *pb.Host, stream pb.NezhaService_RequestTas
 		return err
 	}
 	closeCh := make(chan error)
-	dao.ServerLock.Lock()
+	dao.ServerLock.RLock()
 	dao.ServerList[clientID].TaskStream = stream
 	dao.ServerList[clientID].TaskClose = closeCh
-	dao.ServerLock.Unlock()
+	dao.ServerLock.RUnlock()
 	select {
 	case err = <-closeCh:
 		return err
@@ -88,7 +88,8 @@ func (s *NezhaHandler) ReportSystemState(c context.Context, r *pb.State) (*pb.Re
 	state := model.PB2State(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	dao.ServerList[clientID].LastActive = time.Now()
+	now := time.Now()
+	dao.ServerList[clientID].LastActive = &now
 	dao.ServerList[clientID].State = &state
 	return &pb.Receipt{Proced: true}, nil
 }

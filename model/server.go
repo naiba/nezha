@@ -11,12 +11,13 @@ import (
 type Server struct {
 	Common
 	Name         string
-	DisplayIndex int    // 展示权重，越大越靠前
-	Secret       string `json:"-"`
 	Tag          string
-	Host         *Host      `gorm:"-"`
-	State        *HostState `gorm:"-"`
-	LastActive   time.Time
+	Secret       string `json:"-"`
+	DisplayIndex int    // 展示权重，越大越靠前
+
+	Host       *Host      `gorm:"-"`
+	State      *HostState `gorm:"-"`
+	LastActive *time.Time `gorm:"-"`
 
 	TaskClose  chan error                        `gorm:"-" json:"-"`
 	TaskStream pb.NezhaService_RequestTaskServer `gorm:"-" json:"-"`

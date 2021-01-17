@@ -25,7 +25,6 @@
                                     <div class='ui content popup' style="margin-bottom: 0">
                                         系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
                                             v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
-                                        CPU：@#server.Host.CPU#@<br>
                                         硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br>
                                         内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br>
                                         交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br>
@@ -33,6 +32,7 @@
                                             class='arrow alternate circle down outline icon'></i>@#formatByteSize(server.State.NetInTransfer)#@<i
                                             class='arrow alternate circle up outline icon'></i>@#formatByteSize(server.State.NetOutTransfer)#@<br>
                                         启动：@# formatTimestamp(server.Host.BootTime) #@<br>
+                                        活动：@# new Date(server.LastActive).toLocaleString() #@<br>
                                         版本：@#server.Host.Version#@<br>
                                     </div>
                                     <div class="ui divider" style="margin-bottom: 5px"></div>
