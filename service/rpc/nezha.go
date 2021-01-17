@@ -29,7 +29,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			errMsg = r.GetData()
 		} else {
 			var last model.MonitorHistory
-			if err := dao.DB.Where("monitor_id = ? AND data NOT LIKE ?", r.GetId(), "SSL证书错误：%").Order("id DESC").First(&last).Error; err == nil {
+			if err := dao.DB.Where("monitor_id = ? AND data LIKE ?", r.GetId(), "%|%").Order("id DESC").First(&last).Error; err == nil {
 				var oldCert = strings.Split(last.Data, "|")
 				var newCert = strings.Split(r.GetData(), "|")
 				expiresOld, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
