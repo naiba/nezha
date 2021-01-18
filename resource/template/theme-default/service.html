@@ -1,5 +1,8 @@
 {{define "theme-default/service"}}
 {{template "common/header" .}}
+{{if ts .CustomCode}}
+{{.CustomCode|safe}}
+{{end}}
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">

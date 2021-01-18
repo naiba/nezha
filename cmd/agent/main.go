@@ -198,6 +198,7 @@ func doTask(task *pb.Task) {
 		}
 	case model.MonitorTypeICMPPing:
 		pinger, err := ping.NewPinger(task.GetData())
+		pinger.SetPrivileged(true)
 		if err == nil {
 			pinger.Count = 10
 			pinger.Timeout = time.Second * 20
