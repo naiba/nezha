@@ -17,7 +17,7 @@ type Server struct {
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
-	LastActive *time.Time `gorm:"-"`
+	LastActive time.Time  `gorm:"-"`
 
 	TaskClose  chan error                        `gorm:"-" json:"-"`
 	TaskStream pb.NezhaService_RequestTaskServer `gorm:"-" json:"-"`

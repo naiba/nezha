@@ -88,8 +88,7 @@ func (s *NezhaHandler) ReportSystemState(c context.Context, r *pb.State) (*pb.Re
 	state := model.PB2State(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
-	now := time.Now()
-	dao.ServerList[clientID].LastActive = &now
+	dao.ServerList[clientID].LastActive = time.Now()
 	dao.ServerList[clientID].State = &state
 	return &pb.Receipt{Proced: true}, nil
 }
