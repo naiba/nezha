@@ -84,8 +84,9 @@ func (p *commonPage) service(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
-		"Title":    "服务状态",
-		"Services": msm,
+		"Title":      "服务状态",
+		"Services":   msm,
+		"CustomCode": dao.Conf.Site.CustomCode,
 	}))
 }
 
