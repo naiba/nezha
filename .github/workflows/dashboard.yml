@@ -11,6 +11,7 @@ on:
       - "cmd/agent/**"
       - ".github/workflows/agent.yml"
       - ".goreleaser.yml"
+      - ".github/ISSUE_TEMPLATE/*"
 
 jobs:
   deploy:

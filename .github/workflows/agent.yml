@@ -2,12 +2,6 @@ name: Agent release
 
 on:
   push:
-    paths-ignore:
-      - "script/**"
-      - ".gitignore"
-      - "*.md"
-      - "cmd/dashboard/**"
-      - ".github/workflows/dashboard.yml"
     tags:
       - "v*"
 
