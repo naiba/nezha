@@ -7,6 +7,12 @@ assignees: ''
 
 ---
 
+<!--
+First of all：
+确认你的 管理面板 及 Agent 都是最新版本。
+Make sure your dashboard and agent is up to date.
+-->
+
 ### 描述问题 Describe the problem
 
 <!--
