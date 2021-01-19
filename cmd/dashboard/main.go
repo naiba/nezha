@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/patrickmn/go-cache"
+	"github.com/robfig/cron/v3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -17,8 +18,17 @@ import (
 )
 
 func init() {
-	var err error
+	shanghai, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		panic(err)
+	}
+
+	// 初始化 dao 包
 	dao.Conf = &model.Config{}
+	dao.Cron = cron.New(cron.WithLocation(shanghai))
+	dao.Crons = make(map[uint64]*model.Cron)
+	dao.ServerList = make(map[uint64]*model.Server)
+
 	err = dao.Conf.Read("data/config.yaml")
 	if err != nil {
 		panic(err)
@@ -31,6 +41,7 @@ func init() {
 		dao.DB = dao.DB.Debug()
 	}
 	dao.Cache = cache.New(5*time.Minute, 10*time.Minute)
+
 	initSystem()
 }
 
