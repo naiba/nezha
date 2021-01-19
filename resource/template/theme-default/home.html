@@ -25,6 +25,7 @@
                                     <div class='ui content popup' style="margin-bottom: 0">
                                         系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@ [<span
                                             v-if='server.Host.Virtualization'>@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br>
+                                        CPU：@#server.Host.CPU#@<br>
                                         硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br>
                                         内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br>
                                         交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br>
