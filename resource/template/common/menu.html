@@ -7,6 +7,7 @@
         {{if .IsAdminPage}}
         <a class="item{{if eq .MatchedPath " /server"}} active{{end}}" href="/server">服务器</a>
         <a class="item{{if eq .MatchedPath " /monitor"}} active{{end}}" href="/monitor">服务监控</a>
+        <a class="item{{if eq .MatchedPath " /cron"}} active{{end}}" href="/cron">计划任务</a>
         <a class="item{{if eq .MatchedPath " /notification"}} active{{end}}" href="/notification">通知</a>
         <a class="item{{if eq .MatchedPath " /setting"}} active{{end}}" href="/setting">设置</a>
         {{else}}

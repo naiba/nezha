@@ -9,10 +9,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/naiba/com"
+	"github.com/robfig/cron/v3"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
+	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
@@ -34,6 +36,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/logout", ma.logout)
 	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/monitor", ma.addOrEditMonitor)
+	mr.POST("/cron", ma.addOrEditCron)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -69,6 +72,17 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		err = dao.DB.Delete(&model.Monitor{}, "id = ?", id).Error
 		if err == nil {
 			err = dao.DB.Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
+		}
+	case "cron":
+
+		err = dao.DB.Delete(&model.Cron{}, "id = ?", id).Error
+		if err == nil {
+			dao.CronLock.RLock()
+			defer dao.CronLock.RUnlock()
+			if dao.Crons[id].CronID != 0 {
+				dao.Cron.Remove(dao.Crons[id].CronID)
+			}
+			delete(dao.Crons, id)
 		}
 	case "alert-rule":
 		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
@@ -109,7 +123,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.ID = sf.ID
 		s.Tag = sf.Tag
 		if sf.ID == 0 {
-			s.Secret = com.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
+			s.Secret = utils.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
 			s.Secret = s.Secret[:10]
 			err = dao.DB.Create(&s).Error
 		} else {
@@ -174,6 +188,72 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		})
 		return
 	}
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type cronForm struct {
+	ID             uint64
+	Name           string
+	Scheduler      string
+	Command        string
+	ServersRaw     string
+	PushSuccessful string
+}
+
+func (ma *memberAPI) addOrEditCron(c *gin.Context) {
+	var cf cronForm
+	var cr model.Cron
+	err := c.ShouldBindJSON(&cf)
+	if err == nil {
+		cr.Name = cf.Name
+		cr.Scheduler = cf.Scheduler
+		cr.Command = cf.Command
+		cr.ServersRaw = cf.ServersRaw
+		cr.PushSuccessful = cf.PushSuccessful == "on"
+		cr.ID = cf.ID
+		err = json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
+	}
+	if err == nil {
+		_, err = cron.ParseStandard(cr.Scheduler)
+	}
+	if err == nil {
+		if cf.ID == 0 {
+			err = dao.DB.Create(&cr).Error
+		} else {
+			err = dao.DB.Save(&cr).Error
+		}
+	}
+
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+
+	if cr.CronID != 0 {
+		dao.Cron.Remove(cr.CronID)
+	}
+
+	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, func() {
+		dao.ServerLock.RLock()
+		defer dao.ServerLock.RUnlock()
+		for j := 0; j < len(cr.Servers); j++ {
+			if dao.ServerList[cr.Servers[j]].TaskStream != nil {
+				dao.ServerList[cr.Servers[j]].TaskStream.Send(&pb.Task{
+					Id:   cr.ID,
+					Data: cr.Command,
+					Type: model.TaskTypeCommand,
+				})
+			} else {
+				alertmanager.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]))
+			}
+		}
+	})
+
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

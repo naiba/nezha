@@ -6,9 +6,12 @@ COPY . .
 RUN cd cmd/dashboard && go build -o app -ldflags="-s -w"
 
 FROM alpine:latest
+ENV TZ="Asia/Shanghai"
 RUN apk --no-cache --no-progress add \
     ca-certificates \
-    tzdata
+    tzdata && \
+    cp "/usr/share/zoneinfo/$TZ" /etc/localtime && \
+    echo "$TZ" >  /etc/timezone
 WORKDIR /dashboard
 COPY ./resource ./resource
 COPY --from=binarybuilder /dashboard/cmd/dashboard/app ./app

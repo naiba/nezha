@@ -129,6 +129,23 @@ function addOrEditMonitor(monitor) {
     showFormModal('.monitor.modal', '#monitorForm', '/api/monitor')
 }
 
+function addOrEditCron(cron) {
+    const modal = $('.cron.modal')
+    modal.children('.header').text((cron ? '修改' : '添加') + '计划任务')
+    modal.find('.positive.button').html(cron ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>')
+    modal.find('input[name=ID]').val(cron ? cron.ID : null)
+    modal.find('input[name=Name]').val(cron ? cron.Name : null)
+    modal.find('input[name=Scheduler]').val(cron ? cron.Scheduler : null)
+    modal.find('input[name=ServersRaw]').val(cron ? cron.ServersRaw : '[]')
+    modal.find('textarea[name=Command]').val(cron ? cron.Command : null)
+    if (cron && cron.PushSuccessful) {
+        modal.find('.ui.push-successful.checkbox').checkbox('set checked')
+    } else {
+        modal.find('.ui.push-successful.checkbox').checkbox('set unchecked')
+    }
+    showFormModal('.cron.modal', '#cronForm', '/api/cron')
+}
+
 function deleteRequest(api) {
     $.ajax({
         url: api,

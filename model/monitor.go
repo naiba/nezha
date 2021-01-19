@@ -6,9 +6,10 @@ import (
 
 const (
 	_ = iota
-	MonitorTypeHTTPGET
-	MonitorTypeICMPPing
-	MonitorTypeTCPPing
+	TaskTypeHTTPGET
+	TaskTypeICMPPing
+	TaskTypeTCPPing
+	TaskTypeCommand
 )
 
 type Monitor struct {

@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/google/go-github/github"
-	"github.com/naiba/com"
+
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 type User struct {
@@ -44,6 +45,6 @@ func NewUserFromGitHub(gu *github.User) User {
 }
 
 func (u *User) IssueNewToken() {
-	u.Token = com.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login))
+	u.Token = utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login))
 	u.TokenExpired = time.Now().AddDate(0, 2, 0)
 }

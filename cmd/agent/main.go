@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -62,7 +63,7 @@ func doSelfUpdate() {
 		updateCh <- struct{}{}
 	}()
 	v := semver.MustParse(version)
-	log.Println("check update", v)
+	log.Println("Check update", v)
 	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
 	if err != nil {
 		log.Println("Binary update failed:", err)
@@ -84,7 +85,6 @@ func init() {
 func main() {
 	// 来自于 GoReleaser 的版本号
 	dao.Version = version
-
 	rootCmd.PersistentFlags().StringVarP(&server, "server", "s", "localhost:5555", "客户端ID")
 	rootCmd.PersistentFlags().StringVarP(&clientID, "id", "i", "", "客户端ID")
 	rootCmd.PersistentFlags().StringVarP(&clientSecret, "secret", "p", "", "客户端Secret")
@@ -174,7 +174,7 @@ func doTask(task *pb.Task) {
 	result.Id = task.GetId()
 	result.Type = task.GetType()
 	switch task.GetType() {
-	case model.MonitorTypeHTTPGET:
+	case model.TaskTypeHTTPGET:
 		start := time.Now()
 		resp, err := httpClient.Get(task.GetData())
 		if err == nil {
@@ -196,7 +196,7 @@ func doTask(task *pb.Task) {
 		} else {
 			result.Data = err.Error()
 		}
-	case model.MonitorTypeICMPPing:
+	case model.TaskTypeICMPPing:
 		pinger, err := ping.NewPinger(task.GetData())
 		if err == nil {
 			pinger.SetPrivileged(true)
@@ -210,7 +210,7 @@ func doTask(task *pb.Task) {
 		} else {
 			result.Data = err.Error()
 		}
-	case model.MonitorTypeTCPPing:
+	case model.TaskTypeTCPPing:
 		start := time.Now()
 		conn, err := net.DialTimeout("tcp", task.GetData(), time.Second*10)
 		if err == nil {
@@ -220,6 +220,17 @@ func doTask(task *pb.Task) {
 			result.Successful = true
 		} else {
 			result.Data = err.Error()
+		}
+	case model.TaskTypeCommand:
+		startedAt := time.Now()
+		cmd := exec.Command(task.GetData())
+		output, err := cmd.Output()
+		result.Delay = float32(time.Now().Sub(startedAt).Seconds())
+		if err != nil {
+			result.Data = fmt.Sprintf("%s\n%s", string(output), err.Error())
+		} else {
+			result.Data = string(output)
+			result.Successful = true
 		}
 	default:
 		log.Printf("Unknown action: %v", task)

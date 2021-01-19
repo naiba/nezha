@@ -3,8 +3,10 @@ package dao
 import (
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/patrickmn/go-cache"
+	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
@@ -21,13 +23,29 @@ var Cache *cache.Cache
 
 var DB *gorm.DB
 
+// 服务器监控、状态相关
 var ServerList map[uint64]*model.Server
 var ServerLock sync.RWMutex
 
 var SortedServerList []*model.Server
 var SortedServerLock sync.RWMutex
 
-var Version = "v0.2.6"
+// 计划任务相关
+var CronLock sync.RWMutex
+var Crons map[uint64]*model.Cron
+var Cron *cron.Cron
+
+var Version = "v0.3.0"
+
+func init() {
+	shanghai, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		panic(err)
+	}
+	Cron = cron.New(cron.WithLocation(shanghai))
+	Crons = make(map[uint64]*model.Cron)
+	ServerList = make(map[uint64]*model.Server)
+}
 
 func ReSortServer() {
 	ServerLock.RLock()

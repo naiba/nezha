@@ -22,7 +22,7 @@ func ServeWeb(port uint) {
 	r.Use(mygin.RecordPath)
 	r.SetFuncMap(template.FuncMap{
 		"tf": func(t time.Time) string {
-			return t.Format("2006年1月2号")
+			return t.Format("2006年1月2号 15:04:05")
 		},
 		"safe": func(s string) template.HTML {
 			return template.HTML(s)

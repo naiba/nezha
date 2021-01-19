@@ -15,6 +15,7 @@ var adminPage = map[string]bool{
 	"/monitor":      true,
 	"/setting":      true,
 	"/notification": true,
+	"/cron":         true,
 }
 
 func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {

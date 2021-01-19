@@ -11,7 +11,7 @@ on:
       - "cmd/agent/**"
       - ".github/workflows/agent.yml"
       - ".goreleaser.yml"
-      - ".github/ISSUE_TEMPLATE/*"
+      - ".github/ISSUE_TEMPLATE/**"
 
 jobs:
   deploy:
@@ -25,5 +25,5 @@ jobs:
       - name: Build and push dasbboard image
         run: |
           go test -v ./... 
-          docker build -t ghcr.io/${{ github.repository_owner }}/nezha-dashboard -f Dockerfile.dashboard .
+          docker build -t ghcr.io/${{ github.repository_owner }}/nezha-dashboard -f Dockerfile .
           docker push ghcr.io/${{ github.repository_owner }}/nezha-dashboard

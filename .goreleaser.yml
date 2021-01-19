@@ -10,12 +10,14 @@ builds:
       - windows
       - darwin
     goarch:
-      - amd64
+      - arm
       - arm64
       - 386
-      - arm
+      - amd64
       - mips
       - mips64
+    gomips:
+      - softfloat
     main: ./cmd/agent
     binary: nezha-agent
 checksum:

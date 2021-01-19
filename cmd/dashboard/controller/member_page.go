@@ -24,6 +24,7 @@ func (mp *memberPage) serve() {
 	}))
 	mr.GET("/server", mp.server)
 	mr.GET("/monitor", mp.monitor)
+	mr.GET("/cron", mp.cron)
 	mr.GET("/notification", mp.notification)
 	mr.GET("/setting", mp.setting)
 }
@@ -43,6 +44,15 @@ func (mp *memberPage) monitor(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard/monitor", mygin.CommonEnvironment(c, gin.H{
 		"Title":    "服务监控",
 		"Monitors": monitors,
+	}))
+}
+
+func (mp *memberPage) cron(c *gin.Context) {
+	var crons []model.Cron
+	dao.DB.Find(&crons)
+	c.HTML(http.StatusOK, "dashboard/cron", mygin.CommonEnvironment(c, gin.H{
+		"Title": "计划任务",
+		"Crons": crons,
 	}))
 }
 

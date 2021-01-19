@@ -6,14 +6,13 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/naiba/com"
-
 	"github.com/gin-gonic/gin"
 	GitHubAPI "github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -28,7 +27,7 @@ func (oa *oauth2controller) serve() {
 }
 
 func (oa *oauth2controller) login(c *gin.Context) {
-	state := com.RandomString(6)
+	state := utils.RandStringBytesMaskImprSrcUnsafe(6)
 	dao.Cache.Set(fmt.Sprintf("%s%s", model.CtxKeyOauth2State, c.ClientIP()), state, 0)
 	url := oa.oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOnline)
 	c.Redirect(http.StatusFound, url)

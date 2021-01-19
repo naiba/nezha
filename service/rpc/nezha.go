@@ -18,10 +18,11 @@ type NezhaHandler struct {
 
 func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Receipt, error) {
 	var err error
-	if _, err = s.Auth.Check(c); err != nil {
+	var clientID uint64
+	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
-	if r.GetType() == model.MonitorTypeHTTPGET {
+	if r.GetType() == model.TaskTypeHTTPGET {
 		// SSL 证书报警
 		var errMsg string
 		if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
@@ -54,10 +55,27 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			alertmanager.SendNotification(fmt.Sprintf("服务监控：%s %s", monitor.Name, errMsg))
 		}
 	}
-	// 存入历史记录
-	mh := model.PB2MonitorHistory(r)
-	if err := dao.DB.Create(&mh).Error; err != nil {
-		return nil, err
+	if r.GetType() == model.TaskTypeCommand {
+		// 处理上报的计划任务
+		dao.CronLock.RLock()
+		cr := dao.Crons[r.GetId()]
+		dao.CronLock.RUnlock()
+		if cr.PushSuccessful && r.GetSuccessful() {
+			alertmanager.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()))
+		}
+		if !r.GetSuccessful() {
+			alertmanager.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()))
+		}
+		dao.DB.Model(cr).Updates(model.Cron{
+			LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
+			LastResult:     r.GetSuccessful(),
+		})
+	} else {
+		// 存入历史记录
+		mh := model.PB2MonitorHistory(r)
+		if err := dao.DB.Create(&mh).Error; err != nil {
+			return nil, err
+		}
 	}
 	return &pb.Receipt{Proced: true}, nil
 }
