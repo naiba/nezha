@@ -34,7 +34,7 @@ var CronLock sync.RWMutex
 var Crons map[uint64]*model.Cron
 var Cron *cron.Cron
 
-var Version = "v0.3.3"
+var Version = "v0.3.4"
 
 func ReSortServer() {
 	ServerLock.RLock()

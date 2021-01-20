@@ -1,40 +1,41 @@
 {{define "theme-daynight/service"}}
 {{template "common/header" .}}
+{{if ts .CustomCode}}
+{{.CustomCode|safe}}
+{{end}}
 {{template "common/menu" .}}
 <div class="nb-container">
     <div class="ui container">
-        <div class="ui segment service-status">
-            {{range $service := .Services}}
-            <div class="ui grid">
-                <div class="three wide column">
-                    <p>{{$service.Monitor.Name}}</p>
-                    <p>30天在线率{{divU64 $service.TotalDown (addU64 $service.TotalUp $service.TotalDown)}}%</p>
-                </div>
-                <div class="eleven wide column">
-                    {{range $i,$d := $service.Delay}}
-                    <div class="ui icon button{{if gt (add (index $service.Up $i) (index $service.Down $i)) 0}}
-                    {{if gt (div (index $service.Down $i) (add (index $service.Up $i) (index $service.Down $i))) 30.0}}danger
-                    {{else if gt (div (index $service.Down $i) (add (index $service.Up $i) (index $service.Down $i))) 10.0}}
-                    warning{{else}}good{{end}}
-                    {{end}}" data-tooltip="{{dayBefore $i}}，平均延迟:{{$d}}ms">
-                        <i class="delay"></i>
-                    </div>
-                    {{end}}
-                </div>
-                <div class="two wide column round{{if gt (addU64 $service.TotalUp $service.TotalDown) 0}}
-                    {{if gt (divU64 $service.TotalDown (addU64 $service.TotalUp $service.TotalDown)) 30.0}}danger{{else if gt (divU64 $service.TotalDown (addU64 $service.TotalUp $service.TotalDown)) 10.0}}warning{{else}}good{{end}}
-                {{end}}">
-                    <i></i>
-                    {{if gt (addU64 $service.TotalUp $service.TotalDown) 0}}
-                    {{if gt (divU64 $service.TotalDown (addU64 $service.TotalUp $service.TotalDown)) 30.0}}故障
-                    {{else if gt (divU64 $service.TotalDown (addU64 $service.TotalUp $service.TotalDown)) 10.0}}
-                    低可用{{else}}良好{{end}}
-                    {{else}}无数据
-                    {{end}}
-                </div>
-            </div>
-            <div class="ui divider"></div>
-            {{end}}
+        <div class="service-status">
+
+            <table class="ui celled table">
+                <thead>
+                    <tr>
+                        <th class="ui center aligned">名称</th>
+                        <th class="ui center aligned">30天在线率</th>
+                        <th class="ui center aligned">详情</th>
+                        <th class="ui center aligned">状态</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $service := .Services}}
+                    <tr>
+                        <td class="ui center aligned">{{$service.Monitor.Name}}</td>
+                        <td class="ui center aligned">
+                            {{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%
+                        </td>
+                        <td class="ui center aligned">{{range $i,$d := $service.Delay}}
+                            <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"
+                                data-tooltip="{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms">
+                            </div> {{end}}
+                        </td>
+                        <td class="ui center aligned delay-today">
+                            <i class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
+                            {{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}
+                        </td>
+                    </tr> {{end}}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

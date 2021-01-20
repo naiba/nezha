@@ -1,12 +1,12 @@
 # 哪吒面板
 
-![dashboard](https://img.shields.io/badge/管理面板-v0.3.2-brightgreen) ![agent](https://img.shields.io/badge/Agent-v0.3.1-brightgreen)
+![dashboard](https://img.shields.io/badge/管理面板-v0.3.4-brightgreen?style=for-the-badge&logo=github) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github)
 
 系统状态监控报警、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控、计划任务(可以定时在Agent上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
 
-|   首页截图1   |   首页截图2   |
-| ---- | ---- |
-|   ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)     | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
+|   默认主题   | DayNight [@JackieSung](https://github.com/JackieSung4ev) |  hotaru [@CokeMine](https://github.com/CokeMine)   |
+| ---- | ---- | ---- |
+|   ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)   | <img src="https://s3.ax1x.com/2021/01/20/sfJv2q.jpg"/> | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
 
 \>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
 
@@ -87,7 +87,7 @@
 
 <details>
     <summary>报警通知：CPU、内存、硬盘、带宽、流量实时监控。</summary>
-    
+
 #### 灵活通知方式
 
 `#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
@@ -114,7 +114,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
       - 请求类型: JSON
       - Body: `{"appToken":"你的appToken","topicIds":[],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
 
-    - telegram示例 @haitau 贡献
+    - telegram示例 [@haitau](https://github.com/haitau) 贡献
       - 备注：telegram机器人消息通知
       - URL：https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA#
       - 请求方式: GET
