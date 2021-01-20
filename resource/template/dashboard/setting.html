@@ -48,5 +48,8 @@
         return false;
     })
     $('.checkbox').checkbox()
+    {{if .Conf.EnableIPChangeNotification}}
+    $('.checkbox').checkbox('set checked')
+    {{end}}
 </script>
 {{end}}
