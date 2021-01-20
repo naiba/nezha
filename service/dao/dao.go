@@ -34,7 +34,7 @@ var CronLock sync.RWMutex
 var Crons map[uint64]*model.Cron
 var Cron *cron.Cron
 
-var Version = "v0.3.1"
+var Version = "v0.3.2"
 
 func ReSortServer() {
 	ServerLock.RLock()
@@ -48,6 +48,9 @@ func ReSortServer() {
 	}
 
 	sort.SliceStable(SortedServerList, func(i, j int) bool {
+		if SortedServerList[i].DisplayIndex == SortedServerList[j].DisplayIndex {
+			return SortedServerList[i].ID < SortedServerList[i].ID
+		}
 		return SortedServerList[i].DisplayIndex > SortedServerList[j].DisplayIndex
 	})
 }

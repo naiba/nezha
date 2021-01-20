@@ -28,14 +28,14 @@ func (oa *oauth2controller) serve() {
 
 func (oa *oauth2controller) login(c *gin.Context) {
 	state := utils.RandStringBytesMaskImprSrcUnsafe(6)
-	dao.Cache.Set(fmt.Sprintf("%s%s", model.CtxKeyOauth2State, c.ClientIP()), state, 0)
+	dao.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()), state, 0)
 	url := oa.oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOnline)
 	c.Redirect(http.StatusFound, url)
 }
 
 func (oa *oauth2controller) callback(c *gin.Context) {
 	// 验证登录跳转时的 State
-	state, ok := dao.Cache.Get(fmt.Sprintf("%s%s", model.CtxKeyOauth2State, c.ClientIP()))
+	state, ok := dao.Cache.Get(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()))
 	if !ok || state.(string) != c.Query("state") {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code:  http.StatusBadRequest,

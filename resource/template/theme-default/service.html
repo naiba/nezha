@@ -26,7 +26,7 @@
                         </td>
                         <td class="ui center aligned">{{range $i,$d := $service.Delay}}
                             <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"
-                                data-tooltip="{{dayBefore $i}}，平均延迟:{{float32f $d}}ms">
+                                data-tooltip="{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms">
                             </div> {{end}}
                         </td>
                         <td class="ui center aligned delay-today">

@@ -1,6 +1,8 @@
 # 哪吒面板
 
-系统状态监控报警；API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控；计划任务可以定时在Agent上执行命令（备份、重启、What ever you want）；极省资源，64M 服务器也能装 agent。
+![dashboard](https://img.shields.io/badge/管理面板-v0.3.2-brightgreen) ![agent](https://img.shields.io/badge/Agent-v0.3.1-brightgreen)
+
+系统状态监控报警、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控、计划任务(可以定时在Agent上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
 
 |   首页截图1   |   首页截图2   |
 | ---- | ---- |
@@ -207,16 +209,3 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 - [哪吒面板，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
 - [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) *（已过时）*
 - [>>更多教程](https://www.google.com/search?q=%22%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22+%22%E6%95%99%E7%A8%8B%22) (Google)
-
-## 变更日志
-
-只保留最后一次更新导致必须更新面板的说明。
-
-- `agent 0.3.1`
-
-   - 0.3.0 的更新的一个问题导致 Windows 用户的 Agent 无法自动更新，需要下载 0.3.1 或更新的 release 手动替换掉二进制文件。
-   - 增加了对 mips(路由器) 的支持，在 release 处下载后手动配置
-
-- `dashboard 0.3.0` `agent 0.3.0` **重大更新**
-
-   增加了定时任务功能，可以定时在 Agent 上执行脚本（应用于定期备份、重启服务等计划运维场景）
