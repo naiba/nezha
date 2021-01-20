@@ -18,7 +18,12 @@
             </div>
             <div class="field">
                 <label>执行服务器ID列表</label>
-                <input type="text" name="ServersRaw" placeholder="[10,7,19]">
+                <div class="ui fluid multiple servers search selection dropdown">
+                    <input type="hidden" name="ServersRaw">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">输入ID/备注以搜索</div>
+                    <div class="menu"></div>
+                </div>
             </div>
             <div class="field">
                 <div class="ui push-successful checkbox">
@@ -30,7 +35,8 @@
         <div class="ui warning message">
             <p>
                 计划的格式为：<code>* * * * *</code> 分 时 天 月 星期，详情见 <a
-                    href="https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format" target="_blank">计划表达式格式</a><br>
+                    href="https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format"
+                    target="_blank">计划表达式格式</a><br>
                 命令：Shell 命令，就像写脚本一样就可以，如果遇到 xxx 命令找不到，可能是 <code>PATH</code> 环境变量的问题，<code>source ~/.bashrc</code>
                 或者使用绝对路径执行。
             </p>

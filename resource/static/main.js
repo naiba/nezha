@@ -36,10 +36,22 @@ function showFormModal(modelSelector, formID, URL, getData) {
             form.children('.message').remove()
             btn.toggleClass('loading')
             const data = getData ? getData() : $(formID).serializeArray().reduce(function (obj, item) {
-                obj[item.name] = (item.name.endsWith('_id') ||
+                // ID 类的数据
+                if ((item.name.endsWith('_id') ||
                     item.name === 'id' || item.name === 'ID' ||
                     item.name === 'RequestType' || item.name === 'RequestMethod' ||
-                    item.name === 'DisplayIndex' || item.name === 'Type') ? parseInt(item.value) : item.value;
+                    item.name === 'DisplayIndex' || item.name === 'Type')) {
+                    obj[item.name] = parseInt(item.value);
+                } else {
+                    obj[item.name] = item.value;
+                }
+
+                if (item.name == 'ServersRaw') {
+                    if (item.value.length > 2) {
+                        obj[item.name] = '[' + item.value.substr(3, item.value.length - 1) + ']'
+                    }
+                }
+
                 return obj;
             }, {});
             $.post(URL, JSON.stringify(data)).done(function (resp) {
@@ -108,6 +120,7 @@ function addOrEditServer(server) {
     modal.find('input[name=name]').val(server ? server.Name : null)
     modal.find('input[name=Tag]').val(server ? server.Tag : null)
     modal.find('input[name=DisplayIndex]').val(server ? server.DisplayIndex : null)
+    modal.find('textarea[name=Note]').val(server ? server.Note : null)
     if (server) {
         modal.find('.secret.field').attr('style', '')
         modal.find('input[name=secret]').val(server.Secret)
@@ -136,7 +149,16 @@ function addOrEditCron(cron) {
     modal.find('input[name=ID]').val(cron ? cron.ID : null)
     modal.find('input[name=Name]').val(cron ? cron.Name : null)
     modal.find('input[name=Scheduler]').val(cron ? cron.Scheduler : null)
-    modal.find('input[name=ServersRaw]').val(cron ? cron.ServersRaw : '[]')
+    var servers
+    if (cron) {
+        servers = cron.ServersRaw
+        serverList = JSON.parse(servers)
+        const node = modal.find('i.dropdown.icon')
+        for (let i = 0; i < serverList.length; i++) {
+            node.after('<a class="ui label transition visible" data-value="' + serverList[i] + '" style="display: inline-block !important;">ID:' + serverList[i] + '<i class="delete icon"></i></a>')
+        }
+    }
+    modal.find('input[name=ServersRaw]').val(cron ? '[],' + servers.substr(1, servers.length - 2) : '[]')
     modal.find('textarea[name=Command]').val(cron ? cron.Command : null)
     if (cron && cron.PushSuccessful) {
         modal.find('.ui.push-successful.checkbox').checkbox('set checked')
@@ -197,3 +219,16 @@ function logout(id) {
         });
     })
 }
+
+$(document).ready(() => {
+    try {
+        $('.ui.servers.search.dropdown').dropdown({
+            clearable: true,
+            apiSettings: {
+                url: '/api/search-server?word={query}',
+                cache: false,
+            },
+        })
+    } catch (error) {
+    }
+})

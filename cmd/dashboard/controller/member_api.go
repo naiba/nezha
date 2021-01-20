@@ -33,7 +33,7 @@ func (ma *memberAPI) serve() {
 		Redirect: "/login",
 	}))
 
-	mr.POST("/logout", ma.logout)
+	mr.GET("/search-server", ma.searchServer)
 	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
@@ -41,6 +41,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/:model/:id", ma.delete)
+	mr.POST("/logout", ma.logout)
 }
 
 func (ma *memberAPI) delete(c *gin.Context) {
@@ -99,6 +100,33 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
+	})
+}
+
+type searchResult struct {
+	Name  string `json:"name,omitempty"`
+	Value uint64 `json:"value,omitempty"`
+	Text  string `json:"text,omitempty"`
+}
+
+func (ma *memberAPI) searchServer(c *gin.Context) {
+	var servers []model.Server
+	likeWord := "%" + c.Query("word") + "%"
+	dao.DB.Select("id,name").Where("id = ? OR name LIKE ? OR tag LIKE ? OR note LIKE ?",
+		c.Query("word"), likeWord, likeWord, likeWord).Find(&servers)
+
+	var resp []searchResult
+	for i := 0; i < len(servers); i++ {
+		resp = append(resp, searchResult{
+			Value: servers[i].ID,
+			Name:  servers[i].Name,
+			Text:  servers[i].Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"results": resp,
 	})
 }
 
