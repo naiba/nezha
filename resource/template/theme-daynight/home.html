@@ -72,8 +72,8 @@
                     <li>@#server.State?secondToDate(server.State.Uptime):'-'#@</li>
                     <li>@#formatByteSize(server.State.SwapUsed)#@ / @#formatByteSize(server.Host.SwapTotal)#@</li>
                     <li>@#formatByteSize(server.State.DiskUsed)#@ / @#formatByteSize(server.Host.DiskTotal)#@</li>
-                    <li>@#formatByteSize(server.State.NetInSpeed)#@/s</li>
-                    <li>@#formatByteSize(server.State.NetOutSpeed)#@/s</li>
+                    <li>@#formatByteSize(server.State.NetInTransfer) #@(@#formatByteSize(server.State.NetInSpeed)#@/s)</li>
+                    <li>@#formatByteSize(server.State.NetOutTransfer) #@(@#formatByteSize(server.State.NetOutSpeed)#@/s)</li>
                     <li>
                         <div class="cpu-bar">
                             <div>
