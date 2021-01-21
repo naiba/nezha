@@ -43,14 +43,25 @@
     </header>
     <script>$(document).ready(function () { $(".hamburger").click(function () { $(this).toggleClass("is-active"); $('.nav-menu').toggleClass('active'); $('.nav-bar').toggleClass('active'); }); }); </script>
     <section class="toggle-container">
-        <div class="toggle-dark-mode">
-            <h4><i class="fas fa-sun fa-lg" title="白昼模式"></i>　/　<i class="fas fa-moon fa-lg" title="暗黑模式"></i></h4>
-            <input type="checkbox" name="theme" id="switch"><label for="switch">Toggle</label>
-        </div>
-        <div class="toggle-grid-mode">
-            <h4><i class="fas fa-th fa-lg" title="网格视图"></i>　/　<i class="fas fa-list-ul fa-lg" title="列表视图"></i></h4>
-            <input type="checkbox" name="grid" id="grid-list"><label for="grid-list">Toggle</label>
-        </div>
+      <div class="dark-mode-toggle">
+        <label class="switcher">
+          <input type="checkbox" name="theme" id="switch" />
+          <div>
+            <i class="fas fa-sun" title="白昼模式"></i>
+            <i class="fas fa-moon" title="暗黑模式"></i>
+          </div>
+        </label>
+      </div>
+
+      <div class="grid-mode-toggle">
+        <label class="switcher">
+          <input type="checkbox" name="grid" id="grid-list" />
+          <div>
+            <i class="fas fa-th" title="网格视图"></i>
+            <i class="fas fa-list-ul" title="列表视图"></i>
+          </div>
+        </label>
+      </div>
     </section>
     <div id="app">
         <div class="server-info-container" v-for='server in servers' :id="server.ID">
@@ -72,8 +83,8 @@
                     <li>@#server.State?secondToDate(server.State.Uptime):'-'#@</li>
                     <li>@#formatByteSize(server.State.SwapUsed)#@ / @#formatByteSize(server.Host.SwapTotal)#@</li>
                     <li>@#formatByteSize(server.State.DiskUsed)#@ / @#formatByteSize(server.Host.DiskTotal)#@</li>
-                    <li>@#formatByteSize(server.State.NetInTransfer) #@(@#formatByteSize(server.State.NetInSpeed)#@/s)</li>
-                    <li>@#formatByteSize(server.State.NetOutTransfer) #@(@#formatByteSize(server.State.NetOutSpeed)#@/s)</li>
+                    <li>@#formatByteSize(server.State.NetInTransfer)#@ (@#formatByteSize(server.State.NetInSpeed)#@/s)</li>
+                    <li>@#formatByteSize(server.State.NetOutTransfer)#@ (@#formatByteSize(server.State.NetOutSpeed)#@/s)</li>
                     <li>
                         <div class="cpu-bar">
                             <div>
@@ -125,42 +136,36 @@
 
     <!-- Dark mode toggle -->
     <script>
-        var checkbox = document.querySelector('input[name=theme]');
-        checkbox.addEventListener('change', function () {
-            if (this.checked) {
-                trans()
-                document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'dark')
-            } else {
-                trans()
-                document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'light')
-            }
-        })
-        let trans = () => {
-            document.getElementsByTagName("BODY")[0].classList.add('transition-theme');
-            window.setTimeout(() => {
-                document.getElementsByTagName("BODY")[0].classList.remove('transition-theme')
-            }, 1000)
+      var checkbox = document.querySelector("input[name=theme]");
+      var themeStatue = document.getElementsByTagName("BODY")[0];
+      checkbox.addEventListener("change", function () {
+        if (this.checked) {
+          themeStatue.setAttribute("data-theme", "dark");
+        } else {
+          themeStatue.setAttribute("data-theme", "light");
         }
+      });
     </script>
 
     <!-- Grid list mode toggle -->
     <script>
-        var checkboxs = document.querySelector('input[name=grid]');
-        checkboxs.addEventListener('change', function () {
-            if (this.checked) {
-                transs()
-                document.getElementsByTagName("BODY")[0].setAttribute('data-gridlist', 'list')
-            } else {
-                transs()
-                document.getElementsByTagName("BODY")[0].setAttribute('data-gridlist', 'grid')
-            }
-        })
-        let transs = () => {
-            document.getElementsByTagName("BODY")[0].classList.add('transition-theme');
-            window.setTimeout(() => {
-                document.getElementsByTagName("BODY")[0].classList.remove('transition-theme')
-            }, 1000)
+      var checkboxs = document.querySelector("input[name=grid]");
+      var themeStatue = document.getElementsByTagName("BODY")[0];
+      checkboxs.addEventListener("change", function () {
+        if (this.checked) {
+          transs();
+          themeStatue.setAttribute("data-gridlist", "list");
+        } else {
+          transs();
+          themeStatue.setAttribute("data-gridlist", "grid");
         }
+      });
+      let transs = () => {
+        themeStatue.classList.add("transition-theme");
+        window.setTimeout(() => {
+          themeStatue.classList.remove("transition-theme");
+        }, 1000);
+      };
     </script>
 
     <!-- Back to top button -->
@@ -243,6 +248,7 @@
                 DarkMode() {
                     const hour = new Date(Date.now()).getHours()
                     if (hour > 17 || hour < 4) {
+                        document.querySelector("input[name=theme]").checked = true;
                         document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'dark');
                     }
                 },
@@ -272,8 +278,9 @@
                 position: 'top',
                 icon: 'success',
                 title: '实时通道建立',
+                text: '可以实时获取最新监控数据啦',
                 showConfirmButton: false,
-                timer: 1500
+                timer: 2000
             });
         }
         ws.onmessage = function (evt) {
@@ -297,8 +304,9 @@
                 position: 'top',
                 icon: 'error',
                 title: '实时通道断开',
+                text: '无法实时获取最新监控数据咯',
                 showConfirmButton: false,
-                timer: 1500
+                timer: 2000
             });
 
         }
