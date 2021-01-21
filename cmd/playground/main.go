@@ -9,15 +9,14 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/genkiroid/cert"
 	"github.com/go-ping/ping"
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
 func main() {
-	icmp()
+	// icmp()
 	// tcpping()
-	// httpWithSSLInfo()
+	httpWithSSLInfo()
 	// diskinfo()
 }
 
@@ -48,12 +47,14 @@ func httpWithSSLInfo() {
 	transCfg := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	httpClient := &http.Client{Transport: transCfg}
-	_, err := httpClient.Get("https://expired-ecc-dv.ssl.com")
-	fmt.Println(err)
+	httpClient := &http.Client{Transport: transCfg, CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}}
+	resp, err := httpClient.Get("http://mail.nai.ba")
+	fmt.Println(err, resp.StatusCode)
 	// SSL 证书信息获取
-	c := cert.NewCert("expired-ecc-dv.ssl.com")
-	fmt.Println(c.Error)
+	// c := cert.NewCert("expired-ecc-dv.ssl.com")
+	// fmt.Println(c.Error)
 }
 
 func icmp() {

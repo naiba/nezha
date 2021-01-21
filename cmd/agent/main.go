@@ -52,9 +52,14 @@ var (
 	ctx            = context.Background()
 	delayWhenError = time.Second * 10
 	updateCh       = make(chan struct{}, 0)
-	httpClient     = &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}}
+	httpClient     = &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 )
 
 func doSelfUpdate() {
@@ -179,7 +184,7 @@ func doTask(task *pb.Task) {
 		resp, err := httpClient.Get(task.GetData())
 		if err == nil {
 			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
-			if resp.StatusCode > 299 || resp.StatusCode < 200 {
+			if resp.StatusCode > 399 || resp.StatusCode < 200 {
 				err = errors.New("\n应用错误：" + resp.Status)
 			}
 		}
@@ -192,6 +197,8 @@ func doTask(task *pb.Task) {
 					result.Data = c.Issuer + "|" + c.NotAfter
 					result.Successful = true
 				}
+			} else {
+				result.Successful = true
 			}
 		} else {
 			result.Data = err.Error()
