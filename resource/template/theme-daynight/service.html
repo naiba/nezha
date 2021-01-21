@@ -30,7 +30,8 @@
                             </div> {{end}}
                         </td>
                         <td class="ui center aligned delay-today">
-                            <i class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
+                            <i
+                                class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
                             {{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}
                         </td>
                     </tr> {{end}}

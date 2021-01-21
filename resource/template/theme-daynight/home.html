@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>{{.Title}}</title>
-    <link rel="shortcut icon" type="image/png" href="/static/theme-daynight/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
 
     <link rel="stylesheet" href="/static/theme-daynight/main.css">
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
@@ -18,64 +18,170 @@
     {{end}}
 </head>
 
-<body data-theme="light"  data-gridlist="grid">
-    <header class="nav-bar clearfix"><figure class="logo"><a href="/">{{.Title}}</a></figure><div class="icon-container"><div class="row cf"><div class="three col"><div class="hamburger" id="hamburger-icon"><span class="line"></span><span class="line"></span><span class="line"></span></div></div></div></div><nav class="nav-menu"><ul><li><a href="/">首页</a></li><li><a href="/service">服务状态</a></li><li><a href="/server">服务器</a></li><li><a href="/monitor">监控</a></li><li><a href="/notification">通知</a></li><li><a href="/setting">设置</a></li>{{if .Admin}} <li><a href="#" style="padding:.8em;text-align:center;" title="您已登录">{{.Admin.Name}}</a></li>{{else}} <li><a href="/login">登录</a></li>{{end}} </ul></nav></header>
-    <script>$(document).ready(function(){ $(".hamburger").click(function(){ $(this).toggleClass("is-active"); $('.nav-menu').toggleClass('active'); $('.nav-bar').toggleClass('active');});}); </script>
-    <section class="toggle-container"><div class="toggle-dark-mode"><h4><i class="fas fa-sun fa-lg" title="白昼模式"></i>　/　<i class="fas fa-moon fa-lg" title="暗黑模式"></i></h4><input type="checkbox" name="theme" id="switch"><label for="switch">Toggle</label></div><div class="toggle-grid-mode"><h4><i class="fas fa-th fa-lg" title="网格视图"></i>　/　<i class="fas fa-list-ul fa-lg" title="列表视图"></i></h4><input type="checkbox" name="grid" id="grid-list"><label for="grid-list">Toggle</label></div></section>
-    <div id="app"><div class="server-info-container" v-for='server in servers' :id="server.ID"><div class="info-body"><ul class="server-info-body-container"><li><div :class="'state-'+ (server.live?'online':'offline')"><p>@#server.live?'Running':'Down'#@</p></div></li><li><h3>@#server.Name#@</h3></li><li><img :src="'/static/theme-daynight/img/flag/'+(server.Host&&server.Host.CountryCode?server.Host.CountryCode.toUpperCase():'CN')+'.png'" :title="server.Host.CountryCode.toUpperCase()" /></li><li>@#server.Host.Platform#@</li><li>@#server.Host.CountryCode.toUpperCase()#@</li><li>@#formatByteSize(server.State.MemUsed)#@ / @#formatByteSize(server.Host.MemTotal)#@</li><li>@#server.State?secondToDate(server.State.Uptime):'-'#@</li><li>@#formatByteSize(server.State.SwapUsed)#@ / @#formatByteSize(server.Host.SwapTotal)#@</li><li>@#formatByteSize(server.State.DiskUsed)#@ / @#formatByteSize(server.Host.DiskTotal)#@</li><li>@#formatByteSize(server.State.NetInSpeed)#@/s</li><li>@#formatByteSize(server.State.NetOutSpeed)#@/s</li><li><div class="cpu-bar"><div><h4>CPU</h4></div><div v-if="server.State" :class="formatPercent(server.live,server.State.CPU, 100).class" :title="formatPercent(server.live,server.State.CPU,100).percent+'%'"><div class="bar td-padding" :style="formatPercent(server.live,server.State.CPU, 100).style"><p>@#formatPercent(server.live,server.State.CPU,100).percent#@%</p></div></div></div></li><li><div class="ram-bar"><div><h4>RAM</h4></div><div v-if="server.State" :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class" :title="parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)+'%'"><div class="bar td-padding" :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style"><p>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</p></div></div></div></li><li><div class="disk-bar"><div><h4>硬盘</h4></div><div v-if="server.State" :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class" :title="parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)+'%'"><div class="bar td-padding" :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style"><p>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</p></div></div></div></li></ul></div></div></div>
+<body data-theme="light" data-gridlist="grid">
+    <header class="nav-bar clearfix">
+        <figure class="logo"><a href="/">{{.Title}}</a></figure>
+        <div class="icon-container">
+            <div class="row cf">
+                <div class="three col">
+                    <div class="hamburger" id="hamburger-icon"><span class="line"></span><span class="line"></span><span
+                            class="line"></span></div>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/service">服务状态</a></li>
+                <li><a href="/server">服务器</a></li>
+                <li><a href="/monitor">监控</a></li>
+                <li><a href="/notification">通知</a></li>
+                <li><a href="/setting">设置</a></li>{{if .Admin}} <li><a href="#" style="padding:.8em;text-align:center;"
+                        title="您已登录">{{.Admin.Name}}</a></li>{{else}} <li><a href="/login">登录</a></li>{{end}}
+            </ul>
+        </nav>
+    </header>
+    <script>$(document).ready(function () { $(".hamburger").click(function () { $(this).toggleClass("is-active"); $('.nav-menu').toggleClass('active'); $('.nav-bar').toggleClass('active'); }); }); </script>
+    <section class="toggle-container">
+        <div class="toggle-dark-mode">
+            <h4><i class="fas fa-sun fa-lg" title="白昼模式"></i>　/　<i class="fas fa-moon fa-lg" title="暗黑模式"></i></h4>
+            <input type="checkbox" name="theme" id="switch"><label for="switch">Toggle</label>
+        </div>
+        <div class="toggle-grid-mode">
+            <h4><i class="fas fa-th fa-lg" title="网格视图"></i>　/　<i class="fas fa-list-ul fa-lg" title="列表视图"></i></h4>
+            <input type="checkbox" name="grid" id="grid-list"><label for="grid-list">Toggle</label>
+        </div>
+    </section>
+    <div id="app">
+        <div class="server-info-container" v-for='server in servers' :id="server.ID">
+            <div class="info-body">
+                <ul class="server-info-body-container">
+                    <li>
+                        <div :class="'state-'+ (server.live?'online':'offline')">
+                            <p>@#server.live?'Running':'Down'#@</p>
+                        </div>
+                    </li>
+                    <li>
+                        <h3>@#server.Name#@</h3>
+                    </li>
+                    <li><img :src="'/static/theme-daynight/img/flag/'+(server.Host&&server.Host.CountryCode?server.Host.CountryCode.toUpperCase():'CN')+'.png'"
+                            :title="server.Host.CountryCode.toUpperCase()" /></li>
+                    <li>@#server.Host.Platform#@</li>
+                    <li>@#server.Host.CountryCode.toUpperCase()#@</li>
+                    <li>@#formatByteSize(server.State.MemUsed)#@ / @#formatByteSize(server.Host.MemTotal)#@</li>
+                    <li>@#server.State?secondToDate(server.State.Uptime):'-'#@</li>
+                    <li>@#formatByteSize(server.State.SwapUsed)#@ / @#formatByteSize(server.Host.SwapTotal)#@</li>
+                    <li>@#formatByteSize(server.State.DiskUsed)#@ / @#formatByteSize(server.Host.DiskTotal)#@</li>
+                    <li>@#formatByteSize(server.State.NetInSpeed)#@/s</li>
+                    <li>@#formatByteSize(server.State.NetOutSpeed)#@/s</li>
+                    <li>
+                        <div class="cpu-bar">
+                            <div>
+                                <h4>CPU</h4>
+                            </div>
+                            <div v-if="server.State" :class="formatPercent(server.live,server.State.CPU, 100).class"
+                                :title="formatPercent(server.live,server.State.CPU,100).percent+'%'">
+                                <div class="bar td-padding"
+                                    :style="formatPercent(server.live,server.State.CPU, 100).style">
+                                    <p>@#formatPercent(server.live,server.State.CPU,100).percent#@%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="ram-bar">
+                            <div>
+                                <h4>RAM</h4>
+                            </div>
+                            <div v-if="server.State"
+                                :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class"
+                                :title="parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)+'%'">
+                                <div class="bar td-padding"
+                                    :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
+                                    <p>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="disk-bar">
+                            <div>
+                                <h4>硬盘</h4>
+                            </div>
+                            <div v-if="server.State"
+                                :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class"
+                                :title="parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)+'%'">
+                                <div class="bar td-padding"
+                                    :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
+                                    <p>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-
-    
-<!-- Dark mode toggle -->
+    <!-- Dark mode toggle -->
     <script>
         var checkbox = document.querySelector('input[name=theme]');
-        checkbox.addEventListener('change', function() {
-    if(this.checked) {
-        trans()
-        document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'dark')
-    } else {
-        trans()
-        document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'light')
-    }
-})
+        checkbox.addEventListener('change', function () {
+            if (this.checked) {
+                trans()
+                document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'dark')
+            } else {
+                trans()
+                document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'light')
+            }
+        })
         let trans = () => {
-        document.getElementsByTagName("BODY")[0].classList.add('transition-theme');
-        window.setTimeout(() => {
-        document.getElementsByTagName("BODY")[0].classList.remove('transition-theme')
-    }, 1000)
-}
+            document.getElementsByTagName("BODY")[0].classList.add('transition-theme');
+            window.setTimeout(() => {
+                document.getElementsByTagName("BODY")[0].classList.remove('transition-theme')
+            }, 1000)
+        }
     </script>
-    
-<!-- Grid list mode toggle -->
+
+    <!-- Grid list mode toggle -->
     <script>
         var checkboxs = document.querySelector('input[name=grid]');
-        checkboxs.addEventListener('change', function() {
-    if(this.checked) {
-        transs()
-        document.getElementsByTagName("BODY")[0].setAttribute('data-gridlist', 'list')
-    } else {
-        transs()
-        document.getElementsByTagName("BODY")[0].setAttribute('data-gridlist', 'grid')
-    }
-})
+        checkboxs.addEventListener('change', function () {
+            if (this.checked) {
+                transs()
+                document.getElementsByTagName("BODY")[0].setAttribute('data-gridlist', 'list')
+            } else {
+                transs()
+                document.getElementsByTagName("BODY")[0].setAttribute('data-gridlist', 'grid')
+            }
+        })
         let transs = () => {
-        document.getElementsByTagName("BODY")[0].classList.add('transition-theme');
-        window.setTimeout(() => {
-        document.getElementsByTagName("BODY")[0].classList.remove('transition-theme')
-    }, 1000)
-}
+            document.getElementsByTagName("BODY")[0].classList.add('transition-theme');
+            window.setTimeout(() => {
+                document.getElementsByTagName("BODY")[0].classList.remove('transition-theme')
+            }, 1000)
+        }
     </script>
 
-<!-- Back to top button -->
-<a id="back-to-top"></a>
-<script>var btn=$('#back-to-top'); $(window).scroll(function(){ if ($(window).scrollTop() >300){ btn.addClass('show');} else{ btn.removeClass('show');}});btn.on('click', function(e){ e.preventDefault(); $('html, body').animate({scrollTop:0}, '300')});</script>
-    
-<footer><div class="footer-container"><div><a href="https://github.com/naiba/nezha" target="_blank">Powered by 哪吒面板 · {{.Version}}</a><p>&copy; <span id="copyright-date"><script>document.getElementById('copyright-date').appendChild(document.createTextNode(new Date().getFullYear()))</script></span> · <a href="https://blog.jackiesung.com" target="_blank">Theme designed by Jackie Sung</a></p></div></div></footer>
+    <!-- Back to top button -->
+    <a id="back-to-top"></a>
+    <script>var btn = $('#back-to-top'); $(window).scroll(function () { if ($(window).scrollTop() > 300) { btn.addClass('show'); } else { btn.removeClass('show'); } }); btn.on('click', function (e) { e.preventDefault(); $('html, body').animate({ scrollTop: 0 }, '300') });</script>
 
-    
+    <footer>
+        <div class="footer-container">
+            <div><a href="https://github.com/naiba/nezha" target="_blank">Powered by 哪吒面板 · {{.Version}}</a>
+                <p>&copy; <span id="copyright-date">
+                        <script>document.getElementById('copyright-date').appendChild(document.createTextNode(new Date().getFullYear()))</script>
+                    </span> · <a href="https://blog.jackiesung.com" target="_blank">Theme designed by Jackie Sung</a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    
+
     <script>
         const initData = {{.Servers }};
         var statusCards = new Vue({
@@ -161,15 +267,15 @@
         })
         const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
         const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
-    ws.onopen = function (evt) {
-        Swal.fire({
-          position: 'top',
-          icon: 'success',
-          title: '实时通道建立',
-          showConfirmButton: false,
-          timer: 1500
-        });
-    }
+        ws.onopen = function (evt) {
+            Swal.fire({
+                position: 'top',
+                icon: 'success',
+                title: '实时通道建立',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
         ws.onmessage = function (evt) {
             statusCards.servers = JSON.parse(evt.data)
             const keys = Object.keys(statusCards.servers)
@@ -187,16 +293,17 @@
             }
         }
         ws.onclose = function () {
-          Swal.fire({
-          position: 'top',
-          icon: 'error',
-          title: '实时通道断开',
-          showConfirmButton: false,
-          timer: 1500
-        });
+            Swal.fire({
+                position: 'top',
+                icon: 'error',
+                title: '实时通道断开',
+                showConfirmButton: false,
+                timer: 1500
+            });
 
-    }
+        }
     </script>
-    </body>
+</body>
+
 </html>
 {{end}}
