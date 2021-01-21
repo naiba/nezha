@@ -149,6 +149,9 @@ function addOrEditCron(cron) {
     modal.find('input[name=ID]').val(cron ? cron.ID : null)
     modal.find('input[name=Name]').val(cron ? cron.Name : null)
     modal.find('input[name=Scheduler]').val(cron ? cron.Scheduler : null)
+    modal.find('a.ui.label.visible').each((i,el) => {
+        el.remove()
+    })
     var servers
     if (cron) {
         servers = cron.ServersRaw

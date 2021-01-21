@@ -5,13 +5,14 @@ on:
     branches:
       - "master"
     paths-ignore:
-      - "script/**"
-      - ".gitignore"
-      - "*.md"
+      - "cmd/playground/**"
       - "cmd/agent/**"
       - ".github/workflows/agent.yml"
-      - ".goreleaser.yml"
       - ".github/ISSUE_TEMPLATE/**"
+      - ".goreleaser.yml"
+      - ".gitignore"
+      - "script/**"
+      - "*.md"
 
 jobs:
   deploy:
