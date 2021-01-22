@@ -1,6 +1,6 @@
 # 哪吒面板
 
-![dashboard](https://img.shields.io/badge/管理面板-v0.3.5-brightgreen?style=for-the-badge&logo=github) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github)
+![dashboard](https://img.shields.io/badge/管理面板-v0.3.6-brightgreen?style=for-the-badge&logo=github) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github)
 
 系统状态监控报警、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控、计划任务(可以定时在Agent上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
 
