@@ -281,7 +281,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 					Type: model.TaskTypeCommand,
 				})
 			} else {
-				alertmanager.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]))
+				alertmanager.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
 			}
 		}
 	})
