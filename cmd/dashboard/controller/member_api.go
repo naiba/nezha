@@ -75,13 +75,13 @@ func (ma *memberAPI) delete(c *gin.Context) {
 			err = dao.DB.Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
 		}
 	case "cron":
-
 		err = dao.DB.Delete(&model.Cron{}, "id = ?", id).Error
 		if err == nil {
 			dao.CronLock.RLock()
 			defer dao.CronLock.RUnlock()
-			if dao.Crons[id].CronID != 0 {
-				dao.Cron.Remove(dao.Crons[id].CronID)
+			cr := dao.Crons[id]
+			if cr != nil && cr.CronID != 0 {
+				dao.Cron.Remove(cr.CronID)
 			}
 			delete(dao.Crons, id)
 		}
@@ -264,13 +264,15 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		return
 	}
 
-	if cr.CronID != 0 {
-		dao.Cron.Remove(cr.CronID)
+	dao.ServerLock.Lock()
+	defer dao.ServerLock.Unlock()
+
+	crOld := dao.Crons[cr.ID]
+	if crOld != nil && crOld.CronID != 0 {
+		dao.Cron.Remove(crOld.CronID)
 	}
 
 	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, func() {
-		dao.ServerLock.RLock()
-		defer dao.ServerLock.RUnlock()
 		for j := 0; j < len(cr.Servers); j++ {
 			if dao.ServerList[cr.Servers[j]].TaskStream != nil {
 				dao.ServerList[cr.Servers[j]].TaskStream.Send(&pb.Task{
@@ -283,6 +285,9 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 			}
 		}
 	})
+
+	delete(dao.Crons, cr.ID)
+	dao.Crons[cr.ID] = &cr
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,

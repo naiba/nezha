@@ -58,18 +58,20 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 	if r.GetType() == model.TaskTypeCommand {
 		// 处理上报的计划任务
 		dao.CronLock.RLock()
+		defer dao.CronLock.RUnlock()
 		cr := dao.Crons[r.GetId()]
-		dao.CronLock.RUnlock()
-		if cr.PushSuccessful && r.GetSuccessful() {
-			alertmanager.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()))
+		if cr != nil {
+			if cr.PushSuccessful && r.GetSuccessful() {
+				alertmanager.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()))
+			}
+			if !r.GetSuccessful() {
+				alertmanager.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()))
+			}
+			dao.DB.Model(cr).Updates(model.Cron{
+				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
+				LastResult:     r.GetSuccessful(),
+			})
 		}
-		if !r.GetSuccessful() {
-			alertmanager.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()))
-		}
-		dao.DB.Model(cr).Updates(model.Cron{
-			LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
-			LastResult:     r.GetSuccessful(),
-		})
 	} else {
 		// 存入历史记录
 		mh := model.PB2MonitorHistory(r)
