@@ -71,6 +71,5 @@ func (mp *memberPage) notification(c *gin.Context) {
 func (mp *memberPage) setting(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard/setting", mygin.CommonEnvironment(c, gin.H{
 		"Title": "系统设置",
-		"Conf":  dao.Conf,
 	}))
 }

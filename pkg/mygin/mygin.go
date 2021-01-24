@@ -21,6 +21,7 @@ var adminPage = map[string]bool{
 func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	data["MatchedPath"] = c.MustGet("MatchedPath")
 	data["Version"] = dao.Version
+	data["Conf"] = dao.Conf
 	// 是否是管理页面
 	data["IsAdminPage"] = adminPage[data["MatchedPath"].(string)]
 	// 站点标题
