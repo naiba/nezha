@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.3.10"
+var Version = "v0.3.11" // ！！记得修改 README 重的 badge 版本！！
 
 const (
 	SnapshotDelay = 3

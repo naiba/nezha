@@ -30,17 +30,11 @@
         </div>
         <nav class="nav-menu">
           <ul>
-            {{if .Admin}}
             <li><a href="/">首页</a></li>
             <li><a href="/service">服务状态</a></li>
-            <li><a href="/server">服务器</a></li>
-            <li><a href="/monitor">监控</a></li>
-            <li><a href="/notification">通知</a></li>
-            <li><a href="/setting">设置</a></li>
+            {{if .Admin}}
             <li><a href="#" style="padding: 0.8em; text-align: center" title="您已登录">{{.Admin.Name}}</a></li>
             {{else}}
-            <li><a href="/">首页</a></li>
-            <li><a href="/service">服务状态</a></li>
             <li><a href="/login">登录</a></li>
             {{end}}
           </ul>
