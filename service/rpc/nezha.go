@@ -8,7 +8,6 @@ import (
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -52,7 +51,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		if errMsg != "" {
 			var monitor model.Monitor
 			dao.DB.First(&monitor, "id = ?", r.GetId())
-			alertmanager.SendNotification(fmt.Sprintf("服务监控：%s %s", monitor.Name, errMsg), true)
+			dao.SendNotification(fmt.Sprintf("服务监控：%s %s", monitor.Name, errMsg), true)
 		}
 	}
 	if r.GetType() == model.TaskTypeCommand {
@@ -62,10 +61,10 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		cr := dao.Crons[r.GetId()]
 		if cr != nil {
 			if cr.PushSuccessful && r.GetSuccessful() {
-				alertmanager.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()), false)
+				dao.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()), false)
 			}
 			if !r.GetSuccessful() {
-				alertmanager.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()), false)
+				dao.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()), false)
 			}
 			dao.DB.Model(cr).Updates(model.Cron{
 				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
@@ -127,7 +126,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		dao.ServerList[clientID].Host.IP != "" &&
 		host.IP != "" &&
 		dao.ServerList[clientID].Host.IP != host.IP {
-		alertmanager.SendNotification(fmt.Sprintf(
+		dao.SendNotification(fmt.Sprintf(
 			"IP变更提醒 服务器：%s ，旧IP：%s，新IP：%s。",
 			dao.ServerList[clientID].Name, dao.ServerList[clientID].Host.IP, host.IP), true)
 	}

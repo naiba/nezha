@@ -13,7 +13,6 @@ import (
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -90,7 +89,7 @@ func loadCrons() {
 						Type: model.TaskTypeCommand,
 					})
 				} else {
-					alertmanager.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
+					dao.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
 				}
 			}
 		})
@@ -106,5 +105,5 @@ func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(5555)
 	go rpc.DispatchTask(time.Minute * 3)
-	alertmanager.Start()
+	dao.AlertSentinelStart()
 }

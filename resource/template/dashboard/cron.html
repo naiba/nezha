@@ -37,6 +37,9 @@
                     <td>{{$cron.LastResult}}</td>
                     <td>
                         <div class="ui mini icon buttons">
+                            <button class="ui button" onclick="manualTrigger(this, {{$cron.ID}})">
+                                <i class="play icon"></i>
+                            </button>
                             <button class="ui button" onclick="addOrEditCron({{$cron}})">
                                 <i class="edit icon"></i>
                             </button>

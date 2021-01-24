@@ -15,7 +15,6 @@ import (
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/alertmanager"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -37,6 +36,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
+	mr.GET("/cron/:id/manual", ma.manualTrigger)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -67,7 +67,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	case "notification":
 		err = dao.DB.Delete(&model.Notification{}, "id = ?", id).Error
 		if err == nil {
-			alertmanager.OnDeleteNotification(id)
+			dao.OnDeleteNotification(id)
 		}
 	case "monitor":
 		err = dao.DB.Delete(&model.Monitor{}, "id = ?", id).Error
@@ -88,7 +88,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	case "alert-rule":
 		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
 		if err == nil {
-			alertmanager.OnDeleteAlert(id)
+			dao.OnDeleteAlert(id)
 		}
 	}
 	if err != nil {
@@ -281,13 +281,30 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 					Type: model.TaskTypeCommand,
 				})
 			} else {
-				alertmanager.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
+				dao.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
 			}
 		}
 	})
 
 	delete(dao.Crons, cr.ID)
 	dao.Crons[cr.ID] = &cr
+
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+func (ma *memberAPI) manualTrigger(c *gin.Context) {
+	var cr model.Cron
+	if err := dao.DB.First(&cr, "id = ?", c.Param("id")).Error; err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	dao.CronTrigger(&cr)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
@@ -333,7 +350,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		})
 		return
 	}
-	alertmanager.OnRefreshOrAddNotification(n)
+	dao.OnRefreshOrAddNotification(n)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
@@ -384,7 +401,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		})
 		return
 	}
-	alertmanager.OnRefreshOrAddAlert(r)
+	dao.OnRefreshOrAddAlert(r)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
