@@ -9,7 +9,7 @@
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
 
-    <link rel="stylesheet" href="/static/theme-daynight/main.css?v202101220904">
+    <link rel="stylesheet" href="/static/theme-daynight/css/main.css">
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
@@ -20,7 +20,7 @@
 
 <body data-theme="light" data-gridlist="grid">
     <header class="nav-bar clearfix">
-        <figure class="logo"><a href="/">{{.Title}}</a></figure>
+        <figure class="logo"><a href="/">哪吒面板</a></figure>
         <div class="icon-container">
             <div class="row cf">
                 <div class="three col">
@@ -31,21 +31,27 @@
         </div>
         <nav class="nav-menu">
             <ul>
+                {{if .Admin}}
                 <li><a href="/">首页</a></li>
                 <li><a href="/service">服务状态</a></li>
                 <li><a href="/server">服务器</a></li>
                 <li><a href="/monitor">监控</a></li>
                 <li><a href="/notification">通知</a></li>
-                <li><a href="/setting">设置</a></li>{{if .Admin}} <li><a href="#" style="padding:.8em;text-align:center;"
-                        title="您已登录">{{.Admin.Name}}</a></li>{{else}} <li><a href="/login">登录</a></li>{{end}}
+                <li><a href="/setting">设置</a></li>
+                <li><a href="#" style="padding:.8em;text-align:center;"
+                        title="您已登录">{{.Admin.Name}}</a></li>
+                {{else}}
+                <li><a href="/">首页</a></li>
+                <li><a href="/service">服务状态</a></li>
+                <li><a href="/login">登录</a></li>{{end}}
             </ul>
         </nav>
     </header>
-    <script>$(document).ready(function () { $(".hamburger").click(function () { $(this).toggleClass("is-active"); $('.nav-menu').toggleClass('active'); $('.nav-bar').toggleClass('active'); }); }); </script>
+ 
     <section class="toggle-container">
       <div class="dark-mode-toggle">
         <label class="switcher">
-          <input type="checkbox" name="theme" id="switch" />
+          <input type="checkbox" name="theme" id="dark-light" />
           <div>
             <i class="fas fa-sun" title="白昼模式"></i>
             <i class="fas fa-moon" title="暗黑模式"></i>
@@ -134,43 +140,8 @@
         </div>
     </div>
 
-    <!-- Dark mode toggle -->
-    <script>
-      var checkbox = document.querySelector("input[name=theme]");
-      var themeStatue = document.getElementsByTagName("BODY")[0];
-      checkbox.addEventListener("change", function () {
-        if (this.checked) {
-          themeStatue.setAttribute("data-theme", "dark");
-        } else {
-          themeStatue.setAttribute("data-theme", "light");
-        }
-      });
-    </script>
-
-    <!-- Grid list mode toggle -->
-    <script>
-      var checkboxs = document.querySelector("input[name=grid]");
-      var themeStatue = document.getElementsByTagName("BODY")[0];
-      checkboxs.addEventListener("change", function () {
-        if (this.checked) {
-          transs();
-          themeStatue.setAttribute("data-gridlist", "list");
-        } else {
-          transs();
-          themeStatue.setAttribute("data-gridlist", "grid");
-        }
-      });
-      let transs = () => {
-        themeStatue.classList.add("transition-theme");
-        window.setTimeout(() => {
-          themeStatue.classList.remove("transition-theme");
-        }, 1000);
-      };
-    </script>
-
     <!-- Back to top button -->
     <a id="back-to-top"></a>
-    <script>var btn = $('#back-to-top'); $(window).scroll(function () { if ($(window).scrollTop() > 300) { btn.addClass('show'); } else { btn.removeClass('show'); } }); btn.on('click', function (e) { e.preventDefault(); $('html, body').animate({ scrollTop: 0 }, '300') });</script>
 
     <footer>
         <div class="footer-container">
@@ -183,7 +154,7 @@
         </div>
     </footer>
 
-
+    <script src="/static/theme-daynight/js/main.js" ></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 

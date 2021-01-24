@@ -1,44 +1,126 @@
 {{define "theme-daynight/service"}}
-{{template "common/header" .}}
-{{if ts .CustomCode}}
-{{.CustomCode|safe}}
-{{end}}
-{{template "common/menu" .}}
-<div class="nb-container">
-    <div class="ui container">
-        <div class="service-status">
 
-            <table class="ui celled table">
-                <thead>
-                    <tr>
-                        <th class="ui center aligned">名称</th>
-                        <th class="ui center aligned">30天在线率</th>
-                        <th class="ui center aligned">详情</th>
-                        <th class="ui center aligned">状态</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {{range $service := .Services}}
-                    <tr>
-                        <td class="ui center aligned">{{$service.Monitor.Name}}</td>
-                        <td class="ui center aligned">
-                            {{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%
-                        </td>
-                        <td class="ui center aligned">{{range $i,$d := $service.Delay}}
-                            <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"
-                                data-tooltip="{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms">
-                            </div> {{end}}
-                        </td>
-                        <td class="ui center aligned delay-today">
-                            <i
-                                class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
-                            {{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}
-                        </td>
-                    </tr> {{end}}
-                </tbody>
-            </table>
+<!DOCTYPE html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+    <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
+    <link rel="stylesheet" href="/static/theme-daynight/css/service.css" />
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    {{if ts .CustomCode}}
+    {{.CustomCode|safe}}
+    {{end}}
+  </head>
+
+  <body data-theme="light" data-gridlist="list">
+    <article>
+      <header class="nav-bar clearfix">
+        <figure class="logo"><a href="/">哪吒面板</a></figure>
+        <div class="icon-container">
+          <div class="row cf">
+            <div class="three col">
+              <div class="hamburger" id="hamburger-icon"><span class="line"></span><span class="line"></span><span class="line"></span></div>
+            </div>
+          </div>
         </div>
-    </div>
-</div>
-{{template "common/footer" .}}
+        <nav class="nav-menu">
+          <ul>
+            {{if .Admin}}
+            <li><a href="/">首页</a></li>
+            <li><a href="/service">服务状态</a></li>
+            <li><a href="/server">服务器</a></li>
+            <li><a href="/monitor">监控</a></li>
+            <li><a href="/notification">通知</a></li>
+            <li><a href="/setting">设置</a></li>
+            <li><a href="#" style="padding: 0.8em; text-align: center" title="您已登录">{{.Admin.Name}}</a></li>
+            {{else}}
+            <li><a href="/">首页</a></li>
+            <li><a href="/service">服务状态</a></li>
+            <li><a href="/login">登录</a></li>
+            {{end}}
+          </ul>
+        </nav>
+      </header>
+
+      <section class="toggle-container">
+        <div class="dark-mode-toggle">
+          <label class="switcher">
+            <input type="checkbox" name="theme" id="dark-light" />
+            <div>
+              <i class="fas fa-sun" title="白昼模式"></i>
+              <i class="fas fa-moon" title="暗黑模式"></i>
+            </div>
+          </label>
+        </div>
+
+        <div class="grid-mode-toggle">
+          <label class="switcher">
+            <input type="checkbox" name="grid" id="grid-list" checked />
+            <div>
+              <i class="fas fa-th" title="网格视图"></i>
+              <i class="fas fa-list-ul" title="列表视图"></i>
+            </div>
+          </label>
+        </div>
+      </section>
+
+      <main>
+        <section class="monitor-header">
+          <h2>服务状态</h2>
+          <h4>最近30天在线率</h4>
+        </section>
+        <section class="monitor-container">
+          {{range $service := .Services}}
+          <section class="monitor-info-container">
+            <div class="monitor-state">
+              <span class="monitor-state-dot {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></span>
+              <span class="monitor-state-text">{{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}</span>
+            </div>
+            <div class="monitor-name">{{$service.Monitor.Name}}</div>
+            <div class="monitor-uptime">{{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%</div>
+
+            <div class="corner-container">
+              {{range $i,$d := $service.Delay}}
+              <div class="corner {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}" aria-expanded="false">
+                <ul class="sub-content">
+                  <li>{{dayBefore $i}}</li>
+                  <li>{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%</li>
+                  <li>{{float32f $d}}ms</li>
+                </ul>
+              </div>
+              {{end}}
+            </div>
+          </section>
+          {{end}}
+        </section>
+      </main>
+
+      <footer>
+        <div class="footer-container">
+          <div>
+            <a href="https://github.com/naiba/nezha" target="_blank">Powered by 哪吒面板 · {{.Version}}</a>
+            <p>
+              &copy;
+              <span id="copyright-date"
+                ><script>
+                  document.getElementById("copyright-date").appendChild(document.createTextNode(new Date().getFullYear()));
+                </script></span
+              >
+              · <a href="https://blog.jackiesung.com" target="_blank">Theme designed by Jackie Sung</a>
+            </p>
+          </div>
+        </div>
+      </footer>
+      <!-- Back to top button -->
+      <a id="back-to-top"></a>
+    </article>
+
+    <script src="/static/theme-daynight/js/service.js" ></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+  </body>
+</html>
 {{end}}
