@@ -7,7 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
-    <link rel="stylesheet" href="/static/theme-daynight/css/service.css" />
+    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202101241800" />
+
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
@@ -19,7 +20,7 @@
   <body data-theme="light" data-gridlist="list">
     <article>
       <header class="nav-bar clearfix">
-        <figure class="logo"><a href="/">哪吒面板</a></figure>
+        <figure class="logo"><a href="/">{{.Title}}</a></figure>
         <div class="icon-container">
           <div class="row cf">
             <div class="three col">
@@ -119,8 +120,8 @@
       <a id="back-to-top"></a>
     </article>
 
-    <script src="/static/theme-daynight/js/service.js" ></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
+    <script src="/static/theme-daynight/js/service.js?v202101241800"></script>
+
   </body>
 </html>
 {{end}}
