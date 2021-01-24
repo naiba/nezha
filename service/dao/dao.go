@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.3.9"
+var Version = "v0.3.10"
 
 const (
 	SnapshotDelay = 3

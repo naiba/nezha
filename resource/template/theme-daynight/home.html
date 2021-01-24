@@ -20,7 +20,7 @@
 
 <body data-theme="light" data-gridlist="grid">
     <header class="nav-bar clearfix">
-        <figure class="logo"><a href="/">{{.Title}}</a></figure>
+        <figure class="logo"><a href="/">{{.Conf.Site.Brand}}</a></figure>
         <div class="icon-container">
             <div class="row cf">
                 <div class="three col">
@@ -34,16 +34,12 @@
                 {{if .Admin}}
                 <li><a href="/">首页</a></li>
                 <li><a href="/service">服务状态</a></li>
-                <li><a href="/server">服务器</a></li>
-                <li><a href="/monitor">监控</a></li>
-                <li><a href="/notification">通知</a></li>
-                <li><a href="/setting">设置</a></li>
-                <li><a href="#" style="padding:.8em;text-align:center;"
-                        title="您已登录">{{.Admin.Name}}</a></li>
+                <li><a href="/server" style="padding:.8em;text-align:center;">管理后台</a></li>
                 {{else}}
                 <li><a href="/">首页</a></li>
                 <li><a href="/service">服务状态</a></li>
-                <li><a href="/login">登录</a></li>{{end}}
+                <li><a href="/login">登录</a></li>
+                {{end}}
             </ul>
         </nav>
     </header>

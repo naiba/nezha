@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"time"
 
@@ -16,8 +17,9 @@ import (
 func main() {
 	// icmp()
 	// tcpping()
-	httpWithSSLInfo()
+	// httpWithSSLInfo()
 	// diskinfo()
+	cmdExec()
 }
 
 func tcpping() {
@@ -71,13 +73,12 @@ func icmp() {
 }
 
 func cmdExec() {
-	cmd := exec.Command("ping", "example.com", "-c2")
+	execFrom, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	cmd := exec.Command(execFrom + "/cmd/playground/example.sh")
 	output, err := cmd.Output()
-	log.Println("output:", string(output))
-	log.Println("err:", err)
-
-	cmd = exec.Command("ping", "example", "-c2")
-	output, err = cmd.Output()
 	log.Println("output:", string(output))
 	log.Println("err:", err)
 }
