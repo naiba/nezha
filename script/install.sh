@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v1.0.2"
+NZ_VERSION="v1.1.0"
 GITHUB_RAW_URL="raw.githubusercontent.com"
 GITHUB_URL="github.com"
 
@@ -77,9 +77,7 @@ pre_check() {
     ## os_arch
     if [ $(uname -m | grep 'x86_64') != "" ]; then
         os_arch="amd64"
-    elif [ $(uname -m | grep 'i686') != "" ]; then
-        os_arch="amd64"
-    elif [ $(uname -m | grep 'i386') != "" ]; then
+    elif [ $(uname -m | grep 'i386\|i686') != "" ]; then
         os_arch="386"
     elif [ $(uname -m | grep 'aarch64') != "" ]; then
         os_arch="arm64"
@@ -364,6 +362,16 @@ uninstall_dashboard() {
     fi
 }
 
+show_agent_log() {
+    echo -e "> 获取Agent日志"
+
+    journalctl -xf -u nezha-agent.service
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
 uninstall_agent() {
     echo -e "> 卸载Agent"
 
@@ -410,6 +418,7 @@ show_usage() {
     echo "--------------------------------------------------------"
     echo "./nbdomain.sh install_agent              - 安装监控Agent"
     echo "./nbdomain.sh modify_agent_config        - 修改Agent配置"
+    echo "./nbdomain.sh show_agent_log             - 查看Agent日志"
     echo "./nbdomain.sh uninstall_agent            - 卸载Agen"
     echo "./nbdomain.sh restart_agent              - 重启Agen"
     echo "--------------------------------------------------------"
@@ -431,10 +440,11 @@ show_menu() {
     ————————————————-
     ${green}8.${plain}  安装监控Agent
     ${green}9.${plain}  修改Agent配置
-    ${green}10.${plain} 卸载Agent
-    ${green}11.${plain} 重启Agent
+    ${green}10.${plain} 查看Agent日志
+    ${green}11.${plain} 卸载Agent
+    ${green}12.${plain} 重启Agent
     "
-    echo && read -p "请输入选择 [0-11]: " num
+    echo && read -p "请输入选择 [0-12]: " num
 
     case "${num}" in
     0)
@@ -468,13 +478,16 @@ show_menu() {
         modify_agent_config
         ;;
     10)
-        uninstall_agent
+        show_agent_log
         ;;
     11)
+        uninstall_agent
+        ;;
+    12)
         restart_agent
         ;;
     *)
-        echo -e "${red}请输入正确的数字 [0-11]${plain}"
+        echo -e "${red}请输入正确的数字 [0-12]${plain}"
         ;;
     esac
 }
@@ -509,6 +522,9 @@ if [[ $# > 0 ]]; then
         ;;
     "modify_agent_config")
         modify_agent_config 0
+        ;;
+    "show_agent_log")
+        show_agent_log 0
         ;;
     "uninstall_agent")
         uninstall_agent 0
