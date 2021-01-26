@@ -153,13 +153,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 ## 常见问题
 
 <details>
-    <summary>数据备份恢复：数据迁移、备份恢复。 来自 @艾斯德斯</summary>
+    <summary>如何进行数据迁移、备份恢复？</summary>
 
 数据储存在 `/opt/nezha` 文件夹中，迁移数据时打包这个文件夹，到新环境解压。然后执行一键脚本安装即可
 </details>
 
 <details>
-    <summary>路由器：OpenWrt/LEDE 自启动</summary>
+    <summary>如何使 OpenWrt/LEDE 自启动？来自 @艾斯德斯</summary>
 
 首先在 release 下载对应的二进制解压后放置到 `/root/nezha-agent`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-agent`：
 
@@ -185,13 +185,13 @@ restart(){
 </details>
 
 <details>
-    <summary>服务器时间不准确：导致首页服务器随机频繁掉线。</summary>
+    <summary>首页服务器随机闪烁掉线？</summary>
 
 执行 `ntpdate 0.pool.ntp.org` 同步一下面板部署所在的服务器的时间，ref: [How do I use pool.ntp.org?](https://www.ntppool.org/en/use.html)
 </details>
 
 <details>
-    <summary>反向代理配置：HTTPS、WebSocket（实时通道断开问题）</summary>
+    <summary>提示实时通道断开？</summary>
 
 ### 启用 HTTPS
 
