@@ -1,6 +1,6 @@
 # 哪吒面板
 
-![dashboard](https://img.shields.io/badge/管理面板-v0.3.11-brightgreen?style=for-the-badge&logo=github) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github)
+![dashboard](https://img.shields.io/badge/管理面板-v0.3.12-brightgreen?style=for-the-badge&logo=github) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github)
 
 系统状态监控报警、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控、计划任务(可以定时在Agent上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
 
@@ -153,9 +153,35 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 ## 常见问题
 
 <details>
-    <summary>数据备份恢复：数据迁移、备份恢复。</summary>
+    <summary>数据备份恢复：数据迁移、备份恢复。 来自 @艾斯德斯</summary>
 
 数据储存在 `/opt/nezha` 文件夹中，迁移数据时打包这个文件夹，到新环境解压。然后执行一键脚本安装即可
+</details>
+
+<details>
+    <summary>路由器：OpenWrt/LEDE 自启动</summary>
+
+首先在 release 下载对应的二进制解压后放置到 `/root/nezha-agent`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-agent`：
+
+```
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start(){
+    nohup /root/nezha-agent -i XXX -d >/dev/null 2>&1 &
+}
+stop(){
+    # kill your pid
+    kill -9 `ps | grep '/root/nezha-agent' | grep -v 'grep' | awk '{print $1}'`
+}
+restart(){
+    kill -9 `ps | grep '/root/nezha-agent' | grep -v 'grep' | awk '{print $1}'`
+    nohup /root/nezha-agent -i XXX -d >/dev/null 2>&1 &
+}
+```
+
+赋予执行权限 `chmod +x /etc/init.d/nezha-agnt` 然后启动服务 `/etc/init.d/nezha-agent enable && /etc/init.d/nezha-agent start`
 </details>
 
 <details>
