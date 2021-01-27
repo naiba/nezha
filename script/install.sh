@@ -182,7 +182,7 @@ install_agent() {
     fi
     tar xf nezha-agent_linux_${os_arch}.tar.gz &&
         mv nezha-agent $NZ_AGENT_PATH &&
-        rm -rf nezha-agent*
+        rm -rf README.md
 
     modify_agent_config 0
 
