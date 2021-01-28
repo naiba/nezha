@@ -7,14 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
-    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202101241800" />
+    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202101290086" />
 
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    {{if ts .CustomCode}}
-    {{.CustomCode|safe}}
-    {{end}}
+    {{if ts .CustomCode}} {{.CustomCode|safe}} {{end}}
   </head>
 
   <body data-theme="light" data-gridlist="list">
@@ -33,35 +31,13 @@
             <li><a href="/">首页</a></li>
             <li><a href="/service">服务状态</a></li>
             {{if .Admin}}
-            <li><a href="/server" style="padding:.8em;text-align:center;">管理后台</a></li>
+            <li><a href="/server" style="padding: 0.8em; text-align: center">管理后台</a></li>
             {{else}}
             <li><a href="/login">登录</a></li>
             {{end}}
           </ul>
         </nav>
       </header>
-
-      <section class="toggle-container">
-        <div class="dark-mode-toggle">
-          <label class="switcher">
-            <input type="checkbox" name="theme" id="dark-light" />
-            <div>
-              <i class="fas fa-sun" title="白昼模式"></i>
-              <i class="fas fa-moon" title="暗黑模式"></i>
-            </div>
-          </label>
-        </div>
-
-        <div class="grid-mode-toggle">
-          <label class="switcher">
-            <input type="checkbox" name="grid" id="grid-list" checked />
-            <div>
-              <i class="fas fa-th" title="网格视图"></i>
-              <i class="fas fa-list-ul" title="列表视图"></i>
-            </div>
-          </label>
-        </div>
-      </section>
 
       <main>
         <section class="monitor-header">
@@ -94,6 +70,37 @@
         </section>
       </main>
 
+      <div class="sidebar-container">
+        <ul>
+          <li><i class="fas fa-sun" title="白昼模式"></i><span>白昼模式</span></li>
+          <li><i class="fas fa-moon" title="暗黑模式"></i><span>暗黑模式</span></li>
+          <li><i class="fas fa-th" title="网格视图"></i><span>网格视图</span></li>
+          <li><i class="fas fa-list-ul" title="列表视图"></i><span>列表视图</span></li>
+        </ul>
+      </div>
+
+      <section class="service-mobile-toggle">
+        <ul>
+          <li><i class="fas fa-plus"></i></li>
+          <li>
+            <label class="switcher">
+              <input type="checkbox" name="service-theme" id="dark-light" />
+              <div>
+                <i class="fas fa-adjust"></i>
+              </div>
+            </label>
+          </li>
+          <li>
+            <label class="switcher">
+              <input type="checkbox" name="service-grid" id="grid-list" checked />
+              <div>
+                <i class="fas fa-grip-horizontal"></i>
+              </div>
+            </label>
+          </li>
+        </ul>
+      </section>
+
       <footer>
         <div class="footer-container">
           <div>
@@ -110,12 +117,12 @@
           </div>
         </div>
       </footer>
+
       <!-- Back to top button -->
       <a id="back-to-top"></a>
     </article>
 
-    <script src="/static/theme-daynight/js/service.js?v202101241800"></script>
-
+    <script src="/static/theme-daynight/js/service.js?v202101290086"></script>
   </body>
 </html>
 {{end}}
