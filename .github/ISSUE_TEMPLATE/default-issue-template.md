@@ -9,8 +9,12 @@ assignees: ''
 
 <!--
 First of all：
+
 确认你的 管理面板 及 Agent 都是最新版本。
 Make sure your dashboard and agent is up to date.
+
+确认你已再次看过一遍 README 文档，因为有些问题可能在你离开的这段时间已被解决。
+Make sure you have read the README file again, because some issues may have been resolved during your absence.
 -->
 
 ### 描述问题 Describe the problem
@@ -18,6 +22,9 @@ Make sure your dashboard and agent is up to date.
 <!--
 请尽量清晰精准地描述你碰到的问题。
 Please describe your problem as clearly and accurately as possible.
+
+主题问题请 @ 主题的作者，在 README 截图顶部。
+For system theme questions, please @ the author of the theme, the author information is at the top of the README screenshot.
 -->
 
 ### 期待的结果 Expected result

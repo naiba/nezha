@@ -21,6 +21,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 	"github.com/naiba/nezha/service/monitor"
@@ -230,7 +231,12 @@ func doTask(task *pb.Task) {
 		}
 	case model.TaskTypeCommand:
 		startedAt := time.Now()
-		cmd := exec.Command(task.GetData())
+		var cmd *exec.Cmd
+		if utils.IsWindows() {
+			cmd = exec.Command("cmd", "/c", task.GetData())
+		} else {
+			cmd = exec.Command("sh", "-c", task.GetData())
+		}
 		output, err := cmd.Output()
 		result.Delay = float32(time.Now().Sub(startedAt).Seconds())
 		if err != nil {

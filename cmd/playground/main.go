@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-ping/ping"
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/shirou/gopsutil/v3/disk"
 )
 
@@ -77,7 +78,13 @@ func cmdExec() {
 	if err != nil {
 		panic(err)
 	}
-	cmd := exec.Command(execFrom + "/cmd/playground/example.sh")
+	var cmd *exec.Cmd
+	if utils.IsWindows() {
+		cmd = exec.Command("cmd", "/c", execFrom+"/cmd/playground/example.sh hello asd")
+	} else {
+		cmd = exec.Command("sh", "-c", execFrom+`/cmd/playground/example.sh hello && \
+echo world!`)
+	}
 	output, err := cmd.Output()
 	log.Println("output:", string(output))
 	log.Println("err:", err)

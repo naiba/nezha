@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"math/rand"
+	"os"
 	"time"
 	"unsafe"
 )
@@ -39,4 +40,8 @@ func MD5(plantext string) string {
 	hash := md5.New()
 	hash.Write([]byte(plantext))
 	return hex.EncodeToString(hash.Sum(nil))
+}
+
+func IsWindows() bool {
+	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
 }
