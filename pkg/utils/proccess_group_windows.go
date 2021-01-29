@@ -1,7 +1,9 @@
+// +build windows
+
 package utils
 
 import (
-	"os"
+	"os/exec"
 	"unsafe"
 
 	"golang.org/x/sys/windows"
@@ -42,8 +44,8 @@ func (g ProcessExitGroup) Dispose() error {
 	return windows.CloseHandle(windows.Handle(g))
 }
 
-func (g ProcessExitGroup) AddProcess(p *os.Process) error {
+func (g ProcessExitGroup) AddProcess(cmd *exec.Cmd) error {
 	return windows.AssignProcessToJobObject(
 		windows.Handle(g),
-		windows.Handle((*process)(unsafe.Pointer(p)).Handle))
+		windows.Handle((*process)(unsafe.Pointer(cmd.Process)).Handle))
 }

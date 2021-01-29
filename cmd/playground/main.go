@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -80,40 +79,25 @@ func cmdExec() {
 		panic(err)
 	}
 	var cmd *exec.Cmd
-	var pg utils.ProcessExitGroup
+	pg, err := utils.NewProcessExitGroup()
+	if err != nil {
+		panic(err)
+	}
 	if utils.IsWindows() {
-		pg, err = utils.NewProcessExitGroup()
-		if err != nil {
-			panic(err)
-		}
 		cmd = exec.Command("cmd", "/c", execFrom+"/cmd/playground/example.sh hello asd")
-		pg.AddProcess(cmd.Process)
 	} else {
 		cmd = exec.Command("sh", "-c", execFrom+`/cmd/playground/example.sh hello && \
-echo world!`)
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+			echo world!`)
 	}
-	var endCh = make(chan struct{})
-	go func() {
-		output, err := cmd.Output()
-		log.Println("output:", string(output))
-		log.Println("err:", err)
-		close(endCh)
-	}()
+	pg.AddProcess(cmd)
 	go func() {
 		time.Sleep(time.Second * 2)
-		fmt.Println("killed")
-		if utils.IsWindows() {
-			if err := pg.Dispose(); err != nil {
-				panic(err)
-			}
-		} else {
-			if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
-				panic(err)
-			}
+		if err = pg.Dispose(); err != nil {
+			panic(err)
 		}
+		fmt.Println("killed")
 	}()
-	select {
-	case <-endCh:
-	}
+	output, err := cmd.Output()
+	log.Println("output:", string(output))
+	log.Println("err:", err)
 }

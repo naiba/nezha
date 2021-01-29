@@ -11,7 +11,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/blang/semver"
@@ -234,32 +233,25 @@ func doTask(task *pb.Task) {
 		startedAt := time.Now()
 		var cmd *exec.Cmd
 		var endCh = make(chan struct{})
-		var pg utils.ProcessExitGroup
+		pg, err := utils.NewProcessExitGroup()
+		if err != nil {
+			// 进程组创建失败，直接退出
+			result.Data = err.Error()
+			client.ReportTask(ctx, &result)
+			return
+		}
 		timeout := time.NewTimer(time.Hour * 2)
 		if utils.IsWindows() {
-			var err error
-			pg, err = utils.NewProcessExitGroup()
-			if err != nil {
-				// Windows 进程组创建失败，直接退出
-				result.Data = err.Error()
-				client.ReportTask(ctx, &result)
-				return
-			}
 			cmd = exec.Command("cmd", "/c", task.GetData())
-			pg.AddProcess(cmd.Process)
 		} else {
 			cmd = exec.Command("sh", "-c", task.GetData())
-			cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 		}
+		pg.AddProcess(cmd)
 		go func() {
 			select {
 			case <-timeout.C:
 				result.Data = "任务执行超时\n"
-				if utils.IsWindows() {
-					pg.Dispose()
-				} else {
-					cmd.Process.Kill()
-				}
+				pg.Dispose()
 				close(endCh)
 			case <-endCh:
 			}
