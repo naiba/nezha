@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/blang/semver"
@@ -232,30 +233,30 @@ func doTask(task *pb.Task) {
 	case model.TaskTypeCommand:
 		startedAt := time.Now()
 		var cmd *exec.Cmd
-		var resChan chan string
-		var errChan chan string
-		timeout := time.NewTimer(time.Minute * 30)
+		var endCh = make(chan struct{})
+		timeout := time.NewTimer(time.Hour * 2)
 		if utils.IsWindows() {
 			cmd = exec.Command("cmd", "/c", task.GetData())
 		} else {
 			cmd = exec.Command("sh", "-c", task.GetData())
 		}
-		go func(resChan, errChan chan string) {
-			output, err := cmd.Output()
-			if err != nil {
-				errChan <- fmt.Sprintf("%s\n%s", string(output), err.Error())
-				return
+		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+		go func() {
+			select {
+			case <-timeout.C:
+				result.Data = "任务执行超时\n"
+				cmd.Process.Kill()
+				close(endCh)
+			case <-endCh:
 			}
-			resChan <- string(output)
-		}(resChan, errChan)
-		select {
-		case <-timeout.C:
-			result.Data = "任务执行超时（30分钟）"
-		case output := <-resChan:
-			result.Data = output
+		}()
+		output, err := cmd.Output()
+		if err != nil {
+			result.Data += fmt.Sprintf("%s\n%s", string(output), err.Error())
+		} else {
+			close(endCh)
+			result.Data = string(output)
 			result.Successful = true
-		case errString := <-errChan:
-			result.Data = errString
 		}
 		result.Delay = float32(time.Now().Sub(startedAt).Seconds())
 	default:

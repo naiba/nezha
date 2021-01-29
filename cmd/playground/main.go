@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"syscall"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -85,7 +86,22 @@ func cmdExec() {
 		cmd = exec.Command("sh", "-c", execFrom+`/cmd/playground/example.sh hello && \
 echo world!`)
 	}
-	output, err := cmd.Output()
-	log.Println("output:", string(output))
-	log.Println("err:", err)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	var endCh = make(chan struct{})
+	go func() {
+		output, err := cmd.Output()
+		log.Println("output:", string(output))
+		log.Println("err:", err)
+		close(endCh)
+	}()
+	go func() {
+		time.Sleep(time.Second * 2)
+		fmt.Println("killed")
+		if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+			panic(err)
+		}
+	}()
+	select {
+	case <-endCh:
+	}
 }
