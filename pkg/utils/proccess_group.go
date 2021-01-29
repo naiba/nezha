@@ -15,7 +15,7 @@ func NewProcessExitGroup() (ProcessExitGroup, error) {
 	return ProcessExitGroup{}, nil
 }
 
-func (g ProcessExitGroup) Dispose() error {
+func (g *ProcessExitGroup) Dispose() error {
 	for _, c := range g.cmds {
 		if err := syscall.Kill(-c.Process.Pid, syscall.SIGKILL); err != nil {
 			return err

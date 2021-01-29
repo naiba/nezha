@@ -84,14 +84,15 @@ func cmdExec() {
 		panic(err)
 	}
 	if utils.IsWindows() {
-		cmd = exec.Command("cmd", "/c", execFrom+"/cmd/playground/example.sh hello asd")
+		cmd = exec.Command("cmd", "/c", os.Args[1])
+		// cmd = exec.Command("cmd", "/c", execFrom+"/cmd/playground/example.sh hello asd")
 	} else {
 		cmd = exec.Command("sh", "-c", execFrom+`/cmd/playground/example.sh hello && \
 			echo world!`)
 	}
 	pg.AddProcess(cmd)
 	go func() {
-		time.Sleep(time.Second * 2)
+		time.Sleep(time.Second * 10)
 		if err = pg.Dispose(); err != nil {
 			panic(err)
 		}

@@ -167,17 +167,23 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 #!/bin/sh /etc/rc.common
 
 START=99
+USE_PROCD=1
 
-start(){
-    nohup /root/nezha-agent -i XXX -d >/dev/null 2>&1 &
+start_service() {
+	procd_open_instance
+	procd_set_param command /root/nezha-agent -i xxx -p 111 -d
+	procd_set_param respawn
+	procd_close_instance
 }
-stop(){
-    # kill your pid
-    kill -9 `ps | grep '/root/nezha-agent' | grep -v 'grep' | awk '{print $1}'`
+
+stop_service() {
+    killall nezha-agent
 }
-restart(){
-    kill -9 `ps | grep '/root/nezha-agent' | grep -v 'grep' | awk '{print $1}'`
-    nohup /root/nezha-agent -i XXX -d >/dev/null 2>&1 &
+
+restart() {
+	stop
+	sleep 2
+	start
 }
 ```
 

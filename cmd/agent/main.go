@@ -251,9 +251,10 @@ func doTask(task *pb.Task) {
 			select {
 			case <-timeout.C:
 				result.Data = "任务执行超时\n"
-				pg.Dispose()
 				close(endCh)
+				pg.Dispose()
 			case <-endCh:
+				timeout.Stop()
 			}
 		}()
 		output, err := cmd.Output()
