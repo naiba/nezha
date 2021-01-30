@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v1.1.0"
+NZ_VERSION="v4.0.0"
 GITHUB_RAW_URL="raw.githubusercontent.com"
 GITHUB_URL="github.com"
 
