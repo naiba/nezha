@@ -7,36 +7,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
-    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202101290086" />
+    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202101301768" />
 
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-    {{if ts .CustomCode}} {{.CustomCode|safe}} {{end}}
+    {{if ts .CustomCode}}
+    {{.CustomCode|safe}}
+    {{end}}
   </head>
 
   <body data-theme="light" data-gridlist="list">
     <article>
-      <header class="nav-bar clearfix">
-        <figure class="logo"><a href="/">{{.Conf.Site.Brand}}</a></figure>
-        <div class="icon-container">
-          <div class="row cf">
-            <div class="three col">
-              <div class="hamburger" id="hamburger-icon"><span class="line"></span><span class="line"></span><span class="line"></span></div>
+      <header>
+        <section class="nav-bar clearfix">
+            <figure class="logo"><a href="/">{{.Conf.Site.Brand}}</a></figure>
+            <div class="icon-container">
+              <div class="row cf">
+                <div class="three col">
+                  <div class="hamburger" id="hamburger-icon"><span class="line"></span><span class="line"></span><span class="line"></span></div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        <nav class="nav-menu">
-          <ul>
-            <li><a href="/">首页</a></li>
-            <li><a href="/service">服务状态</a></li>
-            {{if .Admin}}
-            <li><a href="/server" style="padding: 0.8em; text-align: center">管理后台</a></li>
-            {{else}}
-            <li><a href="/login">登录</a></li>
-            {{end}}
-          </ul>
-        </nav>
+            <nav class="nav-menu">
+              <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/service">服务状态</a></li>
+                {{if .Admin}}
+                <li><a href="/server" style="padding:.8em;text-align:center;">管理后台</a></li>
+                {{else}}
+                <li><a href="/login">登录</a></li>
+                {{end}}
+              </ul>
+            </nav>
+        </section>
       </header>
 
       <main>
@@ -69,7 +73,7 @@
           {{end}}
         </section>
       </main>
-
+      
       <div class="sidebar-container">
         <ul>
           <li><i class="fas fa-sun" title="白昼模式"></i><span>白昼模式</span></li>
@@ -92,7 +96,7 @@
           </li>
           <li>
             <label class="switcher">
-              <input type="checkbox" name="service-grid" id="grid-list" checked />
+              <input type="checkbox" name="service-grid" id="grid-list" checked/>
               <div>
                 <i class="fas fa-grip-horizontal"></i>
               </div>
@@ -117,12 +121,13 @@
           </div>
         </div>
       </footer>
-
+      
       <!-- Back to top button -->
       <a id="back-to-top"></a>
     </article>
 
-    <script src="/static/theme-daynight/js/service.js?v202101290086"></script>
+    <script src="/static/theme-daynight/js/service.js?v202101301768"></script>
+
   </body>
 </html>
 {{end}}
