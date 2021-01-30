@@ -7,12 +7,9 @@ on:
     paths-ignore:
       - "cmd/playground/**"
       - "cmd/agent/**"
-      - ".github/workflows/agent.yml"
-      - ".github/ISSUE_TEMPLATE/**"
-      - ".goreleaser.yml"
-      - ".gitignore"
       - "script/**"
       - "*.md"
+      - ".*"
 
 jobs:
   deploy:
