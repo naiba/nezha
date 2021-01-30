@@ -5,11 +5,10 @@
             <img src="/static/logo.png">
         </div>
         {{if .IsAdminPage}}
-        <a class="item{{if eq .MatchedPath " /server"}} active{{end}}" href="/server">服务器</a>
-        <a class="item{{if eq .MatchedPath " /monitor"}} active{{end}}" href="/monitor">服务监控</a>
-        <a class="item{{if eq .MatchedPath " /cron"}} active{{end}}" href="/cron">计划任务</a>
-        <a class="item{{if eq .MatchedPath " /notification"}} active{{end}}" href="/notification">通知</a>
-        <a class="item{{if eq .MatchedPath " /setting"}} active{{end}}" href="/setting">设置</a>
+        <a class="item{{if eq .MatchedPath " /server"}} active{{end}}" href="/server">Agent</a>
+        <a class="item{{if eq .MatchedPath " /monitor"}} active{{end}}" href="/monitor">Service</a>
+        <a class="item{{if eq .MatchedPath " /cron"}} active{{end}}" href="/cron">Cron</a>
+        <a class="item{{if eq .MatchedPath " /notification"}} active{{end}}" href="/notification">报警</a>
         {{else}}
         <a class="item{{if eq .MatchedPath " /"}} active{{end}}" href="/">首页</a>
         <a class="item{{if eq .MatchedPath " /service"}} active{{end}}" href="/service">服务状态</a>
@@ -24,6 +23,9 @@
                     <i class="dropdown icon"></i>
                     <div class="menu">
                         {{if .IsAdminPage}}
+                        <a class="item" href="/setting">
+                            <i class="settings icon"></i>系统设置
+                        </a>
                         <a class="item" href="/">
                             <i class="chart area icon"></i>返回前台
                         </a>

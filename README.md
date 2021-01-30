@@ -101,21 +101,21 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 1. 添加通知方式
 
     - server酱示例
-      - 备注：server酱
+      - 名称：server酱
       - URL：https://sc.ftqq.com/SCUrandomkeys.send?text=#NEZHA#
       - 请求方式: GET
       - 请求类型: 默认
       - Body: 空
       
     - wxpusher示例，需要关注你的应用
-      - 备注: wxpusher
+      - 名称: wxpusher
       - URL：http://wxpusher.zjiecode.com/api/send/message
       - 请求方式: POST
       - 请求类型: JSON
       - Body: `{"appToken":"你的appToken","topicIds":[],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
 
     - telegram示例 [@haitau](https://github.com/haitau) 贡献
-      - 备注：telegram机器人消息通知
+      - 名称：telegram机器人消息通知
       - URL：https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA#
       - 请求方式: GET
       - 请求类型: 默认
@@ -124,13 +124,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 2. 添加一个离线报警
 
-    - 备注：离线通知
+    - 名称：离线通知
     - 规则：`[{"Type":"offline","Min":0,"Max":0,"Duration":10}]`
     - 启用：√
 
 3. 添加一个监控 CPU 持续 10s 超过 50% **且** 内存持续 20s 占用低于 20% 的报警
 
-    - 备注：CPU+内存
+    - 名称：CPU+内存
     - 规则：`[{"Type":"cpu","Min":0,"Max":50,"Duration":10},{"Type":"memory","Min":20,"Max":0,"Duration":20}]`
     - 启用：√
 

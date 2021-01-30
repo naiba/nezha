@@ -6,28 +6,23 @@
 
 .nb-container {
     padding-top: 75px;
-    min-height: 80%;
-    padding-bottom: 75px;
+    min-height: 100%;
+    padding-bottom: 55px;
+    margin-bottom: -47px;
 }
 
-.footer.segment {
+.login.nb-container {
+    display: flex;
+    align-items: center;
+    padding-top: unset;
+}
+
+.login.nb-container>.grid {
     width: 100%;
-    position: fixed;
-    bottom: 0;
-    padding-top: 20px;
-    padding-bottom: 20px;
 }
 
-.login-form {
-    height: 82%;
-}
-
-.login-form .column {
+.login.nb-container>.grid .column {
     max-width: 450px;
-}
-
-.login-form .grid {
-    height: 100%;
 }
 
 .status.cards .flag {

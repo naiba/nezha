@@ -14,7 +14,7 @@ type Server struct {
 	Tag          string // 分组名
 	Secret       string `json:"-"`
 	Note         string `json:"-"` // 管理员可见备注
-	DisplayIndex int    // 展示权重，越大越靠前
+	DisplayIndex int    // 展示排序，越大越靠前
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
