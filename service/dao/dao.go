@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.4.1" // ！！记得修改 README 重的 badge 版本！！
+var Version = "v0.4.2" // ！！记得修改 README 重的 badge 版本！！
 
 const (
 	SnapshotDelay = 3
@@ -26,6 +26,7 @@ var (
 	DB    *gorm.DB
 
 	ServerList map[uint64]*model.Server
+	SecretToID map[string]uint64
 	ServerLock sync.RWMutex
 
 	SortedServerList []*model.Server

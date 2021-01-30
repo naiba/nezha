@@ -60,6 +60,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		err = dao.DB.Delete(&model.Server{}, "id = ?", id).Error
 		if err == nil {
 			dao.ServerLock.Lock()
+			delete(dao.SecretToID, dao.ServerList[id].Secret)
 			delete(dao.ServerList, id)
 			dao.ServerLock.Unlock()
 			dao.ReSortServer()
@@ -154,7 +155,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Note = sf.Note
 		if sf.ID == 0 {
 			s.Secret = utils.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
-			s.Secret = s.Secret[:10]
+			s.Secret = s.Secret[:18]
 			err = dao.DB.Create(&s).Error
 		} else {
 			isEdit = true
@@ -178,6 +179,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}
 		dao.ServerLock.Lock()
+		dao.SecretToID[s.Secret] = s.ID
 		dao.ServerList[s.ID] = &s
 		dao.ServerLock.Unlock()
 	}
@@ -264,15 +266,16 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		return
 	}
 
-	dao.ServerLock.Lock()
-	defer dao.ServerLock.Unlock()
-
+	dao.CronLock.Lock()
+	defer dao.CronLock.Unlock()
 	crOld := dao.Crons[cr.ID]
 	if crOld != nil && crOld.CronID != 0 {
 		dao.Cron.Remove(crOld.CronID)
 	}
 
 	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, func() {
+		dao.ServerLock.RLock()
+		defer dao.ServerLock.RUnlock()
 		for j := 0; j < len(cr.Servers); j++ {
 			if dao.ServerList[cr.Servers[j]].TaskStream != nil {
 				dao.ServerList[cr.Servers[j]].TaskStream.Send(&pb.Task{

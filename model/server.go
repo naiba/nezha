@@ -12,7 +12,7 @@ type Server struct {
 	Common
 	Name         string
 	Tag          string // 分组名
-	Secret       string `json:"-"`
+	Secret       string `gorm:"uniqueIndex" json:"-"`
 	Note         string `json:"-"` // 管理员可见备注
 	DisplayIndex int    // 展示排序，越大越靠前
 

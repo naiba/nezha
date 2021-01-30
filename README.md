@@ -1,14 +1,16 @@
 # 哪吒面板
 
-![dashboard](https://img.shields.io/badge/管理面板-v0.4.1-brightgreen?style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=%E9%9D%A2%E6%9D%BF%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge)
+![dashboard](https://img.shields.io/badge/管理面板-v0.4.2-brightgreen?style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=%E9%9D%A2%E6%9D%BF%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge)
 
 系统状态监控报警、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控、计划任务(可以定时在Agent上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
+
+\>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
+
+\>> QQ交流群：955957790
 
 |   默认主题   | DayNight [@JackieSung](https://github.com/JackieSung4ev) |  hotaru [@CokeMine](https://github.com/CokeMine)   |
 | ---- | ---- | ---- |
 |   ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg)   | <img src="https://s3.ax1x.com/2021/01/20/sfJv2q.jpg"/> | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
-
-\>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
 
 ## 一键脚本
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -17,7 +18,6 @@ import (
 	"github.com/genkiroid/cert"
 	"github.com/go-ping/ping"
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
-	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 
 	"github.com/naiba/nezha/model"
@@ -29,30 +29,17 @@ import (
 )
 
 var (
-	clientID     string
 	server       string
 	clientSecret string
-	debug        bool
 	version      string
-
-	rootCmd = &cobra.Command{
-		Use:   "nezha-agent",
-		Short: "「哪吒面板」监控、备份、站点管理一站式服务",
-		Long: `哪吒面板
-================================
-监控、备份、站点管理一站式服务
-啦啦啦，啦啦啦，我是 mjj 小行家`,
-		Run:     run,
-		Version: version,
-	}
 )
 
 var (
 	reporting      bool
 	client         pb.NezhaServiceClient
 	ctx            = context.Background()
-	delayWhenError = time.Second * 10
-	updateCh       = make(chan struct{}, 0)
+	delayWhenError = time.Second * 10       // Agent 重连间隔
+	updateCh       = make(chan struct{}, 0) // Agent 自动更新间隔
 	httpClient     = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -91,22 +78,28 @@ func init() {
 func main() {
 	// 来自于 GoReleaser 的版本号
 	dao.Version = version
-	rootCmd.PersistentFlags().StringVarP(&server, "server", "s", "localhost:5555", "客户端ID")
-	rootCmd.PersistentFlags().StringVarP(&clientID, "id", "i", "", "客户端ID")
-	rootCmd.PersistentFlags().StringVarP(&clientSecret, "secret", "p", "", "客户端Secret")
-	rootCmd.PersistentFlags().BoolVarP(&debug, "debug", "d", false, "开启Debug")
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-}
 
-func run(cmd *cobra.Command, args []string) {
+	var debug bool
+	flag.String("i", "", "unused 旧Agent兼容")
+	flag.BoolVar(&debug, "d", false, "允许不安全连接")
+	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
+	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
+	flag.Parse()
+
 	dao.Conf = &model.Config{
 		Debug: debug,
 	}
+
+	if server == "" || clientSecret == "" {
+		flag.Usage()
+		return
+	}
+
+	run()
+}
+
+func run() {
 	auth := rpc.AuthHandler{
-		ClientID:     clientID,
 		ClientSecret: clientSecret,
 	}
 

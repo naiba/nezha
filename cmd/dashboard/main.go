@@ -27,6 +27,7 @@ func init() {
 	dao.Cron = cron.New(cron.WithLocation(shanghai))
 	dao.Crons = make(map[uint64]*model.Cron)
 	dao.ServerList = make(map[uint64]*model.Server)
+	dao.SecretToID = make(map[string]uint64)
 
 	err = dao.Conf.Read("data/config.yaml")
 	if err != nil {
@@ -68,6 +69,7 @@ func loadServers() {
 		innerS.Host = &model.Host{}
 		innerS.State = &model.HostState{}
 		dao.ServerList[innerS.ID] = &innerS
+		dao.SecretToID[innerS.Secret] = innerS.ID
 	}
 	dao.ReSortServer()
 }

@@ -13,11 +13,10 @@
         <table class="ui very basic table">
             <thead>
                 <tr>
-                    <th>排序</th>
+                    <th>ID(排序)</th>
                     <th>名称</th>
                     <th>分组</th>
                     <th>IP</th>
-                    <th>ID</th>
                     <th>密钥</th>
                     <th>备注</th>
                     <th>管理</th>
@@ -26,11 +25,10 @@
             <tbody>
                 {{range $server := .Servers}}
                 <tr>
-                    <td>{{$server.DisplayIndex}}</td>
+                    <td>{{$server.ID}}({{$server.DisplayIndex}})</td>
                     <td>{{$server.Name}}</td>
                     <td>{{$server.Tag}}</td>
                     <td>{{$server.Host.IP}}</td>
-                    <td>{{$server.ID}}</td>
                     <td>{{$server.Secret}}</td>
                     <td style="word-break: break-word;">{{$server.Note}}</td>
                     <td>
