@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.2"
+NZ_VERSION="v0.4.3"
 GITHUB_RAW_URL="raw.githubusercontent.com"
 GITHUB_URL="github.com"
 
@@ -85,8 +85,7 @@ pre_check() {
         os_arch="arm"
     fi
 
-    ## server location
-    if curl -s api.myip.la/json | grep -q 'China'; then
+    if [[ -z "${CN}" ]]; then
         GITHUB_RAW_URL="raw.sevencdn.com"
         GITHUB_URL="hub.fastgit.org"
     fi
