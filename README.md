@@ -1,6 +1,6 @@
 # 哪吒面板
 
-![dashboard](https://img.shields.io/badge/管理面板-v0.4.4-brightgreen?style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=%E9%9D%A2%E6%9D%BF%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.0-brightgreen?style=for-the-badge&logo=linux)
+![dashboard](https://img.shields.io/badge/管理面板-v0.4.4-brightgreen?style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=%E9%9D%A2%E6%9D%BF%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.1-brightgreen?style=for-the-badge&logo=linux)
 
 系统状态监控报警、API(SSL证书变更、即将到期、到期)/TCP端口存活/PING 监控、计划任务(可以定时在Agent上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
 
