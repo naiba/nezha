@@ -10,9 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.3"
-GITHUB_RAW_URL="raw.githubusercontent.com"
-GITHUB_URL="github.com"
+NZ_VERSION="v0.4.4"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -86,6 +84,9 @@ pre_check() {
     fi
 
     if [[ -z "${CN}" ]]; then
+        GITHUB_RAW_URL="raw.githubusercontent.com"
+        GITHUB_URL="github.com"
+    else
         GITHUB_RAW_URL="raw.sevencdn.com"
         GITHUB_URL="hub.fastgit.org"
     fi
