@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v4.0.1"
+NZ_VERSION="v0.4.2"
 GITHUB_RAW_URL="raw.githubusercontent.com"
 GITHUB_URL="github.com"
 
@@ -203,8 +203,8 @@ modify_agent_config() {
     echo "请先在管理面板上添加Agent，记录下密钥" &&
         read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
         read -p "请输入面板RPC端口: (5555)" nz_grpc_port &&
-        read -p "请输入Agent 密钥: " nezha_client_secret
-    if [[ -z "${nz_grpc_host}" || -z "${nezha_client_secret}" ]]; then
+        read -p "请输入Agent 密钥: " nz_client_secret
+    if [[ -z "${nz_grpc_host}" || -z "${nz_client_secret}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
         return 1
@@ -216,7 +216,7 @@ modify_agent_config() {
 
     sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
-    sed -i "s/nezha_client_secret/${nezha_client_secret}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
 
