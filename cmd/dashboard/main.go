@@ -40,6 +40,9 @@ func init() {
 	if dao.Conf.Debug {
 		dao.DB = dao.DB.Debug()
 	}
+	if dao.Conf.GRPCPort == 0 {
+		dao.Conf.GRPCPort = 5555
+	}
 	dao.Cache = cache.New(5*time.Minute, 10*time.Minute)
 
 	initSystem()
@@ -105,7 +108,7 @@ func loadCrons() {
 
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
-	go rpc.ServeRPC(5555)
+	go rpc.ServeRPC(dao.Conf.GRPCPort)
 	go rpc.DispatchTask(time.Minute * 3)
 	dao.AlertSentinelStart()
 }

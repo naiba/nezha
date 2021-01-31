@@ -202,7 +202,7 @@ modify_agent_config() {
 
     echo "请先在管理面板上添加Agent，记录下密钥" &&
         read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_rpc_host &&
-        read -p "请输入面板RPC端口: (5555)" nz_rpc_port &&
+        read -p "请输入面板RPC端口: (5555)" nz_grpc_port &&
         read -p "请输入Agent 密钥: " nezha_client_secret
     if [[ -z "${nz_rpc_host}" || -z "${nezha_client_secret}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
@@ -210,12 +210,12 @@ modify_agent_config() {
         return 1
     fi
 
-    if [[ -z "${nz_rpc_port}" ]]; then
-        nz_rpc_port=5555
+    if [[ -z "${nz_grpc_port}" ]]; then
+        nz_grpc_port=5555
     fi
 
     sed -i "s/nz_rpc_host/${nz_rpc_host}/" ${NZ_AGENT_SERVICE}
-    sed -i "s/nz_rpc_port/${nz_rpc_port}/" ${NZ_AGENT_SERVICE}
+    sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nezha_client_secret/${nezha_client_secret}/" ${NZ_AGENT_SERVICE}
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
@@ -254,7 +254,7 @@ modify_dashboard_config() {
         read -p "请输入 GitHub Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
         read -p "请输入站点标题: " nz_site_title &&
         read -p "请输入站点访问端口: (8008)" nz_site_port &&
-        read -p "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_rpc_port
+        read -p "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_grpc_port
     if [[ -z "${nz_admin_ids}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
@@ -264,8 +264,8 @@ modify_dashboard_config() {
     if [[ -z "${nz_site_port}" ]]; then
         nz_site_port=8008
     fi
-    if [[ -z "${nz_rpc_port}" ]]; then
-        nz_rpc_port=5555
+    if [[ -z "${nz_grpc_port}" ]]; then
+        nz_grpc_port=5555
     fi
 
     sed -i "s/nz_admin_ids/${nz_admin_ids}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
@@ -273,7 +273,7 @@ modify_dashboard_config() {
     sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_site_port/${nz_site_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
-    sed -i "s/nz_rpc_port/${nz_rpc_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
+    sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 

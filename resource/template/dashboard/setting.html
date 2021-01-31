@@ -24,6 +24,10 @@
                 <textarea name="CustomCode">{{.Conf.Site.CustomCode}}</textarea>
             </div>
             <div class="field">
+                <label>前台查看密码</label>
+                <input type="text" name="ViewPassword" placeholder="" value="{{.Conf.Site.ViewPassword}}">
+            </div>
+            <div class="field">
                 <div class="ui nf-ssl checkbox">
                     <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
                     <label>开启 IP 变更提醒</label>

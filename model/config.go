@@ -13,10 +13,11 @@ import (
 type Config struct {
 	Debug bool
 	Site  struct {
-		Brand      string // 站点名称
-		CookieName string // 浏览器 Cookie 名称
-		Theme      string
-		CustomCode string
+		Brand        string // 站点名称
+		CookieName   string // 浏览器 Cookie 名称
+		Theme        string
+		CustomCode   string
+		ViewPassword string // 前台查看密码
 	}
 	GitHub struct {
 		Admin        string // 管理员ID列表
@@ -24,6 +25,7 @@ type Config struct {
 		ClientSecret string
 	}
 	HTTPPort                   uint
+	GRPCPort                   uint
 	EnableIPChangeNotification bool
 
 	v *viper.Viper

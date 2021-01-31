@@ -445,6 +445,7 @@ type settingForm struct {
 	Admin                      string
 	Theme                      string
 	CustomCode                 string
+	ViewPassword               string
 	EnableIPChangeNotification string
 }
 
@@ -461,6 +462,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	dao.Conf.Site.Brand = sf.Title
 	dao.Conf.Site.Theme = sf.Theme
 	dao.Conf.Site.CustomCode = sf.CustomCode
+	dao.Conf.Site.ViewPassword = sf.ViewPassword
 	dao.Conf.GitHub.Admin = sf.Admin
 	if err := dao.Conf.Save(); err != nil {
 		c.JSON(http.StatusOK, model.Response{

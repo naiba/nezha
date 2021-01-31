@@ -26,6 +26,7 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 		if opt.Guest {
 			code = http.StatusBadRequest
 		}
+
 		commonErr := ErrInfo{
 			Title: "访问受限",
 			Code:  code,
@@ -36,6 +37,7 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 
 		var isLogin bool
 
+		// 用户鉴权
 		token, _ := c.Cookie(dao.Conf.Site.CookieName)
 		token = strings.TrimSpace(token)
 		if token != "" {
