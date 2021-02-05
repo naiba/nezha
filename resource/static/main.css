@@ -19,6 +19,7 @@
 
 .login.nb-container>.grid {
     width: 100%;
+    margin: 0 auto;
 }
 
 .login.nb-container>.grid .column {
