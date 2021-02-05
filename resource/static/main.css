@@ -1,101 +1,105 @@
 @media only screen and (min-width: 1200px) {
-    .ui.container {
-        width: 77%;
-    }
+  .ui.container {
+    width: 77%;
+  }
 }
 
 .nb-container {
-    padding-top: 75px;
-    min-height: 100%;
-    padding-bottom: 55px;
-    margin-bottom: -47px;
+  padding-top: 75px;
+  min-height: 100%;
+  padding-bottom: 55px;
+  margin-bottom: -47px;
+}
+
+#app .ui.fluid.accordion {
+  margin-bottom: 1rem;
 }
 
 .login.nb-container {
-    display: flex;
-    align-items: center;
-    padding-top: unset;
+  display: flex;
+  align-items: center;
+  padding-top: unset;
 }
 
-.login.nb-container>.grid {
-    width: 100%;
-    margin: 0 auto;
+.login.nb-container > .grid {
+  width: 100%;
+  margin: 0 auto;
 }
 
-.login.nb-container>.grid .column {
-    max-width: 450px;
+.login.nb-container > .grid .column {
+  max-width: 450px;
 }
 
 .status.cards .flag {
-    margin-right: 0 !important;
+  margin-right: 0 !important;
 }
 
-.status.cards .header>.info.icon {
-    float: right;
-    margin-right: 0;
+.status.cards .header > .info.icon {
+  float: right;
+  margin-right: 0;
 }
 
 .status.cards .wide.column {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    height: 2rem !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 2rem !important;
 }
 
 .status.cards .three.wide.column {
-    padding-right: 0 !important;
+  padding-right: 0 !important;
 }
 
 .status.cards .wide.column:nth-child(1) {
-    margin-top: 1rem !important;
+  margin-top: 1rem !important;
 }
 
 .status.cards .wide.column:nth-child(2) {
-    margin-top: 1rem !important;
+  margin-top: 1rem !important;
 }
 
 .status.cards .description {
-    padding-bottom: 1rem !important;
+  padding-bottom: 1rem !important;
 }
 
 .status.cards .ui.content.popup {
-    min-width: 250px;
+  min-width: 250px;
 }
 
 .status.cards .outline.icon {
-    margin-right: 0 !important;
+  margin-right: 0 !important;
 }
 
 .ui.progress .bar {
-    min-width: 1.26em !important;
-    text-align: right;
-    padding-right: .4em;
-    line-height: 1.75em;
-    color: rgba(255, 255, 255, .7);
-    font-weight: 700;
+  min-width: 1.26em !important;
+  text-align: right;
+  padding-right: 0.4em;
+  line-height: 1.75em;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 700;
 }
 
 .service-status .delay-today {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
-.service-status .delay-today>i {
-    display: inline-block;
-    width: 1.2em;
-    height: 1.2em;
-    border-radius: .6em;
-    background-color: grey;
-    margin-right: .3em;
+.service-status .delay-today > i {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  border-radius: 0.6em;
+  background-color: grey;
+  margin-right: 0.3em;
 }
 
 .service-status .danger {
-    background-color: crimson !important;
+  background-color: crimson !important;
 }
 
 .service-status .good {
-    background-color: rgb(0, 235, 139) !important;
+  background-color: rgb(0, 235, 139) !important;
 }
 
 .service-status .warning {
-    background-color: orange !important;
+  background-color: orange !important;
 }
