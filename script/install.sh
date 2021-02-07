@@ -2,7 +2,7 @@
 
 #======================================================
 #   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+
-#   Description: 哪吒面板安装脚本
+#   Description: 哪吒监控安装脚本
 #   Github: https://github.com/naiba/nezha
 #======================================================
 
@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.4"
+NZ_VERSION="v0.4.5"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -129,7 +129,7 @@ install_dashboard() {
 
     echo -e "> 安装面板"
 
-    # 哪吒面板文件夹
+    # 哪吒监控文件夹
     mkdir -p $NZ_DASHBOARD_PATH
     chmod 777 -R $NZ_DASHBOARD_PATH
 
@@ -170,7 +170,7 @@ install_agent() {
 
     echo -e "> 安装监控Agent"
 
-    # 哪吒面板文件夹
+    # 哪吒监控文件夹
     mkdir -p $NZ_AGENT_PATH
     chmod 777 -R $NZ_AGENT_PATH
 
@@ -292,7 +292,7 @@ restart_and_update() {
     docker-compose down
     docker-compose up -d
     if [[ $? == 0 ]]; then
-        echo -e "${green}哪吒面板 重启成功${plain}"
+        echo -e "${green}哪吒监控 重启成功${plain}"
         echo -e "默认管理面板地址：${yellow}域名:站点访问端口${plain}"
     else
         echo -e "${red}重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
@@ -308,7 +308,7 @@ start_dashboard() {
 
     cd $NZ_DASHBOARD_PATH && docker-compose up -d
     if [[ $? == 0 ]]; then
-        echo -e "${green}哪吒面板 启动成功${plain}"
+        echo -e "${green}哪吒监控 启动成功${plain}"
     else
         echo -e "${red}启动失败，请稍后查看日志信息${plain}"
     fi
@@ -323,7 +323,7 @@ stop_dashboard() {
 
     cd $NZ_DASHBOARD_PATH && docker-compose down
     if [[ $? == 0 ]]; then
-        echo -e "${green}哪吒面板 停止成功${plain}"
+        echo -e "${green}哪吒监控 停止成功${plain}"
     else
         echo -e "${red}停止失败，请稍后查看日志信息${plain}"
     fi
@@ -399,7 +399,7 @@ clean_all() {
 }
 
 show_usage() {
-    echo "哪吒面板 管理脚本使用方法: "
+    echo "哪吒监控 管理脚本使用方法: "
     echo "--------------------------------------------------------"
     echo "./nbdomain.sh                            - 显示管理菜单"
     echo "./nbdomain.sh install_dashboard          - 安装面板端"
@@ -420,7 +420,7 @@ show_usage() {
 
 show_menu() {
     echo -e "
-    ${green}哪吒面板管理脚本${plain} ${red}${NZ_VERSION}${plain}
+    ${green}哪吒监控管理脚本${plain} ${red}${NZ_VERSION}${plain}
     --- https://github.com/naiba/nezha ---
     ${green}0.${plain}  退出脚本
     ————————————————-

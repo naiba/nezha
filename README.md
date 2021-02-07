@@ -1,87 +1,36 @@
-# 哪吒面板
+# 哪吒监控
 
-![dashboard](https://img.shields.io/badge/管理面板-v0.4.7-brightgreen?style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=%E9%9D%A2%E6%9D%BF%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20%E6%9E%84%E5%BB%BA&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.4-brightgreen?style=for-the-badge&logo=linux)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=管理面板%20v0.4.8&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.5-brightgreen?style=for-the-badge&logo=linux)
 
-系统状态监控报警、API(SSL 证书变更、即将到期、到期)/TCP 端口存活/PING 监控、计划任务(可以定时在 Agent 上执行命令，备份、重启、What ever you want)、极省资源，64M 服务器也能装 agent。
-
-\>> [查看针友列表](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
+:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，批量执行命令和计划任务。
 
 \>> QQ 交流群：955957790
+\>> [我们的用户](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22&filter=0) (Google)
 
 | 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru [@CokeMine](https://github.com/CokeMine)                        |
 | ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
 | ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg) | <img src="https://s3.ax1x.com/2021/01/20/sfJv2q.jpg"/>   | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
 
-## 一键脚本
+## 安装脚本
 
 建议使用 WatchTower 自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）
 
-- 海外：
 
-  ```shell
-  curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
-  ./nezha.sh
-  ```
-
-- 国内加速：（有缓存可能不是最新的，非作者维护）
-
-  ```shell
-  curl -L https://raw.sevencdn.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
-  CN=true ./nezha.sh
-  ```
-
-## 功能说明
+```shell
+curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+./nezha.sh
+```
 
 <details>
-  <summary>自定义代码：去版权、改LOGO、改色调、加统计代码等。</summary>
+    <summary>国内镜像加速：（有缓存，版本更新不及时，能不用尽量不用，非作者维护）</summary>
 
-- 默认主题更改进度条颜色示例
+```shell
+curl -L https://raw.sevencdn.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+CN=true ./nezha.sh
+```
+</details>
 
-  ```
-  <style>
-  .ui.fine.progress> .bar {
-      background-color: pink !important;
-  }
-  </style>
-  ```
-
-- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)，欢迎 PR）
-
-  ```
-  <style>
-  .right.menu>a{
-  visibility: hidden;
-  }
-  .footer .is-size-7{
-  visibility: hidden;
-  }
-  .item img{
-  visibility: hidden;
-  }
-  </style>
-  <script>
-  window.onload = function(){
-  var avatar=document.querySelector(".item img")
-  var footer=document.querySelector("div.is-size-7")
-  footer.innerHTML="Powered by 你的名字"
-  footer.style.visibility="visible"
-  avatar.src="你的方形logo地址"
-  avatar.style.visibility="visible"
-  }
-  </script>
-  ```
-
-- hotaru 主题更改背景图片示例
-
-      ```
-      <style>
-      .hotaru-cover {
-          background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
-      }
-      </style>
-      ```
-
-  </details>
+## 功能说明
 
 <details>
     <summary>计划任务：备份脚本、服务重启，等定期运维任务。</summary>
@@ -153,6 +102,57 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
     <summary>服务监控：HTTP、SSL证书、ping、TCP 端口等。</summary>
 
 进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。
+
+</details>
+
+<details>
+  <summary>自定义代码：改LOGO、改色调、加统计代码等。</summary>
+
+- 默认主题更改进度条颜色示例
+
+  ```
+  <style>
+  .ui.fine.progress> .bar {
+      background-color: pink !important;
+  }
+  </style>
+  ```
+
+- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)，欢迎 PR）
+
+  ```
+  <style>
+  .right.menu>a{
+  visibility: hidden;
+  }
+  .footer .is-size-7{
+  visibility: hidden;
+  }
+  .item img{
+  visibility: hidden;
+  }
+  </style>
+  <script>
+  window.onload = function(){
+  var avatar=document.querySelector(".item img")
+  var footer=document.querySelector("div.is-size-7")
+  footer.innerHTML="Powered by 你的名字"
+  footer.style.visibility="visible"
+  avatar.src="你的方形logo地址"
+  avatar.style.visibility="visible"
+  }
+  </script>
+  ```
+
+- hotaru 主题更改背景图片示例
+
+      ```
+      <style>
+      .hotaru-cover {
+          background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
+      }
+      </style>
+      ```
 
 </details>
 
@@ -243,11 +243,11 @@ restart() {
       }
       ```
 
-  </details>
+</details>
 
 ## 社区文章
 
 - [哪吒探针 - Windows 客户端安装](https://nyko.me/2020/12/13/nezha-windows-client.html)
-- [哪吒面板，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
-- [哪吒面板：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) _（已过时）_
-- [>>更多教程](https://www.google.com/search?q=%22%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%22+%22%E6%95%99%E7%A8%8B%22) (Google)
+- [哪吒监控，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
+- [哪吒监控：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) _（已过时）_
+- [>>更多教程](https://www.google.com/search?q=%22%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%7C%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22+%22%E6%95%99%E7%A8%8B%22) (Google)
