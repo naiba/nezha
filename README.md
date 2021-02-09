@@ -195,7 +195,7 @@ restart() {
 }
 ```
 
-赋予执行权限 `chmod +x /etc/init.d/nezha-agnt` 然后启动服务 `/etc/init.d/nezha-agent enable && /etc/init.d/nezha-agent start`
+赋予执行权限 `chmod +x /etc/init.d/nezha-agent` 然后启动服务 `/etc/init.d/nezha-agent enable && /etc/init.d/nezha-agent start`
 
 </details>
 
