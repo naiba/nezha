@@ -6,7 +6,7 @@
 
 \>> QQ 交流群：955957790
 
-\>> [我们的用户](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22&filter=0) (Google)
+\>> [我们的用户](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%22%2B%22%E7%9B%91%E6%8E%A7%7C%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
 
 | 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru [@CokeMine](https://github.com/CokeMine)                        |
 | ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
