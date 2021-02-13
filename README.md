@@ -6,7 +6,7 @@
 
 \>> QQ 交流群：955957790
 
-\>> [我们的用户](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%22%2B%22%E7%9B%91%E6%8E%A7%7C%E9%9D%A2%E6%9D%BF%22&filter=0) (Google)
+\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒"+"监控%7C面板"&filter=0) (Google)
 
 | 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru [@CokeMine](https://github.com/CokeMine)                        |
 | ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -16,11 +16,12 @@
 
 建议使用 WatchTower 自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）
 
-
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
 ./nezha.sh
 ```
+
+_\* 目前安装脚本仅支持 CentOS 7+ / Debian 8+ / Ubuntu 16+，Windows 及 其他 Linux 发行版请在 Release 处下载对应二进制文件。_
 
 <details>
     <summary>国内镜像加速：（有缓存，版本更新不及时，能不用尽量不用，非作者维护）</summary>
@@ -29,6 +30,7 @@ curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -
 curl -L https://raw.sevencdn.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
 CN=true ./nezha.sh
 ```
+
 </details>
 
 ## 功能说明
@@ -80,7 +82,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 2. 添加一个离线报警
 
    - 名称：离线通知
-   - 规则：`[{"Type":"offline","Min":0,"Max":0,"Duration":10}]`
+   - 规则：`[{"Type":"offline","Duration":10}]`
    - 启用：√
 
 3. 添加一个监控 CPU 持续 10s 超过 50% **且** 内存持续 20s 占用低于 20% 的报警
@@ -238,11 +240,11 @@ restart() {
 
 - CaddyServer v1（v2 无需特别配置）
 
-      ```Caddyfile
-      proxy /ws http://ip:8008 {
-          websocket
-      }
-      ```
+  ```Caddyfile
+  proxy /ws http://ip:8008 {
+      websocket
+  }
+  ```
 
 </details>
 
@@ -251,4 +253,4 @@ restart() {
 - [哪吒探针 - Windows 客户端安装](https://nyko.me/2020/12/13/nezha-windows-client.html)
 - [哪吒监控，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
 - [哪吒监控：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) _（已过时）_
-- [>>更多教程](https://www.google.com/search?q=%22%E5%93%AA%E5%90%92%E9%9D%A2%E6%9D%BF%7C%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22+%22%E6%95%99%E7%A8%8B%22) (Google)
+- [>>更多教程](https://www.google.com/search?q="哪吒"%2B"面板%7C监控%7C探针"+"教程") (Google)
