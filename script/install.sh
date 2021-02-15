@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.5"
+NZ_VERSION="v0.4.6"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -182,7 +182,7 @@ install_agent() {
     fi
     tar xf nezha-agent_linux_${os_arch}.tar.gz &&
         mv nezha-agent $NZ_AGENT_PATH &&
-        rm -rf README.md
+        rm -rf nezha-agent_linux_${os_arch}.tar.gz README.md
 
     modify_agent_config 0
 
