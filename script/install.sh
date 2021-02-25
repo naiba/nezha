@@ -149,7 +149,7 @@ install_dashboard() {
     command -v docker-compose >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "正在安装 Docker Compose"
-        wget -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/download/1.25.0/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1 &&
+        wget -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1 &&
             chmod +x /usr/local/bin/docker-compose
         if [[ $? != 0 ]]; then
             echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_URL}${plain}"

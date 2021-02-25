@@ -5,13 +5,16 @@
             <img src="/static/logo.png">
         </div>
         {{if .IsAdminPage}}
-        <a class="item{{if eq .MatchedPath " /server"}} active{{end}}" href="/server">Agent</a>
-        <a class="item{{if eq .MatchedPath " /monitor"}} active{{end}}" href="/monitor">Service</a>
-        <a class="item{{if eq .MatchedPath " /cron"}} active{{end}}" href="/cron">Cron</a>
-        <a class="item{{if eq .MatchedPath " /notification"}} active{{end}}" href="/notification">报警</a>
+        <a class="item{{if eq .MatchedPath " /server"}} active{{end}}" href="/server"><i class="server icon"></i>资产</a>
+        <a class="item{{if eq .MatchedPath " /monitor"}} active{{end}}" href="/monitor"><i class="rss icon"></i>服务</a>
+        <a class="item{{if eq .MatchedPath " /cron"}} active{{end}}" href="/cron"><i class="clock icon"></i>任务</a>
+        <a class="item{{if eq .MatchedPath " /notification"}} active{{end}}" href="/notification"><i class="bell icon"></i>报警</a>
+        <a class="item{{if eq .MatchedPath " /setting"}} active{{end}}" href="/setting">
+            <i class="settings icon"></i>设置
+        </a>
         {{else}}
-        <a class="item{{if eq .MatchedPath " /"}} active{{end}}" href="/">首页</a>
-        <a class="item{{if eq .MatchedPath " /service"}} active{{end}}" href="/service">服务状态</a>
+        <a class="item{{if eq .MatchedPath " /"}} active{{end}}" href="/"><i class="home icon"></i>首页</a>
+        <a class="item{{if eq .MatchedPath " /service"}} active{{end}}" href="/service"><i class="rss icon"></i>服务状态</a>
         {{end}}
         <div class="right menu">
             <div class="item">
@@ -23,9 +26,6 @@
                     <i class="dropdown icon"></i>
                     <div class="menu">
                         {{if .IsAdminPage}}
-                        <a class="item" href="/setting">
-                            <i class="settings icon"></i>系统设置
-                        </a>
                         <a class="item" href="/">
                             <i class="chart area icon"></i>返回前台
                         </a>

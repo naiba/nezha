@@ -25,8 +25,10 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		// SSL 证书报警
 		var errMsg string
 		if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
-			// 证书错误提醒
-			errMsg = r.GetData()
+			// 排除超时错误
+			if !strings.HasSuffix(r.GetData(), "i/o timeout") {
+				errMsg = r.GetData()
+			}
 		} else {
 			var last model.MonitorHistory
 			var newCert = strings.Split(r.GetData(), "|")
