@@ -36,11 +36,12 @@ func GetHost() *model.Host {
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
 	u, _ := disk.Partitions(false)
-	var total uint64
+	var total uint64 = 0
 	for _, dev := range u {
 		usage, _ := disk.Usage(dev.Mountpoint)
 		total += usage.Total
 	}
+	fmt.Println(total)
 	var ip ipDotSbGeoIP
 	resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
 	if err == nil {
@@ -83,7 +84,7 @@ func GetState(delay int64) *model.HostState {
 	}
 	// Disk
 	u, _ := disk.Partitions(false)
-	var used uint64
+	var used uint64 = 0
 	for _, dev := range u {
 		usage, _ := disk.Usage(dev.Mountpoint)
 		used += usage.Used
