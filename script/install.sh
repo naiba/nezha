@@ -10,7 +10,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.6"
+NZ_VERSION="v0.4.7"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -149,12 +149,12 @@ install_dashboard() {
     command -v docker-compose >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "正在安装 Docker Compose"
-        wget -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1 &&
-            chmod +x /usr/local/bin/docker-compose
+        wget -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1
         if [[ $? != 0 ]]; then
             echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
             return 0
         fi
+        chmod +x /usr/local/bin/docker-compose
         echo -e "${green}Docker Compose${plain} 安装成功"
     fi
 
