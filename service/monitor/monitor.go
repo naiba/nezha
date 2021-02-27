@@ -35,7 +35,13 @@ func GetHost() *model.Host {
 	}
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
-	u, _ := disk.Usage("/")
+	u, _ := disk.Partitions(false)
+	var total uint64 = 0
+	for _, dev := range u {
+		usage, _ := disk.Usage(dev.Mountpoint)
+		total += usage.Total
+	}
+	fmt.Println(total)
 	var ip ipDotSbGeoIP
 	resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
 	if err == nil {
@@ -54,7 +60,7 @@ func GetHost() *model.Host {
 		PlatformVersion: hi.PlatformVersion,
 		CPU:             cpus,
 		MemTotal:        mv.Total,
-		DiskTotal:       u.Total,
+		DiskTotal:       total,
 		SwapTotal:       ms.Total,
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
@@ -77,13 +83,18 @@ func GetState(delay int64) *model.HostState {
 		cpuPercent = cp[0]
 	}
 	// Disk
-	u, _ := disk.Usage("/")
+	u, _ := disk.Partitions(false)
+	var used uint64 = 0
+	for _, dev := range u {
+		usage, _ := disk.Usage(dev.Mountpoint)
+		used += usage.Used
+	}
 
 	return &model.HostState{
 		CPU:            cpuPercent,
 		MemUsed:        mv.Used,
 		SwapUsed:       ms.Used,
-		DiskUsed:       u.Used,
+		DiskUsed:       used,
 		NetInTransfer:  atomic.LoadUint64(&netInTransfer),
 		NetOutTransfer: atomic.LoadUint64(&netOutTransfer),
 		NetInSpeed:     atomic.LoadUint64(&netInSpeed),
