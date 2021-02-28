@@ -26,7 +26,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		var errMsg string
 		if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
 			// 排除超时错误
-			if !strings.HasSuffix(r.GetData(), "i/o timeout") {
+			if !strings.HasSuffix(r.GetData(), "timeout") {
 				errMsg = r.GetData()
 			}
 		} else {
