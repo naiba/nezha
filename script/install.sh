@@ -1,16 +1,17 @@
 #!/bin/bash
 
-#======================================================
-#   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+
+#========================================================
+#   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+ /
+#     Arch 未测试
 #   Description: 哪吒监控安装脚本
 #   Github: https://github.com/naiba/nezha
-#======================================================
+#========================================================
 
 NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.7"
+NZ_VERSION="v0.4.8"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -18,7 +19,6 @@ yellow='\033[0;33m'
 plain='\033[0m'
 export PATH=$PATH:/usr/local/bin
 
-os_version=""
 os_arch=""
 
 pre_check() {
@@ -30,47 +30,6 @@ pre_check() {
 
     # check root
     [[ $EUID -ne 0 ]] && echo -e "${red}错误: ${plain} 必须使用root用户运行此脚本！\n" && exit 1
-
-    # check os
-    if [[ -f /etc/redhat-release ]]; then
-        release="centos"
-    elif cat /etc/issue | grep -Eqi "debian"; then
-        release="debian"
-    elif cat /etc/issue | grep -Eqi "ubuntu"; then
-        release="ubuntu"
-    elif cat /etc/issue | grep -Eqi "centos|red hat|redhat"; then
-        release="centos"
-    elif cat /proc/version | grep -Eqi "debian"; then
-        release="debian"
-    elif cat /proc/version | grep -Eqi "ubuntu"; then
-        release="ubuntu"
-    elif cat /proc/version | grep -Eqi "centos|red hat|redhat"; then
-        release="centos"
-    else
-        echo -e "${red}未检测到系统版本，请联系脚本作者！${plain}\n" && exit 1
-    fi
-
-    # os version
-    if [[ -f /etc/os-release ]]; then
-        os_version=$(awk -F'[= ."]' '/VERSION_ID/{print $3}' /etc/os-release)
-    fi
-    if [[ -z "$os_version" && -f /etc/lsb-release ]]; then
-        os_version=$(awk -F'[= ."]+' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
-    fi
-
-    if [[ x"${release}" == x"centos" ]]; then
-        if [[ ${os_version} -le 6 ]]; then
-            echo -e "${red}请使用 CentOS 7 或更高版本的系统！${plain}\n" && exit 1
-        fi
-    elif [[ x"${release}" == x"ubuntu" ]]; then
-        if [[ ${os_version} -lt 16 ]]; then
-            echo -e "${red}请使用 Ubuntu 16 或更高版本的系统！${plain}\n" && exit 1
-        fi
-    elif [[ x"${release}" == x"debian" ]]; then
-        if [[ ${os_version} -lt 8 ]]; then
-            echo -e "${red}请使用 Debian 8 或更高版本的系统！${plain}\n" && exit 1
-        fi
-    fi
 
     ## os_arch
     if [[ $(uname -m | grep 'x86_64') != "" ]]; then
@@ -121,6 +80,7 @@ install_base() {
 install_soft() {
     (command -v yum >/dev/null 2>&1 && yum install $* -y) ||
         (command -v apt >/dev/null 2>&1 && apt install $* -y) ||
+        (command -v pacman >/dev/null 2>&1 && pacman -Syu $*) ||
         (command -v apt-get >/dev/null 2>&1 && apt-get install $* -y)
 }
 
@@ -248,14 +208,16 @@ modify_dashboard_config() {
     fi
 
     echo "关于管理员 GitHub ID：复制自己GitHub头像图片地址里面的数字，/87123.png 多个用英文逗号隔开 87123,id2,id3" &&
-        read -p "请输入 ID 列表: " nz_admin_ids &&
-        echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback" &&
-        read -p "请输入 GitHub Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
-        read -p "请输入 GitHub Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
+        echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+        echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+        read -p "请输入 OAuth2 提供商(gitee/github，默认 github): " nz_oauth2_type &&
+        read -p "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
+        read -p "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
+        read -p "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
         read -p "请输入站点标题: " nz_site_title &&
         read -p "请输入站点访问端口: (8008)" nz_site_port &&
         read -p "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_grpc_port
-    if [[ -z "${nz_admin_ids}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
+    if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
         return 1
@@ -267,8 +229,12 @@ modify_dashboard_config() {
     if [[ -z "${nz_grpc_port}" ]]; then
         nz_grpc_port=5555
     fi
+    if [[ -z "${nz_oauth2_type}" ]]; then
+        nz_oauth2_type=github
+    fi
 
-    sed -i "s/nz_admin_ids/${nz_admin_ids}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
+    sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
+    sed -i "s/nz_admin_logins/${nz_admin_logins}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/data/config.yaml

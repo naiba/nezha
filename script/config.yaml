@@ -1,7 +1,8 @@
 debug: true
 httpport: 80
-github:
-  admin: "nz_admin_ids" #管理员 GitHub ID，复制自己GitHub头像图片地址，/[ID].png 多个用英文逗号隔开
+oauth2:
+  type: "nz_oauth2_type" #Oauth2 登录接入类型，gitee/github
+  admin: "nz_admin_logins" #管理员列表，半角逗号隔开
   clientid: "nz_github_oauth_client_id" # 在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback
   clientsecret: "nz_github_oauth_client_secret"
 site:

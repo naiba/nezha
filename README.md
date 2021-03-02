@@ -1,6 +1,6 @@
 # 哪吒监控
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=管理面板%20v0.4.11&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.7-brightgreen?style=for-the-badge&logo=linux)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=管理面板%20v0.4.12&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.7-brightgreen?style=for-the-badge&logo=linux)
 
 :trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。
 
@@ -14,14 +14,14 @@
 
 ## 安装脚本
 
-建议使用 WatchTower 自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）
+**推荐配置：** 安装前解析 _两个域名_ 到面板服务器，一个作为 _公开访问_ ，可以 **接入CDN**，比如 (status.nai.ba)；另外一个作为安装 Agent 时连接 Dashboard 使用，**不能接入CDN** 直接暴露面板主机IP，比如（randomdashboard.nai.ba）。
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
 ./nezha.sh
 ```
 
-_\* 目前安装脚本仅支持 CentOS 7+ / Debian 8+ / Ubuntu 16+，Windows 及 其他 Linux 发行版请在 Release 处下载对应二进制文件。_
+_\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
 
 <details>
     <summary>国内镜像加速：（有缓存，版本更新不及时，能不用尽量不用，非作者维护）</summary>
@@ -97,7 +97,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - cpu、memory、swap、disk：Min/Max 数值为占用百分比
   - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024\*1024）
   - offline：不支持 Min/Max 参数
-- Duration：持续秒数，监控比较简陋，取持续时间内的 70 采样结果
+- Duration：持续秒数，监控比较简陋，取持续时间内的 70% 采样结果
 - Ignore: `{"1": true, "2":false}` 忽略此规则的服务器 ID 列表
 </details>
 

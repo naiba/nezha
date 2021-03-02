@@ -17,11 +17,11 @@ const (
 type Rule struct {
 	// 指标类型，cpu、memory、swap、disk、net_in_speed、net_out_speed
 	// net_all_speed、transfer_in、transfer_out、transfer_all、offline
-	Type     string
-	Min      uint64          // 最小阈值 (百分比、字节 kb ÷ 1024)
-	Max      uint64          // 最大阈值 (百分比、字节 kb ÷ 1024)
-	Duration uint64          // 持续时间 (秒)
-	Ignore   map[uint64]bool //忽略此规则的ID列表
+	Type     string          `json:"type,omitempty"`
+	Min      uint64          `json:"min,omitempty"`      // 最小阈值 (百分比、字节 kb ÷ 1024)
+	Max      uint64          `json:"max,omitempty"`      // 最大阈值 (百分比、字节 kb ÷ 1024)
+	Duration uint64          `json:"duration,omitempty"` // 持续时间 (秒)
+	Ignore   map[uint64]bool `json:"ignore,omitempty"`   //忽略此规则的ID列表
 }
 
 func percentage(used, total uint64) uint64 {
@@ -123,7 +123,7 @@ func (r *AlertRule) Check(points [][]interface{}) (int, string) {
 				fail++
 			}
 		}
-		if fail/total > 0.5 {
+		if fail/total > 0.7 {
 			count++
 			dist.WriteString(fmt.Sprintf("%+v\n", r.Rules[i]))
 		}

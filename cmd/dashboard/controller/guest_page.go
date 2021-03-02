@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/service/dao"
 	"golang.org/x/oauth2"
@@ -26,12 +27,23 @@ func (gp *guestPage) serve() {
 
 	gr.GET("/login", gp.login)
 
+	var endPoint oauth2.Endpoint
+
+	if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
+		endPoint = oauth2.Endpoint{
+			AuthURL:  "https://gitee.com/oauth/authorize",
+			TokenURL: "https://gitee.com/oauth/token",
+		}
+	} else {
+		endPoint = github.Endpoint
+	}
+
 	oauth := &oauth2controller{
 		oauth2Config: &oauth2.Config{
-			ClientID:     dao.Conf.GitHub.ClientID,
-			ClientSecret: dao.Conf.GitHub.ClientSecret,
+			ClientID:     dao.Conf.Oauth2.ClientID,
+			ClientSecret: dao.Conf.Oauth2.ClientSecret,
 			Scopes:       []string{},
-			Endpoint:     github.Endpoint,
+			Endpoint:     endPoint,
 		},
 		r: gr,
 	}
