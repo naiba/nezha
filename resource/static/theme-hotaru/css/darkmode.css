@@ -7,8 +7,13 @@ body.dark table.table-striped tr.even {
     background-color: #212f36;
 }
 
+#servers tr:nth-child(odd) {
+    /* color: red; */
+    background: #384d58;
+}
+
 body.dark table.table-striped tr.odd {
-    background-color: #2f3c42;
+    background-color: #384d58;
 }
 
 body.dark tr.expandRow {
