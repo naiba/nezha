@@ -42,12 +42,30 @@
     $('#settingForm').submit(function () {
         $.post('/api/setting', $('#settingForm').serialize()).then((resp) => {
             if (resp.code == 200) {
-                alert("保存成功")
+                $.suiAlert({
+                    title: '',
+                    description: '修改成功',
+                    type: 'success',
+                    time: '3',
+                    position: 'top-center',
+                });
             } else {
-                alert(resp.message)
+                $.suiAlert({
+                    title: '',
+                    description:resp.message,
+                    type: 'error',
+                    time: '3',
+                    position: 'top-center',
+                });
             }
         }).error(err => {
-            alert(err)
+            $.suiAlert({
+                title: '',
+                description:err,
+                type: 'error',
+                time: '3',
+                position: 'top-center',
+            });
         })
         return false;
     })
