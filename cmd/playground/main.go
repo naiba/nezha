@@ -12,15 +12,17 @@ import (
 
 	"github.com/go-ping/ping"
 	"github.com/naiba/nezha/pkg/utils"
+	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v3/host"
 )
 
 func main() {
 	// icmp()
 	// tcpping()
 	// httpWithSSLInfo()
-	// diskinfo()
-	cmdExec()
+	sysinfo()
+	// cmdExec()
 }
 
 func tcpping() {
@@ -34,8 +36,26 @@ func tcpping() {
 	fmt.Println(time.Now().Sub(start).Microseconds(), float32(time.Now().Sub(start).Microseconds())/1000.0)
 }
 
-func diskinfo() {
-	// 硬盘信息
+func sysinfo() {
+	hi, _ := host.Info()
+	var cpuType string
+	if hi.VirtualizationSystem != "" {
+		cpuType = "Virtual"
+	} else {
+		cpuType = "Physical"
+	}
+	cpuModelCount := make(map[string]int)
+	ci, _ := cpu.Info()
+	for i := 0; i < len(ci); i++ {
+		cpuModelCount[ci[i].ModelName]++
+	}
+	var cpus []string
+	for model, count := range cpuModelCount {
+		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
+	}
+	log.Println(cpus)
+	os.Exit(0)
+	// 硬盘信息，不使用的原因是会重复统计 Linux、Mac
 	dparts, _ := disk.Partitions(false)
 	for _, part := range dparts {
 		u, _ := disk.Usage(part.Mountpoint)

@@ -28,10 +28,20 @@ var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
 
 func GetHost() *model.Host {
 	hi, _ := host.Info()
-	var cpus []string
+	var cpuType string
+	if hi.VirtualizationSystem != "" {
+		cpuType = "Virtual"
+	} else {
+		cpuType = "Physical"
+	}
+	cpuModelCount := make(map[string]int)
 	ci, _ := cpu.Info()
 	for i := 0; i < len(ci); i++ {
-		cpus = append(cpus, fmt.Sprintf("%v-%vC%vT", ci[i].ModelName, ci[i].Cores, ci[i].Stepping))
+		cpuModelCount[ci[i].ModelName]++
+	}
+	var cpus []string
+	for model, count := range cpuModelCount {
+		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
 	}
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
@@ -47,7 +57,11 @@ func GetHost() *model.Host {
 	if err == nil {
 		defer resp.Body.Close()
 		body, _ := ioutil.ReadAll(resp.Body)
-		ip.IP = fmt.Sprintf("ip(v4: %s, v6: %s)", ip.IP, body)
+		if ip.IP == "" {
+			ip.IP = string(body)
+		} else {
+			ip.IP = fmt.Sprintf("ip(v4: %s, v6: %s)", ip.IP, body)
+		}
 	}
 	return &model.Host{
 		Platform:        hi.OS,

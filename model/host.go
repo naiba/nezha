@@ -1,8 +1,6 @@
 package model
 
 import (
-	"fmt"
-
 	pb "github.com/naiba/nezha/proto"
 )
 
@@ -85,22 +83,10 @@ func (h *Host) PB() *pb.Host {
 }
 
 func PB2Host(h *pb.Host) Host {
-
-	cpuCount := make(map[string]int, 0)
-	cpus := h.GetCpu()
-	for _, u := range cpus {
-		cpuCount[u]++
-	}
-
-	var distCpu []string
-	for u, num := range cpuCount {
-		distCpu = append(distCpu, fmt.Sprintf("%sx%d", u, num))
-	}
-
 	return Host{
 		Platform:        h.GetPlatform(),
 		PlatformVersion: h.GetPlatformVersion(),
-		CPU:             distCpu,
+		CPU:             h.GetCpu(),
 		MemTotal:        h.GetMemTotal(),
 		DiskTotal:       h.GetDiskTotal(),
 		SwapTotal:       h.GetSwapTotal(),
