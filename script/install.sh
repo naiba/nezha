@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.8"
+NZ_VERSION="v0.4.9"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -207,8 +207,7 @@ modify_dashboard_config() {
         return 0
     fi
 
-    echo "关于管理员 GitHub ID：复制自己GitHub头像图片地址里面的数字，/87123.png 多个用英文逗号隔开 87123,id2,id3" &&
-        echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+    echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
         echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
         read -p "请输入 OAuth2 提供商(gitee/github，默认 github): " nz_oauth2_type &&
         read -p "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
@@ -217,6 +216,7 @@ modify_dashboard_config() {
         read -p "请输入站点标题: " nz_site_title &&
         read -p "请输入站点访问端口: (8008)" nz_site_port &&
         read -p "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_grpc_port
+
     if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu

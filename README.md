@@ -1,6 +1,6 @@
 # 哪吒监控
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=管理面板%20v0.4.12&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.7-brightgreen?style=for-the-badge&logo=linux)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=管理面板%20v0.4.12&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.9-brightgreen?style=for-the-badge&logo=linux)
 
 :trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。
 
