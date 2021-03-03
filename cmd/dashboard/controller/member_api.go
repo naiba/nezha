@@ -447,6 +447,7 @@ type settingForm struct {
 	CustomCode                 string
 	ViewPassword               string
 	EnableIPChangeNotification string
+	Oauth2Type                 string
 }
 
 func (ma *memberAPI) updateSetting(c *gin.Context) {
@@ -463,7 +464,8 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	dao.Conf.Site.Theme = sf.Theme
 	dao.Conf.Site.CustomCode = sf.CustomCode
 	dao.Conf.Site.ViewPassword = sf.ViewPassword
-	dao.Conf.GitHub.Admin = sf.Admin
+	dao.Conf.Oauth2.Type = sf.Oauth2Type
+	dao.Conf.Oauth2.Admin = sf.Admin
 	if err := dao.Conf.Save(); err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
