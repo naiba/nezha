@@ -7,8 +7,7 @@ body.dark table.table-striped tr.even {
     background-color: #212f36;
 }
 
-#servers tr:nth-child(odd) {
-    /* color: red; */
+body.dark table tr:nth-child(odd) {
     background: #384d58;
 }
 
