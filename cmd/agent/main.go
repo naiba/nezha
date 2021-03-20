@@ -20,11 +20,11 @@ import (
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
 	"google.golang.org/grpc"
 
+	"github.com/naiba/nezha/cmd/agent/monitor"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
-	"github.com/naiba/nezha/service/monitor"
 	"github.com/naiba/nezha/service/rpc"
 )
 

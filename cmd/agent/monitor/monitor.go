@@ -25,7 +25,6 @@ type ipDotSbGeoIP struct {
 }
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
-
 var cachedIP, country string
 var latestFetchIP time.Time
 
@@ -60,6 +59,8 @@ func GetHost() *model.Host {
 			json.Unmarshal(body, &ip)
 			cachedIP = ip.IP
 			country = ip.CountryCode
+		} else {
+			cachedIP = ""
 		}
 		resp, err = http.Get("https://api-ipv6.ip.sb/geoip")
 		if err == nil {
