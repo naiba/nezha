@@ -5,7 +5,7 @@
 :trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。
 
 <div align="center">
-  <img width="480" style="max-width:100%" src="https://img.ketowe.com/od/2021/03/20/1ef423d35a23e.png">
+  <img width="500" style="max-width:100%" src="https://raw.githubusercontent.com/JackieSung4ev/nezha/daynight/resource/static/brand.png">
 </div>
 
 \>> QQ 交流群：955957790
