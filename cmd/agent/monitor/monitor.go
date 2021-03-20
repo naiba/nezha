@@ -25,8 +25,41 @@ type ipDotSbGeoIP struct {
 }
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
-var cachedIP, country string
-var latestFetchIP time.Time
+var cachedIP, cachedCountry string
+
+func UpdateIP() {
+	var ip ipDotSbGeoIP
+	for {
+		var tempIP string
+		var tempCountry string
+		resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
+		if err == nil {
+			defer resp.Body.Close()
+			body, _ := ioutil.ReadAll(resp.Body)
+			json.Unmarshal(body, &ip)
+			tempIP = ip.IP
+			tempCountry = ip.CountryCode
+		} else {
+			cachedIP = ""
+		}
+		time.Sleep(time.Second * 10)
+		resp, err = http.Get("https://api-ipv6.ip.sb/geoip")
+		if err == nil {
+			defer resp.Body.Close()
+			body, _ := ioutil.ReadAll(resp.Body)
+			json.Unmarshal(body, &ip)
+			if tempIP == "" {
+				tempIP = ip.IP
+			} else {
+				tempIP = fmt.Sprintf("ip(v4: %s, v6: %s)", tempIP, ip.IP)
+			}
+			tempCountry = ip.CountryCode
+		}
+		cachedIP = tempIP
+		cachedCountry = tempCountry
+		time.Sleep(time.Minute * 10)
+	}
+}
 
 func GetHost() *model.Host {
 	hi, _ := host.Info()
@@ -49,33 +82,6 @@ func GetHost() *model.Host {
 	ms, _ := mem.SwapMemory()
 	u, _ := disk.Usage("/")
 
-	if latestFetchIP.Before(time.Now().Add(time.Minute * -15)) {
-		var ip ipDotSbGeoIP
-		latestFetchIP = time.Now()
-		resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
-		if err == nil {
-			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
-			json.Unmarshal(body, &ip)
-			cachedIP = ip.IP
-			country = ip.CountryCode
-		} else {
-			cachedIP = ""
-		}
-		resp, err = http.Get("https://api-ipv6.ip.sb/geoip")
-		if err == nil {
-			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
-			json.Unmarshal(body, &ip)
-			if cachedIP == "" {
-				cachedIP = ip.IP
-			} else {
-				cachedIP = fmt.Sprintf("ip(v4: %s, v6: %s)", cachedIP, ip.IP)
-			}
-			country = ip.CountryCode
-		}
-	}
-
 	return &model.Host{
 		Platform:        hi.OS,
 		PlatformVersion: hi.PlatformVersion,
@@ -87,7 +93,7 @@ func GetHost() *model.Host {
 		Virtualization:  hi.VirtualizationSystem,
 		BootTime:        hi.BootTime,
 		IP:              cachedIP,
-		CountryCode:     strings.ToLower(country),
+		CountryCode:     strings.ToLower(cachedCountry),
 		Version:         dao.Version,
 	}
 }

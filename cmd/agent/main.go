@@ -105,6 +105,8 @@ func run() {
 
 	// 上报服务器信息
 	go reportState()
+	// 更新IP信息
+	go monitor.UpdateIP()
 
 	if version != "" {
 		go func() {
