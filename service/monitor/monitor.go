@@ -65,10 +65,11 @@ func GetHost() *model.Host {
 		if err == nil {
 			defer resp.Body.Close()
 			body, _ := ioutil.ReadAll(resp.Body)
-			if ip.IP == "" {
-				cachedIP = string(body)
+			json.Unmarshal(body, &ip)
+			if cachedIP == "" {
+				cachedIP = ip.IP
 			} else {
-				cachedIP = fmt.Sprintf("ip(v4: %s, v6: %s)", ip.IP, body)
+				cachedIP = fmt.Sprintf("ip(v4: %s, v6: %s)", cachedIP, ip.IP)
 			}
 			country = ip.CountryCode
 		}
