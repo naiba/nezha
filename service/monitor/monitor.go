@@ -26,6 +26,9 @@ type ipDotSbGeoIP struct {
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
 
+var cachedIP, country string
+var latestFetchIP time.Time
+
 func GetHost() *model.Host {
 	hi, _ := host.Info()
 	var cpuType string
@@ -46,23 +49,31 @@ func GetHost() *model.Host {
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
 	u, _ := disk.Usage("/")
-	var ip ipDotSbGeoIP
-	resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
-	if err == nil {
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		json.Unmarshal(body, &ip)
-	}
-	resp, err = http.Get("https://api-ipv6.ip.sb/ip")
-	if err == nil {
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		if ip.IP == "" {
-			ip.IP = string(body)
-		} else {
-			ip.IP = fmt.Sprintf("ip(v4: %s, v6: %s)", ip.IP, body)
+
+	if latestFetchIP.Before(time.Now().Add(time.Minute * -15)) {
+		var ip ipDotSbGeoIP
+		latestFetchIP = time.Now()
+		resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
+		if err == nil {
+			defer resp.Body.Close()
+			body, _ := ioutil.ReadAll(resp.Body)
+			json.Unmarshal(body, &ip)
+			cachedIP = ip.IP
+			country = ip.CountryCode
+		}
+		resp, err = http.Get("https://api-ipv6.ip.sb/geoip")
+		if err == nil {
+			defer resp.Body.Close()
+			body, _ := ioutil.ReadAll(resp.Body)
+			if ip.IP == "" {
+				cachedIP = string(body)
+			} else {
+				cachedIP = fmt.Sprintf("ip(v4: %s, v6: %s)", ip.IP, body)
+			}
+			country = ip.CountryCode
 		}
 	}
+
 	return &model.Host{
 		Platform:        hi.OS,
 		PlatformVersion: hi.PlatformVersion,
@@ -73,8 +84,8 @@ func GetHost() *model.Host {
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
 		BootTime:        hi.BootTime,
-		IP:              ip.IP,
-		CountryCode:     strings.ToLower(ip.CountryCode),
+		IP:              cachedIP,
+		CountryCode:     strings.ToLower(country),
 		Version:         dao.Version,
 	}
 }
