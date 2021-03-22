@@ -1,10 +1,7 @@
 package monitor
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -19,47 +16,7 @@ import (
 	"github.com/naiba/nezha/service/dao"
 )
 
-type ipDotSbGeoIP struct {
-	CountryCode string `json:"country_code,omitempty"`
-	IP          string `json:"ip,omitempty"`
-}
-
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
-var cachedIP, cachedCountry string
-
-func UpdateIP() {
-	var ip ipDotSbGeoIP
-	for {
-		var tempIP string
-		var tempCountry string
-		resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
-		if err == nil {
-			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
-			json.Unmarshal(body, &ip)
-			tempIP = ip.IP
-			tempCountry = ip.CountryCode
-		} else {
-			cachedIP = ""
-		}
-		time.Sleep(time.Second * 10)
-		resp, err = http.Get("https://api-ipv6.ip.sb/geoip")
-		if err == nil {
-			defer resp.Body.Close()
-			body, _ := ioutil.ReadAll(resp.Body)
-			json.Unmarshal(body, &ip)
-			if tempIP == "" {
-				tempIP = ip.IP
-			} else {
-				tempIP = fmt.Sprintf("ip(v4: %s, v6: %s)", tempIP, ip.IP)
-			}
-			tempCountry = ip.CountryCode
-		}
-		cachedIP = tempIP
-		cachedCountry = tempCountry
-		time.Sleep(time.Minute * 10)
-	}
-}
 
 func GetHost() *model.Host {
 	hi, _ := host.Info()
