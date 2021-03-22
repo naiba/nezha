@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -27,12 +26,6 @@ var ipv6Servers = []string{
 var cachedIP, cachedCountry string
 
 func UpdateIP() {
-	go func() {
-		for {
-			log.Println(cachedIP, cachedCountry)
-			time.Sleep(time.Second)
-		}
-	}()
 	for {
 		ipv4 := fetchGeoIP(ipv4Servers)
 		ipv6 := fetchGeoIP(ipv6Servers)
