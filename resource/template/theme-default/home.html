@@ -240,6 +240,7 @@
             }
         }
         statusCards.groups = groupingData(statusCards.servers, "Tag")
+        ws.send("success");
     }
     ws.onclose = function () {
         $.suiAlert({
