@@ -6,8 +6,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
-    <link rel="shortcut icon" type="image/png" href="/static/logo.png" />
-    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202102012266" />
+    <link rel="shortcut icon" type="image/png" href="/static/logo.png?v20210320" />
+    <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202103202286" />
 
     <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -21,7 +21,17 @@
     <article>
       <header>
         <section class="nav-bar clearfix">
-            <figure class="logo"><a href="/">{{.Conf.Site.Brand}}</a></figure>
+          <figure class="logo">
+            <a href="/">
+              <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 88 88">
+                <g>
+                  <path fill="#1d71b8" d="M81.46,20.89l-.26.26-9.71,9.71h0l-9.41,9.4-9.56,9.56,0,0L43,59.36l0,0,0,0-9.58-9.58-9.46-9.47-9.77,9.77L3.36,61A43.92,43.92,0,0,1,0,45.2v0L14.35,30.81l6-6,3.52-3.52,9.57,9.58L43,40.29l0,0,9.55-9.55L63,20.22a30.47,30.47,0,0,0-26.69-5.69L25.75,4A44,44,0,0,1,72.64,10.6,44.36,44.36,0,0,1,81.46,20.89Z" />
+                  <path fill="#36a9e1" d="M88,44A44,44,0,0,1,10.58,72.66L20.21,63a30.45,30.45,0,0,0,54.06-15.6L87,34.68A44.15,44.15,0,0,1,88,44Z" />
+                </g>
+              </svg>
+            </a>
+            <a href="/">{{.Conf.Site.Brand}}</a>
+          </figure>
             <div class="icon-container">
               <div class="row cf">
                 <div class="three col">

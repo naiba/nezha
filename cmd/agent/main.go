@@ -20,11 +20,11 @@ import (
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
 	"google.golang.org/grpc"
 
+	"github.com/naiba/nezha/cmd/agent/monitor"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
-	"github.com/naiba/nezha/service/monitor"
 	"github.com/naiba/nezha/service/rpc"
 )
 
@@ -105,6 +105,8 @@ func run() {
 
 	// 上报服务器信息
 	go reportState()
+	// 更新IP信息
+	go monitor.UpdateIP()
 
 	if version != "" {
 		go func() {

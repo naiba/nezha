@@ -61,7 +61,7 @@ func initSystem() {
 }
 
 func cleanMonitorHistory() {
-	dao.DB.Delete(&model.MonitorHistory{}, "created_at < ?", time.Now().AddDate(0, -1, 0))
+	dao.DB.Delete(&model.MonitorHistory{}, "created_at < ?", time.Now().AddDate(0, 0, -30))
 }
 
 func loadServers() {

@@ -1,10 +1,7 @@
 package monitor
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -18,11 +15,6 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/dao"
 )
-
-type ipDotSbGeoIP struct {
-	CountryCode string `json:"country_code,omitempty"`
-	IP          string `json:"ip,omitempty"`
-}
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
 
@@ -46,23 +38,7 @@ func GetHost() *model.Host {
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
 	u, _ := disk.Usage("/")
-	var ip ipDotSbGeoIP
-	resp, err := http.Get("https://api-ipv4.ip.sb/geoip")
-	if err == nil {
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		json.Unmarshal(body, &ip)
-	}
-	resp, err = http.Get("https://api-ipv6.ip.sb/ip")
-	if err == nil {
-		defer resp.Body.Close()
-		body, _ := ioutil.ReadAll(resp.Body)
-		if ip.IP == "" {
-			ip.IP = string(body)
-		} else {
-			ip.IP = fmt.Sprintf("ip(v4: %s, v6: %s)", ip.IP, body)
-		}
-	}
+
 	return &model.Host{
 		Platform:        hi.OS,
 		PlatformVersion: hi.PlatformVersion,
@@ -73,8 +49,8 @@ func GetHost() *model.Host {
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
 		BootTime:        hi.BootTime,
-		IP:              ip.IP,
-		CountryCode:     strings.ToLower(ip.CountryCode),
+		IP:              cachedIP,
+		CountryCode:     strings.ToLower(cachedCountry),
 		Version:         dao.Version,
 	}
 }

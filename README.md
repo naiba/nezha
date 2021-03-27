@@ -1,20 +1,22 @@
-# 哪吒监控
+<div align="center" style="background-color: white">
+  <img width="500" style="max-width:100%" src="https://raw.githubusercontent.com/naiba/nezha/master/resource/static/brand.png" title="哪吒监控">
+  <br><br>
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.4.14&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.4.9-brightgreen?style=for-the-badge&logo=linux">
+  <br>
+  <p>:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
+</div>
 
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=管理面板%20v0.4.12&logo=github&style=for-the-badge) ![Agent release](https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github) ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge) ![shell](https://img.shields.io/badge/安装脚本-v0.4.9-brightgreen?style=for-the-badge&logo=linux)
+\>> QQ 交流群： ~~955957790~~ 各式心态的人都有，解散了省心，**自2021年3月26起不再提供任何支持，接受PR，但不再更新。**
 
-:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。
+\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控%7C哪吒面板"&filter=0) (Google)
 
-\>> QQ 交流群：955957790
-
-\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒"+"监控%7C面板"&filter=0) (Google)
-
-| 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru                        |
+| 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru                                                                 |
 | ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
 | ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg) | <img src="https://s3.ax1x.com/2021/01/20/sfJv2q.jpg"/>   | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
 
 ## 安装脚本
 
-**推荐配置：** 安装前解析 _两个域名_ 到面板服务器，一个作为 _公开访问_ ，可以 **接入CDN**，比如 (status.nai.ba)；另外一个作为安装 Agent 时连接 Dashboard 使用，**不能接入CDN** 直接暴露面板主机IP，比如（randomdashboard.nai.ba）。
+**推荐配置：** 安装前解析 _两个域名_ 到面板服务器，一个作为 _公开访问_ ，可以 **接入 CDN**，比如 (status.nai.ba)；另外一个作为安装 Agent 时连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
