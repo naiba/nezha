@@ -195,7 +195,10 @@ func (cp *commonPage) ws(c *gin.Context) {
 		}
 		count += 1
 		if count%4 == 0 {
-			conn.WriteMessage(websocket.PingMessage, []byte{})
+			err = conn.WriteMessage(websocket.PingMessage, []byte{})
+			if err != nil {
+				break
+			}
 		}
 		time.Sleep(time.Second * 2)
 	}
