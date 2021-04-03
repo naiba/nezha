@@ -185,12 +185,17 @@ func (cp *commonPage) ws(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
+	count := 0
 	for {
 		dao.SortedServerLock.RLock()
 		err = conn.WriteJSON(dao.SortedServerList)
 		dao.SortedServerLock.RUnlock()
 		if err != nil {
 			break
+		}
+		count += 1
+		if count%4 == 0 {
+			conn.WriteMessage(websocket.PingMessage, []byte{})
 		}
 		time.Sleep(time.Second * 2)
 	}
