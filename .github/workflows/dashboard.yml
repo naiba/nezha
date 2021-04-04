@@ -22,6 +22,8 @@ jobs:
 
       - name: Build and push dasbboard image
         run: |
+          go env
           go test -v ./... 
-          docker build -t ghcr.io/${{ github.repository_owner }}/nezha-dashboard -f Dockerfile .
-          docker push ghcr.io/${{ github.repository_owner }}/nezha-dashboard
+          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
+          docker build -t $IMAGE_NAME -f Dockerfile .
+          docker push $IMAGE_NAME
