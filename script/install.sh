@@ -43,8 +43,6 @@ pre_check() {
     fi
 
     ## China_IP
-
-    IP_JSON=
     if [[ $(curl -m 10 -s https://api.ip.sb/geoip | grep 'China') != "" ]]; then
         echo "根据ip.sb提供的信息，当前IP可能在中国"
         while true
