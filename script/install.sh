@@ -45,25 +45,22 @@ pre_check() {
     ## China_IP
     if [[ $(curl -m 10 -s https://api.ip.sb/geoip | grep 'China') != "" ]]; then
         echo "根据ip.sb提供的信息，当前IP可能在中国"
-        while true
-        do
-            read -r -p "是否选用中国镜像完成安装? [Y/n] " input
-            case $input in
-                [yY][eE][sS]|[yY])
-                    echo "使用中国镜像"
-                    CN=true
-                    ;;
+        read -r -p "是否选用中国镜像完成安装? [Y/n] " input
+        case $input in
+            [yY][eE][sS]|[yY])
+                echo "使用中国镜像"
+                CN=true
+                ;;
 
-                [nN][oO]|[nN])
-                    echo "不使用中国镜像"      	
-                    ;;
-
-                *)
-                    echo "错误输入..."
-                    ;;
-            esac
-        done
-
+            [nN][oO]|[nN])
+                echo "不使用中国镜像"  	
+                ;;
+            *)
+                echo "使用中国镜像"
+                CN=true
+                ;;
+        esac
+    fi
     
     if [[ -z "${CN}" ]]; then
         GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
@@ -74,7 +71,7 @@ pre_check() {
         GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.daocloud.io/docker"
-        Get_Docker_Argu=" --mirror Aliyun"
+        Get_Docker_Argu=" -s docker --mirror Aliyun"
         echo "写入/etc/hosts 52.68.132.128 ghcr.io"
         echo "52.68.132.128 ghcr.io" >> /etc/hosts
     fi
