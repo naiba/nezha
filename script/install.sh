@@ -66,7 +66,7 @@ pre_check() {
         GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
         GITHUB_URL="github.com"
         Get_Docker_URL="get.docker.com"
-        Get_Docker_Argu =""
+        Get_Docker_Argu=" "
     else
         GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
