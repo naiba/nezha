@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.9"
+NZ_VERSION="v0.4.10"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -47,21 +47,21 @@ pre_check() {
         echo "根据ip.sb提供的信息，当前IP可能在中国"
         read -r -p "是否选用中国镜像完成安装? [Y/n] " input
         case $input in
-            [yY][eE][sS]|[yY])
-                echo "使用中国镜像"
-                CN=true
-                ;;
+        [yY][eE][sS] | [yY])
+            echo "使用中国镜像"
+            CN=true
+            ;;
 
-            [nN][oO]|[nN])
-                echo "不使用中国镜像"  	
-                ;;
-            *)
-                echo "使用中国镜像"
-                CN=true
-                ;;
+        [nN][oO] | [nN])
+            echo "不使用中国镜像"
+            ;;
+        *)
+            echo "使用中国镜像"
+            CN=true
+            ;;
         esac
     fi
-    
+
     if [[ -z "${CN}" ]]; then
         GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
         GITHUB_URL="github.com"
@@ -72,8 +72,6 @@ pre_check() {
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.daocloud.io/docker"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
-        echo "写入/etc/hosts 52.68.132.128 ghcr.io"
-        echo "52.68.132.128 ghcr.io" >> /etc/hosts
     fi
 }
 

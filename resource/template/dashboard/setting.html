@@ -28,6 +28,10 @@
                 <input type="text" name="ViewPassword" placeholder="" value="{{.Conf.Site.ViewPassword}}">
             </div>
             <div class="field">
+                <label>IP 变更忽略</label>
+                <input type="text" name="IgnoredIPNotification" placeholder="服务器ID 以逗号隔开 1001,1002,1003" value="{{.Conf.IgnoredIPNotification}}">
+            </div>
+            <div class="field">
                 <div class="ui nf-ssl checkbox">
                     <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
                     <label>开启 IP 变更提醒</label>
