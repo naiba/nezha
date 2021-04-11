@@ -30,7 +30,10 @@ jobs:
       - name: Push dasbboard image
         run: |
           GHRC_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
-          ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
+          if [ ${{ github.repository_owner }} = "naiba" ]
+          then ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard")
+          else ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
+          fi
           docker tag nezha-dasbboard $GHRC_IMAGE_NAME
           docker tag nezha-dasbboard $ALI_IMAGE_NAME
           docker push $GHRC_IMAGE_NAME
