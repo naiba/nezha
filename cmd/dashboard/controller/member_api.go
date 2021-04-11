@@ -447,6 +447,7 @@ type settingForm struct {
 	CustomCode                 string
 	ViewPassword               string
 	EnableIPChangeNotification string
+	IgnoredIPNotification      string
 	Oauth2Type                 string
 }
 
@@ -460,6 +461,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 	dao.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
+	dao.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
 	dao.Conf.Site.Brand = sf.Title
 	dao.Conf.Site.Theme = sf.Theme
 	dao.Conf.Site.CustomCode = sf.CustomCode

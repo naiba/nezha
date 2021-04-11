@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -27,7 +28,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
 			// 排除 i/o timeont、connection timeout、EOF 错误
 			if !strings.HasSuffix(r.GetData(), "timeout") &&
-				r.GetData() != "EOF" &&
+				!strings.HasSuffix(r.GetData(), "EOF") &&
 				!strings.HasSuffix(r.GetData(), "timed out") {
 				errMsg = r.GetData()
 			}
@@ -130,7 +131,9 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	host := model.PB2Host(r)
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
+	log.Println(dao.Conf.IgnoredIPNotificationServerIDs)
 	if dao.Conf.EnableIPChangeNotification &&
+		dao.Conf.IgnoredIPNotificationServerIDs[clientID] != struct{}{} &&
 		dao.ServerList[clientID].Host != nil &&
 		dao.ServerList[clientID].Host.IP != "" &&
 		host.IP != "" &&
