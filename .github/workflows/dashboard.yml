@@ -18,12 +18,20 @@ jobs:
       - uses: actions/checkout@master
 
       - name: Log into registry
-        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+        run:
+          echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          echo "${{ secrets.ALI_PAT }}" | docker login registry.cn-shanghai.aliyuncs.com -u ${{ secrets.ALI_USER }} --password-stdin
 
-      - name: Build and push dasbboard image
+      - name: Build dasbboard image
         run: |
           go env
           go test -v ./... 
-          IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
-          docker build -t $IMAGE_NAME -f Dockerfile .
-          docker push $IMAGE_NAME
+          docker build -t nezha-dasbboard -f Dockerfile .
+      - name: Push dasbboard image
+        run: |
+          GHRC_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
+          ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
+          docker tag nezha-dasbboard $GHRC_IMAGE_NAME
+          docker tag nezha-dasbboard $ALI_IMAGE_NAME
+          docker push $GHRC_IMAGE_NAME
+          docker push $ALI_IMAGE_NAME
