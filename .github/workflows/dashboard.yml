@@ -35,3 +35,9 @@ jobs:
           docker tag nezha-dasbboard $ALI_IMAGE_NAME
           docker push $GHRC_IMAGE_NAME
           docker push $ALI_IMAGE_NAME
+      - name: Purge jsdelivr cache
+        run: |
+          curl https://purge.jsdelivr.net/gh/${{ github.repository_owner }}/nezha@master/script/install.sh
+          curl https://purge.jsdelivr.net/gh/${{ github.repository_owner }}/nezha@master/script/nezha-agent.service
+          curl https://purge.jsdelivr.net/gh/${{ github.repository_owner }}/nezha@master/script/docker-compose.yaml
+          curl https://purge.jsdelivr.net/gh/${{ github.repository_owner }}/nezha@master/script/config.yaml
