@@ -73,7 +73,7 @@ pre_check() {
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.daocloud.io/docker"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
-        Docker_IMG="registry.cn-shanghai.aliyuncs.com/erope/nezha-dashboard"
+        Docker_IMG="registry.cn-shanghai.aliyuncs.com/naiba/nezha-dashboard"
     fi
 }
 
