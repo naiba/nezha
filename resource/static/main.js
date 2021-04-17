@@ -139,6 +139,11 @@ function addOrEditMonitor(monitor) {
     modal.find('input[name=Name]').val(monitor ? monitor.Name : null)
     modal.find('input[name=Target]').val(monitor ? monitor.Target : null)
     modal.find('select[name=Type]').val(monitor ? monitor.Type : 1)
+    if (monitor && monitor.Notify) {
+      modal.find(".ui.nb-notify.checkbox").checkbox("set checked");
+    } else {
+      modal.find(".ui.nb-notify.checkbox").checkbox("set unchecked");
+    }
     showFormModal('.monitor.modal', '#monitorForm', '/api/monitor')
 }
 

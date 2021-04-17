@@ -53,7 +53,6 @@ func sysinfo() {
 	for model, count := range cpuModelCount {
 		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
 	}
-	log.Println(cpus)
 	os.Exit(0)
 	// 硬盘信息，不使用的原因是会重复统计 Linux、Mac
 	dparts, _ := disk.Partitions(false)

@@ -17,6 +17,7 @@ type Monitor struct {
 	Name   string
 	Type   uint8
 	Target string
+	Notify bool
 }
 
 func (m *Monitor) PB() *pb.Task {

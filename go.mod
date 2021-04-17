@@ -26,5 +26,5 @@ require (
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/yaml.v2 v2.2.8
 	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.20.8
+	gorm.io/gorm v1.21.8
 )

@@ -73,6 +73,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	case "monitor":
 		err = dao.DB.Delete(&model.Monitor{}, "id = ?", id).Error
 		if err == nil {
+			dao.ServiceSentinelShared.OnMonitorDelete(id)
 			err = dao.DB.Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
 		}
 	case "cron":
@@ -194,6 +195,7 @@ type monitorForm struct {
 	Name   string
 	Target string
 	Type   uint8
+	Notify string
 }
 
 func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
@@ -205,6 +207,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.Target = mf.Target
 		m.Type = mf.Type
 		m.ID = mf.ID
+		m.Notify = mf.Notify == "on"
 	}
 	if err == nil {
 		if m.ID == 0 {
@@ -219,6 +222,8 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 			Message: fmt.Sprintf("请求错误：%s", err),
 		})
 		return
+	} else {
+		dao.ServiceSentinelShared.OnMonitorUpdate()
 	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,

@@ -7,7 +7,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 	rpcService "github.com/naiba/nezha/service/rpc"
@@ -28,9 +27,8 @@ func ServeRPC(port uint) {
 func DispatchTask(duration time.Duration) {
 	var index uint64 = 0
 	for {
-		var tasks []model.Monitor
 		var hasAliveAgent bool
-		dao.DB.Find(&tasks)
+		tasks := dao.ServiceSentinelShared.Monitors()
 		dao.SortedServerLock.RLock()
 		startedAt := time.Now()
 		for i := 0; i < len(tasks); i++ {
