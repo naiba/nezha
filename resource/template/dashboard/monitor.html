@@ -15,6 +15,7 @@
                 <tr>
                     <th>ID</th>
                     <th>名称</th>
+                    <th>通知</th>
                     <th>目标</th>
                     <th>类型</th>
                     <th>管理</th>
@@ -25,6 +26,7 @@
                 <tr>
                     <td>{{$monitor.ID}}</td>
                     <td>{{$monitor.Name}}</td>
+                    <td>{{$monitor.Notify}}</td>
                     <td>{{$monitor.Target}}</td>
                     <td>
                         {{if eq $monitor.Type 1}}HTTP(S)/SSL证书
