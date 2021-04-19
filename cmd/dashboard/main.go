@@ -110,6 +110,6 @@ func loadCrons() {
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(dao.Conf.GRPCPort)
-	go rpc.DispatchTask(time.Minute * 3)
+	go rpc.DispatchTask(time.Second * 30)
 	dao.AlertSentinelStart()
 }

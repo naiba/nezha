@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/genkiroid/cert"
 	"github.com/go-ping/ping"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -20,8 +21,8 @@ import (
 func main() {
 	// icmp()
 	// tcpping()
-	// httpWithSSLInfo()
-	sysinfo()
+	httpWithSSLInfo()
+	// sysinfo()
 	// cmdExec()
 }
 
@@ -72,11 +73,12 @@ func httpWithSSLInfo() {
 	httpClient := &http.Client{Transport: transCfg, CheckRedirect: func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}}
-	resp, err := httpClient.Get("http://mail.nai.ba")
-	fmt.Println(err, resp.StatusCode)
+	url := "https://ops.naibahq.com"
+	resp, err := httpClient.Get(url)
+	fmt.Println(err, resp)
 	// SSL 证书信息获取
-	// c := cert.NewCert("expired-ecc-dv.ssl.com")
-	// fmt.Println(c.Error)
+	c := cert.NewCert(url[8:])
+	fmt.Println(c.Error)
 }
 
 func icmp() {

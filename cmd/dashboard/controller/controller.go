@@ -54,7 +54,7 @@ func ServeWeb(port uint) {
 			}
 			if a == 0 {
 				// 这是从未在线的情况
-				return 1 / float32(b) * 100
+				return 0.00001 / float32(b) * 100
 			}
 			return float32(a) / float32(b) * 100
 		},
@@ -67,7 +67,7 @@ func ServeWeb(port uint) {
 			}
 			if a == 0 {
 				// 这是从未在线的情况
-				return 1 / float32(b) * 100
+				return 0.00001 / float32(b) * 100
 			}
 			return float32(a) / float32(b) * 100
 		},

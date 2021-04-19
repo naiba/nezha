@@ -15,15 +15,22 @@ var ServiceSentinelShared *ServiceSentinel
 
 func NewServiceSentinel() {
 	ServiceSentinelShared = &ServiceSentinel{
-		serviceResponseChannel:              make(chan *pb.TaskResult, 200),
-		serviceResponseDataStoreToday:       make(map[uint64][]model.MonitorHistory),
-		lastStatus:                          make(map[uint64]string),
-		serviceResponseDataStoreCurrentUp:   make(map[uint64]uint64),
-		serviceResponseDataStoreCurrentDown: make(map[uint64]uint64),
-		monitors:                            make(map[uint64]model.Monitor),
-		latestDate:                          time.Now().Format("02-Jan-06"),
+		serviceResponseChannel:                  make(chan *pb.TaskResult, 200),
+		serviceResponseDataStoreTodaySavedIndex: make(map[uint64]int),
+		serviceCurrentStatusIndex:               make(map[uint64]int),
+		serviceCurrentStatusData:                make(map[uint64][]model.MonitorHistory),
+		serviceResponseDataStoreTodayLastSave:   make(map[uint64]time.Time),
+		latestDate:                              make(map[uint64]string),
+		lastStatus:                              make(map[uint64]string),
+		serviceResponseDataStoreCurrentUp:       make(map[uint64]uint64),
+		serviceResponseDataStoreCurrentDown:     make(map[uint64]uint64),
+		monitors:                                make(map[uint64]model.Monitor),
+		serviceResponseDataStoreToday:           make(map[uint64][]model.MonitorHistory),
 	}
 	ServiceSentinelShared.OnMonitorUpdate()
+	for k := range ServiceSentinelShared.monitors {
+		ServiceSentinelShared.latestDate[k] = time.Now().Format("02-Jan-06")
+	}
 	go ServiceSentinelShared.worker()
 }
 
@@ -32,17 +39,19 @@ func NewServiceSentinel() {
    需要记录上一次的状态信息
 */
 type ServiceSentinel struct {
-	latestDate                              string
-	serviceResponseDataStoreTodaySavedIndex int
-	serviceResponseDataStoreTodayLastSave   time.Time
 	serviceResponseDataStoreLock            sync.RWMutex
 	monitorsLock                            sync.RWMutex
 	serviceResponseChannel                  chan *pb.TaskResult
+	serviceResponseDataStoreTodaySavedIndex map[uint64]int
+	serviceCurrentStatusIndex               map[uint64]int
+	serviceCurrentStatusData                map[uint64][]model.MonitorHistory
+	serviceResponseDataStoreTodayLastSave   map[uint64]time.Time
+	latestDate                              map[uint64]string
 	lastStatus                              map[uint64]string
-	monitors                                map[uint64]model.Monitor
-	serviceResponseDataStoreToday           map[uint64][]model.MonitorHistory
 	serviceResponseDataStoreCurrentUp       map[uint64]uint64
 	serviceResponseDataStoreCurrentDown     map[uint64]uint64
+	monitors                                map[uint64]model.Monitor
+	serviceResponseDataStoreToday           map[uint64][]model.MonitorHistory
 }
 
 func (ss *ServiceSentinel) Dispatch(r *pb.TaskResult) {
@@ -67,19 +76,28 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 	ss.monitors = make(map[uint64]model.Monitor)
 	for i := 0; i < len(monitors); i++ {
 		ss.monitors[monitors[i].ID] = monitors[i]
+		if len(ss.serviceCurrentStatusData[monitors[i].ID]) == 0 {
+			ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, 20)
+		}
 	}
 }
 
 func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	ss.serviceResponseDataStoreLock.Lock()
 	defer ss.serviceResponseDataStoreLock.Unlock()
-	delete(ss.serviceResponseDataStoreCurrentDown, id)
-	delete(ss.serviceResponseDataStoreCurrentUp, id)
-	delete(ss.serviceResponseDataStoreToday, id)
+	delete(ss.serviceResponseDataStoreTodaySavedIndex, id)
+	delete(ss.serviceCurrentStatusIndex, id)
+	delete(ss.serviceCurrentStatusData, id)
+	delete(ss.serviceResponseDataStoreTodayLastSave, id)
+	delete(ss.latestDate, id)
 	delete(ss.lastStatus, id)
+	delete(ss.serviceResponseDataStoreCurrentUp, id)
+	delete(ss.serviceResponseDataStoreCurrentDown, id)
+	delete(ss.serviceResponseDataStoreToday, id)
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 	delete(ss.monitors, id)
+	Cache.Delete(model.CacheKeyServicePage)
 }
 
 func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
@@ -124,11 +142,16 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 	// 最新一天的数据
 	ss.serviceResponseDataStoreLock.RLock()
 	defer ss.serviceResponseDataStoreLock.RUnlock()
-	for k, v := range ss.serviceResponseDataStoreToday {
+	for k := range ss.monitors {
 		if msm[k] == nil {
-			msm[k] = &model.ServiceItemResponse{}
+			msm[k] = &model.ServiceItemResponse{
+				Up:    new([30]int),
+				Down:  new([30]int),
+				Delay: new([30]float32),
+			}
 		}
 		msm[k].Monitor = ss.monitors[k]
+		v := ss.serviceResponseDataStoreToday[k]
 		for i := 0; i < len(v); i++ {
 			if v[i].Successful {
 				msm[k].Up[29]++
@@ -163,44 +186,60 @@ func getStateStr(percent uint64) string {
 
 func (ss *ServiceSentinel) worker() {
 	for r := range ss.serviceResponseChannel {
+		if ss.monitors[r.GetId()].ID == 0 {
+			continue
+		}
 		mh := model.PB2MonitorHistory(r)
 		ss.serviceResponseDataStoreLock.Lock()
 		// 先查看是否到下一天
 		nowDate := time.Now().Format("02-Jan-06")
-		if nowDate != ss.latestDate {
-			ss.latestDate = nowDate
-			dataToSave := ss.serviceResponseDataStoreToday[mh.MonitorID][ss.serviceResponseDataStoreTodaySavedIndex:]
+		if nowDate != ss.latestDate[mh.MonitorID] {
+			ss.latestDate[mh.MonitorID] = nowDate
+			dataToSave := ss.serviceResponseDataStoreToday[mh.MonitorID][ss.serviceResponseDataStoreTodaySavedIndex[mh.MonitorID]:]
 			if err := DB.Create(&dataToSave).Error; err != nil {
 				log.Println(err)
 			}
-			ss.serviceResponseDataStoreTodaySavedIndex = 0
+			ss.serviceResponseDataStoreTodaySavedIndex[mh.MonitorID] = 0
 			ss.serviceResponseDataStoreToday[mh.MonitorID] = []model.MonitorHistory{}
 			ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] = 0
 			ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] = 0
-			ss.serviceResponseDataStoreTodayLastSave = time.Now()
+			ss.serviceResponseDataStoreTodayLastSave[mh.MonitorID] = time.Now()
 		}
 		// 储存至当日数据
 		ss.serviceResponseDataStoreToday[mh.MonitorID] = append(ss.serviceResponseDataStoreToday[mh.MonitorID], mh)
 		// 每20分钟入库一次
-		if time.Now().After(ss.serviceResponseDataStoreTodayLastSave.Add(time.Minute * 20)) {
-			ss.serviceResponseDataStoreTodayLastSave = time.Now()
-			dataToSave := ss.serviceResponseDataStoreToday[mh.MonitorID][ss.serviceResponseDataStoreTodaySavedIndex:]
+		if time.Now().After(ss.serviceResponseDataStoreTodayLastSave[mh.MonitorID].Add(time.Minute * 20)) {
+			ss.serviceResponseDataStoreTodayLastSave[mh.MonitorID] = time.Now()
+			dataToSave := ss.serviceResponseDataStoreToday[mh.MonitorID][ss.serviceResponseDataStoreTodaySavedIndex[mh.MonitorID]:]
 			if err := DB.Create(&dataToSave).Error; err != nil {
 				log.Println(err)
 			}
-			ss.serviceResponseDataStoreTodaySavedIndex = len(ss.serviceResponseDataStoreToday[mh.MonitorID])
+			ss.serviceResponseDataStoreTodaySavedIndex[mh.MonitorID] = len(ss.serviceResponseDataStoreToday[mh.MonitorID])
+		}
+		// 写入当前数据
+		ss.serviceCurrentStatusData[mh.MonitorID][ss.serviceCurrentStatusIndex[mh.MonitorID]] = mh
+		ss.serviceCurrentStatusIndex[mh.MonitorID]++
+		if ss.serviceCurrentStatusIndex[mh.MonitorID] == 20 {
+			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
 		}
 		// 更新当前状态
 		ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] = 0
 		ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] = 0
-		for i := len(ss.serviceResponseDataStoreToday[mh.MonitorID]) - 1; i >= 0 && i >= len(ss.serviceResponseDataStoreToday[mh.MonitorID])-20; i-- {
-			if ss.serviceResponseDataStoreToday[mh.MonitorID][i].Successful {
-				ss.serviceResponseDataStoreCurrentUp[mh.MonitorID]++
-			} else {
-				ss.serviceResponseDataStoreCurrentDown[mh.MonitorID]++
+		for i := 0; i < len(ss.serviceCurrentStatusData[mh.MonitorID]); i++ {
+			if ss.serviceCurrentStatusData[mh.MonitorID][i].MonitorID > 0 {
+				if ss.serviceCurrentStatusData[mh.MonitorID][i].Successful {
+					ss.serviceResponseDataStoreCurrentUp[mh.MonitorID]++
+				} else {
+					ss.serviceResponseDataStoreCurrentDown[mh.MonitorID]++
+				}
 			}
 		}
-		stateStr := getStateStr(ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID]))
+		var upPercent uint64 = 0
+		if ss.serviceResponseDataStoreCurrentDown[mh.MonitorID]+ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] > 0 {
+			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID])
+		}
+		stateStr := getStateStr(upPercent)
+		log.Println(ss.monitors[mh.MonitorID].Target, stateStr)
 		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
 			isSendNotification := (ss.lastStatus[mh.MonitorID] != "" || stateStr == "故障") && ss.monitors[mh.MonitorID].Notify
