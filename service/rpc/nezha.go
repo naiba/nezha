@@ -21,7 +21,10 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		return nil, err
 	}
 	if r.GetType() != model.TaskTypeCommand {
-		dao.ServiceSentinelShared.Dispatch(r)
+		dao.ServiceSentinelShared.Dispatch(dao.ReportData{
+			Data:     r,
+			Reporter: clientID,
+		})
 	} else {
 		// 处理上报的计划任务
 		dao.CronLock.RLock()

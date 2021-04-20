@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -71,7 +70,6 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	if err == nil {
 		gu, _, err = client.Users.Get(ctx, "")
 	}
-	log.Printf("%+v", gu)
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code:  http.StatusBadRequest,

@@ -46,7 +46,7 @@ func ReSortServer() {
 
 	sort.SliceStable(SortedServerList, func(i, j int) bool {
 		if SortedServerList[i].DisplayIndex == SortedServerList[j].DisplayIndex {
-			return SortedServerList[i].ID < SortedServerList[i].ID
+			return SortedServerList[i].ID < SortedServerList[j].ID
 		}
 		return SortedServerList[i].DisplayIndex > SortedServerList[j].DisplayIndex
 	})

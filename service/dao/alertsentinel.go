@@ -43,7 +43,9 @@ func AlertSentinelStart() {
 		checkStatus()
 		checkCount++
 		if lastPrint.Before(startedAt.Add(-1 * time.Hour)) {
-			log.Println("报警规则检测每小时", checkCount, "次", startedAt, time.Now())
+			if Conf.Debug {
+				log.Println("报警规则检测每小时", checkCount, "次", startedAt, time.Now())
+			}
 			checkCount = 0
 			lastPrint = startedAt
 		}

@@ -35,11 +35,10 @@ var (
 )
 
 var (
-	reporting      bool
 	client         pb.NezhaServiceClient
 	ctx            = context.Background()
-	delayWhenError = time.Second * 10       // Agent 重连间隔
-	updateCh       = make(chan struct{}, 0) // Agent 自动更新间隔
+	delayWhenError = time.Second * 10    // Agent 重连间隔
+	updateCh       = make(chan struct{}) // Agent 自动更新间隔
 	httpClient     = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -179,12 +178,14 @@ func doTask(task *pb.Task) {
 		start := time.Now()
 		resp, err := httpClient.Get(task.GetData())
 		if err == nil {
-			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+			// 检查 HTTP Response 状态
+			result.Delay = float32(time.Since(start).Microseconds()) / 1000.0
 			if resp.StatusCode > 399 || resp.StatusCode < 200 {
 				err = errors.New("\n应用错误：" + resp.Status)
 			}
 		}
 		if err == nil {
+			// 检查 SSL 证书信息
 			if strings.HasPrefix(task.GetData(), "https://") {
 				c := cert.NewCert(task.GetData()[8:])
 				if c.Error != "" {
@@ -197,6 +198,7 @@ func doTask(task *pb.Task) {
 				result.Successful = true
 			}
 		} else {
+			// HTTP 请求失败
 			result.Data = err.Error()
 		}
 	case model.TaskTypeICMPPing:
@@ -219,7 +221,7 @@ func doTask(task *pb.Task) {
 		if err == nil {
 			conn.Write([]byte("ping\n"))
 			conn.Close()
-			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+			result.Delay = float32(time.Since(start).Microseconds()) / 1000.0
 			result.Successful = true
 		} else {
 			result.Data = err.Error()
@@ -260,7 +262,7 @@ func doTask(task *pb.Task) {
 			result.Data = string(output)
 			result.Successful = true
 		}
-		result.Delay = float32(time.Now().Sub(startedAt).Seconds())
+		result.Delay = float32(time.Since(startedAt).Seconds())
 	default:
 		log.Printf("Unknown action: %v", task)
 	}

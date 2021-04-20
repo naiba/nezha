@@ -15,7 +15,7 @@ var ServiceSentinelShared *ServiceSentinel
 
 func NewServiceSentinel() {
 	ServiceSentinelShared = &ServiceSentinel{
-		serviceResponseChannel:                  make(chan *pb.TaskResult, 200),
+		serviceResponseChannel:                  make(chan ReportData, 200),
 		serviceResponseDataStoreTodaySavedIndex: make(map[uint64]int),
 		serviceCurrentStatusIndex:               make(map[uint64]int),
 		serviceCurrentStatusData:                make(map[uint64][]model.MonitorHistory),
@@ -26,12 +26,33 @@ func NewServiceSentinel() {
 		serviceResponseDataStoreCurrentDown:     make(map[uint64]uint64),
 		monitors:                                make(map[uint64]model.Monitor),
 		serviceResponseDataStoreToday:           make(map[uint64][]model.MonitorHistory),
+		sslCertCache:                            make(map[uint64]string),
 	}
 	ServiceSentinelShared.OnMonitorUpdate()
+
+	year, month, day := time.Now().Date()
+	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+	var mhs []model.MonitorHistory
+	DB.Where("created_at >= ?", today).Find(&mhs)
+
+	// 加载当日记录
+	for i := 0; i < len(mhs); i++ {
+		ServiceSentinelShared.serviceResponseDataStoreToday[mhs[i].MonitorID] =
+			append(ServiceSentinelShared.serviceResponseDataStoreToday[mhs[i].MonitorID], mhs[i])
+	}
+
+	// 更新入库时间及当日数据入库游标
 	for k := range ServiceSentinelShared.monitors {
 		ServiceSentinelShared.latestDate[k] = time.Now().Format("02-Jan-06")
+		ServiceSentinelShared.serviceResponseDataStoreTodaySavedIndex[k] = len(ServiceSentinelShared.serviceResponseDataStoreToday[k])
 	}
+
 	go ServiceSentinelShared.worker()
+}
+
+type ReportData struct {
+	Data     *pb.TaskResult
+	Reporter uint64
 }
 
 /*
@@ -41,7 +62,7 @@ func NewServiceSentinel() {
 type ServiceSentinel struct {
 	serviceResponseDataStoreLock            sync.RWMutex
 	monitorsLock                            sync.RWMutex
-	serviceResponseChannel                  chan *pb.TaskResult
+	serviceResponseChannel                  chan ReportData
 	serviceResponseDataStoreTodaySavedIndex map[uint64]int
 	serviceCurrentStatusIndex               map[uint64]int
 	serviceCurrentStatusData                map[uint64][]model.MonitorHistory
@@ -52,9 +73,10 @@ type ServiceSentinel struct {
 	serviceResponseDataStoreCurrentDown     map[uint64]uint64
 	monitors                                map[uint64]model.Monitor
 	serviceResponseDataStoreToday           map[uint64][]model.MonitorHistory
+	sslCertCache                            map[uint64]string
 }
 
-func (ss *ServiceSentinel) Dispatch(r *pb.TaskResult) {
+func (ss *ServiceSentinel) Dispatch(r ReportData) {
 	ss.serviceResponseChannel <- r
 }
 
@@ -94,6 +116,7 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	delete(ss.serviceResponseDataStoreCurrentUp, id)
 	delete(ss.serviceResponseDataStoreCurrentDown, id)
 	delete(ss.serviceResponseDataStoreToday, id)
+	delete(ss.sslCertCache, id)
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 	delete(ss.monitors, id)
@@ -186,10 +209,10 @@ func getStateStr(percent uint64) string {
 
 func (ss *ServiceSentinel) worker() {
 	for r := range ss.serviceResponseChannel {
-		if ss.monitors[r.GetId()].ID == 0 {
+		if ss.monitors[r.Data.GetId()].ID == 0 {
 			continue
 		}
-		mh := model.PB2MonitorHistory(r)
+		mh := model.PB2MonitorHistory(r.Data)
 		ss.serviceResponseDataStoreLock.Lock()
 		// 先查看是否到下一天
 		nowDate := time.Now().Format("02-Jan-06")
@@ -239,30 +262,34 @@ func (ss *ServiceSentinel) worker() {
 			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID])
 		}
 		stateStr := getStateStr(upPercent)
-		log.Println(ss.monitors[mh.MonitorID].Target, stateStr)
+		if Conf.Debug {
+			log.Println(ss.monitors[mh.MonitorID].Target, stateStr, "Reporter:", r.Reporter, "Successful:", mh.Successful, "Data:", mh.Data)
+		}
 		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
 			isSendNotification := (ss.lastStatus[mh.MonitorID] != "" || stateStr == "故障") && ss.monitors[mh.MonitorID].Notify
 			ss.lastStatus[mh.MonitorID] = stateStr
 			if isSendNotification {
-				SendNotification(fmt.Sprintf("服务监控：%s 服务状态：%s", ss.monitors[mh.MonitorID].Name, stateStr), true)
+				go SendNotification(fmt.Sprintf("服务监控：%s 服务状态：%s", ss.monitors[mh.MonitorID].Name, stateStr), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}
 		ss.serviceResponseDataStoreLock.Unlock()
 		// SSL 证书报警
 		var errMsg string
-		if strings.HasPrefix(r.GetData(), "SSL证书错误：") {
+		if strings.HasPrefix(mh.Data, "SSL证书错误：") {
 			// 排除 i/o timeont、connection timeout、EOF 错误
-			if !strings.HasSuffix(r.GetData(), "timeout") &&
-				!strings.HasSuffix(r.GetData(), "EOF") &&
-				!strings.HasSuffix(r.GetData(), "timed out") {
-				errMsg = r.GetData()
+			if !strings.HasSuffix(mh.Data, "timeout") &&
+				!strings.HasSuffix(mh.Data, "EOF") &&
+				!strings.HasSuffix(mh.Data, "timed out") {
+				errMsg = mh.Data
 			}
 		} else {
-			var last model.MonitorHistory
-			var newCert = strings.Split(r.GetData(), "|")
+			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
+				if ss.sslCertCache[mh.MonitorID] == "" {
+					ss.sslCertCache[mh.MonitorID] = mh.Data
+				}
 				expiresNew, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", newCert[1])
 				// 证书过期提醒
 				if expiresNew.Before(time.Now().AddDate(0, 0, 7)) {
@@ -271,23 +298,23 @@ func (ss *ServiceSentinel) worker() {
 						expiresNew.Format("2006-01-02 15:04:05"))
 				}
 				// 证书变更提醒
-				if err := DB.Where("monitor_id = ? AND data LIKE ?", r.GetId(), "%|%").Order("id DESC").First(&last).Error; err == nil {
-					var oldCert = strings.Split(last.Data, "|")
-					var expiresOld time.Time
-					if len(oldCert) > 1 {
-						expiresOld, _ = time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
-					}
-					if last.Data != "" && oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
-						errMsg = fmt.Sprintf(
-							"SSL证书变更，旧：%s, %s 过期；新：%s, %s 过期。",
-							oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
-					}
+				var oldCert = strings.Split(ss.sslCertCache[mh.MonitorID], "|")
+				var expiresOld time.Time
+				if len(oldCert) > 1 {
+					expiresOld, _ = time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
+				}
+				if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
+					errMsg = fmt.Sprintf(
+						"SSL证书变更，旧：%s, %s 过期；新：%s, %s 过期。",
+						oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
 				}
 			}
 		}
 		if errMsg != "" {
 			ss.monitorsLock.RLock()
-			SendNotification(fmt.Sprintf("服务监控：%s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
+			if ss.monitors[mh.MonitorID].Notify {
+				go SendNotification(fmt.Sprintf("服务监控：%s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
+			}
 			ss.monitorsLock.RUnlock()
 		}
 	}

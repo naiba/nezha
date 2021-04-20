@@ -34,7 +34,7 @@ func tcpping() {
 	}
 	conn.Write([]byte("ping\n"))
 	conn.Close()
-	fmt.Println(time.Now().Sub(start).Microseconds(), float32(time.Now().Sub(start).Microseconds())/1000.0)
+	fmt.Println(time.Since(start).Microseconds(), float32(time.Since(start).Microseconds())/1000.0)
 }
 
 func sysinfo() {
