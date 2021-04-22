@@ -11,6 +11,8 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
+const _CurrentStatusSize = 60 // 统计 10 分钟内的数据为当前状态
+
 var ServiceSentinelShared *ServiceSentinel
 
 func NewServiceSentinel() {
@@ -99,7 +101,7 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 	for i := 0; i < len(monitors); i++ {
 		ss.monitors[monitors[i].ID] = monitors[i]
 		if len(ss.serviceCurrentStatusData[monitors[i].ID]) == 0 {
-			ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, 20)
+			ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, _CurrentStatusSize)
 		}
 	}
 }
@@ -184,7 +186,7 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 			msm[k].Delay[29] = (msm[k].Delay[29]*float32(msm[k].Up[29]) + v[i].Delay) / float32(msm[k].Up[29]+1)
 		}
 	}
-	// 最后20分钟的状态 与 monitor 对象填充
+	// 最后 10 分钟的状态 与 monitor 对象填充
 	for k, v := range ss.serviceResponseDataStoreCurrentDown {
 		msm[k].CurrentDown = v
 	}
@@ -242,7 +244,7 @@ func (ss *ServiceSentinel) worker() {
 		// 写入当前数据
 		ss.serviceCurrentStatusData[mh.MonitorID][ss.serviceCurrentStatusIndex[mh.MonitorID]] = mh
 		ss.serviceCurrentStatusIndex[mh.MonitorID]++
-		if ss.serviceCurrentStatusIndex[mh.MonitorID] == 20 {
+		if ss.serviceCurrentStatusIndex[mh.MonitorID] == _CurrentStatusSize {
 			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
 		}
 		// 更新当前状态
