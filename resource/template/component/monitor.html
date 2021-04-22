@@ -25,6 +25,15 @@
         </select>
       </div>
       <div class="field">
+        <label>不通过下列服务器请求</label>
+        <div class="ui fluid multiple servers search selection dropdown">
+          <input type="hidden" name="SkipServersRaw" />
+          <i class="dropdown icon"></i>
+          <div class="default text">输入ID/名称以搜索</div>
+          <div class="menu"></div>
+        </div>
+      </div>
+      <div class="field">
         <div class="ui nb-notify checkbox">
           <input name="Notify" type="checkbox" tabindex="0" class="hidden" />
           <label>启用故障通知</label>

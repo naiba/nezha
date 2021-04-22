@@ -191,11 +191,12 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 }
 
 type monitorForm struct {
-	ID     uint64
-	Name   string
-	Target string
-	Type   uint8
-	Notify string
+	ID             uint64
+	Name           string
+	Target         string
+	Type           uint8
+	Notify         string
+	SkipServersRaw string
 }
 
 func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
@@ -207,6 +208,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.Target = mf.Target
 		m.Type = mf.Type
 		m.ID = mf.ID
+		m.SkipServersRaw = mf.SkipServersRaw
 		m.Notify = mf.Notify == "on"
 	}
 	if err == nil {

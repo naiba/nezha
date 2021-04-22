@@ -11,7 +11,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-const _CurrentStatusSize = 60 // 统计 10 分钟内的数据为当前状态
+const _CurrentStatusSize = 30 // 统计 5 分钟内的数据为当前状态
 
 var ServiceSentinelShared *ServiceSentinel
 
@@ -186,7 +186,7 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 			msm[k].Delay[29] = (msm[k].Delay[29]*float32(msm[k].Up[29]) + v[i].Delay) / float32(msm[k].Up[29]+1)
 		}
 	}
-	// 最后 10 分钟的状态 与 monitor 对象填充
+	// 最后 5 分钟的状态 与 monitor 对象填充
 	for k, v := range ss.serviceResponseDataStoreCurrentDown {
 		msm[k].CurrentDown = v
 	}
