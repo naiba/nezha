@@ -201,8 +201,8 @@ function addOrEditMonitor(monitor) {
   }
   var servers;
   if (monitor) {
-    servers = monitor.SkipServersRaw || "[]";
-    const serverList = JSON.parse(servers);
+    servers = monitor.SkipServersRaw;
+    const serverList = JSON.parse(servers || "[]");
     const node = modal.find("i.dropdown.icon");
     for (let i = 0; i < serverList.length; i++) {
       node.after(
@@ -237,7 +237,7 @@ function addOrEditCron(cron) {
   var servers;
   if (cron) {
     servers = cron.ServersRaw;
-    const serverList = JSON.parse(servers);
+    const serverList = JSON.parse(servers || "[]");
     const node = modal.find("i.dropdown.icon");
     for (let i = 0; i < serverList.length; i++) {
       node.after(

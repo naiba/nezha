@@ -180,8 +180,10 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 		for i := 0; i < len(v); i++ {
 			if v[i].Successful {
 				msm[k].Up[29]++
+				msm[k].TotalUp++
 			} else {
 				msm[k].Down[29]++
+				msm[k].TotalDown++
 			}
 			msm[k].Delay[29] = (msm[k].Delay[29]*float32(msm[k].Up[29]) + v[i].Delay) / float32(msm[k].Up[29]+1)
 		}

@@ -1,6 +1,5 @@
-{{define "dashboard/monitor"}}
-{{template "common/header" .}}
-{{template "common/menu" .}}
+{{define "dashboard/monitor"}} {{template "common/header" .}} {{template
+"common/menu" .}}
 <div class="nb-container">
   <div class="ui container">
     <div class="ui grid">
@@ -18,10 +17,10 @@
         <tr>
           <th>ID</th>
           <th>名称</th>
-          <th>通知</th>
           <th>目标</th>
-          <th>类型</th>
           <th>跳过的服务器</th>
+          <th>类型</th>
+          <th>通知</th>
           <th>管理</th>
         </tr>
       </thead>
@@ -30,13 +29,13 @@
         <tr>
           <td>{{$monitor.ID}}</td>
           <td>{{$monitor.Name}}</td>
-          <td>{{$monitor.Notify}}</td>
           <td>{{$monitor.Target}}</td>
+          <td>{{$monitor.SkipServersRaw}}</td>
           <td>
             {{if eq $monitor.Type 1}}HTTP(S)/SSL证书 {{else if eq $monitor.Type
             2}} ICMP Ping {{else}} TCP 端口 {{end}}
           </td>
-          <td>{{$monitor.SkipServersRaw}}</td>
+          <td>{{$monitor.Notify}}</td>
           <td>
             <div class="ui mini icon buttons">
               <button
@@ -59,8 +58,7 @@
     </table>
   </div>
 </div>
-{{template "component/monitor"}}
-{{template "common/footer" .}}
+{{template "component/monitor"}} {{template "common/footer" .}}
 <script>
   $(".checkbox").checkbox();
 </script>
