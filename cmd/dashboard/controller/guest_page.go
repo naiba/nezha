@@ -51,7 +51,15 @@ func (gp *guestPage) serve() {
 }
 
 func (gp *guestPage) login(c *gin.Context) {
+	LoginType := "GitHub"
+	RegistrationLink := "https://github.com/join"
+	if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
+		LoginType = "Gitee"
+		RegistrationLink = "https://gitee.com/signup"
+	}
 	c.HTML(http.StatusOK, "dashboard/login", mygin.CommonEnvironment(c, gin.H{
-		"Title": "登录",
+		"Title":            "登录",
+		"LoginType":        LoginType,
+		"RegistrationLink": RegistrationLink,
 	}))
 }
