@@ -60,8 +60,11 @@ function showFormModal(modelSelector, formID, URL, getData) {
 
                 if (item.name.endsWith("ServersRaw")) {
                   if (item.value.length > 2) {
-                    obj[item.name] =
-                      "[" + item.value.substr(3, item.value.length - 1) + "]";
+                    obj[item.name] = JSON.stringify(
+                      [...item.value.matchAll(/\d+/gm)].map((k) =>
+                        parseInt(k[0])
+                      )
+                    );
                   }
                 }
 

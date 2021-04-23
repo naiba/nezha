@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -205,7 +206,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 	err := c.ShouldBindJSON(&mf)
 	if err == nil {
 		m.Name = mf.Name
-		m.Target = mf.Target
+		m.Target = strings.TrimSpace(mf.Target)
 		m.Type = mf.Type
 		m.ID = mf.ID
 		m.SkipServersRaw = mf.SkipServersRaw
