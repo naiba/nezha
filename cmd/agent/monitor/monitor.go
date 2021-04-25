@@ -112,7 +112,8 @@ func getDiskTotalAndUsed() (total uint64, used uint64) {
 	diskList, _ := disk.Partitions(false)
 	for _, d := range diskList {
 		fsType := strings.ToLower(d.Fstype)
-		if strings.Contains(fsType, "ext4") ||
+		if strings.Contains(fsType, "apfs") ||
+			strings.Contains(fsType, "ext4") ||
 			strings.Contains(fsType, "ext3") ||
 			strings.Contains(fsType, "ext2") ||
 			strings.Contains(fsType, "reiserfs") ||
@@ -127,6 +128,14 @@ func getDiskTotalAndUsed() (total uint64, used uint64) {
 			strings.Contains(fsType, "xfs") {
 			diskUsageOf, _ := disk.Usage(d.Mountpoint)
 			path := diskUsageOf.Path
+			// Mac 下只统计 "/"
+			if fsType == "apfs" {
+				if path == "/" {
+					total += diskUsageOf.Total
+				}
+				used += diskUsageOf.Used
+				continue
+			}
 			// 不统计 K8s 的虚拟挂载点，see here：https://github.com/shirou/gopsutil/issues/1007
 			if !strings.Contains(path, "/var/lib/kubelet") {
 				total += diskUsageOf.Total
