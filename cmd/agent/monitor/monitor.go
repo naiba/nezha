@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -17,6 +18,13 @@ import (
 )
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
+var expectDiskFsTypes = []string{
+	"apfs", "ext4", "ext3", "ext2", "reiserfs", "jfs", "btrfs", "fuseblk", "zfs", "simfs", "ntfs", "fat32", "exfat", "xfs",
+}
+var excludeNetInterfaces = []string{
+	"lo", "tun", "docker", "veth", "br-", "vmbr", "vnet", "kube",
+}
+var getMacDiskNo = regexp.MustCompile(`\/dev\/disk(\d)s.*`)
 
 func GetHost() *model.Host {
 	hi, _ := host.Info()
@@ -83,14 +91,7 @@ func TrackNetworkSpeed() {
 	nc, err := net.IOCounters(true)
 	if err == nil {
 		for _, v := range nc {
-			if strings.Contains(v.Name, "lo") ||
-				strings.Contains(v.Name, "tun") ||
-				strings.Contains(v.Name, "docker") ||
-				strings.Contains(v.Name, "veth") ||
-				strings.Contains(v.Name, "br-") ||
-				strings.Contains(v.Name, "vmbr") ||
-				strings.Contains(v.Name, "vnet") ||
-				strings.Contains(v.Name, "kube") {
+			if isListContainsStr(excludeNetInterfaces, v.Name) {
 				continue
 			}
 			innerNetInTransfer += v.BytesRecv
@@ -110,38 +111,37 @@ func TrackNetworkSpeed() {
 
 func getDiskTotalAndUsed() (total uint64, used uint64) {
 	diskList, _ := disk.Partitions(false)
+	devices := make(map[string]string)
+	countedDiskForMac := make(map[string]struct{})
 	for _, d := range diskList {
 		fsType := strings.ToLower(d.Fstype)
-		if strings.Contains(fsType, "apfs") ||
-			strings.Contains(fsType, "ext4") ||
-			strings.Contains(fsType, "ext3") ||
-			strings.Contains(fsType, "ext2") ||
-			strings.Contains(fsType, "reiserfs") ||
-			strings.Contains(fsType, "jfs") ||
-			strings.Contains(fsType, "btrfs") ||
-			strings.Contains(fsType, "fuseblk") ||
-			strings.Contains(fsType, "zfs") ||
-			strings.Contains(fsType, "simfs") ||
-			strings.Contains(fsType, "ntfs") ||
-			strings.Contains(fsType, "fat32") ||
-			strings.Contains(fsType, "exfat") ||
-			strings.Contains(fsType, "xfs") {
-			diskUsageOf, _ := disk.Usage(d.Mountpoint)
-			path := diskUsageOf.Path
-			// Mac 下只统计 "/"
-			if fsType == "apfs" {
-				if path == "/" {
-					total += diskUsageOf.Total
-				}
-				used += diskUsageOf.Used
-				continue
-			}
-			// 不统计 K8s 的虚拟挂载点，see here：https://github.com/shirou/gopsutil/issues/1007
-			if !strings.Contains(path, "/var/lib/kubelet") {
-				total += diskUsageOf.Total
-				used += diskUsageOf.Used
-			}
+		// 不统计 K8s 的虚拟挂载点：https://github.com/shirou/gopsutil/issues/1007
+		if devices[d.Device] == "" && isListContainsStr(expectDiskFsTypes, fsType) && !strings.Contains(d.Mountpoint, "/var/lib/kubelet") {
+			devices[d.Device] = d.Mountpoint
 		}
 	}
+	for device, mountPath := range devices {
+		diskUsageOf, _ := disk.Usage(mountPath)
+		// 这里是针对 Mac 机器的处理，https://github.com/giampaolo/psutil/issues/1509
+		matches := getMacDiskNo.FindStringSubmatch(device)
+		if len(matches) == 2 {
+			if _, has := countedDiskForMac[matches[1]]; !has {
+				countedDiskForMac[matches[1]] = struct{}{}
+				total += diskUsageOf.Total
+			}
+		} else {
+			total += diskUsageOf.Total
+		}
+		used += diskUsageOf.Used
+	}
 	return
+}
+
+func isListContainsStr(list []string, str string) bool {
+	for i := 0; i < len(list); i++ {
+		if strings.Contains(list[i], str) {
+			return true
+		}
+	}
+	return false
 }
