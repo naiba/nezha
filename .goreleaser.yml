@@ -15,7 +15,6 @@ builds:
       - 386
       - amd64
       - mips
-      #- mips64
     gomips:
       - softfloat
     ignore:
