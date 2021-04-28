@@ -25,10 +25,6 @@ builds:
     main: ./cmd/agent
     binary: nezha-agent
     # 为路由器、开发板缩小二进制体积
-    asmflags:
-      - all=-trimpath={{.Env.GOPATH}}
-    gcflags:
-      - all=-trimpath={{.Env.GOPATH}}
     ldflags:
       - -s -w
     hooks:
