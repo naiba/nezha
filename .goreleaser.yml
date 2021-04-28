@@ -3,6 +3,8 @@ before:
     - go mod tidy -v
 builds:
   - id: nezha-agent
+    ldflags:
+      - -s -w
     env:
       - CGO_ENABLED=0
     goos:
@@ -25,6 +27,10 @@ builds:
         goarch: arm64
     main: ./cmd/agent
     binary: nezha-agent
+    hooks:
+      post:
+        # 为路由器、开发板缩小二进制体积
+        - npx --best "{{.Path}}"
 checksum:
   name_template: "checksums.txt"
 snapshot:

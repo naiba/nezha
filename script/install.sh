@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.4.10"
+NZ_VERSION="v0.5.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -266,7 +266,7 @@ modify_dashboard_config() {
     sed -i "s/nz_site_title/${nz_site_title}/" ${NZ_DASHBOARD_PATH}/data/config.yaml
     sed -i "s/nz_site_port/${nz_site_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
     sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
-    sed -i "s/image_url/${Docker_IMG}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
+    sed -i "s/nz_image_url/${Docker_IMG}/" ${NZ_DASHBOARD_PATH}/docker-compose.yaml
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 
