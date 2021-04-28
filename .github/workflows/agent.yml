@@ -14,6 +14,7 @@ jobs:
         run: |
           wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz
           tar --strip-components=1 -xf upx-3.95-amd64_linux.tar.xz && sudo mv upx /usr/bin/
+          git reset --hard
           git clean -f -d
           upx --version
       - name: Run GoReleaser
