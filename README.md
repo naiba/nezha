@@ -120,6 +120,16 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
+- DayNight 主题更改进度条颜色示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)，欢迎 PR）
+
+  ```
+  <style>
+  .ui.fine.progress> .progress-bar {
+    background-color: #00a7d0 !important;
+  }
+  </style>
+  ```
+
 - 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)，欢迎 PR）
 
   ```
@@ -142,6 +152,17 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   footer.style.visibility="visible"
   avatar.src="你的方形logo地址"
   avatar.style.visibility="visible"
+  }
+  </script>
+  ```
+- DayNight 移除版权示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)，欢迎 PR）
+  
+  ```
+  <script>
+  window.onload = function(){
+  var footer=document.querySelector("div.footer-container")
+  footer.innerHTML="©2021 你的名字 & Powered by 你的名字"
+  footer.style.visibility="visible"
   }
   </script>
   ```
