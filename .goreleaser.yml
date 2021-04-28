@@ -30,7 +30,7 @@ builds:
     hooks:
       post:
         # 为路由器、开发板缩小二进制体积
-        - npx --best "{{.Path}}"
+        - upx --best "{{.Path}}"
 checksum:
   name_template: "checksums.txt"
 snapshot:
