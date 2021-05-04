@@ -79,7 +79,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	var client *GitHubAPI.Client
 	if err == nil {
 		oc := oauth2Config.Client(ctx, otk)
-		if dao.Conf.Oauth2.Type == "gitee" {
+		if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
 			client, err = GitHubAPI.NewEnterpriseClient("https://gitee.com/api/v5/", "https://gitee.com/api/v5/", oc)
 		} else {
 			client = GitHubAPI.NewClient(oc)
