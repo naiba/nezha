@@ -9,9 +9,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/blang/semver"
@@ -186,16 +186,21 @@ func doTask(task *pb.Task) {
 		}
 		if err == nil {
 			// 检查 SSL 证书信息
-			if strings.HasPrefix(task.GetData(), "https://") {
-				c := cert.NewCert(task.GetData()[8:])
-				if c.Error != "" {
-					result.Data = "SSL证书错误：" + c.Error
+			serviceUrl, err := url.Parse(task.GetData())
+			if err == nil {
+				if serviceUrl.Scheme == "https" {
+					c := cert.NewCert(serviceUrl.Host)
+					if c.Error != "" {
+						result.Data = "SSL证书错误：" + c.Error
+					} else {
+						result.Data = c.Issuer + "|" + c.NotAfter
+						result.Successful = true
+					}
 				} else {
-					result.Data = c.Issuer + "|" + c.NotAfter
 					result.Successful = true
 				}
 			} else {
-				result.Successful = true
+				result.Data = "URL解析错误：" + err.Error()
 			}
 		} else {
 			// HTTP 请求失败
