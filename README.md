@@ -6,6 +6,8 @@
   <p>:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
 </div>
 
+\>> 交流论坛：[打杂社区](https://daza.net/c/nezha) (Lemmy)
+
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控%7C哪吒面板"&filter=0) (Google)
@@ -169,13 +171,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 - hotaru 主题更改背景图片示例
 
-      ```
-      <style>
-      .hotaru-cover {
-          background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
-      }
-      </style>
-      ```
+  ```
+  <style>
+  .hotaru-cover {
+     background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;
+  }
+  </style>
+  ```
 
 </details>
 
