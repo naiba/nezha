@@ -62,10 +62,9 @@ func doSelfUpdate() {
 		return
 	}
 	if latest.Version.Equals(v) {
-		// latest version is the same as current version. It means current binary is up to date.
-		println("Current binary is the latest version", version)
+		println("Current binary is up to date", version)
 	} else {
-		println("Successfully updated to version", latest.Version)
+		println("Upgrade successfully", latest.Version)
 		os.Exit(1)
 	}
 }

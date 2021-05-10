@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 
 	"github.com/naiba/nezha/pkg/mygin"
@@ -15,10 +16,11 @@ import (
 
 func ServeWeb(port uint) {
 	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
 	if dao.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
+		pprof.Register(r)
 	}
-	r := gin.Default()
 	r.Use(mygin.RecordPath)
 	r.SetFuncMap(template.FuncMap{
 		"tf": func(t time.Time) string {
