@@ -80,7 +80,7 @@ func main() {
 
 	var debug bool
 	flag.String("i", "", "unused 旧Agent配置兼容")
-	flag.BoolVar(&debug, "d", false, "允许不安全连接")
+	flag.BoolVar(&debug, "d", false, "开启调试信息")
 	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
 	flag.Parse()

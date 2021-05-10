@@ -1,7 +1,7 @@
 <div align="center" style="background-color: white">
   <img width="500" style="max-width:100%" src="https://raw.githubusercontent.com/naiba/nezha/master/resource/static/brand.png" title="哪吒监控">
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.6.7&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.5.0-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.7.0&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.5.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <p>:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
 </div>
@@ -18,7 +18,7 @@
 
 ## 安装脚本
 
-**推荐配置：** 安装前解析 _两个域名_ 到面板服务器，一个作为 _公开访问_ ，可以 **接入 CDN**，比如 (status.nai.ba)；另外一个作为安装 Agent 时连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
+**推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh
@@ -59,11 +59,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 1. 添加通知方式
 
    - server 酱示例
+
      - 名称：server 酱
      - URL：https://sc.ftqq.com/SCUrandomkeys.send?text=#NEZHA#
      - 请求方式: GET
      - 请求类型: 默认
      - Body: 空
+
    - wxpusher 示例，需要关注你的应用
 
      - 名称: wxpusher
@@ -73,6 +75,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
      - Body: `{"appToken":"你的appToken","topicIds":[],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
 
    - telegram 示例 [@haitau](https://github.com/haitau) 贡献
+
      - 名称：telegram 机器人消息通知
      - URL：https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA#
      - 请求方式: GET
@@ -122,7 +125,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
-- DayNight 主题更改进度条颜色示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)，欢迎 PR）
+- DayNight 主题更改进度条颜色示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
 
   ```
   <style>
@@ -132,7 +135,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
-- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)，欢迎 PR）
+- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)）
 
   ```
   <style>
@@ -157,8 +160,9 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   }
   </script>
   ```
-- DayNight 移除版权示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)，欢迎 PR）
-  
+
+- DayNight 移除版权示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
+
   ```
   <script>
   window.onload = function(){
