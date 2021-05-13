@@ -21,14 +21,14 @@
 **推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
 
 ```shell
-curl -sSL https://raw.githubusercontent.com/naiba/nezha/master/script/fetch.sh | sh
+curl -sSL https://raw.githubusercontent.com/naiba/nezha/master/script/fetch.sh | bash
 /opt/nezha/nezha.sh
 ```
 
 国内镜像加速：
 
 ```shell
-curl -sSL https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/fetch.sh | CN=true sh
+curl -sSL https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/fetch.sh | CN=true bash
 CN=true /opt/nezha/nezha.sh
 ```
 
