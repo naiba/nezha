@@ -98,10 +98,10 @@ update_script () {
 
     mkdir -p $NZ_BASE_PATH
     chmod 777 -R $NZ_BASE_PATH
-    curl -sL https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o /tmp/nezha.sh
+    curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
     new_version=$(cat /tmp/nezha.sh | grep "NZ_VERSION" | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$new_version" ]; then  
-        echo -e "脚本获取失败，请检查本机能否链接 https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/install.sh"
+        echo -e "脚本获取失败，请检查本机能否链接 https://${GITHUB_RAW_URL}/script/install.sh"
         return 1
     fi
     echo -e "当前最新版本为: ${new_version}"
