@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/genkiroid/cert"
 	"github.com/go-ping/ping"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -20,8 +21,8 @@ import (
 func main() {
 	// icmp()
 	// tcpping()
-	// httpWithSSLInfo()
-	sysinfo()
+	httpWithSSLInfo()
+	// sysinfo()
 	// cmdExec()
 }
 
@@ -33,7 +34,7 @@ func tcpping() {
 	}
 	conn.Write([]byte("ping\n"))
 	conn.Close()
-	fmt.Println(time.Now().Sub(start).Microseconds(), float32(time.Now().Sub(start).Microseconds())/1000.0)
+	fmt.Println(time.Since(start).Microseconds(), float32(time.Since(start).Microseconds())/1000.0)
 }
 
 func sysinfo() {
@@ -53,7 +54,6 @@ func sysinfo() {
 	for model, count := range cpuModelCount {
 		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
 	}
-	log.Println(cpus)
 	os.Exit(0)
 	// 硬盘信息，不使用的原因是会重复统计 Linux、Mac
 	dparts, _ := disk.Partitions(false)
@@ -73,11 +73,12 @@ func httpWithSSLInfo() {
 	httpClient := &http.Client{Transport: transCfg, CheckRedirect: func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}}
-	resp, err := httpClient.Get("http://mail.nai.ba")
-	fmt.Println(err, resp.StatusCode)
+	url := "https://ops.naibahq.com"
+	resp, err := httpClient.Get(url)
+	fmt.Println(err, resp)
 	// SSL 证书信息获取
-	// c := cert.NewCert("expired-ecc-dv.ssl.com")
-	// fmt.Println(c.Error)
+	c := cert.NewCert(url[8:])
+	fmt.Println(c.Error)
 }
 
 func icmp() {

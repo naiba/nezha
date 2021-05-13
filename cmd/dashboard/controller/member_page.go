@@ -39,11 +39,9 @@ func (mp *memberPage) server(c *gin.Context) {
 }
 
 func (mp *memberPage) monitor(c *gin.Context) {
-	var monitors []model.Monitor
-	dao.DB.Find(&monitors)
 	c.HTML(http.StatusOK, "dashboard/monitor", mygin.CommonEnvironment(c, gin.H{
 		"Title":    "服务监控",
-		"Monitors": monitors,
+		"Monitors": dao.ServiceSentinelShared.Monitors(),
 	}))
 }
 

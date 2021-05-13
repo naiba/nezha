@@ -6,7 +6,7 @@
 
 .nb-container {
   padding-top: 75px;
-  min-height: 100%;
+  min-height: 100vh;
   padding-bottom: 55px;
   margin-bottom: -47px;
 }

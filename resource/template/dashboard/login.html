@@ -6,12 +6,12 @@
             <h2 class="ui teal image header">
                 <img src="static/logo.png?v20210320" class="image">
                 <div class="content">
-                    使用 GitHub 账号登录
+                    使用 {{.LoginType}} 账号登录
                 </div>
             </h2>
             <a href="/oauth2/login" class="ui fluid large teal submit button">登录</a>
             <div class="ui message">
-                没有账号？ <a href="https://github.com/join" target="_blank">注册</a>
+                没有账号？ <a href="{{.RegistrationLink}}" target="_blank">注册</a>
             </div>
         </div>
     </div>

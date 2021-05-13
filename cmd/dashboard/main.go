@@ -52,6 +52,7 @@ func initSystem() {
 	dao.DB.AutoMigrate(model.Server{}, model.User{},
 		model.Notification{}, model.AlertRule{}, model.Monitor{},
 		model.MonitorHistory{}, model.Cron{})
+	dao.NewServiceSentinel()
 
 	loadServers() //加载服务器列表
 	loadCrons()   //加载计划任务
@@ -109,6 +110,6 @@ func loadCrons() {
 func main() {
 	go controller.ServeWeb(dao.Conf.HTTPPort)
 	go rpc.ServeRPC(dao.Conf.GRPCPort)
-	go rpc.DispatchTask(time.Minute * 3)
+	go rpc.DispatchTask(time.Second * 30)
 	dao.AlertSentinelStart()
 }

@@ -15,7 +15,7 @@ Type=simple
 User=root
 Group=root
 WorkingDirectory=/opt/nezha/agent/
-ExecStart=/opt/nezha/agent/nezha-agent -d -s nz_grpc_host:nz_grpc_port -p nz_client_secret
+ExecStart=/opt/nezha/agent/nezha-agent -s nz_grpc_host:nz_grpc_port -p nz_client_secret
 Restart=always
 #Environment=DEBUG=true
 

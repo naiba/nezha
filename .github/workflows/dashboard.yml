@@ -10,6 +10,7 @@ on:
       - "script/**"
       - "*.md"
       - ".*"
+      - ".github/workflows/agent.yml"
 
 jobs:
   deploy:

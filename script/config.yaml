@@ -1,4 +1,4 @@
-debug: true
+debug: false
 httpport: 80
 oauth2:
   type: "nz_oauth2_type" #Oauth2 登录接入类型，gitee/github

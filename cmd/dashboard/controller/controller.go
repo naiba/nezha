@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"code.cloudfoundry.org/bytefmt"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 
 	"github.com/naiba/nezha/pkg/mygin"
@@ -15,10 +16,11 @@ import (
 
 func ServeWeb(port uint) {
 	gin.SetMode(gin.ReleaseMode)
+	r := gin.Default()
 	if dao.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
+		pprof.Register(r)
 	}
-	r := gin.Default()
 	r.Use(mygin.RecordPath)
 	r.SetFuncMap(template.FuncMap{
 		"tf": func(t time.Time) string {
@@ -54,7 +56,7 @@ func ServeWeb(port uint) {
 			}
 			if a == 0 {
 				// 这是从未在线的情况
-				return 1 / float32(b) * 100
+				return 0.00001 / float32(b) * 100
 			}
 			return float32(a) / float32(b) * 100
 		},
@@ -67,7 +69,7 @@ func ServeWeb(port uint) {
 			}
 			if a == 0 {
 				// 这是从未在线的情况
-				return 1 / float32(b) * 100
+				return 0.00001 / float32(b) * 100
 			}
 			return float32(a) / float32(b) * 100
 		},

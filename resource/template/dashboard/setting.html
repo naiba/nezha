@@ -9,10 +9,18 @@
                 <input type="text" name="Title" placeholder="哪吒监控" value="{{.Conf.Site.Brand}}">
             </div>
             <div class="field">
+                <label>登录类型</label>
+                <select name="Oauth2Type">
+                    <option value="github"{{if eq .Conf.Oauth2.Type "github"}} selected="selected"{{end}}>GitHub</option>
+                    <option value="gitee"{{if eq .Conf.Oauth2.Type "gitee"}} selected="selected"{{end}}>Gitee</option>
+                </select>
+            </div>
+            <div class="field">
                 <label>管理员列表</label>
                 <input type="text" name="Admin" placeholder="1010,2020" value="{{.Conf.Oauth2.Admin}}">
             </div>
             <div class="field">
+                <label>前台主题</label>
                 <select name="Theme">
                     <option value="default"{{if eq .Conf.Site.Theme "default"}} selected="selected"{{end}}>默认主题</option>
                     <option value="daynight"{{if eq .Conf.Site.Theme "daynight"}} selected="selected"{{end}}>JackieSung DayNight</option>
