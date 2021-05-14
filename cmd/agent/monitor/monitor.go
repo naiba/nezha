@@ -19,7 +19,7 @@ import (
 
 var netInSpeed, netOutSpeed, netInTransfer, netOutTransfer, lastUpdate uint64
 var expectDiskFsTypes = []string{
-	"apfs", "ext4", "ext3", "ext2", "f2fs", "reiserfs", "jfs", "btrfs", "fuseblk", "zfs", "simfs", "ntfs", "fat32", "exfat", "xfs",
+	"apfs", "ext4", "ext3", "ext2", "overlay", "reiserfs", "jfs", "btrfs", "fuseblk", "zfs", "simfs", "ntfs", "fat32", "exfat", "xfs",
 }
 var excludeNetInterfaces = []string{
 	"lo", "tun", "docker", "veth", "br-", "vmbr", "vnet", "kube",
