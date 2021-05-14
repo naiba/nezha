@@ -254,4 +254,65 @@
         .accordion({"exclusive": false})
     ;
 </script>
+<!-- Swap text change -->
+<script>
+var statusList = document.getElementsByTagName('small')
+            for (i=0; i<statusList.length; i++){
+                if (statusList[i].innerText == 'NaN%'){
+              statusList[i].innerText='无'
+                }
+            }
+</script>
+<!-- Back to top button -->
+<a id="back-to-top"></a>
+<style type="text/css">
+#back-to-top {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    background-color: #FF9800;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    -webkit-transition: background-color .3s, opacity .5s, visibility .5s;
+    transition: background-color .3s, opacity .5s, visibility .5s;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1000
+}
+
+#back-to-top:after {
+    font-family: "Icons";
+    font-weight: 900;
+    content: "\f106";
+    font-size: 2.2em;
+    color: #fff
+}
+
+#back-to-top:hover {
+    cursor: pointer;
+    background-color: #cc7a00
+}
+
+#back-to-top:active {
+    background-color: #cc7a00
+}
+
+#back-to-top.show {
+    opacity: 1;
+    visibility: visible
+}
+</style>
+<script>
+var btn = $('#back-to-top'); $(window).scroll(function () { if ($(window).scrollTop() > 300) { btn.addClass('show'); } else { btn.removeClass('show'); } }); btn.on('click', function (e) { e.preventDefault(); $('html, body').animate({ scrollTop: 0 }, '300') });
+</script>
 {{end}}
