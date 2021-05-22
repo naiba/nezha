@@ -28,6 +28,11 @@ import (
 	"github.com/naiba/nezha/service/rpc"
 )
 
+func init() {
+	cert.TimeoutSeconds = 30
+	http.DefaultClient.Timeout = time.Second * 5
+}
+
 var (
 	server       string
 	clientSecret string
@@ -35,43 +40,23 @@ var (
 )
 
 var (
-	client         pb.NezhaServiceClient
-	ctx            = context.Background()
-	delayWhenError = time.Second * 10    // Agent 重连间隔
-	updateCh       = make(chan struct{}) // Agent 自动更新间隔
-	httpClient     = &http.Client{
+	client     pb.NezhaServiceClient
+	ctx        = context.Background()
+	updateCh   = make(chan struct{}) // Agent 自动更新间隔
+	httpClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+		Timeout: time.Second * 30,
 	}
 )
 
-func doSelfUpdate() {
-	defer func() {
-		time.Sleep(time.Minute * 20)
-		updateCh <- struct{}{}
-	}()
-	v := semver.MustParse(version)
-	println("Check update", v)
-	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
-	if err != nil {
-		println("Binary update failed:", err)
-		return
-	}
-	if latest.Version.Equals(v) {
-		println("Current binary is up to date", version)
-	} else {
-		println("Upgrade successfully", latest.Version)
-		os.Exit(1)
-	}
-}
-
-func init() {
-	cert.TimeoutSeconds = 30
-}
+const (
+	delayWhenError = time.Second * 10 // Agent 重连间隔
+)
 
 func main() {
 	// 来自于 GoReleaser 的版本号
@@ -106,7 +91,7 @@ func run() {
 	// 更新IP信息
 	go monitor.UpdateIP()
 
-	if version != "" {
+	if _, err := semver.Parse(version); err == nil {
 		go func() {
 			for range updateCh {
 				go doSelfUpdate()
@@ -128,12 +113,15 @@ func run() {
 	}
 
 	for {
-		conn, err = grpc.Dial(server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+		timeOutCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+		conn, err = grpc.DialContext(timeOutCtx, server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
 			println("grpc.Dial err: ", err)
+			cancel()
 			retry()
 			continue
 		}
+		cancel()
 		client = pb.NewNezhaServiceClient(conn)
 		// 第一步注册
 		_, err = client.ReportSystemInfo(ctx, monitor.GetHost().PB())
@@ -209,7 +197,7 @@ func doTask(task *pb.Task) {
 		pinger, err := ping.NewPinger(task.GetData())
 		if err == nil {
 			pinger.SetPrivileged(true)
-			pinger.Count = 10
+			pinger.Count = 5
 			pinger.Timeout = time.Second * 20
 			err = pinger.Run() // Blocks until finished.
 		}
@@ -290,6 +278,26 @@ func reportState() {
 				client.ReportSystemInfo(ctx, monitor.GetHost().PB())
 			}
 		}
+	}
+}
+
+func doSelfUpdate() {
+	defer func() {
+		time.Sleep(time.Minute * 20)
+		updateCh <- struct{}{}
+	}()
+	v := semver.MustParse(version)
+	println("Check update", v)
+	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
+	if err != nil {
+		println("Binary update failed:", err)
+		return
+	}
+	if latest.Version.Equals(v) {
+		println("Current binary is up to date", version)
+	} else {
+		println("Upgrade successfully", latest.Version)
+		os.Exit(1)
 	}
 }
 
