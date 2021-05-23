@@ -123,7 +123,7 @@ func resolveIP(addr string, ipv6 bool) (string, error) {
 	for _, ans := range r.Answer {
 		if ipv6 {
 			if aaaa, ok := ans.(*dns.AAAA); ok {
-				url[0] = aaaa.AAAA.String()
+				url[0] = "[" + aaaa.AAAA.String() + "]"
 				ipv6Resolved = true
 			}
 		} else {
