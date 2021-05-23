@@ -108,8 +108,13 @@ func resolveIP(addr string, ipv6 bool) (string, error) {
 	}
 	m.RecursionDesired = true
 
+	dnsServer := "2606:4700:4700::1111"
+	if !ipv6 {
+		dnsServer = "1.1.1.1"
+	}
+
 	c := new(dns.Client)
-	r, _, err := c.Exchange(m, net.JoinHostPort("1.1.1.1", "53"))
+	r, _, err := c.Exchange(m, net.JoinHostPort(dnsServer, "53"))
 	if err != nil {
 		return "", err
 	}

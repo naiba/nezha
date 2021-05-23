@@ -1,14 +1,15 @@
 <div align="center" style="background-color: white">
   <img width="500" style="max-width:100%" src="https://raw.githubusercontent.com/naiba/nezha/master/resource/static/brand.png" title="哪吒监控">
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.7.1&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.0-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.7.2&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <p>:trollface: 哪吒监控 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
 </div>
 
 \>> 交流论坛：[打杂社区](https://daza.net/c/nezha) (Lemmy)
 
-\>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
+\>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**<br>
+群友互助/服务器交流，作者不答疑，找 naiba 请至论坛发帖
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控%7C哪吒面板"&filter=0) (Google)
 
@@ -22,17 +23,18 @@
 
 ```shell
 curl -sSL https://raw.githubusercontent.com/naiba/nezha/master/script/fetch.sh | bash
-/opt/nezha/nezha.sh
+sudo /opt/nezha/nezha.sh
 ```
 
 国内镜像加速：
 
 ```shell
 curl -sSL https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/fetch.sh | CN=true bash
-CN=true /opt/nezha/nezha.sh
+CN=true sudo /opt/nezha/nezha.sh
 ```
 
 再次运行仅需:
+
 ```
 /opt/nezha/nezha.sh
 ```

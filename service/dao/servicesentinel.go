@@ -275,7 +275,7 @@ func (ss *ServiceSentinel) worker() {
 		}
 		stateStr := getStateStr(upPercent)
 		if Conf.Debug {
-			log.Println(ss.monitors[mh.MonitorID].Target, stateStr, "Agent:", r.Reporter, "Successful:", mh.Successful, "Response:", mh.Data)
+			log.Println("服务监控上报:", ss.monitors[mh.MonitorID].Target, stateStr, "上报者:", r.Reporter, "是否正常:", mh.Successful, "请求输出:", mh.Data)
 		}
 		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
