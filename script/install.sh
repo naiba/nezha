@@ -93,25 +93,22 @@ confirm() {
     fi
 }
 
-update_script () {
+update_script() {
     echo -e "> 更新脚本"
 
-    mkdir -p $NZ_BASE_PATH
-    chmod 777 -R $NZ_BASE_PATH
     curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
     new_version=$(cat /tmp/nezha.sh | grep "NZ_VERSION" | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$new_version" ]; then  
+    if [ ! -n "$new_version" ]; then
         echo -e "脚本获取失败，请检查本机能否链接 https://${GITHUB_RAW_URL}/script/install.sh"
         return 1
     fi
     echo -e "当前最新版本为: ${new_version}"
-    mv -f /tmp/nezha.sh ${NZ_BASE_PATH}/nezha.sh && chmod a+x ${NZ_BASE_PATH}/nezha.sh
-    
-    echo -e "脚本获取成功，脚本固定位置为${NZ_BASE_PATH}/nezha.sh，请今后使用 ${NZ_BASE_PATH}/nezha.sh 运行脚本"
-    echo -e "10s后执行新脚本"
-    sleep 10s
+    mv -f /tmp/nezha.sh ./nezha.sh && chmod a+x ./nezha.sh
+
+    echo -e "3s后执行新脚本"
+    sleep 3s
     clear
-    exec ${NZ_BASE_PATH}/nezha.sh
+    exec ./nezha.sh
     exit 0
 }
 
@@ -182,7 +179,7 @@ install_agent() {
 
     local version=$(curl -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
 
-    if [ ! -n "$version" ]; then  
+    if [ ! -n "$version" ]; then
         echo -e "获取版本号失败，请检查本机能否链接 https://api.github.com/repos/naiba/nezha/releases/latest"
     else
         echo -e "当前最新版本为: ${version}"

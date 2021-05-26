@@ -22,21 +22,15 @@
 **推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
 
 ```shell
-curl -sSL https://raw.githubusercontent.com/naiba/nezha/master/script/fetch.sh | bash
-sudo /opt/nezha/nezha.sh
+curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh  -o nezha.sh && chmod +x nezha.sh
+sudo ./nezha.sh
 ```
 
 国内镜像加速：
 
 ```shell
-curl -sSL https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/fetch.sh | CN=true bash
-CN=true sudo /opt/nezha/nezha.sh
-```
-
-再次运行仅需:
-
-```
-/opt/nezha/nezha.sh
+curl -L https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+CN=true sudo ./nezha.sh
 ```
 
 _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
