@@ -24,10 +24,6 @@ builds:
         goarch: arm64
     main: ./cmd/agent
     binary: nezha-agent
-    # 为路由器、开发板缩小二进制体积
-    hooks:
-      post:
-        - upx --best "{{.Path}}"
 checksum:
   name_template: "checksums.txt"
 snapshot:
