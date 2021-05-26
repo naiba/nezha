@@ -1,38 +1,59 @@
 {{define "component/monitor"}}
 <div class="ui tiny monitor modal transition hidden">
-    <div class="header">添加监控</div>
-    <div class="content">
-        <form id="monitorForm" class="ui form">
-            <input type="hidden" name="ID">
-            <div class="field">
-                <label>名称</label>
-                <input type="text" name="Name" placeholder="博客">
-            </div>
-            <div class="field">
-                <label>目标</label>
-                <input type="text" name="Target" placeholder="HTTP(https://t.tt)｜Ping(t.tt)｜TCP(t.tt:80)">
-            </div>
-            <div class="field">
-                <label>类型</label>
-                <select name="Type" class="ui fluid dropdown">
-                    <option value="1">HTTP-GET(SSL到期、变更)</option>
-                    <option value="2">ICMP-Ping</option>
-                    <option value="3">TCP-Ping</option>
-                </select>
-            </div>
-        </form>
-        <div class="ui warning message">
-            <p>
-                类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS 协议的会顺带监控SSL证书)；<br>
-                类型为 <b>ICMP-Ping</b> 时输入主机名/IP，不带端口；<br>
-                类型为 <b>TCP-Ping</b> 时输入主机名/IP + 端口号：example.com:22
-            </p>
+  <div class="header">添加监控</div>
+  <div class="content">
+    <form id="monitorForm" class="ui form">
+      <input type="hidden" name="ID" />
+      <div class="field">
+        <label>名称</label>
+        <input type="text" name="Name" placeholder="博客" />
+      </div>
+      <div class="field">
+        <label>目标</label>
+        <input
+          type="text"
+          name="Target"
+          placeholder="HTTP(https://t.tt)｜Ping(t.tt)｜TCP(t.tt:80)"
+        />
+      </div>
+      <div class="field">
+        <label>类型</label>
+        <select name="Type" class="ui fluid dropdown">
+          <option value="1">HTTP-GET(SSL到期、变更)</option>
+          <option value="2">ICMP-Ping</option>
+          <option value="3">TCP-Ping</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>不通过下列服务器请求</label>
+        <div class="ui fluid multiple servers search selection dropdown">
+          <input type="hidden" name="SkipServersRaw" />
+          <i class="dropdown icon"></i>
+          <div class="default text">输入ID/名称以搜索</div>
+          <div class="menu"></div>
         </div>
+      </div>
+      <div class="field">
+        <div class="ui nb-notify checkbox">
+          <input name="Notify" type="checkbox" tabindex="0" class="hidden" />
+          <label>启用故障通知</label>
+        </div>
+      </div>
+    </form>
+    <div class="ui warning message">
+      <p>
+        类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS
+        协议的会顺带监控SSL证书)；<br />
+        类型为 <b>ICMP-Ping</b> 时输入主机名/IP，不带端口；<br />
+        类型为 <b>TCP-Ping</b> 时输入主机名/IP + 端口号：example.com:22
+      </p>
     </div>
-    <div class=" actions">
-        <div class="ui negative button">取消</div>
-        <button class="ui positive right labeled icon button">确认<i class="checkmark icon"></i>
-        </button>
-    </div>
+  </div>
+  <div class="actions">
+    <div class="ui negative button">取消</div>
+    <button class="ui positive right labeled icon button">
+      确认<i class="checkmark icon"></i>
+    </button>
+  </div>
 </div>
 {{end}}

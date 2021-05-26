@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.4.15" // ！！记得修改 README 重的 badge 版本！！
+var Version = "v0.7.2" // ！！记得修改 README 中的 badge 版本！！
 
 const (
 	SnapshotDelay = 3
@@ -46,7 +46,7 @@ func ReSortServer() {
 
 	sort.SliceStable(SortedServerList, func(i, j int) bool {
 		if SortedServerList[i].DisplayIndex == SortedServerList[j].DisplayIndex {
-			return SortedServerList[i].ID < SortedServerList[i].ID
+			return SortedServerList[i].ID < SortedServerList[j].ID
 		}
 		return SortedServerList[i].DisplayIndex > SortedServerList[j].DisplayIndex
 	})

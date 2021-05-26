@@ -9,9 +9,9 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/blang/semver"
@@ -28,6 +28,11 @@ import (
 	"github.com/naiba/nezha/service/rpc"
 )
 
+func init() {
+	cert.TimeoutSeconds = 30
+	http.DefaultClient.Timeout = time.Second * 5
+}
+
 var (
 	server       string
 	clientSecret string
@@ -35,45 +40,23 @@ var (
 )
 
 var (
-	reporting      bool
-	client         pb.NezhaServiceClient
-	ctx            = context.Background()
-	delayWhenError = time.Second * 10       // Agent 重连间隔
-	updateCh       = make(chan struct{}, 0) // Agent 自动更新间隔
-	httpClient     = &http.Client{
+	client     pb.NezhaServiceClient
+	ctx        = context.Background()
+	updateCh   = make(chan struct{}) // Agent 自动更新间隔
+	httpClient = &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
+		Timeout: time.Second * 30,
 	}
 )
 
-func doSelfUpdate() {
-	defer func() {
-		time.Sleep(time.Minute * 20)
-		updateCh <- struct{}{}
-	}()
-	v := semver.MustParse(version)
-	log.Println("Check update", v)
-	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
-	if err != nil {
-		log.Println("Binary update failed:", err)
-		return
-	}
-	if latest.Version.Equals(v) {
-		// latest version is the same as current version. It means current binary is up to date.
-		log.Println("Current binary is the latest version", version)
-	} else {
-		log.Println("Successfully updated to version", latest.Version)
-		os.Exit(1)
-	}
-}
-
-func init() {
-	cert.TimeoutSeconds = 30
-}
+const (
+	delayWhenError = time.Second * 10 // Agent 重连间隔
+)
 
 func main() {
 	// 来自于 GoReleaser 的版本号
@@ -81,7 +64,7 @@ func main() {
 
 	var debug bool
 	flag.String("i", "", "unused 旧Agent配置兼容")
-	flag.BoolVar(&debug, "d", false, "允许不安全连接")
+	flag.BoolVar(&debug, "d", false, "开启调试信息")
 	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
 	flag.Parse()
@@ -108,7 +91,7 @@ func run() {
 	// 更新IP信息
 	go monitor.UpdateIP()
 
-	if version != "" {
+	if _, err := semver.Parse(version); err == nil {
 		go func() {
 			for range updateCh {
 				go doSelfUpdate()
@@ -121,45 +104,48 @@ func run() {
 	var conn *grpc.ClientConn
 
 	retry := func() {
-		log.Println("Error to close connection ...")
+		println("Error to close connection ...")
 		if conn != nil {
 			conn.Close()
 		}
 		time.Sleep(delayWhenError)
-		log.Println("Try to reconnect ...")
+		println("Try to reconnect ...")
 	}
 
 	for {
-		conn, err = grpc.Dial(server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+		timeOutCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+		conn, err = grpc.DialContext(timeOutCtx, server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
-			log.Printf("grpc.Dial err: %v", err)
+			println("grpc.Dial err: ", err)
+			cancel()
 			retry()
 			continue
 		}
+		cancel()
 		client = pb.NewNezhaServiceClient(conn)
 		// 第一步注册
 		_, err = client.ReportSystemInfo(ctx, monitor.GetHost().PB())
 		if err != nil {
-			log.Printf("client.ReportSystemInfo err: %v", err)
+			println("client.ReportSystemInfo err: ", err)
 			retry()
 			continue
 		}
 		// 执行 Task
 		tasks, err := client.RequestTask(ctx, monitor.GetHost().PB())
 		if err != nil {
-			log.Printf("client.RequestTask err: %v", err)
+			println("client.RequestTask err: ", err)
 			retry()
 			continue
 		}
 		err = receiveTasks(tasks)
-		log.Printf("receiveTasks exit to main: %v", err)
+		println("receiveTasks exit to main: ", err)
 		retry()
 	}
 }
 
 func receiveTasks(tasks pb.NezhaService_RequestTaskClient) error {
 	var err error
-	defer log.Printf("receiveTasks exit %v => %v", time.Now(), err)
+	defer println("receiveTasks exit", time.Now(), "=>", err)
 	for {
 		var task *pb.Task
 		task, err = tasks.Recv()
@@ -179,31 +165,39 @@ func doTask(task *pb.Task) {
 		start := time.Now()
 		resp, err := httpClient.Get(task.GetData())
 		if err == nil {
-			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+			// 检查 HTTP Response 状态
+			result.Delay = float32(time.Since(start).Microseconds()) / 1000.0
 			if resp.StatusCode > 399 || resp.StatusCode < 200 {
 				err = errors.New("\n应用错误：" + resp.Status)
 			}
 		}
 		if err == nil {
-			if strings.HasPrefix(task.GetData(), "https://") {
-				c := cert.NewCert(task.GetData()[8:])
-				if c.Error != "" {
-					result.Data = "SSL证书错误：" + c.Error
+			// 检查 SSL 证书信息
+			serviceUrl, err := url.Parse(task.GetData())
+			if err == nil {
+				if serviceUrl.Scheme == "https" {
+					c := cert.NewCert(serviceUrl.Host)
+					if c.Error != "" {
+						result.Data = "SSL证书错误：" + c.Error
+					} else {
+						result.Data = c.Issuer + "|" + c.NotAfter
+						result.Successful = true
+					}
 				} else {
-					result.Data = c.Issuer + "|" + c.NotAfter
 					result.Successful = true
 				}
 			} else {
-				result.Successful = true
+				result.Data = "URL解析错误：" + err.Error()
 			}
 		} else {
+			// HTTP 请求失败
 			result.Data = err.Error()
 		}
 	case model.TaskTypeICMPPing:
 		pinger, err := ping.NewPinger(task.GetData())
 		if err == nil {
 			pinger.SetPrivileged(true)
-			pinger.Count = 10
+			pinger.Count = 5
 			pinger.Timeout = time.Second * 20
 			err = pinger.Run() // Blocks until finished.
 		}
@@ -219,7 +213,7 @@ func doTask(task *pb.Task) {
 		if err == nil {
 			conn.Write([]byte("ping\n"))
 			conn.Close()
-			result.Delay = float32(time.Now().Sub(start).Microseconds()) / 1000.0
+			result.Delay = float32(time.Since(start).Microseconds()) / 1000.0
 			result.Successful = true
 		} else {
 			result.Data = err.Error()
@@ -260,9 +254,9 @@ func doTask(task *pb.Task) {
 			result.Data = string(output)
 			result.Successful = true
 		}
-		result.Delay = float32(time.Now().Sub(startedAt).Seconds())
+		result.Delay = float32(time.Since(startedAt).Seconds())
 	default:
-		log.Printf("Unknown action: %v", task)
+		println("Unknown action: ", task)
 	}
 	client.ReportTask(ctx, &result)
 }
@@ -270,13 +264,13 @@ func doTask(task *pb.Task) {
 func reportState() {
 	var lastReportHostInfo time.Time
 	var err error
-	defer log.Printf("reportState exit %v => %v", time.Now(), err)
+	defer println("reportState exit", time.Now(), "=>", err)
 	for {
 		if client != nil {
 			monitor.TrackNetworkSpeed()
 			_, err = client.ReportSystemState(ctx, monitor.GetState(dao.ReportDelay).PB())
 			if err != nil {
-				log.Printf("reportState error %v", err)
+				println("reportState error", err)
 				time.Sleep(delayWhenError)
 			}
 			if lastReportHostInfo.Before(time.Now().Add(-10 * time.Minute)) {
@@ -284,5 +278,31 @@ func reportState() {
 				client.ReportSystemInfo(ctx, monitor.GetHost().PB())
 			}
 		}
+	}
+}
+
+func doSelfUpdate() {
+	defer func() {
+		time.Sleep(time.Minute * 20)
+		updateCh <- struct{}{}
+	}()
+	v := semver.MustParse(version)
+	println("Check update", v)
+	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
+	if err != nil {
+		println("Binary update failed:", err)
+		return
+	}
+	if latest.Version.Equals(v) {
+		println("Current binary is up to date", version)
+	} else {
+		println("Upgrade successfully", latest.Version)
+		os.Exit(1)
+	}
+}
+
+func println(v ...interface{}) {
+	if dao.Conf.Debug {
+		log.Println(v...)
 	}
 }

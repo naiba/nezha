@@ -18,7 +18,7 @@ func (a *AuthHandler) GetRequestMetadata(ctx context.Context, uri ...string) (ma
 }
 
 func (a *AuthHandler) RequireTransportSecurity() bool {
-	return !dao.Conf.Debug
+	return false
 }
 
 func (a *AuthHandler) Check(ctx context.Context) (uint64, error) {
