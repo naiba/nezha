@@ -204,7 +204,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>如何使 OpenWrt/LEDE 自启动？来自 @艾斯德斯</summary>
 
-首先在 release 下载对应的二进制解压后放置到 `/root/nezha-agent`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-agent`：
+首先在 release 下载对应的二进制解压tar.gz包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
 
 ```
 #!/bin/sh /etc/rc.common
@@ -214,7 +214,7 @@ USE_PROCD=1
 
 start_service() {
 	procd_open_instance
-	procd_set_param command /root/nezha-agent -i xxx -p 111 -d
+	procd_set_param command /root/nezha-agent -s 面板网址:接收端口 -p 唯一秘钥 -d
 	procd_set_param respawn
 	procd_close_instance
 }
@@ -230,7 +230,7 @@ restart() {
 }
 ```
 
-赋予执行权限 `chmod +x /etc/init.d/nezha-agent` 然后启动服务 `/etc/init.d/nezha-agent enable && /etc/init.d/nezha-agent start`
+赋予执行权限 `chmod +x /etc/init.d/nezha-service` 然后启动服务 `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
 
 </details>
 
