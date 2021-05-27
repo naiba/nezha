@@ -37,7 +37,7 @@ func UpdateIP() {
 	for {
 		ipv4 := fetchGeoIP(ipv4Servers, false)
 		ipv6 := fetchGeoIP(ipv6Servers, true)
-		cachedIP = fmt.Sprintf("ip(v4:%s,v6:%s)", ipv4.IP, ipv6.IP)
+		cachedIP = fmt.Sprintf("ip(v4:%s,v6:[%s])", ipv4.IP, ipv6.IP)
 		if ipv4.CountryCode != "" {
 			cachedCountry = ipv4.CountryCode
 		} else if ipv6.CountryCode != "" {

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 // 报警规则
@@ -100,7 +101,7 @@ func checkStatus() {
 			// 发送通知
 			max, desc := alert.Check(alertsStore[alert.ID][server.ID])
 			if desc != "" {
-				message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，%s，逮到咯，快去看看！", alert.Name, server.Name, server.Host.IP, desc)
+				message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，逮到咯，快去看看！", alert.Name, server.Name, utils.IPDesensitize(server.Host.IP))
 				go SendNotification(message, true)
 			}
 			// 清理旧数据

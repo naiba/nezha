@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"math/rand"
 	"os"
+	"regexp"
 	"time"
 	"unsafe"
 )
@@ -44,4 +45,22 @@ func MD5(plantext string) string {
 
 func IsWindows() bool {
 	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
+}
+
+var ipv4Re = regexp.MustCompile(`(\d*\.).*(\.\d*)`)
+
+func ipv4Desensitize(ipv4Addr string) string {
+	return ipv4Re.ReplaceAllString(ipv4Addr, "$1****$2")
+}
+
+var ipv6Re = regexp.MustCompile(`(\w*:\w*:).*(:\w*:\w*)`)
+
+func ipv6Desensitize(ipv6Addr string) string {
+	return ipv6Re.ReplaceAllString(ipv6Addr, "$1****$2")
+}
+
+func IPDesensitize(ipAddr string) string {
+	ipAddr = ipv4Desensitize(ipAddr)
+	ipAddr = ipv6Desensitize(ipAddr)
+	return ipAddr
 }
