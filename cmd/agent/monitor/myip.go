@@ -9,6 +9,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/miekg/dns"
@@ -108,31 +109,49 @@ func resolveIP(addr string, ipv6 bool) (string, error) {
 	}
 	m.RecursionDesired = true
 
-	dnsServer := "2606:4700:4700::1111"
+	dnsServers := []string{"2606:4700:4700::1001", "2001:4860:4860::8844"}
 	if !ipv6 {
-		dnsServer = "1.1.1.1"
+		dnsServers = []string{"1.0.0.1", "8.8.4.4"}
 	}
 
-	c := new(dns.Client)
-	r, _, err := c.Exchange(m, net.JoinHostPort(dnsServer, "53"))
-	if err != nil {
-		return "", err
-	}
-
+	var wg sync.WaitGroup
+	var resolveLock sync.RWMutex
 	var ipv4Resolved, ipv6Resolved bool
-	for _, ans := range r.Answer {
-		if ipv6 {
-			if aaaa, ok := ans.(*dns.AAAA); ok {
-				url[0] = "[" + aaaa.AAAA.String() + "]"
-				ipv6Resolved = true
+
+	wg.Add(len(dnsServers))
+	for i := 0; i < len(dnsServers); i++ {
+		go func(i int) {
+			defer wg.Done()
+			c := new(dns.Client)
+			c.Timeout = time.Second * 3
+			r, _, err := c.Exchange(m, net.JoinHostPort(dnsServers[i], "53"))
+			if err != nil {
+				return
 			}
-		} else {
-			if a, ok := ans.(*dns.A); ok {
-				url[0] = a.A.String()
-				ipv4Resolved = true
+			resolveLock.Lock()
+			defer resolveLock.Unlock()
+			if ipv6 && ipv6Resolved {
+				return
 			}
-		}
+			if !ipv6 && ipv4Resolved {
+				return
+			}
+			for _, ans := range r.Answer {
+				if ipv6 {
+					if aaaa, ok := ans.(*dns.AAAA); ok {
+						url[0] = "[" + aaaa.AAAA.String() + "]"
+						ipv6Resolved = true
+					}
+				} else {
+					if a, ok := ans.(*dns.A); ok {
+						url[0] = a.A.String()
+						ipv4Resolved = true
+					}
+				}
+			}
+		}(i)
 	}
+	wg.Wait()
 
 	if ipv6 && !ipv6Resolved {
 		return "", errors.New("the AAAA record not resolved")
