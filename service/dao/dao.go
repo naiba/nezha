@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.7.2" // ！！记得修改 README 中的 badge 版本！！
+var Version = "v0.7.3" // ！！记得修改 README 中的 badge 版本！！
 
 const (
 	SnapshotDelay = 3
@@ -69,7 +69,7 @@ func CronTrigger(c *model.Cron) {
 				Type: model.TaskTypeCommand,
 			})
 		} else {
-			SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", c.Name, c.Servers[j]), false)
+			SendNotification(fmt.Sprintf("计划任务：%s，服务器：%s 离线，无法执行。", c.Name, ServerList[c.Servers[j]].Name), false)
 		}
 	}
 }

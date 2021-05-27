@@ -31,11 +31,13 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 		defer dao.CronLock.RUnlock()
 		cr := dao.Crons[r.GetId()]
 		if cr != nil {
+			dao.ServerLock.RLock()
+			defer dao.ServerLock.RUnlock()
 			if cr.PushSuccessful && r.GetSuccessful() {
-				dao.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()), false)
+				dao.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%s，日志：\n%s", cr.Name, dao.ServerList[clientID].Name, r.GetData()), false)
 			}
 			if !r.GetSuccessful() {
-				dao.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%d，日志：\n%s", cr.Name, clientID, r.GetData()), false)
+				dao.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%s，日志：\n%s", cr.Name, dao.ServerList[clientID].Name, r.GetData()), false)
 			}
 			dao.DB.Model(cr).Updates(model.Cron{
 				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),

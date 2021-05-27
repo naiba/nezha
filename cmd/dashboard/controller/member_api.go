@@ -292,10 +292,13 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 					Type: model.TaskTypeCommand,
 				})
 			} else {
-				dao.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%d 离线，无法执行。", cr.Name, cr.Servers[j]), false)
+				dao.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%s 离线，无法执行。", cr.Name, dao.ServerList[cr.Servers[j]].Name), false)
 			}
 		}
 	})
+	if err != nil {
+		panic(err)
+	}
 
 	delete(dao.Crons, cr.ID)
 	dao.Crons[cr.ID] = &cr
