@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.6.0"
+NZ_VERSION="v0.6.1"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -93,25 +93,22 @@ confirm() {
     fi
 }
 
-update_script () {
+update_script() {
     echo -e "> 更新脚本"
 
-    mkdir -p $NZ_BASE_PATH
-    chmod 777 -R $NZ_BASE_PATH
     curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
     new_version=$(cat /tmp/nezha.sh | grep "NZ_VERSION" | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$new_version" ]; then  
+    if [ ! -n "$new_version" ]; then
         echo -e "脚本获取失败，请检查本机能否链接 https://${GITHUB_RAW_URL}/script/install.sh"
         return 1
     fi
     echo -e "当前最新版本为: ${new_version}"
-    mv -f /tmp/nezha.sh ${NZ_BASE_PATH}/nezha.sh && chmod a+x ${NZ_BASE_PATH}/nezha.sh
-    
-    echo -e "脚本获取成功，脚本固定位置为${NZ_BASE_PATH}/nezha.sh，请今后使用 ${NZ_BASE_PATH}/nezha.sh 运行脚本"
-    echo -e "10s后执行新脚本"
-    sleep 10s
+    mv -f /tmp/nezha.sh ./nezha.sh && chmod a+x ./nezha.sh
+
+    echo -e "3s后执行新脚本"
+    sleep 3s
     clear
-    exec ${NZ_BASE_PATH}/nezha.sh
+    exec ./nezha.sh
     exit 0
 }
 
@@ -182,7 +179,7 @@ install_agent() {
 
     local version=$(curl -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
 
-    if [ ! -n "$version" ]; then  
+    if [ ! -n "$version" ]; then
         echo -e "获取版本号失败，请检查本机能否链接 https://api.github.com/repos/naiba/nezha/releases/latest"
     else
         echo -e "当前最新版本为: ${version}"
@@ -426,21 +423,21 @@ clean_all() {
 show_usage() {
     echo "哪吒监控 管理脚本使用方法: "
     echo "--------------------------------------------------------"
-    echo "/opt/nezha/nezha.sh                            - 显示管理菜单"
-    echo "/opt/nezha/nezha.sh install_dashboard          - 安装面板端"
-    echo "/opt/nezha/nezha.sh modify_dashboard_config    - 修改面板配置"
-    echo "/opt/nezha/nezha.sh start_dashboard            - 启动面板"
-    echo "/opt/nezha/nezha.sh stop_dashboard             - 停止面板"
-    echo "/opt/nezha/nezha.sh restart_and_update         - 重启并更新面板"
-    echo "/opt/nezha/nezha.sh show_dashboard_log         - 查看面板日志"
-    echo "/opt/nezha/nezha.sh uninstall_dashboard        - 卸载管理面板"
+    echo "./nezha.sh                            - 显示管理菜单"
+    echo "./nezha.sh install_dashboard          - 安装面板端"
+    echo "./nezha.sh modify_dashboard_config    - 修改面板配置"
+    echo "./nezha.sh start_dashboard            - 启动面板"
+    echo "./nezha.sh stop_dashboard             - 停止面板"
+    echo "./nezha.sh restart_and_update         - 重启并更新面板"
+    echo "./nezha.sh show_dashboard_log         - 查看面板日志"
+    echo "./nezha.sh uninstall_dashboard        - 卸载管理面板"
     echo "--------------------------------------------------------"
-    echo "/opt/nezha/nezha.sh install_agent              - 安装监控Agent"
-    echo "/opt/nezha/nezha.sh modify_agent_config        - 修改Agent配置"
-    echo "/opt/nezha/nezha.sh show_agent_log             - 查看Agent日志"
-    echo "/opt/nezha/nezha.sh uninstall_agent            - 卸载Agen"
-    echo "/opt/nezha/nezha.sh restart_agent              - 重启Agen"
-    echo "/opt/nezha/nezha.sh update_script              - 更新脚本"
+    echo "./nezha.sh install_agent              - 安装监控Agent"
+    echo "./nezha.sh modify_agent_config        - 修改Agent配置"
+    echo "./nezha.sh show_agent_log             - 查看Agent日志"
+    echo "./nezha.sh uninstall_agent            - 卸载Agen"
+    echo "./nezha.sh restart_agent              - 重启Agen"
+    echo "./nezha.sh update_script              - 更新脚本"
     echo "--------------------------------------------------------"
 }
 
@@ -462,8 +459,9 @@ show_menu() {
     ${green}11.${plain} 卸载Agent
     ${green}12.${plain} 重启Agent
     ————————————————-
-    ${green}0.${plain}  退出脚本
     ${green}13.${plain} 更新脚本
+    ————————————————-
+    ${green}0.${plain}  退出脚本
     "
     echo && read -p "请输入选择 [0-13]: " num
 
@@ -511,7 +509,7 @@ show_menu() {
         update_script
         ;;
     *)
-        echo -e "${red}请输入正确的数字 [0-12]${plain}"
+        echo -e "${red}请输入正确的数字 [0-13]${plain}"
         ;;
     esac
 }
