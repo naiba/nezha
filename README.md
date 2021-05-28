@@ -229,6 +229,21 @@ restart() {
 </details>
 
 <details>
+    <summary>MT7621架构路由器运行提示 line 1: syntax error: unexpected "(" </summary>
+
+由于MT7621 本身没有 FPU (浮点运算器)，需要使用软件模拟浮点运算器。
+这里提供手动编译命令
+```
+	git clone https://github.com/naiba/nezha.git
+	cd nezha
+	GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build cmd/agent/main.go
+```
+参考教程
+- [为 OpenWrt 路由器编译哪吒监控](https://blog.kuretru.com/posts/b9934504/)
+	
+</details>
+
+<details>
     <summary>首页服务器随机闪烁掉线？</summary>
 
 执行 `ntpdate 0.pool.ntp.org` 同步一下面板部署所在的服务器的时间，ref: [How do I use pool.ntp.org?](https://www.ntppool.org/en/use.html)
