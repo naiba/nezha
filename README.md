@@ -234,9 +234,9 @@ restart() {
 由于MT7621 本身没有 FPU (浮点运算器)，需要使用软件模拟浮点运算器。
 这里提供手动编译命令
 ```
-	git clone https://github.com/naiba/nezha.git
-	cd nezha
-	GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build cmd/agent/main.go
+git clone https://github.com/naiba/nezha.git
+cd nezha
+GOOS=linux GOARCH=mipsle GOMIPS=softfloat go build cmd/agent/main.go
 ```
 参考教程
 - [为 OpenWrt 路由器编译哪吒监控](https://blog.kuretru.com/posts/b9934504/)
