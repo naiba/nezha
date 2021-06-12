@@ -41,7 +41,6 @@ var (
 
 var (
 	client     pb.NezhaServiceClient
-	ctx        = context.Background()
 	updateCh   = make(chan struct{}) // Agent 自动更新间隔
 	httpClient = &http.Client{
 		Transport: &http.Transport{
@@ -56,6 +55,7 @@ var (
 
 const (
 	delayWhenError = time.Second * 10 // Agent 重连间隔
+	networkTimeOut = time.Second * 5  // 普通网络超时
 )
 
 func main() {
@@ -113,7 +113,7 @@ func run() {
 	}
 
 	for {
-		timeOutCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+		timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
 		conn, err = grpc.DialContext(timeOutCtx, server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
 			println("grpc.Dial err: ", err)
@@ -124,19 +124,25 @@ func run() {
 		cancel()
 		client = pb.NewNezhaServiceClient(conn)
 		// 第一步注册
-		_, err = client.ReportSystemInfo(ctx, monitor.GetHost().PB())
+		timeOutCtx, cancel = context.WithTimeout(context.Background(), networkTimeOut)
+		_, err = client.ReportSystemInfo(timeOutCtx, monitor.GetHost().PB())
 		if err != nil {
 			println("client.ReportSystemInfo err: ", err)
+			cancel()
 			retry()
 			continue
 		}
+		cancel()
 		// 执行 Task
-		tasks, err := client.RequestTask(ctx, monitor.GetHost().PB())
+		timeOutCtx, cancel = context.WithTimeout(context.Background(), networkTimeOut)
+		tasks, err := client.RequestTask(timeOutCtx, monitor.GetHost().PB())
 		if err != nil {
 			println("client.RequestTask err: ", err)
+			cancel()
 			retry()
 			continue
 		}
+		cancel()
 		err = receiveTasks(tasks)
 		println("receiveTasks exit to main: ", err)
 		retry()
@@ -226,7 +232,7 @@ func doTask(task *pb.Task) {
 		if err != nil {
 			// 进程组创建失败，直接退出
 			result.Data = err.Error()
-			client.ReportTask(ctx, &result)
+			client.ReportTask(context.Background(), &result)
 			return
 		}
 		timeout := time.NewTimer(time.Hour * 2)
@@ -258,7 +264,7 @@ func doTask(task *pb.Task) {
 	default:
 		println("Unknown action: ", task)
 	}
-	client.ReportTask(ctx, &result)
+	client.ReportTask(context.Background(), &result)
 }
 
 func reportState() {
@@ -268,14 +274,16 @@ func reportState() {
 	for {
 		if client != nil {
 			monitor.TrackNetworkSpeed()
-			_, err = client.ReportSystemState(ctx, monitor.GetState(dao.ReportDelay).PB())
+			timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
+			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(dao.ReportDelay).PB())
+			cancel()
 			if err != nil {
 				println("reportState error", err)
 				time.Sleep(delayWhenError)
 			}
 			if lastReportHostInfo.Before(time.Now().Add(-10 * time.Minute)) {
 				lastReportHostInfo = time.Now()
-				client.ReportSystemInfo(ctx, monitor.GetHost().PB())
+				client.ReportSystemInfo(context.Background(), monitor.GetHost().PB())
 			}
 		}
 	}

@@ -8,8 +8,7 @@
 
 \>> 交流论坛：[打杂社区](https://daza.net/c/nezha) (Lemmy)
 
-\>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**<br>
-群友互助/服务器交流，作者不答疑，找 naiba 请至论坛发帖
+\>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控%7C哪吒面板"&filter=0) (Google)
 
@@ -103,7 +102,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024\*1024）
   - offline：不支持 Min/Max 参数
 - Duration：持续秒数，监控比较简陋，取持续时间内的 70% 采样结果
-- Ignore: `{"1": true, "2":false}` 忽略此规则的服务器 ID 列表
+- Ignore: `{"1": true, "2":false}` 忽略此规则的服务器 ID 列表，比如忽略服务器 ID 5 的离线通知 `[{"Type":"offline","Duration":10, "Ignore":{"5": true}}]`
 </details>
 
 <details>
@@ -198,7 +197,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>如何使 OpenWrt/LEDE 自启动？来自 @艾斯德斯</summary>
 
-首先在 release 下载对应的二进制解压tar.gz包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
+首先在 release 下载对应的二进制解压 tar.gz 包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
 
 ```
 #!/bin/sh /etc/rc.common
@@ -251,6 +250,7 @@ restart() {
   ```nginx
   server{
 
+      #原有的一些配置
       #server_name blablabla...
 
       location /ws {
