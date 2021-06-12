@@ -134,15 +134,12 @@ func run() {
 		}
 		cancel()
 		// 执行 Task
-		timeOutCtx, cancel = context.WithTimeout(context.Background(), networkTimeOut)
-		tasks, err := client.RequestTask(timeOutCtx, monitor.GetHost().PB())
+		tasks, err := client.RequestTask(context.Background(), monitor.GetHost().PB())
 		if err != nil {
 			println("client.RequestTask err: ", err)
-			cancel()
 			retry()
 			continue
 		}
-		cancel()
 		err = receiveTasks(tasks)
 		println("receiveTasks exit to main: ", err)
 		retry()
