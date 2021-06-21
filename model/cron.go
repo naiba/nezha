@@ -8,6 +8,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	CronCoverIgnoreAll = iota
+	CronCoverAll
+)
+
 type Cron struct {
 	Common
 	Name           string
@@ -17,6 +22,7 @@ type Cron struct {
 	PushSuccessful bool      // 推送成功的通知
 	LastExecutedAt time.Time // 最后一次执行时间
 	LastResult     bool      // 最后一次执行结果
+	Cover          uint8
 
 	CronID     cron.EntryID `gorn:"-"`
 	ServersRaw string

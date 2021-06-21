@@ -4,10 +4,7 @@
   <div class="ui container">
     <div class="ui grid">
       <div class="right floated right aligned twelve wide column">
-        <button
-          class="ui right labeled positive icon button"
-          onclick="addOrEditMonitor()"
-        >
+        <button class="ui right labeled positive icon button" onclick="addOrEditMonitor()">
           <i class="add icon"></i> 添加监控
         </button>
       </div>
@@ -18,7 +15,8 @@
           <th>ID</th>
           <th>名称</th>
           <th>目标</th>
-          <th>跳过的服务器</th>
+          <th>覆盖范围</th>
+          <th>排除服务器</th>
           <th>类型</th>
           <th>通知</th>
           <th>管理</th>
@@ -30,6 +28,7 @@
           <td>{{$monitor.ID}}</td>
           <td>{{$monitor.Name}}</td>
           <td>{{$monitor.Target}}</td>
+          <td>{{if eq $monitor.Cover 0}}覆盖所有{{else}}忽略所有{{end}}</td>
           <td>{{$monitor.SkipServersRaw}}</td>
           <td>
             {{if eq $monitor.Type 1}}HTTP(S)/SSL证书 {{else if eq $monitor.Type
@@ -38,16 +37,11 @@
           <td>{{$monitor.Notify}}</td>
           <td>
             <div class="ui mini icon buttons">
-              <button
-                class="ui button"
-                onclick="addOrEditMonitor({{$monitor}})"
-              >
+              <button class="ui button" onclick="addOrEditMonitor({{$monitor}})">
                 <i class="edit icon"></i>
               </button>
-              <button
-                class="ui button"
-                onclick="showConfirm('删除监控','确认删除此监控？',deleteRequest,'/api/monitor/'+{{$monitor.ID}})"
-              >
+              <button class="ui button"
+                onclick="showConfirm('删除监控','确认删除此监控？',deleteRequest,'/api/monitor/'+{{$monitor.ID}})">
                 <i class="trash alternate outline icon"></i>
               </button>
             </div>

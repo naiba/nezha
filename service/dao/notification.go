@@ -3,6 +3,7 @@ package dao
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"log"
 	"sync"
 	"time"
 
@@ -69,6 +70,9 @@ func SendNotification(desc string, muteable bool) {
 		}
 
 		if !flag {
+			if Conf.Debug {
+				log.Println("muted notification", desc, muteable)
+			}
 			return
 		}
 	}

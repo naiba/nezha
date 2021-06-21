@@ -15,6 +15,11 @@ const (
 	TaskTypeCommand
 )
 
+const (
+	MonitorCoverAll = iota
+	MonitorCoverIgnoreAll
+)
+
 type Monitor struct {
 	Common
 	Name           string
@@ -22,8 +27,8 @@ type Monitor struct {
 	Target         string
 	SkipServersRaw string
 	Notify         bool
-
-	SkipServers map[uint64]bool `gorm:"-" json:"-"`
+	Cover          uint8
+	SkipServers    map[uint64]bool `gorm:"-" json:"-"`
 }
 
 func (m *Monitor) PB() *pb.Task {

@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.7.4" // ！！记得修改 README 中的 badge 版本！！
+var Version = "v0.8.0" // ！！记得修改 README 中的 badge 版本！！
 
 const (
 	SnapshotDelay = 3
@@ -58,7 +58,7 @@ var CronLock sync.RWMutex
 var Crons map[uint64]*model.Cron
 var Cron *cron.Cron
 
-func CronTrigger(c *model.Cron) {
+func ManualTrigger(c *model.Cron) {
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
 	for j := 0; j < len(c.Servers); j++ {
@@ -70,6 +70,34 @@ func CronTrigger(c *model.Cron) {
 			})
 		} else {
 			SendNotification(fmt.Sprintf("计划任务：%s，服务器：%s 离线，无法执行。", c.Name, ServerList[c.Servers[j]].Name), false)
+		}
+	}
+}
+
+func CronTrigger(cr model.Cron) func() {
+	crIgnoreMap := make(map[uint64]bool)
+	for j := 0; j < len(cr.Servers); j++ {
+		crIgnoreMap[cr.Servers[j]] = true
+	}
+	return func() {
+		ServerLock.RLock()
+		defer ServerLock.RUnlock()
+		for _, s := range ServerList {
+			if cr.Cover == model.CronCoverAll && crIgnoreMap[s.ID] {
+				continue
+			}
+			if cr.Cover == model.CronCoverIgnoreAll && !crIgnoreMap[s.ID] {
+				continue
+			}
+			if s.TaskStream != nil {
+				s.TaskStream.Send(&pb.Task{
+					Id:   cr.ID,
+					Data: cr.Command,
+					Type: model.TaskTypeCommand,
+				})
+			} else {
+				SendNotification(fmt.Sprintf("计划任务：%s，服务器：%s 离线，无法执行。", cr.Name, s.Name), false)
+			}
 		}
 	}
 }

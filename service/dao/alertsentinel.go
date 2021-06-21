@@ -10,10 +10,17 @@ import (
 	"github.com/naiba/nezha/pkg/utils"
 )
 
+const (
+	_RuleCheckNoData = iota
+	_RuleCheckFail
+	_RuleCheckPass
+)
+
 // 报警规则
 var alertsLock sync.RWMutex
-var alerts []model.AlertRule
+var alerts []*model.AlertRule
 var alertsStore map[uint64]map[uint64][][]interface{}
+var alertsPrevState map[uint64]map[uint64]uint
 
 type NotificationHistory struct {
 	Duration time.Duration
@@ -22,6 +29,7 @@ type NotificationHistory struct {
 
 func AlertSentinelStart() {
 	alertsStore = make(map[uint64]map[uint64][][]interface{})
+	alertsPrevState = make(map[uint64]map[uint64]uint)
 	notificationsLock.Lock()
 	if err := DB.Find(&notifications).Error; err != nil {
 		panic(err)
@@ -33,6 +41,7 @@ func AlertSentinelStart() {
 	}
 	for i := 0; i < len(alerts); i++ {
 		alertsStore[alerts[i].ID] = make(map[uint64][][]interface{})
+		alertsPrevState[alerts[i].ID] = make(map[uint64]uint)
 	}
 	alertsLock.Unlock()
 
@@ -58,23 +67,26 @@ func OnRefreshOrAddAlert(alert model.AlertRule) {
 	alertsLock.Lock()
 	defer alertsLock.Unlock()
 	delete(alertsStore, alert.ID)
+	delete(alertsPrevState, alert.ID)
 	var isEdit bool
 	for i := 0; i < len(alerts); i++ {
 		if alerts[i].ID == alert.ID {
-			alerts[i] = alert
+			alerts[i] = &alert
 			isEdit = true
 		}
 	}
 	if !isEdit {
-		alerts = append(alerts, alert)
+		alerts = append(alerts, &alert)
 	}
 	alertsStore[alert.ID] = make(map[uint64][][]interface{})
+	alertsPrevState[alert.ID] = make(map[uint64]uint)
 }
 
 func OnDeleteAlert(id uint64) {
 	alertsLock.Lock()
 	defer alertsLock.Unlock()
 	delete(alertsStore, id)
+	delete(alertsPrevState, id)
 	for i := 0; i < len(alerts); i++ {
 		if alerts[i].ID == id {
 			alerts = append(alerts[:i], alerts[i+1:]...)
@@ -98,11 +110,18 @@ func checkStatus() {
 			// 监测点
 			alertsStore[alert.ID][server.ID] = append(alertsStore[alert.
 				ID][server.ID], alert.Snapshot(server))
-			// 发送通知
-			max, desc := alert.Check(alertsStore[alert.ID][server.ID])
-			if desc != "" {
+			// 发送通知，分为触发报警和恢复通知
+			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
+			if !passed {
+				alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
 				message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，逮到咯，快去看看！", alert.Name, server.Name, utils.IPDesensitize(server.Host.IP))
 				go SendNotification(message, true)
+			} else {
+				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
+					message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，已恢复正常", alert.Name, server.Name, utils.IPDesensitize(server.Host.IP))
+					go SendNotification(message, true)
+				}
+				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
 			}
 			// 清理旧数据
 			if max > 0 && max < len(alertsStore[alert.ID][server.ID]) {

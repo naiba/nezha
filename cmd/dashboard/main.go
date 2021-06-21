@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -12,7 +11,6 @@ import (
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
-	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -84,21 +82,13 @@ func loadCrons() {
 	var err error
 	for i := 0; i < len(crons); i++ {
 		cr := crons[i]
-		cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, func() {
-			dao.ServerLock.RLock()
-			defer dao.ServerLock.RUnlock()
-			for j := 0; j < len(cr.Servers); j++ {
-				if dao.ServerList[cr.Servers[j]].TaskStream != nil {
-					dao.ServerList[cr.Servers[j]].TaskStream.Send(&pb.Task{
-						Id:   cr.ID,
-						Data: cr.Command,
-						Type: model.TaskTypeCommand,
-					})
-				} else {
-					dao.SendNotification(fmt.Sprintf("计划任务：%s，服务器：%s 离线，无法执行。", cr.Name, dao.ServerList[cr.Servers[j]].Name), false)
-				}
-			}
-		})
+
+		crIgnoreMap := make(map[uint64]bool)
+		for j := 0; j < len(cr.Servers); j++ {
+			crIgnoreMap[cr.Servers[j]] = true
+		}
+
+		cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
 		if err != nil {
 			panic(err)
 		}
