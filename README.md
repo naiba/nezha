@@ -1,7 +1,7 @@
 <div align="center">
   <img width="500" style="max-width:100%" src="resource/static/brand.png" title="哪吒监控">
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.8.0&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.1-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.8.1&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.1-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
@@ -101,10 +101,10 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024\*1024）
   - offline：不支持 Min/Max 参数
 - Duration：持续秒数，监控比较简陋，取持续时间内的 70% 采样结果
-- Cover
-  - `0` 监控所有，通过 `Ignore` 忽略特定服务器
-  - `1` 忽略所有，通过 `Ignore` 监控特定服务器
-- Ignore: `{"1": true, "2":false}` 忽略此规则的服务器 ID 列表，比如忽略服务器 ID 5 的离线通知 `[{"Type":"offline","Duration":10, "Ignore":{"5": true}}]`
+- Cover `[{"Type":"offline","Duration":10, "Cover": 0, "Ignore":{"5": true}}]`
+  - `0` 监控所有，通过 `Ignore` 忽略指定服务器
+  - `1` 忽略所有，通过 `Ignore` 监控指定服务器
+- Ignore: `{"1": true, "2":false}` 指定服务器，搭配 `Cover` 使用
 </details>
 
 <details>
