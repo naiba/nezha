@@ -56,7 +56,7 @@ func resolveIP(addr string, ipv6 bool) (string, error) {
 	var resolveLock sync.RWMutex
 	var ipv4Resolved, ipv6Resolved bool
 
-	wg.Add(len(dnsServers) + 1)
+	wg.Add(len(dnsServers))
 	go func() {
 
 	}()
