@@ -71,14 +71,15 @@ func resolveIP(addr string, ipv6 bool) (string, error) {
 	var ipv4Resolved, ipv6Resolved bool
 
 	for i := 0; i < len(res); i++ {
-		if ip4 := res[i].To4(); ip4 != nil && !ipv6 {
+		ip := res[i].String()
+		if strings.Contains(ip, ".") && !ipv6 {
 			ipv4Resolved = true
-			url[0] = ip4.String()
+			url[0] = ip
 			break
 		}
-		if ip6 := res[i].To16(); ip6 != nil && ipv6 {
+		if strings.Contains(ip, ":") && ipv6 {
 			ipv6Resolved = true
-			url[0] = "[" + ip6.String() + "]"
+			url[0] = "[" + ip + "]"
 			break
 		}
 	}
