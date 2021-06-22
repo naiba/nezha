@@ -86,7 +86,8 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
 	if dao.Conf.EnableIPChangeNotification &&
-		dao.Conf.IgnoredIPNotificationServerIDs[clientID] != struct{}{} &&
+		((dao.Conf.Cover == model.ConfigCoverAll && !dao.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
+			(dao.Conf.Cover == model.ConfigCoverIgnoreAll && dao.Conf.IgnoredIPNotificationServerIDs[clientID])) &&
 		dao.ServerList[clientID].Host != nil &&
 		dao.ServerList[clientID].Host.IP != "" &&
 		host.IP != "" &&

@@ -11,8 +11,10 @@
             <div class="field">
                 <label>登录类型</label>
                 <select name="Oauth2Type">
-                    <option value="github"{{if eq .Conf.Oauth2.Type "github"}} selected="selected"{{end}}>GitHub</option>
-                    <option value="gitee"{{if eq .Conf.Oauth2.Type "gitee"}} selected="selected"{{end}}>Gitee</option>
+                    <option value="github" {{if eq .Conf.Oauth2.Type "github" }} selected="selected" {{end}}>GitHub
+                    </option>
+                    <option value="gitee" {{if eq .Conf.Oauth2.Type "gitee" }} selected="selected" {{end}}>Gitee
+                    </option>
                 </select>
             </div>
             <div class="field">
@@ -22,9 +24,12 @@
             <div class="field">
                 <label>前台主题</label>
                 <select name="Theme">
-                    <option value="default"{{if eq .Conf.Site.Theme "default"}} selected="selected"{{end}}>默认主题</option>
-                    <option value="daynight"{{if eq .Conf.Site.Theme "daynight"}} selected="selected"{{end}}>JackieSung DayNight</option>
-                    <option value="hotaru"{{if eq .Conf.Site.Theme "hotaru"}} selected="selected"{{end}}>CokeMine Hotaru</option>
+                    <option value="default" {{if eq .Conf.Site.Theme "default" }} selected="selected" {{end}}>默认主题
+                    </option>
+                    <option value="daynight" {{if eq .Conf.Site.Theme "daynight" }} selected="selected" {{end}}>
+                        JackieSung DayNight</option>
+                    <option value="hotaru" {{if eq .Conf.Site.Theme "hotaru" }} selected="selected" {{end}}>CokeMine
+                        Hotaru</option>
                 </select>
             </div>
             <div class="field">
@@ -36,13 +41,26 @@
                 <input type="text" name="ViewPassword" placeholder="" value="{{.Conf.Site.ViewPassword}}">
             </div>
             <div class="field">
-                <label>IP 变更忽略</label>
-                <input type="text" name="IgnoredIPNotification" placeholder="服务器ID 以逗号隔开 1001,1002,1003" value="{{.Conf.IgnoredIPNotification}}">
+                <label>IP 变更提醒</label>
             </div>
-            <div class="field">
-                <div class="ui nf-ssl checkbox">
-                    <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
-                    <label>开启 IP 变更提醒</label>
+            <div class="ui segment">
+                <div class="field">
+                    <label>覆盖范围</label>
+                    <select name="Cover" class="ui fluid dropdown">
+                        <option value=0>覆盖所有，仅特定服务器不提醒</option>
+                        <option value=1>忽略所有，仅提醒特定服务器</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>特定服务器</label>
+                    <input type="text" name="IgnoredIPNotification" placeholder="服务器ID 以逗号隔开 1001,1002,1003"
+                        value="{{.Conf.IgnoredIPNotification}}">
+                </div>
+                <div class="field">
+                    <div class="ui nf-ssl checkbox">
+                        <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
+                        <label>启用</label>
+                    </div>
                 </div>
             </div>
             <button class="ui button" type="submit">保存</button>
@@ -64,7 +82,7 @@
             } else {
                 $.suiAlert({
                     title: '',
-                    description:resp.message,
+                    description: resp.message,
                     type: 'error',
                     time: '3',
                     position: 'top-center',
@@ -73,7 +91,7 @@
         }).error(err => {
             $.suiAlert({
                 title: '',
-                description:err,
+                description: err,
                 type: 'error',
                 time: '3',
                 position: 'top-center',
@@ -82,8 +100,10 @@
         return false;
     })
     $('.checkbox').checkbox()
-    {{if .Conf.EnableIPChangeNotification}}
+    $('#settingForm').find("select[name=Cover]")
+        .val({{.Conf.Cover}});
+    {{ if .Conf.EnableIPChangeNotification}}
     $('.checkbox').checkbox('set checked')
-    {{end}}
+    {{ end }}
 </script>
 {{end}}

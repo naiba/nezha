@@ -17,6 +17,11 @@ const (
 	ConfigTypeGitee  = "gitee"
 )
 
+const (
+	ConfigCoverAll = iota
+	ConfigCoverIgnoreAll
+)
+
 type Config struct {
 	Debug bool
 	Site  struct {
@@ -35,10 +40,13 @@ type Config struct {
 	HTTPPort                   uint
 	GRPCPort                   uint
 	EnableIPChangeNotification bool
-	IgnoredIPNotification      string // 忽略IP变更提醒的服务器列表
+
+	// IP变更提醒
+	Cover                 uint8  // 覆盖范围
+	IgnoredIPNotification string // 特定服务器
 
 	v                              *viper.Viper
-	IgnoredIPNotificationServerIDs map[uint64]struct{}
+	IgnoredIPNotificationServerIDs map[uint64]bool
 }
 
 func (c *Config) Read(path string) error {
@@ -70,12 +78,12 @@ func (c *Config) Read(path string) error {
 }
 
 func (c *Config) updateIgnoredIPNotificationID() {
-	c.IgnoredIPNotificationServerIDs = make(map[uint64]struct{})
+	c.IgnoredIPNotificationServerIDs = make(map[uint64]bool)
 	splitedIDs := strings.Split(c.IgnoredIPNotification, ",")
 	for i := 0; i < len(splitedIDs); i++ {
 		id, _ := strconv.ParseUint(splitedIDs[i], 10, 64)
 		if id > 0 {
-			c.IgnoredIPNotificationServerIDs[id] = struct{}{}
+			c.IgnoredIPNotificationServerIDs[id] = true
 		}
 	}
 }
