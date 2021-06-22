@@ -13,7 +13,6 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2
-	github.com/miekg/dns v1.0.14
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/p14yground/go-github-selfupdate v0.0.0-20210520015421-eddf14461293
