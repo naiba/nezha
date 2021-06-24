@@ -9,7 +9,7 @@
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
 
-\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控%7C哪吒面板"&filter=0) (Google)
+\>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
 
 | 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru                                                                 |
 | ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
@@ -101,7 +101,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024\*1024）
   - offline：不支持 Min/Max 参数
 - Duration：持续秒数，监控比较简陋，取持续时间内的 70% 采样结果
-- Cover `[{"Type":"offline","Duration":10, "Cover": 0, "Ignore":{"5": true}}]`
+- Cover `[{"Type":"offline","Duration":10, "Cover":0, "Ignore":{"5": true}}]`
   - `0` 监控所有，通过 `Ignore` 忽略特定服务器
   - `1` 忽略所有，通过 `Ignore` 监控特定服务器
 - Ignore: `{"1": true, "2":false}` 特定服务器，搭配 `Cover` 使用
@@ -282,4 +282,4 @@ restart() {
 - [哪吒探针 - Windows 客户端安装](https://nyko.me/2020/12/13/nezha-windows-client.html)
 - [哪吒监控，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
 - [哪吒监控：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) _（已过时）_
-- [>>更多教程](https://www.google.com/search?q="哪吒"%2B"面板%7C监控%7C探针"+"教程") (Google)
+- [>>更多教程](https://www.google.com/search?q="哪吒监控"+"教程") (Google)
