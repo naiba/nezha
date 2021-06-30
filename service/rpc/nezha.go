@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 )
@@ -94,7 +95,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		dao.ServerList[clientID].Host.IP != host.IP {
 		dao.SendNotification(fmt.Sprintf(
 			"IP变更提醒 服务器：%s ，旧IP：%s，新IP：%s。",
-			dao.ServerList[clientID].Name, dao.ServerList[clientID].Host.IP, host.IP), true)
+			dao.ServerList[clientID].Name, utils.IPDesensitize(dao.ServerList[clientID].Host.IP), utils.IPDesensitize(host.IP)), true)
 	}
 	dao.ServerList[clientID].Host = &host
 	return &pb.Receipt{Proced: true}, nil

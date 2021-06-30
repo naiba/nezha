@@ -41,7 +41,7 @@ func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
 	for i := 0; i < len(r.Rules); i++ {
 		total := 0.0
 		fail := 0.0
-		num := int(r.Rules[i].Duration / 2) // SnapshotDelay
+		num := int(r.Rules[i].Duration)
 		if num > max {
 			max = num
 		}

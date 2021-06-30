@@ -267,12 +267,14 @@ func doTask(task *pb.Task) {
 func reportState() {
 	var lastReportHostInfo time.Time
 	var err error
+	var now time.Time
 	defer println("reportState exit", time.Now(), "=>", err)
 	for {
+		now = time.Now()
 		if client != nil {
 			monitor.TrackNetworkSpeed()
 			timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
-			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(dao.ReportDelay).PB())
+			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState().PB())
 			cancel()
 			if err != nil {
 				println("reportState error", err)
@@ -283,6 +285,7 @@ func reportState() {
 				client.ReportSystemInfo(context.Background(), monitor.GetHost().PB())
 			}
 		}
+		time.Sleep(time.Until(now.Add(time.Second)))
 	}
 }
 

@@ -63,12 +63,12 @@ func GetHost() *model.Host {
 	}
 }
 
-func GetState(delay int64) *model.HostState {
+func GetState() *model.HostState {
 	hi, _ := host.Info()
 	mv, _ := mem.VirtualMemory()
 	ms, _ := mem.SwapMemory()
 	var cpuPercent float64
-	cp, err := cpu.Percent(time.Second*time.Duration(delay), false)
+	cp, err := cpu.Percent(0, false)
 	if err == nil {
 		cpuPercent = cp[0]
 	}

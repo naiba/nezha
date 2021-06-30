@@ -59,7 +59,7 @@ func AlertSentinelStart() {
 			checkCount = 0
 			lastPrint = startedAt
 		}
-		time.Sleep(time.Until(startedAt.Add(time.Second * SnapshotDelay)))
+		time.Sleep(time.Until(startedAt.Add(time.Second * 3))) // 3秒钟检查一次
 	}
 }
 
