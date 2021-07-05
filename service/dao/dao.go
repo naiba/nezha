@@ -13,12 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.8.3" // ！！记得修改 README 中的 badge 版本！！
-
-const (
-	SnapshotDelay = 3
-	ReportDelay   = 2
-)
+var Version = "v0.8.5" // ！！记得修改 README 中的 badge 版本！！
 
 var (
 	Conf  *model.Config
