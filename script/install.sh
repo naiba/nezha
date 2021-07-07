@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.6.2"
+NZ_VERSION="v0.6.3"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -134,7 +134,7 @@ install_dashboard() {
 
     echo -e "> 安装面板"
 
-    if [[ $(uname -m | grep 'arm') != "" ]]; then
+    if [[ $(uname -m | grep 'arm\|aarch') != "" ]]; then
         echo "面板目前不支持在 arm 环境下安装"
         exit 1
     fi
@@ -182,10 +182,14 @@ install_agent() {
 
     echo -e "正在获取监控Agent版本号"
 
-    local version=$(curl -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://cdn.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    fi
 
     if [ ! -n "$version" ]; then
         echo -e "获取版本号失败，请检查本机能否链接 https://api.github.com/repos/naiba/nezha/releases/latest"
+        return 0
     else
         echo -e "当前最新版本为: ${version}"
     fi
