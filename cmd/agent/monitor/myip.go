@@ -13,18 +13,17 @@ import (
 type geoIP struct {
 	CountryCode string `json:"country_code,omitempty"`
 	IP          string `json:"ip,omitempty"`
+	Query       string `json:"query,omitempty"`
 }
 
 var (
-	ipv4Servers = []string{
+	geoIPApiList = []string{
 		"https://api.ip.sb/geoip",
 		"https://ip.seeip.org/geoip",
 		"https://ipapi.co/json",
-	}
-	ipv6Servers = []string{
-		"https://api.ip.sb/geoip",
-		"https://ip.seeip.org/geoip",
-		"https://ipapi.co/json",
+		"https://freegeoip.app/json/",
+		"http://ip-api.com/json/",
+		"https://extreme-ip-lookup.com/json/",
 	}
 	cachedIP, cachedCountry string
 	httpClientV4            = utils.NewSingleStackHTTPClient(time.Second*20, time.Second*5, time.Second*10, false)
@@ -33,8 +32,8 @@ var (
 
 func UpdateIP() {
 	for {
-		ipv4 := fetchGeoIP(ipv4Servers, false)
-		ipv6 := fetchGeoIP(ipv6Servers, true)
+		ipv4 := fetchGeoIP(geoIPApiList, false)
+		ipv6 := fetchGeoIP(geoIPApiList, true)
 		cachedIP = fmt.Sprintf("ip(v4:%s,v6:[%s])", ipv4.IP, ipv6.IP)
 		if ipv4.CountryCode != "" {
 			cachedCountry = ipv4.CountryCode
@@ -64,6 +63,9 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 			err = json.Unmarshal(body, &ip)
 			if err != nil {
 				continue
+			}
+			if ip.IP == "" && ip.Query != "" {
+				ip.IP = ip.Query
 			}
 			return ip
 		}

@@ -24,7 +24,6 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/dao"
 	"github.com/naiba/nezha/service/rpc"
 )
 
@@ -37,6 +36,7 @@ var (
 	server       string
 	clientSecret string
 	version      string
+	debug        bool
 )
 
 var (
@@ -60,18 +60,13 @@ const (
 
 func main() {
 	// 来自于 GoReleaser 的版本号
-	dao.Version = version
+	monitor.Version = version
 
-	var debug bool
 	flag.String("i", "", "unused 旧Agent配置兼容")
 	flag.BoolVar(&debug, "d", false, "开启调试信息")
 	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
 	flag.Parse()
-
-	dao.Conf = &model.Config{
-		Debug: debug,
-	}
 
 	if server == "" || clientSecret == "" {
 		flag.Usage()
@@ -310,7 +305,7 @@ func doSelfUpdate() {
 }
 
 func println(v ...interface{}) {
-	if dao.Conf.Debug {
+	if debug {
 		log.Println(v...)
 	}
 }
