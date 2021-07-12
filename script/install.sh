@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.6.3"
+NZ_VERSION="v0.6.4"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -133,11 +133,6 @@ install_dashboard() {
     install_base
 
     echo -e "> 安装面板"
-
-    if [[ $(uname -m | grep 'arm\|aarch') != "" ]]; then
-        echo "面板目前不支持在 arm 环境下安装"
-        exit 1
-    fi
 
     # 哪吒监控文件夹
     mkdir -p $NZ_DASHBOARD_PATH
