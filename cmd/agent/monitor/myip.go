@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/naiba/nezha/pkg/utils"
@@ -62,6 +63,14 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 			resp.Body.Close()
 			err = json.Unmarshal(body, &ip)
 			if err != nil {
+				continue
+			}
+			// 没取到 v6 IP
+			if isV6 && !strings.Contains(ip.IP, ":") {
+				continue
+			}
+			// 没取到 v4 IP
+			if !isV6 && !strings.Contains(ip.IP, ".") {
 				continue
 			}
 			if ip.IP == "" && ip.Query != "" {

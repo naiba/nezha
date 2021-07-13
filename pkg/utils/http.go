@@ -36,7 +36,7 @@ func NewSingleStackHTTPClient(httpTimeout, dialTimeout, keepAliveTimeout time.Du
 func resolveIP(addr string, ipv6 bool) (string, error) {
 	url := strings.Split(addr, ":")
 
-	dnsServers := []string{"2606:4700:4700::1001", "2001:4860:4860::8844", "2400:3200::1", "2400:3200:baba::1"}
+	dnsServers := []string{"[2606:4700:4700::1001]", "[2001:4860:4860::8844]", "[2400:3200::1]", "[2400:3200:baba::1]"}
 	if !ipv6 {
 		dnsServers = []string{"1.0.0.1", "8.8.4.4", "223.5.5.5", "223.6.6.6"}
 	}
@@ -44,17 +44,13 @@ func resolveIP(addr string, ipv6 bool) (string, error) {
 	res, err := net.LookupIP(url[0])
 	if err != nil {
 		for i := 0; i < len(dnsServers); i++ {
-			dnsServer := dnsServers[i]
-			if ipv6 {
-				dnsServer = "[" + dnsServer + "]"
-			}
 			r := &net.Resolver{
 				PreferGo: true,
 				Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
 					d := net.Dialer{
 						Timeout: time.Second * 10,
 					}
-					return d.DialContext(ctx, "udp", dnsServer+":53")
+					return d.DialContext(ctx, "udp", dnsServers[i]+":53")
 				},
 			}
 			res, err = r.LookupIP(context.Background(), "ip", url[0])
