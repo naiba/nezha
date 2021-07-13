@@ -65,6 +65,9 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 			if err != nil {
 				continue
 			}
+			if ip.IP == "" && ip.Query != "" {
+				ip.IP = ip.Query
+			}
 			// 没取到 v6 IP
 			if isV6 && !strings.Contains(ip.IP, ":") {
 				continue
@@ -72,9 +75,6 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 			// 没取到 v4 IP
 			if !isV6 && !strings.Contains(ip.IP, ".") {
 				continue
-			}
-			if ip.IP == "" && ip.Query != "" {
-				ip.IP = ip.Query
 			}
 			return ip
 		}
