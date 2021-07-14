@@ -12,7 +12,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-const _CurrentStatusSize = 30 // 统计 5 分钟内的数据为当前状态
+const _CurrentStatusSize = 30 // 统计 15 分钟内的数据为当前状态
 
 var ServiceSentinelShared *ServiceSentinel
 

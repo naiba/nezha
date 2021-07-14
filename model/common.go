@@ -8,8 +8,8 @@ const CacheKeyOauth2State = "p:a:state"
 const CacheKeyServicePage = "p:c:service"
 
 type Common struct {
-	ID        uint64 `gorm:"primary_key"`
-	CreatedAt time.Time
+	ID        uint64    `gorm:"primary_key"`
+	CreatedAt time.Time `sql:"index"`
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
 }

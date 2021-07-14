@@ -23,6 +23,9 @@ type Server struct {
 
 	TaskClose  chan error                        `gorm:"-" json:"-"`
 	TaskStream pb.NezhaService_RequestTaskServer `gorm:"-" json:"-"`
+
+	PrevHourlyTransferIn  int64 `gorm:"-" json:"-"` // 上次数据点时的入站使用量
+	PrevHourlyTransferOut int64 `gorm:"-" json:"-"` // 上次数据点时的出站使用量
 }
 
 func (s Server) Marshal() template.JS {

@@ -57,7 +57,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	var err error
 	switch c.Param("model") {
 	case "server":
-		err = dao.DB.Delete(&model.Server{}, "id = ?", id).Error
+		err = dao.DB.Unscoped().Delete(&model.Server{}, "id = ?", id).Error
 		if err == nil {
 			dao.ServerLock.Lock()
 			delete(dao.SecretToID, dao.ServerList[id].Secret)
@@ -66,18 +66,18 @@ func (ma *memberAPI) delete(c *gin.Context) {
 			dao.ReSortServer()
 		}
 	case "notification":
-		err = dao.DB.Delete(&model.Notification{}, "id = ?", id).Error
+		err = dao.DB.Unscoped().Delete(&model.Notification{}, "id = ?", id).Error
 		if err == nil {
 			dao.OnDeleteNotification(id)
 		}
 	case "monitor":
-		err = dao.DB.Delete(&model.Monitor{}, "id = ?", id).Error
+		err = dao.DB.Unscoped().Delete(&model.Monitor{}, "id = ?", id).Error
 		if err == nil {
 			dao.ServiceSentinelShared.OnMonitorDelete(id)
-			err = dao.DB.Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
+			err = dao.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
 		}
 	case "cron":
-		err = dao.DB.Delete(&model.Cron{}, "id = ?", id).Error
+		err = dao.DB.Unscoped().Delete(&model.Cron{}, "id = ?", id).Error
 		if err == nil {
 			dao.CronLock.RLock()
 			defer dao.CronLock.RUnlock()
@@ -88,7 +88,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 			delete(dao.Crons, id)
 		}
 	case "alert-rule":
-		err = dao.DB.Delete(&model.AlertRule{}, "id = ?", id).Error
+		err = dao.DB.Unscoped().Delete(&model.AlertRule{}, "id = ?", id).Error
 		if err == nil {
 			dao.OnDeleteAlert(id)
 		}
@@ -378,8 +378,8 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 			err = errors.New("至少定义一条规则")
 		} else {
 			for i := 0; i < len(r.Rules); i++ {
-				if r.Rules[i].Duration < 3 {
-					err = errors.New("Duration 至少为 3")
+				if !r.Rules[i].IsTransferDurationRule() && r.Rules[i].Duration < 3 {
+					err = errors.New("错误：Duration 至少为 3")
 					break
 				}
 			}

@@ -1,7 +1,7 @@
 <div align="center">
   <img width="500" style="max-width:100%" src="resource/static/brand.png" title="哪吒监控">
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.8.6&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.4-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.9.0&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.4-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
@@ -43,7 +43,7 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 </details>
 
 <details>
-    <summary>报警通知：CPU、内存、硬盘、带宽、流量实时监控。</summary>
+    <summary>报警通知：CPU、内存、硬盘、带宽、流量、 **月流量** 实时监控。</summary>
 
 #### 灵活通知方式
 
@@ -96,15 +96,34 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 #### 报警规则说明
 
-- Type
-  - cpu、memory、swap、disk：Min/Max 数值为占用百分比
-  - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)：Min/Max 数值为字节（1kb=1024，1mb = 1024\*1024）
-  - offline：不支持 Min/Max 参数
-- Duration：持续秒数，监控比较简陋，取持续时间内的 70% 采样结果
-- Cover `[{"Type":"offline","Duration":10, "Cover":0, "Ignore":{"5": true}}]`
-  - `0` 监控所有，通过 `Ignore` 忽略特定服务器
-  - `1` 忽略所有，通过 `Ignore` 监控特定服务器
-- Ignore: `{"1": true, "2":false}` 特定服务器，搭配 `Cover` 使用
+##### 基本规则
+
+- type
+  - cpu、memory、swap、disk
+  - net_in_speed(入站网速)、net_out_speed(出站网速)、net_all_speed(双向网速)、transfer_in(入站流量)、transfer_out(出站流量)、transfer_all(双向流量)
+  - offline
+- duration：持续秒数，秒数内采样记录 30% 以上触发阈值才会报警（防数据插针）
+- min/max
+  - 流量、网速类数值 为字节（1kb=1024，1mb = 1024\*1024）
+  - 内存、硬盘、CPU 为占用百分比
+  - 离线监控无需设置
+- cover `[{"type":"offline","duration":10, "cover":0, "ignore":{"5": true}}]`
+  - `0` 监控所有，通过 `ignore` 忽略特定服务器
+  - `1` 忽略所有，通过 `ignore` 监控特定服务器
+- ignore: `{"1": true, "2":false}` 特定服务器，搭配 `cover` 使用
+
+##### 特殊：任意周期流量报警
+
+可以用作月流量报警
+
+- type
+  - transfer_in_cycle 周期内的入站流量
+  - transfer_out_cycle 周期内的出站流量
+  - transfer_all_cycle 周期内双向流量和
+- cycle_start 周期开始日期（可以是你机器计费周期的开始日期）
+- cycle_interval 小时（可以设为1月，30*24）
+- min/max、cover、ignore 参考基本规则配置
+- 示例: 每月15号计费的月流量1T报警 `[{"type":"transfer_all_cycle","max":1000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":720}]`
 </details>
 
 <details>

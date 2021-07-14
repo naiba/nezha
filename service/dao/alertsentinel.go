@@ -109,7 +109,7 @@ func checkStatus() {
 		for _, server := range ServerList {
 			// 监测点
 			alertsStore[alert.ID][server.ID] = append(alertsStore[alert.
-				ID][server.ID], alert.Snapshot(server))
+				ID][server.ID], alert.Snapshot(server, DB))
 			// 发送通知，分为触发报警和恢复通知
 			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
 			if !passed {

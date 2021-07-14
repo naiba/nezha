@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"html/template"
+	"net/http"
 	"strings"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 	"github.com/naiba/nezha/service/dao"
 )
 
-func ServeWeb(port uint) {
+func ServeWeb(port uint) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	if dao.Conf.Debug {
@@ -112,7 +113,11 @@ func ServeWeb(port uint) {
 	r.Static("/static", "resource/static")
 	r.LoadHTMLGlob("resource/template/**/*")
 	routers(r)
-	r.Run(fmt.Sprintf(":%d", port))
+	srv := &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: r,
+	}
+	return srv
 }
 
 func routers(r *gin.Engine) {

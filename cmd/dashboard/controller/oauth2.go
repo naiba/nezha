@@ -29,22 +29,24 @@ func (oa *oauth2controller) serve() {
 }
 
 func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config {
-	var endPoint oauth2.Endpoint
 	if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
-		endPoint = oauth2.Endpoint{
-			AuthURL:  "https://gitee.com/oauth/authorize",
-			TokenURL: "https://gitee.com/oauth/token",
+		return &oauth2.Config{
+			ClientID:     dao.Conf.Oauth2.ClientID,
+			ClientSecret: dao.Conf.Oauth2.ClientSecret,
+			Scopes:       []string{},
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  "https://gitee.com/oauth/authorize",
+				TokenURL: "https://gitee.com/oauth/token",
+			},
+			RedirectURL: oa.getRedirectURL(c),
 		}
 	} else {
-		endPoint = GitHubOauth2.Endpoint
-	}
-
-	return &oauth2.Config{
-		ClientID:     dao.Conf.Oauth2.ClientID,
-		ClientSecret: dao.Conf.Oauth2.ClientSecret,
-		Scopes:       []string{},
-		Endpoint:     endPoint,
-		RedirectURL:  oa.getRedirectURL(c),
+		return &oauth2.Config{
+			ClientID:     dao.Conf.Oauth2.ClientID,
+			ClientSecret: dao.Conf.Oauth2.ClientSecret,
+			Scopes:       []string{},
+			Endpoint:     GitHubOauth2.Endpoint,
+		}
 	}
 }
 
