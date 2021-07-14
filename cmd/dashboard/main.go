@@ -120,7 +120,11 @@ func cleanMonitorHistory() {
 	for id, couldRemove := range specialServerKeep {
 		dao.DB.Unscoped().Delete(&model.Transfer{}, "id = ? AND created_at < ?", id, couldRemove)
 	}
-	dao.DB.Unscoped().Delete(&model.Transfer{}, "id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
+	if allServerKeep.IsZero() {
+		dao.DB.Unscoped().Delete(&model.Transfer{}, "id NOT IN (?)", specialServerIDs)
+	} else {
+		dao.DB.Unscoped().Delete(&model.Transfer{}, "id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
+	}
 }
 
 func loadServers() {
