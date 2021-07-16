@@ -43,7 +43,7 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 </details>
 
 <details>
-    <summary>报警通知：CPU、内存、硬盘、带宽、流量、 **月流量** 实时监控。</summary>
+    <summary>报警通知：CPU、内存、硬盘、带宽、流量、月流量实时监控。</summary>
 
 #### 灵活通知方式
 
@@ -104,7 +104,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - offline
 - duration：持续秒数，秒数内采样记录 30% 以上触发阈值才会报警（防数据插针）
 - min/max
-  - 流量、网速类数值 为字节（1kb=1024，1mb = 1024\*1024）
+  - 流量、网速类数值 为字节（1KB=1024B，1MB = 1024\*1024B）
   - 内存、硬盘、CPU 为占用百分比
   - 离线监控无需设置
 - cover `[{"type":"offline","duration":10, "cover":0, "ignore":{"5": true}}]`
@@ -123,7 +123,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 - cycle_start 周期开始日期（可以是你机器计费周期的开始日期）
 - cycle_interval 小时（可以设为1月，30*24）
 - min/max、cover、ignore 参考基本规则配置
-- 示例: 每月15号计费的月流量1T报警 `[{"type":"transfer_all_cycle","max":1000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":720}]`
+- 示例: 3号机器的每月15号计费的出站月流量1T报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":720,"cover":1,"ignore":{"3":true}}]`
 </details>
 
 <details>
