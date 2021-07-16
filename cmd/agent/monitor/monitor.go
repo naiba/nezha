@@ -139,7 +139,7 @@ func getDiskTotalAndUsed() (total uint64, used uint64) {
 
 func isListContainsStr(list []string, str string) bool {
 	for i := 0; i < len(list); i++ {
-		if strings.Contains(list[i], str) {
+		if strings.Contains(str, list[i]) {
 			return true
 		}
 	}
