@@ -76,6 +76,7 @@
   line-height: 1.75em;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 700;
+  max-width: 100% !important;
 }
 
 .service-status .delay-today {
