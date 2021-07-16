@@ -90,21 +90,21 @@ func (u *Rule) Snapshot(server *Server, db *gorm.DB) interface{} {
 		src = server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn)
 		if u.CycleInterval != 1 {
 			var res NResult
-			db.Model(&Transfer{}).Select("SUM('in') AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
+			db.Model(&Transfer{}).Select("SUM(`in`) AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += res.N
 		}
 	case "transfer_out_cycle":
 		src = server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut)
 		if u.CycleInterval != 1 {
 			var res NResult
-			db.Model(&Transfer{}).Select("SUM('out') AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
+			db.Model(&Transfer{}).Select("SUM(`out`) AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += res.N
 		}
 	case "transfer_all_cycle":
 		src = server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut) + server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn)
 		if u.CycleInterval != 1 {
 			var res NResult
-			db.Model(&Transfer{}).Select("SUM('in'+'out') AS n").Where("created_at > ?  AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
+			db.Model(&Transfer{}).Select("SUM(`in`+`out`) AS n").Where("created_at > ?  AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += res.N
 		}
 	}

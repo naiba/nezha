@@ -162,6 +162,7 @@ func loadCrons() {
 }
 
 func main() {
+	cleanMonitorHistory()
 	go rpc.ServeRPC(dao.Conf.GRPCPort)
 	go rpc.DispatchTask(time.Second * 30)
 	go dao.AlertSentinelStart()

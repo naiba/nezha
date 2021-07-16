@@ -41,6 +41,7 @@ var (
 
 var (
 	client     pb.NezhaServiceClient
+	inited     bool
 	updateCh   = make(chan struct{}) // Agent 自动更新间隔
 	httpClient = &http.Client{
 		Transport: &http.Transport{
@@ -99,6 +100,7 @@ func run() {
 	var conn *grpc.ClientConn
 
 	retry := func() {
+		inited = false
 		println("Error to close connection ...")
 		if conn != nil {
 			conn.Close()
@@ -128,6 +130,7 @@ func run() {
 			continue
 		}
 		cancel()
+		inited = true
 		// 执行 Task
 		tasks, err := client.RequestTask(context.Background(), monitor.GetHost().PB())
 		if err != nil {
@@ -266,7 +269,8 @@ func reportState() {
 	defer println("reportState exit", time.Now(), "=>", err)
 	for {
 		now = time.Now()
-		if client != nil {
+		// 为了更准确的记录时段流量，inited 后再上传状态信息
+		if client != nil && inited {
 			monitor.TrackNetworkSpeed()
 			timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
 			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState().PB())
