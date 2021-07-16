@@ -254,13 +254,14 @@
   }
   ws.onmessage = function (evt) {
       const oldServers = statusCards.servers
-      statusCards.servers = JSON.parse(evt.data)
+      const data = JSON.parse(evt.data)
+      statusCards.servers = data.servers
       for (let i = 0; i < statusCards.servers.length; i++) {
           const ns = statusCards.servers[i];
           if (!ns.Host) ns.live = false
           else {
               const lastActive = new Date(ns.LastActive).getTime()
-              if (Date.now() - lastActive > 20 * 1000) {
+              if (data.now - lastActive > 10 * 1000) {
                   ns.live = false
               } else {
                   ns.live = true

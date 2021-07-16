@@ -175,7 +175,7 @@ func main() {
 		for _, s := range dao.ServerList {
 			in := s.State.NetInTransfer - uint64(s.PrevHourlyTransferIn)
 			out := s.State.NetOutTransfer - uint64(s.PrevHourlyTransferOut)
-			if in > 0 && out > 0 {
+			if in > 0 || out > 0 {
 				tx := model.Transfer{
 					ServerID: s.ID,
 					In:       in,

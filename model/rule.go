@@ -30,7 +30,8 @@ type Rule struct {
 	Ignore        map[uint64]bool `json:"ignore,omitempty"`         // 覆盖范围的排除
 
 	// 只作为缓存使用，记录下次该检测的时间
-	NextTransferAt map[uint64]time.Time `json:"-"`
+	NextTransferAt  map[uint64]time.Time   `json:"-"`
+	LastCycleStatus map[uint64]interface{} `json:"-"`
 }
 
 func percentage(used, total uint64) uint64 {
@@ -53,7 +54,7 @@ func (u *Rule) Snapshot(server *Server, db *gorm.DB) interface{} {
 
 	// 循环区间流量检测 · 短期无需重复检测
 	if u.IsTransferDurationRule() && u.NextTransferAt[server.ID].After(time.Now()) {
-		return nil
+		return u.LastCycleStatus[server.ID]
 	}
 
 	var src uint64
@@ -96,7 +97,7 @@ func (u *Rule) Snapshot(server *Server, db *gorm.DB) interface{} {
 		src = server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut)
 		if u.CycleInterval != 1 {
 			var res NResult
-			db.Model(&Transfer{}).Select("SUM('in') AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
+			db.Model(&Transfer{}).Select("SUM('out') AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += res.N
 		}
 	case "transfer_all_cycle":
@@ -117,7 +118,15 @@ func (u *Rule) Snapshot(server *Server, db *gorm.DB) interface{} {
 		if u.NextTransferAt == nil {
 			u.NextTransferAt = make(map[uint64]time.Time)
 		}
+		if u.LastCycleStatus == nil {
+			u.LastCycleStatus = make(map[uint64]interface{})
+		}
 		u.NextTransferAt[server.ID] = time.Now().Add(time.Duration(time.Second * seconds))
+		if (u.Max > 0 && src > u.Max) || (u.Min > 0 && src < u.Min) {
+			u.LastCycleStatus[server.ID] = struct{}{}
+		} else {
+			u.LastCycleStatus[server.ID] = nil
+		}
 	}
 
 	if u.Type == "offline" && uint64(time.Now().Unix())-src > 6 {

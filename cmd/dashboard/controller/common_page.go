@@ -100,6 +100,11 @@ func (cp *commonPage) home(c *gin.Context) {
 
 var upgrader = websocket.Upgrader{}
 
+type Data struct {
+	Now     int64           `json:"now,omitempty"`
+	Servers []*model.Server `json:"servers,omitempty"`
+}
+
 func (cp *commonPage) ws(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -116,7 +121,10 @@ func (cp *commonPage) ws(c *gin.Context) {
 	count := 0
 	for {
 		dao.SortedServerLock.RLock()
-		err = conn.WriteJSON(dao.SortedServerList)
+		err = conn.WriteJSON(Data{
+			Now:     time.Now().Unix() * 1000,
+			Servers: dao.SortedServerList,
+		})
 		dao.SortedServerLock.RUnlock()
 		if err != nil {
 			break

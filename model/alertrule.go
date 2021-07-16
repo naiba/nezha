@@ -40,10 +40,10 @@ func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
 	var count int
 	for i := 0; i < len(r.Rules); i++ {
 		if r.Rules[i].IsTransferDurationRule() {
+			// 循环区间流量报警
 			if max < 1 {
 				max = 1
 			}
-			// 循环区间流量报警
 			for j := len(points[i]) - 1; j >= 0; j-- {
 				if points[i][j] != nil {
 					count++
