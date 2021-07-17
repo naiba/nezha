@@ -39,15 +39,17 @@ func NewServiceSentinel() {
 		serviceResponseDataStoreCurrentDown: make(map[uint64]uint64),
 		monitors:                            make(map[uint64]model.Monitor),
 		sslCertCache:                        make(map[uint64]string),
+		// 30天数据缓存
+		monthlyStatus: make(map[uint64]*model.ServiceItemResponse),
 	}
 	ServiceSentinelShared.OnMonitorUpdate()
 
 	year, month, day := time.Now().Date()
 	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
-	var mhs []model.MonitorHistory
-	DB.Where("created_at >= ?", today).Find(&mhs)
 
+	var mhs []model.MonitorHistory
 	// 加载当日记录
+	DB.Where("created_at >= ?", today).Find(&mhs)
 	totalDelay := make(map[uint64]float32)
 	for i := 0; i < len(mhs); i++ {
 		if mhs[i].Successful {
@@ -67,6 +69,9 @@ func NewServiceSentinel() {
 	}
 
 	go ServiceSentinelShared.worker()
+
+	// 每日将游标往后推一天
+	Cron.AddFunc("0 0 * * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
 }
 
 /*
@@ -86,6 +91,22 @@ type ServiceSentinel struct {
 	serviceResponseDataStoreCurrentDown map[uint64]uint64
 	monitors                            map[uint64]model.Monitor
 	sslCertCache                        map[uint64]string
+	// 30天数据缓存
+	monthlyStatusLock sync.RWMutex
+	monthlyStatus     map[uint64]*model.ServiceItemResponse
+}
+
+func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
+	ss.monthlyStatusLock.Lock()
+	defer ss.monitorsLock.Unlock()
+	// 将数据往前搦
+	for _, v := range ss.monthlyStatus {
+		for i := 0; i < len(v.Up)-2; i++ {
+			v.Up[i] = v.Up[i+1]
+			v.Down[i] = v.Down[i+1]
+			v.Delay[i] = v.Delay[i+1]
+		}
+	}
 }
 
 func (ss *ServiceSentinel) Dispatch(r ReportData) {
@@ -120,6 +141,36 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 			ss.serviceStatusToday[monitors[i].ID] = &_TodayStatsOfMonitor{}
 		}
 	}
+
+	ss.monthlyStatusLock.Lock()
+	defer ss.monthlyStatusLock.Unlock()
+	year, month, day := time.Now().Date()
+	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+
+	// 加载历史记录
+	var mhs []model.MonitorHistory
+	DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
+	for i := 0; i < len(monitors); i++ {
+		ServiceSentinelShared.monthlyStatus[monitors[i].ID] = &model.ServiceItemResponse{
+			Monitor: monitors[i],
+			Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}
+	}
+
+	// 整合数据
+	for i := 0; i < len(mhs); i++ {
+		dayIndex := 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
+		if mhs[i].Successful {
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex] = (ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex]*float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]) + mhs[i].Delay) / float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]+1)
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]++
+		} else {
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown++
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex]++
+		}
+	}
 }
 
 func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
@@ -135,75 +186,41 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 	delete(ss.monitors, id)
-	Cache.Delete(model.CacheKeyServicePage)
+	ss.monthlyStatusLock.Lock()
+	defer ss.monitorsLock.Unlock()
+	delete(ss.monthlyStatus, id)
 }
 
 func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
-	var cached bool
-	var msm map[uint64]*model.ServiceItemResponse
-	data, has := Cache.Get(model.CacheKeyServicePage)
-	if has {
-		msm = data.(map[uint64]*model.ServiceItemResponse)
-		cached = true
-	}
-	if !cached {
-		msm = make(map[uint64]*model.ServiceItemResponse)
-		var ms []model.Monitor
-		DB.Find(&ms)
-		year, month, day := time.Now().Date()
-		today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
-		var mhs []model.MonitorHistory
-		DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
-		for i := 0; i < len(ms); i++ {
-			msm[ms[i].ID] = &model.ServiceItemResponse{
-				Monitor: ms[i],
-				Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-				Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-				Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			}
-		}
-		// 整合数据
-		for i := 0; i < len(mhs); i++ {
-			dayIndex := 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
-			if mhs[i].Successful {
-				msm[mhs[i].MonitorID].TotalUp++
-				msm[mhs[i].MonitorID].Delay[dayIndex] = (msm[mhs[i].MonitorID].Delay[dayIndex]*float32(msm[mhs[i].MonitorID].Up[dayIndex]) + mhs[i].Delay) / float32(msm[mhs[i].MonitorID].Up[dayIndex]+1)
-				msm[mhs[i].MonitorID].Up[dayIndex]++
-			} else {
-				msm[mhs[i].MonitorID].TotalDown++
-				msm[mhs[i].MonitorID].Down[dayIndex]++
-			}
-		}
-		// 缓存一天
-		Cache.Set(model.CacheKeyServicePage, msm, time.Until(time.Date(year, month, day, 23, 59, 59, 999, today.Location())))
-	}
-	// 最新一天的数据
+	// 刷新最新一天的数据
 	ss.serviceResponseDataStoreLock.RLock()
 	defer ss.serviceResponseDataStoreLock.RUnlock()
+	ss.monthlyStatusLock.RLock()
+	defer ss.monthlyStatusLock.RUnlock()
 	for k := range ss.monitors {
-		if msm[k] == nil {
-			msm[k] = &model.ServiceItemResponse{
+		if ss.monthlyStatus[k] == nil {
+			ss.monthlyStatus[k] = &model.ServiceItemResponse{
 				Up:    new([30]int),
 				Down:  new([30]int),
 				Delay: new([30]float32),
 			}
 		}
-		msm[k].Monitor = ss.monitors[k]
+		ss.monthlyStatus[k].Monitor = ss.monitors[k]
 		v := ss.serviceStatusToday[k]
-		msm[k].Up[29] = v.Up
-		msm[k].Down[29] = v.Down
-		msm[k].TotalUp += uint64(v.Up)
-		msm[k].TotalDown += uint64(v.Down)
-		msm[k].Delay[29] = v.Delay
+		ss.monthlyStatus[k].Up[29] = v.Up
+		ss.monthlyStatus[k].Down[29] = v.Down
+		ss.monthlyStatus[k].TotalUp += uint64(v.Up)
+		ss.monthlyStatus[k].TotalDown += uint64(v.Down)
+		ss.monthlyStatus[k].Delay[29] = v.Delay
 	}
 	// 最后 5 分钟的状态 与 monitor 对象填充
 	for k, v := range ss.serviceResponseDataStoreCurrentDown {
-		msm[k].CurrentDown = v
+		ss.monthlyStatus[k].CurrentDown = v
 	}
 	for k, v := range ss.serviceResponseDataStoreCurrentUp {
-		msm[k].CurrentUp = v
+		ss.monthlyStatus[k].CurrentUp = v
 	}
-	return msm
+	return ss.monthlyStatus
 }
 
 func getStateStr(percent uint64) string {

@@ -80,10 +80,9 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 }
 
 func (p *commonPage) service(c *gin.Context) {
-	msm := dao.ServiceSentinelShared.LoadStats()
 	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
 		"Title":      "服务状态",
-		"Services":   msm,
+		"Services":   dao.ServiceSentinelShared.LoadStats(),
 		"CustomCode": dao.Conf.Site.CustomCode,
 	}))
 }

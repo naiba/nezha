@@ -5,7 +5,6 @@ import "time"
 const CtxKeyAuthorizedUser = "ckau"
 
 const CacheKeyOauth2State = "p:a:state"
-const CacheKeyServicePage = "p:c:service"
 
 type Common struct {
 	ID        uint64    `gorm:"primary_key"`
