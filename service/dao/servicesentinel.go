@@ -132,6 +132,7 @@ func (ss *ServiceSentinel) Monitors() []model.Monitor {
 func (ss *ServiceSentinel) OnMonitorUpdate() {
 	var monitors []model.Monitor
 	DB.Find(&monitors)
+
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 	ss.monitors = make(map[uint64]model.Monitor)
@@ -145,14 +146,11 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 		}
 	}
 
-	ss.monthlyStatusLock.Lock()
-	defer ss.monthlyStatusLock.Unlock()
 	year, month, day := time.Now().Date()
 	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
 
-	// 加载历史记录
-	var mhs []model.MonitorHistory
-	DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
+	ss.monthlyStatusLock.Lock()
+	defer ss.monthlyStatusLock.Unlock()
 	for i := 0; i < len(monitors); i++ {
 		ServiceSentinelShared.monthlyStatus[monitors[i].ID] = &model.ServiceItemResponse{
 			Monitor: monitors[i],
@@ -162,8 +160,13 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 		}
 	}
 
-	// 整合数据
+	// 加载历史记录
+	var mhs []model.MonitorHistory
+	DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
 	for i := 0; i < len(mhs); i++ {
+		if ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID] == nil {
+			continue
+		}
 		dayIndex := 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
 		if mhs[i].Successful {
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
