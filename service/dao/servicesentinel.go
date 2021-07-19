@@ -164,9 +164,6 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 	var mhs []model.MonitorHistory
 	DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
 	for i := 0; i < len(mhs); i++ {
-		if ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID] == nil {
-			continue
-		}
 		dayIndex := 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
 		if mhs[i].Successful {
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++

@@ -93,7 +93,10 @@ func recordTransferHourlyUsage() {
 }
 
 func cleanMonitorHistory() {
-	dao.DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ?", time.Now().AddDate(0, 0, -30))
+	// 清理无效数据
+	dao.DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ? OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -30))
+	dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (SELECT `id` FROM servers)")
+	// 计算可清理流量记录的时长
 	var allServerKeep time.Time
 	specialServerKeep := make(map[uint64]time.Time)
 	var specialServerIDs []uint64

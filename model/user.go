@@ -22,8 +22,6 @@ type User struct {
 	Token        string    `gorm:"UNIQUE_INDEX" json:"-"`   // 认证 Token
 	TokenExpired time.Time `json:"token_expired,omitempty"` // Token 过期时间
 	SuperAdmin   bool      `json:"super_admin,omitempty"`   // 超级管理员
-
-	TeamsID []uint64 `gorm:"-"`
 }
 
 func NewUserFromGitHub(gu *github.User) User {
