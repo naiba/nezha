@@ -268,20 +268,13 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 			err = dao.DB.Save(&cr).Error
 		}
 	}
-
+	if err == nil {
+		cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
+	}
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("请求错误：%s", err),
-		})
-		return
-	}
-
-	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
-	if err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
 		})
 		return
 	}
