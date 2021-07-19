@@ -277,16 +277,20 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		return
 	}
 
+	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
 	dao.CronLock.Lock()
 	defer dao.CronLock.Unlock()
 	crOld := dao.Crons[cr.ID]
 	if crOld != nil && crOld.CronID != 0 {
-		dao.Cron.Remove(crOld.CronID)
-	}
-
-	cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
-	if err != nil {
-		panic(err)
+		dao.Cron.Remove(cron.EntryID(crOld.ID))
 	}
 
 	delete(dao.Crons, cr.ID)

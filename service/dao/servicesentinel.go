@@ -71,7 +71,10 @@ func NewServiceSentinel() {
 	go ServiceSentinelShared.worker()
 
 	// 每日将游标往后推一天
-	Cron.AddFunc("0 0 * * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
+	_, err := Cron.AddFunc("* * * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
+	if err != nil {
+		panic(err)
+	}
 }
 
 /*
@@ -92,13 +95,13 @@ type ServiceSentinel struct {
 	monitors                            map[uint64]model.Monitor
 	sslCertCache                        map[uint64]string
 	// 30天数据缓存
-	monthlyStatusLock sync.RWMutex
+	monthlyStatusLock sync.Mutex
 	monthlyStatus     map[uint64]*model.ServiceItemResponse
 }
 
 func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
 	ss.monthlyStatusLock.Lock()
-	defer ss.monitorsLock.Unlock()
+	defer ss.monthlyStatusLock.Unlock()
 	// 将数据往前搦
 	for _, v := range ss.monthlyStatus {
 		for i := 0; i < len(v.Up)-2; i++ {
@@ -195,16 +198,9 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 	// 刷新最新一天的数据
 	ss.serviceResponseDataStoreLock.RLock()
 	defer ss.serviceResponseDataStoreLock.RUnlock()
-	ss.monthlyStatusLock.RLock()
-	defer ss.monthlyStatusLock.RUnlock()
+	ss.monthlyStatusLock.Lock()
+	defer ss.monthlyStatusLock.Unlock()
 	for k := range ss.monitors {
-		if ss.monthlyStatus[k] == nil {
-			ss.monthlyStatus[k] = &model.ServiceItemResponse{
-				Up:    new([30]int),
-				Down:  new([30]int),
-				Delay: new([30]float32),
-			}
-		}
 		ss.monthlyStatus[k].Monitor = ss.monitors[k]
 		v := ss.serviceStatusToday[k]
 		ss.monthlyStatus[k].Up[29] = v.Up

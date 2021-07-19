@@ -61,9 +61,15 @@ func initSystem() {
 	loadCrons()   //加载计划任务
 
 	// 清理 服务请求记录 和 流量记录 的旧数据
-	dao.Cron.AddFunc("0 20 3 * * *", cleanMonitorHistory)
+	_, err := dao.Cron.AddFunc("30 3 * * *", cleanMonitorHistory)
+	if err != nil {
+		panic(err)
+	}
 	// 流量记录打点
-	dao.Cron.AddFunc("0 0 * * * *", recordTransferHourlyUsage)
+	_, err = dao.Cron.AddFunc("0 * * * *", recordTransferHourlyUsage)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func recordTransferHourlyUsage() {
