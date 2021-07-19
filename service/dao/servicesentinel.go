@@ -190,7 +190,7 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	defer ss.monitorsLock.Unlock()
 	delete(ss.monitors, id)
 	ss.monthlyStatusLock.Lock()
-	defer ss.monitorsLock.Unlock()
+	defer ss.monthlyStatusLock.Unlock()
 	delete(ss.monthlyStatus, id)
 }
 
