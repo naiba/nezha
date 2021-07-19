@@ -71,7 +71,7 @@ func NewServiceSentinel() {
 	go ServiceSentinelShared.worker()
 
 	// 每日将游标往后推一天
-	_, err := Cron.AddFunc("* * * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
+	_, err := Cron.AddFunc("0 0 * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
 	if err != nil {
 		panic(err)
 	}
