@@ -174,7 +174,9 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		dao.ServerLock.RLock()
 		s.Host = dao.ServerList[s.ID].Host
 		s.State = dao.ServerList[s.ID].State
+		dao.SecretToID[s.Secret] = s.ID
 		dao.ServerList[s.ID] = &s
+		delete(dao.SecretToID, dao.ServerList[s.ID].Secret)
 		dao.ServerLock.RUnlock()
 	} else {
 		s.Host = &model.Host{}
