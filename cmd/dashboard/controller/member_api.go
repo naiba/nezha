@@ -154,7 +154,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.ID = sf.ID
 		s.Tag = sf.Tag
 		s.Note = sf.Note
-		if sf.ID == 0 {
+		if s.ID == 0 {
 			s.Secret = utils.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
 			s.Secret = s.Secret[:18]
 			err = dao.DB.Create(&s).Error
@@ -171,13 +171,17 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		return
 	}
 	if isEdit {
-		dao.ServerLock.RLock()
-		s.Host = dao.ServerList[s.ID].Host
-		s.State = dao.ServerList[s.ID].State
-		dao.SecretToID[s.Secret] = s.ID
-		delete(dao.SecretToID, dao.ServerList[s.ID].Secret)
+		dao.ServerLock.Lock()
+		s.CopyFromRunningServer(dao.ServerList[s.ID])
+		// 如果修改了 Secret
+		if s.Secret != dao.ServerList[s.ID].Secret {
+			// 删除旧 Secret-ID 绑定关系
+			dao.SecretToID[s.Secret] = s.ID
+			// 设置新的 Secret-ID 绑定关系
+			delete(dao.SecretToID, dao.ServerList[s.ID].Secret)
+		}
 		dao.ServerList[s.ID] = &s
-		dao.ServerLock.RUnlock()
+		dao.ServerLock.Unlock()
 	} else {
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}

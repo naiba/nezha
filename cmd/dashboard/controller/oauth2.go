@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/github"
 	GitHubAPI "github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 	GitHubOauth2 "golang.org/x/oauth2/github"
@@ -87,7 +86,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 			client = GitHubAPI.NewClient(oc)
 		}
 	}
-	var gu *github.User
+	var gu *GitHubAPI.User
 	if err == nil {
 		gu, _, err = client.Users.Get(ctx, "")
 	}

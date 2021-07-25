@@ -28,6 +28,16 @@ type Server struct {
 	PrevHourlyTransferOut int64 `gorm:"-" json:"-"` // 上次数据点时的出站使用量
 }
 
+func (s *Server) CopyFromRunningServer(old *Server) {
+	s.Host = old.Host
+	s.State = old.State
+	s.LastActive = old.LastActive
+	s.TaskClose = old.TaskClose
+	s.TaskStream = old.TaskStream
+	s.PrevHourlyTransferIn = old.PrevHourlyTransferIn
+	s.PrevHourlyTransferOut = old.PrevHourlyTransferOut
+}
+
 func (s Server) Marshal() template.JS {
 	name, _ := json.Marshal(s.Name)
 	tag, _ := json.Marshal(s.Tag)

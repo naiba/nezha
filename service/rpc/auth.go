@@ -35,8 +35,11 @@ func (a *AuthHandler) Check(ctx context.Context) (uint64, error) {
 	dao.ServerLock.RLock()
 	defer dao.ServerLock.RUnlock()
 	clientID, hasID := dao.SecretToID[clientSecret]
+	if !hasID {
+		return 0, status.Errorf(codes.Unauthenticated, "客户端认证失败")
+	}
 	_, hasServer := dao.ServerList[clientID]
-	if !hasID || !hasServer {
+	if !hasServer {
 		return 0, status.Errorf(codes.Unauthenticated, "客户端认证失败")
 	}
 	return clientID, nil
