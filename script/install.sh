@@ -45,7 +45,7 @@ pre_check() {
     ## China_IP
     if [[ $(curl -m 10 -s https://api.ip.sb/geoip | grep 'China') != "" ]]; then
         echo "根据ip.sb提供的信息，当前IP可能在中国"
-        read -r -p "是否选用中国镜像完成安装? [Y/n] " input
+        read -e -r -p "是否选用中国镜像完成安装? [Y/n] " input
         case $input in
         [yY][eE][sS] | [yY])
             echo "使用中国镜像"
@@ -79,12 +79,12 @@ pre_check() {
 
 confirm() {
     if [[ $# > 1 ]]; then
-        echo && read -p "$1 [默认$2]: " temp
+        echo && read -e -p "$1 [默认$2]: " temp
         if [[ x"${temp}" == x"" ]]; then
             temp=$2
         fi
     else
-        read -p "$1 [y/n]: " temp
+        read -e -p "$1 [y/n]: " temp
     fi
     if [[ x"${temp}" == x"y" || x"${temp}" == x"Y" ]]; then
         return 0
@@ -220,9 +220,9 @@ modify_agent_config() {
     fi
 
     echo "请先在管理面板上添加Agent，记录下密钥" &&
-        read -p "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
-        read -p "请输入面板RPC端口: (5555)" nz_grpc_port &&
-        read -p "请输入Agent 密钥: " nz_client_secret
+        read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
+        read -ep "请输入面板RPC端口: (5555)" nz_grpc_port &&
+        read -ep "请输入Agent 密钥: " nz_client_secret
     if [[ -z "${nz_grpc_host}" || -z "${nz_client_secret}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
         before_show_menu
@@ -268,13 +268,13 @@ modify_dashboard_config() {
 
     echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
         echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
-        read -p "请输入 OAuth2 提供商(gitee/github，默认 github): " nz_oauth2_type &&
-        read -p "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
-        read -p "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
-        read -p "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
-        read -p "请输入站点标题: " nz_site_title &&
-        read -p "请输入站点访问端口: (8008)" nz_site_port &&
-        read -p "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_grpc_port
+        read -ep "请输入 OAuth2 提供商(gitee/github，默认 github): " nz_oauth2_type &&
+        read -ep "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
+        read -ep "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
+        read -ep "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
+        read -ep "请输入站点标题: " nz_site_title &&
+        read -ep "请输入站点访问端口: (8008)" nz_site_port &&
+        read -ep "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_grpc_port
 
     if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"
@@ -467,7 +467,7 @@ show_menu() {
     ————————————————-
     ${green}0.${plain}  退出脚本
     "
-    echo && read -p "请输入选择 [0-13]: " num
+    echo && read -ep "请输入选择 [0-13]: " num
 
     case "${num}" in
     0)
