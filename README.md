@@ -121,9 +121,9 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - transfer_out_cycle 周期内的出站流量
   - transfer_all_cycle 周期内双向流量和
 - cycle_start 周期开始日期（可以是你机器计费周期的开始日期）
-- cycle_interval 小时（可以设为1月，30*24）
+- cycle_interval 小时（可以设为 1 月，30\*24）
 - min/max、cover、ignore 参考基本规则配置
-- 示例: 3号机器的每月15号计费的出站月流量1T报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":720,"cover":1,"ignore":{"3":true}}]`
+- 示例: 3 号机器的每月 15 号计费的出站月流量 1T 报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":720,"cover":1,"ignore":{"3":true}}]`
 </details>
 
 <details>
@@ -245,13 +245,6 @@ restart() {
 ```
 
 赋予执行权限 `chmod +x /etc/init.d/nezha-service` 然后启动服务 `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
-
-</details>
-
-<details>
-    <summary>首页服务器随机闪烁掉线？</summary>
-
-执行 `ntpdate 0.pool.ntp.org` 同步一下面板部署所在的服务器的时间，ref: [How do I use pool.ntp.org?](https://www.ntppool.org/en/use.html)
 
 </details>
 
