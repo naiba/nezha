@@ -44,7 +44,6 @@ func GetHost() *model.Host {
 		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
 	}
 	mv, _ := mem.VirtualMemory()
-	ms, _ := mem.SwapMemory()
 	diskTotal, _ := getDiskTotalAndUsed()
 
 	return &model.Host{
@@ -52,7 +51,7 @@ func GetHost() *model.Host {
 		PlatformVersion: hi.PlatformVersion,
 		CPU:             cpus,
 		MemTotal:        mv.Total,
-		SwapTotal:       ms.Total,
+		SwapTotal:       mv.SwapTotal,
 		DiskTotal:       diskTotal,
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
@@ -66,7 +65,6 @@ func GetHost() *model.Host {
 func GetState() *model.HostState {
 	hi, _ := host.Info()
 	mv, _ := mem.VirtualMemory()
-	ms, _ := mem.SwapMemory()
 	var cpuPercent float64
 	cp, err := cpu.Percent(0, false)
 	if err == nil {
@@ -75,8 +73,8 @@ func GetState() *model.HostState {
 	_, diskUsed := getDiskTotalAndUsed()
 	return &model.HostState{
 		CPU:            cpuPercent,
-		MemUsed:        mv.Used,
-		SwapUsed:       ms.Used,
+		MemUsed:        mv.Total - mv.Available,
+		SwapUsed:       mv.SwapTotal - mv.SwapFree,
 		DiskUsed:       diskUsed,
 		NetInTransfer:  atomic.LoadUint64(&netInTransfer),
 		NetOutTransfer: atomic.LoadUint64(&netOutTransfer),
