@@ -98,9 +98,18 @@
 }
 
 .service-status .good {
-  background-color: rgb(0, 235, 139) !important;
+  background-color: rgb(10, 148, 242) !important;
 }
 
 .service-status .warning {
   background-color: orange !important;
+}
+
+.nezha-primary-btn {
+  background-color: #0338d6 !important;
+  color: white !important;
+}
+
+.nezha-primary-font {
+  color: #0338d6 !important;
 }
