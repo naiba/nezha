@@ -34,7 +34,7 @@
                     class="freebsd icon"
                   ></i
                   >@#server.Name + (server.live?'':' [已离线]')#@
-                  <i class="yellow info circle icon"></i>
+                  <i class="nezha-secondary-font info circle icon"></i>
                   <div class="ui content popup" style="margin-bottom: 0">
                     系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@
                     [<span v-if="server.Host.Virtualization"
@@ -160,7 +160,7 @@
           this.group()
       },
       mounted() {
-          $('.yellow.info.icon').popup({
+          $('.nezha-secondary-font.info.icon').popup({
               popup: '.ui.content.popup',
               exclusive: true,
           });
