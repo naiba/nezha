@@ -203,7 +203,11 @@ install_agent() {
         mv nezha-agent $NZ_AGENT_PATH &&
         rm -rf nezha-agent_linux_${os_arch}.tar.gz README.md
 
-    modify_agent_config 0
+    if [[ $# == 3 ]]; then
+        modify_agent_config $1 $2 $3
+    else
+        modify_agent_config 0
+    fi
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -219,19 +223,26 @@ modify_agent_config() {
         return 0
     fi
 
-    echo "请先在管理面板上添加Agent，记录下密钥" &&
-        read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
-        read -ep "请输入面板RPC端口: (5555)" nz_grpc_port &&
-        read -ep "请输入Agent 密钥: " nz_client_secret
-    if [[ -z "${nz_grpc_host}" || -z "${nz_client_secret}" ]]; then
-        echo -e "${red}所有选项都不能为空${plain}"
-        before_show_menu
-        return 1
+    if [[ $1 == 0 ]]; then
+        echo "请先在管理面板上添加Agent，记录下密钥" &&
+            read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
+            read -ep "请输入面板RPC端口: (5555)" nz_grpc_port &&
+            read -ep "请输入Agent 密钥: " nz_client_secret
+        if [[ -z "${nz_grpc_host}" || -z "${nz_client_secret}" ]]; then
+            echo -e "${red}所有选项都不能为空${plain}"
+            before_show_menu
+            return 1
+        fi
+        if [[ -z "${nz_grpc_port}" ]]; then
+            nz_grpc_port=5555
+        fi
+    else
+        nz_grpc_host=$1
+        nz_grpc_port=$2
+        nz_client_secret=$3
     fi
 
-    if [[ -z "${nz_grpc_port}" ]]; then
-        nz_grpc_port=5555
-    fi
+
 
     sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
