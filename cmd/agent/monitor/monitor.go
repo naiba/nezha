@@ -3,6 +3,7 @@ package monitor
 import (
 	"fmt"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -46,12 +47,20 @@ func GetHost() *model.Host {
 	mv, _ := mem.VirtualMemory()
 	diskTotal, _ := getDiskTotalAndUsed()
 
+	var swapMemTotal uint64
+	if runtime.GOOS == "windows" {
+		ms, _ := mem.SwapMemory()
+		swapMemTotal = ms.Total
+	} else {
+		swapMemTotal = mv.SwapTotal
+	}
+
 	return &model.Host{
 		Platform:        hi.OS,
 		PlatformVersion: hi.PlatformVersion,
 		CPU:             cpus,
 		MemTotal:        mv.Total,
-		SwapTotal:       mv.SwapTotal,
+		SwapTotal:       swapMemTotal,
 		DiskTotal:       diskTotal,
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
@@ -65,6 +74,15 @@ func GetHost() *model.Host {
 func GetState() *model.HostState {
 	hi, _ := host.Info()
 	mv, _ := mem.VirtualMemory()
+
+	var swapMemUsed uint64
+	if runtime.GOOS == "windows" {
+		ms, _ := mem.SwapMemory()
+		swapMemUsed = ms.Used
+	} else {
+		swapMemUsed = mv.SwapTotal - mv.SwapFree
+	}
+
 	var cpuPercent float64
 	cp, err := cpu.Percent(0, false)
 	if err == nil {
@@ -74,7 +92,7 @@ func GetState() *model.HostState {
 	return &model.HostState{
 		CPU:            cpuPercent,
 		MemUsed:        mv.Total - mv.Available,
-		SwapUsed:       mv.SwapTotal - mv.SwapFree,
+		SwapUsed:       swapMemUsed,
 		DiskUsed:       diskUsed,
 		NetInTransfer:  atomic.LoadUint64(&netInTransfer),
 		NetOutTransfer: atomic.LoadUint64(&netOutTransfer),
