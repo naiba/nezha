@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.9.15&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.5-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.9.16&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.6.5-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
@@ -216,6 +216,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 数据储存在 `/opt/nezha` 文件夹中，迁移数据时打包这个文件夹，到新环境解压。然后执行一键脚本安装即可
 
+</details>
+
+<details>
+    <summary>Agent 不断重启/无法启动 ？</summary>
+
+1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看是否是 DNS 问题 或 Agent 出口网络/面板入口网络防火墙问题，自行解决。
+2. 如果上面命令执行正常，Agent 正常上线，尝试关闭 SELinux，[如何关闭 SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
 </details>
 
 <details>
