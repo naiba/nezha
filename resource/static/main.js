@@ -155,7 +155,7 @@ function addOrEditNotification(notification) {
   );
 }
 
-function addOrEditServer(server) {
+function addOrEditServer(server, conf) {
   const modal = $(".server.modal");
   modal.children(".header").text((server ? "修改" : "添加") + "服务器");
   modal
@@ -172,9 +172,14 @@ function addOrEditServer(server) {
   modal.find("textarea[name=Note]").val(server ? server.Note : null);
   if (server) {
     modal.find(".secret.field").attr("style", "");
+    modal.find(".command.field").attr("style", "");
+    modal.find(".command.hostSecret").text(server.Secret);
+    modal.find(".command.GRPCHost").text(conf.GRPCHost);
+    modal.find(".command.GRPCPort").text(conf.GRPCPort);
     modal.find("input[name=secret]").val(server.Secret);
   } else {
     modal.find(".secret.field").attr("style", "display:none");
+    modal.find(".command.field").attr("style", "display:none");
     modal.find("input[name=secret]").val("");
   }
   showFormModal(".server.modal", "#serverForm", "/api/server");

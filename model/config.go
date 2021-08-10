@@ -39,6 +39,7 @@ type Config struct {
 	}
 	HTTPPort                   uint
 	GRPCPort                   uint
+	GRPCHost                   string
 	EnableIPChangeNotification bool
 
 	// IP变更提醒

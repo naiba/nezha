@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/naiba/nezha/util"
 	"log"
 	"time"
 
@@ -45,6 +46,9 @@ func init() {
 	}
 	if dao.Conf.GRPCPort == 0 {
 		dao.Conf.GRPCPort = 5555
+	}
+	if dao.Conf.GRPCHost == "" {
+		dao.Conf.GRPCHost = util.FetchGeoIP(false).IP
 	}
 	dao.Cache = cache.New(5*time.Minute, 10*time.Minute)
 
