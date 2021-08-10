@@ -223,7 +223,7 @@ modify_agent_config() {
         return 0
     fi
 
-    if [[ $1 == 0 ]]; then
+    if [[ $# != 3 ]]; then
         echo "请先在管理面板上添加Agent，记录下密钥" &&
             read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
             read -ep "请输入面板RPC端口: (5555)" nz_grpc_port &&
