@@ -113,6 +113,19 @@ func ServeWeb(port uint) *http.Server {
 	r.Static("/static", "resource/static")
 	r.LoadHTMLGlob("resource/template/**/*")
 	routers(r)
+
+	page404 := func(c *gin.Context) {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusNotFound,
+			Title: "该页面不存在",
+			Msg:   "该页面内容可能已着陆火星",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+	}
+	r.NoRoute(page404)
+	r.NoMethod(page404)
+
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
 		Handler: r,

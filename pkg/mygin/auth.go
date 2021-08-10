@@ -22,7 +22,7 @@ type AuthorizeOption struct {
 
 func Authorize(opt AuthorizeOption) func(*gin.Context) {
 	return func(c *gin.Context) {
-		var code uint64 = http.StatusForbidden
+		var code = http.StatusForbidden
 		if opt.Guest {
 			code = http.StatusBadRequest
 		}

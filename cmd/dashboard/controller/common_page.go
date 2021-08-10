@@ -45,6 +45,7 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 	}
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusOK,
 			Title: "出现错误",
 			Msg:   fmt.Sprintf("请求错误：%s", err),
 		}, true)

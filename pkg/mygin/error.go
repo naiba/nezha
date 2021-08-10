@@ -9,7 +9,7 @@ import (
 )
 
 type ErrInfo struct {
-	Code  uint64
+	Code  int
 	Title string
 	Msg   string
 	Link  string
@@ -18,7 +18,7 @@ type ErrInfo struct {
 
 func ShowErrorPage(c *gin.Context, i ErrInfo, isPage bool) {
 	if isPage {
-		c.HTML(http.StatusOK, "dashboard/error", CommonEnvironment(c, gin.H{
+		c.HTML(i.Code, "dashboard/error", CommonEnvironment(c, gin.H{
 			"Code":  i.Code,
 			"Title": i.Title,
 			"Msg":   i.Msg,
