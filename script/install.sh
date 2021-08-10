@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.6.6"
+NZ_VERSION="v0.6.7"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -223,7 +223,7 @@ modify_agent_config() {
         return 0
     fi
 
-    if [[ $1 == 0 ]]; then
+    if [[ $# != 3 ]]; then
         echo "请先在管理面板上添加Agent，记录下密钥" &&
             read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
             read -ep "请输入面板RPC端口: (5555)" nz_grpc_port &&
