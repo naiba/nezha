@@ -24,6 +24,18 @@
                 <label>备注</label>
                 <textarea name="Note"></textarea>
             </div>
+
+            <div class="command field">
+                <label>Agent 安装命令</label>
+                <div class="ui message">
+                    <div class="header">
+                        Shell（推荐）
+                    </div>
+                    <div class="ui segment">
+                        curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh  -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh <code class="command host"></code> 5555 <code class="command hostSecret"></code>
+                    </div>
+                </div>
+            </div>
         </form>
     </div>
     <div class=" actions">
