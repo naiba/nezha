@@ -35,8 +35,7 @@
                     <td>{{$server.Secret}}</td>
                     <td>
                         <button class="ui icon green mini button"
-                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod
-                    +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{$.Conf.GRPCPort}} {{$server.Secret}}{{else}}请先在设置页面配置 未接入CDN的面板服务器域名/IP{{end}}"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{$.Conf.GRPCPort}} {{$server.Secret}}{{else}}请先在设置页面配置 未接入CDN的面板服务器域名/IP{{end}}"
                             data-tooltip="点击复制安装命令">
                             <i class="linux icon"></i>
                         </button>
