@@ -26,14 +26,15 @@
             </div>
 
             <div class="command field">
-                <label>Agent 安装命令</label>
+                <label>Linux 一键安装</label>
                 <div class="ui message">
-                    <div class="header">
-                        systemd
-                    </div>
-                    <div class="ui segment">
-                        curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh  -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent <code class="command GRPCHost"></code> <code class="command GRPCPort"></code> <code class="command hostSecret"></code>
-                    </div>
+                    {{if .Conf.GRPCHost}}
+                    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod
+                    +x nezha.sh && sudo ./nezha.sh install_agent <code class="command">{{.Conf.GRPCHost}}</code> <code
+                        class="command">{{.Conf.GRPCPort}}</code> <code class="command hostSecret"></code>
+                    {{else}}
+                    请先在设置页面配置 未接入CDN的面板服务器域名/IP
+                    {{end}}
                 </div>
             </div>
         </form>

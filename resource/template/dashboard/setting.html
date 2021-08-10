@@ -41,6 +41,10 @@
                 <input type="text" name="ViewPassword" placeholder="" value="{{.Conf.Site.ViewPassword}}">
             </div>
             <div class="field">
+                <label>未接入CDN的面板服务器域名/IP</label>
+                <input type="text" name="GRPCHost" placeholder="" value="{{.Conf.GRPCHost}}">
+            </div>
+            <div class="field">
                 <label>IP 变更提醒</label>
             </div>
             <div class="ui segment">
@@ -70,39 +74,40 @@
 {{template "common/footer" .}}
 <script>
     $('#settingForm').submit(function () {
-        $.post('/api/setting', $('#settingForm').serialize()).then((resp) => {
-            if (resp.code == 200) {
+        $.post('/api/setting', $('#settingForm').serialize())
+            .then((resp) => {
+                if (resp.code == 200) {
+                    $.suiAlert({
+                        title: '',
+                        description: '修改成功',
+                        type: 'success',
+                        time: '3',
+                        position: 'top-center',
+                    });
+                } else {
+                    $.suiAlert({
+                        title: '',
+                        description: resp.message,
+                        type: 'error',
+                        time: '3',
+                        position: 'top-center',
+                    });
+                }
+            }).catch(err => {
                 $.suiAlert({
                     title: '',
-                    description: '修改成功',
-                    type: 'success',
-                    time: '3',
-                    position: 'top-center',
-                });
-            } else {
-                $.suiAlert({
-                    title: '',
-                    description: resp.message,
+                    description: err,
                     type: 'error',
                     time: '3',
                     position: 'top-center',
                 });
-            }
-        }).error(err => {
-            $.suiAlert({
-                title: '',
-                description: err,
-                type: 'error',
-                time: '3',
-                position: 'top-center',
-            });
-        })
+            })
         return false;
     })
     $('.checkbox').checkbox()
     $('#settingForm').find("select[name=Cover]")
-        .val({{.Conf.Cover}});
-    {{ if .Conf.EnableIPChangeNotification}}
+        .val({{.Conf.Cover }});
+    {{if .Conf.EnableIPChangeNotification}}
     $('.checkbox').checkbox('set checked')
     {{ end }}
 </script>

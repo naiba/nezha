@@ -19,6 +19,7 @@
                     <th>IP</th>
                     <th>版本号</th>
                     <th>密钥</th>
+                    <th>一键安装</th>
                     <th>备注</th>
                     <th>管理</th>
                 </tr>
@@ -32,10 +33,24 @@
                     <td>{{$server.Host.IP}}</td>
                     <td>{{$server.Host.Version}}</td>
                     <td>{{$server.Secret}}</td>
+                    <td>
+                        <button class="ui icon green mini button"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod
+                    +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{$.Conf.GRPCPort}} {{$server.Secret}}{{else}}请先在设置页面配置 未接入CDN的面板服务器域名/IP{{end}}"
+                            data-tooltip="点击复制安装命令">
+                            <i class="linux icon"></i>
+                        </button>
+                        <button class="ui icon mini button" data-tooltip="尚未支持，请下载release手动安装">
+                            <i class="windows icon"></i>
+                        </button>
+                        <button class="ui icon mini button" data-tooltip="尚未支持，请下载release手动安装">
+                            <i class="apple icon"></i>
+                        </button>
+                    </td>
                     <td style="word-break: break-word;">{{$server.Note}}</td>
                     <td>
                         <div class="ui mini icon buttons">
-                            <button class="ui button" onclick="addOrEditServer({{$server.Marshal}},{{$.Conf}})">
+                            <button class="ui button" onclick="addOrEditServer({{$server.Marshal}})">
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
@@ -50,6 +65,10 @@
         </table>
     </div>
 </div>
-{{template "component/server"}}
+{{template "component/server" .}}
 {{template "common/footer" .}}
+<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+<script>
+    var clipboard = new ClipboardJS('.ui.icon.green.mini.button');
+</script>
 {{end}}
