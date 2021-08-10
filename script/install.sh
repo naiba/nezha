@@ -555,7 +555,11 @@ if [[ $# > 0 ]]; then
         uninstall_dashboard 0
         ;;
     "install_agent")
-        install_agent 0
+        if [[ $# == 4 ]]; then
+            install_agent $2 $3 $4
+        else
+            install_agent 0
+        fi
         ;;
     "modify_agent_config")
         modify_agent_config 0
