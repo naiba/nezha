@@ -46,7 +46,7 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 </details>
 
 <details>
-    <summary>报警通知：CPU、内存、硬盘、带宽、流量、月流量实时监控。</summary>
+    <summary>报警通知：负载、CPU、内存、硬盘、带宽、流量、月流量、进程数、连接数实时监控。</summary>
 
 #### 灵活通知方式
 
@@ -106,8 +106,8 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - `net_in_speed` 入站网速、`net_out_speed` 出站网速、`net_all_speed` 双向网速、`transfer_in` 入站流量、`transfer_out` 出站流量、`transfer_all` 双向流量
   - `offline` 离线监控
   - `load1`、`load5`、`load15` 负载
-  - `process_count` 线程数 *目前取线程数占用资源太多，暂时不支持*
-  - `tcp_conn_count`、`udp_conn_count` 网络连接数
+  - `process_count` 进程数 *目前取线程数占用资源太多，暂时不支持*
+  - `tcp_conn_count`、`udp_conn_count` 连接数
 - duration：持续秒数，秒数内采样记录 30% 以上触发阈值才会报警（防数据插针）
 - min/max
   - 流量、网速类数值 为字节（1KB=1024B，1MB = 1024\*1024B）
