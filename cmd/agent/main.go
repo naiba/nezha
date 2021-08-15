@@ -265,10 +265,8 @@ func doTask(task *pb.Task) {
 func reportState() {
 	var lastReportHostInfo time.Time
 	var err error
-	var now time.Time
 	defer println("reportState exit", time.Now(), "=>", err)
 	for {
-		now = time.Now()
 		// 为了更准确的记录时段流量，inited 后再上传状态信息
 		if client != nil && inited {
 			monitor.TrackNetworkSpeed()
@@ -284,7 +282,7 @@ func reportState() {
 				client.ReportSystemInfo(context.Background(), monitor.GetHost().PB())
 			}
 		}
-		time.Sleep(time.Until(now.Add(time.Second)))
+		time.Sleep(time.Second)
 	}
 }
 

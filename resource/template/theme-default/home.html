@@ -51,6 +51,9 @@
                       class="arrow alternate circle up outline icon"
                     ></i
                     >@#formatByteSize(server.State.NetOutTransfer)#@<br />
+                    负载：@# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@# toFixed2(server.State.Load15) #@<br />
+                    进程数：@# server.State.ProcessCount #@<br />
+                    连接数：TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
                     启动：@# formatTimestamp(server.Host.BootTime) #@<br />
                     活动：@# new Date(server.LastActive).toLocaleString() #@<br />
                     版本：@#server.Host.Version#@<br />
@@ -166,6 +169,9 @@
           });
       },
       methods: {
+          toFixed2(f){
+            return f.toFixed(2)
+          },
           group() {
               this.groups = groupingData(this.data, "Tag")
           },

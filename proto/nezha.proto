@@ -35,6 +35,12 @@ message State {
     uint64 net_in_speed = 8;
     uint64 net_out_speed = 9;
     uint64 uptime = 10;
+    double load1 = 11;
+    double load5 = 12;
+    double load15 = 13;
+    uint64 tcp_conn_count = 14;
+    uint64 udp_conn_count = 15;
+    uint64 process_count = 16;
 }
 
 message Task {

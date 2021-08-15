@@ -20,6 +20,12 @@ type HostState struct {
 	NetInSpeed     uint64
 	NetOutSpeed    uint64
 	Uptime         uint64
+	Load1          float64
+	Load5          float64
+	Load15         float64
+	TcpConnCount   uint64
+	UdpConnCount   uint64
+	ProcessCount   uint64
 }
 
 func (s *HostState) PB() *pb.State {
@@ -33,6 +39,12 @@ func (s *HostState) PB() *pb.State {
 		NetInSpeed:     s.NetInSpeed,
 		NetOutSpeed:    s.NetOutSpeed,
 		Uptime:         s.Uptime,
+		Load1:          s.Load1,
+		Load5:          s.Load5,
+		Load15:         s.Load15,
+		TcpConnCount:   s.TcpConnCount,
+		UdpConnCount:   s.UdpConnCount,
+		ProcessCount:   s.ProcessCount,
 	}
 }
 
@@ -47,6 +59,12 @@ func PB2State(s *pb.State) HostState {
 		NetInSpeed:     s.GetNetInSpeed(),
 		NetOutSpeed:    s.GetNetOutSpeed(),
 		Uptime:         s.GetUptime(),
+		Load1:          s.GetLoad1(),
+		Load5:          s.GetLoad5(),
+		Load15:         s.GetLoad15(),
+		TcpConnCount:   s.GetTcpConnCount(),
+		UdpConnCount:   s.GetUdpConnCount(),
+		ProcessCount:   s.GetProcessCount(),
 	}
 }
 

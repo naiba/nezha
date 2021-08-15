@@ -11,8 +11,10 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
+	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
+	"github.com/shirou/gopsutil/v3/process"
 
 	"github.com/naiba/nezha/model"
 )
@@ -77,6 +79,7 @@ func GetState() *model.HostState {
 
 	var swapMemUsed uint64
 	if runtime.GOOS == "windows" {
+		// gopsutil 在 Windows 下不能正确取 swap
 		ms, _ := mem.SwapMemory()
 		swapMemUsed = ms.Used
 	} else {
@@ -89,6 +92,24 @@ func GetState() *model.HostState {
 		cpuPercent = cp[0]
 	}
 	_, diskUsed := getDiskTotalAndUsed()
+	loadStat, _ := load.Avg()
+
+	tcpConns, _ := net.Connections("tcp")
+	udpConns, _ := net.Connections("udp")
+
+	ps, _ := process.Pids()
+	// log.Println("pids", len(ps), err)
+	// var threads uint64
+	// for i := 0; i < len(ps); i++ {
+	// 	p, err := process.NewProcess(ps[i])
+	// 	if err != nil {
+	// 		continue
+	// 	}
+	// 	c, _ := p.NumThreads()
+	// 	threads += uint64(c)
+	// }
+	// log.Println("threads", threads)
+
 	return &model.HostState{
 		CPU:            cpuPercent,
 		MemUsed:        mv.Total - mv.Available,
@@ -99,6 +120,12 @@ func GetState() *model.HostState {
 		NetInSpeed:     atomic.LoadUint64(&netInSpeed),
 		NetOutSpeed:    atomic.LoadUint64(&netOutSpeed),
 		Uptime:         hi.Uptime,
+		Load1:          loadStat.Load1,
+		Load5:          loadStat.Load5,
+		Load15:         loadStat.Load15,
+		TcpConnCount:   uint64(len(tcpConns)),
+		UdpConnCount:   uint64(len(udpConns)),
+		ProcessCount:   uint64(len(ps)),
 	}
 }
 
