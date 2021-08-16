@@ -100,11 +100,13 @@ type ServiceSentinel struct {
 }
 
 func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
+	// 刷新数据防止无人访问
+	ss.LoadStats()
+	// 将数据往前刷一天
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
-	// 将数据往前搦
 	for _, v := range ss.monthlyStatus {
-		for i := 0; i < len(v.Up)-2; i++ {
+		for i := 0; i < len(v.Up)-1; i++ {
 			v.Up[i] = v.Up[i+1]
 			v.Down[i] = v.Down[i+1]
 			v.Delay[i] = v.Delay[i+1]

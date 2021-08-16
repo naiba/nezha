@@ -18,6 +18,7 @@ require (
 	github.com/ory/graceful v0.1.1
 	github.com/p14yground/go-github-selfupdate v0.0.0-20210520015421-eddf14461293
 	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.21.7
 	github.com/spf13/viper v1.7.1
