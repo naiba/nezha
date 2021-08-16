@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"strings"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/shirou/gopsutil/v3/cpu"
@@ -73,7 +74,12 @@ func GetHost() *model.Host {
 	}
 }
 
-func GetState() *model.HostState {
+type GetStateConfig struct {
+	SkipConnectionCount bool
+	SkipProcessCount    bool
+}
+
+func GetState(conf GetStateConfig) *model.HostState {
 	hi, _ := host.Info()
 	mv, _ := mem.VirtualMemory()
 
@@ -94,21 +100,36 @@ func GetState() *model.HostState {
 	_, diskUsed := getDiskTotalAndUsed()
 	loadStat, _ := load.Avg()
 
-	tcpConns, _ := net.Connections("tcp")
-	udpConns, _ := net.Connections("udp")
+	var tcpConnCount, udpConnCount uint64
 
-	ps, _ := process.Pids()
-	// log.Println("pids", len(ps), err)
-	// var threads uint64
-	// for i := 0; i < len(ps); i++ {
-	// 	p, err := process.NewProcess(ps[i])
-	// 	if err != nil {
-	// 		continue
-	// 	}
-	// 	c, _ := p.NumThreads()
-	// 	threads += uint64(c)
-	// }
-	// log.Println("threads", threads)
+	if !conf.SkipConnectionCount {
+		conns, _ := net.Connections("all")
+		for i := 0; i < len(conns); i++ {
+			switch conns[i].Type {
+			case syscall.SOCK_STREAM:
+				tcpConnCount++
+			case syscall.SOCK_DGRAM:
+				udpConnCount++
+			}
+		}
+	}
+
+	var processCount uint64
+	if !conf.SkipProcessCount {
+		ps, _ := process.Pids()
+		processCount = uint64(len(ps))
+		// log.Println("pids", len(ps), err)
+		// var threads uint64
+		// for i := 0; i < len(ps); i++ {
+		// 	p, err := process.NewProcess(ps[i])
+		// 	if err != nil {
+		// 		continue
+		// 	}
+		// 	c, _ := p.NumThreads()
+		// 	threads += uint64(c)
+		// }
+		// log.Println("threads", threads)
+	}
 
 	return &model.HostState{
 		CPU:            cpuPercent,
@@ -123,9 +144,9 @@ func GetState() *model.HostState {
 		Load1:          loadStat.Load1,
 		Load5:          loadStat.Load5,
 		Load15:         loadStat.Load15,
-		TcpConnCount:   uint64(len(tcpConns)),
-		UdpConnCount:   uint64(len(udpConns)),
-		ProcessCount:   uint64(len(ps)),
+		TcpConnCount:   tcpConnCount,
+		UdpConnCount:   udpConnCount,
+		ProcessCount:   processCount,
 	}
 }
 

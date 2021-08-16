@@ -33,10 +33,9 @@ func init() {
 }
 
 var (
-	server       string
-	clientSecret string
-	version      string
-	debug        bool
+	server, clientSecret, version string
+	debug                         bool
+	stateConf                     monitor.GetStateConfig
 )
 
 var (
@@ -67,6 +66,8 @@ func main() {
 	flag.BoolVar(&debug, "d", false, "开启调试信息")
 	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
+	flag.BoolVar(&stateConf.SkipConnectionCount, "kconn", false, "不监控连接数")
+	flag.BoolVar(&stateConf.SkipProcessCount, "kprocess", false, "不监控进程数")
 	flag.Parse()
 
 	if server == "" || clientSecret == "" {
@@ -271,7 +272,7 @@ func reportState() {
 		if client != nil && inited {
 			monitor.TrackNetworkSpeed()
 			timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
-			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState().PB())
+			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(stateConf).PB())
 			cancel()
 			if err != nil {
 				println("reportState error", err)

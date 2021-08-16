@@ -222,6 +222,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
+    <summary>如何禁用连接数/进程数等占用资源的监控？</summary>
+
+编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `-kconn` 就是不监控连接数，加上 `-kprocess` 就是不监控进程数
+
+</details>
+
+<details>
     <summary>Agent 不断重启/无法启动 ？</summary>
 
 1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS 问题。
