@@ -40,6 +40,10 @@
         term.loadAddon(fitAddon);
         term.open(document.getElementById('terminal-container'));
 
+        socket.onopen = () => {
+            onResize()
+        }
+
         function onResize() {
             fitAddon.fit()
             const w = fitAddon.proposeDimensions();

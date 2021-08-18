@@ -8,4 +8,4 @@ services:
       - ./data:/dashboard/data
     ports:
       - nz_site_port:80
-      - nz_grpc_port:5555
+      - nz_grpc_port:nz_grpc_port

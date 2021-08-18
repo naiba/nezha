@@ -73,12 +73,12 @@ func Start() (*Pty, error) {
 	if err != nil {
 		return nil, err
 	}
-	tty, err := winpty.Open(path, shellPath)
+	tty, err := winpty.OpenDefault(path, shellPath)
 	return &Pty{tty: tty}, err
 }
 
 func (pty *Pty) Write(p []byte) (n int, err error) {
-	return pty.tty.StdIn.Read(p)
+	return pty.tty.StdIn.Write(p)
 }
 
 func (pty *Pty) Read(p []byte) (n int, err error) {

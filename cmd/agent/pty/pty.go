@@ -4,11 +4,14 @@
 package pty
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 
 	opty "github.com/creack/pty"
 )
+
+var defaultShells = []string{"zsh", "fish", "bash", "sh"}
 
 type Pty struct {
 	tty *os.File
@@ -19,9 +22,15 @@ func DownloadDependency() {
 }
 
 func Start() (*Pty, error) {
-	shellPath := os.Getenv("SHELL")
+	var shellPath string
+	for i := 0; i < len(defaultShells); i++ {
+		shellPath, _ = exec.LookPath(defaultShells[i])
+		if shellPath != "" {
+			break
+		}
+	}
 	if shellPath == "" {
-		shellPath = "sh"
+		return nil, errors.New("没有可用终端")
 	}
 	cmd := exec.Command(shellPath)
 	cmd.Env = append(os.Environ(), "TERM=xterm")

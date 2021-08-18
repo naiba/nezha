@@ -163,6 +163,7 @@ function post(path, params, method = 'post') {
   const form = document.createElement('form');
   form.method = method;
   form.action = path;
+  form.target = "_blank";
 
   for (const key in params) {
     if (params.hasOwnProperty(key)) {
@@ -176,6 +177,7 @@ function post(path, params, method = 'post') {
 
   document.body.appendChild(form);
   form.submit();
+  document.removeChild(form);
 }
 
 function addOrEditServer(server, conf) {
