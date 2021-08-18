@@ -20,7 +20,7 @@ jobs:
 
       - name: Log into registry
         run: |
-          echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
           echo "${{ secrets.ALI_PAT }}" | docker login registry.cn-shanghai.aliyuncs.com -u ${{ secrets.ALI_USER }} --password-stdin
       
       - name: Set up QEMU
