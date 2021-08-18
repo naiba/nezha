@@ -18,10 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
-      - name: Log into registry
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
-          echo "${{ secrets.ALI_PAT }}" | docker login registry.cn-shanghai.aliyuncs.com -u ${{ secrets.ALI_USER }} --password-stdin
+      - name: Log in to the GHCR
+        uses: docker/login-action@master
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to the AliyunCS
+        uses: docker/login-action@master
+        with:
+          registry: registry.cn-shanghai.aliyuncs.com
+          username: ${{ secrets.ALI_USER }}
+          password: ${{ secrets.ALI_PAT }}
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
