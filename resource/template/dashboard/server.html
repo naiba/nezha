@@ -49,6 +49,9 @@
                     <td style="word-break: break-word;">{{$server.Note}}</td>
                     <td>
                         <div class="ui mini icon buttons">
+                            <button class="ui button" onclick="connectToServer({{$server.ID}})">
+                                <i class="terminal icon"></i>
+                            </button>
                             <button class="ui button" onclick="addOrEditServer({{$server.Marshal}})">
                                 <i class="edit icon"></i>
                             </button>

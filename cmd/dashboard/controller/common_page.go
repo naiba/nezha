@@ -1,22 +1,37 @@
 package controller
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/hashicorp/go-uuid"
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 )
 
+type terminalContext struct {
+	agentConn *websocket.Conn
+	userConn  *websocket.Conn
+	serverID  uint64
+	host      string
+	useSSL    bool
+}
+
 type commonPage struct {
-	r *gin.Engine
+	r             *gin.Engine
+	terminals     map[string]*terminalContext
+	terminalsLock *sync.Mutex
 }
 
 func (cp *commonPage) serve() {
@@ -27,6 +42,8 @@ func (cp *commonPage) serve() {
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
 	cr.GET("/ws", cp.ws)
+	cr.POST("/terminal", cp.createTerminal)
+	cr.GET("/terminal/:id", cp.terminal)
 }
 
 type viewPasswordForm struct {
@@ -98,7 +115,10 @@ func (cp *commonPage) home(c *gin.Context) {
 	}))
 }
 
-var upgrader = websocket.Upgrader{}
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
 
 type Data struct {
 	Now     int64           `json:"now,omitempty"`
@@ -138,4 +158,218 @@ func (cp *commonPage) ws(c *gin.Context) {
 		}
 		time.Sleep(time.Second * 2)
 	}
+}
+
+func (cp *commonPage) terminal(c *gin.Context) {
+	log.Println("terminal connected", c.Request.URL)
+	defer log.Println("terminal disconnected", c.Request.URL)
+	terminalID := c.Param("id")
+	cp.terminalsLock.Lock()
+	if terminalID == "" || cp.terminals[terminalID] == nil {
+		cp.terminalsLock.Unlock()
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "无权访问",
+			Msg:   "终端会话不存在",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+		return
+	}
+
+	terminal := cp.terminals[terminalID]
+	cp.terminalsLock.Unlock()
+
+	defer func() {
+		cp.terminalsLock.Lock()
+		defer cp.terminalsLock.Unlock()
+		delete(cp.terminals, terminalID)
+	}()
+
+	var isAgent bool
+
+	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
+		dao.ServerLock.RLock()
+		_, hasID := dao.SecretToID[c.Request.Header.Get("Secret")]
+		dao.ServerLock.RUnlock()
+		if !hasID {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusForbidden,
+				Title: "无权访问",
+				Msg:   "用户未登录或非法终端",
+				Link:  "/",
+				Btn:   "返回首页",
+			}, true)
+			return
+		}
+		if terminal.userConn == nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusForbidden,
+				Title: "无权访问",
+				Msg:   "用户不在线",
+				Link:  "/",
+				Btn:   "返回首页",
+			}, true)
+			return
+		}
+		if terminal.agentConn != nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusInternalServerError,
+				Title: "连接已存在",
+				Msg:   "Websocket协议切换失败",
+				Link:  "/",
+				Btn:   "返回首页",
+			}, true)
+			return
+		}
+		isAgent = true
+	} else {
+		dao.ServerLock.RLock()
+		server := dao.ServerList[terminal.serverID]
+		dao.ServerLock.RUnlock()
+		if server == nil || server.TaskStream == nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusForbidden,
+				Title: "请求失败",
+				Msg:   "服务器不存在或处于离线状态",
+				Link:  "/server",
+				Btn:   "返回重试",
+			}, true)
+			return
+		}
+
+		terminalData, _ := json.Marshal(&model.TerminalTask{
+			Host:    terminal.host,
+			UseSSL:  terminal.useSSL,
+			Session: terminalID,
+		})
+
+		if err := server.TaskStream.Send(&proto.Task{
+			Type: model.TaskTypeTerminal,
+			Data: string(terminalData),
+		}); err != nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusForbidden,
+				Title: "请求失败",
+				Msg:   "Agent信令下发失败",
+				Link:  "/server",
+				Btn:   "返回重试",
+			}, true)
+			return
+		}
+	}
+
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusInternalServerError,
+			Title: "网络错误",
+			Msg:   "Websocket协议切换失败",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+		return
+	}
+	defer conn.Close()
+
+	if isAgent {
+		terminal.agentConn = conn
+	} else {
+		terminal.userConn = conn
+		defer func() {
+			// 用户断开链接时断开 Agent 连接
+			if terminal.agentConn != nil {
+				terminal.agentConn.Close()
+			}
+		}()
+	}
+
+	for {
+		msgType, data, err := conn.ReadMessage()
+		if err != nil {
+			return
+		}
+		// 将文本消息转换为命令输入
+		if msgType == websocket.TextMessage {
+			data = append([]byte{0}, data...)
+		}
+		// 传递给对方
+		if isAgent {
+			err = terminal.userConn.WriteMessage(websocket.BinaryMessage, data)
+		} else {
+			err = terminal.agentConn.WriteMessage(websocket.BinaryMessage, data)
+		}
+		if err != nil {
+			return
+		}
+	}
+}
+
+type createTerminalRequest struct {
+	Host     string
+	Protocol string
+	ID       uint64
+}
+
+func (cp *commonPage) createTerminal(c *gin.Context) {
+	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "无权访问",
+			Msg:   "用户未登录",
+			Link:  "/login",
+			Btn:   "去登录",
+		}, true)
+		return
+	}
+	var createTerminalReq createTerminalRequest
+	if err := c.ShouldBind(&createTerminalReq); err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "请求参数有误：" + err.Error(),
+			Link:  "/server",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+
+	id, err := uuid.GenerateUUID()
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusInternalServerError,
+			Title: "系统错误",
+			Msg:   "生成会话ID失败",
+			Link:  "/server",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+
+	dao.ServerLock.RLock()
+	server := dao.ServerList[createTerminalReq.ID]
+	dao.ServerLock.RUnlock()
+	if server == nil || server.TaskStream == nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "服务器不存在或处于离线状态",
+			Link:  "/server",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+
+	cp.terminalsLock.Lock()
+	defer cp.terminalsLock.Unlock()
+
+	cp.terminals[id] = &terminalContext{
+		serverID: createTerminalReq.ID,
+		host:     createTerminalReq.Host,
+		useSSL:   createTerminalReq.Protocol == "https:",
+	}
+
+	c.HTML(http.StatusOK, "dashboard/terminal", mygin.CommonEnvironment(c, gin.H{
+		"SessionID": id,
+	}))
 }

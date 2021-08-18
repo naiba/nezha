@@ -1,0 +1,47 @@
+{{define "dashboard/terminal"}}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal - {{.Title}}</title>
+    <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.13.0/css/xterm.css">
+</head>
+
+<style>
+    html,
+    body,
+    #terminal-container {
+        padding: unset;
+        margin: unset;
+        width: 100vw;
+        height: 100vh;
+    }
+</style>
+
+<body>
+    <div id="terminal-container"></div>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@4.13.0/lib/xterm.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-attach@0.6.0/lib/xterm-addon-attach.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.min.js"></script>
+    <script>
+        const term = new Terminal({
+            screenKeys: true,
+            useStyle: true,
+            cursorBlink: true,
+        });
+        const socket = new WebSocket((window.location.protocol == 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/terminal/' + '{{.SessionID}}');
+        const attachAddon = new AttachAddon.AttachAddon(socket);
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(attachAddon);
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal-container'));
+        fitAddon.fit()
+    </script>
+</body>
+
+</html>
+{{end}}

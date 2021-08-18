@@ -13,7 +13,17 @@ const (
 	TaskTypeICMPPing
 	TaskTypeTCPPing
 	TaskTypeCommand
+	TaskTypeTerminal
 )
+
+type TerminalTask struct {
+	// websocket 主机名
+	Host string `json:"host,omitempty"`
+	// 是否启用 SSL
+	UseSSL bool `json:"use_ssl,omitempty"`
+	// 会话标识
+	Session string `json:"session,omitempty"`
+}
 
 const (
 	MonitorCoverAll = iota

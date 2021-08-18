@@ -155,6 +155,29 @@ function addOrEditNotification(notification) {
   );
 }
 
+function connectToServer(id) {
+  post('/terminal', { Host: window.location.host, Protocol: window.location.protocol, ID: id })
+}
+
+function post(path, params, method = 'post') {
+  const form = document.createElement('form');
+  form.method = method;
+  form.action = path;
+
+  for (const key in params) {
+    if (params.hasOwnProperty(key)) {
+      const hiddenField = document.createElement('input');
+      hiddenField.type = 'hidden';
+      hiddenField.name = key;
+      hiddenField.value = params[key];
+      form.appendChild(hiddenField);
+    }
+  }
+
+  document.body.appendChild(form);
+  form.submit();
+}
+
 function addOrEditServer(server, conf) {
   const modal = $(".server.modal");
   modal.children(".header").text((server ? "修改" : "添加") + "服务器");

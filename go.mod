@@ -13,6 +13,8 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2
+	github.com/hashicorp/go-uuid v1.0.1
+	github.com/kr/pty v1.1.1
 	github.com/onsi/ginkgo v1.7.0 // indirect
 	github.com/onsi/gomega v1.4.3 // indirect
 	github.com/ory/graceful v0.1.1

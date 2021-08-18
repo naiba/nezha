@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -27,8 +28,41 @@ func main() {
 	// httpWithSSLInfo()
 	// sysinfo()
 	// cmdExec()
-	resolveIP("ipapi.co", true)
-	resolveIP("ipapi.co", false)
+	// resolveIP("ipapi.co", true)
+	// resolveIP("ipapi.co", false)
+	log.Println(exec.LookPath("powershell.exe"))
+	defaultShell := os.Getenv("SHELL")
+	if defaultShell == "" {
+		defaultShell = "sh"
+	}
+	cmd := exec.Command(defaultShell)
+	cmd.Stdin = os.Stdin
+	stdoutReader, err := cmd.StdoutPipe()
+	if err != nil {
+		println("Terminal StdoutPipe:", err)
+		return
+	}
+	stderrReader, err := cmd.StderrPipe()
+	if err != nil {
+		println("Terminal StderrPipe: ", err)
+		return
+	}
+
+	readers := []io.Reader{stdoutReader, stderrReader}
+	for i := 0; i < len(readers); i++ {
+		go func(j int) {
+			data := make([]byte, 2048)
+			for {
+				count, err := readers[j].Read(data)
+				if err != nil {
+					panic(err)
+				}
+				os.Stdout.Write(data[:count])
+			}
+		}(i)
+	}
+
+	cmd.Run()
 }
 
 func resolveIP(addr string, ipv6 bool) {

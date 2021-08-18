@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"code.cloudfoundry.org/bytefmt"
@@ -135,7 +136,7 @@ func ServeWeb(port uint) *http.Server {
 
 func routers(r *gin.Engine) {
 	// 通用页面
-	cp := commonPage{r}
+	cp := commonPage{r: r, terminals: make(map[string]*terminalContext), terminalsLock: new(sync.Mutex)}
 	cp.serve()
 	// 游客页面
 	gp := guestPage{r}
