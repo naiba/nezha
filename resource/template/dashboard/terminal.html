@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terminal - {{.Title}}</title>
+    <title>tty#{{.SessionID}} - {{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.13.0/css/xterm.css">
 </head>
@@ -22,7 +22,7 @@
     }
 </style>
 
-<body>
+<body onresize="onResize()">
     <div id="terminal-container"></div>
     <script src="https://cdn.jsdelivr.net/npm/xterm@4.13.0/lib/xterm.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-attach@0.6.0/lib/xterm-addon-attach.min.js"></script>
@@ -39,7 +39,22 @@
         term.loadAddon(attachAddon);
         term.loadAddon(fitAddon);
         term.open(document.getElementById('terminal-container'));
-        fitAddon.fit()
+
+        function onResize() {
+            fitAddon.fit()
+            const w = fitAddon.proposeDimensions();
+            const prefix = new Int8Array([1]);
+            const resizeMessage = new TextEncoder().encode(JSON.stringify({
+                Rows: w.rows,
+                Cols: w.cols,
+            }));
+
+            var msg = new Int8Array(prefix.length + resizeMessage.length);
+            msg.set(prefix);
+            msg.set(resizeMessage, prefix.length);
+
+            socket.send(msg)
+        }
     </script>
 </body>
 

@@ -1,10 +1,10 @@
-// +build !windows
+// +build windows
 
-package utils
+package processgroup
 
 import (
+	"fmt"
 	"os/exec"
-	"syscall"
 )
 
 type ProcessExitGroup struct {
@@ -17,7 +17,7 @@ func NewProcessExitGroup() (ProcessExitGroup, error) {
 
 func (g *ProcessExitGroup) Dispose() error {
 	for _, c := range g.cmds {
-		if err := syscall.Kill(-c.Process.Pid, syscall.SIGKILL); err != nil {
+		if err := exec.Command("taskkill", "/F", "/T", "/PID", fmt.Sprint(c.Process.Pid)).Run(); err != nil {
 			return err
 		}
 	}
@@ -25,7 +25,6 @@ func (g *ProcessExitGroup) Dispose() error {
 }
 
 func (g *ProcessExitGroup) AddProcess(cmd *exec.Cmd) error {
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	g.cmds = append(g.cmds, cmd)
 	return nil
 }

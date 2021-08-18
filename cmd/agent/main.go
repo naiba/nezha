@@ -14,20 +14,18 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"runtime"
-	"syscall"
 	"time"
-	"unsafe"
 
 	"github.com/blang/semver"
 	"github.com/genkiroid/cert"
 	"github.com/go-ping/ping"
 	"github.com/gorilla/websocket"
-	"github.com/kr/pty"
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
 	"google.golang.org/grpc"
 
 	"github.com/naiba/nezha/cmd/agent/monitor"
+	"github.com/naiba/nezha/cmd/agent/processgroup"
+	"github.com/naiba/nezha/cmd/agent/pty"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
@@ -96,6 +94,8 @@ func run() {
 	auth := rpc.AuthHandler{
 		ClientSecret: clientSecret,
 	}
+
+	go pty.DownloadDependency()
 
 	// 上报服务器信息
 	go reportState()
@@ -311,7 +311,7 @@ func handleCommandTask(task *pb.Task, result *pb.TaskResult) {
 	startedAt := time.Now()
 	var cmd *exec.Cmd
 	var endCh = make(chan struct{})
-	pg, err := utils.NewProcessExitGroup()
+	pg, err := processgroup.NewProcessExitGroup()
 	if err != nil {
 		// 进程组创建失败，直接退出
 		result.Data = err.Error()
@@ -345,6 +345,11 @@ func handleCommandTask(task *pb.Task, result *pb.TaskResult) {
 	result.Delay = float32(time.Since(startedAt).Seconds())
 }
 
+type WindowSize struct {
+	Cols uint32
+	Rows uint32
+}
+
 func handleTerminalTask(task *pb.Task) {
 	var terminal model.TerminalTask
 	err := json.Unmarshal([]byte(task.GetData()), &terminal)
@@ -365,36 +370,18 @@ func handleTerminalTask(task *pb.Task) {
 	}
 	defer conn.Close()
 
-	var cmd *exec.Cmd
-	var shellPath string
-	if runtime.GOOS == "windows" {
-		shellPath, err = exec.LookPath("powershell.exe")
-		if err != nil || shellPath == "" {
-			shellPath = "cmd.exe"
-		}
-	} else {
-		shellPath = os.Getenv("SHELL")
-		if shellPath == "" {
-			shellPath = "sh"
-		}
-	}
-	cmd = exec.Command(shellPath)
-	cmd.Env = append(os.Environ(), "TERM=xterm")
-
-	tty, err := pty.Start(cmd)
+	tty, err := pty.Start()
 	if err != nil {
 		println("Terminal pty.Start失败：", err)
 		return
 	}
 
 	defer func() {
-		cmd.Process.Kill()
-		cmd.Process.Wait()
 		tty.Close()
 		conn.Close()
 		println("terminal exit", terminal.Session)
 	}()
-	println("terminal init", terminal.Session, shellPath)
+	println("terminal init", terminal.Session)
 
 	go func() {
 		for {
@@ -434,17 +421,12 @@ func handleTerminalTask(task *pb.Task) {
 			io.Copy(tty, reader)
 		case 1:
 			decoder := json.NewDecoder(reader)
-			resizeMessage := windowSize{}
+			var resizeMessage WindowSize
 			err := decoder.Decode(&resizeMessage)
 			if err != nil {
 				continue
 			}
-			syscall.Syscall(
-				syscall.SYS_IOCTL,
-				tty.Fd(),
-				syscall.TIOCSWINSZ,
-				uintptr(unsafe.Pointer(&resizeMessage)),
-			)
+			tty.Setsize(resizeMessage.Cols, resizeMessage.Rows)
 		}
 	}
 }
