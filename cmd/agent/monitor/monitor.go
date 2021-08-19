@@ -15,7 +15,6 @@ import (
 	"github.com/shirou/gopsutil/v3/load"
 	"github.com/shirou/gopsutil/v3/mem"
 	"github.com/shirou/gopsutil/v3/net"
-	"github.com/shirou/gopsutil/v3/process"
 
 	"github.com/naiba/nezha/model"
 )
@@ -114,23 +113,6 @@ func GetState(conf GetStateConfig) *model.HostState {
 		}
 	}
 
-	var processCount uint64
-	if !conf.SkipProcessCount {
-		ps, _ := process.Pids()
-		processCount = uint64(len(ps))
-		// log.Println("pids", len(ps), err)
-		// var threads uint64
-		// for i := 0; i < len(ps); i++ {
-		// 	p, err := process.NewProcess(ps[i])
-		// 	if err != nil {
-		// 		continue
-		// 	}
-		// 	c, _ := p.NumThreads()
-		// 	threads += uint64(c)
-		// }
-		// log.Println("threads", threads)
-	}
-
 	return &model.HostState{
 		CPU:            cpuPercent,
 		MemUsed:        mv.Total - mv.Available,
@@ -146,7 +128,7 @@ func GetState(conf GetStateConfig) *model.HostState {
 		Load15:         loadStat.Load15,
 		TcpConnCount:   tcpConnCount,
 		UdpConnCount:   udpConnCount,
-		ProcessCount:   processCount,
+		ProcessCount:   hi.Procs,
 	}
 }
 

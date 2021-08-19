@@ -79,7 +79,6 @@ func main() {
 	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
 	flag.BoolVar(&stateConf.SkipConnectionCount, "kconn", false, "不监控连接数")
-	flag.BoolVar(&stateConf.SkipProcessCount, "kprocess", false, "不监控进程数")
 	flag.Parse()
 
 	if server == "" || clientSecret == "" {
@@ -323,6 +322,7 @@ func handleCommandTask(task *pb.Task, result *pb.TaskResult) {
 	} else {
 		cmd = exec.Command("sh", "-c", task.GetData())
 	}
+	cmd.Env = os.Environ()
 	pg.AddProcess(cmd)
 	go func() {
 		select {
