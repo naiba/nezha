@@ -48,6 +48,11 @@
             onResize()
         }
 
+        socket.onclose = () => {
+            alert('Terminal 连接超时或会话已结束')
+            window.close()
+        }
+
         socket.onerror = () => {
             alert('Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反代情况')
         }

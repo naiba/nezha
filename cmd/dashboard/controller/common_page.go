@@ -161,8 +161,6 @@ func (cp *commonPage) ws(c *gin.Context) {
 }
 
 func (cp *commonPage) terminal(c *gin.Context) {
-	log.Println("terminal connected", c.Request.URL)
-	defer log.Println("terminal disconnected", c.Request.URL)
 	terminalID := c.Param("id")
 	cp.terminalsLock.Lock()
 	if terminalID == "" || cp.terminals[terminalID] == nil {
@@ -181,6 +179,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	cp.terminalsLock.Unlock()
 
 	defer func() {
+		// 清理 context
 		cp.terminalsLock.Lock()
 		defer cp.terminalsLock.Unlock()
 		delete(cp.terminals, terminalID)
@@ -272,8 +271,17 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	}
 	defer conn.Close()
 
+	log.Println("terminal connected", isAgent, c.Request.URL)
+	defer log.Println("terminal disconnected", isAgent, c.Request.URL)
+
 	if isAgent {
 		terminal.agentConn = conn
+		defer func() {
+			// Agent断开链接时断开用户连接
+			if terminal.userConn != nil {
+				terminal.userConn.Close()
+			}
+		}()
 	} else {
 		terminal.userConn = conn
 		defer func() {
@@ -284,23 +292,57 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}()
 	}
 
+	deadlineCh := make(chan interface{})
+	go func() {
+		connectDeadline := time.NewTimer(time.Second * 15)
+		<-connectDeadline.C
+		close(deadlineCh)
+	}()
+
+	dataCh := make(chan []byte)
+	go func() {
+		for {
+			msgType, data, err := conn.ReadMessage()
+			if err != nil {
+				return
+			}
+			// 将文本消息转换为命令输入
+			if msgType == websocket.TextMessage {
+				data = append([]byte{0}, data...)
+			}
+
+			dataCh <- data
+		}
+	}()
+
+	var dataBuffer [][]byte
+	var distConn *websocket.Conn
+
 	for {
-		msgType, data, err := conn.ReadMessage()
-		if err != nil {
-			return
-		}
-		// 将文本消息转换为命令输入
-		if msgType == websocket.TextMessage {
-			data = append([]byte{0}, data...)
-		}
-		// 传递给对方
-		if isAgent {
-			err = terminal.userConn.WriteMessage(websocket.BinaryMessage, data)
-		} else {
-			err = terminal.agentConn.WriteMessage(websocket.BinaryMessage, data)
-		}
-		if err != nil {
-			return
+		select {
+		case <-deadlineCh:
+			if distConn == nil {
+				return
+			}
+		case data := <-dataCh:
+			dataBuffer = append(dataBuffer, data)
+			if distConn == nil {
+				// 传递给对方
+				if isAgent {
+					distConn = terminal.userConn
+				} else {
+					distConn = terminal.agentConn
+				}
+			}
+			if distConn != nil {
+				for i := 0; i < len(dataBuffer); i++ {
+					err = distConn.WriteMessage(websocket.BinaryMessage, dataBuffer[i])
+					if err != nil {
+						return
+					}
+				}
+				dataBuffer = dataBuffer[:0]
+			}
 		}
 	}
 }
