@@ -299,6 +299,9 @@ restart() {
   proxy /ws http://ip:8008 {
       websocket
   }
+  proxy /terminal/* http://ip:8008 {
+      websocket
+  }
   ```
 
 </details>
