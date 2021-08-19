@@ -75,7 +75,6 @@ func GetHost() *model.Host {
 
 type GetStateConfig struct {
 	SkipConnectionCount bool
-	SkipProcessCount    bool
 }
 
 func GetState(conf GetStateConfig) *model.HostState {
