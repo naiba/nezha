@@ -296,21 +296,22 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	go func() {
 		connectDeadline := time.NewTimer(time.Second * 15)
 		<-connectDeadline.C
-		close(deadlineCh)
+		deadlineCh <- struct{}{}
 	}()
 
 	dataCh := make(chan []byte)
+	errorCh := make(chan error)
 	go func() {
 		for {
 			msgType, data, err := conn.ReadMessage()
 			if err != nil {
+				errorCh <- err
 				return
 			}
 			// 将文本消息转换为命令输入
 			if msgType == websocket.TextMessage {
 				data = append([]byte{0}, data...)
 			}
-
 			dataCh <- data
 		}
 	}()
@@ -324,6 +325,8 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			if distConn == nil {
 				return
 			}
+		case <-errorCh:
+			return
 		case data := <-dataCh:
 			dataBuffer = append(dataBuffer, data)
 			if distConn == nil {
