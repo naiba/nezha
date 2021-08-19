@@ -370,6 +370,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "dashboard/terminal", mygin.CommonEnvironment(c, gin.H{
-		"SessionID": id,
+		"SessionID":  id,
+		"ServerName": server.Name,
 	}))
 }

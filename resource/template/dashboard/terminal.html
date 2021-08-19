@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tty#{{.SessionID}} - {{.Title}}</title>
+    <title>tty@{{.ServerName}} - {{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.13.0/css/xterm.css">
 </head>
@@ -19,6 +19,10 @@
         margin: unset;
         width: 100vw;
         height: 100vh;
+    }
+
+    body {
+        background-color: black;
     }
 </style>
 
@@ -42,6 +46,10 @@
 
         socket.onopen = () => {
             onResize()
+        }
+
+        socket.onerror = () => {
+            alert('Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反代情况')
         }
 
         function onResize() {
