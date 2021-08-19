@@ -1,6 +1,5 @@
 debug: false
-httpport: nz_grpc_port
-grpcport: 
+grpcport: nz_grpc_port
 oauth2:
   type: "nz_oauth2_type" #Oauth2 登录接入类型，gitee/github
   admin: "nz_admin_logins" #管理员列表，半角逗号隔开
