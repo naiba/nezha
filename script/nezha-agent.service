@@ -21,10 +21,10 @@ Restart=always
 
 # Some distributions may not support these hardening directives. If you cannot start the service due
 # to an unknown option, comment out the ones not supported by your version of systemd.
-ProtectSystem=full
-PrivateDevices=yes
-PrivateTmp=yes
-NoNewPrivileges=true
+#ProtectSystem=full
+#PrivateDevices=yes
+#PrivateTmp=yes
+#NoNewPrivileges=true
 
 [Install]
 WantedBy=multi-user.target
