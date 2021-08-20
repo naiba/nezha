@@ -63,13 +63,6 @@ const (
 	networkTimeOut = time.Second * 5  // 普通网络超时
 )
 
-type windowSize struct {
-	Rows uint16 `json:"rows"`
-	Cols uint16 `json:"cols"`
-	X    uint16
-	Y    uint16
-}
-
 func main() {
 	// 来自于 GoReleaser 的版本号
 	monitor.Version = version

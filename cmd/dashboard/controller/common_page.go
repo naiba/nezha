@@ -37,13 +37,13 @@ type commonPage struct {
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
 	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
+	cr.GET("/terminal/:id", cp.terminal)
 	cr.POST("/view-password", cp.issueViewPassword)
 	cr.Use(cp.checkViewPassword) // 前端查看密码鉴权
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
 	cr.GET("/ws", cp.ws)
 	cr.POST("/terminal", cp.createTerminal)
-	cr.GET("/terminal/:id", cp.terminal)
 }
 
 type viewPasswordForm struct {
