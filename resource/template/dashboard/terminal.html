@@ -32,6 +32,41 @@
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-attach@0.6.0/lib/xterm-addon-attach.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.min.js"></script>
     <script>
+        let sendResizing = false;
+
+        function doResize() {
+            fitAddon.fit()
+            const w = fitAddon.proposeDimensions();
+            const prefix = new Int8Array([1]);
+            const resizeMessage = new TextEncoder().encode(JSON.stringify({
+                Rows: w.rows,
+                Cols: w.cols,
+            }));
+
+            var msg = new Int8Array(prefix.length + resizeMessage.length);
+            msg.set(prefix);
+            msg.set(resizeMessage, prefix.length);
+
+            socket.send(msg)
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function onResize() {
+            if (sendResizing) return;
+            sendResizing = true;
+            try {
+                await sleep(1500);
+                doResize();
+            } catch (error) {
+                console.log('resize', error);
+            } finally {
+                sendResizing = false
+            }
+        }
+
         const term = new Terminal({
             screenKeys: true,
             useStyle: true,
@@ -55,22 +90,6 @@
 
         socket.onerror = () => {
             alert('Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反代情况')
-        }
-
-        function onResize() {
-            fitAddon.fit()
-            const w = fitAddon.proposeDimensions();
-            const prefix = new Int8Array([1]);
-            const resizeMessage = new TextEncoder().encode(JSON.stringify({
-                Rows: w.rows,
-                Cols: w.cols,
-            }));
-
-            var msg = new Int8Array(prefix.length + resizeMessage.length);
-            msg.set(prefix);
-            msg.set(resizeMessage, prefix.length);
-
-            socket.send(msg)
         }
     </script>
 </body>

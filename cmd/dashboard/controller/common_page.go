@@ -294,9 +294,20 @@ func (cp *commonPage) terminal(c *gin.Context) {
 
 	deadlineCh := make(chan interface{})
 	go func() {
+		// 对方连接超时
 		connectDeadline := time.NewTimer(time.Second * 15)
 		<-connectDeadline.C
 		deadlineCh <- struct{}{}
+	}()
+
+	go func() {
+		// PING 保活
+		for {
+			if err = conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				return
+			}
+			time.Sleep(time.Second * 10)
+		}
 	}()
 
 	dataCh := make(chan []byte)
@@ -318,10 +329,20 @@ func (cp *commonPage) terminal(c *gin.Context) {
 
 	var dataBuffer [][]byte
 	var distConn *websocket.Conn
+	checkDistConn := func() {
+		if distConn == nil {
+			if isAgent {
+				distConn = terminal.userConn
+			} else {
+				distConn = terminal.agentConn
+			}
+		}
+	}
 
 	for {
 		select {
 		case <-deadlineCh:
+			checkDistConn()
 			if distConn == nil {
 				return
 			}
@@ -329,14 +350,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			return
 		case data := <-dataCh:
 			dataBuffer = append(dataBuffer, data)
-			if distConn == nil {
-				// 传递给对方
-				if isAgent {
-					distConn = terminal.userConn
-				} else {
-					distConn = terminal.agentConn
-				}
-			}
+			checkDistConn()
 			if distConn != nil {
 				for i := 0; i < len(dataBuffer); i++ {
 					err = distConn.WriteMessage(websocket.BinaryMessage, dataBuffer[i])
