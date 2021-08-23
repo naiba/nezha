@@ -222,9 +222,9 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
-    <summary>如何禁用连接数/进程数等占用资源的监控？</summary>
+    <summary>如何禁用网络连接数监控？</summary>
 
-编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `-kconn` 就是不监控连接数，加上 `-kprocess` 就是不监控进程数
+编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `-kconn` 就是不监控连接数
 
 </details>
 
@@ -270,7 +270,7 @@ restart() {
 </details>
 
 <details>
-    <summary>实时通道断开/Terminal管理一直黑屏</summary>
+    <summary>实时通道断开/终端连接失败</summary>
 使用反向代理时需要针对 `/ws` 路径的 WebSocket 进行特别配置以支持实时更新服务器状态。
 
 - Nginx(宝塔)：在你的 nginx 配置文件中加入以下代码
