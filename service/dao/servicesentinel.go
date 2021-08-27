@@ -269,7 +269,7 @@ func (ss *ServiceSentinel) worker() {
 			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
 			dataToSave := ss.serviceCurrentStatusData[mh.MonitorID]
 			if err := DB.Create(&dataToSave).Error; err != nil {
-				log.Println(err)
+				log.Println("服务监控数据持久化失败：", err)
 			}
 		}
 		// 更新当前状态
@@ -289,9 +289,9 @@ func (ss *ServiceSentinel) worker() {
 			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID])
 		}
 		stateStr := getStateStr(upPercent)
-		if Conf.Debug {
+		if !mh.Successful {
 			ServerLock.RLock()
-			log.Println("服务监控上报:", ss.monitors[mh.MonitorID].Target, stateStr, "上报者:", ServerList[r.Reporter].Name, "是否正常:", mh.Successful, "请求输出:", mh.Data)
+			log.Println("服务故障上报：", ss.monitors[mh.MonitorID].Target, stateStr, "上报者：", ServerList[r.Reporter].Name, "请求输出：", mh.Data)
 			ServerLock.RUnlock()
 		}
 		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {

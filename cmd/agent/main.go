@@ -120,7 +120,7 @@ func run() {
 		timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
 		conn, err = grpc.DialContext(timeOutCtx, server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
-			println("grpc.Dial err: ", err)
+			println("与面板建立连接失败：", err)
 			cancel()
 			retry()
 			continue
@@ -131,7 +131,7 @@ func run() {
 		timeOutCtx, cancel = context.WithTimeout(context.Background(), networkTimeOut)
 		_, err = client.ReportSystemInfo(timeOutCtx, monitor.GetHost().PB())
 		if err != nil {
-			println("client.ReportSystemInfo err: ", err)
+			println("上报系统信息失败：", err)
 			cancel()
 			retry()
 			continue
@@ -141,12 +141,12 @@ func run() {
 		// 执行 Task
 		tasks, err := client.RequestTask(context.Background(), monitor.GetHost().PB())
 		if err != nil {
-			println("client.RequestTask err: ", err)
+			println("请求任务失败：", err)
 			retry()
 			continue
 		}
 		err = receiveTasks(tasks)
-		println("receiveTasks exit to main: ", err)
+		println("receiveTasks exit to main：", err)
 		retry()
 	}
 }
@@ -187,7 +187,7 @@ func doTask(task *pb.Task) {
 	case model.TaskTypeCommand:
 		handleCommandTask(task, &result)
 	default:
-		println("Unknown action: ", task)
+		println("不支持的任务：", task)
 	}
 	client.ReportTask(context.Background(), &result)
 }
@@ -222,16 +222,13 @@ func doSelfUpdate() {
 		updateCh <- struct{}{}
 	}()
 	v := semver.MustParse(version)
-	println("Check update", v)
+	println("检查更新：", v)
 	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
 	if err != nil {
-		println("Binary update failed:", err)
+		println("自动更新失败：", err)
 		return
 	}
-	if latest.Version.Equals(v) {
-		println("Current binary is up to date", version)
-	} else {
-		println("Upgrade successfully", latest.Version)
+	if !latest.Version.Equals(v) {
 		os.Exit(1)
 	}
 }

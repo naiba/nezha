@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -101,11 +100,6 @@ func (n *Notification) Send(message string) error {
 	if err == nil && (resp.StatusCode < 200 || resp.StatusCode > 299) {
 		err = fmt.Errorf("%d %s", resp.StatusCode, resp.Status)
 	}
-
-	// defer resp.Body.Close()
-	// body, _ := ioutil.ReadAll(resp.Body)
-
-	log.Printf("%s 通知：%s %s %+v\n", n.Name, message, reqBody, err)
 
 	return err
 }
