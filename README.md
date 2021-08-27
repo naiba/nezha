@@ -106,7 +106,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - `net_in_speed` 入站网速、`net_out_speed` 出站网速、`net_all_speed` 双向网速、`transfer_in` 入站流量、`transfer_out` 出站流量、`transfer_all` 双向流量
   - `offline` 离线监控
   - `load1`、`load5`、`load15` 负载
-  - `process_count` 进程数 *目前取线程数占用资源太多，暂时不支持*
+  - `process_count` 进程数 _目前取线程数占用资源太多，暂时不支持_
   - `tcp_conn_count`、`udp_conn_count` 连接数
 - duration：持续秒数，秒数内采样记录 30% 以上触发阈值才会报警（防数据插针）
 - min/max
@@ -224,7 +224,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>如何禁用网络连接数监控？</summary>
 
-编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `-kconn` 就是不监控连接数
+编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `--skip-conn` 就是不监控连接数
 
 </details>
 

@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -21,6 +20,7 @@ import (
 	"github.com/go-ping/ping"
 	"github.com/gorilla/websocket"
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
+	flag "github.com/spf13/pflag"
 	"google.golang.org/grpc"
 
 	"github.com/naiba/nezha/cmd/agent/monitor"
@@ -35,6 +35,7 @@ import (
 func init() {
 	cert.TimeoutSeconds = 30
 	http.DefaultClient.Timeout = time.Second * 5
+	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 }
 
 var (
@@ -67,14 +68,13 @@ func main() {
 	// 来自于 GoReleaser 的版本号
 	monitor.Version = version
 
-	flag.String("i", "", "unused 旧Agent配置兼容")
-	flag.BoolVar(&debug, "d", false, "开启调试信息")
-	flag.StringVar(&server, "s", "localhost:5555", "管理面板RPC端口")
-	flag.StringVar(&clientSecret, "p", "", "Agent连接Secret")
-	flag.BoolVar(&stateConf.SkipConnectionCount, "kconn", false, "不监控连接数")
+	flag.BoolVarP(&debug, "debug", "d", false, "开启调试信息")
+	flag.StringVarP(&server, "*server", "s", "localhost:5555", "管理面板RPC端口")
+	flag.StringVarP(&clientSecret, "password", "p", "", "Agent连接Secret")
+	flag.BoolVar(&stateConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
 	flag.Parse()
 
-	if server == "" || clientSecret == "" {
+	if clientSecret == "" {
 		flag.Usage()
 		return
 	}
