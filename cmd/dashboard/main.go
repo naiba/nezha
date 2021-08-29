@@ -82,7 +82,7 @@ func recordTransferHourlyUsage() {
 		tx := model.Transfer{
 			ServerID: id,
 			In:       server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn),
-			Out:      server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn),
+			Out:      server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut),
 		}
 		server.PrevHourlyTransferIn = int64(server.State.NetInTransfer)
 		server.PrevHourlyTransferOut = int64(server.State.NetOutTransfer)
