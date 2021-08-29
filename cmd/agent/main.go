@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,13 +9,11 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"os/exec"
 	"time"
 
 	"github.com/blang/semver"
-	"github.com/genkiroid/cert"
 	"github.com/go-ping/ping"
 	"github.com/gorilla/websocket"
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
@@ -33,7 +30,6 @@ import (
 )
 
 func init() {
-	cert.TimeoutSeconds = 30
 	http.DefaultClient.Timeout = time.Second * 5
 	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 }
@@ -49,9 +45,6 @@ var (
 	inited     bool
 	updateCh   = make(chan struct{}) // Agent 自动更新间隔
 	httpClient = &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
@@ -274,22 +267,11 @@ func handleHttpGetTask(task *pb.Task, result *pb.TaskResult) {
 	}
 	if err == nil {
 		// 检查 SSL 证书信息
-		serviceUrl, err := url.Parse(task.GetData())
-		if err == nil {
-			if serviceUrl.Scheme == "https" {
-				c := cert.NewCert(serviceUrl.Host)
-				if c.Error != "" {
-					result.Data = "SSL证书错误：" + c.Error
-				} else {
-					result.Data = c.Issuer + "|" + c.NotAfter
-					result.Successful = true
-				}
-			} else {
-				result.Successful = true
-			}
-		} else {
-			result.Data = "URL解析错误：" + err.Error()
+		if len(resp.TLS.PeerCertificates) > 0 {
+			c := resp.TLS.PeerCertificates[0]
+			result.Data = c.Issuer.CommonName + "|" + c.NotAfter.In(time.Local).String()
 		}
+		result.Successful = true
 	} else {
 		// HTTP 请求失败
 		result.Data = err.Error()

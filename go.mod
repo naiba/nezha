@@ -8,7 +8,6 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/creack/pty v1.1.14
 	github.com/fsnotify/fsnotify v1.4.9
-	github.com/genkiroid/cert v0.0.0-20191007122723-897560fbbe50
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.0
 	github.com/go-ping/ping v0.0.0-20210407214646-e4e642a95741
