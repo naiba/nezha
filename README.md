@@ -135,7 +135,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>服务监控：HTTP、SSL证书、ping、TCP 端口等。</summary>
 
-进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。
+进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。目前监控频率 30 秒，不可自定义。
 
 </details>
 
@@ -312,3 +312,5 @@ restart() {
 - [哪吒监控，一个便携服务器状态监控面板搭建教程，不想拥有一个自己的探针吗？](https://haoduck.com/644.html)
 - [哪吒监控：小鸡们的最佳探针](https://www.zhujizixun.com/2843.html) _（已过时）_
 - [>>更多教程](https://www.google.com/search?q="哪吒监控"+"教程") (Google)
+
+SEO **云探针、多服务器探针、云监控、多服务器云监控**
