@@ -135,7 +135,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>服务监控：HTTP、SSL证书、ping、TCP 端口等。</summary>
 
-进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。目前监控频率 30 秒，不可自定义。
+进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。
 
 </details>
 
