@@ -17,7 +17,11 @@ import (
 	"github.com/naiba/nezha/service/dao"
 )
 
+var serviceSentinelDispatchBus chan model.Monitor
+
 func init() {
+	serviceSentinelDispatchBus = make(chan model.Monitor)
+
 	shanghai, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
 		panic(err)
@@ -55,7 +59,7 @@ func initSystem() {
 	dao.DB.AutoMigrate(model.Server{}, model.User{},
 		model.Notification{}, model.AlertRule{}, model.Monitor{},
 		model.MonitorHistory{}, model.Cron{}, model.Transfer{})
-	dao.NewServiceSentinel()
+	dao.NewServiceSentinel(serviceSentinelDispatchBus)
 
 	loadServers() //加载服务器列表
 	loadCrons()   //加载计划任务
@@ -65,6 +69,7 @@ func initSystem() {
 	if err != nil {
 		panic(err)
 	}
+
 	// 流量记录打点
 	_, err = dao.Cron.AddFunc("0 * * * *", recordTransferHourlyUsage)
 	if err != nil {
@@ -173,7 +178,7 @@ func loadCrons() {
 func main() {
 	cleanMonitorHistory()
 	go rpc.ServeRPC(dao.Conf.GRPCPort)
-	go rpc.DispatchTask(time.Second * 30)
+	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go dao.AlertSentinelStart()
 	srv := controller.ServeWeb(dao.Conf.HTTPPort)
 	graceful.Graceful(func() error {

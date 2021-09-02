@@ -2,8 +2,10 @@ package model
 
 import (
 	"encoding/json"
+	"fmt"
 
 	pb "github.com/naiba/nezha/proto"
+	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
 )
 
@@ -36,9 +38,12 @@ type Monitor struct {
 	Type           uint8
 	Target         string
 	SkipServersRaw string
+	Duration       uint64
 	Notify         bool
 	Cover          uint8
-	SkipServers    map[uint64]bool `gorm:"-" json:"-"`
+
+	SkipServers map[uint64]bool `gorm:"-" json:"-"`
+	CronJobID   cron.EntryID    `gorm:"-" json:"-"`
 }
 
 func (m *Monitor) PB() *pb.Task {
@@ -47,6 +52,14 @@ func (m *Monitor) PB() *pb.Task {
 		Type: uint64(m.Type),
 		Data: m.Target,
 	}
+}
+
+func (m *Monitor) CronSpec() string {
+	if m.Duration == 0 {
+		// 默认间隔 30 秒
+		m.Duration = 30
+	}
+	return fmt.Sprintf("@every %ds", m.Duration)
 }
 
 func (m *Monitor) AfterFind(tx *gorm.DB) error {

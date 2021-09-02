@@ -55,7 +55,8 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "RequestMethod" ||
                 item.name === "DisplayIndex" ||
                 item.name === "Type" ||
-                item.name === "Cover"
+                item.name === "Cover" ||
+                item.name === "Duration"
               ) {
                 obj[item.name] = parseInt(item.value);
               } else {
@@ -218,6 +219,7 @@ function addOrEditMonitor(monitor) {
   modal.find("input[name=ID]").val(monitor ? monitor.ID : null);
   modal.find("input[name=Name]").val(monitor ? monitor.Name : null);
   modal.find("input[name=Target]").val(monitor ? monitor.Target : null);
+  modal.find("input[name=Duration]").val(monitor && monitor.Duration ? monitor.Duration : 30);
   modal.find("select[name=Type]").val(monitor ? monitor.Type : 1);
   modal.find("select[name=Cover]").val(monitor ? monitor.Cover : 0);
   if (monitor && monitor.Notify) {

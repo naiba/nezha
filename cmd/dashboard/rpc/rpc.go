@@ -3,7 +3,6 @@ package rpc
 import (
 	"fmt"
 	"net"
-	"time"
 
 	"google.golang.org/grpc"
 
@@ -25,41 +24,36 @@ func ServeRPC(port uint) {
 	server.Serve(listen)
 }
 
-func DispatchTask(duration time.Duration) {
-	var index uint64 = 0
-	for {
-		var hasAliveAgent bool
-		tasks := dao.ServiceSentinelShared.Monitors()
+func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
+	workedServerIndex := 0
+	for task := range serviceSentinelDispatchBus {
+		round := 0
+		prevIndex := workedServerIndex
 		dao.SortedServerLock.RLock()
-		startedAt := time.Now()
-		for i := 0; i < len(tasks); i++ {
-			if index >= uint64(len(dao.SortedServerList)) {
-				index = 0
-				if !hasAliveAgent {
-					break
-				}
-				hasAliveAgent = false
-			}
-
-			// 1. 如果服务器不在线，跳过这个服务器
-			if dao.SortedServerList[index].TaskStream == nil {
-				i--
-				index++
+		// 如果已经轮了一整圈没有合适机器去请求，跳出循环
+		for round == 0 && prevIndex != workedServerIndex {
+			// 如果到了圈尾，再回到圈头，圈数加一，游标重置
+			if workedServerIndex == len(dao.SortedServerList) {
+				workedServerIndex = 0
+				round++
 				continue
 			}
-			// 2. 如果此任务不可使用此服务器请求，跳过这个服务器（有些 IPv6 only 开了 NAT64 的机器请求 IPv4 总会出问题）
-			if (tasks[i].Cover == model.MonitorCoverAll && tasks[i].SkipServers[dao.SortedServerList[index].ID]) ||
-				(tasks[i].Cover == model.MonitorCoverIgnoreAll && !tasks[i].SkipServers[dao.SortedServerList[index].ID]) {
-				i--
-				index++
+			// 如果服务器不在线，跳过这个服务器
+			if dao.SortedServerList[workedServerIndex].TaskStream == nil {
+				workedServerIndex++
 				continue
 			}
-
-			hasAliveAgent = true
-			dao.SortedServerList[index].TaskStream.Send(tasks[i].PB())
-			index++
+			// 如果此任务不可使用此服务器请求，跳过这个服务器（有些 IPv6 only 开了 NAT64 的机器请求 IPv4 总会出问题）
+			if (task.Cover == model.MonitorCoverAll && task.SkipServers[dao.SortedServerList[workedServerIndex].ID]) ||
+				(task.Cover == model.MonitorCoverIgnoreAll && !task.SkipServers[dao.SortedServerList[workedServerIndex].ID]) {
+				workedServerIndex++
+				continue
+			}
+			// 找到合适机器执行任务，跳出循环
+			dao.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+			workedServerIndex++
+			break
 		}
 		dao.SortedServerLock.RUnlock()
-		time.Sleep(time.Until(startedAt.Add(duration)))
 	}
 }

@@ -204,6 +204,7 @@ type monitorForm struct {
 	Cover          uint8
 	Notify         string
 	SkipServersRaw string
+	Duration       uint64
 }
 
 func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
@@ -218,6 +219,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.SkipServersRaw = mf.SkipServersRaw
 		m.Cover = mf.Cover
 		m.Notify = mf.Notify == "on"
+		m.Duration = mf.Duration
 	}
 	if err == nil {
 		if m.ID == 0 {
@@ -226,14 +228,15 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 			err = dao.DB.Save(&m).Error
 		}
 	}
+	if err == nil {
+		err = dao.ServiceSentinelShared.OnMonitorUpdate(m)
+	}
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("请求错误：%s", err),
 		})
 		return
-	} else {
-		dao.ServiceSentinelShared.OnMonitorUpdate()
 	}
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,

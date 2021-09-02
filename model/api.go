@@ -1,7 +1,7 @@
 package model
 
 type ServiceItemResponse struct {
-	Monitor     Monitor
+	Monitor     *Monitor
 	TotalUp     uint64
 	TotalDown   uint64
 	CurrentUp   uint64

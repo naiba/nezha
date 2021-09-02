@@ -10,6 +10,7 @@ import (
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
+	"github.com/robfig/cron/v3"
 )
 
 const _CurrentStatusSize = 30 // 统计 15 分钟内的数据为当前状态
@@ -27,7 +28,7 @@ type _TodayStatsOfMonitor struct {
 	Delay float32
 }
 
-func NewServiceSentinel() {
+func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	ServiceSentinelShared = &ServiceSentinel{
 		serviceReportChannel:                make(chan ReportData, 200),
 		serviceStatusToday:                  make(map[uint64]*_TodayStatsOfMonitor),
@@ -37,12 +38,15 @@ func NewServiceSentinel() {
 		lastStatus:                          make(map[uint64]string),
 		serviceResponseDataStoreCurrentUp:   make(map[uint64]uint64),
 		serviceResponseDataStoreCurrentDown: make(map[uint64]uint64),
-		monitors:                            make(map[uint64]model.Monitor),
+		monitors:                            make(map[uint64]*model.Monitor),
 		sslCertCache:                        make(map[uint64]string),
 		// 30天数据缓存
 		monthlyStatus: make(map[uint64]*model.ServiceItemResponse),
+		dispatchCron:  cron.New(cron.WithSeconds()),
+		dispatchBus:   serviceSentinelDispatchBus,
 	}
-	ServiceSentinelShared.OnMonitorUpdate()
+	ServiceSentinelShared.loadMonitorHistory()
+	ServiceSentinelShared.dispatchCron.Start()
 
 	year, month, day := time.Now().Date()
 	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
@@ -92,11 +96,14 @@ type ServiceSentinel struct {
 	lastStatus                          map[uint64]string
 	serviceResponseDataStoreCurrentUp   map[uint64]uint64
 	serviceResponseDataStoreCurrentDown map[uint64]uint64
-	monitors                            map[uint64]model.Monitor
+	monitors                            map[uint64]*model.Monitor
 	sslCertCache                        map[uint64]string
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
 	monthlyStatus     map[uint64]*model.ServiceItemResponse
+	// 服务监控调度计划任务
+	dispatchCron *cron.Cron
+	dispatchBus  chan<- model.Monitor
 }
 
 func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
@@ -118,10 +125,10 @@ func (ss *ServiceSentinel) Dispatch(r ReportData) {
 	ss.serviceReportChannel <- r
 }
 
-func (ss *ServiceSentinel) Monitors() []model.Monitor {
+func (ss *ServiceSentinel) Monitors() []*model.Monitor {
 	ss.monitorsLock.RLock()
 	defer ss.monitorsLock.RUnlock()
-	var monitors []model.Monitor
+	var monitors []*model.Monitor
 	for _, v := range ss.monitors {
 		monitors = append(monitors, v)
 	}
@@ -131,14 +138,21 @@ func (ss *ServiceSentinel) Monitors() []model.Monitor {
 	return monitors
 }
 
-func (ss *ServiceSentinel) OnMonitorUpdate() {
-	var monitors []model.Monitor
+func (ss *ServiceSentinel) loadMonitorHistory() {
+	var monitors []*model.Monitor
 	DB.Find(&monitors)
-
+	var err error
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
-	ss.monitors = make(map[uint64]model.Monitor)
+	ss.monitors = make(map[uint64]*model.Monitor)
 	for i := 0; i < len(monitors); i++ {
+		task := *monitors[i]
+		monitors[i].CronJobID, err = ss.dispatchCron.AddFunc(task.CronSpec(), func() {
+			ss.dispatchBus <- task
+		})
+		if err != nil {
+			panic(err)
+		}
 		ss.monitors[monitors[i].ID] = monitors[i]
 		if len(ss.serviceCurrentStatusData[monitors[i].ID]) == 0 {
 			ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, _CurrentStatusSize)
@@ -178,6 +192,36 @@ func (ss *ServiceSentinel) OnMonitorUpdate() {
 	}
 }
 
+func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
+	ss.monitorsLock.Lock()
+	defer ss.monitorsLock.Unlock()
+	var err error
+	// 写入新任务
+	m.CronJobID, err = ss.dispatchCron.AddFunc(m.CronSpec(), func() {
+		ss.dispatchBus <- m
+	})
+	if err != nil {
+		return err
+	}
+	if ss.monitors[m.ID] != nil {
+		// 停掉旧任务
+		ss.dispatchCron.Remove(ss.monitors[m.ID].CronJobID)
+	} else {
+		// 新任务初始化数据
+		ss.monthlyStatusLock.Lock()
+		defer ss.monthlyStatusLock.Unlock()
+		ss.monthlyStatus[m.ID] = &model.ServiceItemResponse{
+			Monitor: &m,
+			Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		}
+	}
+	// 更新这个任务
+	ss.monitors[m.ID] = &m
+	return nil
+}
+
 func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	ss.serviceResponseDataStoreLock.Lock()
 	defer ss.serviceResponseDataStoreLock.Unlock()
@@ -190,6 +234,8 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	delete(ss.sslCertCache, id)
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
+	// 停掉定时任务
+	ss.dispatchCron.Remove(ss.monitors[id].CronJobID)
 	delete(ss.monitors, id)
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
