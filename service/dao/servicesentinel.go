@@ -154,12 +154,8 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 			panic(err)
 		}
 		ss.monitors[monitors[i].ID] = monitors[i]
-		if len(ss.serviceCurrentStatusData[monitors[i].ID]) == 0 {
-			ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, _CurrentStatusSize)
-		}
-		if ss.serviceStatusToday[monitors[i].ID] == nil {
-			ss.serviceStatusToday[monitors[i].ID] = &_TodayStatsOfMonitor{}
-		}
+		ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, _CurrentStatusSize)
+		ss.serviceStatusToday[monitors[i].ID] = &_TodayStatsOfMonitor{}
 	}
 
 	year, month, day := time.Now().Date()
@@ -216,6 +212,10 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		}
+		ss.serviceResponseDataStoreLock.Lock()
+		defer ss.serviceResponseDataStoreLock.Unlock()
+		ss.serviceCurrentStatusData[m.ID] = make([]model.MonitorHistory, _CurrentStatusSize)
+		ss.serviceStatusToday[m.ID] = &_TodayStatsOfMonitor{}
 	}
 	// 更新这个任务
 	ss.monitors[m.ID] = &m

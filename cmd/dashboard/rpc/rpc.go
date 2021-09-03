@@ -28,10 +28,10 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 	workedServerIndex := 0
 	for task := range serviceSentinelDispatchBus {
 		round := 0
-		prevIndex := workedServerIndex
+		endIndex := workedServerIndex
 		dao.SortedServerLock.RLock()
-		// 如果已经轮了一整圈没有合适机器去请求，跳出循环
-		for round == 0 && prevIndex != workedServerIndex {
+		// 如果已经轮了一整圈又轮到自己，没有合适机器去请求，跳出循环
+		for round < 1 || workedServerIndex < endIndex {
 			// 如果到了圈尾，再回到圈头，圈数加一，游标重置
 			if workedServerIndex == len(dao.SortedServerList) {
 				workedServerIndex = 0
