@@ -1,17 +1,11 @@
 name: Dashboard image
 
 on:
-  push:
-    branches:
-      - "master"
-    paths-ignore:
-      - "cmd/playground/**"
-      - "cmd/agent/**"
-      - "script/**"
-      - "*.md"
-      - ".*"
-      - ".github/workflows/agent.yml"
-      - ".github/workflows/test.yml"
+  workflow_run:
+    workflows: ["Run Tests"]
+    branches: [master]
+    types: 
+      - completed
 
 jobs:
   deploy:
