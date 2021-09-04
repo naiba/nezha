@@ -43,6 +43,5 @@ func (s Server) Marshal() template.JS {
 	tag, _ := json.Marshal(s.Tag)
 	note, _ := json.Marshal(s.Note)
 	secret, _ := json.Marshal(s.Secret)
-	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s}`,
-		s.ID, name, secret, s.DisplayIndex, tag, note))
+	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s}`, s.ID, name, secret, s.DisplayIndex, tag, note)) // #nosec
 }

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"crypto/md5"
+	"crypto/md5" // #nosec
 	"encoding/hex"
 	"math/rand"
 	"os"
@@ -34,11 +34,11 @@ func RandStringBytesMaskImprSrcUnsafe(n int) string {
 		remain--
 	}
 
-	return *(*string)(unsafe.Pointer(&b))
+	return *(*string)(unsafe.Pointer(&b)) //#nosec
 }
 
 func MD5(plantext string) string {
-	hash := md5.New()
+	hash := md5.New() // #nosec
 	hash.Write([]byte(plantext))
 	return hex.EncodeToString(hash.Sum(nil))
 }

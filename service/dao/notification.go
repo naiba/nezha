@@ -1,7 +1,7 @@
 package dao
 
 import (
-	"crypto/md5"
+	"crypto/md5" // #nosec
 	"encoding/hex"
 	"log"
 	"sync"
@@ -45,7 +45,7 @@ func OnDeleteNotification(id uint64) {
 func SendNotification(desc string, muteable bool) {
 	if muteable {
 		// 通知防骚扰策略
-		nID := hex.EncodeToString(md5.New().Sum([]byte(desc)))
+		nID := hex.EncodeToString(md5.New().Sum([]byte(desc))) // #nosec
 		var flag bool
 		if cacheN, has := Cache.Get(nID); has {
 			nHistory := cacheN.(NotificationHistory)

@@ -290,9 +290,9 @@ func handleCommandTask(task *pb.Task, result *pb.TaskResult) {
 	}
 	timeout := time.NewTimer(time.Hour * 2)
 	if utils.IsWindows() {
-		cmd = exec.Command("cmd", "/c", task.GetData())
+		cmd = exec.Command("cmd", "/c", task.GetData()) // #nosec
 	} else {
-		cmd = exec.Command("sh", "-c", task.GetData())
+		cmd = exec.Command("sh", "-c", task.GetData()) // #nosec
 	}
 	cmd.Env = os.Environ()
 	pg.AddProcess(cmd)

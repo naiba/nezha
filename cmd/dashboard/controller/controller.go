@@ -29,10 +29,10 @@ func ServeWeb(port uint) *http.Server {
 			return t.Format("2006年1月2号 15:04:05")
 		},
 		"safe": func(s string) template.HTML {
-			return template.HTML(s)
+			return template.HTML(s) // #nosec
 		},
 		"tag": func(s string) template.HTML {
-			return template.HTML(`<` + s + `>`)
+			return template.HTML(`<` + s + `>`) // #nosec
 		},
 		"stf": func(s uint64) string {
 			return time.Unix(int64(s), 0).Format("2006年1月2号 15:04")
