@@ -80,9 +80,11 @@ func (n *Notification) Send(message string) error {
 		verifySSL = true
 	}
 
+	/* #nosec */
 	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifySSL}, // #nosec
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifySSL},
 	}
+
 	client := &http.Client{Transport: transCfg, Timeout: time.Minute * 10}
 
 	reqBody, err := n.reqBody(message)
