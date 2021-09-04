@@ -16,6 +16,10 @@ jobs:
       - name: Unit test
         run: |
           go test -v ./...
+      - name: Build test
+        run: |
+          go build cmd/dashboard/main.go
+          go build cmd/agent/main.go
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
