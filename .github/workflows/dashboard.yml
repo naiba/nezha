@@ -11,7 +11,7 @@ on:
       - "*.md"
       - ".*"
       - ".github/workflows/agent.yml"
-      - ".github/workflows/gosec.yml"
+      - ".github/workflows/test.yml"
 
 jobs:
   deploy:
