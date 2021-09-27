@@ -97,7 +97,13 @@ func run() {
 	if _, err := semver.Parse(version); err == nil && !agentConf.DisableAutoUpdate {
 		go func() {
 			for range updateCh {
-				go doSelfUpdate()
+				go func() {
+					defer func() {
+						time.Sleep(time.Minute * 20)
+						updateCh <- struct{}{}
+					}()
+					doSelfUpdate()
+				}()
 			}
 		}()
 		updateCh <- struct{}{}
@@ -186,6 +192,8 @@ func doTask(task *pb.Task) {
 		handleTcpPingTask(task, &result)
 	case model.TaskTypeCommand:
 		handleCommandTask(task, &result)
+	case model.TaskTypeUpgrade:
+		handleUpgradeTask(task, &result)
 	default:
 		println("不支持的任务：", task)
 	}
@@ -217,10 +225,6 @@ func reportState() {
 }
 
 func doSelfUpdate() {
-	defer func() {
-		time.Sleep(time.Minute * 20)
-		updateCh <- struct{}{}
-	}()
 	v := semver.MustParse(version)
 	println("检查更新：", v)
 	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
@@ -231,6 +235,10 @@ func doSelfUpdate() {
 	if !latest.Version.Equals(v) {
 		os.Exit(1)
 	}
+}
+
+func handleUpgradeTask(task *pb.Task, result *pb.TaskResult) {
+	doSelfUpdate()
 }
 
 func handleTcpPingTask(task *pb.Task, result *pb.TaskResult) {

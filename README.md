@@ -38,9 +38,9 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 
 ### 特殊技能
 
-编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
+通过执行 `./nezha-agent --help` 查看支持的参数，如果你使用一键脚本，可以编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
 
-- `--skip-conn` 不监控连接数，机场/连接密集型机器推荐设置，不然比较占CPU([shirou/gopsutil/issues#220](https://github.com/shirou/gopsutil/issues/220))
+- `--skip-conn` 不监控连接数，机场/连接密集型机器推荐设置，不然比较占 CPU([shirou/gopsutil/issues#220](https://github.com/shirou/gopsutil/issues/220))
 - `--disable-auto-update` 禁止 Agent 自动更新
 
 ## 功能说明

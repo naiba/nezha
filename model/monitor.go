@@ -16,6 +16,7 @@ const (
 	TaskTypeTCPPing
 	TaskTypeCommand
 	TaskTypeTerminal
+	TaskTypeUpgrade
 )
 
 type TerminalTask struct {
