@@ -68,7 +68,7 @@ func main() {
 	monitor.Version = version
 
 	flag.BoolVarP(&agentConf.Debug, "debug", "d", false, "开启调试信息")
-	flag.StringVarP(&agentConf.Server, "*server", "s", "localhost:5555", "管理面板RPC端口")
+	flag.StringVarP(&agentConf.Server, "server", "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVarP(&agentConf.ClientSecret, "password", "p", "", "Agent连接Secret")
 	flag.BoolVar(&agentConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
 	flag.BoolVar(&agentConf.DisableAutoUpdate, "disable-auto-update", false, "禁用自动升级")
