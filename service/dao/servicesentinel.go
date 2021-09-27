@@ -150,6 +150,7 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 		monitors[i].CronJobID, err = ss.dispatchCron.AddFunc(task.CronSpec(), func() {
 			ss.dispatchBus <- task
 		})
+		log.Println("NEZHA>> 服务监控任务", monitors[i].ID, monitors[i].Name, monitors[i].CronJobID)
 		if err != nil {
 			panic(err)
 		}
@@ -282,7 +283,8 @@ func getStateStr(percent uint64) string {
 
 func (ss *ServiceSentinel) worker() {
 	for r := range ss.serviceReportChannel {
-		if ss.monitors[r.Data.GetId()].ID == 0 {
+		if ss.monitors[r.Data.GetId()] == nil || ss.monitors[r.Data.GetId()].ID == 0 {
+			log.Printf("NEZAH>> 错误的服务监控上报 %+v", r)
 			continue
 		}
 		mh := model.PB2MonitorHistory(r.Data)
@@ -315,7 +317,7 @@ func (ss *ServiceSentinel) worker() {
 			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
 			dataToSave := ss.serviceCurrentStatusData[mh.MonitorID]
 			if err := DB.Create(&dataToSave).Error; err != nil {
-				log.Println("服务监控数据持久化失败：", err)
+				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
 			}
 		}
 		// 更新当前状态
@@ -337,7 +339,7 @@ func (ss *ServiceSentinel) worker() {
 		stateStr := getStateStr(upPercent)
 		if !mh.Successful {
 			ServerLock.RLock()
-			log.Println("服务故障上报：", ss.monitors[mh.MonitorID].Target, stateStr, "上报者：", ServerList[r.Reporter].Name, "请求输出：", mh.Data)
+			log.Println("NEZHA>> 服务故障上报：", ss.monitors[mh.MonitorID].Target, stateStr, "上报者：", ServerList[r.Reporter].Name, "请求输出：", mh.Data)
 			ServerLock.RUnlock()
 		}
 		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
@@ -345,7 +347,7 @@ func (ss *ServiceSentinel) worker() {
 			isNeedSendNotification := (ss.lastStatus[mh.MonitorID] != "" || stateStr == "故障") && ss.monitors[mh.MonitorID].Notify
 			ss.lastStatus[mh.MonitorID] = stateStr
 			if isNeedSendNotification {
-				go SendNotification(fmt.Sprintf("服务监控：%s 服务状态：%s", ss.monitors[mh.MonitorID].Name, stateStr), true)
+				go SendNotification(fmt.Sprintf("[服务%s] %s", stateStr, ss.monitors[mh.MonitorID].Name), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}
@@ -389,7 +391,7 @@ func (ss *ServiceSentinel) worker() {
 		if errMsg != "" {
 			ss.monitorsLock.RLock()
 			if ss.monitors[mh.MonitorID].Notify {
-				go SendNotification(fmt.Sprintf("服务监控：%s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
+				go SendNotification(fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -29,15 +28,22 @@ import (
 	"github.com/naiba/nezha/service/rpc"
 )
 
+type AgentConfig struct {
+	SkipConnectionCount bool
+	DisableAutoUpdate   bool
+	Debug               bool
+	Server              string
+	ClientSecret        string
+}
+
 func init() {
 	http.DefaultClient.Timeout = time.Second * 5
 	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 }
 
 var (
-	server, clientSecret, version string
-	debug                         bool
-	stateConf                     monitor.GetStateConfig
+	version   string
+	agentConf AgentConfig
 )
 
 var (
@@ -61,13 +67,14 @@ func main() {
 	// 来自于 GoReleaser 的版本号
 	monitor.Version = version
 
-	flag.BoolVarP(&debug, "debug", "d", false, "开启调试信息")
-	flag.StringVarP(&server, "*server", "s", "localhost:5555", "管理面板RPC端口")
-	flag.StringVarP(&clientSecret, "password", "p", "", "Agent连接Secret")
-	flag.BoolVar(&stateConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
+	flag.BoolVarP(&agentConf.Debug, "debug", "d", false, "开启调试信息")
+	flag.StringVarP(&agentConf.Server, "*server", "s", "localhost:5555", "管理面板RPC端口")
+	flag.StringVarP(&agentConf.ClientSecret, "password", "p", "", "Agent连接Secret")
+	flag.BoolVar(&agentConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
+	flag.BoolVar(&agentConf.DisableAutoUpdate, "disable-auto-update", false, "禁用自动升级")
 	flag.Parse()
 
-	if clientSecret == "" {
+	if agentConf.ClientSecret == "" {
 		flag.Usage()
 		return
 	}
@@ -77,7 +84,7 @@ func main() {
 
 func run() {
 	auth := rpc.AuthHandler{
-		ClientSecret: clientSecret,
+		ClientSecret: agentConf.ClientSecret,
 	}
 
 	go pty.DownloadDependency()
@@ -87,7 +94,7 @@ func run() {
 	// 更新IP信息
 	go monitor.UpdateIP()
 
-	if _, err := semver.Parse(version); err == nil {
+	if _, err := semver.Parse(version); err == nil && !agentConf.DisableAutoUpdate {
 		go func() {
 			for range updateCh {
 				go doSelfUpdate()
@@ -111,7 +118,7 @@ func run() {
 
 	for {
 		timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
-		conn, err = grpc.DialContext(timeOutCtx, server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
+		conn, err = grpc.DialContext(timeOutCtx, agentConf.Server, grpc.WithInsecure(), grpc.WithPerRPCCredentials(&auth))
 		if err != nil {
 			println("与面板建立连接失败：", err)
 			cancel()
@@ -194,7 +201,7 @@ func reportState() {
 		if client != nil && inited {
 			monitor.TrackNetworkSpeed()
 			timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
-			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(stateConf).PB())
+			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(agentConf.SkipConnectionCount).PB())
 			cancel()
 			if err != nil {
 				println("reportState error", err)
@@ -334,7 +341,7 @@ func handleTerminalTask(task *pb.Task) {
 		protocol += "s"
 	}
 	header := http.Header{}
-	header.Add("Secret", clientSecret)
+	header.Add("Secret", agentConf.ClientSecret)
 	conn, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%s://%s/terminal/%s", protocol, terminal.Host, terminal.Session), header)
 	if err != nil {
 		println("Terminal 连接失败：", err)
@@ -404,7 +411,8 @@ func handleTerminalTask(task *pb.Task) {
 }
 
 func println(v ...interface{}) {
-	if debug {
-		log.Println(v...)
+	if agentConf.Debug {
+		fmt.Printf("NEZHA@%s>> ", time.Now().Format("2006-01-02 15:04:05"))
+		fmt.Println(v...)
 	}
 }

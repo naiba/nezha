@@ -21,12 +21,7 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
-	if r.GetType() != model.TaskTypeCommand {
-		dao.ServiceSentinelShared.Dispatch(dao.ReportData{
-			Data:     r,
-			Reporter: clientID,
-		})
-	} else {
+	if r.GetType() == model.TaskTypeCommand {
 		// 处理上报的计划任务
 		dao.CronLock.RLock()
 		defer dao.CronLock.RUnlock()
@@ -35,16 +30,21 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			dao.ServerLock.RLock()
 			defer dao.ServerLock.RUnlock()
 			if cr.PushSuccessful && r.GetSuccessful() {
-				dao.SendNotification(fmt.Sprintf("成功计划任务：%s ，服务器：%s，日志：\n%s", cr.Name, dao.ServerList[clientID].Name, r.GetData()), false)
+				dao.SendNotification(fmt.Sprintf("[任务成功] %s ，服务器：%s，日志：\n%s", cr.Name, dao.ServerList[clientID].Name, r.GetData()), false)
 			}
 			if !r.GetSuccessful() {
-				dao.SendNotification(fmt.Sprintf("失败计划任务：%s ，服务器：%s，日志：\n%s", cr.Name, dao.ServerList[clientID].Name, r.GetData()), false)
+				dao.SendNotification(fmt.Sprintf("[任务失败] %s ，服务器：%s，日志：\n%s", cr.Name, dao.ServerList[clientID].Name, r.GetData()), false)
 			}
 			dao.DB.Model(cr).Updates(model.Cron{
 				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
 				LastResult:     r.GetSuccessful(),
 			})
 		}
+	} else if model.IsServiceSentinelNeeded(r.GetType()) {
+		dao.ServiceSentinelShared.Dispatch(dao.ReportData{
+			Data:     r,
+			Reporter: clientID,
+		})
 	}
 	return &pb.Receipt{Proced: true}, nil
 }
@@ -101,7 +101,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		host.IP != "" &&
 		dao.ServerList[clientID].Host.IP != host.IP {
 		dao.SendNotification(fmt.Sprintf(
-			"IP变更提醒 服务器：%s ，旧IP：%s，新IP：%s。",
+			"[IP变更] %s ，旧IP：%s，新IP：%s。",
 			dao.ServerList[clientID].Name, utils.IPDesensitize(dao.ServerList[clientID].Host.IP), utils.IPDesensitize(host.IP)), true)
 	}
 

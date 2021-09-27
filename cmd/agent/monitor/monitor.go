@@ -74,11 +74,7 @@ func GetHost() *model.Host {
 	}
 }
 
-type GetStateConfig struct {
-	SkipConnectionCount bool
-}
-
-func GetState(conf GetStateConfig) *model.HostState {
+func GetState(skipConnectionCount bool) *model.HostState {
 	hi, _ := host.Info()
 	mv, _ := mem.VirtualMemory()
 
@@ -101,7 +97,7 @@ func GetState(conf GetStateConfig) *model.HostState {
 
 	var tcpConnCount, udpConnCount uint64
 
-	if !conf.SkipConnectionCount {
+	if !skipConnectionCount {
 		conns, _ := net.Connections("all")
 		for i := 0; i < len(conns); i++ {
 			switch conns[i].Type {

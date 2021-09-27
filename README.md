@@ -1,13 +1,13 @@
-<div align="center"> 
+<div align="center">
   <br>
   <img width="250" style="max-width:80%" src="resource/static/brand.svg" title="哪吒监控">
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.9.34&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.7.0-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.10.0&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.7.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
-  <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>	
+  <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>
 </div>
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
@@ -20,7 +20,7 @@
 
 ## 安装脚本
 
-**推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（randomdashboard.nai.ba）。
+**推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（ip-to-dashboard.nai.ba）。
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh  -o nezha.sh && chmod +x nezha.sh
@@ -35,6 +35,13 @@ CN=true sudo ./nezha.sh
 ```
 
 _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
+
+### 特殊技能
+
+编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
+
+- `--skip-conn` 不监控连接数，机场/连接密集型机器推荐设置，不然比较占CPU([shirou/gopsutil/issues#220](https://github.com/shirou/gopsutil/issues/220))
+- `--disable-auto-update` 禁止 Agent 自动更新
 
 ## 功能说明
 
@@ -63,7 +70,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
    - server 酱示例
 
      - 名称：server 酱
-     - URL：https://sc.ftqq.com/SCUrandomkeys.send?text=#NEZHA#
+     - URL：<https://sc.ftqq.com/SCUrandomkeys.send?text=#NEZHA>#
      - 请求方式: GET
      - 请求类型: 默认
      - Body: 空
@@ -71,7 +78,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
    - wxpusher 示例，需要关注你的应用
 
      - 名称: wxpusher
-     - URL：http://wxpusher.zjiecode.com/api/send/message
+     - URL：<http://wxpusher.zjiecode.com/api/send/message>
      - 请求方式: POST
      - 请求类型: JSON
      - Body: `{"appToken":"你的appToken","topicIds":[],"content":"#NEZHA#","contentType":"1","uids":["你的uid"]}`
@@ -79,7 +86,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
    - telegram 示例 [@haitau](https://github.com/haitau) 贡献
 
      - 名称：telegram 机器人消息通知
-     - URL：https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA#
+     - URL：<https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA>#
      - 请求方式: GET
      - 请求类型: 默认
      - Body: 空
@@ -130,6 +137,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 - cycle_interval 小时（可以设为 1 月，30\*24）
 - min/max、cover、ignore 参考基本规则配置
 - 示例: 3 号机器的每月 15 号计费的出站月流量 1T 报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":720,"cover":1,"ignore":{"3":true}}]`
+
 </details>
 
 <details>
@@ -222,18 +230,12 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
-    <summary>如何禁用网络连接数监控？</summary>
-
-编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `--skip-conn` 就是不监控连接数
-
-</details>
-
-<details>
     <summary>Agent 不断重启/无法启动 ？</summary>
 
 1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS 问题。
-2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 检验是否是网络问题，检查本机与面板服务器出入站防火墙，如果单机无法判断可借助 https://port.ping.pe/ 提供的端口检查工具进行检测。
+2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 检验是否是网络问题，检查本机与面板服务器出入站防火墙，如果单机无法判断可借助 <https://port.ping.pe/> 提供的端口检查工具进行检测。
 3. 如果上面步骤检测正常，Agent 正常上线，尝试关闭 SELinux，[如何关闭 SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
+
 </details>
 
 <details>
@@ -248,10 +250,10 @@ START=99
 USE_PROCD=1
 
 start_service() {
-	procd_open_instance
-	procd_set_param command /root/nezha-agent -s 面板网址:接收端口 -p 唯一秘钥 -d
-	procd_set_param respawn
-	procd_close_instance
+ procd_open_instance
+ procd_set_param command /root/nezha-agent -s 面板网址:接收端口 -p 唯一秘钥 -d
+ procd_set_param respawn
+ procd_close_instance
 }
 
 stop_service() {
@@ -259,9 +261,9 @@ stop_service() {
 }
 
 restart() {
-	stop
-	sleep 2
-	start
+ stop
+ sleep 2
+ start
 }
 ```
 

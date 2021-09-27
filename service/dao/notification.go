@@ -71,7 +71,7 @@ func SendNotification(desc string, muteable bool) {
 
 		if !flag {
 			if Conf.Debug {
-				log.Println("静音的重复通知：", desc, muteable)
+				log.Println("NEZHA>> 静音的重复通知：", desc, muteable)
 			}
 			return
 		}
@@ -81,7 +81,7 @@ func SendNotification(desc string, muteable bool) {
 	defer notificationsLock.RUnlock()
 	for i := 0; i < len(notifications); i++ {
 		if err := notifications[i].Send(desc); err != nil {
-			log.Println("发送通知失败：", err)
+			log.Println("NEZHA>> 发送通知失败：", err)
 		}
 	}
 }

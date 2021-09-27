@@ -198,7 +198,7 @@ func main() {
 			}
 		}
 		if err := dao.DB.Create(txs).Error; err != nil {
-			log.Println("流量统计入库", err)
+			log.Println("NEZHA>> 流量统计入库", err)
 		}
 		srv.Shutdown(c)
 		return nil

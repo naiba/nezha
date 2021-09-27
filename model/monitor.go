@@ -73,3 +73,7 @@ func (m *Monitor) AfterFind(tx *gorm.DB) error {
 	}
 	return nil
 }
+
+func IsServiceSentinelNeeded(t uint64) bool {
+	return t == TaskTypeCommand || t == TaskTypeTerminal
+}

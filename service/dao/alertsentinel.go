@@ -54,7 +54,7 @@ func AlertSentinelStart() {
 		checkCount++
 		if lastPrint.Before(startedAt.Add(-1 * time.Hour)) {
 			if Conf.Debug {
-				log.Println("报警规则检测每小时", checkCount, "次", startedAt, time.Now())
+				log.Println("NEZHA>> 报警规则检测每小时", checkCount, "次", startedAt, time.Now())
 			}
 			checkCount = 0
 			lastPrint = startedAt
@@ -114,11 +114,11 @@ func checkStatus() {
 			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
 			if !passed {
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
-				message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，逮到咯，快去看看！", alert.Name, server.Name, utils.IPDesensitize(server.Host.IP))
+				message := fmt.Sprintf("[主机故障] %s(%s) 规则：%s，", server.Name, utils.IPDesensitize(server.Host.IP), alert.Name)
 				go SendNotification(message, true)
 			} else {
 				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
-					message := fmt.Sprintf("报警规则：%s，服务器：%s(%s)，已恢复正常", alert.Name, server.Name, utils.IPDesensitize(server.Host.IP))
+					message := fmt.Sprintf("[主机恢复] %s(%s) 规则：%s", server.Name, utils.IPDesensitize(server.Host.IP), alert.Name)
 					go SendNotification(message, true)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
