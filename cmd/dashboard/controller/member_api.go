@@ -457,7 +457,6 @@ type settingForm struct {
 	ViewPassword               string
 	EnableIPChangeNotification string
 	IgnoredIPNotification      string
-	Oauth2Type                 string
 	GRPCHost                   string
 	Cover                      uint8
 }
@@ -479,7 +478,6 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	dao.Conf.Site.Theme = sf.Theme
 	dao.Conf.Site.CustomCode = sf.CustomCode
 	dao.Conf.Site.ViewPassword = sf.ViewPassword
-	dao.Conf.Oauth2.Type = sf.Oauth2Type
 	dao.Conf.Oauth2.Admin = sf.Admin
 	if err := dao.Conf.Save(); err != nil {
 		c.JSON(http.StatusOK, model.Response{

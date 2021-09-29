@@ -146,7 +146,6 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
 			ss.dispatchBus <- task
 		})
-		log.Println("NEZHA>> 服务监控任务", monitors[i].ID, monitors[i].Name, monitors[i].CronJobID)
 		if err != nil {
 			panic(err)
 		}

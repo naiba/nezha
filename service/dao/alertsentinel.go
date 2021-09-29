@@ -30,11 +30,6 @@ type NotificationHistory struct {
 func AlertSentinelStart() {
 	alertsStore = make(map[uint64]map[uint64][][]interface{})
 	alertsPrevState = make(map[uint64]map[uint64]uint)
-	notificationsLock.Lock()
-	if err := DB.Find(&notifications).Error; err != nil {
-		panic(err)
-	}
-	notificationsLock.Unlock()
 	alertsLock.Lock()
 	if err := DB.Find(&alerts).Error; err != nil {
 		panic(err)

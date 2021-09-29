@@ -16,6 +16,14 @@ const firstNotificationDelay = time.Minute * 15
 var notifications []model.Notification
 var notificationsLock sync.RWMutex
 
+func LoadNotifications() {
+	notificationsLock.Lock()
+	if err := DB.Find(&notifications).Error; err != nil {
+		panic(err)
+	}
+	notificationsLock.Unlock()
+}
+
 func OnRefreshOrAddNotification(n model.Notification) {
 	notificationsLock.Lock()
 	defer notificationsLock.Unlock()

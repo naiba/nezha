@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -56,6 +58,7 @@ func initSystem() {
 		model.Notification{}, model.AlertRule{}, model.Monitor{},
 		model.MonitorHistory{}, model.Cron{}, model.Transfer{})
 
+	dao.LoadNotifications()
 	loadServers() //加载服务器列表
 	loadCrons()   //加载计划任务
 
@@ -153,6 +156,7 @@ func loadCrons() {
 	var crons []model.Cron
 	dao.DB.Find(&crons)
 	var err error
+	errMsg := new(bytes.Buffer)
 	for i := 0; i < len(crons); i++ {
 		cr := crons[i]
 
@@ -165,8 +169,15 @@ func loadCrons() {
 		if err == nil {
 			dao.Crons[cr.ID] = &cr
 		} else {
-			log.Println("NEZHA>> 计划任务调度失败", cr, err)
+			if errMsg.Len() == 0 {
+				errMsg.WriteString("调度失败的计划任务：[")
+			}
+			errMsg.WriteString(fmt.Sprintf("%d,", cr.ID))
 		}
+	}
+	if errMsg.Len() > 0 {
+		msg := errMsg.String()
+		dao.SendNotification(msg[:len(msg)-1]+"] 这些任务将无法正常执行,请进入后点重新修改保存。", false)
 	}
 	dao.Cron.Start()
 }
