@@ -10,7 +10,7 @@
             </div>
             <div class="field">
                 <label>计划</label>
-                <input type="text" name="Scheduler" placeholder="0 3 * * *（每天3点）">
+                <input type="text" name="Scheduler" placeholder="0 0 3 * * *（每天3点）">
             </div>
             <div class="field">
                 <label>命令</label>
@@ -41,7 +41,7 @@
         </form>
         <div class="ui warning message">
             <p>
-                计划的格式为：<code>* * * * *</code> 分 时 天 月 星期，详情见 <a
+                计划的格式为：<code>* * * * * *</code>&nbsp;秒 分 时 天 月 星期，详情见 <a
                     href="https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format"
                     target="_blank">计划表达式格式</a><br>
                 命令：就像写 shell/bat 脚本一样，但是不推荐换行，多个命令使用 <code>&&</code>/<code>&</code> 连接，如果遇到 xxx 命令找不到，可能是

@@ -5,7 +5,7 @@
     <div class="ui grid">
       <div class="right floated right aligned twelve wide column">
         <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditMonitor()">
-          <i class="add icon"></i> 添加监控
+          <i class="add icon"></i> 添加服务
         </button>
       </div>
     </div>
@@ -43,7 +43,7 @@
                 <i class="edit icon"></i>
               </button>
               <button class="ui button"
-                onclick="showConfirm('删除监控','确认删除此监控？',deleteRequest,'/api/monitor/'+{{$monitor.ID}})">
+                onclick="showConfirm('删除服务','确认删除此服务？',deleteRequest,'/api/monitor/'+{{$monitor.ID}})">
                 <i class="trash alternate outline icon"></i>
               </button>
             </div>

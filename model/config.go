@@ -1,13 +1,11 @@
 package model
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -68,13 +66,6 @@ func (c *Config) Read(path string) error {
 	}
 
 	c.updateIgnoredIPNotificationID()
-
-	c.v.OnConfigChange(func(in fsnotify.Event) {
-		c.v.Unmarshal(c)
-		fmt.Println("配置文件更新，重载配置", c)
-	})
-
-	go c.v.WatchConfig()
 	return nil
 }
 

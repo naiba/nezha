@@ -5,7 +5,7 @@
             <img src="/static/logo.svg?v20210804">
         </div>
         {{if .IsAdminPage}}
-        <a class='item{{if eq .MatchedPath "/server"}} active{{end}}' href="/server"><i class="server icon"></i>资产</a>
+        <a class='item{{if eq .MatchedPath "/server"}} active{{end}}' href="/server"><i class="server icon"></i>主机</a>
         <a class='item{{if eq .MatchedPath "/monitor"}} active{{end}}' href="/monitor"><i class="rss icon"></i>服务</a>
         <a class='item{{if eq .MatchedPath "/cron"}} active{{end}}' href="/cron"><i class="clock icon"></i>任务</a>
         <a class='item{{if eq .MatchedPath "/notification"}} active{{end}}' href="/notification"><i class="bell icon"></i>报警</a>

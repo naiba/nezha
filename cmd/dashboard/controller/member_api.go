@@ -267,18 +267,21 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		cr.Cover = cf.Cover
 		err = json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
 	}
-	if err == nil {
-		_, err = cron.ParseStandard(cr.Scheduler)
-	}
+	tx := dao.DB.Begin()
 	if err == nil {
 		if cf.ID == 0 {
-			err = dao.DB.Create(&cr).Error
+			err = tx.Create(&cr).Error
 		} else {
-			err = dao.DB.Save(&cr).Error
+			err = tx.Save(&cr).Error
 		}
 	}
 	if err == nil {
 		cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
+	}
+	if err == nil {
+		err = tx.Commit().Error
+	} else {
+		tx.Rollback()
 	}
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{

@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.10.1&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.7.0-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.10.2&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.7.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>
@@ -14,9 +14,9 @@
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
 
-| 默认主题                                                | DayNight [@JackieSung](https://github.com/JackieSung4ev) | hotaru                                                                 |
-| ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
-| ![首页截图1](https://s3.ax1x.com/2020/12/07/DvTCwD.jpg) | <img src="https://s3.ax1x.com/2021/01/20/sfJv2q.jpg"/>   | <img src="https://s3.ax1x.com/2020/12/09/rPF4xJ.png" width="1600px" /> |
+| 默认主题                                                    | DayNight [@JackieSung](https://github.com/JackieSung4ev)     | hotaru                                                                     |
+| ----------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| ![默认主题](resource/template/theme-default/screenshot.png) | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="1600px" /> |
 
 ## 安装脚本
 
@@ -36,11 +36,12 @@ CN=true sudo ./nezha.sh
 
 _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
 
-### 特殊技能
+### 增强配置
 
 通过执行 `./nezha-agent --help` 查看支持的参数，如果你使用一键脚本，可以编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
 
 - `--skip-conn` 不监控连接数，机场/连接密集型机器推荐设置，不然比较占 CPU([shirou/gopsutil/issues#220](https://github.com/shirou/gopsutil/issues/220))
+- `--skip-procs` 不监控进程数，也可以降低 agent 占用
 - `--disable-auto-update` 禁止 Agent 自动更新
 
 ## 功能说明
@@ -230,7 +231,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
-    <summary>Agent 不断重启/无法启动 ？</summary>
+    <summary>Agent不上线不启动自检流程</summary>
 
 1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS 问题。
 2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 检验是否是网络问题，检查本机与面板服务器出入站防火墙，如果单机无法判断可借助 <https://port.ping.pe/> 提供的端口检查工具进行检测。
@@ -243,7 +244,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 首先在 release 下载对应的二进制解压 tar.gz 包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
 
-```
+```shell
 #!/bin/sh /etc/rc.common
 
 START=99
@@ -272,8 +273,9 @@ restart() {
 </details>
 
 <details>
-    <summary>实时通道断开/终端连接失败</summary>
-使用反向代理时需要针对 `/ws` 路径的 WebSocket 进行特别配置以支持实时更新服务器状态。
+    <summary>实时通道断开/网页终端连接失败</summary>
+
+使用反向代理时需要针对 `/ws`,`/terminal` 路径的 WebSocket 进行特别配置以支持实时更新服务器状态和 **WebSSH**。
 
 - Nginx(宝塔)：在你的 nginx 配置文件中加入以下代码
 
@@ -285,13 +287,21 @@ restart() {
 
       location ~ ^/(ws|terminal/.+)$  {
           proxy_pass http://ip:站点访问端口;
-          proxy_http_version 1.1;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection "Upgrade";
           proxy_set_header Host $host;
       }
 
       #其他的 location blablabla...
+  }
+  ```
+
+  如果非宝塔，还要在 `server{}` 中添加上这一段
+
+  ```nginx
+  location / {
+    proxy_pass http://ip:站点访问端口;
+    proxy_set_header Host $host;
   }
   ```
 

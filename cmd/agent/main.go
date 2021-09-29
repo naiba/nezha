@@ -30,25 +30,21 @@ import (
 
 type AgentConfig struct {
 	SkipConnectionCount bool
+	SkipProcsCount      bool
 	DisableAutoUpdate   bool
 	Debug               bool
 	Server              string
 	ClientSecret        string
 }
 
-func init() {
-	http.DefaultClient.Timeout = time.Second * 5
-	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
-}
-
 var (
-	version   string
-	agentConf AgentConfig
+	version string
+	client  pb.NezhaServiceClient
+	inited  bool
 )
 
 var (
-	client     pb.NezhaServiceClient
-	inited     bool
+	agentConf  AgentConfig
 	updateCh   = make(chan struct{}) // Agent 自动更新间隔
 	httpClient = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
@@ -63,6 +59,11 @@ const (
 	networkTimeOut = time.Second * 5  // 普通网络超时
 )
 
+func init() {
+	http.DefaultClient.Timeout = time.Second * 5
+	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
+}
+
 func main() {
 	// 来自于 GoReleaser 的版本号
 	monitor.Version = version
@@ -71,6 +72,7 @@ func main() {
 	flag.StringVarP(&agentConf.Server, "server", "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVarP(&agentConf.ClientSecret, "password", "p", "", "Agent连接Secret")
 	flag.BoolVar(&agentConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
+	flag.BoolVar(&agentConf.SkipProcsCount, "skip-procs", false, "不监控进程数")
 	flag.BoolVar(&agentConf.DisableAutoUpdate, "disable-auto-update", false, "禁用自动升级")
 	flag.Parse()
 
@@ -88,7 +90,6 @@ func run() {
 	}
 
 	go pty.DownloadDependency()
-
 	// 上报服务器信息
 	go reportState()
 	// 更新IP信息
@@ -168,8 +169,8 @@ func receiveTasks(tasks pb.NezhaService_RequestTaskClient) error {
 		}
 		go func() {
 			defer func() {
-				if recover() != nil {
-					println("task panic", task)
+				if err := recover(); err != nil {
+					println("task panic", task, err)
 				}
 			}()
 			doTask(task)
@@ -209,7 +210,7 @@ func reportState() {
 		if client != nil && inited {
 			monitor.TrackNetworkSpeed()
 			timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
-			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(agentConf.SkipConnectionCount).PB())
+			_, err = client.ReportSystemState(timeOutCtx, monitor.GetState(agentConf.SkipConnectionCount, agentConf.SkipProcsCount).PB())
 			cancel()
 			if err != nil {
 				println("reportState error", err)
@@ -229,7 +230,7 @@ func doSelfUpdate() {
 	println("检查更新：", v)
 	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
 	if err != nil {
-		println("自动更新失败：", err)
+		println("更新失败：", err)
 		return
 	}
 	if !latest.Version.Equals(v) {
@@ -282,7 +283,7 @@ func handleHttpGetTask(task *pb.Task, result *pb.TaskResult) {
 	}
 	if err == nil {
 		// 检查 SSL 证书信息
-		if len(resp.TLS.PeerCertificates) > 0 {
+		if resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {
 			c := resp.TLS.PeerCertificates[0]
 			result.Data = c.Issuer.CommonName + "|" + c.NotAfter.In(time.Local).String()
 		}

@@ -10,7 +10,6 @@ import (
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
-	"github.com/robfig/cron/v3"
 )
 
 const _CurrentStatusSize = 30 // 统计 15 分钟内的数据为当前状态
@@ -42,11 +41,9 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 		sslCertCache:                        make(map[uint64]string),
 		// 30天数据缓存
 		monthlyStatus: make(map[uint64]*model.ServiceItemResponse),
-		dispatchCron:  cron.New(cron.WithSeconds()),
 		dispatchBus:   serviceSentinelDispatchBus,
 	}
 	ServiceSentinelShared.loadMonitorHistory()
-	ServiceSentinelShared.dispatchCron.Start()
 
 	year, month, day := time.Now().Date()
 	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
@@ -75,7 +72,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	go ServiceSentinelShared.worker()
 
 	// 每日将游标往后推一天
-	_, err := Cron.AddFunc("0 0 * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
+	_, err := Cron.AddFunc("0 0 0 * * *", ServiceSentinelShared.refreshMonthlyServiceStatus)
 	if err != nil {
 		panic(err)
 	}
@@ -102,8 +99,7 @@ type ServiceSentinel struct {
 	monthlyStatusLock sync.Mutex
 	monthlyStatus     map[uint64]*model.ServiceItemResponse
 	// 服务监控调度计划任务
-	dispatchCron *cron.Cron
-	dispatchBus  chan<- model.Monitor
+	dispatchBus chan<- model.Monitor
 }
 
 func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
@@ -147,7 +143,7 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	ss.monitors = make(map[uint64]*model.Monitor)
 	for i := 0; i < len(monitors); i++ {
 		task := *monitors[i]
-		monitors[i].CronJobID, err = ss.dispatchCron.AddFunc(task.CronSpec(), func() {
+		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
 			ss.dispatchBus <- task
 		})
 		log.Println("NEZHA>> 服务监控任务", monitors[i].ID, monitors[i].Name, monitors[i].CronJobID)
@@ -194,7 +190,7 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 	defer ss.monitorsLock.Unlock()
 	var err error
 	// 写入新任务
-	m.CronJobID, err = ss.dispatchCron.AddFunc(m.CronSpec(), func() {
+	m.CronJobID, err = Cron.AddFunc(m.CronSpec(), func() {
 		ss.dispatchBus <- m
 	})
 	if err != nil {
@@ -202,7 +198,7 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 	}
 	if ss.monitors[m.ID] != nil {
 		// 停掉旧任务
-		ss.dispatchCron.Remove(ss.monitors[m.ID].CronJobID)
+		Cron.Remove(ss.monitors[m.ID].CronJobID)
 	} else {
 		// 新任务初始化数据
 		ss.monthlyStatusLock.Lock()
@@ -236,7 +232,7 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 	// 停掉定时任务
-	ss.dispatchCron.Remove(ss.monitors[id].CronJobID)
+	Cron.Remove(ss.monitors[id].CronJobID)
 	delete(ss.monitors, id)
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()

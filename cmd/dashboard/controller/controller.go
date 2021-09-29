@@ -112,7 +112,7 @@ func ServeWeb(port uint) *http.Server {
 		},
 	})
 	r.Static("/static", "resource/static")
-	r.LoadHTMLGlob("resource/template/**/*")
+	r.LoadHTMLGlob("resource/template/**/*.html")
 	routers(r)
 
 	page404 := func(c *gin.Context) {

@@ -35,13 +35,21 @@ func UpdateIP() {
 	for {
 		ipv4 := fetchGeoIP(geoIPApiList, false)
 		ipv6 := fetchGeoIP(geoIPApiList, true)
-		cachedIP = fmt.Sprintf("ip(v4:%s,v6:[%s])", ipv4.IP, ipv6.IP)
+		if ipv4.IP == "" && ipv6.IP == "" {
+			time.Sleep(time.Minute)
+			continue
+		}
+		if ipv4.IP == "" || ipv6.IP == "" {
+			cachedIP = fmt.Sprintf("%s%s", ipv4.IP, ipv6.IP)
+		} else {
+			cachedIP = fmt.Sprintf("%s/%s", ipv4.IP, ipv6.IP)
+		}
 		if ipv4.CountryCode != "" {
 			cachedCountry = ipv4.CountryCode
 		} else if ipv6.CountryCode != "" {
 			cachedCountry = ipv6.CountryCode
 		}
-		time.Sleep(time.Minute * 10)
+		time.Sleep(time.Minute * 30)
 	}
 }
 

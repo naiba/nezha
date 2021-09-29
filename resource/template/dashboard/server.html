@@ -6,7 +6,7 @@
         <div class="ui grid">
             <div class="right floated right aligned twelve wide column">
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditServer()"><i
-                        class="add icon"></i> 添加服务器
+                        class="add icon"></i> 添加主机
                 </button>
             </div>
         </div>
@@ -56,7 +56,7 @@
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('删除节点','确认删除此监控节点？',deleteRequest,'/api/server/'+{{$server.ID}})">
+                                onclick="showConfirm('删除主机','确认删除此主机？',deleteRequest,'/api/server/'+{{$server.ID}})">
                                 <i class="trash alternate outline icon"></i>
                             </button>
                         </div>

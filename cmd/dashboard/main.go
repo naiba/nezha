@@ -25,7 +25,7 @@ func init() {
 
 	// 初始化 dao 包
 	dao.Conf = &model.Config{}
-	dao.Cron = cron.New(cron.WithLocation(shanghai))
+	dao.Cron = cron.New(cron.WithSeconds(), cron.WithLocation(shanghai))
 	dao.Crons = make(map[uint64]*model.Cron)
 	dao.ServerList = make(map[uint64]*model.Server)
 	dao.SecretToID = make(map[string]uint64)
@@ -60,13 +60,13 @@ func initSystem() {
 	loadCrons()   //加载计划任务
 
 	// 清理 服务请求记录 和 流量记录 的旧数据
-	_, err := dao.Cron.AddFunc("30 3 * * *", cleanMonitorHistory)
+	_, err := dao.Cron.AddFunc("0 30 3 * * *", cleanMonitorHistory)
 	if err != nil {
 		panic(err)
 	}
 
 	// 流量记录打点
-	_, err = dao.Cron.AddFunc("0 * * * *", recordTransferHourlyUsage)
+	_, err = dao.Cron.AddFunc("0 0 * * * *", recordTransferHourlyUsage)
 	if err != nil {
 		panic(err)
 	}
@@ -162,10 +162,11 @@ func loadCrons() {
 		}
 
 		cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
-		if err != nil {
-			panic(err)
+		if err == nil {
+			dao.Crons[cr.ID] = &cr
+		} else {
+			log.Println("NEZHA>> 计划任务调度失败", cr, err)
 		}
-		dao.Crons[cr.ID] = &cr
 	}
 	dao.Cron.Start()
 }
