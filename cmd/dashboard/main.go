@@ -165,7 +165,7 @@ func loadCrons() {
 			crIgnoreMap[cr.Servers[j]] = true
 		}
 
-		cr.CronID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
+		cr.CronJobID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
 		if err == nil {
 			dao.Crons[cr.ID] = &cr
 		} else {
