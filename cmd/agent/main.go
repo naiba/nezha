@@ -330,6 +330,7 @@ func handleCommandTask(task *pb.Task, result *pb.TaskResult) {
 		result.Data = string(output)
 		result.Successful = true
 	}
+	pg.Dispose()
 	result.Delay = float32(time.Since(startedAt).Seconds())
 }
 
@@ -365,9 +366,9 @@ func handleTerminalTask(task *pb.Task) {
 	}
 
 	defer func() {
-		tty.Close()
+		err := tty.Close()
 		conn.Close()
-		println("terminal exit", terminal.Session)
+		println("terminal exit", terminal.Session, err)
 	}()
 	println("terminal init", terminal.Session)
 

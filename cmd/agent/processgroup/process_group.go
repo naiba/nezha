@@ -1,9 +1,11 @@
+//go:build !windows
 // +build !windows
 
 package processgroup
 
 import (
 	"os/exec"
+	"sync"
 	"syscall"
 )
 
@@ -15,13 +17,34 @@ func NewProcessExitGroup() (ProcessExitGroup, error) {
 	return ProcessExitGroup{}, nil
 }
 
-func (g *ProcessExitGroup) Dispose() error {
-	for _, c := range g.cmds {
-		if err := syscall.Kill(-c.Process.Pid, syscall.SIGKILL); err != nil {
-			return err
-		}
+func (g *ProcessExitGroup) killChildProcess(c *exec.Cmd) error {
+	pgid, err := syscall.Getpgid(c.Process.Pid)
+	if err != nil {
+		// Fall-back on error. Kill the main process only.
+		c.Process.Kill()
 	}
-	return nil
+	// Kill the whole process group.
+	syscall.Kill(-pgid, syscall.SIGTERM)
+	return c.Wait()
+}
+
+func (g *ProcessExitGroup) Dispose() []error {
+	var errors []error
+	mutex := new(sync.Mutex)
+	wg := new(sync.WaitGroup)
+	wg.Add(len(g.cmds))
+	for _, c := range g.cmds {
+		go func(c *exec.Cmd) {
+			defer wg.Done()
+			if err := g.killChildProcess(c); err != nil {
+				mutex.Lock()
+				defer mutex.Unlock()
+				errors = append(errors, err)
+			}
+		}(c)
+	}
+	wg.Wait()
+	return errors
 }
 
 func (g *ProcessExitGroup) AddProcess(cmd *exec.Cmd) error {

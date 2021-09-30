@@ -1,5 +1,5 @@
 //go:build !windows
-//+build !windows
+// +build !windows
 
 package pty
 
@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"os/exec"
+	"syscall"
 
 	opty "github.com/creack/pty"
 )
@@ -53,9 +54,20 @@ func (pty *Pty) Setsize(cols, rows uint32) error {
 	})
 }
 
+func (pty *Pty) killChildProcess(c *exec.Cmd) error {
+	pgid, err := syscall.Getpgid(c.Process.Pid)
+	if err != nil {
+		// Fall-back on error. Kill the main process only.
+		c.Process.Kill()
+	}
+	// Kill the whole process group.
+	syscall.Kill(-pgid, syscall.SIGTERM)
+	return c.Wait()
+}
+
 func (pty *Pty) Close() error {
 	if err := pty.tty.Close(); err != nil {
 		return err
 	}
-	return pty.cmd.Process.Kill()
+	return pty.killChildProcess(pty.cmd)
 }

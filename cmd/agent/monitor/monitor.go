@@ -64,7 +64,9 @@ func GetHost() *model.Host {
 		swapMemTotal = mv.SwapTotal
 	}
 
-	cachedBootTime = time.Unix(int64(hi.BootTime), 0)
+	if cachedBootTime.IsZero() {
+		cachedBootTime = time.Unix(int64(hi.BootTime), 0)
+	}
 
 	return &model.Host{
 		Platform:        hi.OS,
