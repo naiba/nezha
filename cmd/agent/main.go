@@ -83,7 +83,7 @@ func main() {
 		return
 	}
 
-	if agentConf.ReportDelay < 0 || agentConf.ReportDelay > 4 {
+	if agentConf.ReportDelay < 1 || agentConf.ReportDelay > 4 {
 		println("report-delay 的区间为 1-4")
 		return
 	}
