@@ -14,9 +14,11 @@
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
 
-| 默认主题                                                    | DayNight [@JackieSung](https://github.com/JackieSung4ev)     | hotaru                                                                     |
-| ----------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| ![默认主题](resource/template/theme-default/screenshot.png) | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="1600px" /> |
+| 默认主题                                                                           | DayNight [@JackieSung](https://github.com/JackieSung4ev)     | hotaru                                                                     |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| ![默认主题](resource/template/theme-default/screenshot.png)                        | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="2000px" /> |
+| **默认主题魔改 [教程](https://ii.do/43.html)**                                     |                                                              |                                                                            |
+| ![默认主题魔改](https://cdn.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp) |                                                              |                                                                            |
 
 ## 安装脚本
 
@@ -40,6 +42,7 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 
 通过执行 `./nezha-agent --help` 查看支持的参数，如果你使用一键脚本，可以编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
 
+- `--report-delay` 系统信息上报的间隔，默认为 1 秒，可以设置为 3 来进一步降低 agent 端系统资源占用（配置区间 1-4）
 - `--skip-conn` 不监控连接数，机场/连接密集型机器推荐设置，不然比较占 CPU([shirou/gopsutil/issues#220](https://github.com/shirou/gopsutil/issues/220))
 - `--skip-procs` 不监控进程数，也可以降低 agent 占用
 - `--disable-auto-update` 禁止 Agent 自动更新
@@ -161,7 +164,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
-- DayNight 主题更改进度条颜色示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
+- DayNight 主题更改进度条颜色、修改页脚示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
 
   ```
   <style>
@@ -169,9 +172,16 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
     background-color: #00a7d0 !important;
   }
   </style>
+  <script>
+  window.onload = function(){
+  var footer=document.querySelector("div.footer-container")
+  footer.innerHTML="©2021 你的名字 & Powered by 你的名字"
+  footer.style.visibility="visible"
+  }
+  </script>
   ```
 
-- 默认主题修改 LOGO、移除版权示例（来自 [@iLay1678](https://github.com/iLay1678)）
+- 默认主题修改 LOGO、修改页脚示例（来自 [@iLay1678](https://github.com/iLay1678)）
 
   ```
   <style>
@@ -193,18 +203,6 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   footer.style.visibility="visible"
   avatar.src="你的方形logo地址"
   avatar.style.visibility="visible"
-  }
-  </script>
-  ```
-
-- DayNight 移除版权示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
-
-  ```
-  <script>
-  window.onload = function(){
-  var footer=document.querySelector("div.footer-container")
-  footer.innerHTML="©2021 你的名字 & Powered by 你的名字"
-  footer.style.visibility="visible"
   }
   </script>
   ```
@@ -231,9 +229,9 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
-    <summary>Agent不上线不启动自检流程</summary>
+    <summary>Agent 启动/上线 问题自检流程</summary>
 
-1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS 问题。
+1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS、网络不佳导致超时（timeout） 问题。
 2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 检验是否是网络问题，检查本机与面板服务器出入站防火墙，如果单机无法判断可借助 <https://port.ping.pe/> 提供的端口检查工具进行检测。
 3. 如果上面步骤检测正常，Agent 正常上线，尝试关闭 SELinux，[如何关闭 SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
 

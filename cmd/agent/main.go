@@ -35,6 +35,7 @@ type AgentConfig struct {
 	Debug               bool
 	Server              string
 	ClientSecret        string
+	ReportDelay         int
 }
 
 var (
@@ -71,6 +72,7 @@ func main() {
 	flag.BoolVarP(&agentConf.Debug, "debug", "d", false, "开启调试信息")
 	flag.StringVarP(&agentConf.Server, "server", "s", "localhost:5555", "管理面板RPC端口")
 	flag.StringVarP(&agentConf.ClientSecret, "password", "p", "", "Agent连接Secret")
+	flag.IntVar(&agentConf.ReportDelay, "report-delay", 1, "系统状态上报间隔")
 	flag.BoolVar(&agentConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
 	flag.BoolVar(&agentConf.SkipProcsCount, "skip-procs", false, "不监控进程数")
 	flag.BoolVar(&agentConf.DisableAutoUpdate, "disable-auto-update", false, "禁用自动升级")
@@ -78,6 +80,11 @@ func main() {
 
 	if agentConf.ClientSecret == "" {
 		flag.Usage()
+		return
+	}
+
+	if agentConf.ReportDelay < 0 || agentConf.ReportDelay > 4 {
+		println("report-delay 的区间为 1-4")
 		return
 	}
 
@@ -221,7 +228,7 @@ func reportState() {
 				client.ReportSystemInfo(context.Background(), monitor.GetHost().PB())
 			}
 		}
-		time.Sleep(time.Second)
+		time.Sleep(time.Second * time.Duration(agentConf.ReportDelay))
 	}
 }
 

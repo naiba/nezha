@@ -109,7 +109,7 @@ func checkStatus() {
 			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
 			if !passed {
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
-				message := fmt.Sprintf("[主机故障] %s(%s) 规则：%s，", server.Name, utils.IPDesensitize(server.Host.IP), alert.Name)
+				message := fmt.Sprintf("[主机故障] %s(%s) 规则：%s", server.Name, utils.IPDesensitize(server.Host.IP), alert.Name)
 				go SendNotification(message, true)
 			} else {
 				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
