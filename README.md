@@ -16,8 +16,8 @@
 
 | 默认主题                                                                           | DayNight [@JackieSung](https://github.com/JackieSung4ev)     | hotaru                                                                     |
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| ![默认主题](resource/template/theme-default/screenshot.png)                        | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="2000px" /> |
-| **默认主题魔改 [教程](https://ii.do/43.html)**                                     |                                                              |                                                                            |
+| ![默认主题](resource/template/theme-default/screenshot.png)                        | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="1600px" /> |
+| <div align="center"><b>默认主题魔改 <a href="https://ii.do/43.html">[教程]</a></b></div>                                  |                                                              |                                                                            |
 | ![默认主题魔改](https://cdn.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp) |                                                              |                                                                            |
 
 ## 安装脚本
