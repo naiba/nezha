@@ -33,7 +33,7 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 		// 如果已经轮了一整圈又轮到自己，没有合适机器去请求，跳出循环
 		for round < 1 || workedServerIndex < endIndex {
 			// 如果到了圈尾，再回到圈头，圈数加一，游标重置
-			if workedServerIndex == len(dao.SortedServerList) {
+			if workedServerIndex >= len(dao.SortedServerList) {
 				workedServerIndex = 0
 				round++
 				continue
