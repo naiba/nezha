@@ -7,18 +7,18 @@
 <img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.10.6&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.7.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
-  <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，命令批量执行和计划任务。</p>
+  <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，计划任务和在线终端。</p>
 </div>
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
 
-| 默认主题                                                                           | DayNight [@JackieSung](https://github.com/JackieSung4ev)     | hotaru                                                                     |
-| ---------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
-| ![默认主题](resource/template/theme-default/screenshot.png)                        | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="1600px" /> |
-| <div align="center"><b>默认主题魔改 <a href="https://ii.do/43.html">[教程]</a></b></div>                                  |                                                              |                                                                            |
-| ![默认主题魔改](https://cdn.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp) |                                                              |                                                                            |
+| 默认主题                                                                                 | DayNight [@JackieSung](https://github.com/JackieSung4ev)     | hotaru                                                                     |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| ![默认主题](resource/template/theme-default/screenshot.png)                              | ![daynight](resource/template/theme-daynight/screenshot.png) | <img src="resource/template/theme-hotaru/screenshot.png" width="1600px" /> |
+| <div align="center"><b>默认主题魔改 <a href="https://ii.do/43.html">[教程]</a></b></div> |                                                              |                                                                            |
+| ![默认主题魔改](https://cdn.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp)       |                                                              |                                                                            |
 
 ## 安装脚本
 
@@ -45,7 +45,8 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 - `--report-delay` 系统信息上报的间隔，默认为 1 秒，可以设置为 3 来进一步降低 agent 端系统资源占用（配置区间 1-4）
 - `--skip-conn` 不监控连接数，机场/连接密集型机器推荐设置，不然比较占 CPU([shirou/gopsutil/issues#220](https://github.com/shirou/gopsutil/issues/220))
 - `--skip-procs` 不监控进程数，也可以降低 agent 占用
-- `--disable-auto-update` 禁止 Agent 自动更新
+- `--disable-auto-update` 禁止 Agent 自动更新（安全特性）
+- `--disable-command-execute` 禁止在 Agent 机器上执行定时任务、打开在线终端（安全特性）
 
 ## 功能说明
 
@@ -271,7 +272,7 @@ restart() {
 </details>
 
 <details>
-    <summary>实时通道断开/网页终端连接失败</summary>
+    <summary>实时通道断开/在线终端连接失败</summary>
 
 使用反向代理时需要针对 `/ws`,`/terminal` 路径的 WebSocket 进行特别配置以支持实时更新服务器状态和 **WebSSH**。
 

@@ -29,13 +29,14 @@ import (
 )
 
 type AgentConfig struct {
-	SkipConnectionCount bool
-	SkipProcsCount      bool
-	DisableAutoUpdate   bool
-	Debug               bool
-	Server              string
-	ClientSecret        string
-	ReportDelay         int
+	SkipConnectionCount   bool
+	SkipProcsCount        bool
+	DisableAutoUpdate     bool
+	DisableCommandExecute bool
+	Debug                 bool
+	Server                string
+	ClientSecret          string
+	ReportDelay           int
 }
 
 var (
@@ -75,6 +76,7 @@ func main() {
 	flag.IntVar(&agentConf.ReportDelay, "report-delay", 1, "系统状态上报间隔")
 	flag.BoolVar(&agentConf.SkipConnectionCount, "skip-conn", false, "不监控连接数")
 	flag.BoolVar(&agentConf.SkipProcsCount, "skip-procs", false, "不监控进程数")
+	flag.BoolVar(&agentConf.DisableCommandExecute, "disable-command-execute", false, "禁止在此机器上执行命令")
 	flag.BoolVar(&agentConf.DisableAutoUpdate, "disable-auto-update", false, "禁用自动升级")
 	flag.Parse()
 
@@ -302,6 +304,10 @@ func handleHttpGetTask(task *pb.Task, result *pb.TaskResult) {
 }
 
 func handleCommandTask(task *pb.Task, result *pb.TaskResult) {
+	if agentConf.DisableCommandExecute {
+		result.Data = "此 Agent 已禁止命令执行"
+		return
+	}
 	startedAt := time.Now()
 	var cmd *exec.Cmd
 	var endCh = make(chan struct{})
@@ -347,6 +353,10 @@ type WindowSize struct {
 }
 
 func handleTerminalTask(task *pb.Task) {
+	if agentConf.DisableCommandExecute {
+		println("此 Agent 已禁止命令执行")
+		return
+	}
 	var terminal model.TerminalTask
 	err := json.Unmarshal([]byte(task.GetData()), &terminal)
 	if err != nil {
