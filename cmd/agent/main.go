@@ -98,7 +98,9 @@ func run() {
 		ClientSecret: agentConf.ClientSecret,
 	}
 
-	go pty.DownloadDependency()
+	if !agentConf.DisableCommandExecute {
+		go pty.DownloadDependency()
+	}
 	// 上报服务器信息
 	go reportState()
 	// 更新IP信息
