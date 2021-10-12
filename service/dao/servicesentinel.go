@@ -12,7 +12,10 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-const _CurrentStatusSize = 30 // 统计 15 分钟内的数据为当前状态
+const (
+	_CurrentStatusSize = 30 // 统计 15 分钟内的数据为当前状态
+	_StatusOk          = "良好"
+)
 
 var ServiceSentinelShared *ServiceSentinel
 
@@ -268,7 +271,7 @@ func getStateStr(percent uint64) string {
 		return "无数据"
 	}
 	if percent > 95 {
-		return "良好"
+		return _StatusOk
 	}
 	if percent > 80 {
 		return "低可用"
@@ -303,18 +306,13 @@ func (ss *ServiceSentinel) worker() {
 			ss.serviceStatusToday[mh.MonitorID].Up++
 		} else {
 			ss.serviceStatusToday[mh.MonitorID].Down++
+			ServerLock.RLock()
+			log.Println("NEZHA>> 服务故障上报：", ss.monitors[mh.MonitorID].Target, "上报者：", ServerList[r.Reporter].Name, "错误信息：", mh.Data)
+			ServerLock.RUnlock()
 		}
 		// 写入当前数据
 		ss.serviceCurrentStatusData[mh.MonitorID][ss.serviceCurrentStatusIndex[mh.MonitorID]] = mh
 		ss.serviceCurrentStatusIndex[mh.MonitorID]++
-		// 数据持久化
-		if ss.serviceCurrentStatusIndex[mh.MonitorID] == _CurrentStatusSize {
-			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
-			dataToSave := ss.serviceCurrentStatusData[mh.MonitorID]
-			if err := DB.Create(&dataToSave).Error; err != nil {
-				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
-			}
-		}
 		// 更新当前状态
 		ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] = 0
 		ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] = 0
@@ -332,10 +330,17 @@ func (ss *ServiceSentinel) worker() {
 			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID])
 		}
 		stateStr := getStateStr(upPercent)
-		if !mh.Successful {
-			ServerLock.RLock()
-			log.Println("NEZHA>> 服务故障上报：", ss.monitors[mh.MonitorID].Target, stateStr, "上报者：", ServerList[r.Reporter].Name, "请求输出：", mh.Data)
-			ServerLock.RUnlock()
+		// 数据持久化
+		if ss.serviceCurrentStatusIndex[mh.MonitorID] == _CurrentStatusSize {
+			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
+			if err := DB.Create(&model.MonitorHistory{
+				MonitorID:  mh.MonitorID,
+				Delay:      ss.serviceStatusToday[mh.MonitorID].Delay,
+				Successful: stateStr == _StatusOk,
+				Data:       mh.Data,
+			}).Error; err != nil {
+				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
+			}
 		}
 		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
