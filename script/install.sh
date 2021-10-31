@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.7.0"
+NZ_VERSION="v0.7.1"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -387,6 +387,8 @@ uninstall_dashboard() {
     cd $NZ_DASHBOARD_PATH &&
         docker-compose down
     rm -rf $NZ_DASHBOARD_PATH
+    docker rmi -f ghcr.io/naiba/nezha-dashboard > /dev/null 2>&1
+    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard > /dev/null 2>&1
     clean_all
 
     if [[ $# == 0 ]]; then
