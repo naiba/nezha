@@ -5,8 +5,6 @@ builds:
   - id: nezha-agent
     env:
       - CGO_ENABLED=0
-    ldflags:
-      - -s -w
     goos:
       - linux
       - windows
@@ -28,16 +26,27 @@ builds:
     main: ./cmd/agent
     binary: nezha-agent
 universal_binaries:
-  - replace: true
+  - id: nezha-agent
+    name_template: "nezha-agent"
+    replace: true
 checksum:
   name_template: "checksums.txt"
 snapshot:
   name_template: "{{.ProjectName}}"
 archives:
-  - name_template: "nezha-agent_{{ .Os }}_{{ .Arch }}"
+  - name_template: "nezha-agent"
+    files:
+      - README.md
+      - LICENSE
+      - completions/*
 changelog:
   sort: asc
+  use: github
   filters:
     exclude:
-      - "^docs:"
-      - "^test:"
+      - '^docs:'
+      - '^test:'
+      - '^chore'
+      - Merge pull request
+      - Merge branch
+      - go mod tidy
