@@ -32,7 +32,7 @@ checksum:
 snapshot:
   name_template: "nezha-agent"
 archives:
-  - name_template: "{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
+  - name_template: "nezha-agent_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
     allow_different_binary_count: true
     files:
       - none*
