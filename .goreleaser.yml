@@ -5,6 +5,8 @@ builds:
   - id: nezha-agent
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w
     goos:
       - linux
       - windows
@@ -25,6 +27,8 @@ builds:
         goarch: arm64
     main: ./cmd/agent
     binary: nezha-agent
+universal_binaries:
+  - replace: true
 checksum:
   name_template: "checksums.txt"
 snapshot:
