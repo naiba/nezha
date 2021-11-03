@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - ".github/workflows/agent.yml"
+      - ".github/workflows/test-on-pr.yml"
+      - "README.md"
+      - ".goreleaser.yml"
+
 jobs:
   tests:
     runs-on: ubuntu-latest

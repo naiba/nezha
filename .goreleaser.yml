@@ -2,8 +2,7 @@ before:
   hooks:
     - go mod tidy -v
 builds:
-  - id: nezha-agent
-    env:
+  - env:
       - CGO_ENABLED=0
     goos:
       - linux
@@ -26,27 +25,25 @@ builds:
     main: ./cmd/agent
     binary: nezha-agent
 universal_binaries:
-  - id: nezha-agent
-    name_template: "nezha-agent"
+  - name_template: "nezha-agent"
     replace: true
 checksum:
   name_template: "checksums.txt"
 snapshot:
-  name_template: "{{.ProjectName}}"
+  name_template: "nezha-agent"
 archives:
-  - name_template: "nezha-agent"
+  - name_template: "{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
+    allow_different_binary_count: true
     files:
-      - README.md
-      - LICENSE
-      - completions/*
+      - none*
 changelog:
   sort: asc
   use: github
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore'
+      - "^docs:"
+      - "^test:"
+      - "^chore"
       - Merge pull request
       - Merge branch
       - go mod tidy
