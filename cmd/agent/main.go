@@ -32,6 +32,7 @@ type AgentConfig struct {
 	SkipConnectionCount   bool
 	SkipProcsCount        bool
 	DisableAutoUpdate     bool
+	DisableForceUpdate    bool
 	DisableCommandExecute bool
 	Debug                 bool
 	Server                string
@@ -78,6 +79,7 @@ func main() {
 	flag.BoolVar(&agentConf.SkipProcsCount, "skip-procs", false, "不监控进程数")
 	flag.BoolVar(&agentConf.DisableCommandExecute, "disable-command-execute", false, "禁止在此机器上执行命令")
 	flag.BoolVar(&agentConf.DisableAutoUpdate, "disable-auto-update", false, "禁用自动升级")
+	flag.BoolVar(&agentConf.DisableForceUpdate, "disable-force-update", false, "禁用强制升级")
 	flag.Parse()
 
 	if agentConf.ClientSecret == "" {
@@ -114,7 +116,7 @@ func run() {
 						time.Sleep(time.Minute * 20)
 						updateCh <- struct{}{}
 					}()
-					doSelfUpdate()
+					doSelfUpdate(false)
 				}()
 			}
 		}()
@@ -236,8 +238,11 @@ func reportState() {
 	}
 }
 
-func doSelfUpdate() {
-	v := semver.MustParse(version)
+func doSelfUpdate(donNotUseLocalVersion bool) {
+	v := semver.MustParse("0.1.0")
+	if !donNotUseLocalVersion {
+		v = semver.MustParse(version)
+	}
 	println("检查更新：", v)
 	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
 	if err != nil {
@@ -250,7 +255,7 @@ func doSelfUpdate() {
 }
 
 func handleUpgradeTask(task *pb.Task, result *pb.TaskResult) {
-	doSelfUpdate()
+	doSelfUpdate(true)
 }
 
 func handleTcpPingTask(task *pb.Task, result *pb.TaskResult) {

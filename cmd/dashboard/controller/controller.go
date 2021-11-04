@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -27,6 +28,9 @@ func ServeWeb(port uint) *http.Server {
 	r.SetFuncMap(template.FuncMap{
 		"tf": func(t time.Time) string {
 			return t.Format("2006年1月2号 15:04:05")
+		},
+		"len": func(slice []interface{}) string {
+			return strconv.Itoa(len(slice))
 		},
 		"safe": func(s string) template.HTML {
 			return template.HTML(s) // #nosec

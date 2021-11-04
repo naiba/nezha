@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/dao"
 )
 
@@ -36,6 +38,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
 	mr.GET("/cron/:id/manual", ma.manualTrigger)
+	mr.POST("/force-update", ma.forceUpdate)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -319,6 +322,41 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
+	})
+}
+
+func (ma *memberAPI) forceUpdate(c *gin.Context) {
+	var forceUpdateServers []uint64
+	if err := c.ShouldBindJSON(&forceUpdateServers); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	var executeResult bytes.Buffer
+
+	for i := 0; i < len(forceUpdateServers); i++ {
+		dao.ServerLock.RLock()
+		server := dao.ServerList[forceUpdateServers[i]]
+		dao.ServerLock.RUnlock()
+		if server != nil && server.TaskStream != nil {
+			if err := server.TaskStream.Send(&proto.Task{
+				Type: model.TaskTypeUpgrade,
+			}); err != nil {
+				executeResult.WriteString(fmt.Sprintf("%d 下发指令失败 %+v<br/>", forceUpdateServers[i], err))
+			} else {
+				executeResult.WriteString(fmt.Sprintf("%d 下发指令成功<br/>", forceUpdateServers[i]))
+			}
+		} else {
+			executeResult.WriteString(fmt.Sprintf("%d 离线<br/>", forceUpdateServers[i]))
+		}
+	}
+
+	c.JSON(http.StatusOK, model.Response{
+		Code:    http.StatusOK,
+		Message: executeResult.String(),
 	})
 }
 

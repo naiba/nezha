@@ -26,14 +26,13 @@ builds:
     binary: nezha-agent
 universal_binaries:
   - name_template: "nezha-agent"
-    replace: true
+    replace: false
 checksum:
   name_template: "checksums.txt"
 snapshot:
   name_template: "nezha-agent"
 archives:
   - name_template: "nezha-agent_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}{{ if .Mips }}_{{ .Mips }}{{ end }}"
-    allow_different_binary_count: true
     files:
       - none*
 changelog:

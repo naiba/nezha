@@ -8,11 +8,15 @@
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditServer()"><i
                         class="add icon"></i> 添加主机
                 </button>
+                <button class="ui right labeled nezha-primary-btn icon button" onclick="forceUpdate()"><i
+                        class="arrow alternate circle up outline icon"></i> 强制更新
+                </button>
             </div>
         </div>
         <table class="ui very basic table">
             <thead>
                 <tr>
+                    <th><button onclick="checkAllServer()" class="ui mini nezha-primary-btn button">全选</button></th>
                     <th>ID(排序)</th>
                     <th>名称</th>
                     <th>分组</th>
@@ -27,6 +31,7 @@
             <tbody>
                 {{range $server := .Servers}}
                 <tr>
+                    <td><input type="checkbox" class="nezha-servers" value="{{$server.ID}}" /></td>
                     <td>{{$server.ID}}({{$server.DisplayIndex}})</td>
                     <td>{{$server.Name}}</td>
                     <td>{{$server.Tag}}</td>
@@ -72,5 +77,57 @@
 <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
 <script>
     var clipboard = new ClipboardJS('.ui.icon.green.mini.button');
+    const checkBoxList = document.querySelectorAll('tbody > tr > td > input.nezha-servers[type=checkbox]')
+    function checkAllServer() {
+        checkBoxList.forEach(cb => {
+            cb.checked = true
+        })
+    }
+    function forceUpdate() {
+        const servers = []
+        checkBoxList.forEach(cb => {
+            if (cb.checked) {
+                servers.push(parseInt(cb.value))
+            }
+        })
+        if (servers.length == 0) {
+            $.suiAlert({
+                title: '当前没有选中的服务器',
+                description: '',
+                type: 'warning',
+                time: '2',
+                position: 'top-center',
+            });
+            return
+        }
+        $.post('/api/force-update', JSON.stringify(servers))
+            .then((resp) => {
+                if (resp.code == 200) {
+                    $.suiAlert({
+                        title: '执行结果',
+                        description: resp.message,
+                        type: 'success',
+                        time: '3',
+                        position: 'top-center',
+                    });
+                } else {
+                    $.suiAlert({
+                        title: '',
+                        description: resp.message,
+                        type: 'error',
+                        time: '3',
+                        position: 'top-center',
+                    });
+                }
+            }).catch(err => {
+                $.suiAlert({
+                    title: '',
+                    description: err,
+                    type: 'error',
+                    time: '3',
+                    position: 'top-center',
+                });
+            })
+    }
 </script>
 {{end}}
