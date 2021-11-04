@@ -17,11 +17,9 @@ jobs:
       GO111MODULE: on
     steps:
       - uses: actions/checkout@v2
-      - run: go version
       - uses: actions/setup-go@v2
         with:
-          go-version: '^1.17.2'
-      - run: go version
+          go-version: "^1.17.2"
       - name: Unit test
         run: |
           go test -v ./...
@@ -30,6 +28,6 @@ jobs:
           go build cmd/dashboard/main.go
           go build cmd/agent/main.go
       - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: -exclude=G104 ./...
+        run: |
+          go install github.com/securego/gosec/v2/cmd/gosec@latest
+          gosec -exclude=G104 ./...
