@@ -255,6 +255,9 @@ func doSelfUpdate(donNotUseLocalVersion bool) {
 }
 
 func handleUpgradeTask(task *pb.Task, result *pb.TaskResult) {
+	if agentConf.DisableForceUpdate {
+		return
+	}
 	doSelfUpdate(true)
 }
 
