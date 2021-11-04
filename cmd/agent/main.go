@@ -116,7 +116,7 @@ func run() {
 						time.Sleep(time.Minute * 20)
 						updateCh <- struct{}{}
 					}()
-					doSelfUpdate(false)
+					doSelfUpdate(true)
 				}()
 			}
 		}()
@@ -238,9 +238,9 @@ func reportState() {
 	}
 }
 
-func doSelfUpdate(donNotUseLocalVersion bool) {
+func doSelfUpdate(useLocalVersion bool) {
 	v := semver.MustParse("0.1.0")
-	if !donNotUseLocalVersion {
+	if useLocalVersion {
 		v = semver.MustParse(version)
 	}
 	println("检查更新：", v)
@@ -258,7 +258,7 @@ func handleUpgradeTask(task *pb.Task, result *pb.TaskResult) {
 	if agentConf.DisableForceUpdate {
 		return
 	}
-	doSelfUpdate(true)
+	doSelfUpdate(false)
 }
 
 func handleTcpPingTask(task *pb.Task, result *pb.TaskResult) {
