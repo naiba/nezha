@@ -41,11 +41,14 @@ func (n *Notification) reqURL(message string) string {
 	})
 }
 
-func (n *Notification) reqMethod() string {
-	if n.RequestMethod == NotificationRequestMethodPOST {
-		return http.MethodPost
+func (n *Notification) reqMethod() (string, error) {
+	switch n.RequestMethod {
+	case NotificationRequestMethodPOST:
+		return http.MethodPost, nil
+	case NotificationRequestMethodGET:
+		return http.MethodGet, nil
 	}
-	return http.MethodGet
+	return "", errors.New("不支持的请求方式")
 }
 
 func (n *Notification) reqBody(message string) (string, error) {
@@ -115,7 +118,12 @@ func (n *Notification) Send(message string) error {
 		return err
 	}
 
-	req, err := http.NewRequest(n.reqMethod(), n.reqURL(message), strings.NewReader(reqBody))
+	reqMethod, err := n.reqMethod()
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(reqMethod, n.reqURL(message), strings.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
