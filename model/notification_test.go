@@ -7,9 +7,7 @@ import (
 )
 
 var (
-	msg         = "msg"
-	reqTypeForm = "application/x-www-form-urlencoded"
-	reqTypeJSON = "application/json"
+	msg = "msg"
 )
 
 type testSt struct {
@@ -19,7 +17,6 @@ type testSt struct {
 	reqMethod  int
 	expectURL  string
 	expectBody string
-	expectType string
 }
 
 func execCase(t *testing.T, item testSt) {
@@ -33,7 +30,6 @@ func execCase(t *testing.T, item testSt) {
 	reqBody, err := n.reqBody(msg)
 	assert.Nil(t, err)
 	assert.Equal(t, item.expectBody, reqBody)
-	assert.Equal(t, item.expectType, n.reqContentType())
 }
 
 func TestNotification(t *testing.T) {
@@ -44,7 +40,6 @@ func TestNotification(t *testing.T) {
 			reqMethod:  NotificationRequestMethodGET,
 			expectURL:  "https://example.com",
 			expectBody: "",
-			expectType: "",
 		},
 		{
 			url:        "https://example.com/?m=#NEZHA#",
@@ -52,7 +47,6 @@ func TestNotification(t *testing.T) {
 			reqMethod:  NotificationRequestMethodGET,
 			expectURL:  "https://example.com/?m=" + msg,
 			expectBody: "",
-			expectType: "",
 		},
 		{
 			url:        "https://example.com/?m=#NEZHA#",
@@ -61,7 +55,6 @@ func TestNotification(t *testing.T) {
 			reqType:    NotificationRequestTypeForm,
 			expectURL:  "https://example.com/?m=" + msg,
 			expectBody: "asd=" + msg,
-			expectType: reqTypeForm,
 		},
 		{
 			url:        "https://example.com/?m=#NEZHA#",
@@ -70,7 +63,6 @@ func TestNotification(t *testing.T) {
 			reqType:    NotificationRequestTypeForm,
 			expectURL:  "https://example.com/?m=" + msg,
 			expectBody: "%23NEZHA%23=" + msg,
-			expectType: reqTypeForm,
 		},
 		{
 			url:        "https://example.com/?m=#NEZHA#",
@@ -79,7 +71,6 @@ func TestNotification(t *testing.T) {
 			reqType:    NotificationRequestTypeJSON,
 			expectURL:  "https://example.com/?m=" + msg,
 			expectBody: `{"asd":"msg"}`,
-			expectType: reqTypeJSON,
 		},
 		{
 			url:        "https://example.com/?m=#NEZHA#",
@@ -88,7 +79,6 @@ func TestNotification(t *testing.T) {
 			reqType:    NotificationRequestTypeJSON,
 			expectURL:  "https://example.com/?m=" + msg,
 			expectBody: `{"msg":"msg"}`,
-			expectType: reqTypeJSON,
 		},
 	}
 

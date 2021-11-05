@@ -75,14 +75,15 @@ func (n *Notification) reqBody(message string) (string, error) {
 	return "", errors.New("不支持的请求类型")
 }
 
-func (n *Notification) reqContentType() string {
+func (n *Notification) setContentType(req *http.Request) {
 	if n.RequestMethod == NotificationRequestMethodGET {
-		return ""
+		return
 	}
 	if n.RequestType == NotificationRequestTypeForm {
-		return "application/x-www-form-urlencoded"
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	} else {
+		req.Header.Set("Content-Type", "application/json")
 	}
-	return "application/json"
 }
 
 func (n *Notification) setRequestHeader(req *http.Request) error {
@@ -121,6 +122,8 @@ func (n *Notification) Send(message string) error {
 	if err != nil {
 		return err
 	}
+
+	n.setContentType(req)
 
 	if err := n.setRequestHeader(req); err != nil {
 		return err
