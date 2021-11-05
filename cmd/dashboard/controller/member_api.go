@@ -366,6 +366,7 @@ type notificationForm struct {
 	URL           string
 	RequestMethod int
 	RequestType   int
+	RequestHeader string
 	RequestBody   string
 	VerifySSL     string
 }
@@ -378,6 +379,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		n.Name = nf.Name
 		n.RequestMethod = nf.RequestMethod
 		n.RequestType = nf.RequestType
+		n.RequestHeader = nf.RequestHeader
 		n.RequestBody = nf.RequestBody
 		n.URL = nf.URL
 		verifySSL := nf.VerifySSL == "on"

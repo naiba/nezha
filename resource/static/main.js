@@ -136,6 +136,9 @@ function addOrEditNotification(notification) {
   modal.find("input[name=Name]").val(notification ? notification.Name : null);
   modal.find("input[name=URL]").val(notification ? notification.URL : null);
   modal
+    .find("textarea[name=RequestHeader]")
+    .val(notification ? notification.RequestHeader : null);
+  modal
     .find("textarea[name=RequestBody]")
     .val(notification ? notification.RequestBody : null);
   modal
