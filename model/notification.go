@@ -42,17 +42,14 @@ func (n *Notification) reqURL(message string) string {
 }
 
 func (n *Notification) reqMethod() string {
-	switch n.RequestMethod {
-	case NotificationRequestMethodGET:
-		return http.MethodGet
-	case NotificationRequestMethodPOST:
-		return http.MethodGet
+	if n.RequestMethod == NotificationRequestMethodPOST {
+		return http.MethodPost
 	}
-	return ""
+	return http.MethodGet
 }
 
 func (n *Notification) reqBody(message string) (string, error) {
-	if n.RequestMethod == NotificationRequestMethodGET {
+	if n.RequestMethod == NotificationRequestMethodGET || message == "" {
 		return "", nil
 	}
 	switch n.RequestType {
