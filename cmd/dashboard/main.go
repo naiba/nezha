@@ -87,12 +87,18 @@ func recordTransferHourlyUsage() {
 			In:       server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn),
 			Out:      server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut),
 		}
+		if tx.In == 0 && tx.Out == 0 {
+			continue
+		}
 		server.PrevHourlyTransferIn = int64(server.State.NetInTransfer)
 		server.PrevHourlyTransferOut = int64(server.State.NetOutTransfer)
 		tx.CreatedAt = nowTrimSeconds
 		txs = append(txs, tx)
 	}
-	dao.DB.Create(txs)
+	if len(txs) == 0 {
+		return
+	}
+	log.Println("NEZHA>> Cron 流量统计入库", len(txs), dao.DB.Create(txs).Error)
 }
 
 func cleanMonitorHistory() {
@@ -130,12 +136,12 @@ func cleanMonitorHistory() {
 		}
 	}
 	for id, couldRemove := range specialServerKeep {
-		dao.DB.Unscoped().Delete(&model.Transfer{}, "id = ? AND created_at < ?", id, couldRemove)
+		dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ? AND created_at < ?", id, couldRemove)
 	}
 	if allServerKeep.IsZero() {
-		dao.DB.Unscoped().Delete(&model.Transfer{}, "id NOT IN (?)", specialServerIDs)
+		dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?)", specialServerIDs)
 	} else {
-		dao.DB.Unscoped().Delete(&model.Transfer{}, "id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
+		dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
 	}
 }
 
@@ -193,25 +199,9 @@ func main() {
 	graceful.Graceful(func() error {
 		return srv.ListenAndServe()
 	}, func(c context.Context) error {
-		dao.ServerLock.Lock()
-		defer dao.ServerLock.Unlock()
-		var txs []model.Transfer
-		for _, s := range dao.ServerList {
-			in := s.State.NetInTransfer - uint64(s.PrevHourlyTransferIn)
-			out := s.State.NetOutTransfer - uint64(s.PrevHourlyTransferOut)
-			if in > 0 || out > 0 {
-				tx := model.Transfer{
-					ServerID: s.ID,
-					In:       in,
-					Out:      out,
-				}
-				tx.CreatedAt = time.Now()
-				txs = append(txs, tx)
-			}
-		}
-		if err := dao.DB.Create(txs).Error; err != nil {
-			log.Println("NEZHA>> 流量统计入库", err)
-		}
+		log.Println("NEZHA>> Graceful::START")
+		recordTransferHourlyUsage()
+		log.Println("NEZHA>> Graceful::END")
 		srv.Shutdown(c)
 		return nil
 	})
