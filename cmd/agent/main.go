@@ -144,7 +144,7 @@ func run() {
 		timeOutCtx, cancel := context.WithTimeout(context.Background(), networkTimeOut)
 		var securityOption grpc.DialOption
 		if agentConf.TLS {
-			securityOption = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{}))
+			securityOption = grpc.WithTransportCredentials(credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12}))
 		} else {
 			securityOption = grpc.WithInsecure()
 		}
