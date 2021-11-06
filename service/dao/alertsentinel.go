@@ -16,29 +16,54 @@ const (
 	_RuleCheckPass
 )
 
-// 报警规则
-var alertsLock sync.RWMutex
-var alerts []*model.AlertRule
-var alertsStore map[uint64]map[uint64][][]interface{}
-var alertsPrevState map[uint64]map[uint64]uint
-
 type NotificationHistory struct {
 	Duration time.Duration
 	Until    time.Time
 }
 
+// 报警规则
+var AlertsLock sync.RWMutex
+var Alerts []*model.AlertRule
+var alertsStore map[uint64]map[uint64][][]interface{}
+var alertsPrevState map[uint64]map[uint64]uint
+var AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats
+
+func addCycleTransferStatsInfo(alert *model.AlertRule) {
+	if !alert.Enabled() {
+		return
+	}
+	for j := 0; j < len(alert.Rules); j++ {
+		if !alert.Rules[j].IsTransferDurationRule() {
+			continue
+		}
+		if AlertsCycleTransferStatsStore[alert.ID] == nil {
+			from := alert.Rules[j].GetTransferDurationStart()
+			AlertsCycleTransferStatsStore[alert.ID] = &model.CycleTransferStats{
+				Name:       alert.Name,
+				From:       from,
+				To:         from.Add(time.Hour * time.Duration(alert.Rules[j].CycleInterval)),
+				ServerName: make(map[uint64]string),
+				Transfer:   make(map[uint64]uint64),
+				NextUpdate: make(map[uint64]time.Time),
+			}
+		}
+	}
+}
+
 func AlertSentinelStart() {
 	alertsStore = make(map[uint64]map[uint64][][]interface{})
 	alertsPrevState = make(map[uint64]map[uint64]uint)
-	alertsLock.Lock()
-	if err := DB.Find(&alerts).Error; err != nil {
+	AlertsCycleTransferStatsStore = make(map[uint64]*model.CycleTransferStats)
+	AlertsLock.Lock()
+	if err := DB.Find(&Alerts).Error; err != nil {
 		panic(err)
 	}
-	for i := 0; i < len(alerts); i++ {
-		alertsStore[alerts[i].ID] = make(map[uint64][][]interface{})
-		alertsPrevState[alerts[i].ID] = make(map[uint64]uint)
+	for i := 0; i < len(Alerts); i++ {
+		alertsStore[Alerts[i].ID] = make(map[uint64][][]interface{})
+		alertsPrevState[Alerts[i].ID] = make(map[uint64]uint)
+		addCycleTransferStatsInfo(Alerts[i])
 	}
-	alertsLock.Unlock()
+	AlertsLock.Unlock()
 
 	time.Sleep(time.Second * 10)
 	var lastPrint time.Time
@@ -59,52 +84,55 @@ func AlertSentinelStart() {
 }
 
 func OnRefreshOrAddAlert(alert model.AlertRule) {
-	alertsLock.Lock()
-	defer alertsLock.Unlock()
+	AlertsLock.Lock()
+	defer AlertsLock.Unlock()
 	delete(alertsStore, alert.ID)
 	delete(alertsPrevState, alert.ID)
 	var isEdit bool
-	for i := 0; i < len(alerts); i++ {
-		if alerts[i].ID == alert.ID {
-			alerts[i] = &alert
+	for i := 0; i < len(Alerts); i++ {
+		if Alerts[i].ID == alert.ID {
+			Alerts[i] = &alert
 			isEdit = true
 		}
 	}
 	if !isEdit {
-		alerts = append(alerts, &alert)
+		Alerts = append(Alerts, &alert)
 	}
 	alertsStore[alert.ID] = make(map[uint64][][]interface{})
 	alertsPrevState[alert.ID] = make(map[uint64]uint)
+	delete(AlertsCycleTransferStatsStore, alert.ID)
+	addCycleTransferStatsInfo(&alert)
 }
 
 func OnDeleteAlert(id uint64) {
-	alertsLock.Lock()
-	defer alertsLock.Unlock()
+	AlertsLock.Lock()
+	defer AlertsLock.Unlock()
 	delete(alertsStore, id)
 	delete(alertsPrevState, id)
-	for i := 0; i < len(alerts); i++ {
-		if alerts[i].ID == id {
-			alerts = append(alerts[:i], alerts[i+1:]...)
+	for i := 0; i < len(Alerts); i++ {
+		if Alerts[i].ID == id {
+			Alerts = append(Alerts[:i], Alerts[i+1:]...)
 			i--
 		}
 	}
+	delete(AlertsCycleTransferStatsStore, id)
 }
 
 func checkStatus() {
-	alertsLock.RLock()
-	defer alertsLock.RUnlock()
+	AlertsLock.RLock()
+	defer AlertsLock.RUnlock()
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
 
-	for _, alert := range alerts {
+	for _, alert := range Alerts {
 		// 跳过未启用
-		if alert.Enable == nil || !*alert.Enable {
+		if !alert.Enabled() {
 			continue
 		}
 		for _, server := range ServerList {
 			// 监测点
 			alertsStore[alert.ID][server.ID] = append(alertsStore[alert.
-				ID][server.ID], alert.Snapshot(server, DB))
+				ID][server.ID], alert.Snapshot(AlertsCycleTransferStatsStore[alert.ID], server, DB))
 			// 发送通知，分为触发报警和恢复通知
 			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
 			if !passed {

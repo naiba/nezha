@@ -61,11 +61,24 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	case "server":
 		err = dao.DB.Unscoped().Delete(&model.Server{}, "id = ?", id).Error
 		if err == nil {
+			// 删除服务器
 			dao.ServerLock.Lock()
 			delete(dao.SecretToID, dao.ServerList[id].Secret)
 			delete(dao.ServerList, id)
 			dao.ServerLock.Unlock()
 			dao.ReSortServer()
+			// 删除循环流量状态中的此服务器相关的记录
+			dao.AlertsLock.Lock()
+			for i := 0; i < len(dao.Alerts); i++ {
+				if dao.AlertsCycleTransferStatsStore[dao.Alerts[i].ID] != nil {
+					delete(dao.AlertsCycleTransferStatsStore[dao.Alerts[i].ID].ServerName, id)
+					delete(dao.AlertsCycleTransferStatsStore[dao.Alerts[i].ID].Transfer, id)
+					delete(dao.AlertsCycleTransferStatsStore[dao.Alerts[i].ID].NextUpdate, id)
+				}
+			}
+			dao.AlertsLock.Unlock()
+			// 删除服务器相关循环流量记录
+			dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", id)
 		}
 	case "notification":
 		err = dao.DB.Unscoped().Delete(&model.Notification{}, "id = ?", id).Error

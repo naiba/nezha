@@ -7,7 +7,6 @@
 <div class="nb-container">
     <div class="ui container">
         <div class="service-status">
-
             <table class="ui celled table">
                 <thead>
                     <tr>
@@ -30,12 +29,48 @@
                             </div> {{end}}
                         </td>
                         <td class="ui center aligned delay-today">
-                            <i class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
+                            <i
+                                class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
                             {{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}
                         </td>
                     </tr> {{end}}
                 </tbody>
             </table>
+
+            {{if .CycleTransferStats}}
+
+            <h2 style="text-align: center;">循环流量统计</h2>
+
+            <table class="ui celled table">
+                <thead>
+                    <tr>
+                        <th class="ui center aligned">ID</th>
+                        <th class="ui center aligned">规则</th>
+                        <th class="ui center aligned">服务器</th>
+                        <th class="ui center aligned">自</th>
+                        <th class="ui center aligned">至</th>
+                        <th class="ui center aligned">下次刷新</th>
+                        <th class="ui center aligned">流量</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $id, $stats := .CycleTransferStats}}
+                    {{range $innerId, $transfer := $stats.Transfer}}
+                        <tr>
+                            <td class="ui center aligned">{{$id}}</td>
+                            <td class="ui center aligned">{{$stats.Name}}</td>
+                            <td class="ui center aligned">{{index $stats.ServerName $innerId}}</td>
+                            <td class="ui center aligned">{{$stats.From|tf}}</td>
+                            <td class="ui center aligned">{{$stats.To|tf}}</td>
+                            <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|tf}}</td>
+                            <td class="ui center aligned">{{$transfer|bf}}</td>
+                        </tr>
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+
+            {{end}}
         </div>
     </div>
 </div>

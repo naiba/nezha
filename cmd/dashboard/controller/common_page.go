@@ -98,17 +98,19 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 }
 
 func (p *commonPage) service(c *gin.Context) {
+	dao.AlertsLock.RLock()
+	defer dao.AlertsLock.RUnlock()
 	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
-		"Title":      "服务状态",
-		"Services":   dao.ServiceSentinelShared.LoadStats(),
-		"CustomCode": dao.Conf.Site.CustomCode,
+		"Title":              "服务状态",
+		"Services":           dao.ServiceSentinelShared.LoadStats(),
+		"CycleTransferStats": dao.AlertsCycleTransferStatsStore,
+		"CustomCode":         dao.Conf.Site.CustomCode,
 	}))
 }
 
 func (cp *commonPage) home(c *gin.Context) {
 	dao.SortedServerLock.RLock()
 	defer dao.SortedServerLock.RUnlock()
-
 	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
 		"Servers":    dao.SortedServerList,
 		"CustomCode": dao.Conf.Site.CustomCode,

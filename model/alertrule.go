@@ -2,9 +2,19 @@ package model
 
 import (
 	"encoding/json"
+	"time"
 
 	"gorm.io/gorm"
 )
+
+type CycleTransferStats struct {
+	Name       string
+	From       time.Time
+	To         time.Time
+	ServerName map[uint64]string
+	Transfer   map[uint64]uint64
+	NextUpdate map[uint64]time.Time
+}
 
 type AlertRule struct {
 	Common
@@ -27,10 +37,14 @@ func (r *AlertRule) AfterFind(tx *gorm.DB) error {
 	return json.Unmarshal([]byte(r.RulesRaw), &r.Rules)
 }
 
-func (r *AlertRule) Snapshot(server *Server, db *gorm.DB) []interface{} {
+func (r *AlertRule) Enabled() bool {
+	return r.Enable != nil && *r.Enable
+}
+
+func (r *AlertRule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, db *gorm.DB) []interface{} {
 	var point []interface{}
 	for i := 0; i < len(r.Rules); i++ {
-		point = append(point, r.Rules[i].Snapshot(server, db))
+		point = append(point, r.Rules[i].Snapshot(cycleTransferStats, server, db))
 	}
 	return point
 }
