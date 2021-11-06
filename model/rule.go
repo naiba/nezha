@@ -123,7 +123,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 
 	// 循环区间流量检测 · 更新下次需要检测时间
 	if u.IsTransferDurationRule() {
-		seconds := 1800 * time.Duration(((u.Max - src) / u.Max))
+		seconds := 1800 * ((u.Max - src) / u.Max)
 		if seconds < 180 {
 			seconds = 180
 		}
@@ -133,7 +133,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 		if u.LastCycleStatus == nil {
 			u.LastCycleStatus = make(map[uint64]interface{})
 		}
-		u.NextTransferAt[server.ID] = time.Now().Add(time.Duration(time.Second * seconds))
+		u.NextTransferAt[server.ID] = time.Now().Add(time.Second * time.Duration(seconds))
 		if (u.Max > 0 && src > u.Max) || (u.Min > 0 && src < u.Min) {
 			u.LastCycleStatus[server.ID] = struct{}{}
 		} else {
