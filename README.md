@@ -48,6 +48,7 @@ _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm
 - `--disable-auto-update` 禁止 **自动更新** Agent（安全特性）
 - `--disable-force-update` 禁止 **强制更新** Agent（安全特性）
 - `--disable-command-execute` 禁止在 Agent 机器上执行定时任务、打开在线终端（安全特性）
+- `--tls` 启用SSL/TLS加密（使用 nginx 反向代理 Agent 的 grpc 连接，并且 nginx 开启 SSL/TLS 时，需要启用该项配置）
 
 ## 功能说明
 
@@ -318,6 +319,34 @@ restart() {
   }
   ```
 
+</details>
+
+<details>
+    <summary>Agent 连接 Dashboard 域名开启 Cloudflare CDN</summary>
+根据 Cloudflare gRPC 的要求：gRPC 服务必须侦听 443 端口 且必须支持 TLS 和 HTTP/2。我们可以使用 nginx 反向代理 gRPC 并配置 SSL/TLS 证书。
+
+- nginx 配置，比如 Agent 连接 Dashboard 的域名为 ip-to-dashboard.nai.ba，为 nginx 添加如下配置，然后重新启动 nginx 或者重新加载配置文件。
+```nginx
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name ip-to-dashboard.nai.ba; # 你的 Agent 连接 Dashboard 的域名
+
+    ssl_certificate          /data/letsencrypt/fullchain.pem; # 你的域名证书路径
+    ssl_certificate_key      /data/letsencrypt/key.pem;       # 你的域名私钥路径
+
+    underscores_in_headers on;
+
+    location / {
+        grpc_pass grpc://localhost:5555;
+    }
+}
+```
+- Agent 端配置，编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `--tls`，然后重启 nezha-agent.service。例如：
+```bash
+ExecStart=/opt/nezha/agent/nezha-agent -s ip-to-dashboard.nai.ba:443 -p xxxxxx --tls
+```
+- 在 Cloudflare 中将对应的域名解析设置橙色云开启CDN，并在网络选项中启用gRPC。
 </details>
 
 ## 社区文章
