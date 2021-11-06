@@ -347,7 +347,7 @@ server {
 ExecStart=/opt/nezha/agent/nezha-agent -s ip-to-dashboard.nai.ba:443 -p xxxxxx --tls
 ```
 - 在 Cloudflare 中将对应的域名解析设置橙色云开启CDN，并在网络选项中启用gRPC。
-<details>
+</details>
 
 ## 社区文章
 
