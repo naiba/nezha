@@ -39,6 +39,8 @@ type Config struct {
 	GRPCPort                   uint
 	GRPCHost                   string
 	EnableIPChangeNotification bool
+	ProxyGRPCPort              uint
+	TLS                        bool
 
 	// IP变更提醒
 	Cover                 uint8  // 覆盖范围

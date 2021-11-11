@@ -17,6 +17,7 @@ const (
 	TaskTypeCommand
 	TaskTypeTerminal
 	TaskTypeUpgrade
+	TaskTypeKeepalive
 )
 
 type TerminalTask struct {

@@ -203,8 +203,8 @@ install_agent() {
         mv nezha-agent $NZ_AGENT_PATH &&
         rm -rf nezha-agent_linux_${os_arch}.tar.gz README.md
 
-    if [[ $# == 3 ]]; then
-        modify_agent_config $1 $2 $3
+    if [ $# -ge 3 ]; then
+        modify_agent_config "$@"
     else
         modify_agent_config 0
     fi
@@ -223,7 +223,7 @@ modify_agent_config() {
         return 0
     fi
 
-    if [[ $# != 3 ]]; then
+    if [ $# -lt 3 ]; then
         echo "请先在管理面板上添加Agent，记录下密钥" &&
             read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
             read -ep "请输入面板RPC端口: (5555)" nz_grpc_port &&
@@ -242,11 +242,15 @@ modify_agent_config() {
         nz_client_secret=$3
     fi
 
-
-
     sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
     sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
+
+    shift 3
+    if [ $# -gt 0 ]; then
+        args=" $*"
+        sed -i "/ExecStart/ s/$/${args}/" ${NZ_AGENT_SERVICE}
+    fi
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
 
@@ -558,8 +562,9 @@ if [[ $# > 0 ]]; then
         uninstall_dashboard 0
         ;;
     "install_agent")
-        if [[ $# == 4 ]]; then
-            install_agent $2 $3 $4
+        shift
+        if [ $# -ge 3 ]; then
+            install_agent "$@"
         else
             install_agent 0
         fi

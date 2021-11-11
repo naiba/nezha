@@ -193,6 +193,7 @@ func main() {
 	go rpc.ServeRPC(dao.Conf.GRPCPort)
 	serviceSentinelDispatchBus := make(chan model.Monitor)
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
+	go rpc.DispatchKeepalive()
 	go dao.AlertSentinelStart()
 	dao.NewServiceSentinel(serviceSentinelDispatchBus)
 	srv := controller.ServeWeb(dao.Conf.HTTPPort)

@@ -57,3 +57,17 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 		dao.SortedServerLock.RUnlock()
 	}
 }
+
+func DispatchKeepalive() {
+	dao.Cron.AddFunc("@every 60s", func() {
+		dao.SortedServerLock.RLock()
+		defer dao.SortedServerLock.RUnlock()
+		for i := 0; i < len(dao.SortedServerList); i++ {
+			if dao.SortedServerList[i] == nil || dao.SortedServerList[i].TaskStream == nil {
+				continue
+			}
+
+			dao.SortedServerList[i].TaskStream.Send(&pb.Task{Type: model.TaskTypeKeepalive})
+		}
+	})
+}
