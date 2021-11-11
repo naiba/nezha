@@ -322,10 +322,10 @@ restart() {
 </details>
 
 <details>
-    <summary>Agent 连接 Dashboard 域名开启 Cloudflare CDN</summary>
-根据 Cloudflare gRPC 的要求：gRPC 服务必须侦听 443 端口 且必须支持 TLS 和 HTTP/2。我们可以使用 nginx 反向代理 gRPC 并配置 SSL/TLS 证书。
+    <summary>反向代理 gRPC 端口（支持 Cloudflare CDN）</summary>
+使用 Nginx 或者 Caddy 反向代理 gRPC
 
-- nginx 配置，比如 Agent 连接 Dashboard 的域名为 ip-to-dashboard.nai.ba，为 nginx 添加如下配置，然后重新启动 nginx 或者重新加载配置文件。
+- Nginx 配置
 
 ```nginx
 server {
@@ -339,18 +339,44 @@ server {
     underscores_in_headers on;
 
     location / {
+        grpc_read_timeout 300s;
+        grpc_send_timeout 300s;
         grpc_pass grpc://localhost:5555;
     }
 }
 ```
 
-- Agent 端配置，编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上 `--tls`，然后重启 nezha-agent.service。例如：
+- Caddy 配置
 
-```bash
-ExecStart=/opt/nezha/agent/nezha-agent -s ip-to-dashboard.nai.ba:443 -p xxxxxx --tls
+```Caddyfile
+ip-to-dashboard.nai.ba:443 { 
+    reverse_proxy {
+        to localhost:5555
+        transport http {
+            versions h2c 2
+        }
+    }
+}
 ```
 
-- 在 Cloudflare 中将对应的域名解析设置橙色云开启CDN，并在网络选项中启用gRPC。
+
+Dashboard 面板端配置
+
+- 首先登录面板进入管理后台 打开设置页面，在 `未接入CDN的面板服务器域名/IP` 中填入上一步在 Nginx 或 Caddy 中配置的域名 比如 `ip-to-dashboard.nai.ba` ，并保存。
+- 然后在面板服务器中，打开 /opt/nezha/dashboard/data/config.yaml 文件，将 `proxygrpcport` 修改为 Nginx 或 Caddy 监听的端口，比如上一步设置的 `443` ；因为我们在 Nginx 或 Caddy 中开启了 SSL/TLS，所以需要将 `tls` 设置为 `true` ；修改完成后重启面板。
+
+
+Agent 端配置
+
+- 登录面板管理后台，复制一键安装命令，在对应的服务器上面执行一键安装命令重新安装 agent 端即可。
+
+
+开启 Cloudflare CDN（可选）
+
+根据 Cloudflare gRPC 的要求：gRPC 服务必须侦听 443 端口 且必须支持 TLS 和 HTTP/2。
+所以如果需要开启CDN，必须在配置 Nginx 或者 Caddy 反向代理 gRPC 时使用 443 端口，并配置证书（Caddy 会自动申请并配置证书）。
+
+- 登录 Cloudflare，选择使用的域名。打开 `网络` 选项将 `gRPC` 开关打开，打开 `DNS` 选项，找到 Nginx 或 Caddy 反代 gRPC 配置的域名的解析记录，打开橙色云启用CDN。
 
 </details>
 

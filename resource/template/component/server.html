@@ -31,7 +31,8 @@
                     {{if .Conf.GRPCHost}}
                     curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod
                     +x nezha.sh && sudo ./nezha.sh install_agent <code class="command">{{.Conf.GRPCHost}}</code> <code
-                        class="command">{{.Conf.GRPCPort}}</code> <code class="command hostSecret"></code>
+                        class="command">{{if .Conf.ProxyGRPCPort}}{{.Conf.ProxyGRPCPort}}{{else}}{{.Conf.GRPCPort}}{{end}}</code> <code
+                        class="command hostSecret"></code> <code class="command">{{if .Conf.TLS}}--tls{{end}}</code>
                     {{else}}
                     请先在设置页面配置 未接入CDN的面板服务器域名/IP
                     {{end}}
