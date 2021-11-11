@@ -349,7 +349,7 @@ server {
 - Caddy 配置
 
 ```Caddyfile
-ip-to-dashboard.nai.ba:443 { 
+ip-to-dashboard.nai.ba:443 { # 你的 Agent 连接 Dashboard 的域名
     reverse_proxy {
         to localhost:5555
         transport http {
