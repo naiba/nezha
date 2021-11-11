@@ -3,36 +3,44 @@ module github.com/naiba/nezha
 go 1.13
 
 require (
-	code.cloudfoundry.org/bytefmt v0.0.0-20200131002437-cf55d5288a48
+	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/artdarek/go-unzip v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
-	github.com/creack/pty v1.1.14
-	github.com/fsnotify/fsnotify v1.4.9 // indirect
+	github.com/creack/pty v1.1.17
 	github.com/gin-contrib/pprof v1.3.0
-	github.com/gin-gonic/gin v1.7.0
-	github.com/go-ping/ping v0.0.0-20210407214646-e4e642a95741
-	github.com/golang/protobuf v1.4.2
+	github.com/gin-gonic/gin v1.7.4
+	github.com/go-ping/ping v0.0.0-20211014180314-6e2b003bffdd
+	github.com/go-playground/validator/v10 v10.9.0 // indirect
+	github.com/golang/protobuf v1.5.2
 	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.4.2
-	github.com/hashicorp/go-uuid v1.0.1
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/iamacarpet/go-winpty v1.0.2
-	github.com/onsi/ginkgo v1.7.0 // indirect
-	github.com/onsi/gomega v1.4.3 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/ory/graceful v0.1.1
 	github.com/p14yground/go-github-selfupdate v0.0.0-20210520015421-eddf14461293
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.21.10
-	github.com/spf13/pflag v1.0.3
-	github.com/spf13/viper v1.7.1
+	github.com/spf13/pflag v1.0.5
+	github.com/spf13/viper v1.9.0
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
-	golang.org/x/net v0.0.0-20210423184538-5f58ad60dda6 // indirect
-	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
-	google.golang.org/grpc v1.33.1
-	google.golang.org/protobuf v1.25.0
-	gopkg.in/yaml.v2 v2.2.8
-	gorm.io/driver/sqlite v1.1.4
-	gorm.io/gorm v1.21.8
+	github.com/ugorji/go v1.2.6 // indirect
+	github.com/ulikunitz/xz v0.5.10 // indirect
+	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
+	golang.org/x/net v0.0.0-20211111083644-e5c967477495 // indirect
+	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
+	golang.org/x/sys v0.0.0-20211110154304-99a53858aa08 // indirect
+	golang.org/x/text v0.3.7 // indirect
+	google.golang.org/genproto v0.0.0-20211104193956-4c6863e31247 // indirect
+	google.golang.org/grpc v1.42.0
+	google.golang.org/protobuf v1.27.1
+	gopkg.in/yaml.v2 v2.4.0
+	gorm.io/driver/sqlite v1.2.3
+	gorm.io/gorm v1.22.2
 )

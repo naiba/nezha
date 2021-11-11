@@ -13,7 +13,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.11.8" // ！！记得修改 README 中的 badge 版本！！
+var Version = "v0.11.9" // ！！记得修改 README 中的 badge 版本！！
 
 var (
 	Conf  *model.Config

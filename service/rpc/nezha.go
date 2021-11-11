@@ -57,6 +57,10 @@ func (s *NezhaHandler) RequestTask(h *pb.Host, stream pb.NezhaService_RequestTas
 	}
 	closeCh := make(chan error)
 	dao.ServerLock.RLock()
+	// 修复不断的请求 task 但是没有 return 导致内存泄漏
+	if dao.ServerList[clientID].TaskClose != nil {
+		close(dao.ServerList[clientID].TaskClose)
+	}
 	dao.ServerList[clientID].TaskStream = stream
 	dao.ServerList[clientID].TaskClose = closeCh
 	dao.ServerLock.RUnlock()
