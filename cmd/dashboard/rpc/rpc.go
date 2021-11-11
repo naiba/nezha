@@ -63,7 +63,7 @@ func DispatchKeepalive() {
 		dao.SortedServerLock.RLock()
 		defer dao.SortedServerLock.RUnlock()
 		for i := 0; i < len(dao.SortedServerList); i++ {
-			if dao.SortedServerList[i] == nil || dao.SortedServerList[i].TaskStream == nil || dao.SortedServerList[i].TaskStream.Context().Err() != nil {
+			if dao.SortedServerList[i] == nil || dao.SortedServerList[i].TaskStream == nil {
 				continue
 			}
 
