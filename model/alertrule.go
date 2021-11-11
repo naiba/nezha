@@ -11,6 +11,8 @@ type CycleTransferStats struct {
 	Name       string
 	From       time.Time
 	To         time.Time
+	Max        uint64
+	Min        uint64
 	ServerName map[uint64]string
 	Transfer   map[uint64]uint64
 	NextUpdate map[uint64]time.Time

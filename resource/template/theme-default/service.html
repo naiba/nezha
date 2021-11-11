@@ -49,8 +49,10 @@
                         <th class="ui center aligned">服务器</th>
                         <th class="ui center aligned">自</th>
                         <th class="ui center aligned">至</th>
-                        <th class="ui center aligned">下次刷新</th>
-                        <th class="ui center aligned">流量</th>
+                        <th class="ui center aligned">MAX</th>
+                        <th class="ui center aligned">MIN</th>
+                        <th class="ui center aligned">下次检查</th>
+                        <th class="ui center aligned">当前用量</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -62,7 +64,9 @@
                             <td class="ui center aligned">{{index $stats.ServerName $innerId}}</td>
                             <td class="ui center aligned">{{$stats.From|tf}}</td>
                             <td class="ui center aligned">{{$stats.To|tf}}</td>
-                            <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|tf}}</td>
+                            <td class="ui center aligned">{{$stats.Max|bf}}</td>
+                            <td class="ui center aligned">{{$stats.Min|bf}}</td>
+                            <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|sft}}</td>
                             <td class="ui center aligned">{{$transfer|bf}}</td>
                         </tr>
                     {{end}}

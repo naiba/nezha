@@ -42,6 +42,8 @@ func addCycleTransferStatsInfo(alert *model.AlertRule) {
 				Name:       alert.Name,
 				From:       from,
 				To:         from.Add(time.Hour * time.Duration(alert.Rules[j].CycleInterval)),
+				Max:        uint64(alert.Rules[j].Max),
+				Min:        uint64(alert.Rules[j].Min),
 				ServerName: make(map[uint64]string),
 				Transfer:   make(map[uint64]uint64),
 				NextUpdate: make(map[uint64]time.Time),

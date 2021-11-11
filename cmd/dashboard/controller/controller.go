@@ -44,6 +44,9 @@ func ServeWeb(port uint) *http.Server {
 		"sf": func(duration uint64) string {
 			return time.Duration(time.Duration(duration) * time.Second).String()
 		},
+		"sft": func(future time.Time) string {
+			return time.Until(future).String()
+		},
 		"bf": func(b uint64) string {
 			return bytefmt.ByteSize(b)
 		},
