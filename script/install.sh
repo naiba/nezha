@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.7.1"
+NZ_VERSION="v0.8.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -43,23 +43,25 @@ pre_check() {
     fi
 
     ## China_IP
-    if [[ $(curl -m 10 -s https://api.ip.sb/geoip | grep 'China') != "" ]]; then
-        echo "根据ip.sb提供的信息，当前IP可能在中国"
-        read -e -r -p "是否选用中国镜像完成安装? [Y/n] " input
-        case $input in
-        [yY][eE][sS] | [yY])
-            echo "使用中国镜像"
-            CN=true
-            ;;
+    if [[ -z "${CN}" ]]; then
+        if [[ $(curl -m 10 -s https://api.ip.sb/geoip | grep 'China') != "" ]]; then
+            echo "根据ip.sb提供的信息，当前IP可能在中国"
+            read -e -r -p "是否选用中国镜像完成安装? [Y/n] " input
+            case $input in
+            [yY][eE][sS] | [yY])
+                echo "使用中国镜像"
+                CN=true
+                ;;
 
-        [nN][oO] | [nN])
-            echo "不使用中国镜像"
-            ;;
-        *)
-            echo "使用中国镜像"
-            CN=true
-            ;;
-        esac
+            [nN][oO] | [nN])
+                echo "不使用中国镜像"
+                ;;
+            *)
+                echo "使用中国镜像"
+                CN=true
+                ;;
+            esac
+        fi
     fi
 
     if [[ -z "${CN}" ]]; then
