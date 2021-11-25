@@ -7,6 +7,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+	"strconv"
+	"os/exec"
 
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
@@ -190,6 +192,30 @@ func getDiskTotalAndUsed() (total uint64, used uint64) {
 		}
 		used += diskUsageOf.Used
 	}
+	
+	// Fallback 到这个方法,仅统计根路径,适用于OpenVZ之类的.
+	if runtime.GOOS == "linux" {
+		if total == 0 && used == 0 {
+			cmd := exec.Command("df")
+			out, err := cmd.CombinedOutput()
+			if err == nil {
+				s := strings.Split(string(out), "\n")
+				for _, c := range s {
+					info := strings.Fields(c)
+					if len(info) == 6 {
+						if info[5] == "/" {
+							total, _ = strconv.ParseUint(info[1], 0, 64)
+							used, _ = strconv.ParseUint(info[2], 0, 64)
+							// 默认获取的是1K块为单位的.
+							total = total * 1024
+							used = used * 1024
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return
 }
 
