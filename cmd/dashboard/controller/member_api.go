@@ -331,7 +331,7 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 		return
 	}
 
-	dao.ManualTrigger(&cr)
+	dao.ManualTrigger(cr)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
