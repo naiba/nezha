@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.8.0"
+NZ_VERSION="v0.8.1"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -40,6 +40,10 @@ pre_check() {
         os_arch="arm64"
     elif [[ $(uname -m | grep 'arm') != "" ]]; then
         os_arch="arm"
+    elif [[ $(uname -m | grep 's390x') != "" ]]; then
+        os_arch="s390x"
+    elif [[ $(uname -m | grep 'riscv64') != "" ]]; then
+        os_arch="riscv64"
     fi
 
     ## China_IP
