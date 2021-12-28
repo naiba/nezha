@@ -144,6 +144,9 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 		}
 		cycleTransferStats.Transfer[server.ID] = uint64(src)
 		cycleTransferStats.NextUpdate[server.ID] = u.NextTransferAt[server.ID]
+		// 自动更新周期流量展示起止时间
+		cycleTransferStats.From = u.GetTransferDurationStart()
+		cycleTransferStats.To = cycleTransferStats.From.Add(time.Hour * time.Duration(u.CycleInterval))
 	}
 
 	if u.Type == "offline" && float64(time.Now().Unix())-src > 6 {
