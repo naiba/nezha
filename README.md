@@ -10,7 +10,7 @@
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，计划任务和在线终端。</p>
 </div>
 
-\>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器**
+\>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器， 机器人自动审核**
 
 \>> [我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
 
@@ -243,7 +243,14 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 </details>
 
 <details>
-    <summary>如何使 OpenWrt/LEDE 自启动？来自 @艾斯德斯</summary>
+    <summary>如何使 旧版OpenWRT/LEDE 自启动？</summary>
+
+参考此项目: <https://github.com/Erope/openwrt_nezha>
+
+</details>
+
+<details>
+    <summary>如何使 新版OpenWRT 自启动？来自 @艾斯德斯</summary>
 
 首先在 release 下载对应的二进制解压 tar.gz 包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
 
