@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
+	github.com/Erope/goss v0.0.0-20211230093305-df3c03fd1ed4 // indirect
 	github.com/artdarek/go-unzip v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/creack/pty v1.1.17
