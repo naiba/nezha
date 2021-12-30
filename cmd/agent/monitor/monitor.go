@@ -2,14 +2,15 @@ package monitor
 
 import (
 	"fmt"
+	"os/exec"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
-	"strconv"
-	"os/exec"
 
+	"github.com/Erope/goss"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
@@ -114,13 +115,25 @@ func GetState(skipConnectionCount bool, skipProcsCount bool) *model.HostState {
 
 	var tcpConnCount, udpConnCount uint64
 	if !skipConnectionCount {
-		conns, _ := net.Connections("all")
-		for i := 0; i < len(conns); i++ {
-			switch conns[i].Type {
-			case syscall.SOCK_STREAM:
-				tcpConnCount++
-			case syscall.SOCK_DGRAM:
-				udpConnCount++
+		ss_err := true
+		if runtime.GOOS == "linux" {
+			tcpStat, err_tcp := goss.ConnectionsWithProtocol(syscall.IPPROTO_TCP)
+			udpStat, err_udp := goss.ConnectionsWithProtocol(syscall.IPPROTO_UDP)
+			if err_tcp == nil && err_udp == nil {
+				ss_err = false
+				tcpConnCount = uint64(len(tcpStat))
+				udpConnCount = uint64(len(udpStat))
+			}
+		}
+		if ss_err {
+			conns, _ := net.Connections("all")
+			for i := 0; i < len(conns); i++ {
+				switch conns[i].Type {
+				case syscall.SOCK_STREAM:
+					tcpConnCount++
+				case syscall.SOCK_DGRAM:
+					udpConnCount++
+				}
 			}
 		}
 	}
@@ -192,7 +205,7 @@ func getDiskTotalAndUsed() (total uint64, used uint64) {
 		}
 		used += diskUsageOf.Used
 	}
-	
+
 	// Fallback 到这个方法,仅统计根路径,适用于OpenVZ之类的.
 	if runtime.GOOS == "linux" {
 		if total == 0 && used == 0 {

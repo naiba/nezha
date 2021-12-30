@@ -46,6 +46,8 @@ code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5/go.mod h1:v4VVB
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
+github.com/Erope/goss v0.0.0-20211230093305-df3c03fd1ed4 h1:X35U3bryt+j2a9RZyXyBPISNIYQsfNKWC/d/B8J861I=
+github.com/Erope/goss v0.0.0-20211230093305-df3c03fd1ed4/go.mod h1:gl55GUYOV6rvsL/V23GdfRNdnreh+McD5Yo1sNc+Qe0=
 github.com/OneOfOne/xxhash v1.2.2/go.mod h1:HSdplMjZKSmBqAxg5vPj2TmRDmfkzw+cTzAElWljhcU=
 github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDOSA=
 github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
