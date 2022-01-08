@@ -1,0 +1,299 @@
+{{define "theme-mdui/home"}}
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{.Title}}</title>
+  <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
+
+  <!-- MDUI CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/css/mdui.min.css"/>
+  <link rel="stylesheet" href="/static/theme-mdui/mdui.css" type="text/css">
+  <style>
+	.mdui-table td, .mdui-table th{padding: 6px;}
+	.progress{width: 10%;min-width: 75px;}
+	.progress-text{font-size: 16px;font-weight: 800;position: relative;top: 4px;left: 6px;}
+	.offline st,.offline at,.offline gt,.offline .progress-text{color: grey;}
+	a{text-decoration:none;color:#333;}.mdui-theme-layout-dark a{color:#fff;}
+  </style>
+  {{if ts .CustomCode}}
+  {{.CustomCode|safe}}
+  {{end}}
+</head>
+
+<body>
+  <!-- Menu -->
+  <div class="mdui-appbar">
+    <div class="mdui-tab mdui-color-theme" mdui-tab>
+      {{if .IsAdminPage}}
+      <a href="/server" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">computer</i>主机</a>
+      <a href="/monitor" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">accessibility</i>服务</a>
+      <a href="/cron" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">access_time</i>任务</a>
+      <a href="/notification" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">notifications</i>报警</a>
+      <a href="/setting" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">settings</i>设置</a>
+      {{else}}
+      <a href="/" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">home</i>首页</a>
+      <a href="/service" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">accessibility</i>服务</a>
+      {{end}}
+      <div class="mdui-toolbar-spacer"></div>
+      {{if .Admin}}
+        {{if .IsAdminPage}}
+        <a href="/" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">arrow_back</i>返回前台</a>
+        {{else}}
+        <a href="/server" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">arrow_forward</i>管理后台</a>
+        {{end}}
+        <a class="mdui-ripple mdui-ripple-white mdui-hoverable" onclick="showConfirm('确认注销？','注销后您必须重新登录才能使用',logout,{{.Admin.ID}})"><i class="mdui-icon material-icons">directions_run</i>注销登录</a>
+      {{else}}
+      <a href="/login" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">person</i>登录</a>
+      {{end}}
+    </div>
+  </div>
+
+  <div id="app">
+  <div id="container" class="mdui-container">
+    <button @click="toggleView" class="mdui-fab mdui-fab-wrapper mdui-fab-fixed mdui-ripple mdui-color-pink-accent">
+      <i v-if="showCard" class="mdui-icon material-icons">list</i>
+      <i v-else class="mdui-icon material-icons">apps</i>
+    </button>
+    <div v-if="showCard" class="mdui-row-xs-1 mdui-row-sm-2 mdui-row-md-3 mdui-row-lg-4">
+      <div id="servers">
+        <div class="mdui-col" v-for='server in servers' :id="server.ID">
+          <div :class="'mdui-card mt' + (server.live?'':' offline')">
+            <div class="mdui-card-primary">
+              <div class="mdui-card-primary-title mdui-text-truncate">@#server.Name#@</div>
+            </div>
+            <div class="mdui-card-menu" :mdui-tooltip="formatTooltip(server)">
+              <i class="mdui-icon material-icons">info_outline</i>
+            </div>
+            <div class="mdui-card-content">
+              <ul class="mdui-list">
+                <li class="mdui-list-item">
+                  <i class="mdui-list-item-icon mdui-icon material-icons">memory</i>
+                  <div class="mdui-list-item-content">
+                    <st class="mdui-list-item-title mdui-list-item-one-line">CPU <span>@#server.live?parseInt(server.State.CPU):'NaN'#@%</span></st>
+                    <div class="mdui-list-item-text" style="opacity:1;">
+                      <div class="mdui-progress">
+                        <div class="mdui-progress-determinate mdui-color-indigo-400" :style="'width: ' + (server.live?server.State.CPU:'0') + '%;'"></div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="mdui-list-item">
+                  <i class="mdui-list-item-icon mdui-icon material-icons">straighten</i>
+                  <div class="mdui-list-item-content">
+                    <at class="mdui-list-item-title mdui-list-item-one-line">MEM <span>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</span></at>
+                    <div class="mdui-progress">
+                      <div class="mdui-progress-determinate mdui-color-pink-400" :style="'width: ' + parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0) + '%;'"></div>
+                    </div>
+                  </div>
+                </li>
+                <li class="mdui-list-item">
+                  <i class="mdui-list-item-icon mdui-icon material-icons">swap_vert</i>
+                  <div class="mdui-list-item-content">
+                    <div class="mdui-list-item-title">上行</div>
+                    <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
+                      <at><span>@#formatNetByteSize(server.State.NetOutSpeed)#@</span></at>
+                    </div>
+                  </div>
+                  <div class="mdui-list-item-content">
+                    <div class="mdui-list-item-title">下行</div>
+                    <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
+                      <st><span>@#formatNetByteSize(server.State.NetInSpeed)#@</span></st>
+                    </div>
+                  </div>
+                </li>
+                <li class="mdui-list-item">
+                  <i class="mdui-list-item-icon mdui-icon material-icons">swap_horiz</i>
+                  <div class="mdui-list-item-content">
+                    <div class="mdui-list-item-title">总上行</div>
+                    <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
+                      <at><span>@#formatByteSize(server.State.NetOutTransfer)#@</span></at>
+                    </div>
+                  </div>
+                  <div class="mdui-list-item-content">
+                    <div class="mdui-list-item-title">总下行</div>
+                    <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
+                      <st><span>@#formatByteSize(server.State.NetInTransfer)#@</span></st>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div v-else class="mdui-table-fluid mdui-m-t-1">
+      <table class="mdui-table mdui-table-hoverable">
+		<thead>
+		  <tr>
+		    <th class="mdui-text-center">ID</th>
+		    <th class="mdui-text-center">Name</th>
+		    <th class="mdui-text-center">Up</th>
+		    <th class="mdui-text-center">Down</th>
+		   	<th class="mdui-text-center">Total Up</th>
+		    <th class="mdui-text-center">Total Down</th>
+		    <th class="mdui-text-center">CPU</th>
+		    <th class="mdui-text-center">RAM</th>
+		    <th class="mdui-text-center">Online</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr :class="(server.live?'':'offline')" v-for="server in servers">
+		    <td class="mdui-text-center">@#server.ID#@</td>
+		    <td class="mdui-text-center">@#server.Name#@</td>
+		    <td class="mdui-text-center"><at>@#formatNetByteSize(server.State.NetOutSpeed)#@</at></td>
+		    <td class="mdui-text-center"><st>@#formatNetByteSize(server.State.NetInSpeed)#@</st></td>
+		    <td class="mdui-text-center"><at>@#formatByteSize(server.State.NetOutTransfer)#@</at></td>
+		    <td class="mdui-text-center"><st>@#formatByteSize(server.State.NetInTransfer)#@</st></td>
+		    <td class="progress">
+		      <div class="mdui-progress" style="height: 30px;">
+		        <div class="mdui-progress-determinate mdui-color-indigo-400" :style="'width: ' + (server.live?server.State.CPU:'0') + '%;'">
+                    <span class="mdui-text-truncate progress-text">@#server.live?parseInt(server.State.CPU):'NaN'#@%</span>
+                </div>
+		      </div>
+		    </td>
+		    <td class="progress">
+		      <div class="mdui-progress" style="height: 30px;">
+		        <div class="mdui-progress-determinate mdui-color-indigo-400" :style="'width: ' + parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0) + '%;'">
+                    <span class="mdui-text-truncate progress-text">@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</span>
+                </div>
+		      </div>
+		    </td>
+		    <td class="mdui-text-center">@#secondToDate(server.State.Uptime)#@</td>
+		  </tr>
+		</tbody>
+	  </table>
+	</div>
+    
+  </div>
+  </div>
+
+  <footer class="mdui-m-t-5">
+    <div class="mdui-p-a-3 mdui-typo">
+    <center>
+      <p>
+        <a href="/"><at>{{.Title}}</at></a>
+        Powered by <a href="https://github.com/naiba/nezha"><st>哪吒监控&lt;{{.Version}}&gt;</st></a>&nbsp;| Theme designed by Mikoy Chinese
+      </p>
+    </center>
+    </div>
+  </footer>
+
+  <script src="/static/theme-mdui/mdui.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.12/vue.min.js"></script>
+
+  <script>
+    var container=document.querySelector("#container");
+    container.style.minHeight=window.innerHeight-document.body.clientHeight+container.clientHeight+'px';
+    mdui.mutation();
+    const initData = {{.Servers }};
+    var statusCards = new Vue({
+        el: '#app',
+        delimiters: ['@#', '#@'],
+        data: {
+            servers: initData,
+            cache: [],
+            showCard: true
+        },
+        methods: {
+            toggleView() {
+              this.showCard = !this.showCard
+            },
+            toFixed2(f) {
+              return f.toFixed(2)
+            },
+            secondToDate(s) {
+                var d = Math.floor(s / 3600 / 24);
+                if (d > 0) {
+                    return d + "天"
+                }
+                var h = Math.floor(s / 3600 % 24);
+                var m = Math.floor(s / 60 % 60);
+                var s = Math.floor(s % 60);
+                return h + ":" + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
+            },
+            readableBytes(bytes) {
+              if (!bytes) {
+                return '0B'
+              }
+              var i = Math.floor(Math.log(bytes) / Math.log(1024)),
+                sizes = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+              return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + sizes[i];
+            },
+            readableNetBytes(bytes) {
+              if (!bytes) {
+                return '0B'
+              }
+              var Kbps=125, Mbps=Kbps*1000, Gbps=Mbps*1000, Tbps=Gbps*1000;
+              if (bytes < Kbps) return (bytes * 8).toFixed(2) + 'bps';
+              if (bytes < Mbps) return (bytes / Kbps).toFixed(2) + 'Kbps';
+              if (bytes < Gbps) return (bytes / Mbps).toFixed(2) + 'Mbps';
+              if (bytes < Tbps) return (bytes / Gbps).toFixed(2) + 'Gbps';
+              else return (bytes / Tbps).toFixed(2) + 'Tbps';
+            },
+            formatTimestamp(t) {
+                return new Date(t * 1000).toLocaleString()
+            },
+            formatByteSize(bs) {
+                const x = this.readableBytes(bs)
+                return x != "NaN undefined" ? x : 'NaN'
+            },
+            formatNetByteSize(bs) {
+                const x = this.readableNetBytes(bs)
+                return x != "NaN undefined" ? x : 'NaN'
+            },
+            formatTooltip(server) {
+              var disk = this.formatByteSize(server.State.DiskUsed) + '/' + this.formatByteSize(server.Host.DiskTotal);
+              var upTime = this.secondToDate(server.State.Uptime);
+              var tooltip =
+`{content: 'System: ${server.Host.Platform}-${server.Host.PlatformVersion}[${server.Host.Arch}]<br>CPU: ${server.Host.CPU}<br>Disk: ${disk}<br>Online: ${upTime}<br>Version: ${server.Host.Version}'}`;
+              return tooltip
+            }
+        }
+    })
+
+    const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
+    const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
+    ws.onopen = function (evt) {
+        mdui.snackbar({
+          message: '实时通道建立',
+          timeout: 2000,
+          position: 'top',
+          onClosed: function(){
+            mdui.mutation();
+          }
+        });
+    }
+    ws.onmessage = function (evt) {
+        const data = JSON.parse(evt.data)
+        statusCards.servers = data.servers
+        for (let i = 0; i < statusCards.servers.length; i++) {
+            const ns = statusCards.servers[i];
+            if (!ns.Host) ns.live = false
+            else {
+                const lastActive = new Date(ns.LastActive).getTime()
+                if (data.now - lastActive > 10 * 1000) {
+                    ns.live = false
+                } else {
+                    ns.live = true
+                }
+            }
+        }
+    }
+    ws.onclose = function () {
+        mdui.snackbar({
+          message: '实时通道断开',
+          timeout: 2000,
+          position: 'top',
+        });
+    }
+  </script>
+</body>
+</html>
+{{end}}
