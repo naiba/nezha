@@ -24,32 +24,7 @@
 </head>
 
 <body>
-  <!-- Menu -->
-  <div class="mdui-appbar">
-    <div class="mdui-tab mdui-color-theme" mdui-tab>
-      {{if .IsAdminPage}}
-      <a href="/server" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">computer</i>主机</a>
-      <a href="/monitor" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">accessibility</i>服务</a>
-      <a href="/cron" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">access_time</i>任务</a>
-      <a href="/notification" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">notifications</i>报警</a>
-      <a href="/setting" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">settings</i>设置</a>
-      {{else}}
-      <a href="/" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">home</i>首页</a>
-      <a href="/service" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">accessibility</i>服务</a>
-      {{end}}
-      <div class="mdui-toolbar-spacer"></div>
-      {{if .Admin}}
-        {{if .IsAdminPage}}
-        <a href="/" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">arrow_back</i>返回前台</a>
-        {{else}}
-        <a href="/server" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">arrow_forward</i>管理后台</a>
-        {{end}}
-        <a class="mdui-ripple mdui-ripple-white mdui-hoverable" onclick="showConfirm('确认注销？','注销后您必须重新登录才能使用',logout,{{.Admin.ID}})"><i class="mdui-icon material-icons">directions_run</i>注销登录</a>
-      {{else}}
-      <a href="/login" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">person</i>登录</a>
-      {{end}}
-    </div>
-  </div>
+{{template "theme-mdui/menu" .}}
 
   <div id="app">
   <div id="container" class="mdui-container">
@@ -64,9 +39,10 @@
             <div class="mdui-card-primary">
               <div class="mdui-card-primary-title mdui-text-truncate">@#server.Name#@</div>
             </div>
-            <div class="mdui-card-menu" :mdui-tooltip="formatTooltip(server)">
-              <i class="mdui-icon material-icons">info_outline</i>
+            <div v-if="server.live" class="mdui-card-menu">
+              <i :id="'info-' + server.ID" class="mdui-icon material-icons">info_outline</i>
             </div>
+            <div v-else class="mdui-card-menu mdui-typo-title mdui-text-color-grey">Offline</div>
             <div class="mdui-card-content">
               <ul class="mdui-list">
                 <li class="mdui-list-item">
@@ -80,7 +56,7 @@
                     </div>
                   </div>
                 </li>
-                <li class="mdui-list-item">
+                <li class="mdui-list-item" :id="'mem-' + server.ID">
                   <i class="mdui-list-item-icon mdui-icon material-icons">straighten</i>
                   <div class="mdui-list-item-content">
                     <at class="mdui-list-item-title mdui-list-item-one-line">MEM <span>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</span></at>
@@ -150,8 +126,8 @@
 		    <td class="mdui-text-center"><at>@#formatByteSize(server.State.NetOutTransfer)#@</at></td>
 		    <td class="mdui-text-center"><st>@#formatByteSize(server.State.NetInTransfer)#@</st></td>
 		    <td class="progress">
-		      <div class="mdui-progress" style="height: 30px;">
-		        <div class="mdui-progress-determinate mdui-color-indigo-400" :style="'width: ' + (server.live?server.State.CPU:'0') + '%;'">
+		      <div class="mdui-progress" style="height: 30px; background-color: #edbbd2;">
+		        <div class="mdui-progress-determinate mdui-color-pink-a400" :style="'width: ' + (server.live?server.State.CPU:'0') + '%;'">
                     <span class="mdui-text-truncate progress-text">@#server.live?parseInt(server.State.CPU):'NaN'#@%</span>
                 </div>
 		      </div>
@@ -172,16 +148,7 @@
   </div>
   </div>
 
-  <footer class="mdui-m-t-5">
-    <div class="mdui-p-a-3 mdui-typo">
-    <center>
-      <p>
-        <a href="/"><at>{{.Title}}</at></a>
-        Powered by <a href="https://github.com/naiba/nezha"><st>哪吒监控&lt;{{.Version}}&gt;</st></a>&nbsp;| Theme designed by Mikoy Chinese
-      </p>
-    </center>
-    </div>
-  </footer>
+{{template "theme-mdui/footer" .}}
 
   <script src="/static/theme-mdui/mdui.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
@@ -270,6 +237,7 @@
           }
         });
     }
+    var infoTooltip = {}, memTooltip = {};
     ws.onmessage = function (evt) {
         const data = JSON.parse(evt.data)
         statusCards.servers = data.servers
@@ -282,9 +250,30 @@
                     ns.live = false
                 } else {
                     ns.live = true
+                    if (statusCards.showCard) {
+                      var disk =  statusCards.formatByteSize(ns.State.DiskUsed) + '/' + statusCards.formatByteSize(ns.Host.DiskTotal);
+                      var upTime = statusCards.secondToDate(ns.State.Uptime);
+                      var content = 
+`System: ${ns.Host.Platform}-${ns.Host.PlatformVersion}[${ns.Host.Arch}]
+CPU: ${ns.Host.CPU}
+Disk: ${disk}
+Online: ${upTime}
+Version: ${ns.Host.Version}`;
+                      if (infoTooltip[ns.ID]) {infoTooltip[ns.ID].$element[0].innerText = content;}
+                      else {
+                        if (document.getElementById(`info-${ns.ID}`)) infoTooltip[ns.ID] = new mdui.Tooltip(`#info-${ns.ID}`, {})
+                      }
+                      
+                      var content = `${statusCards.formatByteSize(ns.State.MemUsed)}/${statusCards.formatByteSize(ns.Host.MemTotal)}`;
+                      if (memTooltip[ns.ID]) {memTooltip[ns.ID].$element[0].innerText = content;}
+                      else {
+                        if (document.getElementById(`mem-${ns.ID}`)) memTooltip[ns.ID] = new mdui.Tooltip(`#mem-${ns.ID}`, {});
+                      }
+                    } else {mdui.$('div').remove('.mdui-tooltip'); infoTooltip = {}; memTooltip = {};}
                 }
             }
         }
+        mdui.mutation();
     }
     ws.onclose = function () {
         mdui.snackbar({
