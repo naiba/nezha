@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
-	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type memberPage struct {
@@ -30,24 +30,24 @@ func (mp *memberPage) serve() {
 }
 
 func (mp *memberPage) server(c *gin.Context) {
-	dao.SortedServerLock.RLock()
-	defer dao.SortedServerLock.RUnlock()
+	singleton.SortedServerLock.RLock()
+	defer singleton.SortedServerLock.RUnlock()
 	c.HTML(http.StatusOK, "dashboard/server", mygin.CommonEnvironment(c, gin.H{
 		"Title":   "服务器管理",
-		"Servers": dao.SortedServerList,
+		"Servers": singleton.SortedServerList,
 	}))
 }
 
 func (mp *memberPage) monitor(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard/monitor", mygin.CommonEnvironment(c, gin.H{
 		"Title":    "服务监控",
-		"Monitors": dao.ServiceSentinelShared.Monitors(),
+		"Monitors": singleton.ServiceSentinelShared.Monitors(),
 	}))
 }
 
 func (mp *memberPage) cron(c *gin.Context) {
 	var crons []model.Cron
-	dao.DB.Find(&crons)
+	singleton.DB.Find(&crons)
 	c.HTML(http.StatusOK, "dashboard/cron", mygin.CommonEnvironment(c, gin.H{
 		"Title": "计划任务",
 		"Crons": crons,
@@ -56,9 +56,9 @@ func (mp *memberPage) cron(c *gin.Context) {
 
 func (mp *memberPage) notification(c *gin.Context) {
 	var nf []model.Notification
-	dao.DB.Find(&nf)
+	singleton.DB.Find(&nf)
 	var ar []model.AlertRule
-	dao.DB.Find(&ar)
+	singleton.DB.Find(&ar)
 	c.HTML(http.StatusOK, "dashboard/notification", mygin.CommonEnvironment(c, gin.H{
 		"Title":         "报警通知",
 		"Notifications": nf,

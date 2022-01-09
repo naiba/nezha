@@ -16,7 +16,7 @@ import (
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 func init() {
@@ -26,62 +26,62 @@ func init() {
 	}
 
 	// 初始化 dao 包
-	dao.Conf = &model.Config{}
-	dao.Cron = cron.New(cron.WithSeconds(), cron.WithLocation(shanghai))
-	dao.Crons = make(map[uint64]*model.Cron)
-	dao.ServerList = make(map[uint64]*model.Server)
-	dao.SecretToID = make(map[string]uint64)
+	singleton.Conf = &model.Config{}
+	singleton.Cron = cron.New(cron.WithSeconds(), cron.WithLocation(shanghai))
+	singleton.Crons = make(map[uint64]*model.Cron)
+	singleton.ServerList = make(map[uint64]*model.Server)
+	singleton.SecretToID = make(map[string]uint64)
 
-	err = dao.Conf.Read("data/config.yaml")
+	err = singleton.Conf.Read("data/config.yaml")
 	if err != nil {
 		panic(err)
 	}
-	dao.DB, err = gorm.Open(sqlite.Open("data/sqlite.db"), &gorm.Config{
+	singleton.DB, err = gorm.Open(sqlite.Open("data/sqlite.db"), &gorm.Config{
 		CreateBatchSize: 200,
 	})
 	if err != nil {
 		panic(err)
 	}
-	if dao.Conf.Debug {
-		dao.DB = dao.DB.Debug()
+	if singleton.Conf.Debug {
+		singleton.DB = singleton.DB.Debug()
 	}
-	if dao.Conf.GRPCPort == 0 {
-		dao.Conf.GRPCPort = 5555
+	if singleton.Conf.GRPCPort == 0 {
+		singleton.Conf.GRPCPort = 5555
 	}
-	dao.Cache = cache.New(5*time.Minute, 10*time.Minute)
+	singleton.Cache = cache.New(5*time.Minute, 10*time.Minute)
 
 	initSystem()
 }
 
 func initSystem() {
-	dao.DB.AutoMigrate(model.Server{}, model.User{},
+	singleton.DB.AutoMigrate(model.Server{}, model.User{},
 		model.Notification{}, model.AlertRule{}, model.Monitor{},
 		model.MonitorHistory{}, model.Cron{}, model.Transfer{})
 
-	dao.LoadNotifications()
+	singleton.LoadNotifications()
 	loadServers() //加载服务器列表
 	loadCrons()   //加载计划任务
 
 	// 清理 服务请求记录 和 流量记录 的旧数据
-	_, err := dao.Cron.AddFunc("0 30 3 * * *", cleanMonitorHistory)
+	_, err := singleton.Cron.AddFunc("0 30 3 * * *", cleanMonitorHistory)
 	if err != nil {
 		panic(err)
 	}
 
 	// 流量记录打点
-	_, err = dao.Cron.AddFunc("0 0 * * * *", recordTransferHourlyUsage)
+	_, err = singleton.Cron.AddFunc("0 0 * * * *", recordTransferHourlyUsage)
 	if err != nil {
 		panic(err)
 	}
 }
 
 func recordTransferHourlyUsage() {
-	dao.ServerLock.Lock()
-	defer dao.ServerLock.Unlock()
+	singleton.ServerLock.Lock()
+	defer singleton.ServerLock.Unlock()
 	now := time.Now()
 	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, time.Local)
 	var txs []model.Transfer
-	for id, server := range dao.ServerList {
+	for id, server := range singleton.ServerList {
 		tx := model.Transfer{
 			ServerID: id,
 			In:       server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn),
@@ -98,19 +98,19 @@ func recordTransferHourlyUsage() {
 	if len(txs) == 0 {
 		return
 	}
-	log.Println("NEZHA>> Cron 流量统计入库", len(txs), dao.DB.Create(txs).Error)
+	log.Println("NEZHA>> Cron 流量统计入库", len(txs), singleton.DB.Create(txs).Error)
 }
 
 func cleanMonitorHistory() {
 	// 清理无效数据
-	dao.DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ? OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -30))
-	dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (SELECT `id` FROM servers)")
+	singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ? OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -30))
+	singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (SELECT `id` FROM servers)")
 	// 计算可清理流量记录的时长
 	var allServerKeep time.Time
 	specialServerKeep := make(map[uint64]time.Time)
 	var specialServerIDs []uint64
 	var alerts []model.AlertRule
-	dao.DB.Find(&alerts)
+	singleton.DB.Find(&alerts)
 	for i := 0; i < len(alerts); i++ {
 		for j := 0; j < len(alerts[i].Rules); j++ {
 			// 是不是流量记录规则
@@ -136,31 +136,31 @@ func cleanMonitorHistory() {
 		}
 	}
 	for id, couldRemove := range specialServerKeep {
-		dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ? AND created_at < ?", id, couldRemove)
+		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ? AND created_at < ?", id, couldRemove)
 	}
 	if allServerKeep.IsZero() {
-		dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?)", specialServerIDs)
+		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?)", specialServerIDs)
 	} else {
-		dao.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
+		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
 	}
 }
 
 func loadServers() {
 	var servers []model.Server
-	dao.DB.Find(&servers)
+	singleton.DB.Find(&servers)
 	for _, s := range servers {
 		innerS := s
 		innerS.Host = &model.Host{}
 		innerS.State = &model.HostState{}
-		dao.ServerList[innerS.ID] = &innerS
-		dao.SecretToID[innerS.Secret] = innerS.ID
+		singleton.ServerList[innerS.ID] = &innerS
+		singleton.SecretToID[innerS.Secret] = innerS.ID
 	}
-	dao.ReSortServer()
+	singleton.ReSortServer()
 }
 
 func loadCrons() {
 	var crons []model.Cron
-	dao.DB.Find(&crons)
+	singleton.DB.Find(&crons)
 	var err error
 	errMsg := new(bytes.Buffer)
 	for i := 0; i < len(crons); i++ {
@@ -171,9 +171,9 @@ func loadCrons() {
 			crIgnoreMap[cr.Servers[j]] = true
 		}
 
-		cr.CronJobID, err = dao.Cron.AddFunc(cr.Scheduler, dao.CronTrigger(cr))
+		cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
 		if err == nil {
-			dao.Crons[cr.ID] = &cr
+			singleton.Crons[cr.ID] = &cr
 		} else {
 			if errMsg.Len() == 0 {
 				errMsg.WriteString("调度失败的计划任务：[")
@@ -183,20 +183,20 @@ func loadCrons() {
 	}
 	if errMsg.Len() > 0 {
 		msg := errMsg.String()
-		dao.SendNotification(msg[:len(msg)-1]+"] 这些任务将无法正常执行,请进入后点重新修改保存。", false)
+		singleton.SendNotification(msg[:len(msg)-1]+"] 这些任务将无法正常执行,请进入后点重新修改保存。", false)
 	}
-	dao.Cron.Start()
+	singleton.Cron.Start()
 }
 
 func main() {
 	cleanMonitorHistory()
-	go rpc.ServeRPC(dao.Conf.GRPCPort)
+	go rpc.ServeRPC(singleton.Conf.GRPCPort)
 	serviceSentinelDispatchBus := make(chan model.Monitor)
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go rpc.DispatchKeepalive()
-	go dao.AlertSentinelStart()
-	dao.NewServiceSentinel(serviceSentinelDispatchBus)
-	srv := controller.ServeWeb(dao.Conf.HTTPPort)
+	go singleton.AlertSentinelStart()
+	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
+	srv := controller.ServeWeb(singleton.Conf.HTTPPort)
 	graceful.Graceful(func() error {
 		return srv.ListenAndServe()
 	}, func(c context.Context) error {

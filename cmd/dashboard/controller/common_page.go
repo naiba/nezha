@@ -17,7 +17,7 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type terminalContext struct {
@@ -54,7 +54,7 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 	var vpf viewPasswordForm
 	err := c.ShouldBind(&vpf)
 	var hash []byte
-	if err == nil && vpf.Password != dao.Conf.Site.ViewPassword {
+	if err == nil && vpf.Password != singleton.Conf.Site.ViewPassword {
 		err = errors.New("查看密码错误")
 	}
 	if err == nil {
@@ -69,12 +69,12 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.SetCookie(dao.Conf.Site.CookieName+"-vp", string(hash), 60*60*24, "", "", false, false)
+	c.SetCookie(singleton.Conf.Site.CookieName+"-vp", string(hash), 60*60*24, "", "", false, false)
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
 func (p *commonPage) checkViewPassword(c *gin.Context) {
-	if dao.Conf.Site.ViewPassword == "" {
+	if singleton.Conf.Site.ViewPassword == "" {
 		c.Next()
 		return
 	}
@@ -84,11 +84,11 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 	}
 
 	// 验证查看密码
-	viewPassword, _ := c.Cookie(dao.Conf.Site.CookieName + "-vp")
-	if err := bcrypt.CompareHashAndPassword([]byte(viewPassword), []byte(dao.Conf.Site.ViewPassword)); err != nil {
-		c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/viewpassword", mygin.CommonEnvironment(c, gin.H{
+	viewPassword, _ := c.Cookie(singleton.Conf.Site.CookieName + "-vp")
+	if err := bcrypt.CompareHashAndPassword([]byte(viewPassword), []byte(singleton.Conf.Site.ViewPassword)); err != nil {
+		c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/viewpassword", mygin.CommonEnvironment(c, gin.H{
 			"Title":      "验证查看密码",
-			"CustomCode": dao.Conf.Site.CustomCode,
+			"CustomCode": singleton.Conf.Site.CustomCode,
 		}))
 		c.Abort()
 		return
@@ -98,22 +98,22 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 }
 
 func (p *commonPage) service(c *gin.Context) {
-	dao.AlertsLock.RLock()
-	defer dao.AlertsLock.RUnlock()
-	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
+	singleton.AlertsLock.RLock()
+	defer singleton.AlertsLock.RUnlock()
+	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
 		"Title":              "服务状态",
-		"Services":           dao.ServiceSentinelShared.LoadStats(),
-		"CycleTransferStats": dao.AlertsCycleTransferStatsStore,
-		"CustomCode":         dao.Conf.Site.CustomCode,
+		"Services":           singleton.ServiceSentinelShared.LoadStats(),
+		"CycleTransferStats": singleton.AlertsCycleTransferStatsStore,
+		"CustomCode":         singleton.Conf.Site.CustomCode,
 	}))
 }
 
 func (cp *commonPage) home(c *gin.Context) {
-	dao.SortedServerLock.RLock()
-	defer dao.SortedServerLock.RUnlock()
-	c.HTML(http.StatusOK, "theme-"+dao.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
-		"Servers":    dao.SortedServerList,
-		"CustomCode": dao.Conf.Site.CustomCode,
+	singleton.SortedServerLock.RLock()
+	defer singleton.SortedServerLock.RUnlock()
+	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
+		"Servers":    singleton.SortedServerList,
+		"CustomCode": singleton.Conf.Site.CustomCode,
 	}))
 }
 
@@ -142,12 +142,12 @@ func (cp *commonPage) ws(c *gin.Context) {
 	defer conn.Close()
 	count := 0
 	for {
-		dao.SortedServerLock.RLock()
+		singleton.SortedServerLock.RLock()
 		err = conn.WriteJSON(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: dao.SortedServerList,
+			Servers: singleton.SortedServerList,
 		})
-		dao.SortedServerLock.RUnlock()
+		singleton.SortedServerLock.RUnlock()
 		if err != nil {
 			break
 		}
@@ -190,9 +190,9 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	var isAgent bool
 
 	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
-		dao.ServerLock.RLock()
-		_, hasID := dao.SecretToID[c.Request.Header.Get("Secret")]
-		dao.ServerLock.RUnlock()
+		singleton.ServerLock.RLock()
+		_, hasID := singleton.SecretToID[c.Request.Header.Get("Secret")]
+		singleton.ServerLock.RUnlock()
 		if !hasID {
 			mygin.ShowErrorPage(c, mygin.ErrInfo{
 				Code:  http.StatusForbidden,
@@ -225,9 +225,9 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}
 		isAgent = true
 	} else {
-		dao.ServerLock.RLock()
-		server := dao.ServerList[terminal.serverID]
-		dao.ServerLock.RUnlock()
+		singleton.ServerLock.RLock()
+		server := singleton.ServerList[terminal.serverID]
+		singleton.ServerLock.RUnlock()
 		if server == nil || server.TaskStream == nil {
 			mygin.ShowErrorPage(c, mygin.ErrInfo{
 				Code:  http.StatusForbidden,
@@ -407,9 +407,9 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 		return
 	}
 
-	dao.ServerLock.RLock()
-	server := dao.ServerList[createTerminalReq.ID]
-	dao.ServerLock.RUnlock()
+	singleton.ServerLock.RLock()
+	server := singleton.ServerList[createTerminalReq.ID]
+	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code:  http.StatusForbidden,
