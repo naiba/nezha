@@ -101,7 +101,7 @@
         </div>
       </div>
     </div>
-    
+
     <div v-else class="mdui-table-fluid mdui-m-t-1">
       <table class="mdui-table mdui-table-hoverable">
 		<thead>
@@ -144,7 +144,7 @@
 		</tbody>
 	  </table>
 	</div>
-    
+
   </div>
   </div>
 
@@ -251,21 +251,25 @@
                 } else {
                     ns.live = true
                     if (statusCards.showCard) {
-                      var disk =  statusCards.formatByteSize(ns.State.DiskUsed) + '/' + statusCards.formatByteSize(ns.Host.DiskTotal);
-                      var upTime = statusCards.secondToDate(ns.State.Uptime);
-                      var content = 
-`System: ${ns.Host.Platform}-${ns.Host.PlatformVersion}[${ns.Host.Arch}]
-CPU: ${ns.Host.CPU}
-Disk: ${disk}
-Online: ${upTime}
-Version: ${ns.Host.Version}`;
-                      if (infoTooltip[ns.ID]) {infoTooltip[ns.ID].$element[0].innerText = content;}
-                      else {
-                        if (document.getElementById(`info-${ns.ID}`)) infoTooltip[ns.ID] = new mdui.Tooltip(`#info-${ns.ID}`, {})
+                      if (infoTooltip[ns.ID]) {
+                        var disk =  statusCards.formatByteSize(ns.State.DiskUsed) + '/' + statusCards.formatByteSize(ns.Host.DiskTotal);
+                        var upTime = statusCards.secondToDate(ns.State.Uptime);
+                        var content =
+  `System: ${ns.Host.Platform}-${ns.Host.PlatformVersion}[${ns.Host.Arch}]
+  CPU: ${ns.Host.CPU}
+  Disk: ${disk}
+  Online: ${upTime}
+  Version: ${ns.Host.Version}`;
+                        infoTooltip[ns.ID].$element[0].innerText = content;
                       }
-                      
-                      var content = `${statusCards.formatByteSize(ns.State.MemUsed)}/${statusCards.formatByteSize(ns.Host.MemTotal)}`;
-                      if (memTooltip[ns.ID]) {memTooltip[ns.ID].$element[0].innerText = content;}
+                      else {
+                        if (document.getElementById(`info-${ns.ID}`)) infoTooltip[ns.ID] = new mdui.Tooltip(`#info-${ns.ID}`, {});
+                      }
+
+                      if (memTooltip[ns.ID]) {
+                        var content = `${statusCards.formatByteSize(ns.State.MemUsed)}/${statusCards.formatByteSize(ns.Host.MemTotal)}`;
+                        memTooltip[ns.ID].$element[0].innerText = content;
+                      }
                       else {
                         if (document.getElementById(`mem-${ns.ID}`)) memTooltip[ns.ID] = new mdui.Tooltip(`#mem-${ns.ID}`, {});
                       }
