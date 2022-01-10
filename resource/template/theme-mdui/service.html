@@ -17,32 +17,8 @@
 </head>
 
 <body>
-  <!-- Menu -->
-  <div class="mdui-appbar">
-    <div class="mdui-tab mdui-color-theme" mdui-tab>
-      {{if .IsAdminPage}}
-      <a href="/server" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">computer</i>主机</a>
-      <a href="/monitor" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">accessibility</i>服务</a>
-      <a href="/cron" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">access_time</i>任务</a>
-      <a href="/notification" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">notifications</i>报警</a>
-      <a href="/setting" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">settings</i>设置</a>
-      {{else}}
-      <a href="/" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">home</i>首页</a>
-      <a href="/service" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">accessibility</i>服务</a>
-      {{end}}
-      <div class="mdui-toolbar-spacer"></div>
-      {{if .Admin}}
-        {{if .IsAdminPage}}
-        <a href="/" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">arrow_back</i>返回前台</a>
-        {{else}}
-        <a href="/server" class="mdui-ripple mdui-ripple-white mdui-hoverable"><i class="mdui-icon material-icons">arrow_forward</i>管理后台</a>
-        {{end}}
-        <a class="mdui-ripple mdui-ripple-white mdui-hoverable" onclick="showConfirm('确认注销？','注销后您必须重新登录才能使用',logout,{{.Admin.ID}})"><i class="mdui-icon material-icons">directions_run</i>注销登录</a>
-      {{else}}
-      <a href="/login" class="mdui-ripple mdui-ripple-white mdui-hoverable">登录</a>
-      {{end}}
-    </div>
-  </div>
+
+{{template "theme-mdui/menu" .}}
 
   <!-- Container -->
   <div id="container" class="mdui-container mdui-m-t-1">
@@ -84,7 +60,7 @@
               <div class="mdui-spinner mdui-spinner-colorful"></div>
               <p>{{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}</p>
               {{else if ge $percent 80.0}}
-              <i class="mdui-icon material-iconsi mdui-text-color-orange">sentiment_dissatisfied</i>
+              <i class="mdui-icon material-icons mdui-text-color-orange">sentiment_dissatisfied</i>
               <p>{{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}</p>
               {{else}}
               <i class="mdui-icon material-icons mdui-text-color-red-a700">sentiment_very_dissatisfied</i>
@@ -98,16 +74,7 @@
     </div>
   </div>
 
-  <footer class="mdui-m-t-5">
-    <div class="mdui-p-a-3 mdui-typo">
-    <center>
-      <p>
-        <a href="/"><at>{{.Title}}</at></a>
-        Powered by <a href="https://github.com/naiba/nezha"><st>哪吒监控&lt;{{.Version}}&gt;</st></a>&nbsp;| Theme designed by Mikoy Chinese
-      </p>
-    </center>
-    </div>
-  </footer>
+{{template "theme-mdui/footer" .}}
 
   <script src="/static/theme-mdui/mdui.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mdui@1.0.2/dist/js/mdui.min.js"></script>
