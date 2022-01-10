@@ -72,6 +72,45 @@
         </tbody>
       </table>
     </div>
+
+    {{if .CycleTransferStats}}
+    <h2 class="mdui-m-t-5 mdui-text-center">Network Traffic Statistics</h2>
+    <div class="mdui-table-fluid">
+      <table class="mdui-table mdui-table-hoverable">
+        <thead>
+          <tr>
+            <th class="mdui-text-center">ID</th>
+            <th class="mdui-text-center">Rule</th>
+            <th class="mdui-text-center">Sever</th>
+            <th class="mdui-text-center">Date From</th>
+            <th class="mdui-text-center">Date To</th>
+            <th class="mdui-text-center">MAX</th>
+            <th class="mdui-text-center">MIN</th>
+            <th class="mdui-text-center">Check Next</th>
+            <th class="mdui-text-center">Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range $id, $stats := .CycleTransferStats}}
+          {{range $innerId, $transfer := $stats.Transfer}}
+          <tr>
+            <td class="mdui-text-center">{{$id}}</td>
+            <td class="mdui-text-center">{{$stats.Name}}</td>
+            <td class="mdui-text-center">{{index $stats.ServerName $innerId}}</td>
+            <td class="mdui-text-center">{{$stats.From|tf}}</td>
+            <td class="mdui-text-center">{{$stats.To|tf}}</td>
+            <td class="mdui-text-center">{{$stats.Max|bf}}</td>
+            <td class="mdui-text-center">{{$stats.Min|bf}}</td>
+            <td class="mdui-text-center">{{(index $stats.NextUpdate $innerId)|sft}}</td>
+            <td class="mdui-text-center">{{$transfer|bf}}</td>
+          </tr>
+          {{end}}
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
+
   </div>
 
 {{template "theme-mdui/footer" .}}
