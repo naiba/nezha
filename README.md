@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.6&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.8.1-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.7&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.8.1-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，计划任务和在线终端。</p>
@@ -140,12 +140,12 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - transfer_in_cycle 周期内的入站流量
   - transfer_out_cycle 周期内的出站流量
   - transfer_all_cycle 周期内双向流量和
-- cycle_start 统计周期开始日期（可以是你机器计费周期的开始日期），RFC3339时间格式，例如北京时间为`2022-01-11T08:00:00.00+08:00`
-- cycle_interval 每隔多少个周期单位（例如，周期单位为天，该值为7，则代表每隔7天统计一次）
+- cycle_start 统计周期开始日期（可以是你机器计费周期的开始日期），RFC3339 时间格式，例如北京时间为`2022-01-11T08:00:00.00+08:00`
+- cycle_interval 每隔多少个周期单位（例如，周期单位为天，该值为 7，则代表每隔 7 天统计一次）
 - cycle_unit 统计周期单位，默认`hour`,可选(`hour`, `day`, `week`, `month`, `year`)
 - min/max、cover、ignore 参考基本规则配置
 - 示例: ID 为 3 的机器（ignore 里面定义）的每月 15 号计费的出站月流量 1T 报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2021-07-15T08:00:00Z","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
-- [![7QKaUx.md.png](https://s4.ax1x.com/2022/01/13/7QKaUx.md.png)](https://imgtu.com/i/7QKaUx)
+  [![7QKaUx.md.png](https://s4.ax1x.com/2022/01/13/7QKaUx.md.png)](https://imgtu.com/i/7QKaUx)
 
 </details>
 
