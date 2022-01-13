@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type AuthorizeOption struct {
@@ -38,11 +38,11 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 		var isLogin bool
 
 		// 用户鉴权
-		token, _ := c.Cookie(dao.Conf.Site.CookieName)
+		token, _ := c.Cookie(singleton.Conf.Site.CookieName)
 		token = strings.TrimSpace(token)
 		if token != "" {
 			var u model.User
-			if err := dao.DB.Where("token = ?", token).First(&u).Error; err == nil {
+			if err := singleton.DB.Where("token = ?", token).First(&u).Error; err == nil {
 				isLogin = u.TokenExpired.After(time.Now())
 			}
 			if isLogin {

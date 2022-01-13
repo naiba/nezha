@@ -4,9 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
-	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type guestPage struct {
@@ -34,7 +35,7 @@ func (gp *guestPage) serve() {
 func (gp *guestPage) login(c *gin.Context) {
 	LoginType := "GitHub"
 	RegistrationLink := "https://github.com/join"
-	if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
+	if singleton.Conf.Oauth2.Type == model.ConfigTypeGitee {
 		LoginType = "Gitee"
 		RegistrationLink = "https://gitee.com/signup"
 	}

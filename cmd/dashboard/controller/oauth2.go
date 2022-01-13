@@ -15,7 +15,7 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/service/dao"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type oauth2controller struct {
@@ -28,10 +28,10 @@ func (oa *oauth2controller) serve() {
 }
 
 func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config {
-	if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
+	if singleton.Conf.Oauth2.Type == model.ConfigTypeGitee {
 		return &oauth2.Config{
-			ClientID:     dao.Conf.Oauth2.ClientID,
-			ClientSecret: dao.Conf.Oauth2.ClientSecret,
+			ClientID:     singleton.Conf.Oauth2.ClientID,
+			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
 			Scopes:       []string{},
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  "https://gitee.com/oauth/authorize",
@@ -41,8 +41,8 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 		}
 	} else {
 		return &oauth2.Config{
-			ClientID:     dao.Conf.Oauth2.ClientID,
-			ClientSecret: dao.Conf.Oauth2.ClientSecret,
+			ClientID:     singleton.Conf.Oauth2.ClientID,
+			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
 			Scopes:       []string{},
 			Endpoint:     GitHubOauth2.Endpoint,
 		}
@@ -59,7 +59,7 @@ func (oa *oauth2controller) getRedirectURL(c *gin.Context) string {
 
 func (oa *oauth2controller) login(c *gin.Context) {
 	state := utils.RandStringBytesMaskImprSrcUnsafe(6)
-	dao.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()), state, 0)
+	singleton.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()), state, 0)
 	url := oa.getCommonOauth2Config(c).AuthCodeURL(state, oauth2.AccessTypeOnline)
 	c.Redirect(http.StatusFound, url)
 }
@@ -67,7 +67,7 @@ func (oa *oauth2controller) login(c *gin.Context) {
 func (oa *oauth2controller) callback(c *gin.Context) {
 	var err error
 	// 验证登录跳转时的 State
-	state, ok := dao.Cache.Get(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()))
+	state, ok := singleton.Cache.Get(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()))
 	if !ok || state.(string) != c.Query("state") {
 		err = errors.New("非法的登录方式")
 	}
@@ -80,7 +80,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	var client *GitHubAPI.Client
 	if err == nil {
 		oc := oauth2Config.Client(ctx, otk)
-		if dao.Conf.Oauth2.Type == model.ConfigTypeGitee {
+		if singleton.Conf.Oauth2.Type == model.ConfigTypeGitee {
 			client, err = GitHubAPI.NewEnterpriseClient("https://gitee.com/api/v5/", "https://gitee.com/api/v5/", oc)
 		} else {
 			client = GitHubAPI.NewClient(oc)
@@ -99,7 +99,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 		return
 	}
 	var isAdmin bool
-	for _, admin := range strings.Split(dao.Conf.Oauth2.Admin, ",") {
+	for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
 		if admin != "" && gu.GetLogin() == admin {
 			isAdmin = true
 			break
@@ -115,8 +115,8 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	}
 	user := model.NewUserFromGitHub(gu)
 	user.IssueNewToken()
-	dao.DB.Save(&user)
-	c.SetCookie(dao.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, false)
+	singleton.DB.Save(&user)
+	c.SetCookie(singleton.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, false)
 	c.Status(http.StatusOK)
 	c.Writer.WriteString("<script>window.location.href='/'</script>")
 }
