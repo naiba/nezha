@@ -25,6 +25,7 @@ type Rule struct {
 	Max           float64         `json:"max,omitempty"`            // 最大阈值 (百分比、字节 kb ÷ 1024)
 	CycleStart    time.Time       `json:"cycle_start,omitempty"`    // 流量统计的开始时间
 	CycleInterval uint64          `json:"cycle_interval,omitempty"` // 流量统计周期
+	CycleUnit			string					`json:"cycle_unit,omitempty"` 		// 流量统计周期单位，默认hour,可选(hour, day, week, month, year)
 	Duration      uint64          `json:"duration,omitempty"`       // 持续时间 (秒)
 	Cover         uint64          `json:"cover,omitempty"`          // 覆盖范围 RuleCoverAll/IgnoreAll
 	Ignore        map[uint64]bool `json:"ignore,omitempty"`         // 覆盖范围的排除
@@ -88,21 +89,21 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 		}
 	case "transfer_in_cycle":
 		src = float64(server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn))
-		if u.CycleInterval != 1 {
+		if u.CycleInterval != 0 {
 			var res NResult
 			db.Model(&Transfer{}).Select("SUM(`in`) AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += float64(res.N)
 		}
 	case "transfer_out_cycle":
 		src = float64(server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut))
-		if u.CycleInterval != 1 {
+		if u.CycleInterval != 0 {
 			var res NResult
 			db.Model(&Transfer{}).Select("SUM(`out`) AS n").Where("created_at > ? AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += float64(res.N)
 		}
 	case "transfer_all_cycle":
 		src = float64(server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut) + server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn))
-		if u.CycleInterval != 1 {
+		if u.CycleInterval != 0 {
 			var res NResult
 			db.Model(&Transfer{}).Select("SUM(`in`+`out`) AS n").Where("created_at > ?  AND server_id = ?", u.GetTransferDurationStart(), server.ID).Scan(&res)
 			src += float64(res.N)
@@ -146,7 +147,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 		cycleTransferStats.NextUpdate[server.ID] = u.NextTransferAt[server.ID]
 		// 自动更新周期流量展示起止时间
 		cycleTransferStats.From = u.GetTransferDurationStart()
-		cycleTransferStats.To = cycleTransferStats.From.Add(time.Hour * time.Duration(u.CycleInterval))
+		cycleTransferStats.To = u.GetTransferDurationEnd()
 	}
 
 	if u.Type == "offline" && float64(time.Now().Unix())-src > 6 {
@@ -163,6 +164,80 @@ func (rule Rule) IsTransferDurationRule() bool {
 }
 
 func (rule Rule) GetTransferDurationStart() time.Time {
-	interval := 3600 * int64(rule.CycleInterval)
-	return time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
+	// Accept uppercase and lowercase
+	unit := strings.ToLower(rule.CycleUnit)
+	startTime := rule.CycleStart
+	var nextTime time.Time
+	switch unit {
+	case "year":
+		nextTime = startTime.AddDate(int(rule.CycleInterval), 0, 0)
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(int(rule.CycleInterval), 0, 0)
+		}
+	case "month":
+		nextTime = startTime.AddDate(0, int(rule.CycleInterval), 0)
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(0, int(rule.CycleInterval), 0)
+		}
+	case "week":
+		nextTime = startTime.AddDate(0, 0, 7 * int(rule.CycleInterval))
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(0, 0, 7 * int(rule.CycleInterval))
+		}
+	case "day":
+		nextTime = startTime.AddDate(0, 0, int(rule.CycleInterval))
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(0, 0, int(rule.CycleInterval))
+		}
+	default:
+		// For hour unit or not set.
+		interval := 3600 * int64(rule.CycleInterval)
+		startTime = time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
+	}
+
+	return startTime
+}
+
+func (rule Rule) GetTransferDurationEnd() time.Time {
+	// Accept uppercase and lowercase
+	unit := strings.ToLower(rule.CycleUnit)
+	startTime := rule.CycleStart
+	var nextTime time.Time
+	switch unit {
+	case "year":
+		nextTime = startTime.AddDate(int(rule.CycleInterval), 0, 0)
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(int(rule.CycleInterval), 0, 0)
+		}
+	case "month":
+		nextTime = startTime.AddDate(0, int(rule.CycleInterval), 0)
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(0, int(rule.CycleInterval), 0)
+		}
+	case "week":
+		nextTime = startTime.AddDate(0, 0, 7 * int(rule.CycleInterval))
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(0, 0, 7 * int(rule.CycleInterval))
+		}
+	case "day":
+		nextTime = startTime.AddDate(0, 0, int(rule.CycleInterval))
+		for time.Now().After(nextTime) {
+			startTime = nextTime
+			nextTime = nextTime.AddDate(0, 0, int(rule.CycleInterval))
+		}
+	default:
+		// For hour unit or not set.
+		interval := 3600 * int64(rule.CycleInterval)
+		startTime = time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
+		nextTime = time.Unix(startTime.Unix() + interval, 0)
+	}
+
+	return nextTime
 }

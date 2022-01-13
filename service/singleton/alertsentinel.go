@@ -38,10 +38,11 @@ func addCycleTransferStatsInfo(alert *model.AlertRule) {
 		}
 		if AlertsCycleTransferStatsStore[alert.ID] == nil {
 			from := alert.Rules[j].GetTransferDurationStart()
+			to := alert.Rules[j].GetTransferDurationEnd()
 			AlertsCycleTransferStatsStore[alert.ID] = &model.CycleTransferStats{
 				Name:       alert.Name,
 				From:       from,
-				To:         from.Add(time.Hour * time.Duration(alert.Rules[j].CycleInterval)),
+				To:         to,
 				Max:        uint64(alert.Rules[j].Max),
 				Min:        uint64(alert.Rules[j].Min),
 				ServerName: make(map[uint64]string),
