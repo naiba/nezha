@@ -59,9 +59,9 @@
                 <li class="mdui-list-item" :id="'mem-' + server.ID">
                   <i class="mdui-list-item-icon mdui-icon material-icons">straighten</i>
                   <div class="mdui-list-item-content">
-                    <at class="mdui-list-item-title mdui-list-item-one-line">MEM <span>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</span></at>
+                    <at class="mdui-list-item-title mdui-list-item-one-line">MEM <span>@#server.live?parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0):'NaN'#@%</span></at>
                     <div class="mdui-progress">
-                      <div class="mdui-progress-determinate mdui-color-pink-400" :style="'width: ' + parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0) + '%;'"></div>
+                      <div class="mdui-progress-determinate mdui-color-pink-400" :style="'width: ' + (server.live?parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0):'0') + '%;'"></div>
                     </div>
                   </div>
                 </li>
