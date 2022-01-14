@@ -235,6 +235,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.Cover = mf.Cover
 		m.Notify = mf.Notify == "on"
 		m.Duration = mf.Duration
+		err = m.InitSkipServers()
 	}
 	if err == nil {
 		if m.ID == 0 {
