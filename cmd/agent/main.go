@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/blang/semver"
@@ -45,6 +46,7 @@ type AgentConfig struct {
 
 var (
 	version string
+	arch    string = runtime.GOARCH
 	client  pb.NezhaServiceClient
 	inited  bool
 )
@@ -71,6 +73,10 @@ func init() {
 }
 
 func main() {
+	if arch != runtime.GOARCH {
+		panic(fmt.Sprintf("与当前系统不匹配，当前运行 %s_%s, 需要下载 %s_%s", runtime.GOOS, arch, runtime.GOOS, runtime.GOARCH))
+	}
+
 	// 来自于 GoReleaser 的版本号
 	monitor.Version = version
 

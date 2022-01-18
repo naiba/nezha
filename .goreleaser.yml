@@ -4,6 +4,8 @@ before:
 builds:
   - env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.arch={{.Arch}}
     goos:
       - linux
       - windows
