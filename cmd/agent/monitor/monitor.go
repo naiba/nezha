@@ -23,8 +23,8 @@ import (
 )
 
 var (
-	Version           string = "debug"
-	expectDiskFsTypes        = []string{
+	Version           string
+	expectDiskFsTypes = []string{
 		"apfs", "ext4", "ext3", "ext2", "f2fs", "reiserfs", "jfs", "btrfs",
 		"fuseblk", "zfs", "simfs", "ntfs", "fat32", "exfat", "xfs", "fuse.rclone",
 	}

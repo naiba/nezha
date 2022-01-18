@@ -18,6 +18,7 @@ import (
 	"github.com/go-ping/ping"
 	"github.com/gorilla/websocket"
 	"github.com/p14yground/go-github-selfupdate/selfupdate"
+	"github.com/shirou/gopsutil/v3/host"
 	flag "github.com/spf13/pflag"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -46,7 +47,7 @@ type AgentConfig struct {
 
 var (
 	version string
-	arch    string = runtime.GOARCH
+	arch    string
 	client  pb.NezhaServiceClient
 	inited  bool
 )
@@ -73,8 +74,23 @@ func init() {
 }
 
 func main() {
-	if arch != runtime.GOARCH {
-		panic(fmt.Sprintf("与当前系统不匹配，当前运行 %s_%s, 需要下载 %s_%s", runtime.GOOS, arch, runtime.GOOS, runtime.GOARCH))
+	if runtime.GOOS == "windows" {
+		hostArch, err := host.KernelArch()
+		if err != nil {
+			panic(err)
+		}
+		if hostArch == "i386" {
+			hostArch = "386"
+		}
+		if hostArch == "i686" || hostArch == "ia64" || hostArch == "x86_64" {
+			hostArch = "amd64"
+		}
+		if hostArch == "aarch64" {
+			hostArch = "arm64"
+		}
+		if arch != hostArch {
+			panic(fmt.Sprintf("与当前系统不匹配，当前运行 %s_%s, 需要下载 %s_%s", runtime.GOOS, arch, runtime.GOOS, hostArch))
+		}
 	}
 
 	// 来自于 GoReleaser 的版本号
