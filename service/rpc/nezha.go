@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -106,7 +105,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		singleton.ServerList[clientID].Host.IP != host.IP {
 		singleton.SendNotification(fmt.Sprintf(
 			"[IP变更] %s ，旧IP：%s，新IP：%s。",
-			singleton.ServerList[clientID].Name, utils.IPDesensitize(singleton.ServerList[clientID].Host.IP), utils.IPDesensitize(host.IP)), true)
+			singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP), singleton.IPDesensitize(host.IP)), true)
 	}
 
 	// 判断是否是机器重启，如果是机器重启要录入最后记录的流量里面

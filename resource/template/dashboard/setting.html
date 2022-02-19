@@ -53,10 +53,16 @@
                         value="{{.Conf.IgnoredIPNotification}}">
                 </div>
                 <div class="field">
-                    <div class="ui nf-ssl checkbox">
+                    <div class="ui nf-ssl checkbox ip-change">
                         <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
                         <label>启用</label>
                     </div>
+                </div>
+            </div>
+            <div class="field">
+                <div class="ui nf-ssl checkbox plain-ip">
+                    <input name="EnablePlainIPInNotification" type="checkbox" tabindex="0" class="hidden">
+                    <label>通知信息IP不打码</label>
                 </div>
             </div>
             <button class="ui button" type="submit">保存</button>
@@ -97,10 +103,12 @@
         return false;
     })
     $('.checkbox').checkbox()
-    $('#settingForm').find("select[name=Cover]")
-        .val({{.Conf.Cover }});
+    $('#settingForm').find("select[name=Cover]").val({{.Conf.Cover }});
     {{if .Conf.EnableIPChangeNotification}}
-    $('.checkbox').checkbox('set checked')
+    $('.checkbox.ip-change').checkbox('set checked')
+    {{ end }}
+    {{if .Conf.EnablePlainIPInNotification}}
+    $('.checkbox.plain-ip').checkbox('set checked')
     {{ end }}
 </script>
 {{end}}

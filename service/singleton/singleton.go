@@ -10,10 +10,11 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.12.9" // ！！记得修改 README 中的 badge 版本！！
+var Version = "v0.12.10" // ！！记得修改 README 中的 badge 版本！！
 
 var (
 	Conf  *model.Config
@@ -83,4 +84,11 @@ func CronTrigger(cr model.Cron) func() {
 			}
 		}
 	}
+}
+
+func IPDesensitize(ip string) string {
+	if Conf.EnablePlainIPInNotification {
+		return ip
+	}
+	return utils.IPDesensitize(ip)
 }

@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.9&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.8.1-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.10&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.8.1-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，计划任务和在线终端。</p>
@@ -161,7 +161,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 - 默认主题更改进度条颜色示例
 
-  ```
+  ```html
   <style>
   .ui.fine.progress> .bar {
       background-color: pink !important;
@@ -171,7 +171,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 - DayNight 主题更改进度条颜色、修改页脚示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
 
-  ```
+  ```html
   <style>
   .ui.fine.progress> .progress-bar {
     background-color: #00a7d0 !important;
@@ -188,7 +188,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 - 默认主题修改 LOGO、修改页脚示例（来自 [@iLay1678](https://github.com/iLay1678)）
 
-  ```
+  ```html
   <style>
   .right.menu>a{
   visibility: hidden;
@@ -214,7 +214,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 - hotaru 主题更改背景图片示例
 
-  ```
+  ```html
   <style>
   .hotaru-cover {
      background: url(https://s3.ax1x.com/2020/12/08/DzHv6A.jpg) center;

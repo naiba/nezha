@@ -503,15 +503,17 @@ func (ma *memberAPI) logout(c *gin.Context) {
 }
 
 type settingForm struct {
-	Title                      string
-	Admin                      string
-	Theme                      string
-	CustomCode                 string
-	ViewPassword               string
-	EnableIPChangeNotification string
-	IgnoredIPNotification      string
-	GRPCHost                   string
-	Cover                      uint8
+	Title                 string
+	Admin                 string
+	Theme                 string
+	CustomCode            string
+	ViewPassword          string
+	IgnoredIPNotification string
+	GRPCHost              string
+	Cover                 uint8
+
+	EnableIPChangeNotification  string
+	EnablePlainIPInNotification string
 }
 
 func (ma *memberAPI) updateSetting(c *gin.Context) {
@@ -524,6 +526,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
+	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
 	singleton.Conf.Cover = sf.Cover
 	singleton.Conf.GRPCHost = sf.GRPCHost
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
