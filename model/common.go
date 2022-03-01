@@ -6,6 +6,16 @@ const CtxKeyAuthorizedUser = "ckau"
 
 const CacheKeyOauth2State = "p:a:state"
 
+var Loc *time.Location
+
+func init() {
+	var err error
+	Loc, err = time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		panic(err)
+	}
+}
+
 type Common struct {
 	ID        uint64    `gorm:"primary_key"`
 	CreatedAt time.Time `sql:"index"`

@@ -440,9 +440,24 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 			err = errors.New("至少定义一条规则")
 		} else {
 			for i := 0; i < len(r.Rules); i++ {
-				if !r.Rules[i].IsTransferDurationRule() && r.Rules[i].Duration < 3 {
-					err = errors.New("错误：Duration 至少为 3")
-					break
+				if !r.Rules[i].IsTransferDurationRule() {
+					if r.Rules[i].Duration < 3 {
+						err = errors.New("错误：Duration 至少为 3")
+						break
+					}
+				} else {
+					if r.Rules[i].CycleInterval < 1 {
+						err = errors.New("错误: cycle_interval 至少为 1")
+						break
+					}
+					if r.Rules[i].CycleStart == nil {
+						err = errors.New("错误: cycle_start 未设置")
+						break
+					}
+					if r.Rules[i].CycleStart.After(time.Now()) {
+						err = errors.New("错误: cycle_start 是个未来值")
+						break
+					}
 				}
 			}
 		}

@@ -13,10 +13,10 @@ require (
 	github.com/go-ping/ping v0.0.0-20211130115550-779d1e919534
 	github.com/golang/protobuf v1.5.2
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/gorilla/websocket v1.4.2
+	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/iamacarpet/go-winpty v1.0.2
-	github.com/ory/graceful v0.1.1
+	github.com/ory/graceful v0.1.2
 	github.com/p14yground/go-github-selfupdate v0.0.0-20220205132106-76a6d59b925b
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/robfig/cron/v3 v3.0.1
@@ -24,13 +24,13 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.10.1
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
+	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
+	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/sqlite v1.2.6
-	gorm.io/gorm v1.22.5
+	gorm.io/driver/sqlite v1.3.1
+	gorm.io/gorm v1.23.1
 )
 
 require (
