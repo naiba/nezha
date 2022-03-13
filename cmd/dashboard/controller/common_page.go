@@ -140,14 +140,16 @@ func (cp *commonPage) ws(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
+	var servers []*model.Server
 	count := 0
 	for {
 		singleton.SortedServerLock.RLock()
+		servers = singleton.SortedServerList
+		singleton.SortedServerLock.RUnlock()
 		err = conn.WriteJSON(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: singleton.SortedServerList,
+			Servers: servers,
 		})
-		singleton.SortedServerLock.RUnlock()
 		if err != nil {
 			break
 		}
