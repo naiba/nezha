@@ -13,7 +13,6 @@ import (
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 
-	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -28,7 +27,7 @@ func ServeWeb(port uint) *http.Server {
 	r.Use(mygin.RecordPath)
 	r.SetFuncMap(template.FuncMap{
 		"tf": func(t time.Time) string {
-			return t.In(model.Loc).Format("2006年1月2号 15:04:05")
+			return t.In(singleton.Loc).Format("2006年1月2号 15:04:05")
 		},
 		"len": func(slice []interface{}) string {
 			return strconv.Itoa(len(slice))
@@ -40,7 +39,7 @@ func ServeWeb(port uint) *http.Server {
 			return template.HTML(`<` + s + `>`) // #nosec
 		},
 		"stf": func(s uint64) string {
-			return time.Unix(int64(s), 0).In(model.Loc).Format("2006年1月2号 15:04")
+			return time.Unix(int64(s), 0).In(singleton.Loc).Format("2006年1月2号 15:04")
 		},
 		"sf": func(duration uint64) string {
 			return time.Duration(time.Duration(duration) * time.Second).String()
