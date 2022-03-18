@@ -1,7 +1,6 @@
 package monitor
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -69,7 +68,7 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 				continue
 			}
 			resp.Body.Close()
-			err = json.Unmarshal(body, &ip)
+			err = utils.Json.Unmarshal(body, &ip)
 			if err != nil {
 				continue
 			}

@@ -1,9 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"time"
 
+	"github.com/naiba/nezha/pkg/utils"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +27,7 @@ type AlertRule struct {
 }
 
 func (r *AlertRule) BeforeSave(tx *gorm.DB) error {
-	data, err := json.Marshal(r.Rules)
+	data, err := utils.Json.Marshal(r.Rules)
 	if err != nil {
 		return err
 	}
@@ -36,7 +36,7 @@ func (r *AlertRule) BeforeSave(tx *gorm.DB) error {
 }
 
 func (r *AlertRule) AfterFind(tx *gorm.DB) error {
-	return json.Unmarshal([]byte(r.RulesRaw), &r.Rules)
+	return utils.Json.Unmarshal([]byte(r.RulesRaw), &r.Rules)
 }
 
 func (r *AlertRule) Enabled() bool {

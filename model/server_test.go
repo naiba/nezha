@@ -1,9 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"testing"
 
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +21,7 @@ func TestServerMarshal(t *testing.T) {
 		}
 		serverStr := string(server.Marshal())
 		var serverRestore Server
-		assert.Nil(t, json.Unmarshal([]byte(serverStr), &serverRestore))
+		assert.Nil(t, utils.Json.Unmarshal([]byte(serverStr), &serverRestore))
 		assert.Equal(t, server, serverRestore)
 	}
 }

@@ -2,7 +2,6 @@ package model
 
 import (
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -10,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 const (
@@ -58,12 +59,12 @@ func (n *Notification) reqBody(message string) (string, error) {
 	switch n.RequestType {
 	case NotificationRequestTypeJSON:
 		return replaceParamsInString(n.RequestBody, message, func(msg string) string {
-			msgBytes, _ := json.Marshal(msg)
+			msgBytes, _ := utils.Json.Marshal(msg)
 			return string(msgBytes)[1 : len(msgBytes)-1]
 		}), nil
 	case NotificationRequestTypeForm:
 		var data map[string]string
-		if err := json.Unmarshal([]byte(n.RequestBody), &data); err != nil {
+		if err := utils.Json.Unmarshal([]byte(n.RequestBody), &data); err != nil {
 			return "", err
 		}
 		params := url.Values{}
@@ -91,7 +92,7 @@ func (n *Notification) setRequestHeader(req *http.Request) error {
 		return nil
 	}
 	var m map[string]string
-	if err := json.Unmarshal([]byte(n.RequestHeader), &m); err != nil {
+	if err := utils.Json.Unmarshal([]byte(n.RequestHeader), &m); err != nil {
 		return err
 	}
 	for k, v := range m {

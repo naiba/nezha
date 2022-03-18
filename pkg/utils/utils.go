@@ -8,7 +8,11 @@ import (
 	"regexp"
 	"time"
 	"unsafe"
+
+	jsoniter "github.com/json-iterator/go"
 )
+
+var Json = jsoniter.ConfigCompatibleWithStandardLibrary
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const (

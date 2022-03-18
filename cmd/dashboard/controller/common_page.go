@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -16,6 +15,7 @@ import (
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -140,16 +140,23 @@ func (cp *commonPage) ws(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	var servers []*model.Server
+	var bytesToWrite []byte
 	count := 0
 	for {
 		singleton.SortedServerLock.RLock()
-		servers = singleton.SortedServerList
-		singleton.SortedServerLock.RUnlock()
-		err = conn.WriteJSON(Data{
+		bytesToWrite, err = utils.Json.Marshal(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: servers,
+			Servers: singleton.SortedServerList,
 		})
+		singleton.SortedServerLock.RUnlock()
+		if err != nil {
+			break
+		}
+		writer, err := conn.NextWriter(websocket.TextMessage)
+		if err != nil {
+			break
+		}
+		_, err = writer.Write(bytesToWrite)
 		if err != nil {
 			break
 		}
@@ -241,7 +248,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			return
 		}
 
-		terminalData, _ := json.Marshal(&model.TerminalTask{
+		terminalData, _ := utils.Json.Marshal(&model.TerminalTask{
 			Host:    terminal.host,
 			UseSSL:  terminal.useSSL,
 			Session: terminalID,

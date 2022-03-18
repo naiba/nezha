@@ -1,9 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 
+	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
@@ -66,7 +66,7 @@ func (m *Monitor) CronSpec() string {
 
 func (m *Monitor) AfterFind(tx *gorm.DB) error {
 	var skipServers []uint64
-	if err := json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
+	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
 		return err
 	}
 	m.SkipServers = make(map[uint64]bool)
@@ -82,7 +82,7 @@ func IsServiceSentinelNeeded(t uint64) bool {
 
 func (m *Monitor) InitSkipServers() error {
 	var skipServers []uint64
-	if err := json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
+	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
 		return err
 	}
 	m.SkipServers = make(map[uint64]bool)

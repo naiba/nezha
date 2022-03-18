@@ -16,6 +16,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/iamacarpet/go-winpty v1.0.2
+	github.com/json-iterator/go v1.1.12
 	github.com/ory/graceful v0.1.2
 	github.com/p14yground/go-github-selfupdate v0.0.0-20220205132106-76a6d59b925b
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -47,7 +48,6 @@ require (
 	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect

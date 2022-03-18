@@ -2,7 +2,6 @@ package controller
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -281,7 +280,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		cr.PushSuccessful = cf.PushSuccessful == "on"
 		cr.ID = cf.ID
 		cr.Cover = cf.Cover
-		err = json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
+		err = utils.Json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
 	}
 	tx := singleton.DB.Begin()
 	if err == nil {
@@ -433,7 +432,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 	var r model.AlertRule
 	err := c.ShouldBindJSON(&arf)
 	if err == nil {
-		err = json.Unmarshal([]byte(arf.RulesRaw), &r.Rules)
+		err = utils.Json.Unmarshal([]byte(arf.RulesRaw), &r.Rules)
 	}
 	if err == nil {
 		if len(r.Rules) == 0 {

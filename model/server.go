@@ -1,11 +1,11 @@
 package model
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"time"
 
+	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 )
 
@@ -39,9 +39,9 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 }
 
 func (s Server) Marshal() template.JS {
-	name, _ := json.Marshal(s.Name)
-	tag, _ := json.Marshal(s.Tag)
-	note, _ := json.Marshal(s.Note)
-	secret, _ := json.Marshal(s.Secret)
+	name, _ := utils.Json.Marshal(s.Name)
+	tag, _ := utils.Json.Marshal(s.Tag)
+	note, _ := utils.Json.Marshal(s.Note)
+	secret, _ := utils.Json.Marshal(s.Secret)
 	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s}`, s.ID, name, secret, s.DisplayIndex, tag, note)) // #nosec
 }

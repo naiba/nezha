@@ -1,9 +1,9 @@
 package model
 
 import (
-	"encoding/json"
 	"time"
 
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/robfig/cron/v3"
 	"gorm.io/gorm"
 )
@@ -29,5 +29,5 @@ type Cron struct {
 }
 
 func (c *Cron) AfterFind(tx *gorm.DB) error {
-	return json.Unmarshal([]byte(c.ServersRaw), &c.Servers)
+	return utils.Json.Unmarshal([]byte(c.ServersRaw), &c.Servers)
 }
