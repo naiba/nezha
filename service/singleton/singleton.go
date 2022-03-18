@@ -15,7 +15,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
-var Version = "v0.12.13" // ！！记得修改 README 中的 badge 版本！！
+var Version = "v0.12.14" // ！！记得修改 README 中的 badge 版本！！
 
 var (
 	Conf  *model.Config
@@ -31,7 +31,7 @@ var (
 	SortedServerLock sync.RWMutex
 )
 
-func init() {
+func Init() {
 	var err error
 	Loc, err = time.LoadLocation("Asia/Shanghai")
 	if err != nil {
