@@ -38,7 +38,13 @@ CN=true sudo ./nezha.sh
 
 _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
 
-### 增强配置
+### Agent 自定义
+
+#### 自定义监控的网卡和硬盘分区
+
+执行 `/opt/nezha/agent/nezha-agent --edit-agent-config` 来选择自定义的网卡和分区，然后重启 Agent 即可
+
+#### 运行参数
 
 通过执行 `./nezha-agent --help` 查看支持的参数，如果你使用一键脚本，可以编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
 

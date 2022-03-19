@@ -3,7 +3,6 @@ package monitor
 import (
 	"fmt"
 	"os/exec"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -31,7 +30,6 @@ var (
 	excludeNetInterfaces = []string{
 		"lo", "tun", "docker", "veth", "br-", "vmbr", "vnet", "kube",
 	}
-	getMacDiskNo = regexp.MustCompile(`\/dev\/disk(\d)s.*`)
 )
 
 var (
@@ -39,7 +37,7 @@ var (
 	cachedBootTime                                                             time.Time
 )
 
-func GetHost() *model.Host {
+func GetHost(agentConfig *model.AgentConfig) *model.Host {
 	hi, _ := host.Info()
 	var cpuType string
 	if hi.VirtualizationSystem != "" {
@@ -57,7 +55,7 @@ func GetHost() *model.Host {
 		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
 	}
 	mv, _ := mem.VirtualMemory()
-	diskTotal, _ := getDiskTotalAndUsed()
+	diskTotal, _ := getDiskTotalAndUsed(agentConfig)
 
 	var swapMemTotal uint64
 	if runtime.GOOS == "windows" {
@@ -87,7 +85,7 @@ func GetHost() *model.Host {
 	}
 }
 
-func GetState(skipConnectionCount bool, skipProcsCount bool) *model.HostState {
+func GetState(agentConfig *model.AgentConfig, skipConnectionCount bool, skipProcsCount bool) *model.HostState {
 	var procs []int32
 	if !skipProcsCount {
 		procs, _ = process.Pids()
@@ -110,7 +108,7 @@ func GetState(skipConnectionCount bool, skipProcsCount bool) *model.HostState {
 		cpuPercent = cp[0]
 	}
 
-	_, diskUsed := getDiskTotalAndUsed()
+	_, diskUsed := getDiskTotalAndUsed(agentConfig)
 	loadStat, _ := load.Avg()
 
 	var tcpConnCount, udpConnCount uint64
@@ -157,13 +155,19 @@ func GetState(skipConnectionCount bool, skipProcsCount bool) *model.HostState {
 	}
 }
 
-func TrackNetworkSpeed() {
+func TrackNetworkSpeed(agentConfig *model.AgentConfig) {
 	var innerNetInTransfer, innerNetOutTransfer uint64
 	nc, err := net.IOCounters(true)
 	if err == nil {
 		for _, v := range nc {
-			if isListContainsStr(excludeNetInterfaces, v.Name) {
-				continue
+			if len(agentConfig.NICAllowlist) > 0 {
+				if !agentConfig.NICAllowlist[v.Name] {
+					continue
+				}
+			} else {
+				if isListContainsStr(excludeNetInterfaces, v.Name) {
+					continue
+				}
 			}
 			innerNetInTransfer += v.BytesRecv
 			innerNetOutTransfer += v.BytesSent
@@ -180,49 +184,49 @@ func TrackNetworkSpeed() {
 	}
 }
 
-func getDiskTotalAndUsed() (total uint64, used uint64) {
-	diskList, _ := disk.Partitions(false)
+func getDiskTotalAndUsed(agentConfig *model.AgentConfig) (total uint64, used uint64) {
 	devices := make(map[string]string)
-	countedDiskForMac := make(map[string]struct{})
-	for _, d := range diskList {
-		fsType := strings.ToLower(d.Fstype)
-		// 不统计 K8s 的虚拟挂载点：https://github.com/shirou/gopsutil/issues/1007
-		if devices[d.Device] == "" && isListContainsStr(expectDiskFsTypes, fsType) && !strings.Contains(d.Mountpoint, "/var/lib/kubelet") {
-			devices[d.Device] = d.Mountpoint
+
+	if len(agentConfig.HardDrivePartitionAllowlist) > 0 {
+		// 如果配置了白名单，使用白名单的列表
+		for i, v := range agentConfig.HardDrivePartitionAllowlist {
+			devices[strconv.Itoa(i)] = v
+		}
+	} else {
+		// 否则使用默认过滤规则
+		diskList, _ := disk.Partitions(false)
+		for _, d := range diskList {
+			fsType := strings.ToLower(d.Fstype)
+			// 不统计 K8s 的虚拟挂载点：https://github.com/shirou/gopsutil/issues/1007
+			if devices[d.Device] == "" && isListContainsStr(expectDiskFsTypes, fsType) && !strings.Contains(d.Mountpoint, "/var/lib/kubelet") {
+				devices[d.Device] = d.Mountpoint
+			}
 		}
 	}
-	for device, mountPath := range devices {
-		diskUsageOf, _ := disk.Usage(mountPath)
-		// 这里是针对 Mac 机器的处理，https://github.com/giampaolo/psutil/issues/1509
-		matches := getMacDiskNo.FindStringSubmatch(device)
-		if len(matches) == 2 {
-			if _, has := countedDiskForMac[matches[1]]; !has {
-				countedDiskForMac[matches[1]] = struct{}{}
-				total += diskUsageOf.Total
-			}
-		} else {
+
+	for _, mountPath := range devices {
+		diskUsageOf, err := disk.Usage(mountPath)
+		if err == nil {
 			total += diskUsageOf.Total
+			used += diskUsageOf.Used
 		}
-		used += diskUsageOf.Used
 	}
 
 	// Fallback 到这个方法,仅统计根路径,适用于OpenVZ之类的.
-	if runtime.GOOS == "linux" {
-		if total == 0 && used == 0 {
-			cmd := exec.Command("df")
-			out, err := cmd.CombinedOutput()
-			if err == nil {
-				s := strings.Split(string(out), "\n")
-				for _, c := range s {
-					info := strings.Fields(c)
-					if len(info) == 6 {
-						if info[5] == "/" {
-							total, _ = strconv.ParseUint(info[1], 0, 64)
-							used, _ = strconv.ParseUint(info[2], 0, 64)
-							// 默认获取的是1K块为单位的.
-							total = total * 1024
-							used = used * 1024
-						}
+	if runtime.GOOS == "linux" && total == 0 && used == 0 {
+		cmd := exec.Command("df")
+		out, err := cmd.CombinedOutput()
+		if err == nil {
+			s := strings.Split(string(out), "\n")
+			for _, c := range s {
+				info := strings.Fields(c)
+				if len(info) == 6 {
+					if info[5] == "/" {
+						total, _ = strconv.ParseUint(info[1], 0, 64)
+						used, _ = strconv.ParseUint(info[2], 0, 64)
+						// 默认获取的是1K块为单位的.
+						total = total * 1024
+						used = used * 1024
 					}
 				}
 			}

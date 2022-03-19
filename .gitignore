@@ -18,3 +18,4 @@
 /main
 /cmd/agent/main
 /cmd/dashboard/main
+/config.yml

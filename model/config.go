@@ -20,6 +20,34 @@ const (
 	ConfigCoverIgnoreAll
 )
 
+type AgentConfig struct {
+	HardDrivePartitionAllowlist []string
+	NICAllowlist                map[string]bool
+	v                           *viper.Viper
+}
+
+func (c *AgentConfig) Read(path string) error {
+	c.v = viper.New()
+	c.v.SetConfigFile(path)
+	err := c.v.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	err = c.v.Unmarshal(c)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *AgentConfig) Save() error {
+	data, err := yaml.Marshal(c)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(c.v.ConfigFileUsed(), data, os.ModePerm)
+}
+
 type Config struct {
 	Debug bool
 	Site  struct {
