@@ -5,7 +5,8 @@
     <div id="app">
       <div class="ui styled fluid accordion" v-for="group in groups">
         <div class="active title">
-          <i class="dropdown icon"></i>@#(group.Tag!==''?group.Tag:'默认')#@
+          <i class="dropdown icon"></i>
+          @#(group.Tag!==''?group.Tag:'默认')#@
         </div>
         <div class="active content">
           <div class="ui four stackable status cards">
@@ -15,8 +16,8 @@
                   <i :class="server.Host.CountryCode + ' flag'"></i><i v-if='server.Host.Platform == "darwin"'
                     class="apple icon"></i><i v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
                     v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
-                    v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name + (server.live?'':'
-                  [已离线]')#@
+                    v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>
+                  @#server.Name + (server.live?'':'[已离线]')#@
                   <i class="nezha-secondary-font info circle icon" style="height: 28px"></i>
                   <div class="ui content popup" style="margin-bottom: 0">
                     系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@
