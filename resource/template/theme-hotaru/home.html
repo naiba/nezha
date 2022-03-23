@@ -151,7 +151,7 @@
     <script src="/static/semantic-ui-alerts.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.min.js"></script>
     <script>
-        const initData = {{.Servers }};
+        const initData = JSON.parse('{{.Servers}}').servers;
         var statusCards = new Vue({
             el: '#app',
             delimiters: ['@#', '#@'],

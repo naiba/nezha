@@ -10,48 +10,27 @@
         <div class="active content">
           <div class="ui four stackable status cards">
             <div v-for="server in group.data" :id="server.ID" class="ui card">
-              <div
-                class="content"
-                v-if="server.Host"
-                style="margin-top: 10px; padding-bottom: 5px"
-              >
+              <div class="content" v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                 <div class="header">
-                  <i :class="server.Host.CountryCode + ' flag'"></i
-                  ><i
-                    v-if='server.Host.Platform == "darwin"'
-                    class="apple icon"
-                  ></i
-                  ><i
-                    v-if='server.Host.Platform == "linux"'
-                    class="linux icon"
-                  ></i
-                  ><i
-                    v-if='server.Host.Platform == "windows"'
-                    class="windows icon"
-                  ></i
-                  ><i
-                    v-if='server.Host.Platform == "freebsd"'
-                    class="freebsd icon"
-                  ></i
-                  >@#server.Name + (server.live?'':' [已离线]')#@
+                  <i :class="server.Host.CountryCode + ' flag'"></i><i v-if='server.Host.Platform == "darwin"'
+                    class="apple icon"></i><i v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
+                    v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
+                    v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>@#server.Name + (server.live?'':'
+                  [已离线]')#@
                   <i class="nezha-secondary-font info circle icon" style="height: 28px"></i>
                   <div class="ui content popup" style="margin-bottom: 0">
                     系统：@#server.Host.Platform#@-@#server.Host.PlatformVersion#@
-                    [<span v-if="server.Host.Virtualization"
-                      >@#server.Host.Virtualization#@:</span
-                    >@#server.Host.Arch#@]<br />
+                    [<span
+                      v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br />
                     CPU：@#server.Host.CPU#@<br />
                     硬盘：@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
                     内存：@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
                     交换：@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
                     流量：<i
-                      class="arrow alternate circle down outline icon"
-                    ></i
-                    >@#formatByteSize(server.State.NetInTransfer)#@<i
-                      class="arrow alternate circle up outline icon"
-                    ></i
-                    >@#formatByteSize(server.State.NetOutTransfer)#@<br />
-                    负载：@# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@# toFixed2(server.State.Load15) #@<br />
+                      class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@<i
+                      class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@<br />
+                    负载：@# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
+                    toFixed2(server.State.Load15) #@<br />
                     进程数：@# server.State.ProcessCount #@<br />
                     连接数：TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
                     启动：@# formatTimestamp(server.Host.BootTime) #@<br />
@@ -64,46 +43,27 @@
                   <div class="ui grid">
                     <div class="three wide column">CPU</div>
                     <div class="thirteen wide column">
-                      <div
-                        :class="formatPercent(server.live,server.State.CPU, 100).class"
-                      >
-                        <div
-                          class="bar"
-                          :style="formatPercent(server.live,server.State.CPU, 100).style"
-                        >
-                          <small
-                            >@#formatPercent(server.live,server.State.CPU,100).percent#@%</small
-                          >
+                      <div :class="formatPercent(server.live,server.State.CPU, 100).class">
+                        <div class="bar" :style="formatPercent(server.live,server.State.CPU, 100).style">
+                          <small>@#formatPercent(server.live,server.State.CPU,100).percent#@%</small>
                         </div>
                       </div>
                     </div>
                     <div class="three wide column">内存</div>
                     <div class="thirteen wide column">
-                      <div
-                        :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class"
-                      >
-                        <div
-                          class="bar"
-                          :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style"
-                        >
-                          <small
-                            >@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small
-                          >
+                      <div :class="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).class">
+                        <div class="bar"
+                          :style="formatPercent(server.live,server.State.MemUsed, server.Host.MemTotal).style">
+                          <small>@#parseInt(server.State?server.State.MemUsed/server.Host.MemTotal*100:0)#@%</small>
                         </div>
                       </div>
                     </div>
                     <div class="three wide column">交换</div>
                     <div class="thirteen wide column">
-                      <div
-                        :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class"
-                      >
-                        <div
-                          class="bar"
-                          :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style"
-                        >
-                          <small
-                            >@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small
-                          >
+                      <div :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
+                        <div class="bar"
+                          :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style">
+                          <small>@#parseInt(server.State?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
                         </div>
                       </div>
                     </div>
@@ -116,23 +76,16 @@
                     </div>
                     <div class="three wide column">硬盘</div>
                     <div class="thirteen wide column">
-                      <div
-                        :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class"
-                      >
-                        <div
-                          class="bar"
-                          :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style"
-                        >
-                          <small
-                            >@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small
-                          >
+                      <div :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class">
+                        <div class="bar"
+                          :style="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).style">
+                          <small>@#parseInt(server.State?server.State.DiskUsed/server.Host.DiskTotal*100:0)#@%</small>
                         </div>
                       </div>
                     </div>
                     <div class="three wide column">在线</div>
                     <div class="thirteen wide column">
-                      <i class="clock icon"></i
-                      >@#secondToDate(server.State.Uptime)#@
+                      <i class="clock icon"></i>@#secondToDate(server.State.Uptime)#@
                     </div>
                   </div>
                 </div>
@@ -150,143 +103,143 @@
 </div>
 {{template "common/footer" .}}
 <script>
-  const initData = {{.Servers}};
+  const initData = JSON.parse('{{.Servers}}').servers;
   var statusCards = new Vue({
-      el: '#app',
-      delimiters: ['@#', '#@'],
-      data: {
-          data: initData,
-          groups: [],
-          cache: [],
+    el: '#app',
+    delimiters: ['@#', '#@'],
+    data: {
+      data: initData,
+      groups: [],
+      cache: [],
+    },
+    created() {
+      this.group()
+    },
+    mounted() {
+      $('.nezha-secondary-font.info.icon').popup({
+        popup: '.ui.content.popup',
+        exclusive: true,
+      });
+    },
+    methods: {
+      toFixed2(f) {
+        return f.toFixed(2)
       },
-      created() {
-          this.group()
+      group() {
+        this.groups = groupingData(this.data, "Tag")
       },
-      mounted() {
-          $('.nezha-secondary-font.info.icon').popup({
-              popup: '.ui.content.popup',
-              exclusive: true,
-          });
-      },
-      methods: {
-          toFixed2(f){
-            return f.toFixed(2)
-          },
-          group() {
-              this.groups = groupingData(this.data, "Tag")
-          },
-          formatPercent(live, used, total) {
-              const percent = live ? (parseInt(used / total * 100) || 0) : -1
-              if (!this.cache[percent]) {
-                  this.cache[percent] = {
-                      class: {
-                          ui: true,
-                          progress: true,
-                      },
-                      style: {
-                          'transition-duration': '300ms',
-                          'min-width': 'unset',
-                          width: percent + '% !important',
-                      },
-                      percent,
-                  }
-                  if (percent < 0) {
-                      this.cache[percent].style['background-color'] = 'slategray'
-                      this.cache[percent].class.offline = true
-                  } else if (percent < 51) {
-                      this.cache[percent].style['background-color'] = '#0a94f2'
-                      this.cache[percent].class.fine = true
-                  } else if (percent < 81) {
-                      this.cache[percent].style['background-color'] = 'orange'
-                      this.cache[percent].class.warning = true
-                  } else {
-                      this.cache[percent].style['background-color'] = 'crimson'
-                      this.cache[percent].class.error = true
-                  }
-              }
-              return this.cache[percent]
-          },
-          secondToDate(s) {
-              var d = Math.floor(s / 3600 / 24);
-              if (d > 0) {
-                  return d + "天"
-              }
-              var h = Math.floor(s / 3600 % 24);
-              var m = Math.floor(s / 60 % 60);
-              var s = Math.floor(s % 60);
-              return h + ":" + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
-          },
-          formatTimestamp(t) {
-              return new Date(t * 1000).toLocaleString()
-          },
-          formatByteSize(bs) {
-              const x = readableBytes(bs)
-              return x != "NaN undefined" ? x : '0B'
+      formatPercent(live, used, total) {
+        const percent = live ? (parseInt(used / total * 100) || 0) : -1
+        if (!this.cache[percent]) {
+          this.cache[percent] = {
+            class: {
+              ui: true,
+              progress: true,
+            },
+            style: {
+              'transition-duration': '300ms',
+              'min-width': 'unset',
+              width: percent + '% !important',
+            },
+            percent,
           }
+          if (percent < 0) {
+            this.cache[percent].style['background-color'] = 'slategray'
+            this.cache[percent].class.offline = true
+          } else if (percent < 51) {
+            this.cache[percent].style['background-color'] = '#0a94f2'
+            this.cache[percent].class.fine = true
+          } else if (percent < 81) {
+            this.cache[percent].style['background-color'] = 'orange'
+            this.cache[percent].class.warning = true
+          } else {
+            this.cache[percent].style['background-color'] = 'crimson'
+            this.cache[percent].class.error = true
+          }
+        }
+        return this.cache[percent]
+      },
+      secondToDate(s) {
+        var d = Math.floor(s / 3600 / 24);
+        if (d > 0) {
+          return d + "天"
+        }
+        var h = Math.floor(s / 3600 % 24);
+        var m = Math.floor(s / 60 % 60);
+        var s = Math.floor(s % 60);
+        return h + ":" + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
+      },
+      formatTimestamp(t) {
+        return new Date(t * 1000).toLocaleString()
+      },
+      formatByteSize(bs) {
+        const x = readableBytes(bs)
+        return x != "NaN undefined" ? x : '0B'
       }
+    }
   })
 
-  function groupingData(data, filed) {
-      let map = {};
-      let dest = [];
-      data.forEach(item => {
-          if (!map[item[filed]]) {
-              dest.push({
-                  [filed]: item[filed],
-                  data: [item]
-              });
-              map[item[filed]] = item;
-          } else {
-              dest.forEach(dItem => {
-                  if (dItem[filed] == item[filed]) {
-                      dItem.data.push(item);
-                  }
-              });
+  function groupingData(data, field) {
+    let map = {};
+    let dest = [];
+    data.forEach(item => {
+      if (!map[item[field]]) {
+        dest.push({
+          [field]: item[field],
+          data: [item]
+        });
+        map[item[field]] = item;
+      } else {
+        dest.forEach(dItem => {
+          if (dItem[field] == item[field]) {
+            dItem.data.push(item);
           }
-      })
-      return dest;
+        });
+      }
+    })
+    return dest;
   }
 
   const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
   const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
   ws.onopen = function (evt) {
-      $.suiAlert({
-          title: '实时通道建立',
-          description: '可以实时获取最新监控数据啦',
-          type: 'success',
-          time: '2',
-          position: 'top-center',
-      });
+    $.suiAlert({
+      title: '实时通道建立',
+      description: '可以实时获取最新监控数据啦',
+      type: 'success',
+      time: '2',
+      position: 'top-center',
+    });
   }
   ws.onmessage = function (evt) {
-      const oldServers = statusCards.servers
-      const data = JSON.parse(evt.data)
-      statusCards.servers = data.servers
-      for (let i = 0; i < statusCards.servers.length; i++) {
-          const ns = statusCards.servers[i];
-          if (!ns.Host) ns.live = false
-          else {
-              const lastActive = new Date(ns.LastActive).getTime()
-              if (data.now - lastActive > 10 * 1000) {
-                  ns.live = false
-              } else {
-                  ns.live = true
-              }
-          }
+    const oldServers = statusCards.servers
+    const data = JSON.parse(evt.data)
+    statusCards.servers = data.servers
+    for (let i = 0; i < statusCards.servers.length; i++) {
+      const ns = statusCards.servers[i];
+      if (!ns.Host) ns.live = false
+      else {
+        const lastActive = new Date(ns.LastActive).getTime()
+        if (data.now - lastActive > 10 * 1000) {
+          ns.live = false
+        } else {
+          ns.live = true
+        }
       }
-      statusCards.groups = groupingData(statusCards.servers, "Tag")
+    }
+    statusCards.groups = groupingData(statusCards.servers, "Tag")
   }
   ws.onclose = function () {
-      $.suiAlert({
-          title: '实时通道断开',
-          description: '无法实时获取最新监控数据咯',
-          type: 'warning',
-          time: '2',
-          position: 'top-center',
-      });
+    $.suiAlert({
+      title: '实时通道断开',
+      description: '无法实时获取最新监控数据咯',
+      type: 'warning',
+      time: '2',
+      position: 'top-center',
+    });
   }
   $('.ui.accordion')
-      .accordion({"exclusive": false})
-  ;
+    .accordion({ "exclusive": false })
+    ;
 </script>
 {{end}}

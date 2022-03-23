@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/sync/singleflight"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
@@ -32,6 +33,7 @@ type commonPage struct {
 	r             *gin.Engine
 	terminals     map[string]*terminalContext
 	terminalsLock *sync.Mutex
+	requestGroup  singleflight.Group
 }
 
 func (cp *commonPage) serve() {
@@ -108,11 +110,32 @@ func (p *commonPage) service(c *gin.Context) {
 	}))
 }
 
+func (cp *commonPage) getServerStat() ([]byte, error) {
+	v, err, _ := cp.requestGroup.Do("serverStats", func() (any, error) {
+		singleton.SortedServerLock.RLock()
+		defer singleton.SortedServerLock.RUnlock()
+		return utils.Json.Marshal(Data{
+			Now:     time.Now().Unix() * 1000,
+			Servers: singleton.SortedServerList,
+		})
+	})
+	return v.([]byte), err
+}
+
 func (cp *commonPage) home(c *gin.Context) {
-	singleton.SortedServerLock.RLock()
-	defer singleton.SortedServerLock.RUnlock()
+	stat, err := cp.getServerStat()
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusInternalServerError,
+			Title: "系统错误",
+			Msg:   "服务器状态获取失败",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+		return
+	}
 	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
-		"Servers":    singleton.SortedServerList,
+		"Servers":    string(stat),
 		"CustomCode": singleton.Conf.Site.CustomCode,
 	}))
 }
@@ -140,23 +163,17 @@ func (cp *commonPage) ws(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
-	var bytesToWrite []byte
 	count := 0
 	for {
-		singleton.SortedServerLock.RLock()
-		bytesToWrite, err = utils.Json.Marshal(Data{
-			Now:     time.Now().Unix() * 1000,
-			Servers: singleton.SortedServerList,
-		})
-		singleton.SortedServerLock.RUnlock()
+		stat, err := cp.getServerStat()
 		if err != nil {
-			break
+			continue
 		}
 		writer, err := conn.NextWriter(websocket.TextMessage)
 		if err != nil {
 			break
 		}
-		_, err = writer.Write(bytesToWrite)
+		_, err = writer.Write(stat)
 		if err != nil {
 			break
 		}

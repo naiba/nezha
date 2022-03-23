@@ -159,7 +159,7 @@
     var container=document.querySelector("#container");
     container.style.minHeight=window.innerHeight-document.body.clientHeight+container.clientHeight+'px';
     mdui.mutation();
-    const initData = {{.Servers }};
+    const initData = JSON.parse('{{.Servers}}').servers;
     var statusCards = new Vue({
         el: '#app',
         delimiters: ['@#', '#@'],
