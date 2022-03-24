@@ -1,25 +1,27 @@
 package main
 
 import (
-	"log"
+	"fmt"
 
-	"github.com/robfig/cron/v3"
+	"github.com/jinzhu/copier"
 )
 
+type Cat struct {
+	age     int
+	name    string
+	friends []string
+}
+
 func main() {
-	c := cron.New(cron.WithSeconds())
-	_, err := c.AddFunc("* * * * * *", func() {
-		log.Println("bingo second")
-	})
-	if err != nil {
-		panic(err)
-	}
-	_, err = c.AddFunc("* * * * *", func() {
-		log.Println("bingo minute")
-	})
-	if err != nil {
-		panic(err)
-	}
-	c.Start()
-	select {}
+	a := Cat{7, "Wilson", []string{"Tom", "Tabata", "Willie"}}
+	b := Cat{7, "Wilson", []string{"Tom", "Tabata", "Willie"}}
+	c := Cat{7, "Wilson", []string{"Tom", "Tabata", "Willie"}}
+	wilson := []*Cat{&a, &b, &c}
+	nikita := []Cat{}
+	copier.Copy(&nikita, &wilson)
+
+	nikita[0].friends = append(nikita[0].friends, "Syd")
+
+	fmt.Println(wilson[0])
+	fmt.Println(nikita[0])
 }

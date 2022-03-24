@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
+	"github.com/jinzhu/copier"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/sync/singleflight"
 
@@ -100,12 +101,22 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 }
 
 func (p *commonPage) service(c *gin.Context) {
-	singleton.AlertsLock.RLock()
-	defer singleton.AlertsLock.RUnlock()
+	res, _, _ := p.requestGroup.Do("servicePage", func() (interface{}, error) {
+		singleton.AlertsLock.RLock()
+		defer singleton.AlertsLock.RUnlock()
+		var stats map[uint64]model.ServiceItemResponse
+		var statsStore map[uint64]model.CycleTransferStats
+		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
+		copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
+		return []interface {
+		}{
+			stats, statsStore,
+		}, nil
+	})
 	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
 		"Title":              "服务状态",
-		"Services":           singleton.ServiceSentinelShared.LoadStats(),
-		"CycleTransferStats": singleton.AlertsCycleTransferStatsStore,
+		"Services":           res.([]interface{})[0],
+		"CycleTransferStats": res.([]interface{})[1],
 		"CustomCode":         singleton.Conf.Site.CustomCode,
 	}))
 }
