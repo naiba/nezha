@@ -3,6 +3,7 @@ package monitor
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -19,11 +20,11 @@ type geoIP struct {
 var (
 	geoIPApiList = []string{
 		"https://api.ip.sb/geoip",
-		"https://ip.seeip.org/geoip",
 		"https://ipapi.co/json",
 		"https://freegeoip.app/json/",
 		"http://ip-api.com/json/",
 		"https://extreme-ip-lookup.com/json/",
+		// "https://ip.seeip.org/geoip",
 	}
 	cachedIP, cachedCountry string
 	httpClientV4            = utils.NewSingleStackHTTPClient(time.Second*20, time.Second*5, time.Second*10, false)
@@ -56,35 +57,42 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 	var ip geoIP
 	var resp *http.Response
 	var err error
-	for i := 0; i < len(servers); i++ {
-		if isV6 {
-			resp, err = httpClientV6.Get(servers[i])
-		} else {
-			resp, err = httpClientV4.Get(servers[i])
-		}
-		if err == nil {
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				continue
-			}
-			resp.Body.Close()
-			err = utils.Json.Unmarshal(body, &ip)
-			if err != nil {
-				continue
-			}
-			if ip.IP == "" && ip.Query != "" {
-				ip.IP = ip.Query
-			}
-			// 没取到 v6 IP
-			if isV6 && !strings.Contains(ip.IP, ":") {
-				continue
-			}
-			// 没取到 v4 IP
-			if !isV6 && !strings.Contains(ip.IP, ".") {
-				continue
-			}
-			return ip
-		}
+	if isV6 {
+		resp, err = httpGetWithUA(httpClientV6, servers[rand.Intn(len(servers))])
+	} else {
+		resp, err = httpGetWithUA(httpClientV4, servers[rand.Intn(len(servers))])
+	}
+	if err != nil {
+		return ip
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ip
+	}
+	resp.Body.Close()
+	err = utils.Json.Unmarshal(body, &ip)
+	if err != nil {
+		return ip
+	}
+	if ip.IP == "" && ip.Query != "" {
+		ip.IP = ip.Query
+	}
+	// 没取到 v6 IP
+	if isV6 && !strings.Contains(ip.IP, ":") {
+		return ip
+	}
+	// 没取到 v4 IP
+	if !isV6 && !strings.Contains(ip.IP, ".") {
+		return ip
 	}
 	return ip
+}
+
+func httpGetWithUA(client *http.Client, url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36")
+	return client.Do(req)
 }
