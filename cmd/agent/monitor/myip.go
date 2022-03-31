@@ -12,9 +12,23 @@ import (
 )
 
 type geoIP struct {
-	CountryCode string `json:"country_code,omitempty"`
-	IP          string `json:"ip,omitempty"`
-	Query       string `json:"query,omitempty"`
+	CountryCode  string `json:"country_code,omitempty"`
+	CountryCode2 string `json:"countryCode,omitempty"`
+	IP           string `json:"ip,omitempty"`
+	Query        string `json:"query,omitempty"`
+}
+
+func (ip *geoIP) Unmarshal(body []byte) error {
+	if err := utils.Json.Unmarshal(body, ip); err != nil {
+		return err
+	}
+	if ip.IP == "" && ip.Query != "" {
+		ip.IP = ip.Query
+	}
+	if ip.CountryCode == "" && ip.CountryCode2 != "" {
+		ip.CountryCode = ip.CountryCode2
+	}
+	return nil
 }
 
 var (
@@ -23,7 +37,7 @@ var (
 		"https://ipapi.co/json",
 		"https://freegeoip.app/json/",
 		"http://ip-api.com/json/",
-		"https://extreme-ip-lookup.com/json/",
+		// "https://extreme-ip-lookup.com/json/",
 		// "https://ip.seeip.org/geoip",
 	}
 	cachedIP, cachedCountry string
@@ -70,12 +84,8 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 		return ip
 	}
 	resp.Body.Close()
-	err = utils.Json.Unmarshal(body, &ip)
-	if err != nil {
+	if err := ip.Unmarshal(body); err != nil {
 		return ip
-	}
-	if ip.IP == "" && ip.Query != "" {
-		ip.IP = ip.Query
 	}
 	// 没取到 v6 IP
 	if isV6 && !strings.Contains(ip.IP, ":") {

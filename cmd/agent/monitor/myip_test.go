@@ -17,14 +17,16 @@ func TestGeoIPApi(t *testing.T) {
 		assert.Nil(t, err)
 		resp.Body.Close()
 		var ip geoIP
-		err = utils.Json.Unmarshal(body, &ip)
+		err = ip.Unmarshal(body)
 		assert.Nil(t, err)
-		t.Logf("%s %s %s %s", geoIPApiList[i], ip.CountryCode, utils.IPDesensitize(ip.IP), utils.IPDesensitize(ip.Query))
-		assert.True(t, ip.IP != "" || ip.Query != "")
+		t.Logf("%s %s %s", geoIPApiList[i], ip.CountryCode, utils.IPDesensitize(ip.IP))
+		assert.True(t, ip.IP != "")
+		assert.True(t, ip.CountryCode != "")
 	}
 }
 
 func TestFetchGeoIP(t *testing.T) {
 	ip := fetchGeoIP(geoIPApiList, false)
 	assert.NotEmpty(t, ip.IP)
+	assert.NotEmpty(t, ip.CountryCode)
 }
