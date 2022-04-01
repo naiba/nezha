@@ -3,7 +3,6 @@ package monitor
 import (
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -71,29 +70,32 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 	var ip geoIP
 	var resp *http.Response
 	var err error
-	if isV6 {
-		resp, err = httpGetWithUA(httpClientV6, servers[rand.Intn(len(servers))])
-	} else {
-		resp, err = httpGetWithUA(httpClientV4, servers[rand.Intn(len(servers))])
-	}
-	if err != nil {
-		return ip
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return ip
-	}
-	resp.Body.Close()
-	if err := ip.Unmarshal(body); err != nil {
-		return ip
-	}
-	// 没取到 v6 IP
-	if isV6 && !strings.Contains(ip.IP, ":") {
-		return ip
-	}
-	// 没取到 v4 IP
-	if !isV6 && !strings.Contains(ip.IP, ".") {
-		return ip
+	// 双栈支持参差不齐，不能随机请求，有些 IPv6 取不到 IP
+	for i := 0; i < len(servers); i++ {
+		if isV6 {
+			resp, err = httpClientV6.Get(servers[i])
+		} else {
+			resp, err = httpClientV4.Get(servers[i])
+		}
+		if err == nil {
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				continue
+			}
+			resp.Body.Close()
+			if err := ip.Unmarshal(body); err != nil {
+				continue
+			}
+			// 没取到 v6 IP
+			if isV6 && !strings.Contains(ip.IP, ":") {
+				continue
+			}
+			// 没取到 v4 IP
+			if !isV6 && !strings.Contains(ip.IP, ".") {
+				continue
+			}
+			return ip
+		}
 	}
 	return ip
 }
