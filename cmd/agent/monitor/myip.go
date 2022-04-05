@@ -15,6 +15,9 @@ type geoIP struct {
 	CountryCode2 string `json:"countryCode,omitempty"`
 	IP           string `json:"ip,omitempty"`
 	Query        string `json:"query,omitempty"`
+	Location     struct {
+		CountryCode string `json:"country_code,omitempty"`
+	} `json:"location,omitempty"`
 }
 
 func (ip *geoIP) Unmarshal(body []byte) error {
@@ -27,11 +30,15 @@ func (ip *geoIP) Unmarshal(body []byte) error {
 	if ip.CountryCode == "" && ip.CountryCode2 != "" {
 		ip.CountryCode = ip.CountryCode2
 	}
+	if ip.CountryCode == "" && ip.Location.CountryCode != "" {
+		ip.CountryCode = ip.Location.CountryCode
+	}
 	return nil
 }
 
 var (
 	geoIPApiList = []string{
+		"https://api.myip.la/en?json",
 		"https://api.ip.sb/geoip",
 		"https://ipapi.co/json",
 		"https://freegeoip.app/json/",
