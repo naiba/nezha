@@ -41,7 +41,7 @@ func GetHost(agentConfig *model.AgentConfig) *model.Host {
 	hi, _ := host.Info()
 	var cpuType string
 	if hi.VirtualizationSystem != "" {
-		cpuType = "Vrtual"
+		cpuType = "Virtual"
 	} else {
 		cpuType = "Physical"
 	}

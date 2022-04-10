@@ -561,7 +561,7 @@ func editAgentConfig() {
 		panic(err)
 	}
 
-	fmt.Println("修改自定义配置成功，重启 Agnet 后生效")
+	fmt.Println("修改自定义配置成功，重启 Agent 后生效")
 }
 
 func println(v ...interface{}) {
