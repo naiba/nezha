@@ -24,7 +24,7 @@ type Cron struct {
 	LastResult     bool      // 最后一次执行结果
 	Cover          uint8
 
-	CronJobID  cron.EntryID `gorn:"-"`
+	CronJobID  cron.EntryID `gorm:"-"`
 	ServersRaw string
 }
 

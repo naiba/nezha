@@ -50,11 +50,11 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 }
 
 func (oa *oauth2controller) getRedirectURL(c *gin.Context) string {
-	schame := "http://"
+	scheme := "http://"
 	if strings.HasPrefix(c.Request.Referer(), "https://") {
-		schame = "https://"
+		scheme = "https://"
 	}
-	return schame + c.Request.Host + "/oauth2/callback"
+	return scheme + c.Request.Host + "/oauth2/callback"
 }
 
 func (oa *oauth2controller) login(c *gin.Context) {
