@@ -16,6 +16,7 @@ const firstNotificationDelay = time.Minute * 15
 var notifications []model.Notification
 var notificationsLock sync.RWMutex
 
+// LoadNotifications 加载通知方式到 singleton.notifications 变量
 func LoadNotifications() {
 	notificationsLock.Lock()
 	if err := DB.Find(&notifications).Error; err != nil {

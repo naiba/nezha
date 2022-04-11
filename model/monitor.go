@@ -56,6 +56,7 @@ func (m *Monitor) PB() *pb.Task {
 	}
 }
 
+// CronSpec 返回服务监控请求间隔对应的 cron 表达式
 func (m *Monitor) CronSpec() string {
 	if m.Duration == 0 {
 		// 默认间隔 30 秒
@@ -76,6 +77,7 @@ func (m *Monitor) AfterFind(tx *gorm.DB) error {
 	return nil
 }
 
+// IsServiceSentinelNeeded 判断该任务类型是否需要进行服务监控 需要则返回true
 func IsServiceSentinelNeeded(t uint64) bool {
 	return t != TaskTypeCommand && t != TaskTypeTerminal && t != TaskTypeUpgrade
 }

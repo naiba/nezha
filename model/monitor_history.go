@@ -4,6 +4,7 @@ import (
 	pb "github.com/naiba/nezha/proto"
 )
 
+// MonitorHistory 历史监控记录
 type MonitorHistory struct {
 	Common
 	MonitorID  uint64

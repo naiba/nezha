@@ -24,12 +24,14 @@ type ReportData struct {
 	Reporter uint64
 }
 
+// _TodayStatsOfMonitor 今日监控记录
 type _TodayStatsOfMonitor struct {
-	Up    int
-	Down  int
-	Delay float32
+	Up    int     // 今日在线计数
+	Down  int     // 今日离线计数
+	Delay float32 // 今日平均延迟
 }
 
+// NewServiceSentinel 创建服务监控器
 func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	ServiceSentinelShared = &ServiceSentinel{
 		serviceReportChannel:                make(chan ReportData, 200),
@@ -46,6 +48,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 		monthlyStatus: make(map[uint64]*model.ServiceItemResponse),
 		dispatchBus:   serviceSentinelDispatchBus,
 	}
+	// 加载历史记录
 	ServiceSentinelShared.loadMonitorHistory()
 
 	year, month, day := time.Now().Date()
@@ -72,6 +75,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 		ServiceSentinelShared.latestDate[k] = time.Now().Format("02-Jan-06")
 	}
 
+	// 启动服务监控器
 	go ServiceSentinelShared.worker()
 
 	// 每日将游标往后推一天
@@ -88,20 +92,20 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 type ServiceSentinel struct {
 	serviceResponseDataStoreLock        sync.RWMutex
 	monitorsLock                        sync.RWMutex
-	serviceReportChannel                chan ReportData
-	serviceStatusToday                  map[uint64]*_TodayStatsOfMonitor
-	serviceCurrentStatusIndex           map[uint64]int
-	serviceCurrentStatusData            map[uint64][]model.MonitorHistory
-	latestDate                          map[uint64]string
+	serviceReportChannel                chan ReportData                   // 服务状态汇报管道
+	serviceStatusToday                  map[uint64]*_TodayStatsOfMonitor  // [monitor_id] -> _TodayStatsOfMonitor
+	serviceCurrentStatusIndex           map[uint64]int                    // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
+	serviceCurrentStatusData            map[uint64][]model.MonitorHistory // [monitor_id] -> []model.MonitorHistory
+	latestDate                          map[uint64]string                 // 最近一次更新时间
 	lastStatus                          map[uint64]string
-	serviceResponseDataStoreCurrentUp   map[uint64]uint64
-	serviceResponseDataStoreCurrentDown map[uint64]uint64
-	monitors                            map[uint64]*model.Monitor
+	serviceResponseDataStoreCurrentUp   map[uint64]uint64         // [monitor_id] -> 当前服务在线计数
+	serviceResponseDataStoreCurrentDown map[uint64]uint64         // [monitor_id] -> 当前服务离线计数
+	monitors                            map[uint64]*model.Monitor // [monitor_id] -> model.Monitor
 	sslCertCache                        map[uint64]string
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
-	monthlyStatus     map[uint64]*model.ServiceItemResponse
-	// 服务监控调度计划任务
+	monthlyStatus     map[uint64]*model.ServiceItemResponse // [monitor_id] -> model.ServiceItemResponse
+	// 服务监控任务调度管道
 	dispatchBus chan<- model.Monitor
 }
 
@@ -120,6 +124,7 @@ func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
 	}
 }
 
+// Dispatch 将传入的 ReportData 传给 服务状态汇报管道
 func (ss *ServiceSentinel) Dispatch(r ReportData) {
 	ss.serviceReportChannel <- r
 }
@@ -137,6 +142,7 @@ func (ss *ServiceSentinel) Monitors() []*model.Monitor {
 	return monitors
 }
 
+// LoadStats 加载服务监控器的历史状态信息
 func (ss *ServiceSentinel) loadMonitorHistory() {
 	var monitors []*model.Monitor
 	DB.Find(&monitors)
@@ -146,6 +152,7 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	ss.monitors = make(map[uint64]*model.Monitor)
 	for i := 0; i < len(monitors); i++ {
 		task := *monitors[i]
+		// 通过cron定时将服务监控任务传递给任务调度管道
 		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
 			ss.dispatchBus <- task
 		})
@@ -171,7 +178,7 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 		}
 	}
 
-	// 加载历史记录
+	// 加载服务监控历史记录
 	var mhs []model.MonitorHistory
 	DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
 	for i := 0; i < len(mhs); i++ {
@@ -266,6 +273,7 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 	return ss.monthlyStatus
 }
 
+// getStateStr 根据服务在线率返回对应的状态字符串
 func getStateStr(percent uint64) string {
 	if percent == 0 {
 		return "无数据"
@@ -279,7 +287,9 @@ func getStateStr(percent uint64) string {
 	return "故障"
 }
 
+// worker 服务监控的实际工作流程
 func (ss *ServiceSentinel) worker() {
+	// 从服务状态汇报管道获取汇报的服务数据
 	for r := range ss.serviceReportChannel {
 		if ss.monitors[r.Data.GetId()] == nil || ss.monitors[r.Data.GetId()].ID == 0 {
 			log.Printf("NEZAH>> 错误的服务监控上报 %+v", r)
@@ -355,7 +365,7 @@ func (ss *ServiceSentinel) worker() {
 		// SSL 证书报警
 		var errMsg string
 		if strings.HasPrefix(mh.Data, "SSL证书错误：") {
-			// 排除 i/o timeont、connection timeout、EOF 错误
+			// 排除 i/o timeout、connection timeout、EOF 错误
 			if !strings.HasSuffix(mh.Data, "timeout") &&
 				!strings.HasSuffix(mh.Data, "EOF") &&
 				!strings.HasSuffix(mh.Data, "timed out") {

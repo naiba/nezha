@@ -63,19 +63,20 @@ func initSystem() {
 	loadServers() //加载服务器列表
 	loadCrons()   //加载计划任务
 
-	// 清理 服务请求记录 和 流量记录 的旧数据
+	// 每天的3:30 对 监控记录 和 流量记录 进行清理
 	_, err := singleton.Cron.AddFunc("0 30 3 * * *", cleanMonitorHistory)
 	if err != nil {
 		panic(err)
 	}
 
-	// 流量记录打点
+	// 每小时对流量记录进行打点
 	_, err = singleton.Cron.AddFunc("0 0 * * * *", recordTransferHourlyUsage)
 	if err != nil {
 		panic(err)
 	}
 }
 
+// recordTransferHourlyUsage 对流量记录进行打点
 func recordTransferHourlyUsage() {
 	singleton.ServerLock.Lock()
 	defer singleton.ServerLock.Unlock()
@@ -102,8 +103,9 @@ func recordTransferHourlyUsage() {
 	log.Println("NEZHA>> Cron 流量统计入库", len(txs), singleton.DB.Create(txs).Error)
 }
 
+// cleanMonitorHistory 清理无效或过时的 监控记录 和 流量记录
 func cleanMonitorHistory() {
-	// 清理无效数据
+	// 清理已被删除的服务器的监控记录与流量记录
 	singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ? OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -30))
 	singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (SELECT `id` FROM servers)")
 	// 计算可清理流量记录的时长
@@ -146,6 +148,7 @@ func cleanMonitorHistory() {
 	}
 }
 
+//loadServers 加载服务器列表并根据ID排序
 func loadServers() {
 	var servers []model.Server
 	singleton.DB.Find(&servers)
@@ -159,6 +162,7 @@ func loadServers() {
 	singleton.ReSortServer()
 }
 
+// loadCrons 加载计划任务
 func loadCrons() {
 	var crons []model.Cron
 	singleton.DB.Find(&crons)
@@ -172,6 +176,7 @@ func loadCrons() {
 			crIgnoreMap[cr.Servers[j]] = true
 		}
 
+		// 注册计划任务
 		cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
 		if err == nil {
 			singleton.Crons[cr.ID] = &cr
@@ -192,7 +197,7 @@ func loadCrons() {
 func main() {
 	cleanMonitorHistory()
 	go rpc.ServeRPC(singleton.Conf.GRPCPort)
-	serviceSentinelDispatchBus := make(chan model.Monitor)
+	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go rpc.DispatchKeepalive()
 	go singleton.AlertSentinelStart()

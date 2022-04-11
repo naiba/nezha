@@ -159,10 +159,12 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	return nil
 }
 
+// IsTransferDurationRule 判断该规则是否属于周期流量规则 属于则返回true
 func (rule Rule) IsTransferDurationRule() bool {
 	return strings.HasSuffix(rule.Type, "_cycle")
 }
 
+// GetTransferDurationStart 获取周期流量的起始时间
 func (rule Rule) GetTransferDurationStart() time.Time {
 	// Accept uppercase and lowercase
 	unit := strings.ToLower(rule.CycleUnit)
@@ -202,6 +204,7 @@ func (rule Rule) GetTransferDurationStart() time.Time {
 	return startTime
 }
 
+// GetTransferDurationEnd 获取周期流量结束时间
 func (rule Rule) GetTransferDurationEnd() time.Time {
 	// Accept uppercase and lowercase
 	unit := strings.ToLower(rule.CycleUnit)
