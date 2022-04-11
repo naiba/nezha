@@ -149,7 +149,6 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	var err error
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
-	ss.monitors = make(map[uint64]*model.Monitor)
 	for i := 0; i < len(monitors); i++ {
 		task := *monitors[i]
 		// 通过cron定时将服务监控任务传递给任务调度管道

@@ -171,11 +171,6 @@ func loadCrons() {
 	for i := 0; i < len(crons); i++ {
 		cr := crons[i]
 
-		crIgnoreMap := make(map[uint64]bool)
-		for j := 0; j < len(cr.Servers); j++ {
-			crIgnoreMap[cr.Servers[j]] = true
-		}
-
 		// 注册计划任务
 		cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
 		if err == nil {
