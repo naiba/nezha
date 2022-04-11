@@ -23,14 +23,15 @@ var (
 	DB    *gorm.DB
 	Loc   *time.Location
 
-	ServerList map[uint64]*model.Server
-	SecretToID map[string]uint64
+	ServerList map[uint64]*model.Server // [ServerID] -> model.Server
+	SecretToID map[string]uint64        // [ServerSecret] -> ServerID
 	ServerLock sync.RWMutex
 
-	SortedServerList []*model.Server
+	SortedServerList []*model.Server // 用于存储服务器列表的 slice，按照服务器 ID 排序
 	SortedServerLock sync.RWMutex
 )
 
+// Init 初始化时区为上海时区
 func Init() {
 	var err error
 	Loc, err = time.LoadLocation("Asia/Shanghai")
@@ -39,6 +40,7 @@ func Init() {
 	}
 }
 
+// ReSortServer 根据服务器ID 对服务器列表进行排序（ID越大越靠前）
 func ReSortServer() {
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
@@ -50,6 +52,7 @@ func ReSortServer() {
 		SortedServerList = append(SortedServerList, s)
 	}
 
+	// 按照服务器 ID 排序的具体实现（ID越大越靠前）
 	sort.SliceStable(SortedServerList, func(i, j int) bool {
 		if SortedServerList[i].DisplayIndex == SortedServerList[j].DisplayIndex {
 			return SortedServerList[i].ID < SortedServerList[j].ID

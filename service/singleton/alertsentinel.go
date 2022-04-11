@@ -23,10 +23,11 @@ type NotificationHistory struct {
 // 报警规则
 var AlertsLock sync.RWMutex
 var Alerts []*model.AlertRule
-var alertsStore map[uint64]map[uint64][][]interface{}
-var alertsPrevState map[uint64]map[uint64]uint
-var AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats
+var alertsStore map[uint64]map[uint64][][]interface{}                  // [alert_id][server_id] -> 对应报警规则的检查结果
+var alertsPrevState map[uint64]map[uint64]uint                         // [alert_id][server_id] -> 对应报警规则的上一次报警状态
+var AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats // [alert_id] -> 对应报警规则的周期流量统计
 
+// addCycleTransferStatsInfo 向AlertsCycleTransferStatsStore中添加周期流量报警统计信息
 func addCycleTransferStatsInfo(alert *model.AlertRule) {
 	if !alert.Enabled() {
 		return
@@ -52,6 +53,7 @@ func addCycleTransferStatsInfo(alert *model.AlertRule) {
 	}
 }
 
+// AlertSentinelStart 报警器启动
 func AlertSentinelStart() {
 	alertsStore = make(map[uint64]map[uint64][][]interface{})
 	alertsPrevState = make(map[uint64]map[uint64]uint)
@@ -120,6 +122,7 @@ func OnDeleteAlert(id uint64) {
 	delete(AlertsCycleTransferStatsStore, id)
 }
 
+// checkStatus 检查报警规则并发送报警
 func checkStatus() {
 	AlertsLock.RLock()
 	defer AlertsLock.RUnlock()

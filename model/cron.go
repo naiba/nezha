@@ -22,7 +22,7 @@ type Cron struct {
 	PushSuccessful bool      // 推送成功的通知
 	LastExecutedAt time.Time // 最后一次执行时间
 	LastResult     bool      // 最后一次执行结果
-	Cover          uint8
+	Cover          uint8     // 计划任务覆盖范围 (0:仅覆盖特定服务器 1:仅忽略特定服务器)
 
 	CronJobID  cron.EntryID `gorm:"-"`
 	ServersRaw string
