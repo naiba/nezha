@@ -38,16 +38,16 @@ import (
 )
 
 type AgentCliParam struct {
-	SkipConnectionCount   bool
-	SkipProcsCount        bool
-	DisableAutoUpdate     bool
-	DisableForceUpdate    bool
-	DisableCommandExecute bool
-	Debug                 bool
-	Server                string
-	ClientSecret          string
-	ReportDelay           int
-	TLS                   bool
+	SkipConnectionCount   bool   // 跳过连接数检查
+	SkipProcsCount        bool   // 跳过进程数量检查
+	DisableAutoUpdate     bool   // 关闭自动更新
+	DisableForceUpdate    bool   // 关闭强制更新
+	DisableCommandExecute bool   // 关闭命令执行
+	Debug                 bool   // debug模式
+	Server                string // 服务器地址
+	ClientSecret          string // 客户端密钥
+	ReportDelay           int    // 报告间隔
+	TLS                   bool   // 是否使用TLS加密传输至服务端
 }
 
 var (
@@ -60,7 +60,6 @@ var (
 var (
 	agentCliParam AgentCliParam
 	agentConfig   model.AgentConfig
-	updateCh      = make(chan struct{}) // Agent 自动更新间隔
 	httpClient    = &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
@@ -86,6 +85,7 @@ func init() {
 }
 
 func main() {
+	// windows环境处理
 	if runtime.GOOS == "windows" {
 		hostArch, err := host.KernelArch()
 		if err != nil {
@@ -108,6 +108,7 @@ func main() {
 	// 来自于 GoReleaser 的版本号
 	monitor.Version = version
 
+	// 初始化运行参数
 	var isEditAgentConfig bool
 	flag.BoolVarP(&agentCliParam.Debug, "debug", "d", false, "开启调试信息")
 	flag.BoolVarP(&isEditAgentConfig, "edit-agent-config", "", false, "修改要监控的网卡/分区白名单")
@@ -145,6 +146,7 @@ func run() {
 		ClientSecret: agentCliParam.ClientSecret,
 	}
 
+	// 下载远程命令执行需要的终端
 	if !agentCliParam.DisableCommandExecute {
 		go pty.DownloadDependency()
 	}
@@ -153,19 +155,14 @@ func run() {
 	// 更新IP信息
 	go monitor.UpdateIP()
 
+	// 定时检查更新
 	if _, err := semver.Parse(version); err == nil && !agentCliParam.DisableAutoUpdate {
+		doSelfUpdate(true)
 		go func() {
-			for range updateCh {
-				go func() {
-					defer func() {
-						time.Sleep(time.Minute * 20)
-						updateCh <- struct{}{}
-					}()
-					doSelfUpdate(true)
-				}()
+			for range time.Tick(20 * time.Minute) {
+				doSelfUpdate(true)
 			}
 		}()
-		updateCh <- struct{}{}
 	}
 
 	var err error
@@ -267,6 +264,7 @@ func doTask(task *pb.Task) {
 	client.ReportTask(context.Background(), &result)
 }
 
+// reportState 向server上报状态信息
 func reportState() {
 	var lastReportHostInfo time.Time
 	var err error
@@ -282,6 +280,7 @@ func reportState() {
 				println("reportState error", err)
 				time.Sleep(delayWhenError)
 			}
+			// 每10分钟重新获取一次硬件信息
 			if lastReportHostInfo.Before(time.Now().Add(-10 * time.Minute)) {
 				lastReportHostInfo = time.Now()
 				client.ReportSystemInfo(context.Background(), monitor.GetHost(&agentConfig).PB())
@@ -291,6 +290,7 @@ func reportState() {
 	}
 }
 
+// doSelfUpdate 执行更新检查 如果更新成功则会结束进程
 func doSelfUpdate(useLocalVersion bool) {
 	v := semver.MustParse("0.1.0")
 	if useLocalVersion {
@@ -303,6 +303,7 @@ func doSelfUpdate(useLocalVersion bool) {
 		return
 	}
 	if !latest.Version.Equals(v) {
+		println("已经更新至：", latest.Version, " 正在结束进程")
 		os.Exit(1)
 	}
 }
@@ -500,6 +501,7 @@ func handleTerminalTask(task *pb.Task) {
 	}
 }
 
+// 修改Agent要监控的网卡与硬盘分区
 func editAgentConfig() {
 	nc, err := psnet.IOCounters(true)
 	if err != nil {

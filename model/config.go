@@ -26,6 +26,7 @@ type AgentConfig struct {
 	v                           *viper.Viper
 }
 
+// Read 从给定的文件目录加载配置文件
 func (c *AgentConfig) Read(path string) error {
 	c.v = viper.New()
 	c.v.SetConfigFile(path)
@@ -97,6 +98,9 @@ func (c *Config) Read(path string) error {
 
 	if c.Site.Theme == "" {
 		c.Site.Theme = "default"
+	}
+	if c.GRPCPort == 0 {
+		c.GRPCPort = 5555
 	}
 
 	c.updateIgnoredIPNotificationID()

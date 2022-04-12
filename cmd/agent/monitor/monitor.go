@@ -37,6 +37,7 @@ var (
 	cachedBootTime                                                             time.Time
 )
 
+// GetHost 获取主机硬件信息
 func GetHost(agentConfig *model.AgentConfig) *model.Host {
 	hi, _ := host.Info()
 	var cpuType string
@@ -155,6 +156,7 @@ func GetState(agentConfig *model.AgentConfig, skipConnectionCount bool, skipProc
 	}
 }
 
+// TrackNetworkSpeed NIC监控，统计流量与速度
 func TrackNetworkSpeed(agentConfig *model.AgentConfig) {
 	var innerNetInTransfer, innerNetOutTransfer uint64
 	nc, err := net.IOCounters(true)
