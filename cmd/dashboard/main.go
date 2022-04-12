@@ -1,196 +1,40 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"fmt"
-	"log"
-	"time"
-
-	"github.com/ory/graceful"
-	"github.com/patrickmn/go-cache"
-	"github.com/robfig/cron/v3"
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
-
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
+	"github.com/ory/graceful"
+	"log"
 )
 
 func init() {
-	shanghai, err := time.LoadLocation("Asia/Shanghai")
-	if err != nil {
-		panic(err)
-	}
-
 	// 初始化 dao 包
 	singleton.Init()
-	singleton.Conf = &model.Config{}
-	singleton.Cron = cron.New(cron.WithSeconds(), cron.WithLocation(shanghai))
-	singleton.Crons = make(map[uint64]*model.Cron)
-	singleton.ServerList = make(map[uint64]*model.Server)
-	singleton.SecretToID = make(map[string]uint64)
-
-	err = singleton.Conf.Read("data/config.yaml")
-	if err != nil {
-		panic(err)
-	}
-	singleton.DB, err = gorm.Open(sqlite.Open("data/sqlite.db"), &gorm.Config{
-		CreateBatchSize: 200,
-	})
-	if err != nil {
-		panic(err)
-	}
-	if singleton.Conf.Debug {
-		singleton.DB = singleton.DB.Debug()
-	}
-	if singleton.Conf.GRPCPort == 0 {
-		singleton.Conf.GRPCPort = 5555
-	}
-	singleton.Cache = cache.New(5*time.Minute, 10*time.Minute)
-
+	singleton.InitConfigFromPath("data/config.yaml")
+	singleton.InitDBFromPath("data/sqlite.db")
 	initSystem()
 }
 
 func initSystem() {
-	singleton.DB.AutoMigrate(model.Server{}, model.User{},
-		model.Notification{}, model.AlertRule{}, model.Monitor{},
-		model.MonitorHistory{}, model.Cron{}, model.Transfer{})
-
-	singleton.LoadNotifications()
-	loadServers() //加载服务器列表
-	loadCrons()   //加载计划任务
+	// 启动 singleton 包下的所有服务
+	singleton.LoadSingleton()
 
 	// 每天的3:30 对 监控记录 和 流量记录 进行清理
-	_, err := singleton.Cron.AddFunc("0 30 3 * * *", cleanMonitorHistory)
-	if err != nil {
+	if _, err := singleton.Cron.AddFunc("0 30 3 * * *", singleton.CleanMonitorHistory); err != nil {
 		panic(err)
 	}
 
 	// 每小时对流量记录进行打点
-	_, err = singleton.Cron.AddFunc("0 0 * * * *", recordTransferHourlyUsage)
-	if err != nil {
+	if _, err := singleton.Cron.AddFunc("0 0 * * * *", singleton.RecordTransferHourlyUsage); err != nil {
 		panic(err)
 	}
 }
 
-// recordTransferHourlyUsage 对流量记录进行打点
-func recordTransferHourlyUsage() {
-	singleton.ServerLock.Lock()
-	defer singleton.ServerLock.Unlock()
-	now := time.Now()
-	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, time.Local)
-	var txs []model.Transfer
-	for id, server := range singleton.ServerList {
-		tx := model.Transfer{
-			ServerID: id,
-			In:       server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn),
-			Out:      server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut),
-		}
-		if tx.In == 0 && tx.Out == 0 {
-			continue
-		}
-		server.PrevHourlyTransferIn = int64(server.State.NetInTransfer)
-		server.PrevHourlyTransferOut = int64(server.State.NetOutTransfer)
-		tx.CreatedAt = nowTrimSeconds
-		txs = append(txs, tx)
-	}
-	if len(txs) == 0 {
-		return
-	}
-	log.Println("NEZHA>> Cron 流量统计入库", len(txs), singleton.DB.Create(txs).Error)
-}
-
-// cleanMonitorHistory 清理无效或过时的 监控记录 和 流量记录
-func cleanMonitorHistory() {
-	// 清理已被删除的服务器的监控记录与流量记录
-	singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ? OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -30))
-	singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (SELECT `id` FROM servers)")
-	// 计算可清理流量记录的时长
-	var allServerKeep time.Time
-	specialServerKeep := make(map[uint64]time.Time)
-	var specialServerIDs []uint64
-	var alerts []model.AlertRule
-	singleton.DB.Find(&alerts)
-	for i := 0; i < len(alerts); i++ {
-		for j := 0; j < len(alerts[i].Rules); j++ {
-			// 是不是流量记录规则
-			if !alerts[i].Rules[j].IsTransferDurationRule() {
-				continue
-			}
-			dataCouldRemoveBefore := alerts[i].Rules[j].GetTransferDurationStart()
-			// 判断规则影响的机器范围
-			if alerts[i].Rules[j].Cover == model.RuleCoverAll {
-				// 更新全局可以清理的数据点
-				if allServerKeep.IsZero() || allServerKeep.After(dataCouldRemoveBefore) {
-					allServerKeep = dataCouldRemoveBefore
-				}
-			} else {
-				// 更新特定机器可以清理数据点
-				for id := range alerts[i].Rules[j].Ignore {
-					if specialServerKeep[id].IsZero() || specialServerKeep[id].After(dataCouldRemoveBefore) {
-						specialServerKeep[id] = dataCouldRemoveBefore
-						specialServerIDs = append(specialServerIDs, id)
-					}
-				}
-			}
-		}
-	}
-	for id, couldRemove := range specialServerKeep {
-		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ? AND created_at < ?", id, couldRemove)
-	}
-	if allServerKeep.IsZero() {
-		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?)", specialServerIDs)
-	} else {
-		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
-	}
-}
-
-//loadServers 加载服务器列表并根据ID排序
-func loadServers() {
-	var servers []model.Server
-	singleton.DB.Find(&servers)
-	for _, s := range servers {
-		innerS := s
-		innerS.Host = &model.Host{}
-		innerS.State = &model.HostState{}
-		singleton.ServerList[innerS.ID] = &innerS
-		singleton.SecretToID[innerS.Secret] = innerS.ID
-	}
-	singleton.ReSortServer()
-}
-
-// loadCrons 加载计划任务
-func loadCrons() {
-	var crons []model.Cron
-	singleton.DB.Find(&crons)
-	var err error
-	errMsg := new(bytes.Buffer)
-	for i := 0; i < len(crons); i++ {
-		cr := crons[i]
-
-		// 注册计划任务
-		cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
-		if err == nil {
-			singleton.Crons[cr.ID] = &cr
-		} else {
-			if errMsg.Len() == 0 {
-				errMsg.WriteString("调度失败的计划任务：[")
-			}
-			errMsg.WriteString(fmt.Sprintf("%d,", cr.ID))
-		}
-	}
-	if errMsg.Len() > 0 {
-		msg := errMsg.String()
-		singleton.SendNotification(msg[:len(msg)-1]+"] 这些任务将无法正常执行,请进入后点重新修改保存。", false)
-	}
-	singleton.Cron.Start()
-}
-
 func main() {
-	cleanMonitorHistory()
+	singleton.CleanMonitorHistory()
 	go rpc.ServeRPC(singleton.Conf.GRPCPort)
 	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
@@ -202,7 +46,7 @@ func main() {
 		return srv.ListenAndServe()
 	}, func(c context.Context) error {
 		log.Println("NEZHA>> Graceful::START")
-		recordTransferHourlyUsage()
+		singleton.RecordTransferHourlyUsage()
 		log.Println("NEZHA>> Graceful::END")
 		srv.Shutdown(c)
 		return nil
