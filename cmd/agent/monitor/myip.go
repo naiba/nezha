@@ -51,7 +51,7 @@ var (
 	httpClientV6            = utils.NewSingleStackHTTPClient(time.Second*20, time.Second*5, time.Second*10, true)
 )
 
-// UpdateIP 每30分钟汇报一次IP地址信息
+// UpdateIP 每30分钟更新一次IP地址与国家码的缓存
 func UpdateIP() {
 	for {
 		ipv4 := fetchGeoIP(geoIPApiList, false)
