@@ -26,7 +26,7 @@ type AgentConfig struct {
 	v                           *viper.Viper
 }
 
-// Read 从给点的文件目录加载配置文件
+// Read 从给定的文件目录加载配置文件
 func (c *AgentConfig) Read(path string) error {
 	c.v = viper.New()
 	c.v.SetConfigFile(path)
