@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -275,13 +277,28 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			}, true)
 			return
 		}
-
+		cloudflareCookies, _ := c.Cookie("CF_Authorization")
+		// CloudflareCookies合法性验证
+		// 其应该包含.分隔的三组BASE64-URL编码
+		if cloudflareCookies != "" {
+			encodedCookies := strings.Split(cloudflareCookies, ".")
+			if len(encodedCookies) == 3 {
+				for i := 0; i < 3; i++ {
+					if valid, _ := regexp.MatchString("^[A-Za-z0-9-_]+$", encodedCookies[i]); !valid {
+						cloudflareCookies = ""
+						break
+					}
+				}
+			} else {
+				cloudflareCookies = ""
+			}
+		}
 		terminalData, _ := utils.Json.Marshal(&model.TerminalTask{
 			Host:    terminal.host,
 			UseSSL:  terminal.useSSL,
 			Session: terminalID,
+			Cookie:  cloudflareCookies,
 		})
-
 		if err := server.TaskStream.Send(&proto.Task{
 			Type: model.TaskTypeTerminal,
 			Data: string(terminalData),

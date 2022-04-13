@@ -10,7 +10,7 @@ import (
 	"github.com/naiba/nezha/model"
 )
 
-var Version = "v0.12.18" // ！！记得修改 README 中的 badge 版本！！
+var Version = "v0.12.19" // ！！记得修改 README 中的 badge 版本！！
 
 var (
 	Conf  *model.Config
