@@ -275,7 +275,6 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			}, true)
 			return
 		}
-		var cloudflareCookies string
 		cloudflareCookies, _ = c.Cookie("CF_Authorization")
 		terminalData, _ := utils.Json.Marshal(&model.TerminalTask{
 			Host:    terminal.host,
