@@ -27,6 +27,8 @@ type TerminalTask struct {
 	UseSSL bool `json:"use_ssl,omitempty"`
 	// 会话标识
 	Session string `json:"session,omitempty"`
+	// Agent在连接Server时需要的额外Cookie信息
+	Cookie string `json:"cookie,omitempty"`
 }
 
 const (

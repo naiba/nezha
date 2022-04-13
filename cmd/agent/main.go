@@ -433,6 +433,12 @@ func handleTerminalTask(task *pb.Task) {
 	}
 	header := http.Header{}
 	header.Add("Secret", agentCliParam.ClientSecret)
+	// 目前只兼容Cloudflare验证
+	// 后续可能需要兼容更多的Cookie验证情况
+	if terminal.Cookie != "" {
+		cfCookie := fmt.Sprintf("CF_Authorization=%s", terminal.Cookie)
+		header.Add("Cookie", cfCookie)
+	}
 	conn, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("%s://%s/terminal/%s", protocol, terminal.Host, terminal.Session), header)
 	if err != nil {
 		println("Terminal 连接失败：", err)
