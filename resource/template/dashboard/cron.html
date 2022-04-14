@@ -18,6 +18,7 @@
                     <th>计划</th>
                     <th>命令</th>
                     <th>成功推送</th>
+                    <th>通知方式组</th>
                     <th>覆盖范围</th>
                     <th>特定服务器</th>
                     <th>最后执行</th>
@@ -33,6 +34,7 @@
                     <td>{{$cron.Scheduler}}</td>
                     <td>{{$cron.Command}}</td>
                     <td>{{$cron.PushSuccessful}}</td>
+                    <td>{$cron.NotificationTag}</td>
                     <td>{{if eq $cron.Cover 0}}忽略所有{{else}}覆盖所有{{end}}</td>
                     <td>{{$cron.ServersRaw}}</td>
                     <td>{{$cron.LastExecutedAt|tf}}</td>

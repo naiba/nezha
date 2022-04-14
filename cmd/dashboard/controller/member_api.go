@@ -259,13 +259,14 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 }
 
 type cronForm struct {
-	ID             uint64
-	Name           string
-	Scheduler      string
-	Command        string
-	ServersRaw     string
-	Cover          uint8
-	PushSuccessful string
+	ID              uint64
+	Name            string
+	Scheduler       string
+	Command         string
+	ServersRaw      string
+	Cover           uint8
+	PushSuccessful  string
+	NotificationTag string
 }
 
 func (ma *memberAPI) addOrEditCron(c *gin.Context) {
@@ -278,6 +279,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		cr.Command = cf.Command
 		cr.ServersRaw = cf.ServersRaw
 		cr.PushSuccessful = cf.PushSuccessful == "on"
+		cr.NotificationTag = cf.NotificationTag
 		cr.ID = cf.ID
 		cr.Cover = cf.Cover
 		err = utils.Json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
@@ -376,6 +378,7 @@ func (ma *memberAPI) forceUpdate(c *gin.Context) {
 type notificationForm struct {
 	ID            uint64
 	Name          string
+	Tag           string // 分组名
 	URL           string
 	RequestMethod int
 	RequestType   int
@@ -390,6 +393,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 	err := c.ShouldBindJSON(&nf)
 	if err == nil {
 		n.Name = nf.Name
+		n.Tag = nf.Tag
 		n.RequestMethod = nf.RequestMethod
 		n.RequestType = nf.RequestType
 		n.RequestHeader = nf.RequestHeader
@@ -401,6 +405,10 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		err = n.Send("这是测试消息")
 	}
 	if err == nil {
+		// 保证Tag不为空
+		if n.Tag == "" {
+			n.Tag = "default"
+		}
 		if n.ID == 0 {
 			err = singleton.DB.Create(&n).Error
 		} else {
@@ -414,7 +422,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		})
 		return
 	}
-	singleton.OnRefreshOrAddNotification(n)
+	singleton.OnRefreshOrAddNotification(&n)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

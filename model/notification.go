@@ -28,6 +28,7 @@ const (
 type Notification struct {
 	Common
 	Name          string
+	Tag           string // 分组名
 	URL           string
 	RequestMethod int
 	RequestType   int

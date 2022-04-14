@@ -72,6 +72,7 @@ type Config struct {
 	TLS           bool
 
 	EnableIPChangeNotification  bool
+	IPChangeNotificationTag     string
 	EnablePlainIPInNotification bool
 
 	// IP变更提醒
@@ -101,6 +102,9 @@ func (c *Config) Read(path string) error {
 	}
 	if c.GRPCPort == 0 {
 		c.GRPCPort = 5555
+	}
+	if c.EnableIPChangeNotification && c.IPChangeNotificationTag == "" {
+		c.IPChangeNotificationTag = "default"
 	}
 
 	c.updateIgnoredIPNotificationID()
