@@ -53,6 +53,10 @@
                         value="{{.Conf.IgnoredIPNotification}}">
                 </div>
                 <div class="field">
+                    <label>提醒发送指定的通知分组</label>
+                    <input type="text" name="IPChangeNotificationTag" placeholder="" value="{{.Conf.IPChangeNotificationTag}}">
+                </div>
+                <div class="field">
                     <div class="ui nf-ssl checkbox ip-change">
                         <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
                         <label>启用</label>

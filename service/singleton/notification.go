@@ -35,12 +35,12 @@ func LoadNotifications() {
 	if err := DB.Find(&notifications).Error; err != nil {
 		panic(err)
 	}
-	for _, n := range notifications {
+	for i := range notifications {
 		// 旧版本的Tag可能不存在 自动设置为默认值
-		if n.Tag == "" {
-			SetDefaultNotificationTagInDB(&n)
+		if notifications[i].Tag == "" {
+			SetDefaultNotificationTagInDB(&notifications[i])
 		}
-		AddNotificationToList(&n)
+		AddNotificationToList(&notifications[i])
 	}
 }
 
@@ -70,23 +70,16 @@ func OnRefreshOrAddNotification(n *model.Notification) {
 
 // AddNotificationToList 添加通知方式到map中
 func AddNotificationToList(n *model.Notification) {
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
-
 	// 当前 Tag 不存在，创建对应该 Tag 的 子 map 后再添加
 	if _, ok := NotificationList[n.Tag]; !ok {
 		NotificationList[n.Tag] = make(map[uint64]*model.Notification)
 	}
 	NotificationList[n.Tag][n.ID] = n
 	NotificationIDToTag[n.ID] = n.Tag
-
 }
 
 // UpdateNotificationInList 在 map 中更新通知方式
 func UpdateNotificationInList(n *model.Notification) {
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
-
 	NotificationList[n.Tag][n.ID] = n
 }
 
@@ -137,10 +130,14 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 	// 向该通知方式组的所有通知方式发出通知
 	notificationsLock.RLock()
 	defer notificationsLock.RUnlock()
-
+	for _, n := range NotificationList[notificationTag] {
+		log.Println("尝试通知", n.Name)
+	}
 	for _, n := range NotificationList[notificationTag] {
 		if err := n.Send(desc); err != nil {
-			log.Println("NEZHA>> 发送通知失败：", err)
+			log.Println("NEZHA>> 向 ", n.Name, " 发送通知失败：", err)
+		} else {
+			log.Println("NEZHA>> 向 ", n.Name, " 发送通知成功：")
 		}
 	}
 }

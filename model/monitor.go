@@ -38,13 +38,14 @@ const (
 
 type Monitor struct {
 	Common
-	Name           string
-	Type           uint8
-	Target         string
-	SkipServersRaw string
-	Duration       uint64
-	Notify         bool
-	Cover          uint8
+	Name            string
+	Type            uint8
+	Target          string
+	SkipServersRaw  string
+	Duration        uint64
+	Notify          bool
+	NotificationTag string // 当前服务监控所属的通知组
+	Cover           uint8
 
 	SkipServers map[uint64]bool `gorm:"-" json:"-"`
 	CronJobID   cron.EntryID    `gorm:"-" json:"-"`

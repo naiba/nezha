@@ -211,14 +211,15 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 }
 
 type monitorForm struct {
-	ID             uint64
-	Name           string
-	Target         string
-	Type           uint8
-	Cover          uint8
-	Notify         string
-	SkipServersRaw string
-	Duration       uint64
+	ID              uint64
+	Name            string
+	Target          string
+	Type            uint8
+	Cover           uint8
+	Notify          string
+	NotificationTag string
+	SkipServersRaw  string
+	Duration        uint64
 }
 
 func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
@@ -233,10 +234,15 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.SkipServersRaw = mf.SkipServersRaw
 		m.Cover = mf.Cover
 		m.Notify = mf.Notify == "on"
+		m.NotificationTag = mf.NotificationTag
 		m.Duration = mf.Duration
 		err = m.InitSkipServers()
 	}
 	if err == nil {
+		// 旧版本服务监控可能不存在通知组 为其添加默认的通知组
+		if m.NotificationTag == "" {
+			m.NotificationTag = "default"
+		}
 		if m.ID == 0 {
 			err = singleton.DB.Create(&m).Error
 		} else {
@@ -429,10 +435,11 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 }
 
 type alertRuleForm struct {
-	ID       uint64
-	Name     string
-	RulesRaw string
-	Enable   string
+	ID              uint64
+	Name            string
+	RulesRaw        string
+	NotificationTag string
+	Enable          string
 }
 
 func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
@@ -472,6 +479,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 	if err == nil {
 		r.Name = arf.Name
 		r.RulesRaw = arf.RulesRaw
+		r.NotificationTag = arf.NotificationTag
 		enable := arf.Enable == "on"
 		r.Enable = &enable
 		r.ID = arf.ID
@@ -525,14 +533,15 @@ func (ma *memberAPI) logout(c *gin.Context) {
 }
 
 type settingForm struct {
-	Title                 string
-	Admin                 string
-	Theme                 string
-	CustomCode            string
-	ViewPassword          string
-	IgnoredIPNotification string
-	GRPCHost              string
-	Cover                 uint8
+	Title                   string
+	Admin                   string
+	Theme                   string
+	CustomCode              string
+	ViewPassword            string
+	IgnoredIPNotification   string
+	IPChangeNotificationTag string // IP变更提醒的通知组
+	GRPCHost                string
+	Cover                   uint8
 
 	EnableIPChangeNotification  string
 	EnablePlainIPInNotification string
@@ -552,6 +561,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.Cover = sf.Cover
 	singleton.Conf.GRPCHost = sf.GRPCHost
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
+	singleton.Conf.IPChangeNotificationTag = sf.IPChangeNotificationTag
 	singleton.Conf.Site.Brand = sf.Title
 	singleton.Conf.Site.Theme = sf.Theme
 	singleton.Conf.Site.CustomCode = sf.CustomCode

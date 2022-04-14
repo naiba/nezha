@@ -20,10 +20,11 @@ type CycleTransferStats struct {
 
 type AlertRule struct {
 	Common
-	Name     string
-	RulesRaw string
-	Enable   *bool
-	Rules    []Rule `gorm:"-" json:"-"`
+	Name            string
+	RulesRaw        string
+	Enable          *bool
+	NotificationTag string // 该报警规则所在的通知组
+	Rules           []Rule `gorm:"-" json:"-"`
 }
 
 func (r *AlertRule) BeforeSave(tx *gorm.DB) error {

@@ -107,22 +107,22 @@ func CleanMonitorHistory() {
 	var specialServerIDs []uint64
 	var alerts []model.AlertRule
 	DB.Find(&alerts)
-	for i := 0; i < len(alerts); i++ {
-		for j := 0; j < len(alerts[i].Rules); j++ {
+	for _, alert := range alerts {
+		for _, rule := range alert.Rules {
 			// 是不是流量记录规则
-			if !alerts[i].Rules[j].IsTransferDurationRule() {
+			if !rule.IsTransferDurationRule() {
 				continue
 			}
-			dataCouldRemoveBefore := alerts[i].Rules[j].GetTransferDurationStart()
+			dataCouldRemoveBefore := rule.GetTransferDurationStart()
 			// 判断规则影响的机器范围
-			if alerts[i].Rules[j].Cover == model.RuleCoverAll {
+			if rule.Cover == model.RuleCoverAll {
 				// 更新全局可以清理的数据点
 				if allServerKeep.IsZero() || allServerKeep.After(dataCouldRemoveBefore) {
 					allServerKeep = dataCouldRemoveBefore
 				}
 			} else {
 				// 更新特定机器可以清理数据点
-				for id := range alerts[i].Rules[j].Ignore {
+				for id := range rule.Ignore {
 					if specialServerKeep[id].IsZero() || specialServerKeep[id].After(dataCouldRemoveBefore) {
 						specialServerKeep[id] = dataCouldRemoveBefore
 						specialServerIDs = append(specialServerIDs, id)
