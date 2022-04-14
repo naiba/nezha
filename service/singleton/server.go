@@ -1,9 +1,10 @@
 package singleton
 
 import (
-	"github.com/naiba/nezha/model"
 	"sort"
 	"sync"
+
+	"github.com/naiba/nezha/model"
 )
 
 var (
