@@ -30,21 +30,21 @@ func LoadCronTasks() {
 	var err error
 	errMsg := new(bytes.Buffer)
 	var notificationTagList []string
-	for _, cr := range crons {
+	for i := range crons {
 		// 旧版本计划任务可能不存在通知组 为其添加默认通知组
-		if cr.NotificationTag == "" {
-			AddDefaultCronNotificationTag(&cr)
+		if crons[i].NotificationTag == "" {
+			AddDefaultCronNotificationTag(&crons[i])
 		}
 		// 注册计划任务
-		cr.CronJobID, err = Cron.AddFunc(cr.Scheduler, CronTrigger(cr))
+		crons[i].CronJobID, err = Cron.AddFunc(crons[i].Scheduler, CronTrigger(crons[i]))
 		if err == nil {
-			Crons[cr.ID] = &cr
+			Crons[crons[i].ID] = &crons[i]
 		} else {
 			if errMsg.Len() == 0 {
 				errMsg.WriteString("调度失败的计划任务：[")
 			}
-			errMsg.WriteString(fmt.Sprintf("%d,", cr.ID))
-			notificationTagList = append(notificationTagList, cr.NotificationTag)
+			errMsg.WriteString(fmt.Sprintf("%d,", crons[i].ID))
+			notificationTagList = append(notificationTagList, crons[i].NotificationTag)
 		}
 	}
 	if errMsg.Len() > 0 {
