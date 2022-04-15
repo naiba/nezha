@@ -28,8 +28,8 @@ func LoadCronTasks() {
 	var crons []model.Cron
 	DB.Find(&crons)
 	var err error
-	errMsg := new(bytes.Buffer)
 	var notificationTagList []string
+	notificationMsgMap := make(map[string]*bytes.Buffer)
 	for i := range crons {
 		// 旧版本计划任务可能不存在通知组 为其添加默认通知组
 		if crons[i].NotificationTag == "" {
@@ -40,19 +40,19 @@ func LoadCronTasks() {
 		if err == nil {
 			Crons[crons[i].ID] = &crons[i]
 		} else {
-			if errMsg.Len() == 0 {
-				errMsg.WriteString("调度失败的计划任务：[")
+			// 当前通知组首次出现 将其加入通知组列表并初始化通知组消息缓存
+			if _, ok := notificationMsgMap[crons[i].NotificationTag]; !ok {
+				notificationTagList = append(notificationTagList, crons[i].NotificationTag)
+				notificationMsgMap[crons[i].NotificationTag] = bytes.NewBufferString("")
+				notificationMsgMap[crons[i].NotificationTag].WriteString("调度失败的计划任务：[")
 			}
-			errMsg.WriteString(fmt.Sprintf("%d,", crons[i].ID))
-			notificationTagList = append(notificationTagList, crons[i].NotificationTag)
+			notificationMsgMap[crons[i].NotificationTag].WriteString(fmt.Sprintf("%d,", crons[i].ID))
 		}
 	}
-	if errMsg.Len() > 0 {
-		msg := errMsg.String() + "] 这些任务将无法正常执行,请进入后点重新修改保存。"
-		for _, tag := range notificationTagList {
-			// 向调度错误的计划任务所包含的所有通知组发送通知
-			SendNotification(tag, msg, false)
-		}
+	// 向注册错误的计划任务所在通知组发送通知
+	for _, tag := range notificationTagList {
+		notificationMsgMap[tag].WriteString("] 这些任务将无法正常执行,请进入后点重新修改保存。")
+		SendNotification(tag, notificationMsgMap[tag].String(), false)
 	}
 	Cron.Start()
 }
