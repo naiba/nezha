@@ -35,7 +35,7 @@ func LoadNotifications() {
 	if err := DB.Find(&notifications).Error; err != nil {
 		panic(err)
 	}
-	for i := range notifications {
+	for i := 0; i < len(notifications); i++ {
 		// 旧版本的Tag可能不存在 自动设置为默认值
 		if notifications[i].Tag == "" {
 			SetDefaultNotificationTagInDB(&notifications[i])
@@ -58,7 +58,7 @@ func OnRefreshOrAddNotification(n *model.Notification) {
 	defer notificationsLock.Unlock()
 
 	var isEdit bool
-	if _, ok := NotificationList[n.Tag][n.ID]; ok {
+	if _, ok := NotificationIDToTag[n.ID]; ok {
 		isEdit = true
 	}
 	if !isEdit {
@@ -80,7 +80,16 @@ func AddNotificationToList(n *model.Notification) {
 
 // UpdateNotificationInList 在 map 中更新通知方式
 func UpdateNotificationInList(n *model.Notification) {
-	NotificationList[n.Tag][n.ID] = n
+	if n.Tag != NotificationIDToTag[n.ID] {
+		// 如果 Tag 不一致，则需要先移除原有的映射关系
+		delete(NotificationList[NotificationIDToTag[n.ID]], n.ID)
+		delete(NotificationIDToTag, n.ID)
+		// 将新的 Tag 中的通知方式添加到 map 中
+		AddNotificationToList(n)
+	} else {
+		// 如果 Tag 一致，则直接更新
+		NotificationList[n.Tag][n.ID] = n
+	}
 }
 
 // OnDeleteNotification 在map中删除通知方式

@@ -30,10 +30,11 @@ func LoadCronTasks() {
 	var err error
 	var notificationTagList []string
 	notificationMsgMap := make(map[string]*bytes.Buffer)
-	for i := range crons {
+	for i := 0; i < len(crons); i++ {
 		// 旧版本计划任务可能不存在通知组 为其添加默认通知组
 		if crons[i].NotificationTag == "" {
-			AddDefaultCronNotificationTag(&crons[i])
+			crons[i].NotificationTag = "default"
+			DB.Save(crons[i])
 		}
 		// 注册计划任务
 		crons[i].CronJobID, err = Cron.AddFunc(crons[i].Scheduler, CronTrigger(crons[i]))
@@ -55,17 +56,6 @@ func LoadCronTasks() {
 		SendNotification(tag, notificationMsgMap[tag].String(), false)
 	}
 	Cron.Start()
-}
-
-// AddDefaultCronNotificationTag 添加默认的计划任务通知组
-func AddDefaultCronNotificationTag(c *model.Cron) {
-	CronLock.Lock()
-	defer CronLock.Unlock()
-
-	if c.NotificationTag == "" {
-		c.NotificationTag = "default"
-	}
-	DB.Save(c)
 }
 
 func ManualTrigger(c model.Cron) {

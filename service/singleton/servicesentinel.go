@@ -149,7 +149,7 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	var err error
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
-	for i := range monitors {
+	for i := 0; i < len(monitors); i++ {
 		// 旧版本可能不存在通知组 为其设置默认组
 		if monitors[i].NotificationTag == "" {
 			monitors[i].NotificationTag = "default"
