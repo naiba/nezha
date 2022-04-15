@@ -114,6 +114,7 @@ function addOrEditAlertRule(rule) {
   modal.find("input[name=ID]").val(rule ? rule.ID : null);
   modal.find("input[name=Name]").val(rule ? rule.Name : null);
   modal.find("textarea[name=RulesRaw]").val(rule ? rule.RulesRaw : null);
+  modal.find("input[name=NotificationTag]").val(rule ? rule.NotificationTag : null);
   if (rule && rule.Enable) {
     modal.find(".ui.rule-enable.checkbox").checkbox("set checked");
   } else {
@@ -134,6 +135,7 @@ function addOrEditNotification(notification) {
     );
   modal.find("input[name=ID]").val(notification ? notification.ID : null);
   modal.find("input[name=Name]").val(notification ? notification.Name : null);
+  modal.find("input[name=Tag]").val(notification ? notification.Tag : null);
   modal.find("input[name=URL]").val(notification ? notification.URL : null);
   modal
     .find("textarea[name=RequestHeader]")
@@ -225,6 +227,7 @@ function addOrEditMonitor(monitor) {
   modal.find("input[name=Duration]").val(monitor && monitor.Duration ? monitor.Duration : 30);
   modal.find("select[name=Type]").val(monitor ? monitor.Type : 1);
   modal.find("select[name=Cover]").val(monitor ? monitor.Cover : 0);
+  modal.find("input[name=NotificationTag]").val(monitor ? monitor.NotificationTag : null);
   if (monitor && monitor.Notify) {
     modal.find(".ui.nb-notify.checkbox").checkbox("set checked");
   } else {
@@ -261,6 +264,7 @@ function addOrEditCron(cron) {
     );
   modal.find("input[name=ID]").val(cron ? cron.ID : null);
   modal.find("input[name=Name]").val(cron ? cron.Name : null);
+  modal.find("input[name=NotificationTag]").val(cron ? cron.NotificationTag : null);
   modal.find("input[name=Scheduler]").val(cron ? cron.Scheduler : null);
   modal.find("a.ui.label.visible").each((i, el) => {
     el.remove();

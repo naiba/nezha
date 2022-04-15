@@ -19,6 +19,7 @@
           <th>特定服务器</th>
           <th>类型</th>
           <th>请求间隔</th>
+          <th>通知方式组</th>
           <th>通知</th>
           <th>管理</th>
         </tr>
@@ -36,6 +37,7 @@
             2}} ICMP Ping {{else}} TCP 端口 {{end}}
           </td>
           <td>{{$monitor.Duration}}秒</td>
+          <td>{{$monitor.NotificationTag}}</td>
           <td>{{$monitor.Notify}}</td>
           <td>
             <div class="ui mini icon buttons">
