@@ -149,23 +149,23 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	var err error
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
-	for _, monitor := range monitors {
+	for i := range monitors {
 		// 旧版本可能不存在通知组 为其设置默认组
-		if monitor.NotificationTag == "" {
-			monitor.NotificationTag = "default"
-			DB.Save(monitor)
+		if monitors[i].NotificationTag == "" {
+			monitors[i].NotificationTag = "default"
+			DB.Save(monitors[i])
 		}
-		task := *monitor
+		task := *monitors[i]
 		// 通过cron定时将服务监控任务传递给任务调度管道
-		monitor.CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
+		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
 			ss.dispatchBus <- task
 		})
 		if err != nil {
 			panic(err)
 		}
-		ss.monitors[monitor.ID] = monitor
-		ss.serviceCurrentStatusData[monitor.ID] = make([]model.MonitorHistory, _CurrentStatusSize)
-		ss.serviceStatusToday[monitor.ID] = &_TodayStatsOfMonitor{}
+		ss.monitors[monitors[i].ID] = monitors[i]
+		ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, _CurrentStatusSize)
+		ss.serviceStatusToday[monitors[i].ID] = &_TodayStatsOfMonitor{}
 	}
 
 	year, month, day := time.Now().Date()

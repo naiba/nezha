@@ -239,7 +239,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		err = m.InitSkipServers()
 	}
 	if err == nil {
-		// 旧版本服务监控可能不存在通知组 为其添加默认的通知组
+		// 保证NotificationTag不为空
 		if m.NotificationTag == "" {
 			m.NotificationTag = "default"
 		}
@@ -292,6 +292,10 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 	}
 	tx := singleton.DB.Begin()
 	if err == nil {
+		// 保证NotificationTag不为空
+		if cr.NotificationTag == "" {
+			cr.NotificationTag = "default"
+		}
 		if cf.ID == 0 {
 			err = tx.Create(&cr).Error
 		} else {
@@ -483,6 +487,10 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		enable := arf.Enable == "on"
 		r.Enable = &enable
 		r.ID = arf.ID
+		//保证NotificationTag不为空
+		if r.NotificationTag == "" {
+			r.NotificationTag = "default"
+		}
 		if r.ID == 0 {
 			err = singleton.DB.Create(&r).Error
 		} else {
@@ -567,6 +575,10 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.Site.CustomCode = sf.CustomCode
 	singleton.Conf.Site.ViewPassword = sf.ViewPassword
 	singleton.Conf.Oauth2.Admin = sf.Admin
+	// 保证NotificationTag不为空
+	if singleton.Conf.IPChangeNotificationTag == "" {
+		singleton.Conf.IPChangeNotificationTag = "default"
+	}
 	if err := singleton.Conf.Save(); err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
