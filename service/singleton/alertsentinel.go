@@ -21,11 +21,13 @@ type NotificationHistory struct {
 }
 
 // 报警规则
-var AlertsLock sync.RWMutex
-var Alerts []*model.AlertRule
-var alertsStore map[uint64]map[uint64][][]interface{}                  // [alert_id][server_id] -> 对应报警规则的检查结果
-var alertsPrevState map[uint64]map[uint64]uint                         // [alert_id][server_id] -> 对应报警规则的上一次报警状态
-var AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats // [alert_id] -> 对应报警规则的周期流量统计
+var (
+	AlertsLock                    sync.RWMutex
+	Alerts                        []*model.AlertRule
+	alertsStore                   map[uint64]map[uint64][][]interface{} // [alert_id][server_id] -> 对应报警规则的检查结果
+	alertsPrevState               map[uint64]map[uint64]uint            // [alert_id][server_id] -> 对应报警规则的上一次报警状态
+	AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats  // [alert_id] -> 对应报警规则的周期流量统计
+)
 
 // addCycleTransferStatsInfo 向AlertsCycleTransferStatsStore中添加周期流量报警统计信息
 func addCycleTransferStatsInfo(alert *model.AlertRule) {
@@ -62,10 +64,15 @@ func AlertSentinelStart() {
 	if err := DB.Find(&Alerts).Error; err != nil {
 		panic(err)
 	}
-	for i := 0; i < len(Alerts); i++ {
-		alertsStore[Alerts[i].ID] = make(map[uint64][][]interface{})
-		alertsPrevState[Alerts[i].ID] = make(map[uint64]uint)
-		addCycleTransferStatsInfo(Alerts[i])
+	for _, alert := range Alerts {
+		// 旧版本可能不存在通知组 为其添加默认值
+		if alert.NotificationTag == "" {
+			alert.NotificationTag = "default"
+			DB.Save(alert)
+		}
+		alertsStore[alert.ID] = make(map[uint64][][]interface{})
+		alertsPrevState[alert.ID] = make(map[uint64]uint)
+		addCycleTransferStatsInfo(alert)
 	}
 	AlertsLock.Unlock()
 
@@ -143,11 +150,11 @@ func checkStatus() {
 			if !passed {
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
 				message := fmt.Sprintf("[主机故障] %s(%s) 规则：%s", server.Name, IPDesensitize(server.Host.IP), alert.Name)
-				go SendNotification(message, true)
+				go SendNotification(alert.NotificationTag, message, true)
 			} else {
 				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
 					message := fmt.Sprintf("[主机恢复] %s(%s) 规则：%s", server.Name, IPDesensitize(server.Host.IP), alert.Name)
-					go SendNotification(message, true)
+					go SendNotification(alert.NotificationTag, message, true)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
 			}

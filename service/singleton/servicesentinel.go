@@ -150,6 +150,11 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 	for i := 0; i < len(monitors); i++ {
+		// 旧版本可能不存在通知组 为其设置默认组
+		if monitors[i].NotificationTag == "" {
+			monitors[i].NotificationTag = "default"
+			DB.Save(monitors[i])
+		}
 		task := *monitors[i]
 		// 通过cron定时将服务监控任务传递给任务调度管道
 		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
@@ -356,7 +361,7 @@ func (ss *ServiceSentinel) worker() {
 			isNeedSendNotification := (ss.lastStatus[mh.MonitorID] != "" || stateStr == "故障") && ss.monitors[mh.MonitorID].Notify
 			ss.lastStatus[mh.MonitorID] = stateStr
 			if isNeedSendNotification {
-				go SendNotification(fmt.Sprintf("[服务%s] %s", stateStr, ss.monitors[mh.MonitorID].Name), true)
+				go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[服务%s] %s", stateStr, ss.monitors[mh.MonitorID].Name), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}
@@ -400,7 +405,7 @@ func (ss *ServiceSentinel) worker() {
 		if errMsg != "" {
 			ss.monitorsLock.RLock()
 			if ss.monitors[mh.MonitorID].Notify {
-				go SendNotification(fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
+				go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}
