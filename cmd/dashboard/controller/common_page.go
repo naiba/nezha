@@ -182,12 +182,7 @@ func (cp *commonPage) ws(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		writer, err := conn.NextWriter(websocket.TextMessage)
-		if err != nil {
-			break
-		}
-		_, err = writer.Write(stat)
-		if err != nil {
+		if err := conn.WriteMessage(websocket.TextMessage, stat); err != nil {
 			break
 		}
 		count += 1
