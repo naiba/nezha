@@ -25,6 +25,11 @@ const (
 	NotificationRequestMethodPOST
 )
 
+type NotificationServerBundle struct {
+	Notification *Notification
+	Server       *Server
+}
+
 type Notification struct {
 	Common
 	Name          string
@@ -37,8 +42,9 @@ type Notification struct {
 	VerifySSL     *bool
 }
 
-func (n *Notification) reqURL(message string) string {
-	return replaceParamsInString(n.URL, message, func(msg string) string {
+func (ns *NotificationServerBundle) reqURL(message string) string {
+	n := ns.Notification
+	return replaceParamsInString(ns.Server, n.URL, message, func(msg string) string {
 		return url.QueryEscape(msg)
 	})
 }
@@ -53,13 +59,14 @@ func (n *Notification) reqMethod() (string, error) {
 	return "", errors.New("不支持的请求方式")
 }
 
-func (n *Notification) reqBody(message string) (string, error) {
+func (ns *NotificationServerBundle) reqBody(message string) (string, error) {
+	n := ns.Notification
 	if n.RequestMethod == NotificationRequestMethodGET || message == "" {
 		return "", nil
 	}
 	switch n.RequestType {
 	case NotificationRequestTypeJSON:
-		return replaceParamsInString(n.RequestBody, message, func(msg string) string {
+		return replaceParamsInString(ns.Server, n.RequestBody, message, func(msg string) string {
 			msgBytes, _ := utils.Json.Marshal(msg)
 			return string(msgBytes)[1 : len(msgBytes)-1]
 		}), nil
@@ -70,7 +77,7 @@ func (n *Notification) reqBody(message string) (string, error) {
 		}
 		params := url.Values{}
 		for k, v := range data {
-			params.Add(k, replaceParamsInString(v, message, nil))
+			params.Add(k, replaceParamsInString(ns.Server, v, message, nil))
 		}
 		return params.Encode(), nil
 	}
@@ -102,9 +109,9 @@ func (n *Notification) setRequestHeader(req *http.Request) error {
 	return nil
 }
 
-func (n *Notification) Send(message string) error {
+func (ns *NotificationServerBundle) Send(message string) error {
 	var verifySSL bool
-
+	n := ns.Notification
 	if n.VerifySSL != nil && *n.VerifySSL {
 		verifySSL = true
 	}
@@ -115,7 +122,7 @@ func (n *Notification) Send(message string) error {
 	}
 
 	client := &http.Client{Transport: transCfg, Timeout: time.Minute * 10}
-	reqBody, err := n.reqBody(message)
+	reqBody, err := ns.reqBody(message)
 	if err != nil {
 		return err
 	}
@@ -125,7 +132,7 @@ func (n *Notification) Send(message string) error {
 		return err
 	}
 
-	req, err := http.NewRequest(reqMethod, n.reqURL(message), strings.NewReader(reqBody))
+	req, err := http.NewRequest(reqMethod, ns.reqURL(message), strings.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
@@ -150,11 +157,14 @@ func (n *Notification) Send(message string) error {
 	return nil
 }
 
-func replaceParamsInString(str string, message string, mod func(string) string) string {
+func replaceParamsInString(s *Server, str string, message string, mod func(string) string) string {
 	if mod != nil {
 		str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
 	} else {
 		str = strings.ReplaceAll(str, "#NEZHA#", message)
+	}
+	if s != nil {
+		str = strings.ReplaceAll(str, "#SERVER#", s.Name)
 	}
 	return str
 }

@@ -4,6 +4,8 @@ import (
 	"crypto/md5" // #nosec
 	"encoding/hex"
 	"log"
+	"regexp"
+	"strconv"
 	"sync"
 	"time"
 
@@ -143,10 +145,24 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 		log.Println("尝试通知", n.Name)
 	}
 	for _, n := range NotificationList[notificationTag] {
-		if err := n.Send(desc); err != nil {
+		server := findServerInMsg(desc)
+		ns := model.NotificationServerBundle{
+			Notification: n,
+			Server:       server,
+		}
+		if err := ns.Send(desc); err != nil {
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知失败：", err)
 		} else {
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知成功：")
 		}
 	}
+}
+
+// findServerInMsg 通过msg字符串中的$ServerID$ 返回Server对象 未找到会返回nil
+func findServerInMsg(msg string) *model.Server {
+	reg1 := regexp.MustCompile(`^\$\d+`)
+	reg2 := regexp.MustCompile(`[^$]+`)
+	ServerIDStr := reg2.FindString(reg1.FindString(msg))
+	ServerID, _ := strconv.ParseUint(ServerIDStr, 10, 64)
+	return ServerList[ServerID]
 }

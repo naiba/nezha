@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -35,8 +36,27 @@ func execCase(t *testing.T, item testSt) {
 		RequestBody:   item.body,
 		RequestHeader: item.header,
 	}
-	assert.Equal(t, item.expectURL, n.reqURL(msg))
-	reqBody, err := n.reqBody(msg)
+	server := Server{
+		Common:                Common{},
+		Name:                  "ServerName",
+		Tag:                   "",
+		Secret:                "",
+		Note:                  "",
+		DisplayIndex:          0,
+		Host:                  nil,
+		State:                 nil,
+		LastActive:            time.Time{},
+		TaskClose:             nil,
+		TaskStream:            nil,
+		PrevHourlyTransferIn:  0,
+		PrevHourlyTransferOut: 0,
+	}
+	ns := NotificationServerBundle{
+		Notification: &n,
+		Server:       &server,
+	}
+	assert.Equal(t, item.expectURL, ns.reqURL(msg))
+	reqBody, err := ns.reqBody(msg)
 	assert.Nil(t, err)
 	assert.Equal(t, item.expectBody, reqBody)
 	reqMethod, err := n.reqMethod()
@@ -115,6 +135,18 @@ func TestNotification(t *testing.T) {
 			expectMethod:      http.MethodPost,
 			expectContentType: reqTypeJSON,
 			expectBody:        `{"msg":"msg"}`,
+			expectHeader:      map[string]string{"asd": "dsa11"},
+		},
+		{
+			url:               "https://example.com/?m=#NEZHA#",
+			body:              `{"Server":"#SERVER#"}`,
+			reqMethod:         NotificationRequestMethodPOST,
+			header:            `{"asd":"dsa11"}`,
+			reqType:           NotificationRequestTypeJSON,
+			expectURL:         "https://example.com/?m=" + msg,
+			expectMethod:      http.MethodPost,
+			expectContentType: reqTypeJSON,
+			expectBody:        `{"Server":"ServerName"}`,
 			expectHeader:      map[string]string{"asd": "dsa11"},
 		},
 	}
