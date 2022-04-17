@@ -157,14 +157,42 @@ func (ns *NotificationServerBundle) Send(message string) error {
 	return nil
 }
 
+// replaceParamInString 替换字符串中的占位符
 func replaceParamsInString(s *Server, str string, message string, mod func(string) string) string {
 	if mod != nil {
 		str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
+		if s != nil {
+			str = strings.ReplaceAll(str, "#SERVER.NAME#", mod(s.Name))
+			str = strings.ReplaceAll(str, "#SERVER.IP#", mod(s.Host.IP))
+			str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%f", s.State.CPU)))
+			str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%d", s.State.MemUsed)))
+			str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%d", s.State.SwapUsed)))
+			str = strings.ReplaceAll(str, "#SERVER.DISK#", mod(fmt.Sprintf("%d", s.State.DiskUsed)))
+			str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", mod(fmt.Sprintf("%d", s.State.NetInSpeed)))
+			str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", mod(fmt.Sprintf("%d", s.State.NetOutSpeed)))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", mod(fmt.Sprintf("%d", s.State.NetInTransfer)))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", mod(fmt.Sprintf("%d", s.State.NetOutTransfer)))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%f", s.State.Load1)))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%f", s.State.Load5)))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%f", s.State.Load15)))
+		}
 	} else {
 		str = strings.ReplaceAll(str, "#NEZHA#", message)
-	}
-	if s != nil {
-		str = strings.ReplaceAll(str, "#SERVER#", s.Name)
+		if s != nil {
+			str = strings.ReplaceAll(str, "#SERVER.NAME#", s.Name)
+			str = strings.ReplaceAll(str, "#SERVER.IP#", s.Host.IP)
+			str = strings.ReplaceAll(str, "#SERVER.CPU#", fmt.Sprintf("%f", s.State.CPU))
+			str = strings.ReplaceAll(str, "#SERVER.MEM#", fmt.Sprintf("%d", s.State.MemUsed))
+			str = strings.ReplaceAll(str, "#SERVER.SWAP#", fmt.Sprintf("%d", s.State.SwapUsed))
+			str = strings.ReplaceAll(str, "#SERVER.DISK#", fmt.Sprintf("%d", s.State.DiskUsed))
+			str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", fmt.Sprintf("%d", s.State.NetInSpeed))
+			str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", fmt.Sprintf("%d", s.State.NetOutSpeed))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", fmt.Sprintf("%d", s.State.NetInTransfer))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", fmt.Sprintf("%d", s.State.NetOutTransfer))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", fmt.Sprintf("%f", s.State.Load1))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", fmt.Sprintf("%f", s.State.Load5))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", fmt.Sprintf("%f", s.State.Load15))
+		}
 	}
 	return str
 }

@@ -29,10 +29,10 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			singleton.ServerLock.RLock()
 			defer singleton.ServerLock.RUnlock()
 			if cr.PushSuccessful && r.GetSuccessful() {
-				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[任务成功] %s ，服务器：%s，日志：\n%s", cr.Name, singleton.ServerList[clientID].Name, r.GetData()), false)
+				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("$%d$[任务成功] %s ，服务器：%s，日志：\n%s", singleton.ServerList[clientID].ID, cr.Name, singleton.ServerList[clientID].Name, r.GetData()), false)
 			}
 			if !r.GetSuccessful() {
-				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[任务失败] %s ，服务器：%s，日志：\n%s", cr.Name, singleton.ServerList[clientID].Name, r.GetData()), false)
+				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("$%d$[任务失败] %s ，服务器：%s，日志：\n%s", singleton.ServerList[clientID].ID, cr.Name, singleton.ServerList[clientID].Name, r.GetData()), false)
 			}
 			singleton.DB.Model(cr).Updates(model.Cron{
 				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
