@@ -6,6 +6,7 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -145,7 +146,7 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 		log.Println("尝试通知", n.Name)
 	}
 	for _, n := range NotificationList[notificationTag] {
-		server := findServerInMsg(desc)
+		desc, server := findServerInMsg(desc)
 		ns := model.NotificationServerBundle{
 			Notification: n,
 			Server:       server,
@@ -158,11 +159,15 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 	}
 }
 
-// findServerInMsg 通过msg字符串中的$ServerID$ 返回Server对象 未找到会返回nil
-func findServerInMsg(msg string) *model.Server {
+// findServerInMsg 通过msg字符串中的$ServerID$ 返回修改后的字符串与Server对象
+func findServerInMsg(msg string) (string, *model.Server) {
 	reg1 := regexp.MustCompile(`^\$\d+`)
 	reg2 := regexp.MustCompile(`[^$]+`)
 	ServerIDStr := reg2.FindString(reg1.FindString(msg))
 	ServerID, _ := strconv.ParseUint(ServerIDStr, 10, 64)
-	return ServerList[ServerID]
+	// 将原字符串的ServerID标识去除
+	if ServerIDStr != "" {
+		msg = strings.Replace(msg, "$"+ServerIDStr+"$", "", 1)
+	}
+	return msg, ServerList[ServerID]
 }

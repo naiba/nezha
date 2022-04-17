@@ -84,7 +84,7 @@ func CronTrigger(cr model.Cron) func() {
 					Type: model.TaskTypeCommand,
 				})
 			} else {
-				SendNotification(cr.NotificationTag, fmt.Sprintf("[任务失败] %s，服务器 %s 离线，无法执行。", cr.Name, s.Name), false)
+				SendNotification(cr.NotificationTag, fmt.Sprintf("$%d$[任务失败] %s，服务器 %s 离线，无法执行。", s.ID, cr.Name, s.Name), false)
 			}
 		}
 	}
