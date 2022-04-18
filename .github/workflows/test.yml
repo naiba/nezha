@@ -6,6 +6,7 @@ on:
       - master
     paths-ignore:
       - ".github/workflows/agent.yml"
+      - ".github/workflows/codeql-analysis.yml"
       - ".github/workflows/test-on-pr.yml"
       - "README.md"
       - ".goreleaser.yml"

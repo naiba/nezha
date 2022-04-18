@@ -322,8 +322,8 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	}
 	defer conn.Close()
 
-	log.Println("NEZHA>> terminal connected", isAgent, c.Request.URL)
-	defer log.Println("NEZHA>> terminal disconnected", isAgent, c.Request.URL)
+	log.Printf("NEZHA>> terminal connected %t %q", isAgent, c.Request.URL)
+	defer log.Printf("NEZHA>> terminal disconnected %t %q", isAgent, c.Request.URL)
 
 	if isAgent {
 		terminal.agentConn = conn
