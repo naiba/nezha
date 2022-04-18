@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -35,8 +36,56 @@ func execCase(t *testing.T, item testSt) {
 		RequestBody:   item.body,
 		RequestHeader: item.header,
 	}
-	assert.Equal(t, item.expectURL, n.reqURL(msg))
-	reqBody, err := n.reqBody(msg)
+	server := Server{
+		Common:       Common{},
+		Name:         "ServerName",
+		Tag:          "",
+		Secret:       "",
+		Note:         "",
+		DisplayIndex: 0,
+		Host: &Host{
+			Platform:        "",
+			PlatformVersion: "",
+			CPU:             nil,
+			MemTotal:        0,
+			DiskTotal:       0,
+			SwapTotal:       0,
+			Arch:            "",
+			Virtualization:  "",
+			BootTime:        0,
+			IP:              "1.1.1.1",
+			CountryCode:     "",
+			Version:         "",
+		},
+		State: &HostState{
+			CPU:            0,
+			MemUsed:        0,
+			SwapUsed:       8888,
+			DiskUsed:       0,
+			NetInTransfer:  0,
+			NetOutTransfer: 0,
+			NetInSpeed:     0,
+			NetOutSpeed:    0,
+			Uptime:         0,
+			Load1:          0,
+			Load5:          0,
+			Load15:         0,
+			TcpConnCount:   0,
+			UdpConnCount:   0,
+			ProcessCount:   0,
+		},
+		LastActive:            time.Time{},
+		TaskClose:             nil,
+		TaskStream:            nil,
+		PrevHourlyTransferIn:  0,
+		PrevHourlyTransferOut: 0,
+	}
+	ns := NotificationServerBundle{
+		Notification: &n,
+		Server:       &server,
+	}
+	assert.Equal(t, item.expectURL, ns.reqURL(msg))
+	reqBody, err := ns.reqBody(msg)
 	assert.Nil(t, err)
 	assert.Equal(t, item.expectBody, reqBody)
 	reqMethod, err := n.reqMethod()
@@ -116,6 +165,28 @@ func TestNotification(t *testing.T) {
 			expectContentType: reqTypeJSON,
 			expectBody:        `{"msg":"msg"}`,
 			expectHeader:      map[string]string{"asd": "dsa11"},
+		},
+		{
+			url:               "https://example.com/?m=#NEZHA#",
+			body:              `{"Server":"#SERVER.NAME#","ServerIP":"#SERVER.IP#","ServerSWAP":#SERVER.SWAP#}`,
+			reqMethod:         NotificationRequestMethodPOST,
+			header:            `{"asd":"dsa11"}`,
+			reqType:           NotificationRequestTypeJSON,
+			expectURL:         "https://example.com/?m=" + msg,
+			expectMethod:      http.MethodPost,
+			expectContentType: reqTypeJSON,
+			expectBody:        `{"Server":"ServerName","ServerIP":"1.1.1.1","ServerSWAP":8888}`,
+			expectHeader:      map[string]string{"asd": "dsa11"},
+		},
+		{
+			url:               "https://example.com/?m=#NEZHA#",
+			body:              `{"#NEZHA#":"#NEZHA#","Server":"#SERVER.NAME#","ServerIP":"#SERVER.IP#","ServerSWAP":"#SERVER.SWAP#"}`,
+			reqMethod:         NotificationRequestMethodPOST,
+			reqType:           NotificationRequestTypeForm,
+			expectURL:         "https://example.com/?m=" + msg,
+			expectMethod:      http.MethodPost,
+			expectContentType: reqTypeForm,
+			expectBody:        "%23NEZHA%23=" + msg + "&Server=ServerName&ServerIP=1.1.1.1&ServerSWAP=8888",
 		},
 	}
 

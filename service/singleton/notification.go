@@ -102,7 +102,7 @@ func OnDeleteNotification(id uint64) {
 }
 
 // SendNotification 向指定的通知方式组的所有通知方式发送通知
-func SendNotification(notificationTag string, desc string, mutable bool) {
+func SendNotification(notificationTag string, desc string, mutable bool, ext ...*model.Server) {
 	if mutable {
 		// 通知防骚扰策略
 		nID := hex.EncodeToString(md5.New().Sum([]byte(desc))) // #nosec
@@ -143,7 +143,14 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 		log.Println("尝试通知", n.Name)
 	}
 	for _, n := range NotificationList[notificationTag] {
-		if err := n.Send(desc); err != nil {
+		ns := model.NotificationServerBundle{
+			Notification: n,
+			Server:       nil,
+		}
+		if len(ext) > 0 {
+			ns.Server = ext[0]
+		}
+		if err := ns.Send(desc); err != nil {
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知失败：", err)
 		} else {
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知成功：")

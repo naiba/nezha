@@ -412,7 +412,11 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		verifySSL := nf.VerifySSL == "on"
 		n.VerifySSL = &verifySSL
 		n.ID = nf.ID
-		err = n.Send("这是测试消息")
+		ns := model.NotificationServerBundle{
+			Notification: &n,
+			Server:       nil,
+		}
+		err = ns.Send("这是测试消息")
 	}
 	if err == nil {
 		// 保证Tag不为空

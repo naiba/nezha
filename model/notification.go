@@ -25,6 +25,11 @@ const (
 	NotificationRequestMethodPOST
 )
 
+type NotificationServerBundle struct {
+	Notification *Notification
+	Server       *Server
+}
+
 type Notification struct {
 	Common
 	Name          string
@@ -37,8 +42,9 @@ type Notification struct {
 	VerifySSL     *bool
 }
 
-func (n *Notification) reqURL(message string) string {
-	return replaceParamsInString(n.URL, message, func(msg string) string {
+func (ns *NotificationServerBundle) reqURL(message string) string {
+	n := ns.Notification
+	return replaceParamsInString(ns.Server, n.URL, message, func(msg string) string {
 		return url.QueryEscape(msg)
 	})
 }
@@ -53,13 +59,14 @@ func (n *Notification) reqMethod() (string, error) {
 	return "", errors.New("不支持的请求方式")
 }
 
-func (n *Notification) reqBody(message string) (string, error) {
+func (ns *NotificationServerBundle) reqBody(message string) (string, error) {
+	n := ns.Notification
 	if n.RequestMethod == NotificationRequestMethodGET || message == "" {
 		return "", nil
 	}
 	switch n.RequestType {
 	case NotificationRequestTypeJSON:
-		return replaceParamsInString(n.RequestBody, message, func(msg string) string {
+		return replaceParamsInString(ns.Server, n.RequestBody, message, func(msg string) string {
 			msgBytes, _ := utils.Json.Marshal(msg)
 			return string(msgBytes)[1 : len(msgBytes)-1]
 		}), nil
@@ -70,7 +77,7 @@ func (n *Notification) reqBody(message string) (string, error) {
 		}
 		params := url.Values{}
 		for k, v := range data {
-			params.Add(k, replaceParamsInString(v, message, nil))
+			params.Add(k, replaceParamsInString(ns.Server, v, message, nil))
 		}
 		return params.Encode(), nil
 	}
@@ -102,9 +109,9 @@ func (n *Notification) setRequestHeader(req *http.Request) error {
 	return nil
 }
 
-func (n *Notification) Send(message string) error {
+func (ns *NotificationServerBundle) Send(message string) error {
 	var verifySSL bool
-
+	n := ns.Notification
 	if n.VerifySSL != nil && *n.VerifySSL {
 		verifySSL = true
 	}
@@ -115,7 +122,7 @@ func (n *Notification) Send(message string) error {
 	}
 
 	client := &http.Client{Transport: transCfg, Timeout: time.Minute * 10}
-	reqBody, err := n.reqBody(message)
+	reqBody, err := ns.reqBody(message)
 	if err != nil {
 		return err
 	}
@@ -125,7 +132,7 @@ func (n *Notification) Send(message string) error {
 		return err
 	}
 
-	req, err := http.NewRequest(reqMethod, n.reqURL(message), strings.NewReader(reqBody))
+	req, err := http.NewRequest(reqMethod, ns.reqURL(message), strings.NewReader(reqBody))
 	if err != nil {
 		return err
 	}
@@ -150,11 +157,42 @@ func (n *Notification) Send(message string) error {
 	return nil
 }
 
-func replaceParamsInString(str string, message string, mod func(string) string) string {
+// replaceParamInString 替换字符串中的占位符
+func replaceParamsInString(s *Server, str string, message string, mod func(string) string) string {
 	if mod != nil {
 		str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
+		if s != nil {
+			str = strings.ReplaceAll(str, "#SERVER.NAME#", mod(s.Name))
+			str = strings.ReplaceAll(str, "#SERVER.IP#", mod(s.Host.IP))
+			str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%f", s.State.CPU)))
+			str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%d", s.State.MemUsed)))
+			str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%d", s.State.SwapUsed)))
+			str = strings.ReplaceAll(str, "#SERVER.DISK#", mod(fmt.Sprintf("%d", s.State.DiskUsed)))
+			str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", mod(fmt.Sprintf("%d", s.State.NetInSpeed)))
+			str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", mod(fmt.Sprintf("%d", s.State.NetOutSpeed)))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", mod(fmt.Sprintf("%d", s.State.NetInTransfer)))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", mod(fmt.Sprintf("%d", s.State.NetOutTransfer)))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%f", s.State.Load1)))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%f", s.State.Load5)))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%f", s.State.Load15)))
+		}
 	} else {
 		str = strings.ReplaceAll(str, "#NEZHA#", message)
+		if s != nil {
+			str = strings.ReplaceAll(str, "#SERVER.NAME#", s.Name)
+			str = strings.ReplaceAll(str, "#SERVER.IP#", s.Host.IP)
+			str = strings.ReplaceAll(str, "#SERVER.CPU#", fmt.Sprintf("%f", s.State.CPU))
+			str = strings.ReplaceAll(str, "#SERVER.MEM#", fmt.Sprintf("%d", s.State.MemUsed))
+			str = strings.ReplaceAll(str, "#SERVER.SWAP#", fmt.Sprintf("%d", s.State.SwapUsed))
+			str = strings.ReplaceAll(str, "#SERVER.DISK#", fmt.Sprintf("%d", s.State.DiskUsed))
+			str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", fmt.Sprintf("%d", s.State.NetInSpeed))
+			str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", fmt.Sprintf("%d", s.State.NetOutSpeed))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", fmt.Sprintf("%d", s.State.NetInTransfer))
+			str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", fmt.Sprintf("%d", s.State.NetOutTransfer))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", fmt.Sprintf("%f", s.State.Load1))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", fmt.Sprintf("%f", s.State.Load5))
+			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", fmt.Sprintf("%f", s.State.Load15))
+		}
 	}
 	return str
 }

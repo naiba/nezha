@@ -2,6 +2,7 @@ package singleton
 
 import (
 	"fmt"
+	"github.com/jinzhu/copier"
 	"log"
 	"sync"
 	"time"
@@ -147,14 +148,17 @@ func checkStatus() {
 				ID][server.ID], alert.Snapshot(AlertsCycleTransferStatsStore[alert.ID], server, DB))
 			// 发送通知，分为触发报警和恢复通知
 			max, passed := alert.Check(alertsStore[alert.ID][server.ID])
+			// 保存当前服务器状态信息
+			curServer := model.Server{}
+			copier.Copy(&curServer, server)
 			if !passed {
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
 				message := fmt.Sprintf("[主机故障] %s(%s) 规则：%s", server.Name, IPDesensitize(server.Host.IP), alert.Name)
-				go SendNotification(alert.NotificationTag, message, true)
+				go SendNotification(alert.NotificationTag, message, true, &curServer)
 			} else {
 				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
 					message := fmt.Sprintf("[主机恢复] %s(%s) 规则：%s", server.Name, IPDesensitize(server.Host.IP), alert.Name)
-					go SendNotification(alert.NotificationTag, message, true)
+					go SendNotification(alert.NotificationTag, message, true, &curServer)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
 			}
