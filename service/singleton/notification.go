@@ -4,9 +4,6 @@ import (
 	"crypto/md5" // #nosec
 	"encoding/hex"
 	"log"
-	"regexp"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -105,7 +102,7 @@ func OnDeleteNotification(id uint64) {
 }
 
 // SendNotification 向指定的通知方式组的所有通知方式发送通知
-func SendNotification(notificationTag string, desc string, mutable bool) {
+func SendNotification(notificationTag string, desc string, mutable bool, ext ...*model.Server) {
 	if mutable {
 		// 通知防骚扰策略
 		nID := hex.EncodeToString(md5.New().Sum([]byte(desc))) // #nosec
@@ -146,10 +143,12 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 		log.Println("尝试通知", n.Name)
 	}
 	for _, n := range NotificationList[notificationTag] {
-		desc, server := findServerInMsg(desc)
 		ns := model.NotificationServerBundle{
 			Notification: n,
-			Server:       server,
+			Server:       nil,
+		}
+		if len(ext) > 0 {
+			ns.Server = ext[0]
 		}
 		if err := ns.Send(desc); err != nil {
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知失败：", err)
@@ -157,17 +156,4 @@ func SendNotification(notificationTag string, desc string, mutable bool) {
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知成功：")
 		}
 	}
-}
-
-// findServerInMsg 通过msg字符串中的$ServerID$ 返回修改后的字符串与Server对象
-func findServerInMsg(msg string) (string, *model.Server) {
-	reg1 := regexp.MustCompile(`^\$\d+`)
-	reg2 := regexp.MustCompile(`[^$]+`)
-	ServerIDStr := reg2.FindString(reg1.FindString(msg))
-	ServerID, _ := strconv.ParseUint(ServerIDStr, 10, 64)
-	// 将原字符串的ServerID标识去除
-	if ServerIDStr != "" {
-		msg = strings.Replace(msg, "$"+ServerIDStr+"$", "", 1)
-	}
-	return msg, ServerList[ServerID]
 }
