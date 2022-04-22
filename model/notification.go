@@ -175,6 +175,8 @@ func replaceParamsInString(s *Server, str string, message string, mod func(strin
 			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%f", s.State.Load1)))
 			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%f", s.State.Load5)))
 			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%f", s.State.Load15)))
+			str = strings.ReplaceAll(str, "#SERVER.TCPCONNCOUNT#", mod(fmt.Sprintf("%d", s.State.TcpConnCount)))
+			str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", mod(fmt.Sprintf("%d", s.State.UdpConnCount)))
 		}
 	} else {
 		str = strings.ReplaceAll(str, "#NEZHA#", message)
@@ -192,6 +194,8 @@ func replaceParamsInString(s *Server, str string, message string, mod func(strin
 			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", fmt.Sprintf("%f", s.State.Load1))
 			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", fmt.Sprintf("%f", s.State.Load5))
 			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", fmt.Sprintf("%f", s.State.Load15))
+			str = strings.ReplaceAll(str, "#SERVER.TCPCONNCOUNT#", fmt.Sprintf("%d", s.State.TcpConnCount))
+			str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", fmt.Sprintf("%d", s.State.UdpConnCount))
 		}
 	}
 	return str
