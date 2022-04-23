@@ -154,6 +154,7 @@ function addOrEditNotification(notification) {
   } else {
     modal.find(".ui.nf-ssl.checkbox").checkbox("set unchecked");
   }
+  modal.find(".ui.nf-skip-check.checkbox").checkbox("set unchecked");
   showFormModal(
     ".notification.modal",
     "#notificationForm",

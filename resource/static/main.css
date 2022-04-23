@@ -4,6 +4,11 @@
   }
 }
 
+td {
+  word-wrap: break-word;
+  word-break: break-all;
+}
+
 .nb-container {
   padding-top: 75px;
   min-height: 100vh;
