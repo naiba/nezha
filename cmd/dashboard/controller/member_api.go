@@ -418,9 +418,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 			Server:       nil,
 		}
 		// 勾选了跳过检查
-		if nf.SkipCheck == "on" {
-			err = nil
-		} else {
+		if nf.SkipCheck != "on" {
 			err = ns.Send("这是测试消息")
 		}
 	}
