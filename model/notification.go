@@ -159,11 +159,37 @@ func (ns *NotificationServerBundle) Send(message string) error {
 
 // replaceParamInString 替换字符串中的占位符
 func replaceParamsInString(s *Server, str string, message string, mod func(string) string) string {
+	// IP处理
+	ipv4 := ""
+	ipv6 := ""
+	validIP := ""
+	if s != nil {
+		ipList := strings.Split(s.Host.IP, "/")
+		if len(ipList) > 1 {
+			// 双栈
+			ipv4 = ipList[0]
+			ipv6 = ipList[1]
+			validIP = ipv4
+		} else if len(ipList) == 1 {
+			// 仅ipv4|ipv6
+			if strings.Contains(ipList[0], ":") {
+				ipv6 = ipList[0]
+				validIP = ipv6
+			} else {
+				ipv4 = ipList[0]
+				validIP = ipv4
+			}
+		}
+	}
+
 	if mod != nil {
 		str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
 		if s != nil {
+
 			str = strings.ReplaceAll(str, "#SERVER.NAME#", mod(s.Name))
-			str = strings.ReplaceAll(str, "#SERVER.IP#", mod(s.Host.IP))
+			str = strings.ReplaceAll(str, "#SERVER.IP#", mod(validIP))
+			str = strings.ReplaceAll(str, "#SERVER.IPV4#", mod(ipv4))
+			str = strings.ReplaceAll(str, "#SERVER.IPV6#", mod(ipv6))
 			str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%f", s.State.CPU)))
 			str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%d", s.State.MemUsed)))
 			str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%d", s.State.SwapUsed)))
@@ -182,7 +208,9 @@ func replaceParamsInString(s *Server, str string, message string, mod func(strin
 		str = strings.ReplaceAll(str, "#NEZHA#", message)
 		if s != nil {
 			str = strings.ReplaceAll(str, "#SERVER.NAME#", s.Name)
-			str = strings.ReplaceAll(str, "#SERVER.IP#", s.Host.IP)
+			str = strings.ReplaceAll(str, "#SERVER.IP#", validIP)
+			str = strings.ReplaceAll(str, "#SERVER.IPV4#", ipv4)
+			str = strings.ReplaceAll(str, "#SERVER.IPV6#", ipv6)
 			str = strings.ReplaceAll(str, "#SERVER.CPU#", fmt.Sprintf("%f", s.State.CPU))
 			str = strings.ReplaceAll(str, "#SERVER.MEM#", fmt.Sprintf("%d", s.State.MemUsed))
 			str = strings.ReplaceAll(str, "#SERVER.SWAP#", fmt.Sprintf("%d", s.State.SwapUsed))
