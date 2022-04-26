@@ -41,10 +41,10 @@ var (
 		"https://api.myip.la/en?json",
 		"https://api.ip.sb/geoip",
 		"https://ipapi.co/json",
-		"https://freegeoip.app/json/",
 		"http://ip-api.com/json/",
-		// "https://extreme-ip-lookup.com/json/",
-		// "https://ip.seeip.org/geoip",
+		// "https://extreme-ip-lookup.com/json/", // 不精确
+		// "https://ip.seeip.org/geoip", // 不精确
+		// "https://freegeoip.app/json/", // 需要 Key
 	}
 	cachedIP, cachedCountry string
 	httpClientV4            = utils.NewSingleStackHTTPClient(time.Second*20, time.Second*5, time.Second*10, false)
