@@ -1,13 +1,15 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 const CtxKeyAuthorizedUser = "ckau"
 
 const CacheKeyOauth2State = "p:a:state"
 
 type Common struct {
-	ID        uint64    `gorm:"primary_key"`
+	ID        uint64    `gorm:"primaryKey"`
 	CreatedAt time.Time `sql:"index"`
 	UpdatedAt time.Time
 	DeletedAt *time.Time `sql:"index"`
