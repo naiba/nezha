@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	GitHubAPI "github.com/google/go-github/github"
+	"github.com/patrickmn/go-cache"
 	"golang.org/x/oauth2"
 	GitHubOauth2 "golang.org/x/oauth2/github"
 
@@ -58,18 +59,25 @@ func (oa *oauth2controller) getRedirectURL(c *gin.Context) string {
 }
 
 func (oa *oauth2controller) login(c *gin.Context) {
-	state := utils.RandStringBytesMaskImprSrcUnsafe(6)
-	singleton.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()), state, 0)
+	randomString := utils.RandStringBytesMaskImprSrcUnsafe(32)
+	state, stateKey := randomString[:16], randomString[16:]
+	singleton.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, stateKey), state, cache.DefaultExpiration)
 	url := oa.getCommonOauth2Config(c).AuthCodeURL(state, oauth2.AccessTypeOnline)
-	c.Redirect(http.StatusFound, url)
+	c.SetCookie(singleton.Conf.Site.CookieName+"-sk", stateKey, 60*5, "", "", false, false)
+	c.HTML(http.StatusOK, "dashboard/redirect", gin.H{
+		"URL": url,
+	})
 }
 
 func (oa *oauth2controller) callback(c *gin.Context) {
 	var err error
 	// 验证登录跳转时的 State
-	state, ok := singleton.Cache.Get(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, c.ClientIP()))
-	if !ok || state.(string) != c.Query("state") {
-		err = errors.New("非法的登录方式")
+	stateKey, err := c.Cookie(singleton.Conf.Site.CookieName + "-sk")
+	if err == nil {
+		state, ok := singleton.Cache.Get(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, stateKey))
+		if !ok || state.(string) != c.Query("state") {
+			err = errors.New("非法的登录方式")
+		}
 	}
 	oauth2Config := oa.getCommonOauth2Config(c)
 	ctx := context.Background()
@@ -117,6 +125,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	user.IssueNewToken()
 	singleton.DB.Save(&user)
 	c.SetCookie(singleton.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, false)
-	c.Status(http.StatusOK)
-	c.Writer.WriteString("<script>window.location.href='/'</script>")
+	c.HTML(http.StatusOK, "dashboard/redirect", gin.H{
+		"URL": "/",
+	})
 }
