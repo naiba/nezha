@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 	"github.com/ory/graceful"
-	"log"
 )
 
 func init() {
@@ -15,6 +16,7 @@ func init() {
 	singleton.Init()
 	singleton.InitConfigFromPath("data/config.yaml")
 	singleton.InitDBFromPath("data/sqlite.db")
+	singleton.InitLocalizer()
 	initSystem()
 }
 

@@ -51,8 +51,9 @@ func (c *AgentConfig) Save() error {
 
 // Config 站点配置
 type Config struct {
-	Debug bool // debug模式开关
-	Site  struct {
+	Debug    bool   // debug模式开关
+	Language string // 系统语言，默认 zh-CN
+	Site     struct {
 		Brand        string // 站点名称
 		CookieName   string // 浏览器 Cookie 名称
 		Theme        string
@@ -99,6 +100,9 @@ func (c *Config) Read(path string) error {
 
 	if c.Site.Theme == "" {
 		c.Site.Theme = "default"
+	}
+	if c.Language == "" {
+		c.Language = "zh-CN"
 	}
 	if c.GRPCPort == 0 {
 		c.GRPCPort = 5555

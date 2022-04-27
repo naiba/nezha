@@ -5,6 +5,7 @@ go 1.18
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	github.com/AlecAivazis/survey/v2 v2.3.4
+	github.com/BurntSushi/toml v1.0.0
 	github.com/Erope/goss v0.0.0-20211230093305-df3c03fd1ed4
 	github.com/artdarek/go-unzip v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
@@ -19,6 +20,7 @@ require (
 	github.com/iamacarpet/go-winpty v1.0.2
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
+	github.com/nicksnyder/go-i18n/v2 v2.2.0
 	github.com/ory/graceful v0.1.2
 	github.com/p14yground/go-github-selfupdate v0.0.0-20220205132106-76a6d59b925b
 	github.com/patrickmn/go-cache v2.1.0+incompatible
@@ -30,6 +32,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
+	golang.org/x/text v0.3.7
 	google.golang.org/grpc v1.46.0
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -80,7 +83,6 @@ require (
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220407144326-9054f6ed7bac // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
