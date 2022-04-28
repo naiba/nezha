@@ -6,15 +6,15 @@
         </div>
         {{if .IsAdminPage}}
         <a class='item{{if eq .MatchedPath "/server"}} active{{end}}' href="/server"><i class="server icon"></i>{{tr "Server"}}</a>
-        <a class='item{{if eq .MatchedPath "/monitor"}} active{{end}}' href="/monitor"><i class="rss icon"></i>服务</a>
-        <a class='item{{if eq .MatchedPath "/cron"}} active{{end}}' href="/cron"><i class="clock icon"></i>任务</a>
-        <a class='item{{if eq .MatchedPath "/notification"}} active{{end}}' href="/notification"><i class="bell icon"></i>报警</a>
+        <a class='item{{if eq .MatchedPath "/monitor"}} active{{end}}' href="/monitor"><i class="rss icon"></i>{{tr "Services"}}</a>
+        <a class='item{{if eq .MatchedPath "/cron"}} active{{end}}' href="/cron"><i class="clock icon"></i>{{tr "Task"}}</a>
+        <a class='item{{if eq .MatchedPath "/notification"}} active{{end}}' href="/notification"><i class="bell icon"></i>{{tr "Notification"}}</a>
         <a class='item{{if eq .MatchedPath "/setting"}} active{{end}}' href="/setting">
-            <i class="settings icon"></i>设置
+            <i class="settings icon"></i>{{tr "Settings"}}
         </a>
         {{else}}
-        <a class='item{{if eq .MatchedPath "/"}} active{{end}}' href="/"><i class="home icon"></i>首页</a>
-        <a class='item{{if eq .MatchedPath "/service"}} active{{end}}' href="/service"><i class="rss icon"></i>服务</a>
+        <a class='item{{if eq .MatchedPath "/"}} active{{end}}' href="/"><i class="home icon"></i>{{tr "Home"}}</a>
+        <a class='item{{if eq .MatchedPath "/service"}} active{{end}}' href="/service"><i class="rss icon"></i>{{tr "Services"}}</a>
         {{end}}
         <div class="right menu">
             <div class="item">
@@ -27,20 +27,20 @@
                     <div class="menu">
                         {{if .IsAdminPage}}
                         <a class="item" href="/">
-                            <i class="chart area icon"></i>返回前台
+                            <i class="chart area icon"></i>{{tr "Backtohomepage"}}
                         </a>
                         {{else}}
                         <a class="item" href="/server">
-                            <i class="terminal icon"></i>管理后台
+                            <i class="terminal icon"></i>{{tr "AdminPanel"}}
                         </a>
                         {{end}}
                         <button class="item" onclick="showConfirm('确认注销？','注销后您必须重新登录才能使用',logout,{{.Admin.ID}})">
-                            <i class="logout icon"></i>注销登录
+                            <i class="logout icon"></i>{{tr "Logout"}}
                         </button>
                     </div>
                 </div>
                 {{else}}
-                <a href="/login" class="ui large positive nezha-primary-btn button"><i class="sign-in icon"></i>登录</a>
+                <a href="/login" class="ui large positive nezha-primary-btn button"><i class="sign-in icon"></i>{{tr "Login"}}</a>
                 {{end}}
             </div>
         </div>

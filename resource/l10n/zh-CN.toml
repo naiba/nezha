@@ -2,3 +2,21 @@
 other = "哪吒监控"
 [Server]
 other = "主机"
+[Services]
+other = "服务"
+[Task]
+other = "任务"
+[Notification]
+other = "报警"
+[Settings]
+other = "设置"
+[Home]
+other = "首页"
+[Backtohomepage]
+other = "返回前台"
+[AdminPanel]
+other = "管理后台"
+[Logout]
+other = "注销登录"
+[Login]
+other = "登录"
