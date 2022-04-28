@@ -17,6 +17,7 @@ func htmlTemplateTranslateFn(id string, data interface{}, count interface{}) str
 }
 
 func main() {
+	singleton.InitConfigFromPath("data/config.yaml")
 	singleton.InitLocalizer()
 	fmt.Println(singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
 		MessageID: "nezhaMonitor",
