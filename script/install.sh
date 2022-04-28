@@ -205,7 +205,7 @@ install_agent() {
         echo -e "${red}Release 下载失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
         return 0
     fi
-    tar xf nezha-agent_linux_${os_arch}.zip &&
+    unzip -qo nezha-agent_linux_${os_arch}.zip &&
         mv nezha-agent $NZ_AGENT_PATH &&
         rm -rf nezha-agent_linux_${os_arch}.zip README.md
 
