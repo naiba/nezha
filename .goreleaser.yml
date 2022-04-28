@@ -37,6 +37,7 @@ snapshot:
   name_template: "nezha-agent"
 archives:
   - name_template: "nezha-agent_{{ .Os }}_{{ .Arch }}"
+    format: zip
     files:
       - none*
 changelog:

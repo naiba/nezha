@@ -31,13 +31,18 @@ func ServeWeb(port uint) *http.Server {
 			conf := i18n.LocalizeConfig{
 				MessageID: id,
 			}
-			if len(dataAndCount) > 1 {
-				conf.TemplateData = dataAndCount[1]
+			if len(dataAndCount) > 0 {
+				conf.TemplateData = dataAndCount[0]
 			}
-			if len(dataAndCount) > 2 {
-				conf.PluralCount = dataAndCount[2]
+			if len(dataAndCount) > 1 {
+				conf.PluralCount = dataAndCount[1]
 			}
 			return singleton.Localizer.MustLocalize(&conf)
+		},
+		"toValMap": func(val interface{}) map[string]interface{} {
+			return map[string]interface{}{
+				"Value": val,
+			}
 		},
 		"tf": func(t time.Time) string {
 			return t.In(singleton.Loc).Format("2006年1月2号 15:04:05")
