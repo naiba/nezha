@@ -37,6 +37,9 @@ CN=true sudo ./nezha.sh
 ```
 
 _\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动（见尾部教程）_
+**Win一键安装Agent 请使用 Powershell! 管理员权限**(jsdelivr飘忽不定未找到稳定渠道暂对国内不友好)
+![image](https://user-images.githubusercontent.com/47450409/165829132-cb1ab16a-7b22-4c5f-9fdf-89d140cf7e40.png)
+如遇此图请选择 Y
 
 ### Agent 自定义
 
