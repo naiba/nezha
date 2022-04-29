@@ -321,3 +321,135 @@ other = "Terminal connection timeout or session ended"
 
 [TerminalConnectionFailed]
 other = "Terminal connection failed, check reverse proxy for WebSocket connection on /terminal/* path"
+
+[Default]
+other = "默认"
+
+[Offline]
+other = "已离线"
+
+[Platform]
+other = "系统"
+
+[DiskUsed]
+other = "硬盘"
+
+[MemUsed]
+other = "内存"
+
+[SwapUsed]
+other = "交换"
+
+[NetTransfer]
+other = "流量"
+
+[Load]
+other = "负载"
+
+[ProcessCount]
+other = "进程数"
+
+[ConnCount]
+other = "连接数"
+
+[BootTime]
+other = "启动"
+
+[LastActive]
+other = "活动"
+
+[Version]
+other = "版本"
+
+[NetSpeed]
+other = "网络"
+
+[Uptime]
+other = "在线"
+
+[ServerIsOffline]
+other = "节点已离线"
+
+[Day]
+other = "天"
+
+[RealtimeChannelEstablished]
+other = "实时通道建立"
+
+[GetTheLatestMonitoringDataInRealTime]
+other = "可以实时获取最新监控数据啦"
+
+[RealtimeChannelDisconnect]
+other = "实时通道断开"
+
+[CanNotGetTheLatestMonitoringDataInRealTime]
+other = "无法实时获取最新监控数据咯"
+
+[30DaysOnline]
+other = "30天在线率"
+
+[Details]
+other = "详情"
+
+[Status]
+other = "状态"
+
+[Availability]
+other = "在线率"
+
+[AverageLatency]
+other = "平均延迟"
+
+[CycleTransferStats]
+other = "循环流量统计"
+
+[From]
+other = "自"
+
+[To]
+other = "至"
+
+[NextCheck]
+other = "下次检查"
+
+[CurrentUsage]
+other = "当前用量"
+
+[VerifyPassword]
+other = "验证查看密码"
+
+[LightMode]
+other = "白昼模式"
+
+[DarkMode]
+other = "暗黑模式"
+
+[GridLayout]
+other = "网格视图"
+
+[ListLayout]
+other = "列表视图"
+
+[EnterPassword]
+other = "输入密码"
+
+[Location]
+other = "地区"
+
+[Running]
+other = "运行中"
+
+[UpNetTransfer]
+other = "上行"
+
+[DownNetTransfer]
+other = "下行"
+
+[TotalUpNetTransfer]
+other = "总上行"
+
+[TotalDownNetTransfer]
+other = "总下行"
+
+[WrongPassword]
+other = "密码错误"
