@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.29&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.8.3-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.30&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.8.3-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>哪吒监控</b> 一站式轻监控轻运维系统。支持系统状态、HTTP(SSL 证书变更、即将到期、到期)、TCP、Ping 监控报警，计划任务和在线终端。</p>
@@ -18,7 +18,7 @@
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | ![默认主题](resource/template/theme-default/screenshot.png)                              | <img src="resource/template/theme-daynight/screenshot.png" width="3000px"/>                            | <img src="resource/template/theme-hotaru/screenshot.png" width="1500px" /> |
 | <div align="center"><b>默认主题魔改 <a href="https://ii.do/43.html">[教程]</a></b></div> | <div align="center"><b>Neko Mdui <a href="https://github.com/MikoyChinese">@MikoyChinese</a></b></div> |                                                                            |
-| ![默认主题魔改](https://cdn.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp)       | ![Neko Mdui](resource/template/theme-mdui/screenshot.png)                                              |                                                                            |
+| ![默认主题魔改](https://fastly.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp)       | ![Neko Mdui](resource/template/theme-mdui/screenshot.png)                                              |                                                                            |
 
 ## 安装脚本
 
@@ -32,7 +32,7 @@ sudo ./nezha.sh
 国内镜像加速：
 
 ```shell
-curl -L https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+curl -L https://fastly.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh
 CN=true sudo ./nezha.sh
 ```
 
