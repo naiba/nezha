@@ -1,2 +1,323 @@
 [nezhaMonitor]
-other = "Nezha Monitor"
+other = "Nezha Monitoring"
+
+[Server]
+other = "Servers"
+
+[Services]
+other = "Services"
+
+[Task]
+other = "Tasks"
+
+[Notification]
+other = "Notifications"
+
+[Settings]
+other = "Settings"
+
+[Home]
+other = "Home"
+
+[BackToHomepage]
+other = "Back to home"
+
+[AdminPanel]
+other = "Admin"
+
+[Logout]
+other = "Log out"
+
+[Login]
+other = "Log in"
+
+[ConfirmLogout]
+other = "Confirm Logout?"
+
+[AfterLoggingOutYouHaveToLoginAgain]
+other = "You must log in before accessing the admin area"
+
+[Cancel]
+other = "Cancel"
+
+[Confirm]
+other = "Confirm"
+
+[AddScheduledTasks]
+other = "Add Schedule Task"
+
+[Name]
+other = "Name"
+
+[Scheduler]
+other = "Cron Expression"
+
+[BackUp]
+other = "Backup"
+
+[3amDaily]
+other = "(03:00:00 Every day)"
+
+[Command]
+other = "Command"
+
+[Coverage]
+other = "Coverage"
+
+[IgnoreAllAndExecuteOnlyThroughSpecificServers]
+other = "Ignore All, Only execute by specific servers"
+
+[AllIncludedOnlySpecificServersAreNotExecuted]
+other = "Cover All, Only ignore specific servers"
+
+[SpecificServers]
+other = "Specific Servers"
+
+[EnterIdAndNameToSearch]
+other = "Input Server ID/Name to search"
+
+[NotificationMethod]
+other = "Notification Group"
+
+[PushSuccessMessages]
+other = "Send Success Notification"
+
+[TheFormaOfTheScheduleIs]
+other = "The Cron Expression is like:"
+
+[SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
+other = "sec min hour day month week, details in "
+
+[ScheduleExpressionFormat]
+other = "CRON Expression Format"
+
+[IntroductionOfCommands]
+other = "Command: Just like writing shell/bat scripts, but line wrap is not recommended. Multiple Commands should be connected with <code>&&</code>/<code>&</code>. Command not found may cause by missing <code>PATH</code> environment variable, for <code>Linux</code> Server, you may try adding <code>source ~/.bashrc</code> at beginning of your command or execute by absolute path."
+
+[AddMonitor]
+other = "Add Service Monitor"
+
+[Blog]
+other = "Blog"
+
+[Target]
+other = "Target"
+
+[Type]
+other = "Type"
+
+[SslExpirationOrChange]
+other = "(SSL Certificate Expired/Changed)"
+
+[Duration]
+other = "Interval"
+
+[Seconds]
+other = "Seconds"
+
+[EnableFailureNotification]
+other = "Enable Failure Notification"
+
+[IntroductionOfMonitor]
+other = """
+Input URL(With http/https prefix) for type <b>HTTP-GET</b>, SSL Certificate will be monitored automatically when URL has https prefix;<br>
+Input hostname/IP for type <b>ICMP-Ping</b>: example.com;<br>
+Input hostname/IP:Port for type <b>TCP-Ping</b>: example.com:22;"""
+
+[AddNotificationMethod]
+other = "Add Notification Method"
+
+[Tag]
+other = "Notification Group"
+
+[DoNotSendTestMessages]
+other = "Do Not Send Test Message"
+
+[RequestMethod]
+other = "Request Method"
+
+[RequestType]
+other = "Request Type"
+
+[VerifySSL]
+other = "Verify SSL"
+
+[AddNotificationRule]
+other = "Add Alarm Rule"
+
+[Rules]
+other = "Rules"
+
+[Enable]
+other = "Enable"
+
+[AddServer]
+other = "Add Server"
+
+[ServerGroup]
+other = "Server Group"
+
+[EinsteinLightspeed1]
+other = "Einstein Light Speed 1"
+
+[DisplayIndex]
+other = "Display Index"
+
+[TheLargerTheNumberTheHigherThePriority]
+other = "A larger index will be ranked previous"
+
+[Secret]
+other = "Secret"
+
+[Note]
+other = "Note"
+
+[LinuxOneKeyInstall]
+other = "Linux One Key Install"
+
+[NoDomainAlert]
+other = "Set CDN bypassed Domain/IP in setting before using this function"
+
+[PushSuccessfully]
+other = "Send Success Notification"
+
+[LastExecution]
+other = "Last Execution"
+
+[LastResult]
+other = "Last Result"
+
+[Administration]
+other = "Manage"
+
+[CoverAll]
+other = "Cover All"
+
+[IgnoreAll]
+other = "Ignore All"
+
+[DeleteScheduledTask]
+other = "Delete Scheduled Task"
+
+[ConfirmToDeleteThisScheduledTask]
+other = "Confirm Delete?"
+
+[AccessDenied]
+other = "Access Denied"
+
+[Use]
+other = "Use"
+
+[AccountToLogin]
+other = "account to login"
+
+[SignUp]
+other = "Sign up"
+
+[DontHaveAnAccount]
+other = "Don't have an account yet?"
+
+[SSLCertificate]
+other = "HTTP(S)/SSL Certificate"
+
+[TCPPort]
+other = "TCP Port"
+
+[DeleteService]
+other = "Delete Service Monitor"
+
+[ConfirmToDeleteThisService]
+other = "Confirm Delete?"
+
+[DeleteNotificationMethod]
+other = "Delete Notification Method"
+
+[ConfirmToDeleteThisNotificationMethod]
+other = "Confirm Delete?"
+
+[ForceUpdate]
+other = "Force Update"
+
+[SelectAll]
+other = "Select All"
+
+[VersionNumber]
+other = "Version"
+
+[OneKeyInstall]
+other = "One Key Install"
+
+[ClickToCopyTheInstallationCommand]
+other = "Click To Copy Install Command"
+
+[NotSupportedYet]
+other = "Not supported yet, check the release page for manual install"
+
+[DeleteServer]
+other = "Delete Server"
+
+[ConfirmToDeleteThisServer]
+other = "Confirm Delete?"
+
+[NoServerSelected]
+other = "No Server Selected"
+
+[ExecutionResults]
+other = "Execute Results"
+
+[SiteTitle]
+other = "Site Title"
+
+[AdministratorList]
+other = "Admin List"
+
+[Theme]
+other = "Theme"
+
+[DefaultTheme]
+other = "Default Theme"
+
+[CustomCodes]
+other = "Custom code (style, script)"
+
+[AccessPassword]
+other = "Access Password"
+
+[PanelServerDomainAndIP]
+other = "CDN Bypassed Domain/IP"
+
+[IPChangeAlert]
+other = "IP Change Alert"
+
+[AllIncludedOnlySpecificServersAreNotAlerted]
+other = "Cover All, Only ignore specific servers"
+
+[IgnoreAllOnlyAlertSpecificServers]
+other = "Ignore All, Only alert specific servers"
+
+[IgnoreAllRequestOnlyThroughSpecificServers]
+other = "Skip All Servers, Only send requests via specific servers"
+
+[AllIncludedOnlySpecificServersAreNotRequest]
+other = "Send requests from All servers, Only skip specific servers"
+
+[ServerIDSeparatedByCommas]
+other = "Server ID, separated by comma"
+
+[IPChangeNotificationTag]
+other = "Send Notification To Specific Notification Group"
+
+[NotificationMessagesDoNotHideIP]
+other = "Do NOT desensitize Server IP In Notification Messages"
+
+[Save]
+other = "Save"
+
+[ModifiedSuccessfully]
+other = "Modified successfully"
+
+[TerminalConnectionTimeOutOrSessionEnded]
+other = "Terminal connection timeout or session ended"
+
+[TerminalConnectionFailed]
+other = "Terminal connection failed, check reverse proxy for WebSocket connection on /terminal/* path"
