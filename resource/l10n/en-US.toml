@@ -321,3 +321,135 @@ other = "Terminal connection timeout or session ended"
 
 [TerminalConnectionFailed]
 other = "Terminal connection failed, check reverse proxy for WebSocket connection on /terminal/* path"
+
+[Default]
+other = "Default"
+
+[Offline]
+other = "Offline"
+
+[Platform]
+other = "Platform"
+
+[DiskUsed]
+other = "Disk"
+
+[MemUsed]
+other = "RAM"
+
+[SwapUsed]
+other = "Swap"
+
+[NetTransfer]
+other = "Data Transfer"
+
+[Load]
+other = "Load"
+
+[ProcessCount]
+other = "Processes Count"
+
+[ConnCount]
+other = "Connections Count"
+
+[BootTime]
+other = "Boot Time"
+
+[LastActive]
+other = "Last Active"
+
+[Version]
+other = "Version"
+
+[NetSpeed]
+other = "Network Speed"
+
+[Uptime]
+other = "Uptime"
+
+[ServerIsOffline]
+other = "Server is offline"
+
+[Day]
+other = "Day"
+
+[RealtimeChannelEstablished]
+other = "Real-time Channel Established"
+
+[GetTheLatestMonitoringDataInRealTime]
+other = "You can get the latest monitoring data in real-time!"
+
+[RealtimeChannelDisconnect]
+other = "Real-time Channel Disconnect"
+
+[CanNotGetTheLatestMonitoringDataInRealTime]
+other = "Unable to get the latest monitoring data in real-time!"
+
+[30DaysOnline]
+other = "Last 30 days availability"
+
+[Details]
+other = "Details"
+
+[Status]
+other = "Status"
+
+[Availability]
+other = "Availability"
+
+[AverageLatency]
+other = "Average Latency"
+
+[CycleTransferStats]
+other = "Cycle Transfer Statistics"
+
+[From]
+other = "From"
+
+[To]
+other = "To"
+
+[NextCheck]
+other = "Next check"
+
+[CurrentUsage]
+other = "Current Usage"
+
+[VerifyPassword]
+other = "Verify Password"
+
+[LightMode]
+other = "Light Mode"
+
+[DarkMode]
+other = "Dark Mode"
+
+[GridLayout]
+other = "Grid Layout"
+
+[ListLayout]
+other = "List Layout"
+
+[EnterPassword]
+other = "Enter password"
+
+[Location]
+other = "Location"
+
+[Running]
+other = "Running"
+
+[UpNetTransfer]
+other = "Outbound"
+
+[DownNetTransfer]
+other = "Inbound"
+
+[TotalUpNetTransfer]
+other = "Total Outbound"
+
+[TotalDownNetTransfer]
+other = "Total Inbound"
+
+[WrongPassword]
+other = "Incorrect Password"
