@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.8.3"
+NZ_VERSION="v0.9.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -75,7 +75,7 @@ pre_check() {
         Get_Docker_Argu=" "
         Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
     else
-        GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
+        GITHUB_RAW_URL="fastly.jsdelivr.net/gh/naiba/nezha@master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.daocloud.io/docker"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
@@ -124,7 +124,7 @@ before_show_menu() {
 }
 
 install_base() {
-    (command -v git >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v wget >/dev/null 2>&1 && command -v tar >/dev/null 2>&1) ||
+    (command -v git >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v wget >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1) ||
         (install_soft curl wget git unzip)
 }
 
@@ -185,7 +185,7 @@ install_agent() {
 
     local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://cdn.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+        version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
     fi
 
     if [ ! -n "$version" ]; then
@@ -205,6 +205,7 @@ install_agent() {
         echo -e "${red}Release 下载失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
         return 0
     fi
+
     unzip -qo nezha-agent_linux_${os_arch}.zip &&
         mv nezha-agent $NZ_AGENT_PATH &&
         rm -rf nezha-agent_linux_${os_arch}.zip README.md
@@ -294,8 +295,8 @@ modify_dashboard_config() {
         read -ep "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
         read -ep "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
         read -ep "请输入站点标题: " nz_site_title &&
-        read -ep "请输入站点访问端口: (8008)" nz_site_port &&
-        read -ep "请输入用于 Agent 接入的 RPC 端口: (5555)" nz_grpc_port
+        read -ep "请输入站点访问端口: (默认 8008)" nz_site_port &&
+        read -ep "请输入用于 Agent 接入的 RPC 端口: (默认 5555)" nz_grpc_port
 
     if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}所有选项都不能为空${plain}"

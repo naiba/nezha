@@ -18,7 +18,7 @@
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
 | ![默认主题](resource/template/theme-default/screenshot.png)                              | <img src="resource/template/theme-daynight/screenshot.png" width="3000px"/>                            | <img src="resource/template/theme-hotaru/screenshot.png" width="1500px" /> |
 | <div align="center"><b>默认主题魔改 <a href="https://ii.do/43.html">[教程]</a></b></div> | <div align="center"><b>Neko Mdui <a href="https://github.com/MikoyChinese">@MikoyChinese</a></b></div> |                                                                            |
-| ![默认主题魔改](https://cdn.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp)       | ![Neko Mdui](resource/template/theme-mdui/screenshot.png)                                              |                                                                            |
+| ![默认主题魔改](https://fastly.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp)       | ![Neko Mdui](resource/template/theme-mdui/screenshot.png)                                              |                                                                            |
 
 ## 安装脚本
 
@@ -32,7 +32,7 @@ sudo ./nezha.sh
 国内镜像加速：
 
 ```shell
-curl -L https://cdn.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh
+curl -L https://fastly.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh
 CN=true sudo ./nezha.sh
 ```
 
