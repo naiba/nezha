@@ -13,7 +13,24 @@ $releases = "https://api.github.com/repos/$repo/releases"
 Write-Host "Determining latest nezha release" -BackgroundColor DarkGreen -ForegroundColor White
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $tag = (Invoke-WebRequest -Uri $releases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
+#Region判断
+$ipapi= Invoke-RestMethod  -Uri "https://api.myip.com/" -UserAgent "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1"
+$region=$ipapi.cc
+echo $ipapi
+if($region -ne "CN"){
 $download = "https://github.com/$repo/releases/download/$tag/$file"
+Write-Host "Overseas machine("$region") direct connection!" -BackgroundColor DarkRed -ForegroundColor Green
+echo $download
+}elseif($region -eq $null){
+cls
+$download = "https://ghproxy.com/github.com/$repo/releases/download/$tag/$file"
+Write-Host "Error,Most of the time, it is caused by the domestic network environment,use ghproxy.com" -BackgroundColor DarkRed -ForegroundColor Green
+echo $download
+}else{
+$download = "https://ghproxy.com/github.com/$repo/releases/download/$tag/$file"
+Write-Host "China's servers will be downloaded using the image address" -BackgroundColor DarkRed -ForegroundColor Green
+echo $download
+}
 Invoke-WebRequest $download -OutFile "C:\nezha.zip"
 #使用nssm安装服务
 Invoke-WebRequest "http://nssm.cc/release/nssm-2.24.zip" -OutFile "C:\nssm.zip"
