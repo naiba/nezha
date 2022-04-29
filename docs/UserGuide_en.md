@@ -1,8 +1,8 @@
 # User Guide
 
-## 安装脚本
+## install script
 
-**推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（ip-to-dashboard.nai.ba）。
+**Recommended configuration：** Preparation before installation _Two domains_，one can **access CDN** as _public access_，for example (status.nai.ba)；Another one resolves to the panel server as Agent connect Dashboard 使用，**can't access CDN** Direct exposure panel host IP，for example（ip-to-dashboard.nai.ba）。
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh  -o nezha.sh && chmod +x nezha.sh
