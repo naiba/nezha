@@ -2,94 +2,94 @@
 other = "Nezha monitoring"
 
 [Server]
-other = "主机"
+other = "Servers"
 
 [Services]
-other = "服务"
+other = "Services"
 
 [Task]
-other = "任务"
+other = "Tasks"
 
 [Notification]
-other = "报警"
+other = "Notifications"
 
 [Settings]
-other = "设置"
+other = "Settings"
 
 [Home]
-other = "首页"
+other = "Home"
 
 [BackToHomepage]
-other = "返回前台"
+other = "Back to home"
 
 [AdminPanel]
-other = "管理后台"
+other = "Admin"
 
 [Logout]
-other = "注销登录"
+other = "Log out"
 
 [Login]
-other = "登录"
+other = "Log in"
 
 [ConfirmLogout]
-other = "确认注销？"
+other = "Confirm logout?"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "注销后您必须重新登录才能使用"
+other = "You must log in before access admin area"
 
 [Cancel]
-other = "取消"
+other = "Cancel"
 
 [Confirm]
-other = "确认"
+other = "Confirm"
 
 [AddScheduledTasks]
-other = "添加计划任务"
+other = "Add Schedule Task"
 
 [Name]
-other = "名称"
+other = "Name"
 
 [Scheduler]
-other = "计划"
+other = "Cron Expression"
 
 [BackUp]
-other = "备份"
+other = "Backup"
 
 [3amDaily]
-other = "(每天3点)"
+other = "(03:00:00 Every day)"
 
 [Command]
-other = "命令"
+other = "Command"
 
 [Coverage]
-other = "覆盖范围"
+other = "Coverage"
 
 [IgnoreAllAndExecuteOnlyThroughSpecificServers]
-other = "忽略所有，仅通过特定服务器执行"
+other = "Ignore All, Only execute by specific servers"
 
 [AllIncludedOnlySpecificServersAreNotExecuted]
-other = "覆盖所有，仅特定服务器不执行"
+other = "Cover All, Only ignore specific servers"
 
 [SpecificServers]
-other = "特定服务器"
+other = "Specific Servers"
 
 [EnterIdAndNameToSearch]
-other = "输入ID/名称以搜索"
+other = "Input Server ID/Name to search"
 
 [NotificationMethod]
-other = "通知方式组"
+other = "Notification Group"
 
 [PushSuccessMessages]
-other = "推送成功的消息"
+other = "Send success notification"
 
 [TheFormaOfTheScheduleIs]
-other = "计划的格式为："
+other = "The Cron Expression is like:"
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
-other = "秒 分 时 天 月 星期，详情见"
+other = "sec min hour day month week, details in "
 
 [ScheduleExpressionFormat]
-other = "计划表达式格式"
+other = "CRON Expression Format"
 
 [IntroductionOfCommands]
 other = "命令：就像写 shell/bat 脚本一样，但是不推荐换行，多个命令使用 <code>&&</code>/<code>&</code> 连接，如果遇到 xxx 命令找不到，可能是<code>PATH</code> 环境变量的问题，<code>Linux</code> 主机在命令开头加入<code>source ~/.bashrc</code>或者使用绝对路径执行。"
