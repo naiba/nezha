@@ -68,13 +68,13 @@
                 <li class="mdui-list-item">
                   <i class="mdui-list-item-icon mdui-icon material-icons">swap_vert</i>
                   <div class="mdui-list-item-content">
-                    <div class="mdui-list-item-title">上行</div>
+                    <div class="mdui-list-item-title">{{tr "UpNetTransfer"}}</div>
                     <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
                       <at><span>@#formatNetByteSize(server.State.NetOutSpeed)#@</span></at>
                     </div>
                   </div>
                   <div class="mdui-list-item-content">
-                    <div class="mdui-list-item-title">下行</div>
+                    <div class="mdui-list-item-title">{{tr "DownNetTransfer"}}</div>
                     <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
                       <st><span>@#formatNetByteSize(server.State.NetInSpeed)#@</span></st>
                     </div>
@@ -83,13 +83,13 @@
                 <li class="mdui-list-item">
                   <i class="mdui-list-item-icon mdui-icon material-icons">swap_horiz</i>
                   <div class="mdui-list-item-content">
-                    <div class="mdui-list-item-title">总上行</div>
+                    <div class="mdui-list-item-title">{{tr "TotalUpNetTransfer"}}</div>
                     <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
                       <at><span>@#formatByteSize(server.State.NetOutTransfer)#@</span></at>
                     </div>
                   </div>
                   <div class="mdui-list-item-content">
-                    <div class="mdui-list-item-title">总下行</div>
+                    <div class="mdui-list-item-title">{{tr "TotalDownNetTransfer"}}</div>
                     <div class="mdui-list-item-text mdui-list-item-one-line" style="opacity:1;">
                       <st><span>@#formatByteSize(server.State.NetInTransfer)#@</span></st>
                     </div>
@@ -107,14 +107,14 @@
 		<thead>
 		  <tr>
 		    <th class="mdui-text-center">ID</th>
-		    <th class="mdui-text-center">Name</th>
-		    <th class="mdui-text-center">Up</th>
-		    <th class="mdui-text-center">Down</th>
-		   	<th class="mdui-text-center">Total Up</th>
-		    <th class="mdui-text-center">Total Down</th>
+		    <th class="mdui-text-center">{{tr "Name"}}</th>
+		    <th class="mdui-text-center">{{tr "UpNetTransfer"}}</th>
+		    <th class="mdui-text-center">{{tr "DownNetTransfer"}}</th>
+		   	<th class="mdui-text-center">{{tr "TotalUpNetTransfer"}}</th>
+		    <th class="mdui-text-center">{{tr "TotalDownNetTransfer"}}</th>
 		    <th class="mdui-text-center">CPU</th>
 		    <th class="mdui-text-center">RAM</th>
-		    <th class="mdui-text-center">Online</th>
+		    <th class="mdui-text-center">{{tr "Uptime"}}</th>
 		  </tr>
 		</thead>
 		<tbody>
@@ -178,7 +178,7 @@
             secondToDate(s) {
                 var d = Math.floor(s / 3600 / 24);
                 if (d > 0) {
-                    return d + "天"
+                    return d + "{{tr "Day"}}"
                 }
                 var h = Math.floor(s / 3600 % 24);
                 var m = Math.floor(s / 60 % 60);
@@ -229,7 +229,7 @@
     const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
     ws.onopen = function (evt) {
         mdui.snackbar({
-          message: '实时通道建立',
+          message: '{{tr "RealtimeChannelEstablished"}}',
           timeout: 2000,
           position: 'top',
           onClosed: function(){
@@ -281,7 +281,7 @@
     }
     ws.onclose = function () {
         mdui.snackbar({
-          message: '实时通道断开',
+          message: '{{tr "RealtimeChannelDisconnect"}}',
           timeout: 2000,
           position: 'top',
         });

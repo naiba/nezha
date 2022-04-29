@@ -33,7 +33,7 @@
             </h1>
             <div>
                 <p>
-                    <small>狀態更新和事件報告可能會延遲最多30秒鐘<br />具體取決於手頭的技術問題。請向下滾動查看過去的事件報告</small>
+                    <small>{{tr "StatusTips"}}</small>
                 </p>
             </div>
         </div>
@@ -44,16 +44,16 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
-                        <th>运行状态</th>
-                        <th>节点名</th>
-                        <th>系统</th>
-                        <th>位置</th>
-                        <th>在线</th>
-                        <th>网络(B/s) ↓|↑</th>
-                        <th>流量(B) ↓|↑</th>
+                        <th>{{tr "Status"}}</th>
+                        <th>{{tr "Name"}}</th>
+                        <th>{{tr "Platform"}}</th>
+                        <th>{{tr "Location"}}</th>
+                        <th>{{tr "Uptime"}}</th>
+                        <th>{{tr "NetSpeed"}}(B/s) ↓|↑</th>
+                        <th>{{tr "NetTransfer"}}(B) ↓|↑</th>
                         <th>CPU</th>
                         <th>RAM</th>
-                        <th>硬盘</th>
+                        <th>{{tr "DiskUsed"}}</th>
                     </tr>
                 </thead>
                 <tbody id="servers" style="text-align:center;">
@@ -61,7 +61,7 @@
                         <td>
                             <div class="progress">
                                 <div :class="'state-'+ (server.live?'online':'offline')">
-                                    <small>@#server.live?'运行中':'已离线'#@</small>
+                                    <small>@#server.live?'{{tr "Running"}}':'{{tr "Offline"}}'#@</small>
                                 </div>
                             </div>
                         </td>
@@ -123,7 +123,7 @@
                                 </div>
                             </div>
                             <ul class="location-info list-styled">
-                                <li><span class="list-label">网络:</span>
+                                <li><span class="list-label">{{tr "NetSpeed"}}:</span>
                                     @#server.State?formatByteSize(server.State.NetInSpeed)+'/s|'+formatByteSize(server.State.NetOutSpeed)+'/s':'-'#@
                                 </li>
                             </ul>
@@ -135,15 +135,15 @@
     </div>
     <div class="sidebar-container">
         <ul>
-            <li id='sun'><i class="fas fa-sun" title="白昼模式"></i><span>白昼模式</span></li>
-            <li id='moon'><i class="fas fa-moon" title="暗黑模式"></i><span>暗黑模式</span></li>
+            <li id='sun'><i class="fas fa-sun" title="白昼模式"></i><span>{{tr "LightMode"}}</span></li>
+            <li id='moon'><i class="fas fa-moon" title="暗黑模式"></i><span>{{tr "DarkMode"}}</span></li>
         </ul>
     </div>
     <footer>
         <p style="text-align:center;padding: 15px;">Powered by <a href="https://github.com/naiba/nezha">{{tr "nezhaMonitor"}}</a> build ·
             {{.Version}}
-            <a href="/service">服务状态</a>
-            <a href="/server">管理后台</a>
+            <a href="/service">{{tr "Services"}}</a>
+            <a href="/server">{{tr "AdminPanel"}}</a>
         </p>
     </footer>
     <script src="https://fastly.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
@@ -224,7 +224,7 @@
                 secondToDate(s) {
                     var d = Math.floor(s / 3600 / 24);
                     if (d > 0) {
-                        return d + "天"
+                        return d + "{{tr "Day"}}"
                     }
                     var h = Math.floor(s / 3600 % 24);
                     var m = Math.floor(s / 60 % 60);
@@ -251,8 +251,8 @@
         const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
         ws.onopen = function (evt) {
             $.suiAlert({
-                title: '实时通道建立',
-                description: '可以实时获取最新监控数据啦',
+                title: '{{tr "RealtimeChannelEstablished"}}',
+                description: '{{tr "GetTheLatestMonitoringDataInRealTime"}}',
                 type: 'success',
                 time: '2',
                 position: 'top-center',
@@ -276,8 +276,8 @@
         }
         ws.onclose = function () {
             $.suiAlert({
-                title: '实时通道断开',
-                description: '无法实时获取最新监控数据咯',
+                title: '{{tr "RealtimeChannelDisconnect"}}',
+                description: '{{tr "CanNotGetTheLatestMonitoringDataInRealTime"}}',
                 type: 'warning',
                 time: '2',
                 position: 'top-center',
