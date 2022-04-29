@@ -6,7 +6,7 @@
         <div class="ui grid">
             <div class="right floated right aligned twelve wide column">
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditCron()"><i class="add icon"></i>
-                    添加计划任务
+                    {{tr "AddScheduledTasks"}}
                 </button>
             </div>
         </div>
@@ -14,16 +14,16 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>名称</th>
-                    <th>计划</th>
-                    <th>命令</th>
-                    <th>通知方式组</th>
-                    <th>成功推送</th>
-                    <th>覆盖范围</th>
-                    <th>特定服务器</th>
-                    <th>最后执行</th>
-                    <th>最后结果</th>
-                    <th>管理</th>
+                    <th>{{tr "Name"}}</th>
+                    <th>{{tr "Scheduler"}}</th>
+                    <th>{{tr "Command"}}</th>
+                    <th>{{tr "NotificationMethod"}}</th>
+                    <th>{{tr "PushSuccessfully"}}</th>
+                    <th>{{tr "Coverage"}}</th>
+                    <th>{{tr "SpecificServers"}}</th>
+                    <th>{{tr "LastExecution"}}</th>
+                    <th>{{tr "LastResult"}}</th>
+                    <th>{{tr "Administration"}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@
                     <td>{{$cron.Command}}</td>
                     <td>{{$cron.NotificationTag}}</td>
                     <td>{{$cron.PushSuccessful}}</td>
-                    <td>{{if eq $cron.Cover 0}}忽略所有{{else}}覆盖所有{{end}}</td>
+                    <td>{{if eq $cron.Cover 0}}{{tr "IgnoreAll"}}{{else}}{{tr "CoverAll"}}{{end}}</td>
                     <td>{{$cron.ServersRaw}}</td>
                     <td>{{$cron.LastExecutedAt|tf}}</td>
                     <td>{{$cron.LastResult}}</td>
@@ -48,7 +48,7 @@
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('删除计划任务','确认删除此计划任务？',deleteRequest,'/api/cron/'+{{$cron.ID}})">
+                                onclick="showConfirm('{{tr "DeleteScheduledTask"}}','{{tr "ConfirmToDeleteThisScheduledTask"}}',deleteRequest,'/api/cron/'+{{$cron.ID}})">
                                 <i class="trash alternate outline icon"></i>
                             </button>
                         </div>

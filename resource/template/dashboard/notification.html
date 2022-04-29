@@ -6,7 +6,7 @@
         <div class="ui grid">
             <div class="right floated right aligned twelve wide column">
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditNotification()"><i
-                        class="add icon"></i> 添加通知方式
+                        class="add icon"></i> {{tr "AddNotificationMethod"}}
                 </button>
             </div>
         </div>
@@ -14,11 +14,11 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>名称</th>
-                    <th>分组</th>
+                    <th>{{tr "Name"}}</th>
+                    <th>{{tr "Tag"}}</th>
                     <th>URL</th>
-                    <th>验证SSL</th>
-                    <th>管理</th>
+                    <th>{{tr "VerifySSL"}}</th>
+                    <th>{{tr "Administration"}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,7 +35,7 @@
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('删除通知方式','确认删除此通知方式？',deleteRequest,'/api/notification/'+{{$notification.ID}})">
+                                onclick="showConfirm('{{tr "DeleteNotificationMethod"}}','{{tr "ConfirmToDeleteThisNotificationMethod"}}',deleteRequest,'/api/notification/'+{{$notification.ID}})">
                                 <i class="trash alternate outline icon"></i>
                             </button>
                         </div>
@@ -48,7 +48,7 @@
             <div class="right floated right aligned twelve wide column">
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditAlertRule()"><i
                         class="add icon"></i>
-                    添加报警规则
+                    {{tr "AddNotificationRule"}}
                 </button>
             </div>
         </div>
@@ -56,11 +56,11 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>名称</th>
-                    <th>通知方式组</th>
-                    <th>规则</th>
-                    <th>启用</th>
-                    <th>管理</th>
+                    <th>{{tr "Name"}}</th>
+                    <th>{{tr "NotificationMethod"}}</th>
+                    <th>{{tr "Rules"}}</th>
+                    <th>{{tr "Enable"}}</th>
+                    <th>{{tr "Administration"}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -77,7 +77,7 @@
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('删除通知方式','确认删除此通知方式？',deleteRequest,'/api/alert-rule/'+{{$rule.ID}})">
+                                onclick="showConfirm('{{tr "DeleteNotificationMethod"}}','{{tr "ConfirmToDeleteThisNotificationMethod"}}',deleteRequest,'/api/alert-rule/'+{{$rule.ID}})">
                                 <i class="trash alternate outline icon"></i>
                             </button>
                         </div>

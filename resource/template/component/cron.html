@@ -1,62 +1,60 @@
 {{define "component/cron"}}
 <div class="ui tiny cron modal transition hidden">
-    <div class="header">添加计划任务</div>
+    <div class="header">{{tr "AddScheduledTasks"}}</div>
     <div class="content">
         <form id="cronForm" class="ui form">
             <input type="hidden" name="ID">
             <div class="field">
-                <label>名称</label>
-                <input type="text" name="Name" placeholder="备份">
+                <label>{{tr "Name"}}</label>
+                <input type="text" name="Name" placeholder="{{tr "BackUp"}}">
             </div>
             <div class="field">
-                <label>计划</label>
-                <input type="text" name="Scheduler" placeholder="0 0 3 * * *（每天3点）">
+                <label>{{tr "Scheduler"}}</label>
+                <input type="text" name="Scheduler" placeholder="0 0 3 * * *{{tr "3amDaily"}}">
             </div>
             <div class="field">
-                <label>命令</label>
+                <label>{{tr "Command"}}</label>
                 <textarea name="Command"></textarea>
             </div>
             <div class="field">
-                <label>覆盖范围</label>
+                <label>{{tr "Coverage"}}</label>
                 <select name="Cover" class="ui fluid dropdown">
-                    <option value="0">忽略所有，仅通过特定服务器执行</option>
-                    <option value="1">覆盖所有，仅特定服务器不执行</option>
+                    <option value="0">{{tr "IgnoreAllAndExecuteOnlyThroughSpecificServers"}}</option>
+                    <option value="1">{{tr "AllIncludedOnlySpecificServersAreNotExecuted"}}</option>
                 </select>
             </div>
             <div class="field">
-                <label>特定服务器</label>
+                <label>{{tr "SpecificServers"}}</label>
                 <div class="ui fluid multiple servers search selection dropdown">
                     <input type="hidden" name="ServersRaw">
                     <i class="dropdown icon"></i>
-                    <div class="default text">输入ID/名称以搜索</div>
+                    <div class="default text">{{tr "EnterIdAndNameToSearch"}}</div>
                     <div class="menu"></div>
                 </div>
             </div>
             <div class="field">
-                <label>通知方式组</label>
+                <label>{{tr "NotificationMethod"}}}</label>
                 <input type="text" name="NotificationTag" placeholder="default">
             </div>
             <div class="field">
                 <div class="ui push-successful checkbox">
                     <input name="PushSuccessful" type="checkbox" tabindex="0" class="hidden">
-                    <label>推送成功的消息</label>
+                    <label>{{tr "PushSuccessMessages"}}</label>
                 </div>
             </div>
         </form>
         <div class="ui warning message">
             <p>
-                计划的格式为：<code>* * * * * *</code>&nbsp;秒 分 时 天 月 星期，详情见 <a
+                {{tr "TheFormaOfTheScheduleIs"}}<code>* * * * * *</code>&nbsp;{{tr "SecondsMinutesHoursDaysMonthsWeeksSeeDetails"}} <a
                     href="https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format"
-                    target="_blank">计划表达式格式</a><br>
-                命令：就像写 shell/bat 脚本一样，但是不推荐换行，多个命令使用 <code>&&</code>/<code>&</code> 连接，如果遇到 xxx 命令找不到，可能是
-                <code>PATH</code> 环境变量的问题，<code>Linux</code> 主机在命令开头加入
-                <code>source ~/.bashrc</code>或者使用绝对路径执行。
+                    target="_blank">{{tr "ScheduleExpressionFormat"}}</a><br>
+                {{safe (tr "IntroductionOfCommands")}}
             </p>
         </div>
     </div>
     <div class=" actions">
-        <div class="ui negative button">取消</div>
-        <button class="ui positive nezha-primary-btn right labeled icon button">确认<i class="checkmark icon"></i>
+        <div class="ui negative button">{{tr "Cancel"}}</div>
+        <button class="ui positive nezha-primary-btn right labeled icon button">{{tr "Confirm"}}}}<i class="checkmark icon"></i>
         </button>
     </div>
 </div>

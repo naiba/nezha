@@ -1,32 +1,32 @@
 {{define "component/server"}}
 <div class="ui tiny server modal transition hidden">
-    <div class="header">添加服务器</div>
+    <div class="header">{{tr "AddServer"}}</div>
     <div class="content">
         <form id="serverForm" class="ui form">
             <input type="hidden" name="id">
             <div class="field">
-                <label>名称</label>
-                <input type="text" name="name" placeholder="爱因斯坦-光速1号">
+                <label>{{tr "Name"}}</label>
+                <input type="text" name="name" placeholder="{{tr "EinsteinLightspeed1"}}">
             </div>
             <div class="field">
-                <label>分组</label>
-                <input type="text" name="Tag" placeholder="服务器分组">
+                <label>{{tr "Tag"}}</label>
+                <input type="text" name="Tag" placeholder="{{tr "ServerGroup"}}">
             </div>
             <div class="field">
-                <label>排序</label>
-                <input type="number" name="DisplayIndex" placeholder="越大越靠前">
+                <label>{{tr "DisplayIndex"}}</label>
+                <input type="number" name="DisplayIndex" placeholder="{{tr "TheLargerTheNumberTheHigherThePriority"}}">
             </div>
             <div class="secret field">
-                <label>密钥</label>
+                <label>{{tr "Secret"}}</label>
                 <input type="text" name="secret">
             </div>
             <div class="field">
-                <label>备注</label>
+                <label>{{tr "Note"}}</label>
                 <textarea name="Note"></textarea>
             </div>
 
             <div class="command field">
-                <label>Linux 一键安装</label>
+                <label>{{tr "LinuxOneKeyInstall"}}</label>
                 <div class="ui message">
                     {{if .Conf.GRPCHost}}
                     curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod
@@ -34,15 +34,15 @@
                         class="command">{{if .Conf.ProxyGRPCPort}}{{.Conf.ProxyGRPCPort}}{{else}}{{.Conf.GRPCPort}}{{end}}</code> <code
                         class="command hostSecret"></code> <code class="command">{{if .Conf.TLS}}--tls{{end}}</code>
                     {{else}}
-                    请先在设置页面配置 未接入CDN的面板服务器域名/IP
+                    {{tr "NoDomainAlert"}}
                     {{end}}
                 </div>
             </div>
         </form>
     </div>
     <div class=" actions">
-        <div class="ui negative button">取消</div>
-        <button class="ui positive nezha-primary-btn right labeled icon button">确认<i class="checkmark icon"></i>
+        <div class="ui negative button">{{tr "Cancel"}}</div>
+        <button class="ui positive nezha-primary-btn right labeled icon button">{{tr "Confirm"}}<i class="checkmark icon"></i>
         </button>
     </div>
 </div>
