@@ -433,12 +433,6 @@ other = "列表视图"
 [EnterPassword]
 other = "输入密码"
 
-[StatusTips]
-other = """
-状态更新和事件报告可能会延迟最多30秒
-这取决于技术原因。请向下滚动查看过去的活动报告
-"""
-
 [Location]
 other = "地区"
 

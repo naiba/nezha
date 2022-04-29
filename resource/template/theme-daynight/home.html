@@ -42,7 +42,7 @@
                     {{if .Admin}}
                     <li><a href="/server">{{tr "AdminPanel"}}</a></li>
                     {{else}}
-                    <li><a href="/login">{{tr Login}}</a></li>
+                    <li><a href="/login">{{tr "Login"}}</a></li>
                     {{end}}
                 </ul>
             </nav>
@@ -133,10 +133,10 @@
 
         <div class="sidebar-container">
             <ul>
-                <li><i class="fas fa-sun" title="白昼模式"></i><span>{{tr "LightMode"}}</span></li>
-                <li><i class="fas fa-moon" title="暗黑模式"></i><span>{{tr "DarkMode"}}</span></li>
-                <li><i class="fas fa-th" title="网格视图"></i><span>{{tr "GridLayout"}}</span></li>
-                <li><i class="fas fa-list-ul" title="列表视图"></i><span>{{tr "ListLayout"}}</span></li>
+                <li><i class="fas fa-sun" title='{{tr "LightMode"}}'></i><span>{{tr "LightMode"}}</span></li>
+                <li><i class="fas fa-moon" title='{{tr "DarkMode"}}'></i><span>{{tr "DarkMode"}}</span></li>
+                <li><i class="fas fa-th" title='{{tr "GridLayout"}}'></i><span>{{tr "GridLayout"}}</span></li>
+                <li><i class="fas fa-list-ul" title='{{tr "ListLayout"}}'></i><span>{{tr "ListLayout"}}</span></li>
             </ul>
         </div>
     </main>
