@@ -1,9 +1,9 @@
 {{define "common/menu"}}
 <div class="ui large top fixed menu nb-menu">
     <div class="ui container">
-        <div class="item">
+        <a class="item" href="/">
             <img src="/static/logo.svg?v20210804">
-        </div>
+        </a>
         {{if .IsAdminPage}}
         <a class='item{{if eq .MatchedPath "/server"}} active{{end}}' href="/server"><i class="server icon"></i>{{tr "Server"}}</a>
         <a class='item{{if eq .MatchedPath "/monitor"}} active{{end}}' href="/monitor"><i class="rss icon"></i>{{tr "Services"}}</a>
