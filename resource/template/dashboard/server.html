@@ -45,6 +45,9 @@
                             <i class="linux icon"></i>
                         </button>
                         <button class="ui icon mini button" data-tooltip="{{tr "NotSupportedYet"}}">
+                        <button class="ui icon green mini button"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 {{$.Conf.GRPCHost}}:{{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
+                            data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
                             <i class="windows icon"></i>
                         </button>
                         <button class="ui icon mini button" data-tooltip="{{tr "NotSupportedYet"}}">
@@ -74,7 +77,7 @@
 </div>
 {{template "component/server" .}}
 {{template "common/footer" .}}
-<script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
+<script src="https://fastly.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
 <script>
     var clipboard = new ClipboardJS('.ui.icon.green.mini.button');
     const checkBoxList = document.querySelectorAll('tbody > tr > td > input.nezha-servers[type=checkbox]')
