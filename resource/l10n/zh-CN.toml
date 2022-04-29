@@ -80,8 +80,8 @@ other = "秒"
 other = "启用故障通知"
 [IntroductionOfMonitor]
 other = """
-类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS协议的会顺带监控SSL证书)；
-类型为 <b>ICMP-Ping</b> 时输入主机名/IP，不带端口；
+类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS协议的会顺带监控SSL证书)；<br>
+类型为 <b>ICMP-Ping</b> 时输入主机名/IP，不带端口；<br>
 类型为 <b>TCP-Ping</b> 时输入主机名/IP + 端口号：example.com:22"""
 [AddNotificationMethod]
 other = "添加通知方式"
@@ -99,8 +99,6 @@ other = "验证SSL"
 other = "添加报警规则"
 [Rules]
 other = "规则"
-[NotificationMethod]
-other = "通知方式组"
 [Enable]
 other = "启用"
 [AddServer]
