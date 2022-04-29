@@ -5,17 +5,17 @@
     <div class="ui container">
         <form id="settingForm" class="ui large form" onsubmit="return false;">
             <div class="field">
-                <label>站点标题</label>
+                <label>{{tr "SiteTitle"}}</label>
                 <input type="text" name="Title" placeholder="{{tr "nezhaMonitor"}}" value="{{.Conf.Site.Brand}}">
             </div>
             <div class="field">
-                <label>管理员列表</label>
+                <label>{{tr "AdministratorList"}}</label>
                 <input type="text" name="Admin" placeholder="1010,2020" value="{{.Conf.Oauth2.Admin}}">
             </div>
             <div class="field">
-                <label>前台主题</label>
+                <label>{{tr "Theme"}}</label>
                 <select name="Theme">
-                    <option value="default" {{if eq .Conf.Site.Theme "default" }} selected="selected" {{end}}>默认主题
+                    <option value="default" {{if eq .Conf.Site.Theme "default" }} selected="selected" {{end}}>{{tr "DefaultTheme"}}
                     </option>
                     <option value="daynight" {{if eq .Conf.Site.Theme "daynight" }} selected="selected" {{end}}>
                         JackieSung DayNight</option>
@@ -25,51 +25,51 @@
                 </select>
             </div>
             <div class="field">
-                <label>自定义代码(style、script 都可以)</label>
+                <label>{{tr "CustomCodes"}}</label>
                 <textarea name="CustomCode">{{.Conf.Site.CustomCode}}</textarea>
             </div>
             <div class="field">
-                <label>前台查看密码</label>
+                <label>{{tr "AccessPassword"}}}</label>
                 <input type="text" name="ViewPassword" placeholder="" value="{{.Conf.Site.ViewPassword}}">
             </div>
             <div class="field">
-                <label>未接入CDN的面板服务器域名/IP</label>
+                <label>{{tr "PanelServerDomainAndIP"}}</label>
                 <input type="text" name="GRPCHost" placeholder="" value="{{.Conf.GRPCHost}}">
             </div>
             <div class="field">
-                <label>IP 变更提醒</label>
+                <label>{{tr "IPChangeAlert"}}</label>
             </div>
             <div class="ui segment">
                 <div class="field">
-                    <label>覆盖范围</label>
+                    <label>{{tr "Coverage"}}</label>
                     <select name="Cover" class="ui fluid dropdown">
-                        <option value=0>覆盖所有，仅特定服务器不提醒</option>
-                        <option value=1>忽略所有，仅提醒特定服务器</option>
+                        <option value=0>{{tr "AllIncludedOnlySpecificServersAreNotAlerted"}}</option>
+                        <option value=1>{{tr "IgnoreAllOnlyAlertSpecificServers"}}</option>
                     </select>
                 </div>
                 <div class="field">
-                    <label>特定服务器</label>
-                    <input type="text" name="IgnoredIPNotification" placeholder="服务器ID 以逗号隔开 1001,1002,1003"
+                    <label>{{tr "SpecificServers"}}</label>
+                    <input type="text" name="IgnoredIPNotification" placeholder="{{tr "ServerIDSeparatedByCommas"}} 1001,1002,1003"
                         value="{{.Conf.IgnoredIPNotification}}">
                 </div>
                 <div class="field">
-                    <label>提醒发送至指定的通知分组</label>
+                    <label>{{tr "IPChangeNotificationTag"}}</label>
                     <input type="text" name="IPChangeNotificationTag" placeholder="" value="{{.Conf.IPChangeNotificationTag}}">
                 </div>
                 <div class="field">
                     <div class="ui nf-ssl checkbox ip-change">
                         <input name="EnableIPChangeNotification" type="checkbox" tabindex="0" class="hidden">
-                        <label>启用</label>
+                        <label>{{tr "Enable"}}</label>
                     </div>
                 </div>
             </div>
             <div class="field">
                 <div class="ui nf-ssl checkbox plain-ip">
                     <input name="EnablePlainIPInNotification" type="checkbox" tabindex="0" class="hidden">
-                    <label>通知信息IP不打码</label>
+                    <label>{{tr "NotificationMessagesDoNotHideIP"}}</label>
                 </div>
             </div>
-            <button class="ui button" type="submit">保存</button>
+            <button class="ui button" type="submit">{{tr "Save"}}</button>
         </form>
     </div>
 </div>
@@ -81,7 +81,7 @@
                 if (resp.code == 200) {
                     $.suiAlert({
                         title: '',
-                        description: '修改成功',
+                        description: '{{tr "ModifiedSuccessfully"}}',
                         type: 'success',
                         time: '3',
                         position: 'top-center',

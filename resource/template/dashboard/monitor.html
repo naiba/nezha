@@ -5,7 +5,7 @@
     <div class="ui grid">
       <div class="right floated right aligned twelve wide column">
         <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditMonitor()">
-          <i class="add icon"></i> 添加服务
+          <i class="add icon"></i> {{tr "AddMonitor"}}
         </button>
       </div>
     </div>
@@ -13,15 +13,15 @@
       <thead>
         <tr>
           <th>ID</th>
-          <th>名称</th>
-          <th>目标</th>
-          <th>覆盖范围</th>
-          <th>特定服务器</th>
-          <th>类型</th>
-          <th>请求间隔</th>
-          <th>通知方式组</th>
-          <th>通知</th>
-          <th>管理</th>
+          <th>{{tr "Name"}}</th>
+          <th>{{tr "Target"}}</th>
+          <th>{{tr "Coverage"}}</th>
+          <th>{{tr "SpecificServers"}}</th>
+          <th>{{tr "Type"}}</th>
+          <th>{{tr "Duration"}}</th>
+          <th>{{tr "NotificationMethod"}}</th>
+          <th>{{tr "Notification"}}</th>
+          <th>{{tr "Administration"}}</th>
         </tr>
       </thead>
       <tbody>
@@ -30,13 +30,13 @@
           <td>{{$monitor.ID}}</td>
           <td>{{$monitor.Name}}</td>
           <td>{{$monitor.Target}}</td>
-          <td>{{if eq $monitor.Cover 0}}覆盖所有{{else}}忽略所有{{end}}</td>
+          <td>{{if eq $monitor.Cover 0}}{{tr "CoverAll"}}{{else}}{{tr "IgnoreAll"}}{{end}}</td>
           <td>{{$monitor.SkipServersRaw}}</td>
           <td>
-            {{if eq $monitor.Type 1}}HTTP(S)/SSL证书 {{else if eq $monitor.Type
-            2}} ICMP Ping {{else}} TCP 端口 {{end}}
+            {{if eq $monitor.Type 1}}{{tr "SSLCertificate"}} {{else if eq $monitor.Type
+            2}} ICMP Ping {{else}} {{tr "TCPPort"}} {{end}}
           </td>
-          <td>{{$monitor.Duration}}秒</td>
+          <td>{{$monitor.Duration}}{{tr "Seconds"}}</td>
           <td>{{$monitor.NotificationTag}}</td>
           <td>{{$monitor.Notify}}</td>
           <td>
@@ -45,7 +45,7 @@
                 <i class="edit icon"></i>
               </button>
               <button class="ui button"
-                onclick="showConfirm('删除服务','确认删除此服务？',deleteRequest,'/api/monitor/'+{{$monitor.ID}})">
+                onclick="showConfirm('{tr "DeleteService"}','{{tr "ConfirmToDeleteThisService"}}',deleteRequest,'/api/monitor/'+{{$monitor.ID}})">
                 <i class="trash alternate outline icon"></i>
               </button>
             </div>

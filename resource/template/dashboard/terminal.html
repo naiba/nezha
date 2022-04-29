@@ -84,12 +84,12 @@
         }
 
         socket.onclose = () => {
-            alert('Terminal 连接超时或会话已结束')
+            alert('{{tr "TerminalConnectionTimeOutOrSessionEnded"}}')
             window.close()
         }
 
         socket.onerror = () => {
-            alert('Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反代情况')
+            alert('{{tr "TerminalConnectionFailed"}}')
         }
     </script>
 </body>

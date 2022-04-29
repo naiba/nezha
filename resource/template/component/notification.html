@@ -1,15 +1,15 @@
 {{define "component/notification"}}
 <div class="ui tiny notification modal transition hidden">
-    <div class="header">添加通知方式</div>
+    <div class="header">{{tr "AddNotificationMethod"}}</div>
     <div class="content">
         <form id="notificationForm" class="ui form">
             <input type="hidden" name="ID">
             <div class="field">
-                <label>名称</label>
+                <label>{{tr "Name"}}</label>
                 <input type="text" name="Name">
             </div>
             <div class="field">
-                <label>分组</label>
+                <label>{{tr "Tag"}}</label>
                 <input type="text" name="Tag" placeholder="default">
             </div>
             <div class="field">
@@ -17,14 +17,14 @@
                 <input type="text" name="URL">
             </div>
             <div class="field">
-                <label>请求方式</label>
+                <label>{{tr "RequestMethod"}}</label>
                 <select name="RequestMethod" class="ui fluid dropdown">
                     <option value="1">GET</option>
                     <option value="2">POST</option>
                 </select>
             </div>
             <div class="field">
-                <label>请求类型</label>
+                <label>{{tr "RequestType"}}</label>
                 <select name="RequestType" class="ui fluid dropdown">
                     <option value="1">JSON</option>
                     <option value="2">FORM</option>
@@ -41,20 +41,20 @@
             <div class="field">
                 <div class="ui nf-ssl checkbox">
                     <input name="VerifySSL" type="checkbox" tabindex="0" class="hidden">
-                    <label>验证SSL</label>
+                    <label>{{tr "VerifySSL"}}</label>
                 </div>
             </div>
             <div class="field">
                 <div class="ui nf-skip-check checkbox">
                     <input name="SkipCheck" type="checkbox" tabindex="0" class="hidden">
-                    <label>不发送测试信息</label>
+                    <label>{{tr "DoNotSendTestMessages"}}</label>
                 </div>
             </div>
         </form>
     </div>
     <div class="actions">
-        <div class="ui negative button">取消</div>
-        <button class="ui positive nezha-primary-btn right labeled icon button">确认<i class="checkmark icon"></i>
+        <div class="ui negative button">{{tr "Cancel"}}</div>
+        <button class="ui positive nezha-primary-btn right labeled icon button">{{tr "Confirm"}}<i class="checkmark icon"></i>
         </button>
     </div>
 </div>

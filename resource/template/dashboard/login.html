@@ -6,12 +6,12 @@
             <h2 class="ui image header">
                 <img src="static/logo.svg?v20210804" class="image">
                 <div class="content">
-                    使用 {{.LoginType}} 账号登录
+                    {{tr "Use"}} {{.LoginType}} {{tr "AccountToLogin"}}
                 </div>
             </h2>
-            <a href="/oauth2/login" class="ui fluid large nezha-primary-btn submit button">登录</a>
+            <a href="/oauth2/login" class="ui fluid large nezha-primary-btn submit button">{{tr "Login"}}</a>
             <div class="ui message">
-                没有账号？ <a href="{{.RegistrationLink}}" target="_blank" rel="noopener noreferrer">注册</a>
+                {{tr "DontHaveAnAccount"}} <a href="{{.RegistrationLink}}" target="_blank" rel="noopener noreferrer">{{tr "SignUp"}}</a>
             </div>
         </div>
     </div>

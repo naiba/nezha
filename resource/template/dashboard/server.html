@@ -6,26 +6,26 @@
         <div class="ui grid">
             <div class="right floated right aligned twelve wide column">
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditServer()"><i
-                        class="add icon"></i> 添加主机
+                        class="add icon"></i> {{tr "AddServer"}}
                 </button>
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="forceUpdate()"><i
-                        class="arrow alternate circle up outline icon"></i> 强制更新
+                        class="arrow alternate circle up outline icon"></i> {{tr "ForceUpdate"}}
                 </button>
             </div>
         </div>
         <table class="ui very basic table">
             <thead>
                 <tr>
-                    <th><button onclick="checkAllServer()" class="ui mini nezha-primary-btn button">全选</button></th>
-                    <th>ID(排序)</th>
-                    <th>名称</th>
-                    <th>分组</th>
+                    <th><button onclick="checkAllServer()" class="ui mini nezha-primary-btn button">{{tr "SelectAll"}}</button></th>
+                    <th>ID({{tr "DisplayIndex"}})</th>
+                    <th>{{tr "Name"}}</th>
+                    <th>{{tr "Tag"}}</th>
                     <th>IP</th>
-                    <th>版本号</th>
-                    <th>密钥</th>
-                    <th>一键安装</th>
-                    <th>备注</th>
-                    <th>管理</th>
+                    <th>{{tr "VersionNumber"}}</th>
+                    <th>{{tr "Secret"}}</th>
+                    <th>{{tr "OneKeyInstall"}}</th>
+                    <th>{{tr "Note"}}</th>
+                    <th>{{tr "Administration"}}</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,14 +40,14 @@
                     <td>{{$server.Secret}}</td>
                     <td>
                         <button class="ui icon green mini button"
-                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}请先在设置页面配置 未接入CDN的面板服务器域名/IP{{end}}"
-                            data-tooltip="点击复制安装命令">
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
+                            data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
                             <i class="linux icon"></i>
                         </button>
-                        <button class="ui icon mini button" data-tooltip="尚未支持，请下载release手动安装">
+                        <button class="ui icon mini button" data-tooltip="{{tr "NotSupportedYet"}}">
                             <i class="windows icon"></i>
                         </button>
-                        <button class="ui icon mini button" data-tooltip="尚未支持，请下载release手动安装">
+                        <button class="ui icon mini button" data-tooltip="{{tr "NotSupportedYet"}}">
                             <i class="apple icon"></i>
                         </button>
                     </td>
@@ -61,7 +61,7 @@
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('删除主机','确认删除此主机？',deleteRequest,'/api/server/'+{{$server.ID}})">
+                                onclick="showConfirm('{{tr "DeleteServer"}}}','{{tr "ConfirmToDeleteThisServer"}}',deleteRequest,'/api/server/'+{{$server.ID}})">
                                 <i class="trash alternate outline icon"></i>
                             </button>
                         </div>
@@ -92,7 +92,7 @@
         })
         if (servers.length == 0) {
             $.suiAlert({
-                title: '当前没有选中的服务器',
+                title: '{{tr "NoServerSelected"}}',
                 description: '',
                 type: 'warning',
                 time: '2',
@@ -104,7 +104,7 @@
             .then((resp) => {
                 if (resp.code == 200) {
                     $.suiAlert({
-                        title: '执行结果',
+                        title: '{{tr "ExecutionResults"}}',
                         description: resp.message,
                         type: 'success',
                         time: '3',
