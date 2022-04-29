@@ -20,23 +20,23 @@
                   @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@
                   <i class="nezha-secondary-font info circle icon" style="height: 28px"></i>
                   <div class="ui content popup" style="margin-bottom: 0">
-                    {{tr "Platform"}}:@#server.Host.Platform#@-@#server.Host.PlatformVersion#@
+                    {{tr "Platform"}}: @#server.Host.Platform#@-@#server.Host.PlatformVersion#@
                     [<span
                       v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br />
-                    CPU:@#server.Host.CPU#@<br />
-                    {{tr "DiskUsed"}}:@#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
-                    {{tr "MemUsed"}}:@#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
-                    {{tr "SwapUsed"}}:@#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
-                    {{tr "NetTransfer"}}:<i
+                    CPU: @#server.Host.CPU#@<br />
+                    {{tr "DiskUsed"}}: @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
+                    {{tr "MemUsed"}}: @#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
+                    {{tr "SwapUsed"}}: @#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
+                    {{tr "NetTransfer"}}: <i
                       class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@<i
                       class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@<br />
-                      {{tr "Load"}}:@# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
+                      {{tr "Load"}}: @# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
                     toFixed2(server.State.Load15) #@<br />
-                    {{tr "ProcessCount"}}:@# server.State.ProcessCount #@<br />
-                    {{tr "ConnCount"}}:TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
-                    {{tr "BootTime"}}:@# formatTimestamp(server.Host.BootTime) #@<br />
-                    {{tr "LastActive"}}:@# new Date(server.LastActive).toLocaleString() #@<br />
-                    {{tr "Version"}}:@#server.Host.Version#@<br />
+                    {{tr "ProcessCount"}}: @# server.State.ProcessCount #@<br />
+                    {{tr "ConnCount"}}: TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
+                    {{tr "BootTime"}}: @# formatTimestamp(server.Host.BootTime) #@<br />
+                    {{tr "LastActive"}}: @# new Date(server.LastActive).toLocaleString() #@<br />
+                    {{tr "Version"}}: @#server.Host.Version#@<br />
                   </div>
                   <div class="ui divider" style="margin-bottom: 5px"></div>
                 </div>
@@ -163,7 +163,7 @@
       secondToDate(s) {
         var d = Math.floor(s / 3600 / 24);
         if (d > 0) {
-          return d + "{{tr "Day"}}"
+          return d + " {{tr "Day"}}"
         }
         var h = Math.floor(s / 3600 % 24);
         var m = Math.floor(s / 60 % 60);
