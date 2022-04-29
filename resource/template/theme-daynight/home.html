@@ -37,12 +37,12 @@
             </div>
             <nav class="nav-menu">
                 <ul>
-                    <li><a href="/">首页</a></li>
-                    <li><a href="/service">服务状态</a></li>
+                    <li><a href="/">{{tr "Home"}}</a></li>
+                    <li><a href="/service">{{tr "Services"}}</a></li>
                     {{if .Admin}}
-                    <li><a href="/server">管理后台</a></li>
+                    <li><a href="/server">{{tr "AdminPanel"}}</a></li>
                     {{else}}
-                    <li><a href="/login">登录</a></li>
+                    <li><a href="/login">{{tr "Login"}}</a></li>
                     {{end}}
                 </ul>
             </nav>
@@ -111,7 +111,7 @@
                         <li>
                             <div class="disk-bar">
                                 <div>
-                                    <h4>硬盘</h4>
+                                    <h4>{{tr "DiskUsed"}}</h4>
                                 </div>
                                 <div v-if="server.State"
                                     :class="formatPercent(server.live,server.State.DiskUsed, server.Host.DiskTotal).class"
@@ -133,10 +133,10 @@
 
         <div class="sidebar-container">
             <ul>
-                <li><i class="fas fa-sun" title="白昼模式"></i><span>白昼模式</span></li>
-                <li><i class="fas fa-moon" title="暗黑模式"></i><span>暗黑模式</span></li>
-                <li><i class="fas fa-th" title="网格视图"></i><span>网格视图</span></li>
-                <li><i class="fas fa-list-ul" title="列表视图"></i><span>列表视图</span></li>
+                <li><i class="fas fa-sun" title='{{tr "LightMode"}}'></i><span>{{tr "LightMode"}}</span></li>
+                <li><i class="fas fa-moon" title='{{tr "DarkMode"}}'></i><span>{{tr "DarkMode"}}</span></li>
+                <li><i class="fas fa-th" title='{{tr "GridLayout"}}'></i><span>{{tr "GridLayout"}}</span></li>
+                <li><i class="fas fa-list-ul" title='{{tr "ListLayout"}}'></i><span>{{tr "ListLayout"}}</span></li>
             </ul>
         </div>
     </main>
@@ -239,7 +239,7 @@
                 secondToDate(s) {
                     var d = Math.floor(s / 3600 / 24);
                     if (d > 0) {
-                        return d + "天"
+                        return d + "{{tr "Day"}}"
                     }
                     var h = Math.floor(s / 3600 % 24);
                     var m = Math.floor(s / 60 % 60);
@@ -261,8 +261,8 @@
             Swal.fire({
                 position: 'top',
                 icon: 'success',
-                title: '实时通道建立',
-                text: '可以实时获取最新监控数据啦',
+                title: '{{tr "RealtimeChannelEstablished"}}',
+                text: '{{tr "GetTheLatestMonitoringDataInRealTime"}}',
                 showConfirmButton: false,
                 timer: 2000
             });
@@ -288,8 +288,8 @@
             Swal.fire({
                 position: 'top',
                 icon: 'error',
-                title: '实时通道断开',
-                text: '无法实时获取最新监控数据咯',
+                title: '{{tr "RealtimeChannelDisconnect"}}',
+                text: '{{tr "CanNotGetTheLatestMonitoringDataInRealTime"}}',
                 showConfirmButton: false,
                 timer: 2000
             });

@@ -41,12 +41,12 @@
             </div>
             <nav class="nav-menu">
               <ul>
-                <li><a href="/">首页</a></li>
-                <li><a href="/service">服务状态</a></li>
+                <li><a href="/">{{tr "Home"}}</a></li>
+                <li><a href="/service">{{tr "Services"}}</a></li>
                 {{if .Admin}}
-                <li><a href="/server">管理后台</a></li>
+                <li><a href="/server">{{tr "AdminPanel"}}</a></li>
                 {{else}}
-                <li><a href="/login">登录</a></li>
+                <li><a href="/login">{{tr "Login"}}</a></li>
                 {{end}}
               </ul>
             </nav>
@@ -55,8 +55,8 @@
 
       <main>
         <section class="monitor-header">
-          <h2>服务状态</h2>
-          <h4>最近30天在线率</h4>
+          <h2>{{tr "Status"}}</h2>
+          <h4>{{tr "30DaysOnline"}}</h4>
         </section>
         <section class="monitor-container">
           {{range $service := .Services}}
@@ -86,10 +86,10 @@
       
       <div class="sidebar-container">
         <ul>
-          <li><i class="fas fa-sun" title="白昼模式"></i><span>白昼模式</span></li>
-          <li><i class="fas fa-moon" title="暗黑模式"></i><span>暗黑模式</span></li>
-          <li><i class="fas fa-th" title="网格视图"></i><span>网格视图</span></li>
-          <li><i class="fas fa-list-ul" title="列表视图"></i><span>列表视图</span></li>
+          <li><i class="fas fa-sun" title='{{tr "LightMode"}}'></i><span>{{tr "LightMode"}}</span></li>
+          <li><i class="fas fa-moon" title='{{tr "DarkMode"}}'></i><span>{{tr "DarkMode"}}</span></li>
+          <li><i class="fas fa-th" title='{{tr "GridLayout"}}'></i><span>{{tr "GridLayout"}}</span></li>
+          <li><i class="fas fa-list-ul" title='{{tr "ListLayout"}}'></i><span>{{tr "ListLayout"}}</span></li>
         </ul>
       </div>
 

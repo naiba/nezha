@@ -26,10 +26,10 @@
       <table class="mdui-table mdui-table-hoverable">
         <thead>
           <tr>
-            <th class="mdui-text-center">Name</th>
-            <th class="mdui-text-center" mdui-tooltip="{content: 'The status of last 30 days', position: 'top'}">SLA</th>
-            <th class="mdui-text-center">Details of Last 30 Days</th>
-            <th class="mdui-text-center">Now</th>
+            <th class="mdui-text-center">{{tr "Name"}}</th>
+            <th class="mdui-text-center" mdui-tooltip="{content: 'The status of last 30 days', position: 'top'}">{{tr "Availability"}}</th>
+            <th class="mdui-text-center">{{tr "30DaysOnline"}}</th>
+            <th class="mdui-text-center">{{tr "Status"}}</th>
           </tr>
         </thead>
         <tbody>
@@ -41,13 +41,13 @@
               {{range $i,$d := $service.Delay}}
                 {{$percent := (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}
                 {{if eq $percent 0.0}}
-                <i class="mdui-icon material-icons" mdui-tooltip="{content: '{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms'}">favorite_border</i>
+                <i class="mdui-icon material-icons" mdui-tooltip="{content: '{{dayBefore $i}},{{tr "Availability"}}:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%,{{tr "AverageLatency"}}:{{float32f $d}}ms'}">favorite_border</i>
                 {{else if ge $percent 95.0}}
-                <i class="mdui-icon material-icons mdui-text-color-red-a700" mdui-tooltip="{position: 'top', content: '{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms'}">favorite</i>
+                <i class="mdui-icon material-icons mdui-text-color-red-a700" mdui-tooltip="{position: 'top', content: '{{dayBefore $i}},{{tr "Availability"}}:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%,{{tr "AverageLatency"}}:{{float32f $d}}ms'}">favorite</i>
                 {{else if ge $percent 80.0}}
-                <i class="mdui-icon material-icons mdui-text-color-orange" mdui-tooltip="{content: '{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms'}">favorite</i>
+                <i class="mdui-icon material-icons mdui-text-color-orange" mdui-tooltip="{content: '{{dayBefore $i}},{{tr "Availability"}}:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%,{{tr "AverageLatency"}}:{{float32f $d}}ms'}">favorite</i>
                 {{else}}
-                <i class="mdui-icon material-icons mdui-text-color-black" mdui-tooltip="{content: '{{dayBefore $i}}，在线率:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%，平均延迟:{{float32f $d}}ms'}">favorite</i>
+                <i class="mdui-icon material-icons mdui-text-color-black" mdui-tooltip="{content: '{{dayBefore $i}},{{tr "Availability"}}:{{float32f (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}%,{{tr "AverageLatency"}}:{{float32f $d}}ms'}">favorite</i>
                 {{end}}
               {{end}}
             </td>
@@ -74,20 +74,20 @@
     </div>
 
     {{if .CycleTransferStats}}
-    <h2 class="mdui-m-t-5 mdui-text-center">Network Traffic Statistics</h2>
+    <h2 class="mdui-m-t-5 mdui-text-center">{{tr "CycleTransferStats"}}</h2>
     <div class="mdui-table-fluid">
       <table class="mdui-table mdui-table-hoverable">
         <thead>
           <tr>
             <th class="mdui-text-center">ID</th>
-            <th class="mdui-text-center">Rule</th>
-            <th class="mdui-text-center">Sever</th>
-            <th class="mdui-text-center">Date From</th>
-            <th class="mdui-text-center">Date To</th>
+            <th class="mdui-text-center">{{tr "Rules"}}</th>
+            <th class="mdui-text-center">{{tr "Server"}}</th>
+            <th class="mdui-text-center">{{tr "From"}}</th>
+            <th class="mdui-text-center">{{tr "To"}}</th>
             <th class="mdui-text-center">MAX</th>
             <th class="mdui-text-center">MIN</th>
-            <th class="mdui-text-center">Check Next</th>
-            <th class="mdui-text-center">Usage</th>
+            <th class="mdui-text-center">{{tr "NextCheck"}}</th>
+            <th class="mdui-text-center">{{tr "CurrentUsage"}}</th>
           </tr>
         </thead>
         <tbody>
