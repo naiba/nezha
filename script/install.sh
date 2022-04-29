@@ -125,7 +125,7 @@ before_show_menu() {
 
 install_base() {
     (command -v git >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v wget >/dev/null 2>&1 && command -v tar >/dev/null 2>&1) ||
-        (install_soft curl wget git tar)
+        (install_soft curl wget git unzip)
 }
 
 install_soft() {
@@ -205,7 +205,7 @@ install_agent() {
         echo -e "${red}Release 下载失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
         return 0
     fi
-    tar xf nezha-agent_linux_${os_arch}.zip &&
+    unzip nezha-agent_linux_${os_arch}.zip &&
         mv nezha-agent $NZ_AGENT_PATH &&
         rm -rf nezha-agent_linux_${os_arch}.zip README.md
 
