@@ -44,7 +44,9 @@
                             data-tooltip="点击复制安装命令">
                             <i class="linux icon"></i>
                         </button>
-                        <button class="ui icon mini button" data-tooltip="尚未支持，请下载release手动安装">
+                        <button class="ui icon green mini button"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 {{$.Conf.GRPCHost}}:{{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}请先在设置页面配置 未接入CDN的面板服务器域名/IP{{end}}"
+                            data-tooltip="点击复制安装命令">
                             <i class="windows icon"></i>
                         </button>
                         <button class="ui icon mini button" data-tooltip="尚未支持，请下载release手动安装">
