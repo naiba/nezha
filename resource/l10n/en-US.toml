@@ -323,133 +323,133 @@ other = "Terminal connection timeout or session ended"
 other = "Terminal connection failed, check reverse proxy for WebSocket connection on /terminal/* path"
 
 [Default]
-other = "默认"
+other = "Default"
 
 [Offline]
-other = "已离线"
+other = "Offline"
 
 [Platform]
-other = "系统"
+other = "Platform"
 
 [DiskUsed]
-other = "硬盘"
+other = "Disk"
 
 [MemUsed]
-other = "内存"
+other = "RAM"
 
 [SwapUsed]
-other = "交换"
+other = "Swap"
 
 [NetTransfer]
-other = "流量"
+other = "Data Transfer"
 
 [Load]
-other = "负载"
+other = "Load"
 
 [ProcessCount]
-other = "进程数"
+other = "Processes Count"
 
 [ConnCount]
-other = "连接数"
+other = "Connections Count"
 
 [BootTime]
-other = "启动"
+other = "Boot Time"
 
 [LastActive]
-other = "活动"
+other = "Last Active"
 
 [Version]
-other = "版本"
+other = "Version"
 
 [NetSpeed]
-other = "网络"
+other = "Network Speed"
 
 [Uptime]
-other = "在线"
+other = "Uptime"
 
 [ServerIsOffline]
-other = "节点已离线"
+other = "Server is offline"
 
 [Day]
-other = "天"
+other = "Day"
 
 [RealtimeChannelEstablished]
-other = "实时通道建立"
+other = "Real-time Channel Established"
 
 [GetTheLatestMonitoringDataInRealTime]
-other = "可以实时获取最新监控数据啦"
+other = "You can get the latest monitoring data in real-time!"
 
 [RealtimeChannelDisconnect]
-other = "实时通道断开"
+other = "Real-time Channel Disconnect"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
-other = "无法实时获取最新监控数据咯"
+other = "Unable to get the latest monitoring data in real-time!"
 
 [30DaysOnline]
-other = "30天在线率"
+other = "Last 30 days availability"
 
 [Details]
-other = "详情"
+other = "Details"
 
 [Status]
-other = "状态"
+other = "Status"
 
 [Availability]
-other = "在线率"
+other = "Availability"
 
 [AverageLatency]
-other = "平均延迟"
+other = "Average Latency"
 
 [CycleTransferStats]
-other = "循环流量统计"
+other = "Cycle Transfer Statistics"
 
 [From]
-other = "自"
+other = "From"
 
 [To]
-other = "至"
+other = "To"
 
 [NextCheck]
-other = "下次检查"
+other = "Next check"
 
 [CurrentUsage]
-other = "当前用量"
+other = "Current Usage"
 
 [VerifyPassword]
-other = "验证查看密码"
+other = "Verify Password"
 
 [LightMode]
-other = "白昼模式"
+other = "Light Mode"
 
 [DarkMode]
-other = "暗黑模式"
+other = "Dark Mode"
 
 [GridLayout]
-other = "网格视图"
+other = "Grid Layout"
 
 [ListLayout]
-other = "列表视图"
+other = "List Layout"
 
 [EnterPassword]
-other = "输入密码"
+other = "Enter password"
 
 [Location]
-other = "地区"
+other = "Location"
 
 [Running]
-other = "运行中"
+other = "Running"
 
 [UpNetTransfer]
-other = "上行"
+other = "Outbound"
 
 [DownNetTransfer]
-other = "下行"
+other = "Inbound"
 
 [TotalUpNetTransfer]
-other = "总上行"
+other = "Total Outbound"
 
 [TotalDownNetTransfer]
-other = "总下行"
+other = "Total Inbound"
 
 [WrongPassword]
-other = "密码错误"
+other = "Incorrect Password"
