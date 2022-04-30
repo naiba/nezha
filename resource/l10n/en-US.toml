@@ -457,8 +457,8 @@ other = "An error occurred"
 [SystemError]
 other = "System Error"
 
-[NetowrkError]
-other = "Network Error"
+[NetworkError]
+other = "网络错误"
 
 [ServicesStatus]
 other = "Services Status"
