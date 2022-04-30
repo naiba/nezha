@@ -491,7 +491,7 @@ other = "Alarm Rule"
 other = "Notification Method"
 
 [Incident]
-other = "Down"
+other = "Incident"
 
 [Resolved]
 other = "Resolved"
