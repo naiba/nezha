@@ -15,22 +15,18 @@
             <div class="field">
                 <label>{{tr "Theme"}}</label>
                 <select name="Theme">
-                    <option value="default" {{if eq .Conf.Site.Theme "default" }} selected="selected" {{end}}>{{tr "DefaultTheme"}}
-                    </option>
-                    <option value="daynight" {{if eq .Conf.Site.Theme "daynight" }} selected="selected" {{end}}>
-                        JackieSung DayNight</option>
-                    <option value="hotaru" {{if eq .Conf.Site.Theme "hotaru" }} selected="selected" {{end}}>CokeMine
-                        Hotaru</option>
-                    <option value="mdui" {{if eq .Conf.Site.Theme "mdui" }} selected="selected" {{end}}>Neko Mdui</option>
+                    {{range $k,$v := .Themes}}
+                    <option value="{{$k}}" {{if eq $.Conf.Site.Theme $k }} selected="selected" {{end}}>{{$v}}
+                    {{end}}
                 </select>
             </div>
             <div class="field">
                 <label>Language</label>
                 <select name="Language">
-                    <option value="zh-CN" {{if eq .Conf.Language "zh-CN" }} selected="selected" {{end}}>
-                        简体中文</option>
-                    <option value="en-US" {{if eq .Conf.Language "en-US" }} selected="selected" {{end}}>
-                        English</option>
+                    {{range $k,$v := .Languages}}
+                    <option value="{{$k}}" {{if eq $.Conf.Language $k }} selected="selected" {{end}}>
+                        {{$v}}</option>
+                    {{end}}
                 </select>
             </div>
             <div class="field">

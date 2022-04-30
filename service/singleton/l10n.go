@@ -4,9 +4,10 @@ import (
 	"log"
 
 	"github.com/BurntSushi/toml"
-	"github.com/naiba/nezha/pkg/utils"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/text/language"
+
+	"github.com/naiba/nezha/model"
 )
 
 var Localizer *i18n.Localizer
@@ -15,13 +16,11 @@ func InitLocalizer() {
 	bundle := i18n.NewBundle(language.Chinese)
 	bundle.RegisterUnmarshalFunc("toml", toml.Unmarshal)
 
-	userCustomLanguageFile := "resource/l10n/" + Conf.Language + ".toml"
-
-	if exists, err := utils.PathExists(userCustomLanguageFile); !exists {
-		log.Println("NEZHA>> language file not found:", userCustomLanguageFile, err)
+	if _, exists := model.Languages[Conf.Language]; !exists {
+		log.Println("NEZHA>> language not exists:", Conf.Language)
 		Conf.Language = "zh-CN"
 	} else {
-		_, err := bundle.LoadMessageFile(userCustomLanguageFile)
+		_, err := bundle.LoadMessageFile("resource/l10n/" + Conf.Language + ".toml")
 		if err != nil {
 			panic(err)
 		}

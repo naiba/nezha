@@ -69,6 +69,8 @@ func (mp *memberPage) notification(c *gin.Context) {
 
 func (mp *memberPage) setting(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard/setting", mygin.CommonEnvironment(c, gin.H{
-		"Title": singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Settings"}),
+		"Title":     singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Settings"}),
+		"Languages": model.Languages,
+		"Themes":    model.Themes,
 	}))
 }

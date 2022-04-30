@@ -22,9 +22,17 @@
 | <div align="center"><b>Default modified <a href="https://ii.do/43.html">[Guide]</a></b></div> | <div align="center"><b>Neko Mdui <a href="https://github.com/MikoyChinese">@MikoyChinese</a></b></div> |                                                                            |
 | ![默认主题魔改](https://fastly.jsdelivr.net/gh/idarku/img@main/me/1631120192341.webp)       | ![Neko Mdui](resource/template/theme-mdui/screenshot.png)                                              |                                                                            |
 
-## User Guide
+## Supported Languages
 
-[![Crowdin](https://badges.crowdin.net/nezha/localized.svg)](https://crowdin.com/project/nezha)
+Help us improve translation [![Crowdin](https://badges.crowdin.net/nezha/localized.svg)](https://crowdin.com/project/nezha)
+
+- English
+- 简体中文
+- Español _WIP_
+
+You can change the system language in the settings page (`/setting`) after the admin panel is installed.
+
+## User Guide
 
 - [English](docs/UserGuide_en.md)
 - [中文文档](docs/UserGuide_zh.md)
