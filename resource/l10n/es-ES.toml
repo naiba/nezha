@@ -476,37 +476,37 @@ other = "Esta página requiere un acceso"
 other = "Contraseña de acceso incorrecta"
 
 [Add]
-other = "添加"
+other = "Añadir"
 
 [Edit]
-other = "修改"
+other = "Modificar"
 
 [AlarmRule]
-other = "报警规则"
+other = "Reglas de notificación"
 
 [NotificationMethod]
-other = "通知方式"
+other = "Método de notificación"
 
 [Incident]
-other = "故障"
+other = "Incidente"
 
 [Resolved]
-other = "恢复"
+other = "Resuelto"
 
 [StatusNoData]
-other = "无数据"
+other = "No hay datos disponibles"
 
 [StatusGood]
-other = "良好"
+other = "Buena"
 
 [StatusLowAvailability]
-other = "低可用"
+other = "Baja disponibilidad"
 
 [ScheduledTaskExecutedSuccessfully]
-other = "任务成功"
+other = "Tarea ejecutada con éxito"
 
 [ScheduledTaskExecutedFailed]
-other = "任务失败"
+other = "Tarea ejecutada fallida"
 
 [IPChanged]
-other = "IP变更"
+other = "Cambio de IP"
