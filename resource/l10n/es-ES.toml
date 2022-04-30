@@ -8,10 +8,10 @@ other = "Servidores"
 other = "Servicios"
 
 [Task]
-other = "Tarea"
+other = "Tareas"
 
 [Notification]
-other = "Notificación"
+other = "Notificaciones"
 
 [Settings]
 other = "Ajustes"
@@ -32,7 +32,7 @@ other = "Cerrar sesión"
 other = "Iniciar sesión"
 
 [ConfirmLogout]
-other = "¿Confirmación del cierre de sesión?"
+other = "¿Confirma que queire cierre de sesión?"
 
 [AfterLoggingOutYouHaveToLoginAgain]
 other = "Después de cerrar la sesión, debe volver a iniciar la sesión para utilizar"
@@ -200,7 +200,7 @@ other = "Ignora todo"
 other = "Eliminar la tarea programada"
 
 [ConfirmToDeleteThisScheduledTask]
-other = "¿Confirma que quieres eliminar esta tarea programada?"
+other = "¿Confirma que quiere eliminar esta tarea programada?"
 
 [AccessDenied]
 other = "Acceso denegado"
@@ -227,13 +227,13 @@ other = "Puerto TCP"
 other = "Eliminar un servicio"
 
 [ConfirmToDeleteThisService]
-other = "¿Confirma que quieres eliminar este servicio?"
+other = "¿Confirma que quiere eliminar este servicio?"
 
 [DeleteNotificationMethod]
 other = "Eliminar un método de notificación"
 
 [ConfirmToDeleteThisNotificationMethod]
-other = "¿Confirma que quieres eliminar este método de notificación?"
+other = "¿Confirma que quiere eliminar este método de notificación?"
 
 [ForceUpdate]
 other = "Actualizaciones forzosas"
@@ -254,7 +254,7 @@ other = "Haga clic para copiar el comando de instalación"
 other = "Eliminar el servidor"
 
 [ConfirmToDeleteThisServer]
-other = "¿Confirma que quieres eliminar este servidor?"
+other = "¿Confirma que quiere eliminar este servidor?"
 
 [NoServerSelected]
 other = "No hay servidores seleccionados actualmente"
