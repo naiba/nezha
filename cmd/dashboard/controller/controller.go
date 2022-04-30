@@ -26,116 +26,7 @@ func ServeWeb(port uint) *http.Server {
 		pprof.Register(r)
 	}
 	r.Use(mygin.RecordPath)
-	r.SetFuncMap(template.FuncMap{
-		"tr": func(id string, dataAndCount ...interface{}) string {
-			conf := i18n.LocalizeConfig{
-				MessageID: id,
-			}
-			if len(dataAndCount) > 0 {
-				conf.TemplateData = dataAndCount[0]
-			}
-			if len(dataAndCount) > 1 {
-				conf.PluralCount = dataAndCount[1]
-			}
-			return singleton.Localizer.MustLocalize(&conf)
-		},
-		"toValMap": func(val interface{}) map[string]interface{} {
-			return map[string]interface{}{
-				"Value": val,
-			}
-		},
-		"tf": func(t time.Time) string {
-			return t.In(singleton.Loc).Format("2006年1月2号 15:04:05")
-		},
-		"len": func(slice []interface{}) string {
-			return strconv.Itoa(len(slice))
-		},
-		"safe": func(s string) template.HTML {
-			return template.HTML(s) // #nosec
-		},
-		"tag": func(s string) template.HTML {
-			return template.HTML(`<` + s + `>`) // #nosec
-		},
-		"stf": func(s uint64) string {
-			return time.Unix(int64(s), 0).In(singleton.Loc).Format("2006年1月2号 15:04")
-		},
-		"sf": func(duration uint64) string {
-			return time.Duration(time.Duration(duration) * time.Second).String()
-		},
-		"sft": func(future time.Time) string {
-			return time.Until(future).Round(time.Second).String()
-		},
-		"bf": func(b uint64) string {
-			return bytefmt.ByteSize(b)
-		},
-		"ts": func(s string) string {
-			return strings.TrimSpace(s)
-		},
-		"float32f": func(f float32) string {
-			return fmt.Sprintf("%.2f", f)
-		},
-		"divU64": func(a, b uint64) float32 {
-			if b == 0 {
-				if a > 0 {
-					return 100
-				}
-				return 0
-			}
-			if a == 0 {
-				// 这是从未在线的情况
-				return 0.00001 / float32(b) * 100
-			}
-			return float32(a) / float32(b) * 100
-		},
-		"div": func(a, b int) float32 {
-			if b == 0 {
-				if a > 0 {
-					return 100
-				}
-				return 0
-			}
-			if a == 0 {
-				// 这是从未在线的情况
-				return 0.00001 / float32(b) * 100
-			}
-			return float32(a) / float32(b) * 100
-		},
-		"addU64": func(a, b uint64) uint64 {
-			return a + b
-		},
-		"add": func(a, b int) int {
-			return a + b
-		},
-		"dayBefore": func(i int) string {
-			year, month, day := time.Now().Date()
-			today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
-			return today.AddDate(0, 0, i-29).Format("1月2号")
-		},
-		"className": func(percent float32) string {
-			if percent == 0 {
-				return ""
-			}
-			if percent > 95 {
-				return "good"
-			}
-			if percent > 80 {
-				return "warning"
-			}
-			return "danger"
-		},
-		"statusName": func(percent float32) string {
-			if percent == 0 {
-				return "无数据"
-			}
-			if percent > 95 {
-				return "良好"
-			}
-			if percent > 80 {
-				return "低可用"
-			}
-			return "故障"
-		},
-	})
+	r.SetFuncMap(funcMap)
 	r.Static("/static", "resource/static")
 	r.LoadHTMLGlob("resource/template/**/*.html")
 	routers(r)
@@ -175,4 +66,115 @@ func routers(r *gin.Engine) {
 		ma := &memberAPI{api}
 		ma.serve()
 	}
+}
+
+var funcMap = template.FuncMap{
+	"tr": func(id string, dataAndCount ...interface{}) string {
+		conf := i18n.LocalizeConfig{
+			MessageID: id,
+		}
+		if len(dataAndCount) > 0 {
+			conf.TemplateData = dataAndCount[0]
+		}
+		if len(dataAndCount) > 1 {
+			conf.PluralCount = dataAndCount[1]
+		}
+		return singleton.Localizer.MustLocalize(&conf)
+	},
+	"toValMap": func(val interface{}) map[string]interface{} {
+		return map[string]interface{}{
+			"Value": val,
+		}
+	},
+	"tf": func(t time.Time) string {
+		return t.In(singleton.Loc).Format("2006年1月2号 15:04:05")
+	},
+	"len": func(slice []interface{}) string {
+		return strconv.Itoa(len(slice))
+	},
+	"safe": func(s string) template.HTML {
+		return template.HTML(s) // #nosec
+	},
+	"tag": func(s string) template.HTML {
+		return template.HTML(`<` + s + `>`) // #nosec
+	},
+	"stf": func(s uint64) string {
+		return time.Unix(int64(s), 0).In(singleton.Loc).Format("2006年1月2号 15:04")
+	},
+	"sf": func(duration uint64) string {
+		return time.Duration(time.Duration(duration) * time.Second).String()
+	},
+	"sft": func(future time.Time) string {
+		return time.Until(future).Round(time.Second).String()
+	},
+	"bf": func(b uint64) string {
+		return bytefmt.ByteSize(b)
+	},
+	"ts": func(s string) string {
+		return strings.TrimSpace(s)
+	},
+	"float32f": func(f float32) string {
+		return fmt.Sprintf("%.2f", f)
+	},
+	"divU64": func(a, b uint64) float32 {
+		if b == 0 {
+			if a > 0 {
+				return 100
+			}
+			return 0
+		}
+		if a == 0 {
+			// 这是从未在线的情况
+			return 0.00001 / float32(b) * 100
+		}
+		return float32(a) / float32(b) * 100
+	},
+	"div": func(a, b int) float32 {
+		if b == 0 {
+			if a > 0 {
+				return 100
+			}
+			return 0
+		}
+		if a == 0 {
+			// 这是从未在线的情况
+			return 0.00001 / float32(b) * 100
+		}
+		return float32(a) / float32(b) * 100
+	},
+	"addU64": func(a, b uint64) uint64 {
+		return a + b
+	},
+	"add": func(a, b int) int {
+		return a + b
+	},
+	"dayBefore": func(i int) string {
+		year, month, day := time.Now().Date()
+		today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+		return today.AddDate(0, 0, i-29).Format("1月2号")
+	},
+	"className": func(percent float32) string {
+		if percent == 0 {
+			return ""
+		}
+		if percent > 95 {
+			return "good"
+		}
+		if percent > 80 {
+			return "warning"
+		}
+		return "danger"
+	},
+	"statusName": func(percent float32) string {
+		if percent == 0 {
+			return "无数据"
+		}
+		if percent > 95 {
+			return "良好"
+		}
+		if percent > 80 {
+			return "低可用"
+		}
+		return "故障"
+	},
 }

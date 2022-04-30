@@ -1,15 +1,21 @@
 {{define "common/footer"}}
 <div class="ui inverted vertical footer segment">
     <div class="ui center aligned is-size-7 container">
-        <b>&copy; <a style="color: white;" href="/">{{.Conf.Site.Brand}}</a></b> | <small>Powered by <a href="https://github.com/naiba/nezha"
-                style="color: white;" target="_blank">{{tr "nezhaMonitor"}}</a> {{.Version}}</small>
+        <b>&copy; <a style="color: white;" href="/">{{.Conf.Site.Brand}}</a></b> | <small>Powered by <a
+                href="https://github.com/naiba/nezha" style="color: white;" target="_blank">{{tr "NezhaMonitoring"}}</a>
+            {{.Version}}</small>
     </div>
 </div>
 <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.4.1/jquery.min.js"></script>
 <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/semantic-ui/2.4.1/semantic.min.js"></script>
 <script src="/static/semantic-ui-alerts.min.js"></script>
 <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.12/vue.min.js"></script>
-<script src="/static/main.js?v20220423"></script>
+<script src="/static/main.js?v20220430"></script>
+<script>
+    (function () {
+        updateLang({{.LANG }});
+    })();
+</script>
 </body>
 
 </html>

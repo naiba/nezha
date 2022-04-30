@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.12.30&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.9.0-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.13.1&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.9.1-brightgreen?style=for-the-badge&logo=linux">&nbsp;<a title="Crowdin" target="_blank" href="https://crowdin.com/project/nezha"><img src="https://badges.crowdin.net/nezha/localized.svg"></a>
   <br>
   <br>
   <p>:trollface: <b>Nezha Monitoring</b> One-stop light monitoring and light operation and maintenance system. Supports system status, HTTP (SSL certificate change, upcoming expiration, expiration), TCP, Ping monitoring and alarm, scheduled tasks and web terminal.</p>
@@ -14,7 +14,7 @@
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器， 机器人自动审核**
 
-\>> [Use Cases | 我们的用户](https://www.google.com/search?q="powered+by+哪吒监控"&filter=0) (Google)
+\>> [Use Cases | 我们的用户](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22+OR+%22powered+by+Nezha+Monitoring%22&filter=0) (Google)
 
 | Default Theme                                                                                 | DayNight [@JackieSung](https://github.com/JackieSung4ev)                                               | hotaru                                                                     |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -25,7 +25,7 @@
 ## User Guide
 
 - [中文文档](docs/UserGuide_zh.md)
-- [English](docs/UserGuide_en.md)
+- [English](docs/UserGuide_en.md) WIP
 
 ## Special Thanks
 
@@ -33,6 +33,6 @@
 - [@Erope](https://github.com/JackieSung4ev) for contributed a lot to our installation scripts and community building.
 - [@MikoyChinese](https://github.com/MikoyChinese) for our second community-contributed front-end theme.
 - [@AkkiaS7](https://github.com/Akkia) and [hhhkkk520](https://github.com/hhhkkk520) for the excellent contribution in the early days of globalization.
-- [@dysf888](https://gitub.com/dysf888) for the installation script in windows.
+- [@dysf888](https://gitub.com/dysf888) for the installation script in Windows.
 - [@MartijnLindeman](https://github.com/MartijnLindeman) for his perseverance has taken us to the international market.
 - and other [contributors](https://github.com/naiba/nezha/graphs/contributors).

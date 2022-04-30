@@ -1,5 +1,6 @@
 debug: false
 httpport: 80
+language: nz_language
 grpcport: nz_grpc_port
 oauth2:
   type: "nz_oauth2_type" #Oauth2 登录接入类型，gitee/github

@@ -108,7 +108,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	}
 	var isAdmin bool
 	for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
-		if admin != "" && gu.GetLogin() == admin {
+		if admin != "" && strings.ToLower(gu.GetLogin()) == strings.ToLower(admin) {
 			isAdmin = true
 			break
 		}
