@@ -1,5 +1,5 @@
 [NezhaMonitoring]
-other = "哪吒监控"
+other = "Nezha Monitoring"
 
 [Server]
 other = "Servers"
@@ -77,7 +77,7 @@ other = "Specific Servers"
 other = "Input Server ID/Name to search"
 
 [NotificationMethodGroup]
-other = "通知方式组"
+other = "Notification Group"
 
 [PushSuccessMessages]
 other = "Send Success Notification"
@@ -368,7 +368,7 @@ other = "Uptime"
 other = "Server is offline"
 
 [Day]
-other = "Day"
+other = "Days"
 
 [RealtimeChannelEstablished]
 other = "Real-time Channel Established"
@@ -452,40 +452,40 @@ other = "Total Inbound"
 other = "Incorrect Password"
 
 [AnErrorEccurred]
-other = "出现错误"
+other = "An error occurred"
 
 [SystemError]
-other = "系统错误"
+other = "System Error"
 
 [NetowrkError]
-other = "网络错误"
+other = "Network Error"
 
 [ServicesStatus]
-other = "服务状态"
+other = "Services Status"
 
 [ServersManagement]
-other = "服务器管理"
+other = "Servers"
 
 [ServicesManagement]
-other = "服务监控"
+other = "Services"
 
 [ScheduledTasks]
-other = "计划任务"
+other = "Scheduled Tasks"
 
 [YouAreNotAuthorized]
-other = "此页面需要登录"
+other = "You are not authorized"
 
 [WrongAccessPassword]
-other = "查看密码错误"
+other = "Wrong access password"
 
 [Add]
-other = "添加"
+other = "Add"
 
 [Edit]
-other = "修改"
+other = "Edit"
 
 [AlarmRule]
-other = "报警规则"
+other = "Alarm Rule"
 
 [NotificationMethod]
-other = "通知方式"
+other = "Notification Method"
