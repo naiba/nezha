@@ -29,7 +29,7 @@ other = "Panel de administración"
 other = "Cerrar sesión"
 
 [Login]
-other = "Inicia sesión"
+other = "Iniciar sesión"
 
 [ConfirmLogout]
 other = "¿Confirmación del cierre de sesión?"
@@ -152,154 +152,154 @@ other = "Reglas"
 other = "Activar"
 
 [AddServer]
-other = "添加服务器"
+other = "Añadir un servidor"
 
 [ServerGroup]
-other = "服务器分组"
+other = "Grupos de servidores"
 
 [EinsteinLightspeed1]
-other = "爱因斯坦-光速1号"
+other = "Einstein - Velocidad de la luz 1"
 
 [DisplayIndex]
-other = "排序"
+other = "Índice de visualización"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "越大越靠前"
+other = "Un índice mayor se clasificará antes"
 
 [Secret]
-other = "密钥"
+other = "Clave"
 
 [Note]
-other = "备注"
+other = "Nota"
 
 [LinuxOneKeyInstall]
-other = "Linux 一键安装"
+other = "Linux Instalación con un solo clic"
 
 [NoDomainAlert]
-other = "请先在设置页面配置 未接入CDN的面板服务器域名/IP"
+other = "Por favor, configure el dominio o IP del servidor del panel que no está conectado a la CDN en la página de configuración"
 
 [PushSuccessfully]
-other = "成功推送"
+other = "Enviado correctamente"
 
 [LastExecution]
-other = "最后执行"
+other = "Última ejecución"
 
 [LastResult]
-other = "最后结果"
+other = "Resultado final"
 
 [Administration]
-other = "管理"
+other = "Administración"
 
 [CoverAll]
-other = "覆盖所有"
+other = "Cubriendo todo"
 
 [IgnoreAll]
-other = "忽略所有"
+other = "Ignora todo"
 
 [DeleteScheduledTask]
-other = "删除计划任务"
+other = "Eliminar la tarea programada"
 
 [ConfirmToDeleteThisScheduledTask]
-other = "确认删除此计划任务？"
+other = "¿Confirma que quieres eliminar esta tarea programada?"
 
 [AccessDenied]
-other = "访问受限"
+other = "Acceso denegado"
 
 [Use]
-other = "使用"
+other = "Utiliza"
 
 [AccountToLogin]
-other = "账号登录"
+other = "Acceder a la cuenta"
 
 [SignUp]
-other = "注册"
+other = "Regístrate"
 
 [DontHaveAnAccount]
-other = "没有账号？"
+other = "¿No tiene la cuenta?"
 
 [SSLCertificate]
-other = "HTTP(S)/SSL证书"
+other = "Certificados HTTP(S)/SSL"
 
 [TCPPort]
-other = "TCP 端口"
+other = "Puerto TCP"
 
 [DeleteService]
-other = "删除服务"
+other = "Eliminar un servicio"
 
 [ConfirmToDeleteThisService]
-other = "确认删除此服务？"
+other = "¿Confirma que quieres eliminar este servicio?"
 
 [DeleteNotificationMethod]
-other = "删除通知方式"
+other = "Eliminar un método de notificación"
 
 [ConfirmToDeleteThisNotificationMethod]
-other = "确认删除此通知方式？"
+other = "¿Confirma que quieres eliminar este método de notificación?"
 
 [ForceUpdate]
-other = "强制更新"
+other = "Actualizaciones forzosas"
 
 [SelectAll]
-other = "全选"
+other = "Seleccionar todo"
 
 [VersionNumber]
-other = "版本号"
+other = "Número de versión"
 
 [OneKeyInstall]
-other = "一键安装"
+other = "Instalación con un solo clic"
 
 [ClickToCopyTheInstallationCommand]
-other = "点击复制安装命令"
+other = "Haga clic para copiar el comando de instalación"
 
 [DeleteServer]
-other = "删除主机"
+other = "Eliminar el servidor"
 
 [ConfirmToDeleteThisServer]
-other = "确认删除此主机？"
+other = "¿Confirma que quieres eliminar este servidor?"
 
 [NoServerSelected]
-other = "当前没有选中的服务器"
+other = "No hay servidores seleccionados actualmente"
 
 [ExecutionResults]
-other = "执行结果"
+other = "Resultados de la ejecución"
 
 [SiteTitle]
-other = "站点标题"
+other = "Título del sitio"
 
 [AdministratorList]
-other = "管理员列表"
+other = "Lista de administradores"
 
 [Theme]
-other = "主题"
+other = "Temas"
 
 [CustomCodes]
-other = "自定义代码(style、script 都可以)"
+other = "Códigos personalizados"
 
 [AccessPassword]
-other = "前台查看密码"
+other = "Contraseña de acceso"
 
 [PanelServerDomainAndIP]
-other = "未接入CDN的面板服务器域名/IP"
+other = "El dominio o IP del servidor del panel no está conectado a la CDN"
 
 [IPChangeAlert]
-other = "IP 变更提醒"
+other = "Alerta de cambio de IP"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
-other = "覆盖所有，仅特定服务器不提醒"
+other = "Cubrir todo, ignorar sólo servidores específicos"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "忽略所有，仅提醒特定服务器"
+other = "Omitir todo, notificar sólo a los servidores específicos"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
-other = "忽略所有，仅通过特定服务器请求"
+other = "Omitir todos los servidores, sólo enviar peticiones a través de servidores específicos"
 
 [AllIncludedOnlySpecificServersAreNotRequest]
-other = "覆盖所有，仅特定服务器不请求"
+other = "Enviar peticiones de todos los servidores, omitir sólo servidores específicos"
 
 [ServerIDSeparatedByCommas]
-other = "服务器ID 以逗号隔开"
+other = "ID del servidor separado por una coma"
 
 [IPChangeNotificationTag]
-other = "提醒发送至指定的通知分组"
+other = "Enviar una notificación al grupo de notificación especificado"
 
 [NotificationMessagesDoNotHideIP]
 other = "No se oculta la IP en los mensajes de notificación"
@@ -452,28 +452,28 @@ other = "Contraseña incorrecta"
 other = "Ha ocurrido un error"
 
 [SystemError]
-other = "系统错误"
+other = "Error del sistema"
 
 [NetworkError]
-other = "网络错误"
+other = "Error de red"
 
 [ServicesStatus]
-other = "服务状态"
+other = "Estado del servicio"
 
 [ServersManagement]
-other = "服务器管理"
+other = "Gestión de servidores"
 
 [ServicesManagement]
-other = "服务监控"
+other = "Monitorización del servicio"
 
 [ScheduledTasks]
-other = "计划任务"
+other = "Tareas programadas"
 
 [YouAreNotAuthorized]
-other = "此页面需要登录"
+other = "Esta página requiere un acceso"
 
 [WrongAccessPassword]
-other = "查看密码错误"
+other = "Contraseña de acceso incorrecta"
 
 [Add]
 other = "添加"
