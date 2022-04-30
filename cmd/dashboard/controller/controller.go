@@ -87,7 +87,7 @@ var funcMap = template.FuncMap{
 		}
 	},
 	"tf": func(t time.Time) string {
-		return t.In(singleton.Loc).Format("02/01/2006 15:04:05")
+		return t.In(singleton.Loc).Format("01/02/2006 15:04:05")
 	},
 	"len": func(slice []interface{}) string {
 		return strconv.Itoa(len(slice))
@@ -99,7 +99,7 @@ var funcMap = template.FuncMap{
 		return template.HTML(`<` + s + `>`) // #nosec
 	},
 	"stf": func(s uint64) string {
-		return time.Unix(int64(s), 0).In(singleton.Loc).Format("02/01/2006 15:04")
+		return time.Unix(int64(s), 0).In(singleton.Loc).Format("01/02/2006 15:04")
 	},
 	"sf": func(duration uint64) string {
 		return time.Duration(time.Duration(duration) * time.Second).String()
@@ -114,7 +114,7 @@ var funcMap = template.FuncMap{
 		return strings.TrimSpace(s)
 	},
 	"float32f": func(f float32) string {
-		return fmt.Sprintf("%.2f", f)
+		return fmt.Sprintf("%.3f", f)
 	},
 	"divU64": func(a, b uint64) float32 {
 		if b == 0 {
@@ -151,7 +151,7 @@ var funcMap = template.FuncMap{
 	"dayBefore": func(i int) string {
 		year, month, day := time.Now().Date()
 		today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
-		return today.AddDate(0, 0, i-29).Format("02/01")
+		return today.AddDate(0, 0, i-29).Format("01/02")
 	},
 	"className": func(percent float32) string {
 		if percent == 0 {
