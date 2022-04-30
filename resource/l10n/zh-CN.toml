@@ -271,9 +271,6 @@ other = "管理员列表"
 [Theme]
 other = "主题"
 
-[DefaultTheme]
-other = "默认主题"
-
 [CustomCodes]
 other = "自定义代码(style、script 都可以)"
 
