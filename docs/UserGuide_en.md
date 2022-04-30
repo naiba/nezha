@@ -1,138 +1,138 @@
 # User Guide
 
-## 安装脚本
+## install script
 
-**推荐配置：** 安装前准备 _两个域名_，一个可以 **接入 CDN** 作为 _公开访问_，比如 (status.nai.ba)；另外一个解析到面板服务器作为 Agent 连接 Dashboard 使用，**不能接入 CDN** 直接暴露面板主机 IP，比如（ip-to-dashboard.nai.ba）。
+**Recommended configuration：** Preparation before installation _Two domains_，one can **access CDN** as _Public Access_，for example (status.nai.ba)；Another one resolves to the panel server as Agent connect Dashboard use，**can't access CDN** Direct exposure panel host IP，for example（ip-to-dashboard.nai.ba）。
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh  -o nezha.sh && chmod +x nezha.sh
 sudo ./nezha.sh
 ```
 
-_\* 使用 WatchTower 可以自动更新面板，Windows 终端可以使用 nssm 配置自启动_
+_\* use WatchTower Panels can be updated automatically，Windows terminal can use nssm configure autostart_
 
-**Windows 一键安装 Agent （请使用 Powershell 管理员权限）**
+**Windows -A key installation Agent （please use Powershell admin rights）**
 
 ```powershell
 set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 dashboard_host:grpc_port secret
 ```
 
-_如遇到确认「执行策略变更」请选择 Y_
+_In case of confirmation「Implement policy changes」please choose Y_
 
-### Agent 自定义
+### Agent customize
 
-#### 自定义监控的网卡和硬盘分区
+#### Custom monitoring of network cards and hard disk partitions
 
-执行 `/opt/nezha/agent/nezha-agent --edit-agent-config` 来选择自定义的网卡和分区，然后重启 Agent 即可
+implement `/opt/nezha/agent/nezha-agent --edit-agent-config` to select custom NICs and partitions，then reboot just agent
 
-#### 运行参数
+#### Operating parameters
 
-通过执行 `./nezha-agent --help` 查看支持的参数，如果你使用一键脚本，可以编辑 `/etc/systemd/system/nezha-agent.service`，在 `ExecStart=` 这一行的末尾加上
+by executing `./nezha-agent --help` View supported parameters，If you use one-click scripting，can be edited `/etc/systemd/system/nezha-agent.service`，exist `ExecStart=` At the end of this line add
 
-- `--report-delay` 系统信息上报的间隔，默认为 1 秒，可以设置为 3 来进一步降低 agent 端系统资源占用（配置区间 1-4）
-- `--skip-conn` 不监控连接数，如果 机场/连接密集型机器 CPU占用较高，推荐设置
-- `--skip-procs` 不监控进程数，也可以降低 agent 占用
-- `--disable-auto-update` 禁止 **自动更新** Agent（安全特性）
-- `--disable-force-update` 禁止 **强制更新** Agent（安全特性）
-- `--disable-command-execute` 禁止在 Agent 机器上执行定时任务、打开在线终端（安全特性）
-- `--tls` 启用 SSL/TLS 加密（使用 nginx 反向代理 Agent 的 grpc 连接，并且 nginx 开启 SSL/TLS 时，需要启用该项配置）
+- `--report-delay` System information reporting interval，The default is 1 Second，can be set to 3 to further reduce agent End-system resource usage（Configuration interval 1-4）
+- `--skip-conn` Do not monitor the number of connections，if vpn-gateway/connection-intensive machines High CPU usage，Recommended settings
+- `--skip-procs` Do not monitor the number of processes，can also be reduced agent occupy
+- `--disable-auto-update` prohibit **auto update** Agent（safety features）
+- `--disable-force-update` prohibit **Force update** Agent（safety features）
+- `--disable-command-execute` prohibited in Agent Execute scheduled tasks on the machine、Open online terminal（safety features）
+- `--tls` enable SSL/TLS encryption（use nginx reverse proxy Agent of grpc connect，and nginx turn on SSL/TLS Time，This configuration needs to be enabled）
 
-## 功能说明
+## Function Description
 
 <details>
-    <summary>计划任务：备份脚本、服务重启，等定期运维任务。</summary>
+    <summary>Scheduled Tasks：backup script、service restart，and other periodic operation and maintenance tasks。</summary>
 
-使用此功能可以定期结合 restic、rclone 给服务器备份，或者定期某项重启服务来重置网络连接。
+Use this feature to periodically combine restic、rclone back up the server，Or periodically restart some service to reset the network connection。
 
 </details>
 
 <details>
-    <summary>报警通知：负载、CPU、内存、硬盘、带宽、流量、月流量、进程数、连接数实时监控。</summary>
+    <summary>Alarm notification：Real-time monitoring of load, CPU, memory, hard disk, bandwidth, traffic, monthly traffic, number of processes, and number of connections。</summary>
 
-#### 灵活通知方式
+#### Flexible notification methods
 
-`#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
+`#NEZHA#` is the panel message placeholder，The panel will automatically replace the placeholder with the actual message when the notification is triggered
 
-Body 内容是`JSON` 格式的：**当请求类型为 FORM 时**，值为 `key:value` 的形式，`value` 里面可放置占位符，通知时会自动替换。**当请求类型为 JSON 时** 只会简进行字符串替换后直接提交到`URL`。
+Body content is`JSON` formatted：**when the request type is FORM Time**，value is `key:value` form，`value` Placeholders can be placed inside，Automatically replace when notified。**when the request type is JSON** It will only be submitted directly to the`URL`。
 
-URL 里面也可放置占位符，请求时会进行简单的字符串替换。
+URL Placeholders can also be placed inside，Simple string replacement is done when requested。
 
-参考下方的示例，非常灵活。
+Refer to the example below，very flexible。
 
-1. 添加通知方式
+1. Add notification method
 
-   - telegram 示例 [@haitau](https://github.com/haitau) 贡献
+   - telegram Example [@haitau](https://github.com/haitau) contribute
 
-     - 名称：telegram 机器人消息通知
+     - name：telegram Robot message notification
      - URL：<https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA>#
-     - 请求方式: GET
-     - 请求类型: 默认
-     - Body: 空
-     - URL 参数获取说明：botXXXXXX 中的 XXXXXX 是在 telegram 中关注官方 @Botfather ，输入/newbot ，创建新的机器人（bot）时，会提供的 token（在提示 Use this token to access the HTTP API:后面一行）这里 'bot' 三个字母不可少。创建 bot 后，需要先在 telegram 中与 BOT 进行对话（随便发个消息），然后才可用 API 发送消息。YYYYYY 是 telegram 用户的数字 ID。与机器人@userinfobot 对话可获得。
+     - request method: GET
+     - request type: default
+     - Body: null
+     - URL Parameter acquisition instructions：botXXXXXX Neutral XXXXXX is in telegram Follow the official @Botfather ，enter/newbot ，Create new bot（bot）Time，will provide token（in prompt Use this token to access the HTTP API:next line）here 'bot' Three letters are indispensable. After bot created, You need to chat with the BOT to have a conversation（Just send a message），then available API Send a message. YYYYYY is telegram user's number ID。with the robot @userinfobot Dialogue is available。
 
-2. 添加一个离线报警
+2. Add an offline alarm
 
-   - 名称：离线通知
-   - 规则：`[{"Type":"offline","Duration":10}]`
-   - 启用：√
+   - name：Offline notifications
+   - rule：`[{"Type":"offline","Duration":10}]`
+   - enable：√
 
-3. 添加一个监控 CPU 持续 10s 超过 50% **且** 内存持续 20s 占用低于 20% 的报警
+3. add a monitor CPU continued 10s Exceed 50% **and** memory persistent 20s Occupied less than 20% the alarm
 
-   - 名称：CPU+内存
-   - 规则：`[{"Type":"cpu","Min":0,"Max":50,"Duration":10},{"Type":"memory","Min":20,"Max":0,"Duration":20}]`
-   - 启用：√
+   - name：CPU+RAM
+   - rule：`[{"Type":"cpu","Min":0,"Max":50,"Duration":10},{"Type":"memory","Min":20,"Max":0,"Duration":20}]`
+   - enable：√
 
-#### 报警规则说明
+#### Description of alarm rules
 
-##### 基本规则
+##### basic rules
 
 - type
   - `cpu`、`memory`、`swap`、`disk`
-  - `net_in_speed` 入站网速、`net_out_speed` 出站网速、`net_all_speed` 双向网速、`transfer_in` 入站流量、`transfer_out` 出站流量、`transfer_all` 双向流量
-  - `offline` 离线监控
-  - `load1`、`load5`、`load15` 负载
-  - `process_count` 进程数 _目前取线程数占用资源太多，暂时不支持_
-  - `tcp_conn_count`、`udp_conn_count` 连接数
-- duration：持续秒数，秒数内采样记录 30% 以上触发阈值才会报警（防数据插针）
+  - `net_in_speed` Inbound speed、`net_out_speed` Outbound speed、`net_all_speed` two-way speed、`transfer_in` Inbound traffic、`transfer_out` Outbound traffic、`transfer_all` bidirectional traffic
+  - `offline` Offline monitoring
+  - `load1`、`load5`、`load15` load
+  - `process_count` number of processes _Currently fetching threads takes up too many resources，Temporarily not supported_
+  - `tcp_conn_count`、`udp_conn_count` number of connections
+- duration：duration in seconds，Sampling records in seconds 30% The above trigger threshold will only alarm（Anti-Data Pin）
 - min/max
-  - 流量、网速类数值 为字节（1KB=1024B，1MB = 1024\*1024B）
-  - 内存、硬盘、CPU 为占用百分比
-  - 离线监控无需设置
+  - flow、Network speed class value as bytes（1KB=1024B，1MB = 1024\*1024B）
+  - memory、hard disk、CPU occupancy percentage
+  - Offline monitoring without setup
 - cover `[{"type":"offline","duration":10, "cover":0, "ignore":{"5": true}}]`
-  - `0` 监控所有，通过 `ignore` 忽略特定服务器
-  - `1` 忽略所有，通过 `ignore` 监控特定服务器
-- ignore: `{"1": true, "2":false}` 特定服务器，搭配 `cover` 使用
+  - `0` monitor all，pass `ignore` ignore specific server
+  - `1` ignore all，pass `ignore` Monitor specific servers
+- ignore: `{"1": true, "2":false}` specific server，match `cover` use
 
-##### 特殊：任意周期流量报警
+##### special：Arbitrary cycle flow alarm
 
-可以用作月流量报警
+Can be used as monthly flow alarm
 
 - type
-  - transfer_in_cycle 周期内的入站流量
-  - transfer_out_cycle 周期内的出站流量
-  - transfer_all_cycle 周期内双向流量和
-- cycle_start 统计周期开始日期（可以是你机器计费周期的开始日期），RFC3339 时间格式，例如北京时间为`2022-01-11T08:00:00.00+08:00`
-- cycle_interval 每隔多少个周期单位（例如，周期单位为天，该值为 7，则代表每隔 7 天统计一次）
-- cycle_unit 统计周期单位，默认`hour`,可选(`hour`, `day`, `week`, `month`, `year`)
-- min/max、cover、ignore 参考基本规则配置
-- 示例: ID 为 3 的机器（ignore 里面定义）的每月 15 号计费的出站月流量 1T 报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2022-01-11T08:00:00.00+08:00","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
+  - transfer_in_cycle Inbound traffic during the period
+  - transfer_out_cycle Outbound traffic during the period
+  - transfer_all_cycle Bidirectional flow in cycles and
+- cycle_start Fiscal Period Start Date（Can be the start date of your machine billing cycle），RFC3339 Time format，For example, Beijing time is`2022-01-11T08:00:00.00+08:00`
+- cycle_interval How many cycle units every (for example, if the cycle unit is days, the value is 7, which means that the statistics will be counted every 7 days）
+- cycle_unit Statistical period unit, default `hour`, optional(`hour`, `day`, `week`, `month`, `year`)
+- min/max、cover、ignore Refer to Basic Rules Configuration
+- Example: ID for 3 the machine（ignore inside the definition）of monthly 15 outbound monthly traffic billed 1T Call the police `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2022-01-11T08:00:00.00+08:00","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
   ![7QKaUx.md.png](https://s4.ax1x.com/2022/01/13/7QKaUx.md.png)
 
 </details>
 
 <details>
-    <summary>服务监控：HTTP、SSL证书、ping、TCP 端口等。</summary>
+    <summary>service monitoring：HTTP、SSL certificate、ping、TCP port etc。</summary>
 
-进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。
+Enter `/monitor` Click to create a new monitor on the page，Instructions are below the form。
 
 </details>
 
 <details>
-  <summary>自定义代码：改LOGO、改色调、加统计代码等。</summary>
+  <summary>custom code：Change the logo、change color、Add statistical code, etc.。</summary>
 
 **Effective only on the visitor's home page.**
 
-- 默认主题更改进度条颜色示例
+- Default theme changing progress bar color example
 
   ```html
   <style>
@@ -142,7 +142,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   </style>
   ```
 
-- DayNight 主题更改进度条颜色、修改页脚示例（来自 [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
+- DayNight Example of theme changing progress bar color, modifying footer（from [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
 
   ```html
   <style>
@@ -153,13 +153,13 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   <script>
   window.onload = function(){
   var footer=document.querySelector("div.footer-container")
-  footer.innerHTML="©2021 你的名字 & Powered by 你的名字"
+  footer.innerHTML="©2021 "your name" & Powered by "your name"
   footer.style.visibility="visible"
   }
   </script>
   ```
 
-- 默认主题修改 LOGO、修改页脚示例（来自 [@iLay1678](https://github.com/iLay1678)）
+- Default theme modification LOGO、Modify footer example（from [@iLay1678](https://github.com/iLay1678)）
 
   ```html
   <style>
@@ -177,15 +177,15 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   window.onload = function(){
   var avatar=document.querySelector(".item img")
   var footer=document.querySelector("div.is-size-7")
-  footer.innerHTML="Powered by 你的名字"
+  footer.innerHTML="Powered by your name"
   footer.style.visibility="visible"
-  avatar.src="你的方形logo地址"
+  avatar.src="your square logo address"
   avatar.style.visibility="visible"
   }
   </script>
   ```
 
-- hotaru 主题更改背景图片示例
+- hotaru Theme change background image example
 
   ```html
   <style>
@@ -197,37 +197,37 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
 </details>
 
-## 常见问题
+## common problem
 
 <details>
-    <summary>如何进行数据迁移、备份恢复？</summary>
+    <summary>How to perform data migration、Backup and restore？</summary>
 
-1. 先使用一键脚本 `停止面板`
-2. 打包 `/opt/nezha` 文件夹，到新环境相同位置
-3. 使用一键脚本 `启动面板`
+1. First use one-click script `stop panel`
+2. Pack `/opt/nezha` folder, to the same location in the new environment
+3. Use one-click script `Launchpad`
 
 </details>
 
 <details>
-    <summary>Agent 启动/上线 问题自检流程</summary>
+    <summary>Agent Start/Go Online Problem Self-Check Process</summary>
 
-1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS、网络不佳导致超时（timeout） 问题。
-2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 检验是否是网络问题，检查本机与面板服务器出入站防火墙，如果单机无法判断可借助 <https://port.ping.pe/> 提供的端口检查工具进行检测。
-3. 如果上面步骤检测正常，Agent 正常上线，尝试关闭 SELinux，[如何关闭 SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
-
-</details>
-
-<details>
-    <summary>如何使 旧版OpenWRT/LEDE 自启动？</summary>
-
-参考此项目: <https://github.com/Erope/openwrt_nezha>
+1. direct execution `/opt/nezha/agent/nezha-agent -s Panel IP or non-CDN domain name:Panel RPC port -p Agent key -d` Check if the log is DNS、Poor network causes timeout（timeout） question。
+2. `nc -v domain name/IP Panel RPC port` or `telnet domain name/IP Panel RPC port` Check if it is a network problem，Check local and panel server inbound and outbound firewalls，If the single machine cannot judge, you can use the <https://port.ping.pe/> Provided port inspection tool for detection。
+3. If the above steps detect normal，Agent normal online，try to close SELinux，[how to close SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
 
 </details>
 
 <details>
-    <summary>如何使 新版OpenWRT 自启动？来自 @艾斯德斯</summary>
+    <summary>how to make Legacy OpenWRT/LEDE self-start？</summary>
 
-首先在 release 下载对应的二进制解压 zip 包后放置到 `/root`，然后 `chmod +x /root/nezha-agent` 赋予执行权限，然后创建 `/etc/init.d/nezha-service`：
+refer to this project: <https://github.com/Erope/openwrt_nezha>
+
+</details>
+
+<details>
+    <summary>how to make New version of OpenWRT self-start？via @esdes</summary>
+
+first in release Download the corresponding binary decompression zip After the package is placed in `/root`，Then `chmod +x /root/nezha-agent` give execute permission，then create `/etc/init.d/nezha-service`：
 
 ```shell
 #!/bin/sh /etc/rc.common
@@ -237,7 +237,7 @@ USE_PROCD=1
 
 start_service() {
  procd_open_instance
- procd_set_param command /root/nezha-agent -s 面板网址:接收端口 -p 唯一秘钥 -d
+ procd_set_param command /root/nezha-agent -s Panel URL:receive port -p unique key -d
  procd_set_param respawn
  procd_close_instance
 }
@@ -253,44 +253,44 @@ restart() {
 }
 ```
 
-赋予执行权限 `chmod +x /etc/init.d/nezha-service` 然后启动服务 `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
+give execute permission `chmod +x /etc/init.d/nezha-service` then start the service `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
 
 </details>
 
 <details>
-    <summary>实时通道断开/在线终端连接失败</summary>
+    <summary>Live channel disconnected/Online terminal connection failed</summary>
 
-使用反向代理时需要针对 `/ws`,`/terminal` 路径的 WebSocket 进行特别配置以支持实时更新服务器状态和 **WebSSH**。
+When using a reverse proxy, you need to target `/ws`,`/terminal` path WebSocket Specially configured to support real-time server status updates and **WebSSH**。
 
-- Nginx(宝塔)：在你的 nginx 配置文件中加入以下代码
+- Nginx(Aapanel/Pagoda)：At your nginx Add the following code to the configuration file
 
   ```nginx
   server{
 
-      #原有的一些配置
+      #some original configuration
       #server_name blablabla...
 
       location ~ ^/(ws|terminal/.+)$  {
-          proxy_pass http://ip:站点访问端口;
+          proxy_pass http://ip:site access port;
           proxy_set_header Upgrade $http_upgrade;
           proxy_set_header Connection "Upgrade";
           proxy_set_header Host $host;
       }
 
-      #其他的 location blablabla...
+      #others location blablabla...
   }
   ```
 
-  如果非宝塔，还要在 `server{}` 中添加上这一段
+  If not a Aapanel/Pagoda, still in `server{}` add this paragraph
 
   ```nginx
   location / {
-    proxy_pass http://ip:站点访问端口;
+    proxy_pass http://ip:site access port;
     proxy_set_header Host $host;
   }
   ```
 
-- CaddyServer v1（v2 无需特别配置）
+- CaddyServer v1（v2 No special configuration required）
 
   ```Caddyfile
   proxy /ws http://ip:8008 {
@@ -304,19 +304,19 @@ restart() {
 </details>
 
 <details>
-    <summary>反向代理 gRPC 端口（支持 Cloudflare CDN）</summary>
-使用 Nginx 或者 Caddy 反向代理 gRPC
+    <summary>reverse proxy gRPC port（support Cloudflare CDN）</summary>
+use Nginx or Caddy reverse proxy gRPC
 
-- Nginx 配置
+- Nginx configure
 
 ```nginx
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name ip-to-dashboard.nai.ba; # 你的 Agent 连接 Dashboard 的域名
+    server_name ip-to-dashboard.nai.ba; # yours Agent connect Dashboard's domain name
 
-    ssl_certificate          /data/letsencrypt/fullchain.pem; # 你的域名证书路径
-    ssl_certificate_key      /data/letsencrypt/key.pem;       # 你的域名私钥路径
+    ssl_certificate          /data/letsencrypt/fullchain.pem; # your domain certificate path
+    ssl_certificate_key      /data/letsencrypt/key.pem;       # Your domain name private key path
 
     underscores_in_headers on;
 
@@ -328,10 +328,10 @@ server {
 }
 ```
 
-- Caddy 配置
+- Caddy configure
 
 ```Caddyfile
-ip-to-dashboard.nai.ba:443 { # 你的 Agent 连接 Dashboard 的域名
+ip-to-dashboard.nai.ba:443 { # yours Agent connect Dashboard's domain name
     reverse_proxy {
         to localhost:5555
         transport http {
@@ -341,20 +341,20 @@ ip-to-dashboard.nai.ba:443 { # 你的 Agent 连接 Dashboard 的域名
 }
 ```
 
-Dashboard 面板端配置
+Dashboard Panel side configuration
 
-- 首先登录面板进入管理后台 打开设置页面，在 `未接入CDN的面板服务器域名/IP` 中填入上一步在 Nginx 或 Caddy 中配置的域名 比如 `ip-to-dashboard.nai.ba` ，并保存。
-- 然后在面板服务器中，打开 /opt/nezha/dashboard/data/config.yaml 文件，将 `proxygrpcport` 修改为 Nginx 或 Caddy 监听的端口，比如上一步设置的 `443` ；因为我们在 Nginx 或 Caddy 中开启了 SSL/TLS，所以需要将 `tls` 设置为 `true` ；修改完成后重启面板。
+- First log in to the panel to enter the management background Open the settings page，exist `Panel server domain name that is not connected to CDN/IP` Fill in the previous step in Nginx or Caddy domain name configured in for example `ip-to-dashboard.nai.ba` ，and save。
+- then in the panel server，Open /opt/nezha/dashboard/data/config.yaml 文件，将 `proxygrpcport` change into Nginx or Caddy listening port，or as set in the previous step `443` ；because we are Nginx or Caddy turned on SSL/TLS，So it is necessary to `tls` Set as `true` ；Restart the panel after modification is complete。
 
-Agent 端配置
+Agent end configuration
 
-- 登录面板管理后台，复制一键安装命令，在对应的服务器上面执行一键安装命令重新安装 agent 端即可。
+- Login panel management background，Copy the one-click install command，Execute the one-click installation command on the corresponding server to reinstall agent end。
 
-开启 Cloudflare CDN（可选）
+turn on Cloudflare CDN（optional）
 
-根据 Cloudflare gRPC 的要求：gRPC 服务必须侦听 443 端口 且必须支持 TLS 和 HTTP/2。
-所以如果需要开启 CDN，必须在配置 Nginx 或者 Caddy 反向代理 gRPC 时使用 443 端口，并配置证书（Caddy 会自动申请并配置证书）。
+according to Cloudflare gRPC requirements：gRPC Service must listen 443 port and must support TLS and HTTP/2。
+So if you need to turn it on CDN，must be configured Nginx or Caddy reverse proxy gRPC use when 443 port，and configure the certificate（Caddy Will automatically apply and configure the certificate）。
 
-- 登录 Cloudflare，选择使用的域名。打开 `网络` 选项将 `gRPC` 开关打开，打开 `DNS` 选项，找到 Nginx 或 Caddy 反代 gRPC 配置的域名的解析记录，打开橙色云启用 CDN。
+- Log in Cloudflare，Choose a domain name to use。Open `The internet` option will `gRPC` switch on，Open `DNS` options，turn up Nginx or Caddy Anti-generation gRPC The resolution record of the configured domain name，Open Orange Cloud Enable CDN。
 
 </details>
