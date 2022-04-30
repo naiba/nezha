@@ -489,3 +489,27 @@ other = "Alarm Rule"
 
 [NotificationMethod]
 other = "Notification Method"
+
+[Incident]
+other = "Down"
+
+[Resolved]
+other = "Resolved"
+
+[StatusNoData]
+other = "No Data"
+
+[StatusGood]
+other = "Good"
+
+[StatusLowAvailability]
+other = "Low Available"
+
+[ScheduledTaskExecutedSuccessfully]
+other = "Task succeeded"
+
+[ScheduledTaskExecutedFailed]
+other = "Task Failed"
+
+[IPChanged]
+other = "IP Changed"
