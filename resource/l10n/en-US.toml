@@ -491,25 +491,25 @@ other = "Alarm Rule"
 other = "Notification Method"
 
 [Incident]
-other = "故障"
+other = "Down"
 
 [Resolved]
-other = "恢复"
+other = "Resolved"
 
 [StatusNoData]
-other = "无数据"
+other = "No Data"
 
 [StatusGood]
-other = "良好"
+other = "Good"
 
 [StatusLowAvailability]
-other = "低可用"
+other = "Low Available"
 
 [ScheduledTaskExecutedSuccessfully]
-other = "任务成功"
+other = "Task succeeded"
 
 [ScheduledTaskExecutedFailed]
-other = "任务失败"
+other = "Task Failed"
 
 [IPChanged]
-other = "IP变更"
+other = "IP Changed"
