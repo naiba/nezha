@@ -371,7 +371,7 @@ other = "Uptime"
 other = "Server is offline"
 
 [Day]
-other = "Day"
+other = "Days"
 
 [RealtimeChannelEstablished]
 other = "Real-time Channel Established"

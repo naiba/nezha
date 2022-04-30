@@ -36,7 +36,7 @@
             {{if eq $monitor.Type 1}}{{tr "SSLCertificate"}} {{else if eq $monitor.Type
             2}} ICMP Ping {{else}} {{tr "TCPPort"}} {{end}}
           </td>
-          <td>{{$monitor.Duration}}{{tr "Seconds"}}</td>
+          <td>{{$monitor.Duration}} {{tr "Seconds"}}</td>
           <td>{{$monitor.NotificationTag}}</td>
           <td>{{$monitor.Notify}}</td>
           <td>
