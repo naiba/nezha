@@ -308,148 +308,148 @@ other = "No se oculta la IP en los mensajes de notificación"
 other = "Guardar"
 
 [ModifiedSuccessfully]
-other = "修改成功"
+other = "Modificado con éxito"
 
 [TerminalConnectionTimeOutOrSessionEnded]
-other = "Terminal 连接超时或会话已结束"
+other = "La conexión del Terminal ha expirado o la sesión ha terminado"
 
 [TerminalConnectionFailed]
-other = "Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反代情况"
+other = "Fallo en la conexión del terminal, por favor, revise el proxy inverso de WebSocket"
 
 [Default]
-other = "默认"
+other = "Por defecto"
 
 [Offline]
-other = "已离线"
+other = "Desconexión"
 
 [Platform]
-other = "系统"
+other = "Plataforma"
 
 [DiskUsed]
-other = "硬盘"
+other = "Disco"
 
 [MemUsed]
-other = "内存"
+other = "Memoria"
 
 [SwapUsed]
-other = "交换"
+other = "Swap"
 
 [NetTransfer]
-other = "流量"
+other = "Tráfico de red"
 
 [Load]
-other = "负载"
+other = "Carga"
 
 [ProcessCount]
-other = "进程数"
+other = "Número de procesos"
 
 [ConnCount]
-other = "连接数"
+other = "Número de conexiones"
 
 [BootTime]
-other = "启动"
+other = "Tiempo de arranque"
 
 [LastActive]
-other = "活动"
+other = "Último activo"
 
 [Version]
-other = "版本"
+other = "Versiones"
 
 [NetSpeed]
-other = "网络"
+other = "Velocidad de la red"
 
 [Uptime]
-other = "在线"
+other = "Tiempo de funcionamiento"
 
 [ServerIsOffline]
-other = "节点已离线"
+other = "El servidor está desconectado"
 
 [Day]
-other = "天"
+other = "Días"
 
 [RealtimeChannelEstablished]
-other = "实时通道建立"
+other = "Establecimiento de canal en tiempo real"
 
 [GetTheLatestMonitoringDataInRealTime]
-other = "可以实时获取最新监控数据啦"
+other = "¡Ahora puede obtener los últimos datos de monitorización en tiempo real!"
 
 [RealtimeChannelDisconnect]
-other = "实时通道断开"
+other = "Desconexión de canal en tiempo real"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
-other = "无法实时获取最新监控数据咯"
+other = "¡No puede obtener los últimos datos de monitorización en tiempo real!"
 
 [30DaysOnline]
-other = "30天在线率"
+other = "Disponibilidad en los últimos 30 días"
 
 [Details]
-other = "详情"
+other = "Detalles"
 
 [Status]
-other = "状态"
+other = "Estatus"
 
 [Availability]
-other = "在线率"
+other = "Disponibilidad"
 
 [AverageLatency]
-other = "平均延迟"
+other = "Latencia media"
 
 [CycleTransferStats]
-other = "循环流量统计"
+other = "Estadísticas de transmisión circular"
 
 [From]
-other = "自"
+other = "Desde"
 
 [To]
-other = "至"
+other = "A"
 
 [NextCheck]
-other = "下次检查"
+other = "Siguiente prueba"
 
 [CurrentUsage]
-other = "当前用量"
+other = "Uso actual"
 
 [VerifyPassword]
-other = "验证查看密码"
+other = "Verificar contraseña"
 
 [LightMode]
-other = "白昼模式"
+other = "Modo luminoso"
 
 [DarkMode]
-other = "暗黑模式"
+other = "Modo oscuro"
 
 [GridLayout]
-other = "网格视图"
+other = "Grid Layout"
 
 [ListLayout]
-other = "列表视图"
+other = "List Layout"
 
 [EnterPassword]
-other = "输入密码"
+other = "Introduzca su contraseña"
 
 [Location]
-other = "地区"
+other = "Localización"
 
 [Running]
-other = "运行中"
+other = "En línea"
 
 [UpNetTransfer]
-other = "上行"
+other = "Tráfico de salida"
 
 [DownNetTransfer]
-other = "下行"
+other = "Tráfico de entrada"
 
 [TotalUpNetTransfer]
-other = "总上行"
+other = "Tráfico de salida total"
 
 [TotalDownNetTransfer]
-other = "总下行"
+other = "Tráfico de entrada total"
 
 [WrongPassword]
-other = "密码错误"
+other = "Contraseña incorrecta"
 
 [AnErrorEccurred]
-other = "出现错误"
+other = "Ha ocurrido un error"
 
 [SystemError]
 other = "系统错误"
