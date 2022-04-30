@@ -1,4 +1,4 @@
-[nezhaMonitor]
+[NezhaMonitoring]
 other = "哪吒监控"
 
 [Server]
@@ -76,7 +76,7 @@ other = "特定服务器"
 [EnterIdAndNameToSearch]
 other = "输入ID/名称以搜索"
 
-[NotificationMethod]
+[NotificationMethodGroup]
 other = "通知方式组"
 
 [PushSuccessMessages]
@@ -249,9 +249,6 @@ other = "一键安装"
 
 [ClickToCopyTheInstallationCommand]
 other = "点击复制安装命令"
-
-[NotSupportedYet]
-other = "尚未支持，请下载release手动安装"
 
 [DeleteServer]
 other = "删除主机"
@@ -453,3 +450,42 @@ other = "总下行"
 
 [WrongPassword]
 other = "密码错误"
+
+[AnErrorEccurred]
+other = "出现错误"
+
+[SystemError]
+other = "系统错误"
+
+[NetowrkError]
+other = "网络错误"
+
+[ServicesStatus]
+other = "服务状态"
+
+[ServersManagement]
+other = "服务器管理"
+
+[ServicesManagement]
+other = "服务监控"
+
+[ScheduledTasks]
+other = "计划任务"
+
+[YouAreNotAuthorized]
+other = "此页面需要登录"
+
+[WrongAccessPassword]
+other = "查看密码错误"
+
+[Add]
+other = "添加"
+
+[Edit]
+other = "修改"
+
+[AlarmRule]
+other = "报警规则"
+
+[NotificationMethod]
+other = "通知方式"
