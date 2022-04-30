@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
@@ -33,6 +34,15 @@ func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	u, ok := c.Get(model.CtxKeyAuthorizedUser)
 	if ok {
 		data["Admin"] = u
+	}
+	data["LANG"] = map[string]string{
+		"Add":          singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Add"}),
+		"Edit":         singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Edit"}),
+		"AlarmRule":    singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "AlarmRule"}),
+		"Notification": singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "NotificationMethod"}),
+		"Server":       singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Server"}),
+		"Monitor":      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesManagement"}),
+		"Cron":         singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ScheduledTasks"}),
 	}
 	return data
 }

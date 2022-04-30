@@ -44,14 +44,10 @@
                             data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
                             <i class="linux icon"></i>
                         </button>
-                        <button class="ui icon mini button" data-tooltip="{{tr "NotSupportedYet"}}">
                         <button class="ui icon green mini button"
                             data-clipboard-text="{{if $.Conf.GRPCHost}}set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 {{$.Conf.GRPCHost}}:{{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
                             data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
                             <i class="windows icon"></i>
-                        </button>
-                        <button class="ui icon mini button" data-tooltip="{{tr "NotSupportedYet"}}">
-                            <i class="apple icon"></i>
                         </button>
                     </td>
                     <td style="word-break: break-word;">{{$server.Note}}</td>

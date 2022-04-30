@@ -1,4 +1,4 @@
-[nezhaMonitor]
+[NezhaMonitoring]
 other = "Nezha Monitoring"
 
 [Server]
@@ -76,7 +76,7 @@ other = "Specific Servers"
 [EnterIdAndNameToSearch]
 other = "Input Server ID/Name to search"
 
-[NotificationMethod]
+[NotificationMethodGroup]
 other = "Notification Group"
 
 [PushSuccessMessages]
@@ -249,9 +249,6 @@ other = "One Key Install"
 
 [ClickToCopyTheInstallationCommand]
 other = "Click To Copy Install Command"
-
-[NotSupportedYet]
-other = "Not supported yet, check the release page for manual install"
 
 [DeleteServer]
 other = "Delete Server"
@@ -453,3 +450,42 @@ other = "Total Inbound"
 
 [WrongPassword]
 other = "Incorrect Password"
+
+[AnErrorEccurred]
+other = "An error occurred"
+
+[SystemError]
+other = "System Error"
+
+[NetowrkError]
+other = "Netowrk Error"
+
+[ServicesStatus]
+other = "Services Status"
+
+[ServersManagement]
+other = "Servers"
+
+[ServicesManagement]
+other = "Services"
+
+[ScheduledTasks]
+other = "Scheduled Tasks"
+
+[YouAreNotAuthorized]
+other = "You are not authorized"
+
+[WrongAccessPassword]
+other = "Wrong access password"
+
+[Add]
+other = "Add"
+
+[Edit]
+other = "Edit"
+
+[AlarmRule]
+other = "Alarm Rule"
+
+[NotificationMethod]
+other = "Notification Method"

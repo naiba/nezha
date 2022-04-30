@@ -1,3 +1,19 @@
+let LANG = {
+  Add: "添加",
+  Edit: "修改",
+  AlarmRule: "报警规则",
+  Notification: "通知方式",
+  Server: "服务器",
+  Monitor: "监控",
+  Cron: "计划任务",
+}
+
+function updateLang(newLang) {
+  if (newLang) {
+    LANG = newLang;
+  }
+}
+
 function readableBytes(bytes) {
   if (!bytes) {
     return '0B'
@@ -105,11 +121,11 @@ function showFormModal(modelSelector, formID, URL, getData) {
 
 function addOrEditAlertRule(rule) {
   const modal = $(".rule.modal");
-  modal.children(".header").text((rule ? "修改" : "添加") + "报警规则");
+  modal.children(".header").text((rule ? LANG.Edit : LANG.Add) + ' ' + LANG.AlarmRule);
   modal
     .find(".nezha-primary-btn.button")
     .html(
-      rule ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>'
+      rule ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
     );
   modal.find("input[name=ID]").val(rule ? rule.ID : null);
   modal.find("input[name=Name]").val(rule ? rule.Name : null);
@@ -125,13 +141,13 @@ function addOrEditAlertRule(rule) {
 
 function addOrEditNotification(notification) {
   const modal = $(".notification.modal");
-  modal.children(".header").text((notification ? "修改" : "添加") + "通知方式");
+  modal.children(".header").text((notification ? LANG.Edit : LANG.Add) + ' ' + LANG.Notification);
   modal
     .find(".nezha-primary-btn.button")
     .html(
       notification
-        ? '修改<i class="edit icon"></i>'
-        : '添加<i class="add icon"></i>'
+        ? LANG.Edit + '<i class="edit icon"></i>'
+        : LANG.Add + '<i class="add icon"></i>'
     );
   modal.find("input[name=ID]").val(notification ? notification.ID : null);
   modal.find("input[name=Name]").val(notification ? notification.Name : null);
@@ -188,11 +204,11 @@ function post(path, params, method = 'post') {
 
 function addOrEditServer(server, conf) {
   const modal = $(".server.modal");
-  modal.children(".header").text((server ? "修改" : "添加") + "服务器");
+  modal.children(".header").text((server ? LANG.Edit : LANG.Add) + ' ' + LANG.Server);
   modal
     .find(".nezha-primary-btn.button")
     .html(
-      server ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>'
+      server ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
     );
   modal.find("input[name=id]").val(server ? server.ID : null);
   modal.find("input[name=name]").val(server ? server.Name : null);
@@ -216,11 +232,11 @@ function addOrEditServer(server, conf) {
 
 function addOrEditMonitor(monitor) {
   const modal = $(".monitor.modal");
-  modal.children(".header").text((monitor ? "修改" : "添加") + "监控");
+  modal.children(".header").text((monitor ? LANG.Edit : LANG.Add) + ' ' + LANG.Monitor);
   modal
     .find(".nezha-primary-btn.button")
     .html(
-      monitor ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>'
+      monitor ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
     );
   modal.find("input[name=ID]").val(monitor ? monitor.ID : null);
   modal.find("input[name=Name]").val(monitor ? monitor.Name : null);
@@ -257,11 +273,11 @@ function addOrEditMonitor(monitor) {
 
 function addOrEditCron(cron) {
   const modal = $(".cron.modal");
-  modal.children(".header").text((cron ? "修改" : "添加") + "计划任务");
+  modal.children(".header").text((cron ? LANG.Edit : LANG.Add) + ' ' + LANG.Cron);
   modal
     .find(".nezha-primary-btn.button")
     .html(
-      cron ? '修改<i class="edit icon"></i>' : '添加<i class="add icon"></i>'
+      cron ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
     );
   modal.find("input[name=ID]").val(cron ? cron.ID : null);
   modal.find("input[name=Name]").val(cron ? cron.Name : null);
