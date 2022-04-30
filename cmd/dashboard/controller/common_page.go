@@ -173,7 +173,7 @@ func (cp *commonPage) ws(c *gin.Context) {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
 			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "NetowrkError",
+				MessageID: "NetworkError",
 			}),
 			Msg:  "Websocket协议切换失败",
 			Link: "/",
@@ -320,7 +320,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
 			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "NetowrkError",
+				MessageID: "NetworkError",
 			}),
 			Msg:  "Websocket协议切换失败",
 			Link: "/",
