@@ -30,7 +30,7 @@ implement `/opt/nezha/agent/nezha-agent --edit-agent-config` to select custom NI
 by executing `./nezha-agent --help` View supported parameters，If you use one-click scripting，can be edited `/etc/systemd/system/nezha-agent.service`，exist `ExecStart=` At the end of this line add
 
 - `--report-delay` System information reporting interval，The default is 1 Second，can be set to 3 to further reduce agent End-system resource usage（Configuration interval 1-4）
-- `--skip-conn` Do not monitor the number of connections，if Airport/connection-intensive machines High CPU usage，Recommended settings
+- `--skip-conn` Do not monitor the number of connections，if vpn-gateway/connection-intensive machines High CPU usage，Recommended settings
 - `--skip-procs` Do not monitor the number of processes，can also be reduced agent occupy
 - `--disable-auto-update` prohibit **auto update** Agent（safety features）
 - `--disable-force-update` prohibit **Force update** Agent（safety features）
@@ -53,7 +53,7 @@ Use this feature to periodically combine restic、rclone back up the server，Or
 
 `#NEZHA#` is the panel message placeholder，The panel will automatically replace the placeholder with the actual message when the notification is triggered
 
-Body content is`JSON` formatted：**when the request type is FORM Time**，value is `key:value` form，`value` Placeholders can be placed inside，Automatically replace when notified。**when the request type is JSON 时** It will only be submitted directly to the`URL`。
+Body content is`JSON` formatted：**when the request type is FORM Time**，value is `key:value` form，`value` Placeholders can be placed inside，Automatically replace when notified。**when the request type is JSON** It will only be submitted directly to the`URL`。
 
 URL Placeholders can also be placed inside，Simple string replacement is done when requested。
 
@@ -68,7 +68,7 @@ Refer to the example below，very flexible。
      - request method: GET
      - request type: default
      - Body: null
-     - URL Parameter acquisition instructions：botXXXXXX Neutral XXXXXX is in telegram Follow the official @Botfather ，enter/newbot ，Create new bot（bot）Time，will provide token（in prompt Use this token to access the HTTP API:next line）here 'bot' Three letters are indispensable。create bot 后，need first telegram neutral BOT have a conversation（Just send a message），then available API Send a message。YYYYYY Yes telegram user's number ID。with the robot@userinfobot Dialogue is available。
+     - URL Parameter acquisition instructions：botXXXXXX Neutral XXXXXX is in telegram Follow the official @Botfather ，enter/newbot ，Create new bot（bot）Time，will provide token（in prompt Use this token to access the HTTP API:next line）here 'bot' Three letters are indispensable. After bot created, You need to chat with the BOT to have a conversation（Just send a message），then available API Send a message. YYYYYY is telegram user's number ID。with the robot @userinfobot Dialogue is available。
 
 2. Add an offline alarm
 
@@ -96,7 +96,7 @@ Refer to the example below，very flexible。
 - duration：duration in seconds，Sampling records in seconds 30% The above trigger threshold will only alarm（Anti-Data Pin）
 - min/max
   - flow、Network speed class value as bytes（1KB=1024B，1MB = 1024\*1024B）
-  - 内存、hard disk、CPU occupancy percentage
+  - memory、hard disk、CPU occupancy percentage
   - Offline monitoring without setup
 - cover `[{"type":"offline","duration":10, "cover":0, "ignore":{"5": true}}]`
   - `0` monitor all，pass `ignore` ignore specific server
@@ -281,7 +281,7 @@ When using a reverse proxy, you need to target `/ws`,`/terminal` path WebSocket 
   }
   ```
 
-  If not a pagoda，still in `server{}` add this paragraph
+  If not a Aapanel/Pagoda, still in `server{}` add this paragraph
 
   ```nginx
   location / {
