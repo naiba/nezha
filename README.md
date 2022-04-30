@@ -14,7 +14,7 @@
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器， 机器人自动审核**
 
-\>> [Use Cases | 我们的用户](https://www.google.com/search?q=%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22+OR+%22powered+by+Nezha+Monitoring%22&filter=0) (Google)
+\>> [Use Cases | 我们的用户](https://www.google.com/search?q=%22powered+by+Nezha+Monitoring%22+OR+%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22) (Google)
 
 | Default Theme                                                                                 | DayNight [@JackieSung](https://github.com/JackieSung4ev)                                               | hotaru                                                                     |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |

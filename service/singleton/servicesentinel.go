@@ -10,11 +10,11 @@ import (
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
 const (
 	_CurrentStatusSize = 30 // 统计 15 分钟内的数据为当前状态
-	_StatusOk          = "良好"
 )
 
 var ServiceSentinelShared *ServiceSentinel
@@ -39,7 +39,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 		serviceCurrentStatusIndex:           make(map[uint64]int),
 		serviceCurrentStatusData:            make(map[uint64][]model.MonitorHistory),
 		latestDate:                          make(map[uint64]string),
-		lastStatus:                          make(map[uint64]string),
+		lastStatus:                          make(map[uint64]int),
 		serviceResponseDataStoreCurrentUp:   make(map[uint64]uint64),
 		serviceResponseDataStoreCurrentDown: make(map[uint64]uint64),
 		monitors:                            make(map[uint64]*model.Monitor),
@@ -97,7 +97,7 @@ type ServiceSentinel struct {
 	serviceCurrentStatusIndex           map[uint64]int                    // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
 	serviceCurrentStatusData            map[uint64][]model.MonitorHistory // [monitor_id] -> []model.MonitorHistory
 	latestDate                          map[uint64]string                 // 最近一次更新时间
-	lastStatus                          map[uint64]string
+	lastStatus                          map[uint64]int
 	serviceResponseDataStoreCurrentUp   map[uint64]uint64         // [monitor_id] -> 当前服务在线计数
 	serviceResponseDataStoreCurrentDown map[uint64]uint64         // [monitor_id] -> 当前服务离线计数
 	monitors                            map[uint64]*model.Monitor // [monitor_id] -> model.Monitor
@@ -277,20 +277,6 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 	return ss.monthlyStatus
 }
 
-// getStateStr 根据服务在线率返回对应的状态字符串
-func getStateStr(percent uint64) string {
-	if percent == 0 {
-		return "无数据"
-	}
-	if percent > 95 {
-		return _StatusOk
-	}
-	if percent > 80 {
-		return "低可用"
-	}
-	return "故障"
-}
-
 // worker 服务监控的实际工作流程
 func (ss *ServiceSentinel) worker() {
 	// 从服务状态汇报管道获取汇报的服务数据
@@ -321,7 +307,7 @@ func (ss *ServiceSentinel) worker() {
 		} else {
 			ss.serviceStatusToday[mh.MonitorID].Down++
 			ServerLock.RLock()
-			log.Println("NEZHA>> 服务故障上报：", ss.monitors[mh.MonitorID].Target, "上报者：", ServerList[r.Reporter].Name, "错误信息：", mh.Data)
+			log.Println("NEZHA>> Services Incident:", ss.monitors[mh.MonitorID].Target, "Reporter:", ServerList[r.Reporter].Name, "Error:", mh.Data)
 			ServerLock.RUnlock()
 		}
 		// 写入当前数据
@@ -343,25 +329,25 @@ func (ss *ServiceSentinel) worker() {
 		if ss.serviceResponseDataStoreCurrentDown[mh.MonitorID]+ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] > 0 {
 			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID])
 		}
-		stateStr := getStateStr(upPercent)
+		stateCode := GetStatusCode(upPercent)
 		// 数据持久化
 		if ss.serviceCurrentStatusIndex[mh.MonitorID] == _CurrentStatusSize {
 			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
 			if err := DB.Create(&model.MonitorHistory{
 				MonitorID:  mh.MonitorID,
 				Delay:      ss.serviceStatusToday[mh.MonitorID].Delay,
-				Successful: stateStr == _StatusOk,
+				Successful: stateCode == StatusGood,
 				Data:       mh.Data,
 			}).Error; err != nil {
 				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
 			}
 		}
-		if stateStr == "故障" || stateStr != ss.lastStatus[mh.MonitorID] {
+		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
-			isNeedSendNotification := (ss.lastStatus[mh.MonitorID] != "" || stateStr == "故障") && ss.monitors[mh.MonitorID].Notify
-			ss.lastStatus[mh.MonitorID] = stateStr
+			isNeedSendNotification := (ss.lastStatus[mh.MonitorID] != 0 || stateCode == StatusDown) && ss.monitors[mh.MonitorID].Notify
+			ss.lastStatus[mh.MonitorID] = stateCode
 			if isNeedSendNotification {
-				go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[服务%s] %s", stateStr, ss.monitors[mh.MonitorID].Name), true)
+				go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[%s] %s", StatusCodeToString(stateCode), ss.monitors[mh.MonitorID].Name), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}
@@ -385,7 +371,7 @@ func (ss *ServiceSentinel) worker() {
 				// 证书过期提醒
 				if expiresNew.Before(time.Now().AddDate(0, 0, 7)) {
 					errMsg = fmt.Sprintf(
-						"SSL证书将在七天内过期，过期时间：%s。",
+						"The SSL certificate will expire within seven days. Expiration time: %s",
 						expiresNew.Format("2006-01-02 15:04:05"))
 				}
 				// 证书变更提醒
@@ -397,7 +383,7 @@ func (ss *ServiceSentinel) worker() {
 				if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
 					ss.sslCertCache[mh.MonitorID] = mh.Data
 					errMsg = fmt.Sprintf(
-						"SSL证书变更，旧：%s, %s 过期；新：%s, %s 过期。",
+						"SSL certificate changed, old: %s, %s expired; new: %s, %s expired.",
 						oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
 				}
 			}
@@ -409,5 +395,41 @@ func (ss *ServiceSentinel) worker() {
 			}
 			ss.monitorsLock.RUnlock()
 		}
+	}
+}
+
+const (
+	_ = iota
+	StatusNoData
+	StatusGood
+	StatusLowAvailability
+	StatusDown
+)
+
+func GetStatusCode[T float32 | uint64](percent T) int {
+	if percent == 0 {
+		return StatusNoData
+	}
+	if percent > 95 {
+		return StatusGood
+	}
+	if percent > 80 {
+		return StatusLowAvailability
+	}
+	return StatusDown
+}
+
+func StatusCodeToString(statusCode int) string {
+	switch statusCode {
+	case StatusNoData:
+		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusNoData"})
+	case StatusGood:
+		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusGood"})
+	case StatusLowAvailability:
+		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusLowAvailability"})
+	case StatusDown:
+		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusDown"})
+	default:
+		return ""
 	}
 }
