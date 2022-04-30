@@ -457,7 +457,7 @@ other = "出现错误"
 [SystemError]
 other = "系统错误"
 
-[NetowrkError]
+[NetworkError]
 other = "网络错误"
 
 [ServicesStatus]
