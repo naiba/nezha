@@ -19,7 +19,7 @@
                     <th><button onclick="checkAllServer()" class="ui mini nezha-primary-btn button">{{tr "SelectAll"}}</button></th>
                     <th>ID({{tr "DisplayIndex"}})</th>
                     <th>{{tr "Name"}}</th>
-                    <th>{{tr "Tag"}}</th>
+                    <th>{{tr "ServerGroup"}}</th>
                     <th>IP</th>
                     <th>{{tr "VersionNumber"}}</th>
                     <th>{{tr "Secret"}}</th>
@@ -34,7 +34,7 @@
                     <td><input type="checkbox" class="nezha-servers" value="{{$server.ID}}" /></td>
                     <td>{{$server.ID}}({{$server.DisplayIndex}})</td>
                     <td>{{$server.Name}}</td>
-                    <td>{{$server.Tag}}</td>
+                    <td>{{$server.ServerGroup}}</td>
                     <td>{{$server.Host.IP}}</td>
                     <td>{{$server.Host.Version}}</td>
                     <td>{{$server.Secret}}</td>
