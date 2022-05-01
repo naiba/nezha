@@ -271,9 +271,6 @@ other = "Admin List"
 [Theme]
 other = "Theme"
 
-[DefaultTheme]
-other = "Default Theme"
-
 [CustomCodes]
 other = "Custom code (style, script)"
 
