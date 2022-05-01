@@ -386,7 +386,7 @@ other = "Disponibilidad en los últimos 30 días"
 other = "Detalles"
 
 [Status]
-other = "Estatus"
+other = "Estado"
 
 [Availability]
 other = "Disponibilidad"
