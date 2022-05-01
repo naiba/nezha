@@ -188,7 +188,7 @@ other = "Última ejecución"
 other = "Resultado final"
 
 [Administration]
-other = "Administración"
+other = "Gestionar"
 
 [CoverAll]
 other = "Cubriendo todo"
@@ -386,7 +386,7 @@ other = "Disponibilidad en los últimos 30 días"
 other = "Detalles"
 
 [Status]
-other = "Estatus"
+other = "Estado"
 
 [Availability]
 other = "Disponibilidad"
