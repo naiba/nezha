@@ -494,7 +494,7 @@ other = "Incident"
 other = "Resolved"
 
 [StatusDown]
-other = "故障"
+other = "Failure"
 
 [StatusNoData]
 other = "No Data"
