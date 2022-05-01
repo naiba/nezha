@@ -493,6 +493,9 @@ other = "Incidente"
 [Resolved]
 other = "Resuelto"
 
+[StatusDown]
+other = "Fallo"
+
 [StatusNoData]
 other = "No hay datos disponibles"
 
