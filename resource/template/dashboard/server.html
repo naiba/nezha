@@ -40,12 +40,12 @@
                     <td>{{$server.Secret}}</td>
                     <td>
                         <button class="ui icon green mini button"
-                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}{{if eq $server.Host.CountryCode "cn"}}curl -L https://fastly.jsdelivr.net/gh/naiba/nezha@master/script/install.sh -o nezha.sh && chmod +x nezha.sh && CN=True sudo ./nezha.sh install_agent{{else}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent{{end}} {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
                             data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
                             <i class="linux icon"></i>
                         </button>
                         <button class="ui icon green mini button"
-                            data-clipboard-text="{{if $.Conf.GRPCHost}}set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 {{$.Conf.GRPCHost}}:{{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}set-ExecutionPolicy RemoteSigned;Invoke-WebRequest {{if eq $server.Host.CountryCode "cn"}}https://fastly.jsdelivr.net/gh/naiba/nezha@master/script/install.ps1{{else}}https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1{{end}} -OutFile C:\install.ps1;powershell.exe C:\install.ps1 {{$.Conf.GRPCHost}}:{{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
                             data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
                             <i class="windows icon"></i>
                         </button>
