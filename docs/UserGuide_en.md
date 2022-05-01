@@ -1,138 +1,138 @@
 # User Guide
 
-## install script
+## Script for installation
 
-**Recommended configuration：** Preparation before installation _Two domains_，one can **access CDN** as _Public Access_，for example (status.nai.ba)；Another one resolves to the panel server as Agent connect Dashboard use，**can't access CDN** Direct exposure panel host IP，for example（ip-to-dashboard.nai.ba）。
+**Recommended configuration：** Prepare _two domains_ before installation，a domain can **connect to CDN** for _Public Access_，for example (status.nai.ba). Another domain name resolves to the panel server allows the Agent can connect to the Dashboard，This domain **cannot connect to CDN** You need to make it expose the ip of the panel server directly.
 
 ```shell
 curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh  -o nezha.sh && chmod +x nezha.sh
 sudo ./nezha.sh
 ```
 
-_\* use WatchTower Panels can be updated automatically，Windows terminal can use nssm configure autostart_
+_\* Use WatchTower to automatically update the panel, and in Windows you can use nssm to configure self-start_
 
-**Windows -A key installation Agent （please use Powershell admin rights）**
+**Windows One-Click Installation Agent (please use Powershell administrator privileges)**
 
 ```powershell
 set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 dashboard_host:grpc_port secret
 ```
 
-_In case of confirmation「Implement policy changes」please choose Y_
+_If you encounter the prompt "Implement Policy Change" please select Y_
 
-### Agent customize
+### Customize Agent 
 
-#### Custom monitoring of network cards and hard disk partitions
+#### Customize the NIC and hard drive partitions to be monitored
 
-implement `/opt/nezha/agent/nezha-agent --edit-agent-config` to select custom NICs and partitions，then reboot just agent
+Execute `/opt/nezha/agent/nezha-agent --edit-agent-config` to select a custom NIC and partition, and then restart Agent
 
 #### Operating parameters
 
-by executing `./nezha-agent --help` View supported parameters，If you use one-click scripting，can be edited `/etc/systemd/system/nezha-agent.service`，exist `ExecStart=` At the end of this line add
+Execute `./nezha-agent --help` to view supported parameters，if you are already using the one-click script, you can edit `/etc/systemd/system/nezha-agent.service`，at the end of this line `ExecStart=` add:
 
-- `--report-delay` System information reporting interval，The default is 1 Second，can be set to 3 to further reduce agent End-system resource usage（Configuration interval 1-4）
-- `--skip-conn` Do not monitor the number of connections，if vpn-gateway/connection-intensive machines High CPU usage，Recommended settings
-- `--skip-procs` Do not monitor the number of processes，can also be reduced agent occupy
-- `--disable-auto-update` prohibit **auto update** Agent（safety features）
-- `--disable-force-update` prohibit **Force update** Agent（safety features）
-- `--disable-command-execute` prohibited in Agent Execute scheduled tasks on the machine、Open online terminal（safety features）
-- `--tls` enable SSL/TLS encryption（use nginx reverse proxy Agent of grpc connect，and nginx turn on SSL/TLS Time，This configuration needs to be enabled）
+- `--report-delay` System information reporting interval, default is 1 second, can be set to 3 to reduce the system resource usage on the agent side (configuration range 1-4)
+- `--skip-conn` Not monitoring the number of connections, if it is a server with a large number of connections, the CPU usage will be high. It is recommended to set this to reduce CPU usage
+- `--skip-procs` Disable monitoring the number of processes can also reduce CPU and memory usage
+- `--disable-auto-update` Disable **Automatic Update** Agent (security feature)
+- `--disable-force-update` Disable **Forced Update** Agent (security feature)
+- `--disable-command-execute` Disable execution of scheduled tasks, disallow open online terminals on the Agent side (security feature)
+- `--tls` Enable SSL/TLS encryption (If you are using nginx to reverse proxy Agent´s grpc connections, and if nginx has SSL/TLS enabled, you need to enable this configuration)
 
-## Function Description
+## Description of the functions
 
 <details>
-    <summary>Scheduled Tasks：backup script、service restart，and other periodic operation and maintenance tasks。</summary>
+    <summary>Scheduled tasks: backup scripts, service restarts, and other scheduled tasks</summary>
 
-Use this feature to periodically combine restic、rclone back up the server，Or periodically restart some service to reset the network connection。
+Use this feature to periodically back up the server in combination with restic or rclone, or to periodically restart a service to reset the network connection.
 
 </details>
 
 <details>
-    <summary>Alarm notification：Real-time monitoring of load, CPU, memory, hard disk, bandwidth, traffic, monthly traffic, number of processes, and number of connections。</summary>
+    <summary>Notification: Real-time monitoring of load, CPU, memory, hard disk, bandwidth, transfer, monthly transfer, number of processes, number of connections</summary>
 
 #### Flexible notification methods
 
-`#NEZHA#` is the panel message placeholder，The panel will automatically replace the placeholder with the actual message when the notification is triggered
+`#NEZHA#` is a panel message placeholder, and the panel will automatically replace the placeholder with the actual message when it triggers a notification
 
-Body content is`JSON` formatted：**when the request type is FORM Time**，value is `key:value` form，`value` Placeholders can be placed inside，Automatically replace when notified。**when the request type is JSON** It will only be submitted directly to the`URL`。
+The content of Body is  in `JSON` format：**When the request type is FORM**，the value is in the form of `key:value`，`value` can contain placeholders that will be automatically replaced when notified. **When the request type is JSON** It will only do string substitution and submit to the `URL` directly.
 
-URL Placeholders can also be placed inside，Simple string replacement is done when requested。
+Placeholders can also be placed inside the URL, and it will perform a simple string substitution when requested.
 
-Refer to the example below，very flexible。
+Refer to the example below, it is very flexible.
 
 1. Add notification method
 
-   - telegram Example [@haitau](https://github.com/haitau) contribute
+   - Telegram Example, contributed by [@haitau](https://github.com/haitau)
 
-     - name：telegram Robot message notification
+     - Name：Telegram Robot message notification
      - URL：<https://api.telegram.org/botXXXXXX/sendMessage?chat_id=YYYYYY&text=#NEZHA>#
-     - request method: GET
-     - request type: default
+     - Request method: GET
+     - Request type: default
      - Body: null
-     - URL Parameter acquisition instructions：botXXXXXX Neutral XXXXXX is in telegram Follow the official @Botfather ，enter/newbot ，Create new bot（bot）Time，will provide token（in prompt Use this token to access the HTTP API:next line）here 'bot' Three letters are indispensable. After bot created, You need to chat with the BOT to have a conversation（Just send a message），then available API Send a message. YYYYYY is telegram user's number ID。with the robot @userinfobot Dialogue is available。
+     - URL Parameter acquisition instructions：The XXXXXX in botXXXXXX is the token provided when you follow the official @Botfather in Telegram and enter /newbot to create a new bot. (In the line after _Use this token to access the HTTP API_). The 'bot' are essential. After creating a bot, you need to talk to the BOT in Telegram (send a random message) before you can send a message by using API. YYYYYY is Telegram user's ID, you can get it by talking to the bot @userinfobot.
 
-2. Add an offline alarm
+2. Add an offline notification
 
-   - name：Offline notifications
-   - rule：`[{"Type":"offline","Duration":10}]`
-   - enable：√
+   - Name: Offline notifications
+   - Rule: `[{"Type":"offline","Duration":10}]`
+   - Enable: √
 
-3. add a monitor CPU continued 10s Exceed 50% **and** memory persistent 20s Occupied less than 20% the alarm
+3. Add an notification when the CPU exceeds 50% for 10s **but** the memory usage is below 20% for 20s
 
-   - name：CPU+RAM
-   - rule：`[{"Type":"cpu","Min":0,"Max":50,"Duration":10},{"Type":"memory","Min":20,"Max":0,"Duration":20}]`
-   - enable：√
+   - Name: CPU+RAM
+   - Rule: `[{"Type":"cpu","Min":0,"Max":50,"Duration":10},{"Type":"memory","Min":20,"Max":0,"Duration":20}]`
+   - Enable: √
 
-#### Description of alarm rules
+#### Description of notification rules
 
-##### basic rules
+##### Basic Rules
 
-- type
+- Type
   - `cpu`、`memory`、`swap`、`disk`
-  - `net_in_speed` Inbound speed、`net_out_speed` Outbound speed、`net_all_speed` two-way speed、`transfer_in` Inbound traffic、`transfer_out` Outbound traffic、`transfer_all` bidirectional traffic
+  - `net_in_speed` Inbound speed, `net_out_speed` Outbound speed, `net_all_speed` Inbound + Outbound speed, `transfer_in` Inbound Transfer, `transfer_out` Outbound Transfer, `transfer_all` Total Transfer
   - `offline` Offline monitoring
   - `load1`、`load5`、`load15` load
-  - `process_count` number of processes _Currently fetching threads takes up too many resources，Temporarily not supported_
-  - `tcp_conn_count`、`udp_conn_count` number of connections
-- duration：duration in seconds，Sampling records in seconds 30% The above trigger threshold will only alarm（Anti-Data Pin）
+  - `process_count` Number of processes _Currently, counting the number of processes takes up too many resources and is not supported at the moment_
+  - `tcp_conn_count`、`udp_conn_count` Number of connections
+- duration：Lasting for a few seconds, the notification will only be triggered when the sampling record reaches 30% or more within a few seconds
 - min/max
-  - flow、Network speed class value as bytes（1KB=1024B，1MB = 1024\*1024B）
-  - memory、hard disk、CPU occupancy percentage
-  - Offline monitoring without setup
+  - Transfer, network speed, and other values of the same type. Unit is byte (1KB=1024B，1MB = 1024\*1024B)
+  - Memory, hard disk, CPU. units are usage percentages
+  - No setup required for offline monitoring
 - cover `[{"type":"offline","duration":10, "cover":0, "ignore":{"5": true}}]`
-  - `0` monitor all，pass `ignore` ignore specific server
-  - `1` ignore all，pass `ignore` Monitor specific servers
-- ignore: `{"1": true, "2":false}` specific server，match `cover` use
+  - `0` Cover all, use `ignore` to ignore specific servers
+  - `1` Ignore all, use `ignore` to monitoring specific servers
+- ignore: `{"1": true, "2":false}` to ignore specific servers, use with `cover`
 
-##### special：Arbitrary cycle flow alarm
+##### Special: Any-cycle transfer notification
 
-Can be used as monthly flow alarm
+Can be used as monthly transfer notificatin
 
 - type
-  - transfer_in_cycle Inbound traffic during the period
-  - transfer_out_cycle Outbound traffic during the period
-  - transfer_all_cycle Bidirectional flow in cycles and
-- cycle_start Fiscal Period Start Date（Can be the start date of your machine billing cycle），RFC3339 Time format，For example, Beijing time is`2022-01-11T08:00:00.00+08:00`
-- cycle_interval How many cycle units every (for example, if the cycle unit is days, the value is 7, which means that the statistics will be counted every 7 days）
-- cycle_unit Statistical period unit, default `hour`, optional(`hour`, `day`, `week`, `month`, `year`)
-- min/max、cover、ignore Refer to Basic Rules Configuration
-- Example: ID for 3 the machine（ignore inside the definition）of monthly 15 outbound monthly traffic billed 1T Call the police `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2022-01-11T08:00:00.00+08:00","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
+  - transfer_in_cycle Inbound transfer during the cycle
+  - transfer_out_cycle Outbound transfer during the cycle
+  - transfer_all_cycle The sum of inbound and outbound transfer during the cycle
+- cycle_start Start date of the statistical cycle (can be the start date of your server's billing cycle), the time format is RFC3339, for example, the format in Beijing time zone is`2022-01-11T08:00:00.00+08:00`
+- cycle_interval Interval time cycle  (For example, if the cycle is in days and the value is 7, it means that the statistics are counted every 7 days)
+- cycle_unit Statistics cycle unit, default `hour`, optional(`hour`, `day`, `week`, `month`, `year`)
+- min/max、cover、ignore Please refer to the basic rules to configure
+- Example: The server with ID 3 (defined in the `ignore`) is counted on the 15th of each month, and a notification is triggered when the monthly outbound traffic reaches 1TB during the cycle. `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2022-01-11T08:00:00.00+08:00","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
   ![7QKaUx.md.png](https://s4.ax1x.com/2022/01/13/7QKaUx.md.png)
 
 </details>
 
 <details>
-    <summary>service monitoring：HTTP、SSL certificate、ping、TCP port etc。</summary>
+    <summary>Service monitoring: HTTP, SSL certificate, ping, TCP port, etc.</summary>
 
-Enter `/monitor` Click to create a new monitor on the page，Instructions are below the form。
+Just go to the `/service` page and click on Add Service Monitor, there are instructions on the form.
 
 </details>
 
 <details>
-  <summary>custom code：Change the logo、change color、Add statistical code, etc.。</summary>
+  <summary>Custom code: change logo, change color tone, add statistics code, etc.</summary>
 
 **Effective only on the visitor's home page.**
 
-- Default theme changing progress bar color example
+- Example of changing the default theme progress bar color
 
   ```html
   <style>
@@ -142,7 +142,7 @@ Enter `/monitor` Click to create a new monitor on the page，Instructions are be
   </style>
   ```
 
-- DayNight Example of theme changing progress bar color, modifying footer（from [@hyt-allen-xu](https://github.com/hyt-allen-xu)）
+- Example of modifying DayNight theme progress bar color and footer (by [@hyt-allen-xu](https://github.com/hyt-allen-xu))
 
   ```html
   <style>
@@ -159,7 +159,7 @@ Enter `/monitor` Click to create a new monitor on the page，Instructions are be
   </script>
   ```
 
-- Default theme modification LOGO、Modify footer example（from [@iLay1678](https://github.com/iLay1678)）
+- Example of modifying the logo of the default theme, modifying the footer (by [@iLay1678](https://github.com/iLay1678))
 
   ```html
   <style>
@@ -177,15 +177,15 @@ Enter `/monitor` Click to create a new monitor on the page，Instructions are be
   window.onload = function(){
   var avatar=document.querySelector(".item img")
   var footer=document.querySelector("div.is-size-7")
-  footer.innerHTML="Powered by your name"
+  footer.innerHTML="Powered by YOUR NAME"
   footer.style.visibility="visible"
-  avatar.src="your square logo address"
+  avatar.src="Your square logo link"
   avatar.style.visibility="visible"
   }
   </script>
   ```
 
-- hotaru Theme change background image example
+- Example of modifying the background image of hotaru theme
 
   ```html
   <style>
@@ -197,37 +197,37 @@ Enter `/monitor` Click to create a new monitor on the page，Instructions are be
 
 </details>
 
-## common problem
+## FAQ
 
 <details>
-    <summary>How to perform data migration、Backup and restore？</summary>
+    <summary>How do I migrate my data to the new server and restore my backups?</summary>
 
-1. First use one-click script `stop panel`
-2. Pack `/opt/nezha` folder, to the same location in the new environment
-3. Use one-click script `Launchpad`
+1. First use the one-click script and select `Stop Panel`
+2. Compress the `/opt/nezha` folder to the same path as the new server
+3. Using the one-click script, select `Launch Panel`
 
 </details>
 
 <details>
-    <summary>Agent Start/Go Online Problem Self-Check Process</summary>
+    <summary>Let the Agent start/on-line, and the self-test process of the problem</summary>
 
-1. direct execution `/opt/nezha/agent/nezha-agent -s Panel IP or non-CDN domain name:Panel RPC port -p Agent key -d` Check if the log is DNS、Poor network causes timeout（timeout） question。
-2. `nc -v domain name/IP Panel RPC port` or `telnet domain name/IP Panel RPC port` Check if it is a network problem，Check local and panel server inbound and outbound firewalls，If the single machine cannot judge, you can use the <https://port.ping.pe/> Provided port inspection tool for detection。
-3. If the above steps detect normal，Agent normal online，try to close SELinux，[how to close SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
-
-</details>
-
-<details>
-    <summary>how to make Legacy OpenWRT/LEDE self-start？</summary>
-
-refer to this project: <https://github.com/Erope/openwrt_nezha>
+1. Execute `/opt/nezha/agent/nezha-agent -s IP/Domin(Panel IP or Domain not connected to CDN):port(Panel RPC port) -p secret(Agent Secret) -d` Check the logs to see if the timeout is due to a DNS problem or poor network
+2. `nc -v domain/IP port(Panel RPC port)` or `telnet domain/IP port(Panel RPC port)` to check if it' s a network problem, check the inbound and outbound firewall between the local machine and the panel server, if you can' t determine the problem you can check it with the port checking tool provided by <https://port.ping.pe/>.
+3. If the above steps work and the Agent is online, please try to turn off SELinux on the panel server. [How to close SELinux？](https://www.google.com/search?q=How+to+close+SELinux)
 
 </details>
 
 <details>
-    <summary>how to make New version of OpenWRT self-start？via @esdes</summary>
+    <summary>How to make the old version of OpenWRT/LEDE self-boot?</summary>
 
-first in release Download the corresponding binary decompression zip After the package is placed in `/root`，Then `chmod +x /root/nezha-agent` give execute permission，then create `/etc/init.d/nezha-service`：
+Refer to this project: <https://github.com/Erope/openwrt_nezha>
+
+</details>
+
+<details>
+    <summary>How to make the new version of OpenWRT self-boot? By @艾斯德斯</summary>
+
+First download the corresponding binary from the release, unzip the zip package and place it in `/root`, then execute `chmod +x /root/nezha-agent` to give it execute access, create file `/etc/init.d/nezha-service`：
 
 ```shell
 #!/bin/sh /etc/rc.common
@@ -237,7 +237,7 @@ USE_PROCD=1
 
 start_service() {
  procd_open_instance
- procd_set_param command /root/nezha-agent -s Panel URL:receive port -p unique key -d
+ procd_set_param command /root/nezha-agent -s Domin/IP:port -p screat -d
  procd_set_param respawn
  procd_close_instance
 }
@@ -253,21 +253,21 @@ restart() {
 }
 ```
 
-give execute permission `chmod +x /etc/init.d/nezha-service` then start the service `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
+Give it permission to execute `chmod +x /etc/init.d/nezha-service` then start the service `/etc/init.d/nezha-service enable && /etc/init.d/nezha-service start`
 
 </details>
 
 <details>
-    <summary>Live channel disconnected/Online terminal connection failed</summary>
+    <summary>Real-time channel disconnection/online terminal connection failure</summary>
 
-When using a reverse proxy, you need to target `/ws`,`/terminal` path WebSocket Specially configured to support real-time server status updates and **WebSSH**。
+Using a reverse proxy requires special configuration of the WebSocket for the `/ws` and `/terminal` paths to support real-time server status updates and **WebSSH**
 
-- Nginx(Aapanel/Pagoda)：At your nginx Add the following code to the configuration file
+- Nginx(Aapanel)：Add the following code to your nginx configuration file
 
   ```nginx
   server{
 
-      #some original configuration
+      #Some original configurations
       #server_name blablabla...
 
       location ~ ^/(ws|terminal/.+)$  {
@@ -277,20 +277,20 @@ When using a reverse proxy, you need to target `/ws`,`/terminal` path WebSocket 
           proxy_set_header Host $host;
       }
 
-      #others location blablabla...
+      #Others, such as location blablabla...
   }
   ```
 
-  If not a Aapanel/Pagoda, still in `server{}` add this paragraph
+  If you're not using Aapanel, add this code to the `server{}`:
 
   ```nginx
   location / {
-    proxy_pass http://ip:site access port;
+    proxy_pass http://ip:port(Access port);
     proxy_set_header Host $host;
   }
   ```
 
-- CaddyServer v1（v2 No special configuration required）
+- CaddyServer v1（v2 no special configuration required）
 
   ```Caddyfile
   proxy /ws http://ip:8008 {
@@ -304,19 +304,19 @@ When using a reverse proxy, you need to target `/ws`,`/terminal` path WebSocket 
 </details>
 
 <details>
-    <summary>reverse proxy gRPC port（support Cloudflare CDN）</summary>
-use Nginx or Caddy reverse proxy gRPC
+    <summary>Reverse Proxy gRPC Port (support Cloudflare CDN)</summary>
+Use Nginx or Caddy to reverse proxy gRPC
 
-- Nginx configure
+- Nginx configuration files
 
 ```nginx
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name ip-to-dashboard.nai.ba; # yours Agent connect Dashboard's domain name
+    server_name ip-to-dashboard.nai.ba; # The domain name where the Agent connects to Dashboard
 
-    ssl_certificate          /data/letsencrypt/fullchain.pem; # your domain certificate path
-    ssl_certificate_key      /data/letsencrypt/key.pem;       # Your domain name private key path
+    ssl_certificate          /data/letsencrypt/fullchain.pem; # Your domain certificate path
+    ssl_certificate_key      /data/letsencrypt/key.pem;       # Your domain's private key path
 
     underscores_in_headers on;
 
@@ -328,10 +328,10 @@ server {
 }
 ```
 
-- Caddy configure
+- Caddy configuration files
 
 ```Caddyfile
-ip-to-dashboard.nai.ba:443 { # yours Agent connect Dashboard's domain name
+ip-to-dashboard.nai.ba:443 { # The domain name where the Agent connects to Dashboard
     reverse_proxy {
         to localhost:5555
         transport http {
@@ -341,20 +341,20 @@ ip-to-dashboard.nai.ba:443 { # yours Agent connect Dashboard's domain name
 }
 ```
 
-Dashboard Panel side configuration
+Dashboard Panel Configuration
 
-- First log in to the panel to enter the management background Open the settings page，exist `Panel server domain name that is not connected to CDN/IP` Fill in the previous step in Nginx or Caddy domain name configured in for example `ip-to-dashboard.nai.ba` ，and save。
-- then in the panel server，Open /opt/nezha/dashboard/data/config.yaml 文件，将 `proxygrpcport` change into Nginx or Caddy listening port，or as set in the previous step `443` ；because we are Nginx or Caddy turned on SSL/TLS，So it is necessary to `tls` Set as `true` ；Restart the panel after modification is complete。
+- First login to the panel and enter the admin panel, go to the settings page, fill in the `CDN Bypassed Domain/IP` with the domain name you configured in Nginx or Caddy, for example `ip-to-dashboard.nai.ba`, and save it.
+- Then open the /opt/nezha/dashboard/data/config.yaml file in the panel server and change `proxygrpcport` to the port that Nginx or Caddy is listening on, such as `443` as set in the previous step. Since we have SSL/TLS enabled in Nginx or Caddy, we need to set `tls` to `true`, restart the panel when you are done.
 
-Agent end configuration
+Agent Configuration
 
-- Login panel management background，Copy the one-click install command，Execute the one-click installation command on the corresponding server to reinstall agent end。
+- Log in to the admin panel, copy the one-click install command, and execute the one-click install command on the corresponding server to reinstall the agent.
 
-turn on Cloudflare CDN（optional）
+Enable Cloudflare CDN (optional)
 
-according to Cloudflare gRPC requirements：gRPC Service must listen 443 port and must support TLS and HTTP/2。
-So if you need to turn it on CDN，must be configured Nginx or Caddy reverse proxy gRPC use when 443 port，and configure the certificate（Caddy Will automatically apply and configure the certificate）。
+According to Cloudflare gRPC requirements: gRPC services must listen on port 443 and must support TLS and HTTP/2.
+So if you need to enable CDN, you must use port 443 when configuring Nginx or Caddy reverse proxy gRPC and configure the certificate (Caddy will automatically apply and configure the certificate).
 
-- Log in Cloudflare，Choose a domain name to use。Open `The internet` option will `gRPC` switch on，Open `DNS` options，turn up Nginx or Caddy Anti-generation gRPC The resolution record of the configured domain name，Open Orange Cloud Enable CDN。
+-  Log in to Cloudflare and select the domain you are using. Go to the `Network` page and turn on the `gRPC` switch, then go to the `DNS` page, find the resolution record of the domain with gRPC configuration, and turn on the orange cloud icon to enable CDN.
 
 </details>

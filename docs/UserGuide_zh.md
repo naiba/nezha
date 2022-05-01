@@ -57,18 +57,18 @@ _如遇到确认「执行策略变更」请选择 Y_
 <details>
     <summary>计划任务：备份脚本、服务重启，等定期运维任务。</summary>
 
-使用此功能可以定期结合 restic、rclone 给服务器备份，或者定期某项重启服务来重置网络连接。
+使用此功能可以定期结合 restic、rclone 给服务器备份，或者定期重启某项服务来重置网络连接。
 
 </details>
 
 <details>
     <summary>报警通知：负载、CPU、内存、硬盘、带宽、流量、月流量、进程数、连接数实时监控。</summary>
 
-#### 灵活通知方式
+#### 灵活的通知方式
 
 `#NEZHA#` 是面板消息占位符，面板触发通知时会自动替换占位符到实际消息
 
-Body 内容是`JSON` 格式的：**当请求类型为 FORM 时**，值为 `key:value` 的形式，`value` 里面可放置占位符，通知时会自动替换。**当请求类型为 JSON 时** 只会简进行字符串替换后直接提交到`URL`。
+Body 内容是`JSON` 格式的：**当请求类型为 FORM 时**，值为 `key:value` 的形式，`value` 里面可放置占位符，通知时会自动替换。**当请求类型为 JSON 时** 只会简单进行字符串替换后直接提交到`URL`。
 
 URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 
@@ -124,7 +124,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
   - `load1`、`load5`、`load15` 负载
   - `process_count` 进程数 _目前取线程数占用资源太多，暂时不支持_
   - `tcp_conn_count`、`udp_conn_count` 连接数
-- duration：持续秒数，秒数内采样记录 30% 以上触发阈值才会报警（防数据插针）
+- duration：持续数秒，数秒内采样记录 30% 以上触发阈值才会报警（防数据插针）
 - min/max
   - 流量、网速类数值 为字节（1KB=1024B，1MB = 1024\*1024B）
   - 内存、硬盘、CPU 为占用百分比
@@ -132,7 +132,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 - cover `[{"type":"offline","duration":10, "cover":0, "ignore":{"5": true}}]`
   - `0` 监控所有，通过 `ignore` 忽略特定服务器
   - `1` 忽略所有，通过 `ignore` 监控特定服务器
-- ignore: `{"1": true, "2":false}` 特定服务器，搭配 `cover` 使用
+- ignore: `{"1": true, "2":false}` 选择忽略特定服务器，搭配 `cover` 使用
 
 ##### 特殊：任意周期流量报警
 
@@ -146,7 +146,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 - cycle_interval 每隔多少个周期单位（例如，周期单位为天，该值为 7，则代表每隔 7 天统计一次）
 - cycle_unit 统计周期单位，默认`hour`,可选(`hour`, `day`, `week`, `month`, `year`)
 - min/max、cover、ignore 参考基本规则配置
-- 示例: ID 为 3 的机器（ignore 里面定义）的每月 15 号计费的出站月流量 1T 报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2022-01-11T08:00:00.00+08:00","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
+- 示例: ID 为 3 的服务器（ignore 里面定义），以每月 15 号为统计周期，周期内统计的出站月流量 达到 1TB 时报警 `[{"type":"transfer_out_cycle","max":1000000000000,"cycle_start":"2022-01-11T08:00:00.00+08:00","cycle_interval":1,"cycle_unit":"month","cover":1,"ignore":{"3":true}}]`
   ![7QKaUx.md.png](https://s4.ax1x.com/2022/01/13/7QKaUx.md.png)
 
 </details>
@@ -154,7 +154,7 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>服务监控：HTTP、SSL证书、ping、TCP 端口等。</summary>
 
-进入 `/monitor` 页面点击新建监控即可，表单下面有相关说明。
+进入 `/服务` 页面点击新建监控即可，表单下面有相关说明。
 
 </details>
 
@@ -242,8 +242,8 @@ URL 里面也可放置占位符，请求时会进行简单的字符串替换。
 <details>
     <summary>Agent 启动/上线 问题自检流程</summary>
 
-1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是 DNS、网络不佳导致超时（timeout） 问题。
-2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 检验是否是网络问题，检查本机与面板服务器出入站防火墙，如果单机无法判断可借助 <https://port.ping.pe/> 提供的端口检查工具进行检测。
+1. 直接执行 `/opt/nezha/agent/nezha-agent -s 面板IP或非CDN域名:面板RPC端口 -p Agent密钥 -d` 查看日志是否是因为 DNS、网络不佳导致超时（timeout）
+2. `nc -v 域名/IP 面板RPC端口` 或者 `telnet 域名/IP 面板RPC端口` 来检验是否是网络问题，检查本机与面板服务器的出入站防火墙，如果无法判断问题可借助 <https://port.ping.pe/> 提供的端口检查工具进行检测。
 3. 如果上面步骤检测正常，Agent 正常上线，尝试关闭 SELinux，[如何关闭 SELinux？](https://www.google.com/search?q=%E5%85%B3%E9%97%ADSELINUX)
 
 </details>
