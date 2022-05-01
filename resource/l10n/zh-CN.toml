@@ -493,6 +493,9 @@ other = "故障"
 [Resolved]
 other = "恢复"
 
+[StatusDown]
+other = "故障"
+
 [StatusNoData]
 other = "无数据"
 
