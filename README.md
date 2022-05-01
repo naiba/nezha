@@ -1,6 +1,6 @@
 <div align="center">
   <br>
-  <img width="250" style="max-width:80%" src="resource/static/brand.svg" title="哪吒监控 Nezha Monitoring">
+  <img width="360" style="max-width:80%" src="resource/static/brand.svg" title="哪吒监控 Nezha Monitoring">
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
