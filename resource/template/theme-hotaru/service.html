@@ -22,7 +22,7 @@
                     <tr>
                         <td class="ui center aligned">{{$service.Monitor.Name}}</td>
                         <td class="ui center aligned">
-                            {{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%
+                            {{$service.TotalUptime|float32f}}%
                         </td>
                         <td class="ui center aligned">{{range $i,$d := $service.Delay}}
                             <div class="ui icon button {{className (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}"

@@ -36,7 +36,7 @@
           {{range $service := .Services}}
           <tr>
             <td class="mdui-text-center"><strong>{{$service.Monitor.Name}}</strong></td>
-            <td class="mdui-text-center">{{float32f (divU64 $service.TotalUp (addU64 $service.TotalUp $service.TotalDown))}}%</td>
+            <td class="mdui-text-center">{{$service.TotalUptime|float32f}}%</td>
             <td>
               {{range $i,$d := $service.Delay}}
                 {{$percent := (div (index $service.Up $i) (add (index $service.Up $i) (index $service.Down $i)))}}

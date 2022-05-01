@@ -188,11 +188,9 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	for i := 0; i < len(mhs); i++ {
 		dayIndex := 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
 		if mhs[i].Successful {
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex] = (ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex]*float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]) + mhs[i].Delay) / float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]+1)
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]++
 		} else {
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown++
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex]++
 		}
 	}
@@ -263,8 +261,6 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 		v := ss.serviceStatusToday[k]
 		ss.monthlyStatus[k].Up[29] = v.Up
 		ss.monthlyStatus[k].Down[29] = v.Down
-		ss.monthlyStatus[k].TotalUp += uint64(v.Up)
-		ss.monthlyStatus[k].TotalDown += uint64(v.Down)
 		ss.monthlyStatus[k].Delay[29] = v.Delay
 	}
 	// 最后 5 分钟的状态 与 monitor 对象填充
