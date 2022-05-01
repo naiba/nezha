@@ -9,11 +9,11 @@ type ServiceItemResponse struct {
 	Down        *[30]int
 }
 
-func sum[T int | float32](slice *[30]T) T {
+func sum(slice *[30]int) int {
 	if slice == nil {
 		return 0
 	}
-	var sum T
+	var sum int
 	for _, v := range *slice {
 		sum += v
 	}
