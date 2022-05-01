@@ -261,6 +261,8 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 	for k := range ss.monitors {
 		ss.monthlyStatus[k].Monitor = ss.monitors[k]
 		v := ss.serviceStatusToday[k]
+		ss.monthlyStatus[k].TotalUp -= uint64(ss.monthlyStatus[k].Up[29])
+		ss.monthlyStatus[k].TotalDown -= uint64(ss.monthlyStatus[k].Down[29])
 		ss.monthlyStatus[k].Up[29] = v.Up
 		ss.monthlyStatus[k].Down[29] = v.Down
 		ss.monthlyStatus[k].TotalUp += uint64(v.Up)
