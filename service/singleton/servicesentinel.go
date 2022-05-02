@@ -38,7 +38,6 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 		serviceStatusToday:                  make(map[uint64]*_TodayStatsOfMonitor),
 		serviceCurrentStatusIndex:           make(map[uint64]int),
 		serviceCurrentStatusData:            make(map[uint64][]model.MonitorHistory),
-		latestDate:                          make(map[uint64]string),
 		lastStatus:                          make(map[uint64]int),
 		serviceResponseDataStoreCurrentUp:   make(map[uint64]uint64),
 		serviceResponseDataStoreCurrentDown: make(map[uint64]uint64),
@@ -61,18 +60,15 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	for i := 0; i < len(mhs); i++ {
 		if mhs[i].Successful {
 			ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Up++
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
 			totalDelay[mhs[i].MonitorID] += mhs[i].Delay
 		} else {
 			ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Down++
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown++
 		}
 	}
 	for id, delay := range totalDelay {
 		ServiceSentinelShared.serviceStatusToday[id].Delay = delay / float32(ServiceSentinelShared.serviceStatusToday[id].Up)
-	}
-
-	// 更新入库时间及当日数据入库游标
-	for k := range ServiceSentinelShared.monitors {
-		ServiceSentinelShared.latestDate[k] = time.Now().Format("02-Jan-06")
 	}
 
 	// 启动服务监控器
@@ -88,39 +84,58 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 /*
    使用缓存 channel，处理上报的 Service 请求结果，然后判断是否需要报警
    需要记录上一次的状态信息
+
+   加锁顺序：serviceResponseDataStoreLock > monthlyStatusLock > monitorsLock
 */
 type ServiceSentinel struct {
+	// 服务监控任务上报通道
+	serviceReportChannel chan ReportData // 服务状态汇报管道
+	// 服务监控任务调度通道
+	dispatchBus chan<- model.Monitor
+
 	serviceResponseDataStoreLock        sync.RWMutex
-	monitorsLock                        sync.RWMutex
-	serviceReportChannel                chan ReportData                   // 服务状态汇报管道
 	serviceStatusToday                  map[uint64]*_TodayStatsOfMonitor  // [monitor_id] -> _TodayStatsOfMonitor
 	serviceCurrentStatusIndex           map[uint64]int                    // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
 	serviceCurrentStatusData            map[uint64][]model.MonitorHistory // [monitor_id] -> []model.MonitorHistory
-	latestDate                          map[uint64]string                 // 最近一次更新时间
+	serviceResponseDataStoreCurrentUp   map[uint64]uint64                 // [monitor_id] -> 当前服务在线计数
+	serviceResponseDataStoreCurrentDown map[uint64]uint64                 // [monitor_id] -> 当前服务离线计数
 	lastStatus                          map[uint64]int
-	serviceResponseDataStoreCurrentUp   map[uint64]uint64         // [monitor_id] -> 当前服务在线计数
-	serviceResponseDataStoreCurrentDown map[uint64]uint64         // [monitor_id] -> 当前服务离线计数
-	monitors                            map[uint64]*model.Monitor // [monitor_id] -> model.Monitor
 	sslCertCache                        map[uint64]string
+
+	monitorsLock sync.RWMutex
+	monitors     map[uint64]*model.Monitor // [monitor_id] -> model.Monitor
+
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
 	monthlyStatus     map[uint64]*model.ServiceItemResponse // [monitor_id] -> model.ServiceItemResponse
-	// 服务监控任务调度管道
-	dispatchBus chan<- model.Monitor
 }
 
 func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
 	// 刷新数据防止无人访问
 	ss.LoadStats()
 	// 将数据往前刷一天
+	ss.serviceResponseDataStoreLock.Lock()
+	defer ss.serviceResponseDataStoreLock.Unlock()
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
-	for _, v := range ss.monthlyStatus {
+	for k, v := range ss.monthlyStatus {
 		for i := 0; i < len(v.Up)-1; i++ {
-			v.Up[i] = v.Up[i+1]
-			v.Down[i] = v.Down[i+1]
-			v.Delay[i] = v.Delay[i+1]
+			if i == 0 {
+				// 30 天在线率，减去已经出30天之外的数据
+				v.TotalDown -= uint64(v.Down[i])
+				v.TotalUp -= uint64(v.Up[i])
+			}
+			v.Up[i], v.Down[i], v.Delay[i] = v.Up[i+1], v.Down[i+1], v.Delay[i+1]
 		}
+		v.Up[29] = 0
+		v.Down[29] = 0
+		v.Delay[29] = 0
+		// 清理前一天数据
+		ss.serviceResponseDataStoreCurrentUp[k] = 0
+		ss.serviceResponseDataStoreCurrentDown[k] = 0
+		ss.serviceStatusToday[k].Delay = 0
+		ss.serviceStatusToday[k].Up = 0
+		ss.serviceStatusToday[k].Down = 0
 	}
 }
 
@@ -145,10 +160,18 @@ func (ss *ServiceSentinel) Monitors() []*model.Monitor {
 // LoadStats 加载服务监控器的历史状态信息
 func (ss *ServiceSentinel) loadMonitorHistory() {
 	var monitors []*model.Monitor
-	DB.Find(&monitors)
-	var err error
+	err := DB.Find(&monitors).Error
+	if err != nil {
+		return
+	}
+
+	ss.serviceResponseDataStoreLock.Lock()
+	defer ss.serviceResponseDataStoreLock.Unlock()
+	ss.monthlyStatusLock.Lock()
+	defer ss.monthlyStatusLock.Unlock()
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
+
 	for i := 0; i < len(monitors); i++ {
 		// 旧版本可能不存在通知组 为其设置默认组
 		if monitors[i].NotificationTag == "" {
@@ -171,8 +194,6 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	year, month, day := time.Now().Date()
 	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
 
-	ss.monthlyStatusLock.Lock()
-	defer ss.monthlyStatusLock.Unlock()
 	for i := 0; i < len(monitors); i++ {
 		ServiceSentinelShared.monthlyStatus[monitors[i].ID] = &model.ServiceItemResponse{
 			Monitor: monitors[i],
@@ -190,15 +211,22 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 		if mhs[i].Successful {
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex] = (ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex]*float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]) + mhs[i].Delay) / float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]+1)
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]++
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
 		} else {
 			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex]++
+			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown++
 		}
 	}
 }
 
 func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
+	ss.serviceResponseDataStoreLock.Lock()
+	defer ss.serviceResponseDataStoreLock.Unlock()
+	ss.monthlyStatusLock.Lock()
+	defer ss.monthlyStatusLock.Unlock()
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
+
 	var err error
 	// 写入新任务
 	m.CronJobID, err = Cron.AddFunc(m.CronSpec(), func() {
@@ -212,16 +240,12 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 		Cron.Remove(ss.monitors[m.ID].CronJobID)
 	} else {
 		// 新任务初始化数据
-		ss.monthlyStatusLock.Lock()
-		defer ss.monthlyStatusLock.Unlock()
 		ss.monthlyStatus[m.ID] = &model.ServiceItemResponse{
 			Monitor: &m,
 			Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		}
-		ss.serviceResponseDataStoreLock.Lock()
-		defer ss.serviceResponseDataStoreLock.Unlock()
 		ss.serviceCurrentStatusData[m.ID] = make([]model.MonitorHistory, _CurrentStatusSize)
 		ss.serviceStatusToday[m.ID] = &_TodayStatsOfMonitor{}
 	}
@@ -233,32 +257,45 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	ss.serviceResponseDataStoreLock.Lock()
 	defer ss.serviceResponseDataStoreLock.Unlock()
+	ss.monthlyStatusLock.Lock()
+	defer ss.monthlyStatusLock.Unlock()
+	ss.monitorsLock.Lock()
+	defer ss.monitorsLock.Unlock()
+
 	delete(ss.serviceCurrentStatusIndex, id)
 	delete(ss.serviceCurrentStatusData, id)
-	delete(ss.latestDate, id)
 	delete(ss.lastStatus, id)
 	delete(ss.serviceResponseDataStoreCurrentUp, id)
 	delete(ss.serviceResponseDataStoreCurrentDown, id)
 	delete(ss.sslCertCache, id)
-	ss.monitorsLock.Lock()
-	defer ss.monitorsLock.Unlock()
+	delete(ss.serviceStatusToday, id)
+
 	// 停掉定时任务
 	Cron.Remove(ss.monitors[id].CronJobID)
 	delete(ss.monitors, id)
-	ss.monthlyStatusLock.Lock()
-	defer ss.monthlyStatusLock.Unlock()
+
 	delete(ss.monthlyStatus, id)
 }
 
 func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
-	// 刷新最新一天的数据
 	ss.serviceResponseDataStoreLock.RLock()
 	defer ss.serviceResponseDataStoreLock.RUnlock()
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
+
+	// 刷新最新一天的数据
 	for k := range ss.monitors {
 		ss.monthlyStatus[k].Monitor = ss.monitors[k]
 		v := ss.serviceStatusToday[k]
+
+		// 30 天在线率，
+		//   |- 减去上次加的旧当天数据，防止出现重复计数
+		ss.monthlyStatus[k].TotalUp -= uint64(ss.monthlyStatus[k].Up[29])
+		ss.monthlyStatus[k].TotalDown -= uint64(ss.monthlyStatus[k].Down[29])
+		//   |- 加上当日数据
+		ss.monthlyStatus[k].TotalUp += uint64(v.Up)
+		ss.monthlyStatus[k].TotalDown += uint64(v.Down)
+
 		ss.monthlyStatus[k].Up[29] = v.Up
 		ss.monthlyStatus[k].Down[29] = v.Down
 		ss.monthlyStatus[k].Delay[29] = v.Delay
@@ -283,17 +320,6 @@ func (ss *ServiceSentinel) worker() {
 		}
 		mh := model.PB2MonitorHistory(r.Data)
 		ss.serviceResponseDataStoreLock.Lock()
-		// 先查看是否到下一天
-		nowDate := time.Now().Format("02-Jan-06")
-		if nowDate != ss.latestDate[mh.MonitorID] {
-			// 清理前一天数据
-			ss.latestDate[mh.MonitorID] = nowDate
-			ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] = 0
-			ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] = 0
-			ss.serviceStatusToday[mh.MonitorID].Delay = 0
-			ss.serviceStatusToday[mh.MonitorID].Up = 0
-			ss.serviceStatusToday[mh.MonitorID].Down = 0
-		}
 		// 写入当天状态
 		if mh.Successful {
 			ss.serviceStatusToday[mh.MonitorID].Delay = (ss.serviceStatusToday[mh.
