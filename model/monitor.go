@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
@@ -69,11 +70,12 @@ func (m *Monitor) CronSpec() string {
 }
 
 func (m *Monitor) AfterFind(tx *gorm.DB) error {
+	m.SkipServers = make(map[uint64]bool)
 	var skipServers []uint64
 	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
-		return err
+		log.Println("NEZHA>> Monitor.AfterFind:", err)
+		return nil
 	}
-	m.SkipServers = make(map[uint64]bool)
 	for i := 0; i < len(skipServers); i++ {
 		m.SkipServers[skipServers[i]] = true
 	}

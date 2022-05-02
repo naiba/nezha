@@ -162,7 +162,7 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	var monitors []*model.Monitor
 	err := DB.Find(&monitors).Error
 	if err != nil {
-		return
+		panic(err)
 	}
 
 	ss.serviceResponseDataStoreLock.Lock()
