@@ -71,7 +71,7 @@ func GetHost(agentConfig *model.AgentConfig) *model.Host {
 	}
 
 	return &model.Host{
-		Platform:        hi.OS,
+		Platform:        hi.Platform,
 		PlatformVersion: hi.PlatformVersion,
 		CPU:             cpus,
 		MemTotal:        mv.Total,
