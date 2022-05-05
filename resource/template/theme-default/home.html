@@ -16,8 +16,8 @@
               <div class="content" v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                 <div class="header">
                   <i :class="server.Host.CountryCode + ' flag'"></i><i v-if='server.Host.Platform == "darwin"'
-                    class="fl-apple"></i><i v-else-if='isWindowsPlatform(server.Host.Platform)'
-                    class="windows icon"></i><i v-else class="'fl-'+server.Host.Platform"></i>
+                    class="apple icon"></i><i v-else-if='isWindowsPlatform(server.Host.Platform)'
+                    class="windows icon"></i><i v-else :class="'fl-' + getFontLogoClass(server.Host.Platform)"></i>
                   @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@
                   <i class="nezha-secondary-font info circle icon" style="height: 28px"></i>
                   <div class="ui content popup" style="margin-bottom: 0">
@@ -132,6 +132,57 @@
       },
       isWindowsPlatform(str) {
         return str.includes('Windows')
+      },
+      getFontLogoClass(str) {
+        if (["almalinux",
+          "alpine",
+          "aosc",
+          "apple",
+          "archlinux",
+          "archlabs",
+          "artix",
+          "budgie",
+          "centos",
+          "coreos",
+          "debian",
+          "deepin",
+          "devuan",
+          "docker",
+          "elementary",
+          "fedora",
+          "ferris",
+          "flathub",
+          "freebsd",
+          "gentoo",
+          "gnu-guix",
+          "illumos",
+          "kali-linux",
+          "linuxmint",
+          "mageia",
+          "mandriva",
+          "manjaro",
+          "nixos",
+          "openbsd",
+          "opensuse",
+          "pop-os",
+          "raspberry-pi",
+          "redhat",
+          "rocky-linux",
+          "sabayon",
+          "slackware",
+          "snappy",
+          "solus",
+          "tux",
+          "ubuntu",
+          "void",
+          "zorin"].indexOf(str)
+          > -1) {
+            return str;
+        }
+        if (str == 'openwrt') {
+          return 'tux';
+        }
+        return '';
       },
       group() {
         this.groups = groupingData(this.data, "Tag")
