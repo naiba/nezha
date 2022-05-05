@@ -179,8 +179,11 @@
           > -1) {
             return str;
         }
-        if (str == 'openwrt') {
+        if (['openwrt','linux'].indexOf(str) > -1) {
           return 'tux';
+        }
+        if (str == 'amazon') {
+          return 'redhat';
         }
         return '';
       },
