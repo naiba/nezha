@@ -9,7 +9,7 @@
   <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
 
   <!-- MDUI CSS -->
-  <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/mdui@1.0.2/dist/css/mdui.min.css"/>
+  <link rel="stylesheet" href="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-0-M/mdui/1.0.2/css/mdui.min.css"/>
   <link rel="stylesheet" href="/static/theme-mdui/mdui.css" type="text/css">
   <style>
 	.mdui-table td, .mdui-table th{padding: 6px;}
@@ -36,8 +36,10 @@
       <div id="servers">
         <div class="mdui-col" v-for='server in servers' :id="server.ID">
           <div :class="'mdui-card mt' + (server.live?'':' offline')">
-            <div class="mdui-card-primary">
-              <div class="mdui-card-primary-title mdui-text-truncate">@#server.Name#@</div>
+            <div class="mdui-card-header">
+	      <img class="mdui-card-header-avatar" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-0-M/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"/>
+	      <div class="mdui-card-header-title">@#server.Name#@</div>
+	      <div class="mdui-card-header-subtitle">@#server.Host.CountryCode.toUpperCase()#@ | @#server.Host.Platform#@ @#server.Host.PlatformVersion#@</div>
             </div>
             <div v-if="server.live" class="mdui-card-menu">
               <i :id="'info-' + server.ID" class="mdui-icon material-icons">info_outline</i>
