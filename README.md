@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.13.13&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.9.1-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.13.13&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.10.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>Nezha Monitoring</b> self-hosted lightweight monitoring and operation and maintenance system. Supports system status, HTTP (SSL certificate change, upcoming expiration, expiration), TCP, Ping <b>monitoring</b> and <b>alerting</b>, execute scheduled tasks and <b>web terminal</b>.</p>
@@ -40,9 +40,9 @@ You can change the system language in the settings page (`/setting`) after the a
 ## Special Thanks
 
 - [@JackieSung](https://github.com/JackieSung4ev) for our first community-contributed front-end theme.
-- [@Erope](https://github.com/JackieSung4ev) for contributed a lot to our installation scripts and community building.
+- [@Erope](https://github.com/Erope) for contributed a lot to our installation scripts and community building.
 - [@MikoyChinese](https://github.com/MikoyChinese) for our second community-contributed front-end theme.
-- [@AkkiaS7](https://github.com/Akkia) and [@hhhkkk520](https://github.com/hhhkkk520) for the excellent contribution in the early days of globalization.
+- [@AkkiaS7](https://github.com/AkkiaS7) and [@hhhkkk520](https://github.com/hhhkkk520) for the excellent contribution in the early days of globalization.
 - [@dysf888](https://github.com/dysf888) for the installation script in Windows.
 - [@MartijnLindeman](https://github.com/MartijnLindeman) for his perseverance has taken us to the international market.
 - and other [contributors](https://github.com/naiba/nezha/graphs/contributors).

@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.9.1"
+NZ_VERSION="v0.10.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -111,7 +111,25 @@ install_dashboard() {
     echo -e "> Install Panel"
 
     # Nezha Monitoring Folder
-    mkdir -p $NZ_DASHBOARD_PATH
+    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+        mkdir -p $NZ_DASHBOARD_PATH
+    else
+        echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
+        read -e -r -p "Exit the installation? [Y/n] " input
+        case $input in
+        [yY][eE][sS] | [yY])
+            echo "Exit the installation."
+            exit 0
+            ;;
+        [nN][oO] | [nN])
+            echo "Continue."
+            ;;
+        *)
+            echo "Exit the installation."
+            exit 0
+            ;;
+        esac
+    fi
     chmod 777 -R $NZ_DASHBOARD_PATH
 
     command -v docker >/dev/null 2>&1
@@ -156,6 +174,9 @@ install_agent() {
     local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$version" ]; then
         version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    fi
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
     fi
 
     if [ ! -n "$version" ]; then
