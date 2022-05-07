@@ -1,5 +1,7 @@
-{{define "theme-default/home"}} {{template "common/header" .}} {{if ts
-.CustomCode}} {{.CustomCode|safe}} {{end}} {{template "common/menu" .}}
+{{define "theme-default/home"}}
+{{template "common/header" .}}
+{{if ts .CustomCode}} {{.CustomCode|safe}} {{end}}
+{{template "common/menu" .}}
 <div class="nb-container">
   <div class="ui container">
     <div id="app">
@@ -13,10 +15,9 @@
             <div v-for="server in group.data" :id="server.ID" class="ui card">
               <div class="content" v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                 <div class="header">
-                  <i :class="server.Host.CountryCode + ' flag'"></i><i v-if='server.Host.Platform == "darwin"'
-                    class="apple icon"></i><i v-if='server.Host.Platform == "linux"' class="linux icon"></i><i
-                    v-if='server.Host.Platform == "windows"' class="windows icon"></i><i
-                    v-if='server.Host.Platform == "freebsd"' class="freebsd icon"></i>
+                  <i :class="server.Host.CountryCode + ' flag'"></i>&nbsp;<i v-if='server.Host.Platform == "darwin"'
+                    class="apple icon"></i><i v-else-if='isWindowsPlatform(server.Host.Platform)'
+                    class="windows icon"></i><i v-else :class="'fl-' + getFontLogoClass(server.Host.Platform)"></i>
                   @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@
                   <i class="nezha-secondary-font info circle icon" style="height: 28px"></i>
                   <div class="ui content popup" style="margin-bottom: 0">
@@ -24,13 +25,16 @@
                     [<span
                       v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br />
                     CPU: @#server.Host.CPU#@<br />
-                    {{tr "DiskUsed"}}: @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
-                    {{tr "MemUsed"}}: @#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
-                    {{tr "SwapUsed"}}: @#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
+                    {{tr "DiskUsed"}}:
+                    @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
+                    {{tr "MemUsed"}}:
+                    @#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
+                    {{tr "SwapUsed"}}:
+                    @#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
                     {{tr "NetTransfer"}}: <i
                       class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@<i
                       class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@<br />
-                      {{tr "Load"}}: @# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
+                    {{tr "Load"}}: @# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
                     toFixed2(server.State.Load15) #@<br />
                     {{tr "ProcessCount"}}: @# server.State.ProcessCount #@<br />
                     {{tr "ConnCount"}}: TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
@@ -125,6 +129,63 @@
     methods: {
       toFixed2(f) {
         return f.toFixed(2)
+      },
+      isWindowsPlatform(str) {
+        return str.includes('Windows')
+      },
+      getFontLogoClass(str) {
+        if (["almalinux",
+          "alpine",
+          "aosc",
+          "apple",
+          "archlinux",
+          "archlabs",
+          "artix",
+          "budgie",
+          "centos",
+          "coreos",
+          "debian",
+          "deepin",
+          "devuan",
+          "docker",
+          "elementary",
+          "fedora",
+          "ferris",
+          "flathub",
+          "freebsd",
+          "gentoo",
+          "gnu-guix",
+          "illumos",
+          "kali-linux",
+          "linuxmint",
+          "mageia",
+          "mandriva",
+          "manjaro",
+          "nixos",
+          "openbsd",
+          "opensuse",
+          "pop-os",
+          "raspberry-pi",
+          "redhat",
+          "rocky-linux",
+          "sabayon",
+          "slackware",
+          "snappy",
+          "solus",
+          "tux",
+          "ubuntu",
+          "void",
+          "zorin"].indexOf(str)
+          > -1) {
+            return str;
+        }
+        if (['openwrt','linux'].indexOf(str) > -1) {
+          return 'tux';
+        }
+        if (str == 'amazon') {
+          return 'redhat';
+        }
+        return '';
       },
       group() {
         this.groups = groupingData(this.data, "Tag")
