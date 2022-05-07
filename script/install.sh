@@ -141,7 +141,26 @@ install_dashboard() {
     echo -e "> 安装面板"
 
     # 哪吒监控文件夹
-    mkdir -p $NZ_DASHBOARD_PATH
+    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+        mkdir -p $NZ_DASHBOARD_PATH
+    else
+        echo "您可能已经安装过面板端，重复安装会覆盖数据，请注意备份。"
+        read -e -r -p "是否退出安装? [Y/n] " input
+        case $input in
+        [yY][eE][sS] | [yY])
+            echo "退出安装"
+            exit 0
+            ;;
+        [nN][oO] | [nN])
+            echo "继续安装"
+            ;;
+        *)
+            echo "退出安装"
+            exit 0
+            ;;
+        esac
+    fi
+    
     chmod 777 -R $NZ_DASHBOARD_PATH
 
     command -v docker >/dev/null 2>&1
@@ -186,6 +205,9 @@ install_agent() {
     local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$version" ]; then
         version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    fi
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
     fi
 
     if [ ! -n "$version" ]; then

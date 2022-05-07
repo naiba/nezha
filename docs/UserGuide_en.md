@@ -5,8 +5,7 @@
 **Recommended configuration：** Prepare _two domains_ before installation，a domain can **connect to CDN** for _Public Access_，for example (status.nai.ba). Another domain name resolves to the panel server allows the Agent can connect to the Dashboard，This domain **cannot connect to CDN** You need to make it expose the ip of the panel server directly.
 
 ```shell
-curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh  -o nezha.sh && chmod +x nezha.sh
-sudo ./nezha.sh
+curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh  -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh
 ```
 
 _\* Use WatchTower to automatically update the panel, and in Windows you can use nssm to configure self-start_
