@@ -10,6 +10,14 @@ else {
     $file = "nezha-agent_windows_386.zip"
 }
 $releases = "https://api.github.com/repos/$repo/releases"
+#重复运行自动更新
+if (Test-Path "C:\nezha") {
+    Write-Host "Nezha monitoring already exists, delete and reinstall" -BackgroundColor DarkGreen -ForegroundColor White
+    C:/nezha/nssm.exe stop nezha
+    C:/nezha/nssm.exe remove nezha
+    Remove-Item "C:\nezha" -Recurse
+}
+#TLS/SSL
 Write-Host "Determining latest nezha release" -BackgroundColor DarkGreen -ForegroundColor White
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $tag = (Invoke-WebRequest -Uri $releases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
