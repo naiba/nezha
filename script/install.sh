@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.10.1"
+NZ_VERSION="v0.10.2"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -198,7 +198,7 @@ install_dashboard() {
 
 selinux(){
     #判断当前的状态
-    getenforce | grep enfor
+    getenforce | grep '[Ee]nfor'
     if [ $? -eq 0 ];then
         echo -e "SELinux是开启状态，正在关闭！" 
         setenforce 0 &>/dev/null
