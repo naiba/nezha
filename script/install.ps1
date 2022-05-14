@@ -1,5 +1,5 @@
 #Get server and key
-param($server, $key)
+param($server, $key, $tls)
 # Download latest release from github
 $repo = "naiba/nezha"
 #  x86 or x64
@@ -59,7 +59,7 @@ Remove-Item "C:\nezha.zip"
 Remove-Item "C:\nssm.zip"
 Remove-Item "C:\temp" -Recurse
 #安装部分
-C:\nezha\nssm.exe install nezha C:\nezha\nezha-agent.exe -s $server -p $key -d 
+C:\nezha\nssm.exe install nezha C:\nezha\nezha-agent.exe -s $server -p $key $tls -d 
 C:\nezha\nssm.exe start nezha
 #enjoy
 Write-Host "Enjoy It!" -BackgroundColor DarkGreen -ForegroundColor Red
