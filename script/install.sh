@@ -198,7 +198,7 @@ install_dashboard() {
 
 selinux(){
     #判断当前的状态
-    getenforce | grep enfor
+    getenforce | grep '[Ee]nfor'
     if [ $? -eq 0 ];then
         echo -e "SELinux是开启状态，正在关闭！" 
         setenforce 0 &>/dev/null

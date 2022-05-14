@@ -167,7 +167,7 @@ install_dashboard() {
 
 selinux(){
     #Check SELinux
-    getenforce | grep enfor
+    getenforce | grep '[Ee]nfor'
     if [ $? -eq 0 ];then
         echo -e "SELinux running，closing now！" 
         setenforce 0 &>/dev/null
