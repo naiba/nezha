@@ -100,10 +100,10 @@ install_base() {
 
 install_soft() {
     # The official Arch library does not contain selinux components
-    (command -v yum >/dev/null 2>&1 && yum install $* selinux-policy -y) ||
-        (command -v apt >/dev/null 2>&1 && apt install $* selinux-utils -y) ||
+    (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
+        (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
         (command -v pacman >/dev/null 2>&1 && pacman -Syu $*) ||
-        (command -v apt-get >/dev/null 2>&1 && apt-get install $* selinux-utils -y)
+        (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y)
 }
 
 install_dashboard() {
