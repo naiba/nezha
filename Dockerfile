@@ -7,7 +7,7 @@ RUN cd cmd/dashboard && go build -o app -ldflags="-s -w"
 
 FROM alpine:latest
 ENV TZ="Asia/Shanghai"
-COPY ./entrypoint.sh /entrypoint.sh
+COPY ./script/entrypoint.sh /entrypoint.sh
 RUN apk --no-cache --no-progress add \
     ca-certificates \
     tzdata && \
