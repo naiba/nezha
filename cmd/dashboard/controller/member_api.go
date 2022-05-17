@@ -49,12 +49,24 @@ func (ma *memberAPI) serve() {
 	mr.GET("/server/details", ma.serverDetails)
 }
 
-// serverList 获取服务器列表
+// serverList 获取服务器列表 不传入Query参数则获取全部
+// header: Authorization: Token
+// query: tag (服务器分组)
 func (ma *memberAPI) serverList(c *gin.Context) {
-
+	token, _ := c.Cookie("Authorization")
+	tag := c.Query("tag")
+	serverAPI := &singleton.ServerAPI{
+		Token: token,
+		Tag:   tag,
+	}
+	if tag != "" {
+		c.JSON(200, serverAPI.GetListByTag())
+		return
+	}
+	c.JSON(200, serverAPI.GetAllList())
 }
 
-// serverDetails 获取服务器信息
+// serverDetails 获取服务器信息 不传入Query参数则获取全部
 // header: Authorization: Token
 // query: idList (服务器ID，逗号分隔，优先级高于tag查询)
 // query: tag (服务器分组)
