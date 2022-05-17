@@ -34,7 +34,6 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 			Link:  opt.Redirect,
 			Btn:   opt.Btn,
 		}
-
 		var isLogin bool
 
 		// 用户鉴权
@@ -47,6 +46,19 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 			}
 			if isLogin {
 				c.Set(model.CtxKeyAuthorizedUser, &u)
+			}
+		}
+
+		// API鉴权
+		apiToken := c.GetHeader("Authorization")
+		if apiToken != "" {
+			var t model.ApiToken
+			// TODO: 需要有缓存机制 减少数据库查询次数
+			if err := singleton.DB.Where("token = ?", apiToken).First(&t).Error; err == nil {
+				isLogin = t.TokenExpired.After(time.Now())
+			}
+			if isLogin {
+				c.Set(model.CtxKeyAuthorizedUser, &t)
 			}
 		}
 

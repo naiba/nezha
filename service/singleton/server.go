@@ -8,9 +8,10 @@ import (
 )
 
 var (
-	ServerList map[uint64]*model.Server // [ServerID] -> model.Server
-	SecretToID map[string]uint64        // [ServerSecret] -> ServerID
-	ServerLock sync.RWMutex
+	ServerList        map[uint64]*model.Server // [ServerID] -> model.Server
+	SecretToID        map[string]uint64        // [ServerSecret] -> ServerID
+	ServerTagToIDList map[string][]uint64      // [ServerTag] -> ServerID
+	ServerLock        sync.RWMutex
 
 	SortedServerList []*model.Server // 用于存储服务器列表的 slice，按照服务器 ID 排序
 	SortedServerLock sync.RWMutex
@@ -20,6 +21,7 @@ var (
 func InitServer() {
 	ServerList = make(map[uint64]*model.Server)
 	SecretToID = make(map[string]uint64)
+	ServerTagToIDList = make(map[string][]uint64)
 }
 
 //LoadServers 加载服务器列表并根据ID排序
@@ -33,6 +35,7 @@ func LoadServers() {
 		innerS.State = &model.HostState{}
 		ServerList[innerS.ID] = &innerS
 		SecretToID[innerS.Secret] = innerS.ID
+		ServerTagToIDList[innerS.Tag] = append(ServerTagToIDList[innerS.Tag], innerS.ID)
 	}
 	ReSortServer()
 }

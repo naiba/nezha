@@ -43,6 +43,47 @@ func (ma *memberAPI) serve() {
 	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/:model/:id", ma.delete)
 	mr.POST("/logout", ma.logout)
+
+	// API
+	mr.GET("/server/list", ma.serverList)
+	mr.GET("/server/details", ma.serverDetails)
+}
+
+// serverList 获取服务器列表
+func (ma *memberAPI) serverList(c *gin.Context) {
+
+}
+
+// serverDetails 获取服务器信息
+// header: Authorization: Token
+// query: idList (服务器ID，逗号分隔，优先级高于tag查询)
+// query: tag (服务器分组)
+func (ma *memberAPI) serverDetails(c *gin.Context) {
+	token, _ := c.Cookie("Authorization")
+	var idList []uint64
+	idListStr := strings.Split(c.Query("id"), ",")
+	if c.Query("id") != "" {
+		idList = make([]uint64, len(idListStr))
+		for i, v := range idListStr {
+			id, _ := strconv.ParseUint(v, 10, 64)
+			idList[i] = id
+		}
+	}
+	tag := c.Query("tag")
+	serverAPI := &singleton.ServerAPI{
+		Token:  token,
+		IDList: idList,
+		Tag:    tag,
+	}
+	if tag != "" {
+		c.JSON(200, serverAPI.GetStatusByTag())
+		return
+	}
+	if len(idList) != 0 {
+		c.JSON(200, serverAPI.GetStatusByIDList())
+		return
+	}
+	c.JSON(200, serverAPI.GetAllStatus())
 }
 
 func (ma *memberAPI) delete(c *gin.Context) {
@@ -194,6 +235,23 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 			// 设置新的 Secret-ID 绑定关系
 			delete(singleton.SecretToID, singleton.ServerList[s.ID].Secret)
 		}
+		// 如果修改了Tag
+		if s.Tag != singleton.ServerList[s.ID].Tag {
+			index := 0
+			for index < len(singleton.ServerTagToIDList[s.Tag]) {
+				if singleton.ServerTagToIDList[s.Tag][index] == s.ID {
+					break
+				}
+				index++
+			}
+			// 删除旧 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag] = append(singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][:index], singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][index+1:]...)
+			// 设置新的 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
+			if len(singleton.ServerTagToIDList[s.Tag]) == 0 {
+				delete(singleton.ServerTagToIDList, s.Tag)
+			}
+		}
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerLock.Unlock()
 	} else {
@@ -202,6 +260,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		singleton.ServerLock.Lock()
 		singleton.SecretToID[s.Secret] = s.ID
 		singleton.ServerList[s.ID] = &s
+		singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
 		singleton.ServerLock.Unlock()
 	}
 	singleton.ReSortServer()
