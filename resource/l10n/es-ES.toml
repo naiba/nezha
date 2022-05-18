@@ -473,16 +473,16 @@ other = "Tareas programadas"
 other = "API"
 
 [IssueNewApiToken]
-other = "添加Token"
+other = "Añadir un token"
 
 [Token]
 other = "Token"
 
 [DeleteToken]
-other = "删除Token"
+other = "Borrar el token"
 
 [ConfirmToDeleteThisToken]
-other = "确认删除Token"
+other = "Confirmo el borrado de un token"
 
 [YouAreNotAuthorized]
 other = "Esta página requiere un acceso"
