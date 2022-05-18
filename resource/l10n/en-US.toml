@@ -473,16 +473,16 @@ other = "Scheduled Tasks"
 other = "API"
 
 [IssueNewApiToken]
-other = "添加Token"
+other = "Add a token"
 
 [Token]
 other = "Token"
 
 [DeleteToken]
-other = "删除Token"
+other = "Remove Token"
 
 [ConfirmToDeleteThisToken]
-other = "确认删除Token"
+other = "Confirm remove Token"
 
 [YouAreNotAuthorized]
 other = "You are not authorized"
