@@ -47,7 +47,7 @@ func (v *apiV1) serverList(c *gin.Context) {
 
 // serverDetails 获取服务器信息 不传入Query参数则获取全部
 // header: Authorization: Token
-// query: idList (服务器ID，逗号分隔，优先级高于tag查询)
+// query: id (服务器ID，逗号分隔，优先级高于tag查询)
 // query: tag (服务器分组)
 func (v *apiV1) serverDetails(c *gin.Context) {
 	token, _ := c.Cookie("Authorization")
