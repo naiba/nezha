@@ -3,11 +3,13 @@ package singleton
 import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
+	"sync"
 )
 
 var (
 	ApiTokenList         = make(map[string]*model.ApiToken)
 	UserIDToApiTokenList = make(map[uint64][]string)
+	ApiLock              sync.RWMutex
 )
 
 type ServerAPI struct {

@@ -62,7 +62,9 @@ type apiResult struct {
 // getToken 获取 Token
 func (ma *memberAPI) getToken(c *gin.Context) {
 	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	singleton.ApiLock.RLock()
 	tokenList := singleton.UserIDToApiTokenList[u.ID]
+	singleton.ApiLock.RUnlock()
 	res := make([]*apiResult, len(tokenList))
 	for i, token := range tokenList {
 		res[i] = &apiResult{
@@ -84,8 +86,12 @@ func (ma *memberAPI) issueNewToken(c *gin.Context) {
 		Token:  utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login)),
 	}
 	singleton.DB.Create(token)
+
+	singleton.ApiLock.Lock()
 	singleton.ApiTokenList[token.Token] = token
 	singleton.UserIDToApiTokenList[u.ID] = append(singleton.UserIDToApiTokenList[u.ID], token.Token)
+	singleton.ApiLock.Unlock()
+
 	c.JSON(http.StatusOK, model.Response{
 		Code:    http.StatusOK,
 		Message: "success",
@@ -105,6 +111,8 @@ func (ma *memberAPI) deleteToken(c *gin.Context) {
 		})
 		return
 	}
+	singleton.ApiLock.Lock()
+	defer singleton.ApiLock.Unlock()
 	if _, ok := singleton.ApiTokenList[token]; !ok {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
@@ -114,6 +122,7 @@ func (ma *memberAPI) deleteToken(c *gin.Context) {
 	}
 	// 在数据库中删除该Token
 	singleton.DB.Unscoped().Delete(&model.ApiToken{}, "token = ?", token)
+
 	// 在UserIDToApiTokenList中删除该Token
 	for i, t := range singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID] {
 		if t == token {

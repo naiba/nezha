@@ -55,10 +55,12 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 			apiToken := c.GetHeader("Authorization")
 			if apiToken != "" {
 				var u model.User
+				singleton.ApiLock.RLock()
 				if _, ok := singleton.ApiTokenList[apiToken]; ok {
 					err := singleton.DB.First(&u).Where("id = ?", singleton.ApiTokenList[apiToken].UserID).Error
 					isLogin = err == nil
 				}
+				singleton.ApiLock.RUnlock()
 				if isLogin {
 					c.Set(model.CtxKeyAuthorizedUser, &u)
 					c.Set("isAPI", true)
