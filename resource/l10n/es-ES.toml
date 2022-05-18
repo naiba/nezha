@@ -469,6 +469,21 @@ other = "Monitorización del servicio"
 [ScheduledTasks]
 other = "Tareas programadas"
 
+[ApiManagement]
+other = "API"
+
+[IssueNewApiToken]
+other = "Añadir un token"
+
+[Token]
+other = "Token"
+
+[DeleteToken]
+other = "Borrar el token"
+
+[ConfirmToDeleteThisToken]
+other = "Confirmo el borrado de un token"
+
 [YouAreNotAuthorized]
 other = "Esta página requiere un acceso"
 
