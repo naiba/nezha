@@ -469,6 +469,21 @@ other = "服务监控"
 [ScheduledTasks]
 other = "计划任务"
 
+[ApiManagement]
+other="API"
+
+[IssueNewApiToken]
+other="添加Token"
+
+[Token]
+other="Token"
+
+[DeleteToken]
+other="删除Token"
+
+[ConfirmToDeleteThisToken]
+other="确认删除Token"
+
 [YouAreNotAuthorized]
 other = "此页面需要登录"
 
