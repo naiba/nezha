@@ -5,6 +5,11 @@ import (
 	"github.com/naiba/nezha/pkg/utils"
 )
 
+var (
+	ApiTokenList         = make(map[string]*model.ApiToken)
+	UserIDToApiTokenList = make(map[uint64][]string)
+)
+
 type ServerAPI struct {
 	Token  string // 传入Token 后期可能会需要用于scope判定
 	IDList []uint64
@@ -43,6 +48,21 @@ type ServerStatusResponse struct {
 type ServerInfoResponse struct {
 	CommonResponse
 	Result []*CommonServerInfo `json:"result"`
+}
+
+func InitAPI() {
+	ApiTokenList = make(map[string]*model.ApiToken)
+	UserIDToApiTokenList = make(map[uint64][]string)
+}
+
+func LoadAPI() {
+	InitAPI()
+	var tokenList []*model.ApiToken
+	DB.Find(&tokenList)
+	for _, token := range tokenList {
+		ApiTokenList[token.Token] = token
+		UserIDToApiTokenList[token.UserID] = append(UserIDToApiTokenList[token.UserID], token.Token)
+	}
 }
 
 // GetStatusByIDList 获取传入IDList的服务器状态信息

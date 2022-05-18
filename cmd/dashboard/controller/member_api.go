@@ -43,59 +43,93 @@ func (ma *memberAPI) serve() {
 	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/:model/:id", ma.delete)
 	mr.POST("/logout", ma.logout)
+	mr.GET("/token", ma.getToken)
+	mr.POST("/token", ma.issueNewToken)
+	mr.DELETE("/token/:token", ma.deleteToken)
 
 	// API
-	mr.GET("/server/list", ma.serverList)
-	mr.GET("/server/details", ma.serverDetails)
+	v1 := ma.r.Group("v1")
+	{
+		apiv1 := &apiV1{v1}
+		apiv1.serve()
+	}
 }
 
-// serverList 获取服务器列表 不传入Query参数则获取全部
-// header: Authorization: Token
-// query: tag (服务器分组)
-func (ma *memberAPI) serverList(c *gin.Context) {
-	token, _ := c.Cookie("Authorization")
-	tag := c.Query("tag")
-	serverAPI := &singleton.ServerAPI{
-		Token: token,
-		Tag:   tag,
-	}
-	if tag != "" {
-		c.JSON(200, serverAPI.GetListByTag())
-		return
-	}
-	c.JSON(200, serverAPI.GetAllList())
+type apiResult struct {
+	Token string `json:"token"`
 }
 
-// serverDetails 获取服务器信息 不传入Query参数则获取全部
-// header: Authorization: Token
-// query: idList (服务器ID，逗号分隔，优先级高于tag查询)
-// query: tag (服务器分组)
-func (ma *memberAPI) serverDetails(c *gin.Context) {
-	token, _ := c.Cookie("Authorization")
-	var idList []uint64
-	idListStr := strings.Split(c.Query("id"), ",")
-	if c.Query("id") != "" {
-		idList = make([]uint64, len(idListStr))
-		for i, v := range idListStr {
-			id, _ := strconv.ParseUint(v, 10, 64)
-			idList[i] = id
+// getToken 获取 Token
+func (ma *memberAPI) getToken(c *gin.Context) {
+	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	tokenList := singleton.UserIDToApiTokenList[u.ID]
+	res := make([]*apiResult, len(tokenList))
+	for i, token := range tokenList {
+		res[i] = &apiResult{
+			Token: token,
 		}
 	}
-	tag := c.Query("tag")
-	serverAPI := &singleton.ServerAPI{
-		Token:  token,
-		IDList: idList,
-		Tag:    tag,
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"result":  res,
+	})
+}
+
+// issueNewToken 生成新的 token
+func (ma *memberAPI) issueNewToken(c *gin.Context) {
+	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	token := &model.ApiToken{
+		UserID: u.ID,
+		Token:  utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login)),
 	}
-	if tag != "" {
-		c.JSON(200, serverAPI.GetStatusByTag())
+	singleton.DB.Create(token)
+	singleton.ApiTokenList[token.Token] = token
+	singleton.UserIDToApiTokenList[u.ID] = append(singleton.UserIDToApiTokenList[u.ID], token.Token)
+	c.JSON(http.StatusOK, model.Response{
+		Code:    http.StatusOK,
+		Message: "success",
+		Result: map[string]string{
+			"token": token.Token,
+		},
+	})
+}
+
+// deleteToken 删除 token
+func (ma *memberAPI) deleteToken(c *gin.Context) {
+	token := c.Param("token")
+	if token == "" {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: "token 不能为空",
+		})
 		return
 	}
-	if len(idList) != 0 {
-		c.JSON(200, serverAPI.GetStatusByIDList())
+	if _, ok := singleton.ApiTokenList[token]; !ok {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: "token 不存在",
+		})
 		return
 	}
-	c.JSON(200, serverAPI.GetAllStatus())
+	// 在数据库中删除该Token
+	singleton.DB.Unscoped().Delete(&model.ApiToken{}, "token = ?", token)
+	// 在UserIDToApiTokenList中删除该Token
+	for i, t := range singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID] {
+		if t == token {
+			singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID] = append(singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID][:i], singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID][i+1:]...)
+			break
+		}
+	}
+	if len(singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID]) == 0 {
+		delete(singleton.UserIDToApiTokenList, singleton.ApiTokenList[token].UserID)
+	}
+	// 在ApiTokenList中删除该Token
+	delete(singleton.ApiTokenList, token)
+	c.JSON(http.StatusOK, model.Response{
+		Code:    http.StatusOK,
+		Message: "success",
+	})
 }
 
 func (ma *memberAPI) delete(c *gin.Context) {

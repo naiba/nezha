@@ -15,6 +15,7 @@ type AuthorizeOption struct {
 	Guest    bool
 	Member   bool
 	IsPage   bool
+	AllowAPI bool
 	Msg      string
 	Redirect string
 	Btn      string
@@ -50,18 +51,20 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 		}
 
 		// API鉴权
-		apiToken := c.GetHeader("Authorization")
-		if apiToken != "" {
-			var t model.ApiToken
-			// TODO: 需要有缓存机制 减少数据库查询次数
-			if err := singleton.DB.Where("token = ?", apiToken).First(&t).Error; err == nil {
-				isLogin = t.TokenExpired.After(time.Now())
-			}
-			if isLogin {
-				c.Set(model.CtxKeyAuthorizedUser, &t)
+		if opt.AllowAPI {
+			apiToken := c.GetHeader("Authorization")
+			if apiToken != "" {
+				var u model.User
+				if _, ok := singleton.ApiTokenList[apiToken]; ok {
+					err := singleton.DB.First(&u).Where("id = ?", singleton.ApiTokenList[apiToken].UserID).Error
+					isLogin = err == nil
+				}
+				if isLogin {
+					c.Set(model.CtxKeyAuthorizedUser, &u)
+					c.Set("isAPI", true)
+				}
 			}
 		}
-
 		// 已登录且只能游客访问
 		if isLogin && opt.Guest {
 			ShowErrorPage(c, commonErr, opt.IsPage)
