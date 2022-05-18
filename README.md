@@ -4,10 +4,10 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.13.14&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.10.2-brightgreen?style=for-the-badge&logo=linux">
+<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.13.15&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.10.2-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
-  <p>:trollface: <b>Nezha Monitoring</b> self-hosted lightweight monitoring and operation and maintenance system. Supports system status, HTTP (SSL certificate change, upcoming expiration, expiration), TCP, Ping <b>monitoring</b> and <b>alerting</b>, execute scheduled tasks and <b>web terminal</b>.</p>
+  <p>:trollface: <b>Nezha Monitoring</b> self-hosted lightweight monitoring and operation system. Supports system status, HTTP (SSL certificate change, upcoming expiration, expiration), TCP, Ping <b>monitoring</b> and <b>alerting</b>, execute scheduled tasks and <b>web terminal</b>.</p>
 </div>
 
 \>> Telegram Group: [Nezha Monitoring Global (English Only)](https://t.me/nezhamonitoring_global), [哪吒监控（中文群组）](https://t.me/nezhamonitoring)
