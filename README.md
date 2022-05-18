@@ -34,7 +34,7 @@ You can change the system language in the settings page (`/setting`) after the a
 
 ## User Guide
 
-- [English](docs/UserGuide_en.md)
+- [English](https://nezhahq.github.io/)
 - [中文文档](docs/UserGuide_zh.md)
 
 ## Special Thanks
