@@ -57,18 +57,21 @@ func (ma *memberAPI) serve() {
 
 type apiResult struct {
 	Token string `json:"token"`
+	Note  string `json:"note"`
 }
 
 // getToken 获取 Token
 func (ma *memberAPI) getToken(c *gin.Context) {
 	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
 	singleton.ApiLock.RLock()
+	defer singleton.ApiLock.RUnlock()
+
 	tokenList := singleton.UserIDToApiTokenList[u.ID]
-	singleton.ApiLock.RUnlock()
 	res := make([]*apiResult, len(tokenList))
 	for i, token := range tokenList {
 		res[i] = &apiResult{
 			Token: token,
+			Note:  singleton.ApiTokenList[token].Note,
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{
@@ -78,12 +81,26 @@ func (ma *memberAPI) getToken(c *gin.Context) {
 	})
 }
 
+type TokenForm struct {
+	Note string
+}
+
 // issueNewToken 生成新的 token
 func (ma *memberAPI) issueNewToken(c *gin.Context) {
 	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	tf := &TokenForm{}
+	err := c.ShouldBindJSON(tf)
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
 	token := &model.ApiToken{
 		UserID: u.ID,
 		Token:  utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login)),
+		Note:   tf.Note,
 	}
 	singleton.DB.Create(token)
 
@@ -97,6 +114,7 @@ func (ma *memberAPI) issueNewToken(c *gin.Context) {
 		Message: "success",
 		Result: map[string]string{
 			"token": token.Token,
+			"note":  token.Note,
 		},
 	})
 }

@@ -469,6 +469,21 @@ other = "Services"
 [ScheduledTasks]
 other = "Scheduled Tasks"
 
+[ApiManagement]
+other="API"
+
+[IssueNewApiToken]
+other="Create Token"
+
+[Token]
+other="Token"
+
+[DeleteToken]
+other="Delete Token"
+
+[ConfirmToDeleteThisToken]
+other="Confirm Delete?"
+
 [YouAreNotAuthorized]
 other = "You are not authorized"
 
