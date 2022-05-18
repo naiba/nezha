@@ -43,6 +43,120 @@ func (ma *memberAPI) serve() {
 	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/:model/:id", ma.delete)
 	mr.POST("/logout", ma.logout)
+	mr.GET("/token", ma.getToken)
+	mr.POST("/token", ma.issueNewToken)
+	mr.DELETE("/token/:token", ma.deleteToken)
+
+	// API
+	v1 := ma.r.Group("v1")
+	{
+		apiv1 := &apiV1{v1}
+		apiv1.serve()
+	}
+}
+
+type apiResult struct {
+	Token string `json:"token"`
+	Note  string `json:"note"`
+}
+
+// getToken 获取 Token
+func (ma *memberAPI) getToken(c *gin.Context) {
+	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	singleton.ApiLock.RLock()
+	defer singleton.ApiLock.RUnlock()
+
+	tokenList := singleton.UserIDToApiTokenList[u.ID]
+	res := make([]*apiResult, len(tokenList))
+	for i, token := range tokenList {
+		res[i] = &apiResult{
+			Token: token,
+			Note:  singleton.ApiTokenList[token].Note,
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"message": "success",
+		"result":  res,
+	})
+}
+
+type TokenForm struct {
+	Note string
+}
+
+// issueNewToken 生成新的 token
+func (ma *memberAPI) issueNewToken(c *gin.Context) {
+	u := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	tf := &TokenForm{}
+	err := c.ShouldBindJSON(tf)
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+	token := &model.ApiToken{
+		UserID: u.ID,
+		Token:  utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login)),
+		Note:   tf.Note,
+	}
+	singleton.DB.Create(token)
+
+	singleton.ApiLock.Lock()
+	singleton.ApiTokenList[token.Token] = token
+	singleton.UserIDToApiTokenList[u.ID] = append(singleton.UserIDToApiTokenList[u.ID], token.Token)
+	singleton.ApiLock.Unlock()
+
+	c.JSON(http.StatusOK, model.Response{
+		Code:    http.StatusOK,
+		Message: "success",
+		Result: map[string]string{
+			"token": token.Token,
+			"note":  token.Note,
+		},
+	})
+}
+
+// deleteToken 删除 token
+func (ma *memberAPI) deleteToken(c *gin.Context) {
+	token := c.Param("token")
+	if token == "" {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: "token 不能为空",
+		})
+		return
+	}
+	singleton.ApiLock.Lock()
+	defer singleton.ApiLock.Unlock()
+	if _, ok := singleton.ApiTokenList[token]; !ok {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: "token 不存在",
+		})
+		return
+	}
+	// 在数据库中删除该Token
+	singleton.DB.Unscoped().Delete(&model.ApiToken{}, "token = ?", token)
+
+	// 在UserIDToApiTokenList中删除该Token
+	for i, t := range singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID] {
+		if t == token {
+			singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID] = append(singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID][:i], singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID][i+1:]...)
+			break
+		}
+	}
+	if len(singleton.UserIDToApiTokenList[singleton.ApiTokenList[token].UserID]) == 0 {
+		delete(singleton.UserIDToApiTokenList, singleton.ApiTokenList[token].UserID)
+	}
+	// 在ApiTokenList中删除该Token
+	delete(singleton.ApiTokenList, token)
+	c.JSON(http.StatusOK, model.Response{
+		Code:    http.StatusOK,
+		Message: "success",
+	})
 }
 
 func (ma *memberAPI) delete(c *gin.Context) {
@@ -62,8 +176,21 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		if err == nil {
 			// 删除服务器
 			singleton.ServerLock.Lock()
+			tag := singleton.ServerList[id].Tag
 			delete(singleton.SecretToID, singleton.ServerList[id].Secret)
 			delete(singleton.ServerList, id)
+			index := 0
+			for index < len(singleton.ServerTagToIDList[tag]) {
+				if singleton.ServerTagToIDList[tag][index] == id {
+					break
+				}
+				index++
+			}
+			// 删除旧 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[tag] = append(singleton.ServerTagToIDList[tag][:index], singleton.ServerTagToIDList[tag][index+1:]...)
+			if len(singleton.ServerTagToIDList[tag]) == 0 {
+				delete(singleton.ServerTagToIDList, tag)
+			}
 			singleton.ServerLock.Unlock()
 			singleton.ReSortServer()
 			// 删除循环流量状态中的此服务器相关的记录
@@ -194,6 +321,23 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 			// 设置新的 Secret-ID 绑定关系
 			delete(singleton.SecretToID, singleton.ServerList[s.ID].Secret)
 		}
+		// 如果修改了Tag
+		if s.Tag != singleton.ServerList[s.ID].Tag {
+			index := 0
+			for index < len(singleton.ServerTagToIDList[s.Tag]) {
+				if singleton.ServerTagToIDList[s.Tag][index] == s.ID {
+					break
+				}
+				index++
+			}
+			// 删除旧 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag] = append(singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][:index], singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][index+1:]...)
+			// 设置新的 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
+			if len(singleton.ServerTagToIDList[s.Tag]) == 0 {
+				delete(singleton.ServerTagToIDList, s.Tag)
+			}
+		}
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerLock.Unlock()
 	} else {
@@ -202,6 +346,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		singleton.ServerLock.Lock()
 		singleton.SecretToID[s.Secret] = s.ID
 		singleton.ServerList[s.ID] = &s
+		singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
 		singleton.ServerLock.Unlock()
 	}
 	singleton.ReSortServer()

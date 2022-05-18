@@ -15,6 +15,7 @@ type AuthorizeOption struct {
 	Guest    bool
 	Member   bool
 	IsPage   bool
+	AllowAPI bool
 	Msg      string
 	Redirect string
 	Btn      string
@@ -34,7 +35,6 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 			Link:  opt.Redirect,
 			Btn:   opt.Btn,
 		}
-
 		var isLogin bool
 
 		// 用户鉴权
@@ -50,6 +50,23 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 			}
 		}
 
+		// API鉴权
+		if opt.AllowAPI {
+			apiToken := c.GetHeader("Authorization")
+			if apiToken != "" {
+				var u model.User
+				singleton.ApiLock.RLock()
+				if _, ok := singleton.ApiTokenList[apiToken]; ok {
+					err := singleton.DB.First(&u).Where("id = ?", singleton.ApiTokenList[apiToken].UserID).Error
+					isLogin = err == nil
+				}
+				singleton.ApiLock.RUnlock()
+				if isLogin {
+					c.Set(model.CtxKeyAuthorizedUser, &u)
+					c.Set("isAPI", true)
+				}
+			}
+		}
 		// 已登录且只能游客访问
 		if isLogin && opt.Guest {
 			ShowErrorPage(c, commonErr, opt.IsPage)

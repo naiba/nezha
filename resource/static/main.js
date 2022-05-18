@@ -202,6 +202,18 @@ function post(path, params, method = 'post') {
   document.body.removeChild(form);
 }
 
+function issueNewApiToken(apiToken) {
+  const modal = $(".api.modal");
+  modal.children(".header").text((apiToken ? LANG.Edit : LANG.Add) + ' ' + "API Token");
+  modal
+      .find(".nezha-primary-btn.button")
+      .html(
+          apiToken ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
+      );
+  modal.find("textarea[name=Note]").val(apiToken ? apiToken.Note : null);
+  showFormModal(".api.modal", "#apiForm", "/api/token");
+}
+
 function addOrEditServer(server, conf) {
   const modal = $(".server.modal");
   modal.children(".header").text((server ? LANG.Edit : LANG.Add) + ' ' + LANG.Server);
