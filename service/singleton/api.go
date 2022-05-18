@@ -12,11 +12,7 @@ var (
 	ApiLock              sync.RWMutex
 )
 
-type ServerAPI struct {
-	Token  string // 传入Token 后期可能会需要用于scope判定
-	IDList []uint64
-	Tag    string
-}
+type ServerAPI struct{}
 
 // CommonResponse 常规返回结构 包含状态码 和 状态信息
 type CommonResponse struct {
@@ -68,14 +64,14 @@ func LoadAPI() {
 }
 
 // GetStatusByIDList 获取传入IDList的服务器状态信息
-func (s *ServerAPI) GetStatusByIDList() *ServerStatusResponse {
+func (s *ServerAPI) GetStatusByIDList(idList []uint64) *ServerStatusResponse {
 	res := &ServerStatusResponse{}
 	res.Result = make([]*StatusResponse, 0)
 
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
 
-	for _, v := range s.IDList {
+	for _, v := range idList {
 		server := ServerList[v]
 		if server == nil {
 			continue
@@ -103,9 +99,8 @@ func (s *ServerAPI) GetStatusByIDList() *ServerStatusResponse {
 }
 
 // GetStatusByTag 获取传入分组的所有服务器状态信息
-func (s *ServerAPI) GetStatusByTag() *ServerStatusResponse {
-	s.IDList = ServerTagToIDList[s.Tag]
-	return s.GetStatusByIDList()
+func (s *ServerAPI) GetStatusByTag(tag string) *ServerStatusResponse {
+	return s.GetStatusByIDList(ServerTagToIDList[tag])
 }
 
 // GetAllStatus 获取所有服务器状态信息
@@ -143,13 +138,13 @@ func (s *ServerAPI) GetAllStatus() *ServerStatusResponse {
 }
 
 // GetListByTag 获取传入分组的所有服务器信息
-func (s *ServerAPI) GetListByTag() *ServerInfoResponse {
+func (s *ServerAPI) GetListByTag(tag string) *ServerInfoResponse {
 	res := &ServerInfoResponse{}
 	res.Result = make([]*CommonServerInfo, 0)
 
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
-	for _, v := range ServerTagToIDList[s.Tag] {
+	for _, v := range ServerTagToIDList[tag] {
 		host := ServerList[v].Host
 		if host == nil {
 			continue

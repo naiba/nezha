@@ -9,7 +9,6 @@
         <a class='item{{if eq .MatchedPath "/monitor"}} active{{end}}' href="/monitor"><i class="rss icon"></i>{{tr "Services"}}</a>
         <a class='item{{if eq .MatchedPath "/cron"}} active{{end}}' href="/cron"><i class="clock icon"></i>{{tr "Task"}}</a>
         <a class='item{{if eq .MatchedPath "/notification"}} active{{end}}' href="/notification"><i class="bell icon"></i>{{tr "Notification"}}</a>
-        <a class='item{{if eq .MatchedPath "/api"}} active{{end}}' href="/api"><i class="key icon"></i>API</a>
         <a class='item{{if eq .MatchedPath "/setting"}} active{{end}}' href="/setting">
             <i class="settings icon"></i>{{tr "Settings"}}
         </a>
@@ -29,6 +28,9 @@
                         {{if .IsAdminPage}}
                         <a class="item" href="/">
                             <i class="chart area icon"></i>{{tr "BackToHomepage"}}
+                        </a>
+                        <a class="item" href="/api">
+                            <i class="chart key icon"></i>API Token
                         </a>
                         {{else}}
                         <a class="item" href="/server">

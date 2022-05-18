@@ -32,14 +32,10 @@ func (v *apiV1) serve() {
 // header: Authorization: Token
 // query: tag (服务器分组)
 func (v *apiV1) serverList(c *gin.Context) {
-	token, _ := c.Cookie("Authorization")
 	tag := c.Query("tag")
-	serverAPI := &singleton.ServerAPI{
-		Token: token,
-		Tag:   tag,
-	}
+	serverAPI := &singleton.ServerAPI{}
 	if tag != "" {
-		c.JSON(200, serverAPI.GetListByTag())
+		c.JSON(200, serverAPI.GetListByTag(tag))
 		return
 	}
 	c.JSON(200, serverAPI.GetAllList())
@@ -50,7 +46,6 @@ func (v *apiV1) serverList(c *gin.Context) {
 // query: id (服务器ID，逗号分隔，优先级高于tag查询)
 // query: tag (服务器分组)
 func (v *apiV1) serverDetails(c *gin.Context) {
-	token, _ := c.Cookie("Authorization")
 	var idList []uint64
 	idListStr := strings.Split(c.Query("id"), ",")
 	if c.Query("id") != "" {
@@ -61,17 +56,13 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 		}
 	}
 	tag := c.Query("tag")
-	serverAPI := &singleton.ServerAPI{
-		Token:  token,
-		IDList: idList,
-		Tag:    tag,
-	}
+	serverAPI := &singleton.ServerAPI{}
 	if tag != "" {
-		c.JSON(200, serverAPI.GetStatusByTag())
+		c.JSON(200, serverAPI.GetStatusByTag(tag))
 		return
 	}
 	if len(idList) != 0 {
-		c.JSON(200, serverAPI.GetStatusByIDList())
+		c.JSON(200, serverAPI.GetStatusByIDList(idList))
 		return
 	}
 	c.JSON(200, serverAPI.GetAllStatus())

@@ -176,8 +176,21 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		if err == nil {
 			// 删除服务器
 			singleton.ServerLock.Lock()
+			tag := singleton.ServerList[id].Tag
 			delete(singleton.SecretToID, singleton.ServerList[id].Secret)
 			delete(singleton.ServerList, id)
+			index := 0
+			for index < len(singleton.ServerTagToIDList[tag]) {
+				if singleton.ServerTagToIDList[tag][index] == id {
+					break
+				}
+				index++
+			}
+			// 删除旧 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[tag] = append(singleton.ServerTagToIDList[tag][:index], singleton.ServerTagToIDList[tag][index+1:]...)
+			if len(singleton.ServerTagToIDList[tag]) == 0 {
+				delete(singleton.ServerTagToIDList, tag)
+			}
 			singleton.ServerLock.Unlock()
 			singleton.ReSortServer()
 			// 删除循环流量状态中的此服务器相关的记录
