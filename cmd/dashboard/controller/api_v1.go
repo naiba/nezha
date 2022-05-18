@@ -33,12 +33,11 @@ func (v *apiV1) serve() {
 // query: tag (服务器分组)
 func (v *apiV1) serverList(c *gin.Context) {
 	tag := c.Query("tag")
-	serverAPI := &singleton.ServerAPI{}
 	if tag != "" {
-		c.JSON(200, serverAPI.GetListByTag(tag))
+		c.JSON(200, singleton.ServerAPI.GetListByTag(tag))
 		return
 	}
-	c.JSON(200, serverAPI.GetAllList())
+	c.JSON(200, singleton.ServerAPI.GetAllList())
 }
 
 // serverDetails 获取服务器信息 不传入Query参数则获取全部
@@ -56,14 +55,13 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 		}
 	}
 	tag := c.Query("tag")
-	serverAPI := &singleton.ServerAPI{}
 	if tag != "" {
-		c.JSON(200, serverAPI.GetStatusByTag(tag))
+		c.JSON(200, singleton.ServerAPI.GetStatusByTag(tag))
 		return
 	}
 	if len(idList) != 0 {
-		c.JSON(200, serverAPI.GetStatusByIDList(idList))
+		c.JSON(200, singleton.ServerAPI.GetStatusByIDList(idList))
 		return
 	}
-	c.JSON(200, serverAPI.GetAllStatus())
+	c.JSON(200, singleton.ServerAPI.GetAllStatus())
 }

@@ -10,9 +10,11 @@ var (
 	ApiTokenList         = make(map[string]*model.ApiToken)
 	UserIDToApiTokenList = make(map[uint64][]string)
 	ApiLock              sync.RWMutex
+
+	ServerAPI = &ServerAPIService{}
 )
 
-type ServerAPI struct{}
+type ServerAPIService struct{}
 
 // CommonResponse 常规返回结构 包含状态码 和 状态信息
 type CommonResponse struct {
@@ -64,7 +66,7 @@ func LoadAPI() {
 }
 
 // GetStatusByIDList 获取传入IDList的服务器状态信息
-func (s *ServerAPI) GetStatusByIDList(idList []uint64) *ServerStatusResponse {
+func (s *ServerAPIService) GetStatusByIDList(idList []uint64) *ServerStatusResponse {
 	res := &ServerStatusResponse{}
 	res.Result = make([]*StatusResponse, 0)
 
@@ -99,12 +101,12 @@ func (s *ServerAPI) GetStatusByIDList(idList []uint64) *ServerStatusResponse {
 }
 
 // GetStatusByTag 获取传入分组的所有服务器状态信息
-func (s *ServerAPI) GetStatusByTag(tag string) *ServerStatusResponse {
+func (s *ServerAPIService) GetStatusByTag(tag string) *ServerStatusResponse {
 	return s.GetStatusByIDList(ServerTagToIDList[tag])
 }
 
 // GetAllStatus 获取所有服务器状态信息
-func (s *ServerAPI) GetAllStatus() *ServerStatusResponse {
+func (s *ServerAPIService) GetAllStatus() *ServerStatusResponse {
 	res := &ServerStatusResponse{}
 	res.Result = make([]*StatusResponse, 0)
 	ServerLock.RLock()
@@ -138,7 +140,7 @@ func (s *ServerAPI) GetAllStatus() *ServerStatusResponse {
 }
 
 // GetListByTag 获取传入分组的所有服务器信息
-func (s *ServerAPI) GetListByTag(tag string) *ServerInfoResponse {
+func (s *ServerAPIService) GetListByTag(tag string) *ServerInfoResponse {
 	res := &ServerInfoResponse{}
 	res.Result = make([]*CommonServerInfo, 0)
 
@@ -168,7 +170,7 @@ func (s *ServerAPI) GetListByTag(tag string) *ServerInfoResponse {
 }
 
 // GetAllList 获取所有服务器信息
-func (s *ServerAPI) GetAllList() *ServerInfoResponse {
+func (s *ServerAPIService) GetAllList() *ServerInfoResponse {
 	res := &ServerInfoResponse{}
 	res.Result = make([]*CommonServerInfo, 0)
 
