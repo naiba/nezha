@@ -482,7 +482,7 @@ other = "Token"
 other = "Borrar el token"
 
 [ConfirmToDeleteThisToken]
-other = "Confirmo el borrado de un token"
+other = "¿Confirmar para borrar este Token?"
 
 [YouAreNotAuthorized]
 other = "Esta página requiere un acceso"

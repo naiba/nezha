@@ -482,7 +482,7 @@ other = "Token"
 other = "Remove Token"
 
 [ConfirmToDeleteThisToken]
-other = "Confirm remove Token"
+other = "Confirm remove this token?"
 
 [YouAreNotAuthorized]
 other = "You are not authorized"
