@@ -21,6 +21,7 @@ var Themes = map[string]string{
 	"daynight": "JackieSung DayNight",
 	"mdui":     "Neko Mdui",
 	"hotaru":   "Hotaru",
+	"custom":   "Custom(third-party)",
 }
 
 const (
