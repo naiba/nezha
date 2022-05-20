@@ -182,9 +182,9 @@ func (ma *memberAPI) delete(c *gin.Context) {
 			index := -1
 			for i := 0; i < len(singleton.ServerTagToIDList[tag]); i++ {
 				if singleton.ServerTagToIDList[tag][i] == id {
+					index = i
 					break
 				}
-				index = i
 			}
 			if index > -1 {
 				// 删除旧 Tag-ID 绑定关系
@@ -328,9 +328,9 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 			index := -1
 			for i := 0; i < len(singleton.ServerTagToIDList[s.Tag]); i++ {
 				if singleton.ServerTagToIDList[s.Tag][i] == s.ID {
+					index = i
 					break
 				}
-				index = i
 			}
 			if index > -1 {
 				// 删除旧 Tag-ID 绑定关系
