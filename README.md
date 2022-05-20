@@ -7,14 +7,18 @@
 <img src="https://img.shields.io/github/workflow/status/naiba/nezha/Dashboard%20image?label=Dash%20v0.13.19&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/workflow/status/naiba/nezha/Agent%20release?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.10.2-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
-  <p>:trollface: <b>Nezha Monitoring</b> self-hosted lightweight monitoring and operation system. Supports system status, HTTP (SSL certificate change, upcoming expiration, expiration), TCP, Ping <b>monitoring</b> and <b>alerting</b>, execute scheduled tasks and <b>web terminal</b>.</p>
+  <p>:trollface: <b>Nezha Monitoring:</b> A self-hosted, lightweight monitoring and O&M tool. Supports <b>monitoring</b> system status, HTTP (SSL certificate change, upcoming expiration, expired), TCP, Ping and supports <b>notification alarms</b>, execute scheduled tasks and <b>web terminal</b>.</p>
 </div>
 
 \>> Telegram Group: [Nezha Monitoring Global (English Only)](https://t.me/nezhamonitoring_global), [哪吒监控（中文群组）](https://t.me/nezhamonitoring)
 
 \>> QQ 交流群：872069346 **加群要求：已搭建好哪吒监控 & 有 2+ 服务器， 机器人自动审核**
 
-\>> [Use Cases | 我们的用户](https://www.google.com/search?q=%22powered+by+Nezha+Monitoring%22+OR+%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22) (Google)
+\>> [Use Cases | 我们的用户](https://www.google.com/search?q=%22powered+by+Nezha+Monitoring%22+OR+%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22) (Google)  
+## User Guide
+
+- [English](https://nezhahq.github.io/en_US/index.html)
+- [中文文档](https://nezhahq.github.io/index.html)
 
 | Default Theme                                                                                 | DayNight [@JackieSung](https://github.com/JackieSung4ev)                                               | hotaru                                                                     |
 | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
@@ -30,12 +34,7 @@ Help us improve translation [![Crowdin](https://badges.crowdin.net/nezha/localiz
 - 简体中文
 - Español
 
-You can change the system language in the settings page (`/setting`) after the admin panel is installed.
-
-## User Guide
-
-- [English](docs/UserGuide_en.md)
-- [中文文档](https://nezhahq.github.io/)
+You can change the dashboard language in the settings page (`/setting`) after the dashboard is installed.
 
 ## Special Thanks
 
