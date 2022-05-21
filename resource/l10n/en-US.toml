@@ -56,7 +56,7 @@ other = "Cron Expression"
 other = "Backup"
 
 [3amDaily]
-other = "(03:00:00 Every day)"
+other = "(Every day at 3 o'clock)"
 
 [Command]
 other = "Command"
@@ -173,7 +173,7 @@ other = "Secret"
 other = "Note"
 
 [LinuxOneKeyInstall]
-other = "Linux One Key Install"
+other = "One-click installation on Linux"
 
 [NoDomainAlert]
 other = "Set CDN bypassed Domain/IP in setting before using this function"
@@ -245,7 +245,7 @@ other = "Select All"
 other = "Version"
 
 [OneKeyInstall]
-other = "One Key Install"
+other = "One-click installation"
 
 [ClickToCopyTheInstallationCommand]
 other = "Click To Copy Install Command"
