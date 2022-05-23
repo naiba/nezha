@@ -2,14 +2,14 @@ before:
   hooks:
     - go mod tidy -v
 builds:
-  - env:
+  - id: universal
+    env:
       - CGO_ENABLED=0
     ldflags:
       - -s -w -X main.version={{.Version}} -X main.arch={{.Arch}}
     goos:
       - linux
       - windows
-      - darwin
     goarch:
       - arm
       - arm64
@@ -26,6 +26,32 @@ builds:
         goarch: arm
       - goos: windows
         goarch: arm64
+    main: ./cmd/agent
+    binary: nezha-agent
+  - id: darwin-amd64
+    env:
+      - CGO_ENABLED=1
+      - CC=o64-clang
+      - CXX=o64-clang++
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.arch={{.Arch}}
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    main: ./cmd/agent
+    binary: nezha-agent
+  - id: darwin-arm64
+    env:
+      - CGO_ENABLED=1
+      - CC=oa64-clang
+      - CXX=oa64-clang++
+    ldflags:
+      - -s -w -X main.version={{.Version}} -X main.arch={{.Arch}}
+    goos:
+      - darwin
+    goarch:
+      - arm64
     main: ./cmd/agent
     binary: nezha-agent
 universal_binaries:
