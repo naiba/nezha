@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    container:
+      image: goreleaser/goreleaser-cross
     steps:
       - uses: actions/checkout@master
         with:
