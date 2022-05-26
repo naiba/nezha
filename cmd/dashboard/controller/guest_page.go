@@ -39,6 +39,12 @@ func (gp *guestPage) login(c *gin.Context) {
 	if singleton.Conf.Oauth2.Type == model.ConfigTypeGitee {
 		LoginType = "Gitee"
 		RegistrationLink = "https://gitee.com/signup"
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeGitlab {
+		LoginType = "Gitlab"
+		RegistrationLink = "https://gitlab.com/users/sign_up"
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeJihulab {
+		LoginType = "Jihulab"
+		RegistrationLink = "https://jihulab.com/users/sign_up"
 	}
 	c.HTML(http.StatusOK, "dashboard/login", mygin.CommonEnvironment(c, gin.H{
 		"Title":            singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),

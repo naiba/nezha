@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/github"
+	"github.com/xanzy/go-gitlab"
 
 	"github.com/naiba/nezha/pkg/utils"
 )
@@ -24,6 +25,21 @@ type User struct {
 	SuperAdmin   bool      `json:"super_admin,omitempty"`   // 超级管理员
 }
 
+func NewUserFromGitlab(gu *gitlab.User) User {
+	var u User
+	u.ID = uint64(gu.ID)
+	u.Login = gu.Username
+	u.AvatarURL = gu.AvatarURL
+	u.Name = gu.Name
+	if u.Name == "" {
+		u.Name = u.Login
+	}
+	u.Blog = gu.WebsiteURL
+	u.Email = gu.Email
+	u.Bio = gu.Bio
+	return u
+}
+
 func NewUserFromGitHub(gu *github.User) User {
 	var u User
 	u.ID = uint64(gu.GetID())
@@ -34,7 +50,6 @@ func NewUserFromGitHub(gu *github.User) User {
 	if u.Name == "" {
 		u.Name = u.Login
 	}
-	u.Blog = gu.GetBlog()
 	u.Blog = gu.GetBlog()
 	u.Email = gu.GetEmail()
 	u.Hireable = gu.GetHireable()
