@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.10.2"
+NZ_VERSION="v0.10.3"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -294,7 +294,7 @@ modify_dashboard_config() {
 
     echo "About the GitHub Oauth2 application: create it at https://github.com/settings/developers, no review required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
         echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-        read -ep "Please enter the OAuth2 provider (gitee/github, default github): " nz_oauth2_type &&
+        read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
         read -ep "Please enter the Client ID of the Oauth2 application: " nz_github_oauth_client_id &&
         read -ep "Please enter the Client Secret of the Oauth2 application: " nz_github_oauth_client_secret &&
         read -ep "Please enter your GitHub/Gitee login name as the administrator, separated by commas: " nz_admin_logins &&
