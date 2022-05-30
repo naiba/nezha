@@ -5,7 +5,9 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"golang.org/x/sys/windows/svc"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -52,7 +54,7 @@ type AgentCliParam struct {
 
 var (
 	version string
-	arch    string
+	arch    string = "amd64"
 	client  pb.NezhaServiceClient
 	inited  bool
 )
@@ -103,6 +105,29 @@ func main() {
 		if arch != hostArch {
 			panic(fmt.Sprintf("与当前系统不匹配，当前运行 %s_%s, 需要下载 %s_%s", runtime.GOOS, arch, runtime.GOOS, hostArch))
 		}
+		//适配sc创建服务时要求的参数
+		if len(os.Args) > 1 {
+			cmd := strings.ToLower(os.Args[1])
+			switch cmd {
+			case "debug":
+				runService(true)
+				return
+			case "install":
+				err = installService()
+			case "remove":
+				err = removeService()
+			case "start":
+				err = startService()
+			case "stop":
+				err = controlService(svc.Stop, svc.Stopped)
+			case "pause":
+				err = controlService(svc.Pause, svc.Paused)
+			case "continue":
+				err = controlService(svc.Continue, svc.Running)
+			default:
+				//usage(fmt.Sprintf("invalid command %s", cmd))
+			}
+		}
 	}
 
 	// 来自于 GoReleaser 的版本号
@@ -137,7 +162,17 @@ func main() {
 		println("report-delay 的区间为 1-4")
 		return
 	}
-
+	if runtime.GOOS == "windows" {
+		inService, err := svc.IsWindowsService()
+		if err != nil {
+			log.Fatalf("failed to determine if we are running in service: %v", err)
+		}
+		//使用sc创建的服务
+		if inService {
+			runService(false)
+			return
+		}
+	}
 	run()
 }
 
