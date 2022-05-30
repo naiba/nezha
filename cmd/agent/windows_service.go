@@ -59,107 +59,6 @@ func exePath() (string, error) {
 	return "", err
 }
 
-//func installWindowsService() error {
-//	exepath, err := os.Executable()
-//	if err != nil {
-//		return errors.Wrap(err, "Cannot find path name that start the process")
-//	}
-//	m, err := mgr.Connect()
-//	if err != nil {
-//		return errors.Wrap(err, "Cannot establish a connection to the service control manager")
-//	}
-//	defer m.Disconnect()
-//	s, err := m.OpenService(windowsServiceName)
-//	if err != nil {
-//		return err
-//	}
-//	//extraArgs, err := getServiceExtraArgsFromCliArgs(c, &log)
-//	//if err != nil {
-//	//	errMsg := "Unable to determine extra arguments for windows service"
-//	//	return errors.Wrap(err, errMsg)
-//	//}
-//
-//	config := mgr.Config{StartType: mgr.StartAutomatic, DisplayName: windowsServiceDescription}
-//	s, err = m.CreateService(windowsServiceName, exepath, config)
-//	if err != nil {
-//		return errors.Wrap(err, "Cannot install service")
-//	}
-//	defer s.Close()
-//	err = eventlog.InstallAsEventCreate(windowsServiceName, eventlog.Error|eventlog.Warning|eventlog.Info)
-//	if err != nil {
-//		s.Delete()
-//		return errors.Wrap(err, "Cannot install event logger")
-//	}
-//
-//	err = configRecoveryOption(s.Handle)
-//	if err != nil {
-//		return err
-//	}
-//
-//	err = s.Start()
-//	return err
-//}
-//
-//func uninstallWindowsService() error {
-//	m, err := mgr.Connect()
-//	if err != nil {
-//		return errors.Wrap(err, "Cannot establish a connection to the service control manager")
-//	}
-//	defer m.Disconnect()
-//	s, err := m.OpenService(windowsServiceName)
-//	if err != nil {
-//		return fmt.Errorf("Agent service %s is not installed, so it could not be uninstalled", windowsServiceName)
-//	}
-//	defer s.Close()
-//
-//	if status, err := s.Query(); err == nil && status.State == svc.Running {
-//		if _, err := s.Control(svc.Stop); err != nil {
-//			return err
-//		}
-//	}
-//
-//	err = s.Delete()
-//	if err != nil {
-//		return errors.Wrap(err, "Cannot delete agent service")
-//	}
-//	err = eventlog.Remove(windowsServiceName)
-//	if err != nil {
-//		return errors.Wrap(err, "Cannot remove event logger")
-//	}
-//	return nil
-//}
-//
-//// https://msdn.microsoft.com/en-us/library/windows/desktop/ms685937(v=vs.85).aspx
-//// Not supported in Windows Server 2003 and Windows XP
-//type serviceFailureActionsFlag struct {
-//	// enableActionsForStopsWithErr is of type BOOL, which is declared as
-//	// typedef int BOOL in C
-//	enableActionsForStopsWithErr int
-//}
-//
-//type recoveryAction struct {
-//	recoveryType uint32
-//	// The time to wait before performing the specified action, in milliseconds
-//	delay uint32
-//}
-//
-//// until https://github.com/golang/go/issues/23239 is release, we will need to
-//// configure through ChangeServiceConfig2
-//func configRecoveryOption(handle windows.Handle) error {
-//	actions := []recoveryAction{
-//		{recoveryType: uint32(scActionRestart), delay: uint32(recoverActionDelay / time.Millisecond)},
-//	}
-//	serviceRecoveryActions := serviceFailureActions{
-//		resetPeriod: uint32(failureCountResetPeriod / time.Second),
-//		actionCount: uint32(len(actions)),
-//		actions:     uintptr(unsafe.Pointer(&actions[0])),
-//	}
-//	if err := windows.ChangeServiceConfig2(handle, windows.SERVICE_CONFIG_FAILURE_ACTIONS, (*byte)(unsafe.Pointer(&serviceRecoveryActions))); err != nil {
-//		return err
-//	}
-//	serviceFailureActionsFlag := serviceFailureActionsFlag{enableActionsForStopsWithErr: 1}
-//	return windows.ChangeServiceConfig2(handle, serviceConfigFailureActionsFlag, (*byte)(unsafe.Pointer(&serviceFailureActionsFlag)))
-//}
 func installService() error {
 	exepath, err := exePath()
 	if err != nil {
@@ -320,7 +219,8 @@ func runService(isDebug bool) {
 func runSvc() {
 	inService, err := svc.IsWindowsService()
 	if err != nil {
-		log.Fatalf("failed to determine if we are running in service: %v", err)
+		fmt.Errorf("failed to determine if we are running in service: %v", err)
+		return
 	}
 	//使用sc创建的服务
 	if inService {
