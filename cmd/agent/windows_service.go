@@ -3,10 +3,6 @@
 
 package main
 
-//允许使用 sc.exe Create "nezha-agent" binPath= "D:\git\nezha\agent.exe -s 114.230.160.114:5555 -p e86903818636756455" 的方式创建windows服务，不依赖nssm
-// Copypasta from the example files:
-// https://github.com/golang/sys/blob/master/windows/svc/example
-
 import (
 	"fmt"
 	"golang.org/x/sys/windows/svc"
@@ -18,6 +14,12 @@ import (
 	"strings"
 	"time"
 )
+
+//允许使用 sc Create "nezha-agent" start= auto binPath= "D:\git\nezha\agent.exe -s 114.230.160.114:5555 -p e86903818636756455" 的方式创建windows服务，不依赖nssm。如果有空格，另外处理。
+//net start/stop nezha-agent
+//sc delete nezha-agent
+// Copypasta from the example files:
+// https://github.com/golang/sys/blob/master/windows/svc/example
 
 const (
 	windowsServiceName        = "nezha-agent"
@@ -165,6 +167,11 @@ func (m *myservice) Execute(serviceArgs []string, r <-chan svc.ChangeRequest, ch
 	elog.Info(1, "osArgs "+strings.Join(os.Args, ","))
 	//errC := make(chan error)
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				elog.Error(1, fmt.Sprint("Recovering from panic in run error is:", r))
+			}
+		}()
 		run()
 	}()
 	changes <- svc.Status{State: svc.Running, Accepts: cmdsAccepted}

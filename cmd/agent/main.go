@@ -123,7 +123,9 @@ func main() {
 			case "continue":
 				err = controlServiceContinue()
 			default:
-				//usage(fmt.Sprintf("invalid command %s", cmd))
+			}
+			if err != nil {
+				panic(err)
 			}
 		}
 	}
