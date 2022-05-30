@@ -528,3 +528,6 @@ other = "Tarea ejecutada fallida"
 
 [IPChanged]
 other = "Cambio de IP"
+
+[Transleft]
+other = "Datos restantes"
