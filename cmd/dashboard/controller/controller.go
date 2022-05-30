@@ -148,6 +148,17 @@ var funcMap = template.FuncMap{
 	"add": func(a, b int) int {
 		return a + b
 	},
+	"Transleft": func(a, b float64) (n float64) {
+		n, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", (100-(a/b)*100)), 64)
+		if n < 0 {
+			n = 0
+		}
+		return
+	},
+	"UintToFloat": func(a uint64) (n float64) {
+		n, _ = strconv.ParseFloat((strconv.FormatUint(a, 10)), 64)
+		return
+	},
 	"dayBefore": func(i int) string {
 		year, month, day := time.Now().Date()
 		today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)

@@ -528,3 +528,6 @@ other = "任务失败"
 
 [IPChanged]
 other = "IP变更"
+
+[Transleft]
+other = "流量剩余"
