@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.10.4"
+NZ_VERSION="v0.10.5"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -180,7 +180,7 @@ install_dashboard() {
     command -v docker-compose >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "正在安装 Docker Compose"
-        wget -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1
+        wget -t 2 -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1
         if [[ $? != 0 ]]; then
             echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
             return 0
@@ -235,7 +235,7 @@ install_agent() {
     chmod 777 -R $NZ_AGENT_PATH
 
     echo -e "正在下载监控端"
-    wget -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/naiba/nezha/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
+    wget -t 2 -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/naiba/nezha/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Release 下载失败，请检查本机能否连接 ${GITHUB_URL}${plain}"
         return 0
@@ -259,7 +259,7 @@ install_agent() {
 modify_agent_config() {
     echo -e "> 修改Agent配置"
 
-    wget -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
+    wget -t 2 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
         return 0
@@ -309,13 +309,13 @@ modify_dashboard_config() {
     echo -e "> 修改面板配置"
 
     echo -e "正在下载 Docker 脚本"
-    wget -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
+    wget -t 2 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
 
-    wget -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
+    wget -t 2 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
         return 0
