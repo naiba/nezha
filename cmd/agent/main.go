@@ -52,7 +52,7 @@ type AgentCliParam struct {
 
 var (
 	version string
-	arch    string = "amd64"
+	arch    string
 	client  pb.NezhaServiceClient
 	inited  bool
 )
