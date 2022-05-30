@@ -69,7 +69,7 @@
                             <td class="ui center aligned">{{$stats.Min|bf}}</td>
                             <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|sft}}</td>
                             <td class="ui center aligned">{{$transfer|bf}}</td>
-                            <td class="ui center aligned" style="padding: 14px 0px 0px 0px; position: relative;"><div class="thirteen wide column"><div class="ui progress fine"><div class="bar" style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}}% !important;"><small>{{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}} %</small></div></div></div></td>
+                            <td class="ui center aligned" style="padding: 14px 0px 0px 0px; position: relative;"><div class="thirteen wide column"><div class="ui progress fine"><div class="bar" style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}}% !important;"></div><small style="position: absolute; top: 4px; margin-left: -20px;">{{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}} %</small></div></div></td>
                         </tr>
                     {{end}}
                     {{end}}

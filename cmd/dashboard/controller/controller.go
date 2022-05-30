@@ -150,6 +150,9 @@ var funcMap = template.FuncMap{
 	},
 	"Transleft": func(a, b float64) (n float64) {
 		n, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", (100-(a/b)*100)), 64)
+		if n < 0 {
+			n = 0
+		}
 		return
 	},
 	"UintToFloat": func(a uint64) (n float64) {
