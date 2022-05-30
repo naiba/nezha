@@ -53,8 +53,7 @@
                         <th class="ui center aligned">MIN</th>
                         <th class="ui center aligned">{{tr "NextCheck"}}</th>
                         <th class="ui center aligned">{{tr "CurrentUsage"}}</th>
-                        <th class="ui center aligned" style="display:none!important">用量</th>
-                        <th class="ui center aligned" id="TotalTable" style="display:none!important">总量</th>
+                        <th class='ui center aligned' style='padding: 0px 31px 0px 31px;'>{{tr "Transleft"}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -70,8 +69,7 @@
                             <td class="ui center aligned">{{$stats.Min|bf}}</td>
                             <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|sft}}</td>
                             <td class="ui center aligned">{{$transfer|bf}}</td>
-                            <td class="ui center aligned used" style="display:none!important">{{$transfer}}</td>
-                            <td class="ui center aligned total" style="display:none!important">{{$stats.Max}}</td>
+                            <td class="ui center aligned" style="padding: 14px 0px 0px 0px; position: relative;"><div class="thirteen wide column"><div class="ui progress fine"><div class="bar" style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}}% !important;"><small>{{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}} %</small></div></div></div></td>
                         </tr>
                     {{end}}
                     {{end}}
@@ -82,27 +80,5 @@
         </div>
     </div>
 </div>
-<script>
-window.onload = function(){
-var used = []
-var total = []
-var percent = []
-$("#TotalTable").after("<th class='ui center aligned' style='padding: 0px 31px 0px 31px;'>剩余</th>")
-$('.used').each(function () {
-        used.push($(this).html())
-    })
-$('.total').each(function () {
-        total.push($(this).html())
-    })
-for(var i=0;i<used.length;i++){
-    percent[i] = (100 - ((used[i] / total[i]) * 100)).toFixed(2)
-    if (percent[i] < 25){
-            $(".total").eq(i).after("<td class='ui center aligned' style='padding: 14px 0px 0px 0px; position: relative;><div class='thirteen wide column'><div class='ui progress warning'><div class='bar' style='transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: "+percent[i]+"% !important;'><small>"+percent[i]+"%</small></div></div></div></td>") 
-    }else{
-            $(".total").eq(i).after("<td class='ui center aligned' style='padding: 14px 0px 0px 0px; position: relative;'><div class='thirteen wide column'><div class='ui progress fine'><div class='bar' style='transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: "+percent[i]+"% !important;'><small>"+percent[i]+"%</small></div></div></div></td>") 
-    } 
-}
-}
-</script>
 {{template "common/footer" .}}
 {{end}}
