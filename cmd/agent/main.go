@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/naiba/nezha/cmd/agent/service"
 	"io"
 	"net"
 	"net/http"
@@ -52,7 +53,7 @@ type AgentCliParam struct {
 
 var (
 	version string
-	arch    string
+	arch    string = "amd64"
 	client  pb.NezhaServiceClient
 	inited  bool
 )
@@ -85,7 +86,7 @@ func init() {
 }
 
 func main() {
-	prog := &program{}
+	prog := &service.Program{}
 	// windows环境处理
 	if runtime.GOOS == "windows" {
 		hostArch, err := host.KernelArch()
@@ -105,7 +106,7 @@ func main() {
 			panic(fmt.Sprintf("与当前系统不匹配，当前运行 %s_%s, 需要下载 %s_%s", runtime.GOOS, arch, runtime.GOOS, hostArch))
 		}
 		//适配sc创建服务时要求的参数
-		prog.configService(run)
+		prog.ConfigService(run)
 	}
 
 	// 来自于 GoReleaser 的版本号
@@ -141,7 +142,7 @@ func main() {
 		return
 	}
 	if runtime.GOOS == "windows" {
-		prog.runService() //运行于服务中
+		prog.RunService() //运行于服务中
 	} else {
 		//其他系统暂不作出改变
 		run()
