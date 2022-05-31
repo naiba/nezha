@@ -52,7 +52,7 @@ type AgentCliParam struct {
 
 var (
 	version string
-	arch    string
+	arch    string = "amd64"
 	client  pb.NezhaServiceClient
 	inited  bool
 )
@@ -85,6 +85,7 @@ func init() {
 }
 
 func main() {
+	prog := &program{}
 	// windows环境处理
 	if runtime.GOOS == "windows" {
 		hostArch, err := host.KernelArch()
@@ -104,30 +105,31 @@ func main() {
 			panic(fmt.Sprintf("与当前系统不匹配，当前运行 %s_%s, 需要下载 %s_%s", runtime.GOOS, arch, runtime.GOOS, hostArch))
 		}
 		//适配sc创建服务时要求的参数
-		if len(os.Args) > 1 {
-			cmd := strings.ToLower(os.Args[1])
-			switch cmd {
-			case "debug":
-				runService(true)
-				return
-			case "install":
-				err = installService()
-			case "remove":
-				err = removeService()
-			case "start":
-				err = startService()
-			case "stop":
-				err = controlServiceStop()
-			case "pause":
-				err = controlServicePause()
-			case "continue":
-				err = controlServiceContinue()
-			default:
-			}
-			if err != nil {
-				panic(err)
-			}
-		}
+		prog.configService(run)
+		//if len(os.Args) > 1 {
+		//	cmd := strings.ToLower(os.Args[1])
+		//	switch cmd {
+		//	case "debug":
+		//		runService(true)
+		//		return
+		//	case "install":
+		//		err = installService()
+		//	case "remove":
+		//		err = removeService()
+		//	case "start":
+		//		err = startService()
+		//	case "stop":
+		//		err = controlServiceStop()
+		//	case "pause":
+		//		err = controlServicePause()
+		//	case "continue":
+		//		err = controlServiceContinue()
+		//	default:
+		//	}
+		//	if err != nil {
+		//		panic(err)
+		//	}
+		//}
 	}
 
 	// 来自于 GoReleaser 的版本号
@@ -162,7 +164,13 @@ func main() {
 		println("report-delay 的区间为 1-4")
 		return
 	}
-	runSvc()
+	if runtime.GOOS == "windows" {
+		prog.runService() //运行于服务中
+	} else {
+		//其他系统暂不作出改变
+		run()
+	}
+
 }
 
 func run() {
