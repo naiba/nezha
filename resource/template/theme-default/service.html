@@ -59,6 +59,7 @@
                 <tbody>
                     {{range $id, $stats := .CycleTransferStats}}
                     {{range $innerId, $transfer := $stats.Transfer}}
+                    {{$TransLeftPercent := TransLeftPercent (UintToFloat $transfer) (UintToFloat $stats.Max)}}
                         <tr>
                             <td class="ui center aligned">{{$id}}</td>
                             <td class="ui center aligned">{{$stats.Name}}</td>
@@ -69,7 +70,7 @@
                             <td class="ui center aligned">{{$stats.Min|bf}}</td>
                             <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|sft}}</td>
                             <td class="ui center aligned">{{$transfer|bf}}</td>
-                            <td class="ui center aligned" style="padding: 14px 0px 0px 0px; position: relative;"><div class="thirteen wide column"><div class="ui progress fine"><div class="bar" style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}}% !important;"></div><small style="position: absolute; top: 4px; margin-left: -20px;">{{Transleft (UintToFloat $transfer) (UintToFloat $stats.Max)}} %</small></div></div></td>
+                            <td class="ui center aligned" style="padding: 14px 0px 0px 0px; position: relative;"><div class="thirteen wide column"><div class="ui progress {{TransClassName $TransLeftPercent}}" style=" background: rgba(0,0,0,.1); background-color: rgba(0,0,0,.1)!important; height: 25px;"><div class="bar" style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{$TransLeftPercent}}% !important;"></div><small style="position: relative; top: -2em;">{{TransLeft $stats.Max $transfer}} / {{$TransLeftPercent}} %</small></div></div></td>
                         </tr>
                     {{end}}
                     {{end}}

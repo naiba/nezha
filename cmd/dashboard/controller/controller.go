@@ -148,12 +148,33 @@ var funcMap = template.FuncMap{
 	"add": func(a, b int) int {
 		return a + b
 	},
-	"Transleft": func(a, b float64) (n float64) {
+	"TransLeftPercent": func(a, b float64) (n float64) {
 		n, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", (100-(a/b)*100)), 64)
 		if n < 0 {
 			n = 0
 		}
 		return
+	},
+	"TransLeft": func(a, b uint64) string {
+		if a < b {
+			return "0B"
+		}
+		return bytefmt.ByteSize(a - b)
+	},
+	"TransClassName": func(a float64) string {
+		if a == 0 {
+			return "offline"
+		}
+		if a > 50 {
+			return "fine"
+		}
+		if a > 20 {
+			return "warning"
+		}
+		if a > 0 {
+			return "error"
+		}
+		return "offline"
 	},
 	"UintToFloat": func(a uint64) (n float64) {
 		n, _ = strconv.ParseFloat((strconv.FormatUint(a, 10)), 64)
