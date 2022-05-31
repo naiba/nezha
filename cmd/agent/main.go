@@ -52,7 +52,7 @@ type AgentCliParam struct {
 
 var (
 	version string
-	arch    string = "amd64"
+	arch    string
 	client  pb.NezhaServiceClient
 	inited  bool
 )
@@ -106,30 +106,6 @@ func main() {
 		}
 		//适配sc创建服务时要求的参数
 		prog.configService(run)
-		//if len(os.Args) > 1 {
-		//	cmd := strings.ToLower(os.Args[1])
-		//	switch cmd {
-		//	case "debug":
-		//		runService(true)
-		//		return
-		//	case "install":
-		//		err = installService()
-		//	case "remove":
-		//		err = removeService()
-		//	case "start":
-		//		err = startService()
-		//	case "stop":
-		//		err = controlServiceStop()
-		//	case "pause":
-		//		err = controlServicePause()
-		//	case "continue":
-		//		err = controlServiceContinue()
-		//	default:
-		//	}
-		//	if err != nil {
-		//		panic(err)
-		//	}
-		//}
 	}
 
 	// 来自于 GoReleaser 的版本号
