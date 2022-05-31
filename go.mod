@@ -20,6 +20,7 @@ require (
 	github.com/iamacarpet/go-winpty v1.0.2
 	github.com/jinzhu/copier v0.3.5
 	github.com/json-iterator/go v1.1.12
+	github.com/kardianos/service v1.2.1
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
 	github.com/ory/graceful v0.1.2
 	github.com/p14yground/go-github-selfupdate v0.0.0-20220205132106-76a6d59b925b
