@@ -157,7 +157,7 @@ var funcMap = template.FuncMap{
 	},
 	"TransLeft": func(a, b uint64) string {
 		if a < b {
-			return "0KB"
+			return "0B"
 		}
 		return bytefmt.ByteSize(a - b)
 	},
