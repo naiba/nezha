@@ -6,10 +6,10 @@ services:
     restart: always
     volumes:
       - ./data:/dashboard/data
-      - ./theme-custom/template:/dashboard/resuorce/template/theme-custom:ro
-      - ./theme-custom/static:/dashboard/resuorce/static/theme-custom:ro
-      - ./dashboard-custom/template:/dashboard/resuorce/template/dashboard-custom:ro
-      - ./dashboard-custom/static:/dashboard/resuorce/static/dashboard-custom:ro
+      - ./theme-custom/template:/dashboard/resource/template/theme-custom:ro
+      - ./theme-custom/static:/dashboard/resource/static/theme-custom:ro
+      - ./dashboard-custom/template:/dashboard/resource/template/dashboard-custom:ro
+      - ./dashboard-custom/static:/dashboard/resource/static/dashboard-custom:ro
     ports:
       - nz_site_port:80
       - nz_grpc_port:nz_grpc_port
