@@ -531,3 +531,6 @@ other = "IP Changed"
 
 [Transleft]
 other = "Data remaining"
+
+[DashboardTheme]
+other = "Dasboard Theme"
