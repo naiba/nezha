@@ -531,3 +531,6 @@ other = "Cambio de IP"
 
 [Transleft]
 other = "Datos restantes"
+
+[DashboardTheme]
+other = "管理后台主题"
