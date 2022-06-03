@@ -46,7 +46,7 @@ func (gp *guestPage) login(c *gin.Context) {
 		LoginType = "Jihulab"
 		RegistrationLink = "https://jihulab.com/users/sign_up"
 	}
-	c.HTML(http.StatusOK, "dashboard/login", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/login", mygin.CommonEnvironment(c, gin.H{
 		"Title":            singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),
 		"LoginType":        LoginType,
 		"RegistrationLink": RegistrationLink,

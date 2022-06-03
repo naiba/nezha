@@ -1,4 +1,4 @@
-{{define "dashboard/setting"}}
+{{define "dashboard-default/setting"}}
 {{template "common/header" .}}
 {{template "common/menu" .}}
 <div class="nb-container">
@@ -18,6 +18,14 @@
                     {{range $k,$v := .Themes}}
                     <option value="{{$k}}" {{if eq $.Conf.Site.Theme $k }} selected="selected" {{end}}>{{$v}}
                     {{end}}
+                </select>
+            </div>
+            <div class="field">
+                <label>{{tr "DashboardTheme"}}</label>
+                <select name="DashboardTheme">
+                    {{range $k,$v := .DashboardThemes}}
+                    <option value="{{$k}}" {{if eq $.Conf.Site.DashboardTheme $k }} selected="selected" {{end}}>{{$v}}
+                        {{end}}
                 </select>
             </div>
             <div class="field">

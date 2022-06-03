@@ -702,6 +702,7 @@ type settingForm struct {
 	Admin                   string
 	Language                string
 	Theme                   string
+	DashboardTheme          string
 	CustomCode              string
 	ViewPassword            string
 	IgnoredIPNotification   string
@@ -722,6 +723,23 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		})
 		return
 	}
+
+	if yes, err := utils.IsDirEmpty("resource/template/theme-" + sf.Theme); err != nil || yes {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("前台主题文件异常：%s", err),
+		})
+		return
+	}
+
+	if yes, err := utils.IsDirEmpty("resource/template/dashboard-" + sf.DashboardTheme); err != nil || yes {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("后台主题文件异常：%s", err),
+		})
+		return
+	}
+
 	singleton.Conf.Language = sf.Language
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
@@ -731,6 +749,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.IPChangeNotificationTag = sf.IPChangeNotificationTag
 	singleton.Conf.Site.Brand = sf.Title
 	singleton.Conf.Site.Theme = sf.Theme
+	singleton.Conf.Site.DashboardTheme = sf.DashboardTheme
 	singleton.Conf.Site.CustomCode = sf.CustomCode
 	singleton.Conf.Site.ViewPassword = sf.ViewPassword
 	singleton.Conf.Oauth2.Admin = sf.Admin

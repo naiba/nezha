@@ -21,7 +21,12 @@ var Themes = map[string]string{
 	"daynight": "JackieSung DayNight",
 	"mdui":     "Neko Mdui",
 	"hotaru":   "Hotaru",
-	"custom":   "Custom(third-party)",
+	"custom":   "Custom(local)",
+}
+
+var DashboardThemes = map[string]string{
+	"default": "Default",
+	"custom":  "Custom(local)",
 }
 
 const (
@@ -70,11 +75,12 @@ type Config struct {
 	Debug    bool   // debug模式开关
 	Language string // 系统语言，默认 zh-CN
 	Site     struct {
-		Brand        string // 站点名称
-		CookieName   string // 浏览器 Cookie 名称
-		Theme        string
-		CustomCode   string
-		ViewPassword string // 前台查看密码
+		Brand          string // 站点名称
+		CookieName     string // 浏览器 Cookie 名称
+		Theme          string
+		DashboardTheme string
+		CustomCode     string
+		ViewPassword   string // 前台查看密码
 	}
 	Oauth2 struct {
 		Type         string
@@ -116,6 +122,9 @@ func (c *Config) Read(path string) error {
 
 	if c.Site.Theme == "" {
 		c.Site.Theme = "default"
+	}
+	if c.Site.DashboardTheme == "" {
+		c.Site.DashboardTheme = "default"
 	}
 	if c.Language == "" {
 		c.Language = "zh-CN"

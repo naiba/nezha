@@ -489,7 +489,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 		useSSL:   createTerminalReq.Protocol == "https:",
 	}
 
-	c.HTML(http.StatusOK, "dashboard/terminal", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/terminal", mygin.CommonEnvironment(c, gin.H{
 		"SessionID":  id,
 		"ServerName": server.Name,
 	}))
