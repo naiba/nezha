@@ -86,7 +86,7 @@ other = "Enviar el mensaje con éxito"
 other = "El formato del plan es:"
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
-other = "Segundos minutos horas días meses semanas, ver detalles a"
+other = "Segundos, minutos, horas, días, meses, semanas, ver detalles a"
 
 [ScheduleExpressionFormat]
 other = "Formato de expresiones cron"
@@ -356,10 +356,10 @@ other = "Último activo"
 other = "Versiones"
 
 [NetSpeed]
-other = "Velocidad de la red"
+other = "Red"
 
 [Uptime]
-other = "Tiempo de funcionamiento"
+other = "Activo"
 
 [ServerIsOffline]
 other = "El servidor está desconectado"
@@ -368,13 +368,13 @@ other = "El servidor está desconectado"
 other = "Días"
 
 [RealtimeChannelEstablished]
-other = "Establecimiento de canal en tiempo real"
+other = "Canal en tiempo real está conectados"
 
 [GetTheLatestMonitoringDataInRealTime]
 other = "¡Ahora puede obtener los últimos datos de monitorización en tiempo real!"
 
 [RealtimeChannelDisconnect]
-other = "Desconexión de canal en tiempo real"
+other = "Canal en tiempo real desconectado"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
 other = "¡No puede obtener los últimos datos de monitorización en tiempo real!"
@@ -395,19 +395,19 @@ other = "Disponibilidad"
 other = "Latencia media"
 
 [CycleTransferStats]
-other = "Estadísticas de transmisión circular"
+other = "Estadísticas del ciclo de consumo de datos"
 
 [From]
 other = "Desde"
 
 [To]
-other = "A"
+other = "Hasta"
 
 [NextCheck]
 other = "Siguiente prueba"
 
 [CurrentUsage]
-other = "Uso actual"
+other = "Consumo"
 
 [VerifyPassword]
 other = "Verificar contraseña"
@@ -515,7 +515,7 @@ other = "Fallo"
 other = "No hay datos disponibles"
 
 [StatusGood]
-other = "Buena"
+other = "Buen"
 
 [StatusLowAvailability]
 other = "Baja disponibilidad"
@@ -533,4 +533,4 @@ other = "Cambio de IP"
 other = "Datos restantes"
 
 [DashboardTheme]
-other = "Temas panel de administración"
+other = "Temas del panel de administración"
