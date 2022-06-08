@@ -256,45 +256,58 @@
             }
         })
         const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
-        const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
-        ws.onopen = function (evt) {
-            Swal.fire({
-                position: 'top',
-                icon: 'success',
-                title: '{{tr "RealtimeChannelEstablished"}}',
-                text: '{{tr "GetTheLatestMonitoringDataInRealTime"}}',
-                showConfirmButton: false,
-                timer: 2000
-            });
-        }
-        ws.onmessage = function (evt) {
-            const data = JSON.parse(evt.data)
-            statusCards.servers = data.servers
-            const keys = Object.keys(statusCards.servers)
-            for (let i = 0; i < keys.length; i++) {
-                const ns = statusCards.servers[keys[i]];
-                if (!ns.Host) ns.live = false
-                else {
-                    const lastActive = new Date(ns.LastActive).getTime()
-                    if (data.now - lastActive > 10 * 1000) {
-                        ns.live = false
-                    } else {
-                        ns.live = true
+        let canShowError = true;
+        function connect() {
+            const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
+            ws.onopen = function (evt) {
+                canShowError = true;
+                Swal.fire({
+                    position: 'top',
+                    icon: 'success',
+                    title: '{{tr "RealtimeChannelEstablished"}}',
+                    text: '{{tr "GetTheLatestMonitoringDataInRealTime"}}',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            }
+            ws.onmessage = function (evt) {
+                const data = JSON.parse(evt.data)
+                statusCards.servers = data.servers
+                const keys = Object.keys(statusCards.servers)
+                for (let i = 0; i < keys.length; i++) {
+                    const ns = statusCards.servers[keys[i]];
+                    if (!ns.Host) ns.live = false
+                    else {
+                        const lastActive = new Date(ns.LastActive).getTime()
+                        if (data.now - lastActive > 10 * 1000) {
+                            ns.live = false
+                        } else {
+                            ns.live = true
+                        }
                     }
                 }
             }
+            ws.onclose = function () {
+                if (canShowError) {
+                    canShowError = false;
+                    Swal.fire({
+                        position: 'top',
+                        icon: 'error',
+                        title: '{{tr "RealtimeChannelDisconnect"}}',
+                        text: '{{tr "CanNotGetTheLatestMonitoringDataInRealTime"}}',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                }
+                setTimeout(function () {
+                    connect()
+                }, 3000);
+            }
+            ws.onerror = function () {
+                ws.close()
+            }
         }
-        ws.onclose = function () {
-            Swal.fire({
-                position: 'top',
-                icon: 'error',
-                title: '{{tr "RealtimeChannelDisconnect"}}',
-                text: '{{tr "CanNotGetTheLatestMonitoringDataInRealTime"}}',
-                showConfirmButton: false,
-                timer: 2000
-            });
-
-        }
+        connect();
     </script>
 </body>
 

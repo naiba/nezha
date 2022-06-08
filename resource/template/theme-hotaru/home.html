@@ -243,41 +243,55 @@
         })
 
         const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
-        const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
-        ws.onopen = function (evt) {
-            $.suiAlert({
-                title: '{{tr "RealtimeChannelEstablished"}}',
-                description: '{{tr "GetTheLatestMonitoringDataInRealTime"}}',
-                type: 'success',
-                time: '2',
-                position: 'top-center',
-            });
-        }
-        ws.onmessage = function (evt) {
-            const data = JSON.parse(evt.data)
-            statusCards.servers = data.servers
-            for (let i = 0; i < statusCards.servers.length; i++) {
-                const ns = statusCards.servers[i];
-                if (!ns.Host) ns.live = false
-                else {
-                    const lastActive = new Date(ns.LastActive).getTime()
-                    if (data.now - lastActive > 10 * 1000) {
-                        ns.live = false
-                    } else {
-                        ns.live = true
+        let canShowError = true;
+        function connect() {
+            const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
+            ws.onopen = function (evt) {
+                canShowError = true;
+                $.suiAlert({
+                    title: '{{tr "RealtimeChannelEstablished"}}',
+                    description: '{{tr "GetTheLatestMonitoringDataInRealTime"}}',
+                    type: 'success',
+                    time: '2',
+                    position: 'top-center',
+                });
+            }
+            ws.onmessage = function (evt) {
+                const data = JSON.parse(evt.data)
+                statusCards.servers = data.servers
+                for (let i = 0; i < statusCards.servers.length; i++) {
+                    const ns = statusCards.servers[i];
+                    if (!ns.Host) ns.live = false
+                    else {
+                        const lastActive = new Date(ns.LastActive).getTime()
+                        if (data.now - lastActive > 10 * 1000) {
+                            ns.live = false
+                        } else {
+                            ns.live = true
+                        }
                     }
                 }
             }
+            ws.onclose = function () {
+                if (canShowError) {
+                    canShowError = false;
+                    $.suiAlert({
+                        title: '{{tr "RealtimeChannelDisconnect"}}',
+                        description: '{{tr "CanNotGetTheLatestMonitoringDataInRealTime"}}',
+                        type: 'warning',
+                        time: '2',
+                        position: 'top-center',
+                    });
+                }
+                setTimeout(function () {
+                    connect()
+                }, 3000);
+            }
+            ws.onerror = function () {
+                ws.close()
+            }
         }
-        ws.onclose = function () {
-            $.suiAlert({
-                title: '{{tr "RealtimeChannelDisconnect"}}',
-                description: '{{tr "CanNotGetTheLatestMonitoringDataInRealTime"}}',
-                type: 'warning',
-                time: '2',
-                position: 'top-center',
-            });
-        }
+        connect()
     </script>
 </body>
 
