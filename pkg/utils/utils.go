@@ -98,7 +98,7 @@ func SplitIPAddr(v4v6Bundle string) (string, string, string) {
 }
 
 func IsDirEmpty(name string) (bool, error) {
-	f, err := os.Open(filepath.Clean(name))
+	f, err := os.Open(filepath.Join("./", filepath.Clean(name)))
 	if err != nil {
 		return false, err
 	}
