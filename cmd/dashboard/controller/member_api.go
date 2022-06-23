@@ -724,7 +724,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 
-	if yes, err := utils.IsDirEmpty("resource/template/theme-" + sf.Theme); err != nil || yes {
+	if yes, err := utils.IsTemplateDirEmpty("theme-" + sf.Theme); err != nil || yes {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("前台主题文件异常：%s", err),
@@ -732,7 +732,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 
-	if yes, err := utils.IsDirEmpty("resource/template/dashboard-" + sf.DashboardTheme); err != nil || yes {
+	if yes, err := utils.IsTemplateDirEmpty("dashboard-" + sf.DashboardTheme); err != nil || yes {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("后台主题文件异常：%s", err),

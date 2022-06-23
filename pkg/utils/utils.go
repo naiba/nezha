@@ -97,8 +97,8 @@ func SplitIPAddr(v4v6Bundle string) (string, string, string) {
 	return ipv4, ipv6, validIP
 }
 
-func IsDirEmpty(name string) (bool, error) {
-	f, err := os.Open(filepath.Join("./", filepath.Clean(name)))
+func IsTemplateDirEmpty(name string) (bool, error) {
+	f, err := os.Open(filepath.Join("resource/template/", filepath.Clean(name)))
 	if err != nil {
 		return false, err
 	}
