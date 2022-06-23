@@ -1,7 +1,13 @@
 #Get server and key
 param($server, $key, $tls)
 # Download latest release from github
-$repo = "naiba/nezha"
+if($PSVersionTable.PSVersion.Major -lt 5){
+    Write-Host "Require PS >= 5,your PSVersion:"$PSVersionTable.PSVersion.Major -BackgroundColor DarkGreen -ForegroundColor White
+    Write-Host "Refer to the community article and install manually! https://nyko.me/2020/12/13/nezha-windows-client.html" -BackgroundColor DarkRed -ForegroundColor Green
+    exit
+}
+$agentrepo = "naiba/nezha"
+$nssmrepo = "nezhahq/nssm-backup"
 #  x86 or x64
 if ([System.Environment]::Is64BitOperatingSystem) {
     $file = "nezha-agent_windows_amd64.zip"
@@ -9,7 +15,8 @@ if ([System.Environment]::Is64BitOperatingSystem) {
 else {
     $file = "nezha-agent_windows_386.zip"
 }
-$releases = "https://api.github.com/repos/$repo/releases"
+$agentreleases = "https://api.github.com/repos/$agentrepo/releases"
+$nssmreleases = "https://api.github.com/repos/$nssmrepo/releases"
 #重复运行自动更新
 if (Test-Path "C:\nezha") {
     Write-Host "Nezha monitoring already exists, delete and reinstall" -BackgroundColor DarkGreen -ForegroundColor White
@@ -20,28 +27,26 @@ if (Test-Path "C:\nezha") {
 #TLS/SSL
 Write-Host "Determining latest nezha release" -BackgroundColor DarkGreen -ForegroundColor White
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$tag = (Invoke-WebRequest -Uri $releases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
+$agenttag = (Invoke-WebRequest -Uri $agentreleases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
+$nssmtag = (Invoke-WebRequest -Uri $nssmreleases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
 #Region判断
 $ipapi= Invoke-RestMethod  -Uri "https://api.myip.com/" -UserAgent "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1"
 $region=$ipapi.cc
 echo $ipapi
 if($region -ne "CN"){
-$download = "https://github.com/$repo/releases/download/$tag/$file"
-Write-Host "Overseas machine("$region") direct connection!" -BackgroundColor DarkRed -ForegroundColor Green
-echo $download
-}elseif($region -eq $null){
-cls
-$download = "https://ghproxy.com/github.com/$repo/releases/download/$tag/$file"
-Write-Host "Error,Most of the time, it is caused by the domestic network environment,use ghproxy.com" -BackgroundColor DarkRed -ForegroundColor Green
-echo $download
+$download = "https://github.com/$agentrepo/releases/download/$agenttag/$file"
+$nssmdownload="https://github.com/$nssmrepo/releases/download/$nssmtag/nssm.zip"
+Write-Host "Location:$region,connect directly!" -BackgroundColor DarkRed -ForegroundColor Green
 }else{
-$download = "https://ghproxy.com/github.com/$repo/releases/download/$tag/$file"
-Write-Host "China's servers will be downloaded using the image address" -BackgroundColor DarkRed -ForegroundColor Green
-echo $download
+$download = "https://dn-dao-github-mirror.daocloud.io/$agentrepo/releases/download/$agenttag/$file"
+$nssmdownload="https://dn-dao-github-mirror.daocloud.io/$nssmrepo/releases/download/$nssmtag/nssm.zip"
+Write-Host "Location:CN,use mirror address" -BackgroundColor DarkRed -ForegroundColor Green
 }
+echo $download
+echo $nssmdownload
 Invoke-WebRequest $download -OutFile "C:\nezha.zip"
 #使用nssm安装服务
-Invoke-WebRequest "http://nssm.cc/release/nssm-2.24.zip" -OutFile "C:\nssm.zip"
+Invoke-WebRequest $nssmdownload -OutFile "C:\nssm.zip"
 #解压
 Expand-Archive "C:\nezha.zip" -DestinationPath "C:\temp" -Force
 Expand-Archive "C:\nssm.zip" -DestinationPath "C:\temp" -Force
