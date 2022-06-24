@@ -3,11 +3,8 @@ package utils
 import (
 	"crypto/md5" // #nosec
 	"encoding/hex"
-	"io"
-	"log"
 	"math/rand"
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -97,20 +94,7 @@ func SplitIPAddr(v4v6Bundle string) (string, string, string) {
 	return ipv4, ipv6, validIP
 }
 
-func IsTemplateDirEmpty(name string) (bool, error) {
-	f, err := os.Open(filepath.Join("resource/template/", filepath.Clean(name)))
-	if err != nil {
-		return false, err
-	}
-	defer func() {
-		if err := f.Close(); err != nil {
-			log.Printf("Error closing file: %s\n", err)
-		}
-	}()
-
-	_, err = f.Readdirnames(1)
-	if err == io.EOF {
-		return true, nil
-	}
-	return false, err
+func IsFileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
