@@ -10,6 +10,7 @@ builds:
     goos:
       - linux
       - windows
+      - freebsd
     goarch:
       - arm
       - arm64
