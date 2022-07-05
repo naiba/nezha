@@ -102,6 +102,10 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 			if !isV6 && !strings.Contains(ip.IP, ".") {
 				continue
 			}
+			// 未获取到国家码
+			if ip.CountryCode == "" {
+				continue
+			}
 			return ip
 		}
 	}
