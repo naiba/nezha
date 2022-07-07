@@ -1,4 +1,4 @@
-FROM ${TARGETARCH}/ubuntu:20.04
+FROM ubuntu:focal
 
 ENV TZ="Asia/Shanghai"
 
