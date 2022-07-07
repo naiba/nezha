@@ -1,7 +1,4 @@
-ARG TARGETARCH
-ARG TARGETOS
-
-FROM $TARGETARCH/ubuntu:20.04
+FROM ${TARGETARCH}/ubuntu:20.04
 
 ENV TZ="Asia/Shanghai"
 
@@ -16,7 +13,7 @@ RUN export DEBIAN_FRONTEND="noninteractive" && \
 
 WORKDIR /dashboard
 COPY ./resource ./resource
-COPY dist/dashboard-$TARGETOS-$TARGETARCH ./app
+COPY dist/dashboard-${TARGETOS}-${TARGETARCH} ./app
 
 VOLUME ["/dashboard/data"]
 EXPOSE 80 5555
