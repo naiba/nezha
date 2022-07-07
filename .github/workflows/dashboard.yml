@@ -15,6 +15,35 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - name: Extract branch name
+        run: |
+          export BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
+          echo "##[set-output name=branch;]$BRANCH_NAME"
+          if [ $BRANCH_NAME = "main" ] || [ $BRANCH_NAME = "master" ]
+            then echo "##[set-output name=tag;]latest"
+            else echo "##[set-output name=tag;]$BRANCH_NAME"
+          fi
+        id: extract_branch
+
+      - name: xgo build
+        uses: crazy-max/ghaction-xgo@v2
+        with:
+          xgo_version: latest
+          go_version: 1.18
+          dest: dist
+          pkg: cmd/dashboard
+          prefix: dashboard
+          targets: linux/amd64,linux/arm64,linux/arm-7,linux/s390x,linux/riscv64 # linux/386,
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w
+          buildmode: default
+
+      - name: fix dist
+        run: |
+          cp dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
+
       - name: Log in to the GHCR
         uses: docker/login-action@master
         with:
@@ -51,8 +80,8 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm,linux/386,linux/s390x
+          platforms: linux/amd64,linux/arm64,linux/arm,linux/s390x,linux/riscv64 # linux/386,
           push: true
           tags: |
-            ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}
-            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}
+            ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
+            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
