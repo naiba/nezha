@@ -1,0 +1,25 @@
+before:
+  hooks:
+    - go mod tidy -v
+builds:
+  - id: universal
+    env:
+      - CGO_ENABLED=1
+    flags:
+      - -tags
+      - sqlite
+    ldflags:
+      - -s -w
+    goos:
+      - linux
+    goarch:
+      - arm
+      - arm64
+      - amd64
+      - s390x
+    goarm:
+      - 7
+    gomips:
+      - softfloat
+    main: ./cmd/dashboard
+    binary: dashboard

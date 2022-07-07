@@ -15,6 +15,34 @@ jobs:
     steps:
       - uses: actions/checkout@master
 
+      - name: Extract branch name
+        run: |
+          export BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
+          echo "##[set-output name=branch;]$BRANCH_NAME"
+          if [ $BRANCH_NAME = "main" ] || [ $BRANCH_NAME = "master" ]
+            then echo "##[set-output name=tag;]latest"
+            else echo "##[set-output name=tag;]$BRANCH_NAME"
+          fi
+        id: extract_branch
+
+      - name: xgoreleaser build
+        run: |
+          docker pull --platform linux/amd64 oryd/xgoreleaser:latest
+          docker run --mount type=bind,source="$(pwd)",target=/project \
+              --platform linux/amd64 \
+              -e GORELEASER_KEY=$GORELEASER_KEY \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              oryd/xgoreleaser:latest --skip-publish --snapshot --rm-dist -f .goreleaser.dashboard.yml
+
+      - name: move dist
+        run: |
+          mkdir -p target/linux/{arm,arm64,386,amd64,s390x}
+          mkdir target/linux/arm/v7/
+          mv dist/universal_linux_arm_7/dashboard target/linux/arm/v7/dashboard
+          mv dist/universal_linux_arm64/dashboard target/linux/arm64/dashboard
+          mv dist/universal_linux_amd64_v1/dashboard target/linux/amd64/dashboard
+          mv dist/universal_linux_s390x/dashboard target/linux/s390x/dashboard
+
       - name: Log in to the GHCR
         uses: docker/login-action@master
         with:
@@ -54,5 +82,5 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm,linux/386,linux/s390x
           push: true
           tags: |
-            ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}
-            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}
+            ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
+            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
