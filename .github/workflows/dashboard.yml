@@ -33,7 +33,7 @@ jobs:
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
-          targets: linux/amd64,linux/arm64,linux/arm/v7,linux/386,linux/s390x
+          targets: linux/amd64,linux/arm64,linux/arm-7,linux/386,linux/s390x
           v: true
           x: false
           race: false
