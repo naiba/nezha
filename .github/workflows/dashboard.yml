@@ -31,6 +31,8 @@ jobs:
           docker run --mount type=bind,source="$(pwd)",target=/project \
               --platform linux/amd64 \
               -e GORELEASER_KEY=$GORELEASER_KEY \
+              -e DOCKER_USERNAME=$DOCKER_USERNAME \
+              -e DOCKER_PASSWORD=$DOCKER_PASSWORD \
               -v /var/run/docker.sock:/var/run/docker.sock \
               oryd/xgoreleaser:latest --skip-publish --snapshot --rm-dist -f .goreleaser.dashboard.yml
 
