@@ -2,6 +2,9 @@ FROM ubuntu:focal
 
 ENV TZ="Asia/Shanghai"
 
+ARG TARGETOS
+ARG TARGETARCH
+
 COPY ./script/entrypoint.sh /entrypoint.sh
 
 RUN export DEBIAN_FRONTEND="noninteractive" && \
