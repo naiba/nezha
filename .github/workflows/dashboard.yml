@@ -33,22 +33,16 @@ jobs:
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
-          targets: linux/amd64,linux/arm64,linux/arm-7,linux/386,linux/s390x
+          targets: linux/amd64,linux/arm64,linux/arm-7,linux/386,linux/s390x,linux/riscv64
           v: true
           x: false
           race: false
           ldflags: -s -w
           buildmode: default
 
-      - name: move dist
+      - name: fix dist
         run: |
-          mkdir -p target/linux/{arm,arm64,386,amd64,s390x}
-          mkdir target/linux/arm/v7/
-          mv dist/dashboard-linux-arm-7 target/linux/arm/v7/dashboard
-          mv dist/dashboard-linux-arm64 target/linux/arm64/dashboard
-          mv dist/dashboard-linux-386 target/linux/386/dashboard
-          mv dist/dashboard-linux-amd64 target/linux/amd64/dashboard
-          mv dist/dashboard-linux-s390x target/linux/s390x/dashboard
+          cp dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
 
       - name: Log in to the GHCR
         uses: docker/login-action@master
@@ -86,7 +80,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm,linux/386,linux/s390x
+          platforms: linux/amd64,linux/arm64,linux/arm,linux/386,linux/s390x,linux/riscv64
           push: true
           tags: |
             ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
