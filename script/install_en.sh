@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.10.6"
+NZ_VERSION="v0.10.7"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -72,10 +72,10 @@ confirm() {
 update_script() {
     echo -e "> Update Script"
 
-    curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
+    curl -sL https://${GITHUB_RAW_URL}/script/install_en.sh -o /tmp/nezha.sh
     new_version=$(cat /tmp/nezha.sh | grep "NZ_VERSION" | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$new_version" ]; then
-        echo -e "Script failed to get, please check if the network can link https://${GITHUB_RAW_URL}/script/install.sh"
+        echo -e "Script failed to get, please check if the network can link https://${GITHUB_RAW_URL}/script/install_en.sh"
         return 1
     fi
     echo -e "The current latest version is: ${new_version}"
