@@ -7,6 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	ModeAlwaysTrigger  = 0
+	ModeOnetimeTrigger = 1
+)
+
 type CycleTransferStats struct {
 	Name       string
 	From       time.Time
@@ -23,6 +28,7 @@ type AlertRule struct {
 	Name            string
 	RulesRaw        string
 	Enable          *bool
+	TriggerMode     int    `gorm:"default:0"` // 触发模式: 0-始终触发(默认) 1-单次触发
 	NotificationTag string // 该报警规则所在的通知组
 	Rules           []Rule `gorm:"-" json:"-"`
 }

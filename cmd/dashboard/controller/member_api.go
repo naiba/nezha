@@ -600,6 +600,7 @@ type alertRuleForm struct {
 	Name            string
 	RulesRaw        string
 	NotificationTag string
+	TriggerMode     int
 	Enable          string
 }
 
@@ -642,6 +643,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		r.RulesRaw = arf.RulesRaw
 		r.NotificationTag = arf.NotificationTag
 		enable := arf.Enable == "on"
+		r.TriggerMode = arf.TriggerMode
 		r.Enable = &enable
 		r.ID = arf.ID
 		//保证NotificationTag不为空
