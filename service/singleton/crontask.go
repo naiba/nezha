@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jinzhu/copier"
+	"log"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -32,6 +33,10 @@ func LoadCronTasks() {
 	var notificationTagList []string
 	notificationMsgMap := make(map[string]*bytes.Buffer)
 	for i := 0; i < len(crons); i++ {
+		// 触发任务类型无需注册
+		if crons[i].TaskType == model.CronTypeTriggerTask {
+			continue
+		}
 		// 旧版本计划任务可能不存在通知组 为其添加默认通知组
 		if crons[i].NotificationTag == "" {
 			crons[i].NotificationTag = "default"
@@ -63,12 +68,36 @@ func ManualTrigger(c model.Cron) {
 	CronTrigger(c)()
 }
 
-func CronTrigger(cr model.Cron) func() {
+func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 	crIgnoreMap := make(map[uint64]bool)
 	for j := 0; j < len(cr.Servers); j++ {
 		crIgnoreMap[cr.Servers[j]] = true
 	}
 	return func() {
+		if cr.Cover == model.CronCoverSelf {
+			if len(triggerServer) == 0 {
+				log.Println("触发任务未指定触发服务器")
+				return
+			}
+			ServerLock.RLock()
+			defer ServerLock.RUnlock()
+			if s, ok := ServerList[triggerServer[0]]; ok {
+				if s.TaskStream != nil {
+					s.TaskStream.Send(&pb.Task{
+						Id:   cr.ID,
+						Data: cr.Command,
+						Type: model.TaskTypeCommand,
+					})
+				} else {
+					// 保存当前服务器状态信息
+					curServer := model.Server{}
+					copier.Copy(&curServer, s)
+					SendNotification(cr.NotificationTag, fmt.Sprintf("[任务失败] %s，服务器 %s 离线，无法执行。", cr.Name, s.Name), false, &curServer)
+				}
+			}
+			return
+		}
+
 		ServerLock.RLock()
 		defer ServerLock.RUnlock()
 		for _, s := range ServerList {

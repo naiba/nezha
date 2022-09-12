@@ -415,6 +415,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 
 type cronForm struct {
 	ID              uint64
+	TaskType        uint8 // 0:计划任务 1:触发任务
 	Name            string
 	Scheduler       string
 	Command         string
@@ -429,6 +430,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 	var cr model.Cron
 	err := c.ShouldBindJSON(&cf)
 	if err == nil {
+		cr.TaskType = cf.TaskType
 		cr.Name = cf.Name
 		cr.Scheduler = cf.Scheduler
 		cr.Command = cf.Command
@@ -439,6 +441,17 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		cr.Cover = cf.Cover
 		err = utils.Json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
 	}
+
+	// 计划任务类型不得使用触发服务器执行方式
+	if cr.TaskType == model.CronTypeCronTask && cr.Cover == model.CronCoverSelf {
+		err = errors.New("计划任务类型不得使用触发服务器执行方式")
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+
 	tx := singleton.DB.Begin()
 	if err == nil {
 		// 保证NotificationTag不为空
@@ -452,7 +465,10 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		}
 	}
 	if err == nil {
-		cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
+		// 对于计划任务类型，需要更新CronJob
+		if cf.TaskType == model.CronTypeCronTask {
+			cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
+		}
 	}
 	if err == nil {
 		err = tx.Commit().Error
