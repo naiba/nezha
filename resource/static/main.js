@@ -69,6 +69,7 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "ID" ||
                 item.name === "RequestType" ||
                 item.name === "RequestMethod" ||
+                item.name === "TriggerMode" ||
                 item.name === "DisplayIndex" ||
                 item.name === "Type" ||
                 item.name === "Cover" ||
@@ -130,6 +131,7 @@ function addOrEditAlertRule(rule) {
   modal.find("input[name=ID]").val(rule ? rule.ID : null);
   modal.find("input[name=Name]").val(rule ? rule.Name : null);
   modal.find("textarea[name=RulesRaw]").val(rule ? rule.RulesRaw : null);
+  modal.find("select[name=TriggerMode]").val(rule ? rule.TriggerMode : 0);
   modal.find("input[name=NotificationTag]").val(rule ? rule.NotificationTag : null);
   if (rule && rule.Enable) {
     modal.find(".ui.rule-enable.checkbox").checkbox("set checked");

@@ -58,6 +58,7 @@
                     <th>ID</th>
                     <th>{{tr "Name"}}</th>
                     <th>{{tr "NotificationMethodGroup"}}</th>
+                    <th>{{tr "NotificationTriggerMode"}}</th>
                     <th>{{tr "Rules"}}</th>
                     <th>{{tr "Enable"}}</th>
                     <th>{{tr "Administration"}}</th>
@@ -69,6 +70,7 @@
                     <td>{{$rule.ID}}</td>
                     <td>{{$rule.Name}}</td>
                     <td>{{$rule.NotificationTag}}</td>
+                    <td>{{if eq $rule.TriggerMode  0}}{{tr "ModeAlwaysTrigger"}}{{else}}{{tr "ModeOnetimeTrigger"}}{{end}}
                     <td>{{$rule.RulesRaw}}</td>
                     <td>{{$rule.Enable}}</td>
                     <td>

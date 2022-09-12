@@ -148,6 +148,15 @@ other = "添加报警规则"
 [Rules]
 other = "规则"
 
+[NotificationTriggerMode]
+other = "通知触发模式"
+
+[ModeAlwaysTrigger]
+other = "始终触发"
+
+[ModeOnetimeTrigger]
+other = "单次触发"
+
 [Enable]
 other = "启用"
 
