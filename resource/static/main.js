@@ -264,6 +264,9 @@ function addOrEditMonitor(monitor) {
   } else {
     modal.find(".ui.nb-notify.checkbox").checkbox("set unchecked");
   }
+  modal.find("a.ui.label.visible").each((i, el) => {
+    el.remove();
+  });
   var servers;
   if (monitor) {
     servers = monitor.SkipServersRaw;
