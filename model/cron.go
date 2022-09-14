@@ -11,7 +11,7 @@ import (
 const (
 	CronCoverIgnoreAll = iota
 	CronCoverAll
-	CronCoverSelf
+	CronCoverAlertTrigger
 	CronTypeCronTask    = 0
 	CronTypeTriggerTask = 1
 )

@@ -3,8 +3,9 @@ package singleton
 import (
 	"bytes"
 	"fmt"
-	"github.com/jinzhu/copier"
 	"sync"
+
+	"github.com/jinzhu/copier"
 
 	"github.com/robfig/cron/v3"
 
@@ -90,7 +91,7 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 		crIgnoreMap[cr.Servers[j]] = true
 	}
 	return func() {
-		if cr.Cover == model.CronCoverSelf {
+		if cr.Cover == model.CronCoverAlertTrigger {
 			if len(triggerServer) == 0 {
 				return
 			}

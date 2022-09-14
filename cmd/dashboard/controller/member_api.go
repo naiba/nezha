@@ -465,7 +465,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 	}
 
 	// 计划任务类型不得使用触发服务器执行方式
-	if cr.TaskType == model.CronTypeCronTask && cr.Cover == model.CronCoverSelf {
+	if cr.TaskType == model.CronTypeCronTask && cr.Cover == model.CronCoverAlertTrigger {
 		err = errors.New("计划任务类型不得使用触发服务器执行方式")
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
