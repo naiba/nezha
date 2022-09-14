@@ -35,6 +35,7 @@ func LoadCronTasks() {
 	for i := 0; i < len(crons); i++ {
 		// 触发任务类型无需注册
 		if crons[i].TaskType == model.CronTypeTriggerTask {
+			Crons[crons[i].ID] = &crons[i]
 			continue
 		}
 		// 旧版本计划任务可能不存在通知组 为其添加默认通知组
@@ -68,6 +69,22 @@ func ManualTrigger(c model.Cron) {
 	CronTrigger(c)()
 }
 
+func SendTriggerTasks(taskIDs []uint64, triggerServer uint64) {
+	CronLock.RLock()
+	var cronLists []*model.Cron
+	for _, taskID := range taskIDs {
+		if c, ok := Crons[taskID]; ok {
+			cronLists = append(cronLists, c)
+		}
+	}
+	CronLock.RUnlock()
+
+	// 依次调用CronTrigger发送任务
+	for _, c := range cronLists {
+		go CronTrigger(*c, triggerServer)()
+	}
+}
+
 func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 	crIgnoreMap := make(map[uint64]bool)
 	for j := 0; j < len(cr.Servers); j++ {
@@ -76,7 +93,7 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 	return func() {
 		if cr.Cover == model.CronCoverSelf {
 			if len(triggerServer) == 0 {
-				log.Println("触发任务未指定触发服务器")
+				log.Println("触发任务", cr.Name, "未指定触发服务器")
 				return
 			}
 			ServerLock.RLock()

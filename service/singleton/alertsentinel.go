@@ -162,6 +162,7 @@ func checkStatus() {
 					message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.MustLocalize(&i18n.LocalizeConfig{
 						MessageID: "Incident",
 					}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
+					go SendTriggerTasks(alert.FailTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationTag, message, true, &curServer)
 				}
 			} else {
@@ -170,6 +171,7 @@ func checkStatus() {
 					message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.MustLocalize(&i18n.LocalizeConfig{
 						MessageID: "Resolved",
 					}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
+					go SendTriggerTasks(alert.RecoverTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationTag, message, true, &curServer)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
