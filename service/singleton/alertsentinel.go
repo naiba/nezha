@@ -153,17 +153,25 @@ func checkStatus() {
 			// 保存当前服务器状态信息
 			curServer := model.Server{}
 			copier.Copy(&curServer, server)
+
+			// 本次未通过检查
 			if !passed {
-				alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
-				message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.MustLocalize(&i18n.LocalizeConfig{
-					MessageID: "Incident",
-				}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
-				go SendNotification(alert.NotificationTag, message, true, &curServer)
+				// 始终触发模式或上次检查不为失败时触发报警（跳过单次触发+上次失败的情况）
+				if alert.TriggerMode == model.ModeAlwaysTrigger || alertsPrevState[alert.ID][server.ID] != _RuleCheckFail {
+					alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
+					message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.MustLocalize(&i18n.LocalizeConfig{
+						MessageID: "Incident",
+					}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
+					go SendTriggerTasks(alert.FailTriggerTasks, curServer.ID)
+					go SendNotification(alert.NotificationTag, message, true, &curServer)
+				}
 			} else {
+				// 本次通过检查但上一次的状态为失败，则发送恢复通知
 				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
 					message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.MustLocalize(&i18n.LocalizeConfig{
 						MessageID: "Resolved",
 					}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
+					go SendTriggerTasks(alert.RecoverTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationTag, message, true, &curServer)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass

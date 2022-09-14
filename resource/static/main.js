@@ -69,6 +69,8 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "ID" ||
                 item.name === "RequestType" ||
                 item.name === "RequestMethod" ||
+                item.name === "TriggerMode" ||
+                item.name === "TaskType" ||
                 item.name === "DisplayIndex" ||
                 item.name === "Type" ||
                 item.name === "Cover" ||
@@ -85,6 +87,16 @@ function showFormModal(modelSelector, formID, URL, getData) {
                     [...item.value.matchAll(/\d+/gm)].map((k) =>
                       parseInt(k[0])
                     )
+                  );
+                }
+              }
+
+              if (item.name.endsWith("TasksRaw")) {
+                if (item.value.length > 2) {
+                  obj[item.name] = JSON.stringify(
+                      [...item.value.matchAll(/\d+/gm)].map((k) =>
+                          parseInt(k[0])
+                      )
                   );
                 }
               }
@@ -130,12 +142,51 @@ function addOrEditAlertRule(rule) {
   modal.find("input[name=ID]").val(rule ? rule.ID : null);
   modal.find("input[name=Name]").val(rule ? rule.Name : null);
   modal.find("textarea[name=RulesRaw]").val(rule ? rule.RulesRaw : null);
+  modal.find("select[name=TriggerMode]").val(rule ? rule.TriggerMode : 0);
   modal.find("input[name=NotificationTag]").val(rule ? rule.NotificationTag : null);
   if (rule && rule.Enable) {
     modal.find(".ui.rule-enable.checkbox").checkbox("set checked");
   } else {
     modal.find(".ui.rule-enable.checkbox").checkbox("set unchecked");
   }
+  modal.find("a.ui.label.visible").each((i, el) => {
+    el.remove();
+  });
+  var failTriggerTasks;
+  var recoverTriggerTasks;
+  if (rule) {
+    failTriggerTasks = rule.FailTriggerTasksRaw;
+    recoverTriggerTasks = rule.RecoverTriggerTasksRaw;
+    const failTriggerTasksList = JSON.parse(failTriggerTasks || "[]");
+    const recoverTriggerTasksList = JSON.parse(recoverTriggerTasks || "[]");
+    const node1 = modal.find("i.dropdown.icon.1");
+    const node2 = modal.find("i.dropdown.icon.2");
+    for (let i = 0; i < failTriggerTasksList.length; i++) {
+      node1.after(
+          '<a class="ui label transition visible" data-value="' +
+          failTriggerTasksList[i] +
+          '" style="display: inline-block !important;">ID:' +
+          failTriggerTasksList[i] +
+          '<i class="delete icon"></i></a>'
+      );
+    }
+    for (let i = 0; i < recoverTriggerTasksList.length; i++) {
+      node2.after(
+          '<a class="ui label transition visible" data-value="' +
+          recoverTriggerTasksList[i] +
+          '" style="display: inline-block !important;">ID:' +
+          recoverTriggerTasksList[i] +
+          '<i class="delete icon"></i></a>'
+      );
+    }
+  }
+  modal
+      .find("input[name=FailTriggerTasksRaw]")
+      .val(rule ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
+  modal
+      .find("input[name=RecoverTriggerTasksRaw]")
+      .val(rule ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
+
   showFormModal(".rule.modal", "#ruleForm", "/api/alert-rule");
 }
 
@@ -262,6 +313,9 @@ function addOrEditMonitor(monitor) {
   } else {
     modal.find(".ui.nb-notify.checkbox").checkbox("set unchecked");
   }
+  modal.find("a.ui.label.visible").each((i, el) => {
+    el.remove();
+  });
   var servers;
   if (monitor) {
     servers = monitor.SkipServersRaw;
@@ -293,6 +347,8 @@ function addOrEditCron(cron) {
     );
   modal.find("input[name=ID]").val(cron ? cron.ID : null);
   modal.find("input[name=Name]").val(cron ? cron.Name : null);
+  modal.find("select[name=TaskType]").val(cron ? cron.TaskType : 0);
+  modal.find("select[name=Cover]").val(cron ? cron.Cover : 0);
   modal.find("input[name=NotificationTag]").val(cron ? cron.NotificationTag : null);
   modal.find("input[name=Scheduler]").val(cron ? cron.Scheduler : null);
   modal.find("a.ui.label.visible").each((i, el) => {
@@ -425,6 +481,18 @@ $(document).ready(() => {
       clearable: true,
       apiSettings: {
         url: "/api/search-server?word={query}",
+        cache: false,
+      },
+    });
+  } catch (error) { }
+});
+
+$(document).ready(() => {
+  try {
+    $(".ui.tasks.search.dropdown").dropdown({
+      clearable: true,
+      apiSettings: {
+        url: "/api/search-tasks?word={query}",
         cache: false,
       },
     });

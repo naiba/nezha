@@ -15,6 +15,7 @@
                 <tr>
                     <th>ID</th>
                     <th>{{tr "Name"}}</th>
+                    <th>{{tr "TaskType"}}</th>
                     <th>{{tr "Scheduler"}}</th>
                     <th>{{tr "Command"}}</th>
                     <th>{{tr "NotificationMethodGroup"}}</th>
@@ -31,11 +32,12 @@
                 <tr>
                     <td>{{$cron.ID}}</td>
                     <td>{{$cron.Name}}</td>
+                    <td>{{if eq $cron.TaskType 0}}{{tr "CronTask"}}{{else}}{{tr "TriggerTask"}}{{end}}</td>
                     <td>{{$cron.Scheduler}}</td>
                     <td>{{$cron.Command}}</td>
                     <td>{{$cron.NotificationTag}}</td>
                     <td>{{$cron.PushSuccessful}}</td>
-                    <td>{{if eq $cron.Cover 0}}{{tr "IgnoreAll"}}{{else}}{{tr "CoverAll"}}{{end}}</td>
+                    <td>{{if eq $cron.Cover 0}}{{tr "IgnoreAll"}}{{else if eq $cron.Cover 1}}{{tr "CoverAll"}}{{else}}{{tr "ByTrigger"}}{{end}}</td>
                     <td>{{$cron.ServersRaw}}</td>
                     <td>{{$cron.LastExecutedAt|tf}}</td>
                     <td>{{$cron.LastResult}}</td>

@@ -7,6 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	ModeAlwaysTrigger  = 0
+	ModeOnetimeTrigger = 1
+)
+
 type CycleTransferStats struct {
 	Name       string
 	From       time.Time
@@ -20,24 +25,49 @@ type CycleTransferStats struct {
 
 type AlertRule struct {
 	Common
-	Name            string
-	RulesRaw        string
-	Enable          *bool
-	NotificationTag string // 该报警规则所在的通知组
-	Rules           []Rule `gorm:"-" json:"-"`
+	Name                   string
+	RulesRaw               string
+	Enable                 *bool
+	TriggerMode            int      `gorm:"default:0"` // 触发模式: 0-始终触发(默认) 1-单次触发
+	NotificationTag        string   // 该报警规则所在的通知组
+	FailTriggerTasksRaw    string   `gorm:"default:'[]'"`
+	RecoverTriggerTasksRaw string   `gorm:"default:'[]'"`
+	Rules                  []Rule   `gorm:"-" json:"-"`
+	FailTriggerTasks       []uint64 `gorm:"-" json:"-"` // 失败时执行的触发任务id
+	RecoverTriggerTasks    []uint64 `gorm:"-" json:"-"` // 恢复时执行的触发任务id
 }
 
 func (r *AlertRule) BeforeSave(tx *gorm.DB) error {
-	data, err := utils.Json.Marshal(r.Rules)
-	if err != nil {
+	if data, err := utils.Json.Marshal(r.Rules); err != nil {
 		return err
+	} else {
+		r.RulesRaw = string(data)
 	}
-	r.RulesRaw = string(data)
+	if data, err := utils.Json.Marshal(r.FailTriggerTasks); err != nil {
+		return err
+	} else {
+		r.FailTriggerTasksRaw = string(data)
+	}
+	if data, err := utils.Json.Marshal(r.RecoverTriggerTasks); err != nil {
+		return err
+	} else {
+		r.RecoverTriggerTasksRaw = string(data)
+	}
 	return nil
 }
 
 func (r *AlertRule) AfterFind(tx *gorm.DB) error {
-	return utils.Json.Unmarshal([]byte(r.RulesRaw), &r.Rules)
+	var err error
+	if err = utils.Json.Unmarshal([]byte(r.RulesRaw), &r.Rules); err != nil {
+		return err
+	}
+	if err = utils.Json.Unmarshal([]byte(r.FailTriggerTasksRaw), &r.FailTriggerTasks); err != nil {
+		return err
+	}
+	if err = utils.Json.Unmarshal([]byte(r.RecoverTriggerTasksRaw), &r.RecoverTriggerTasks); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *AlertRule) Enabled() bool {

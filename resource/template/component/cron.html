@@ -9,6 +9,13 @@
                 <input type="text" name="Name" placeholder="{{tr "BackUp"}}">
             </div>
             <div class="field">
+                <label>{{tr "TaskType"}}</label>
+                <select name="TaskType" class="ui fluid dropdown">
+                    <option value="0">{{tr "CronTask"}}</option>
+                    <option value="1">{{tr "TriggerTask"}}</option>
+                </select>
+            </div>
+            <div class="field">
                 <label>{{tr "Scheduler"}}</label>
                 <input type="text" name="Scheduler" placeholder="0 0 3 * * *{{tr "3amDaily"}}">
             </div>
@@ -21,6 +28,7 @@
                 <select name="Cover" class="ui fluid dropdown">
                     <option value="0">{{tr "IgnoreAllAndExecuteOnlyThroughSpecificServers"}}</option>
                     <option value="1">{{tr "AllIncludedOnlySpecificServersAreNotExecuted"}}</option>
+                    <option value="2">{{tr "ExecuteByTriggerServer"}}</option>
                 </select>
             </div>
             <div class="field">
