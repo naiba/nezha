@@ -60,6 +60,8 @@
                     <th>{{tr "NotificationMethodGroup"}}</th>
                     <th>{{tr "NotificationTriggerMode"}}</th>
                     <th>{{tr "Rules"}}</th>
+                    <th>{{tr "FailTriggerTasks"}}</th>
+                    <th>{{tr "RecoverTriggerTasks"}}</th>
                     <th>{{tr "Enable"}}</th>
                     <th>{{tr "Administration"}}</th>
                 </tr>
@@ -72,6 +74,8 @@
                     <td>{{$rule.NotificationTag}}</td>
                     <td>{{if eq $rule.TriggerMode  0}}{{tr "ModeAlwaysTrigger"}}{{else}}{{tr "ModeOnetimeTrigger"}}{{end}}
                     <td>{{$rule.RulesRaw}}</td>
+                    <td>{{$rule.FailTriggerTasksRaw}}</td>
+                    <td>{{$rule.RecoverTriggerTasksRaw}}</td>
                     <td>{{$rule.Enable}}</td>
                     <td>
                         <div class="ui mini icon buttons">

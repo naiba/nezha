@@ -70,6 +70,9 @@ other = "忽略所有，仅通过特定服务器执行"
 [AllIncludedOnlySpecificServersAreNotExecuted]
 other = "覆盖所有，仅特定服务器不执行"
 
+[ExecuteByTriggerServer]
+other = "由触发的服务器执行"
+
 [SpecificServers]
 other = "特定服务器"
 
@@ -81,6 +84,15 @@ other = "通知方式组"
 
 [PushSuccessMessages]
 other = "推送成功的消息"
+
+[TaskType]
+other = "任务类型"
+
+[CronTask]
+other = "计划任务"
+
+[TriggerTask]
+other = "触发任务"
 
 [TheFormaOfTheScheduleIs]
 other = "计划的格式为："
@@ -157,6 +169,12 @@ other = "始终触发"
 [ModeOnetimeTrigger]
 other = "单次触发"
 
+[FailTriggerTasks]
+other = "故障时触发任务"
+
+[RecoverTriggerTasks]
+other = "恢复时触发任务"
+
 [Enable]
 other = "启用"
 
@@ -204,6 +222,9 @@ other = "覆盖所有"
 
 [IgnoreAll]
 other = "忽略所有"
+
+[ByTrigger]
+other = "触发执行"
 
 [DeleteScheduledTask]
 other = "删除计划任务"

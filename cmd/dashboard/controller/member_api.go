@@ -33,6 +33,7 @@ func (ma *memberAPI) serve() {
 	}))
 
 	mr.GET("/search-server", ma.searchServer)
+	mr.GET("/search-tasks", ma.searchTask)
 	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
@@ -266,6 +267,27 @@ func (ma *memberAPI) searchServer(c *gin.Context) {
 			Value: servers[i].ID,
 			Name:  servers[i].Name,
 			Text:  servers[i].Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"results": resp,
+	})
+}
+
+func (ma *memberAPI) searchTask(c *gin.Context) {
+	var tasks []model.Cron
+	likeWord := "%" + c.Query("word") + "%"
+	singleton.DB.Select("id,name").Where("id = ? OR name LIKE ?",
+		c.Query("word"), likeWord).Find(&tasks)
+
+	var resp []searchResult
+	for i := 0; i < len(tasks); i++ {
+		resp = append(resp, searchResult{
+			Value: tasks[i].ID,
+			Name:  tasks[i].Name,
+			Text:  tasks[i].Name,
 		})
 	}
 
