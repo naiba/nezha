@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jinzhu/copier"
-	"log"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -93,7 +92,6 @@ func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
 	return func() {
 		if cr.Cover == model.CronCoverSelf {
 			if len(triggerServer) == 0 {
-				log.Println("触发任务", cr.Name, "未指定触发服务器")
 				return
 			}
 			ServerLock.RLock()
