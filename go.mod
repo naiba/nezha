@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
-	github.com/AlecAivazis/survey/v2 v2.3.5
+	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/BurntSushi/toml v1.2.0
 	github.com/Erope/goss v0.0.0-20211230093305-df3c03fd1ed4
 	github.com/artdarek/go-unzip v1.0.0
@@ -25,16 +25,16 @@ require (
 	github.com/ory/graceful v0.1.3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/shirou/gopsutil/v3 v3.22.7
+	github.com/shirou/gopsutil/v3 v3.22.8
 	github.com/spf13/pflag v1.0.5
-	github.com/spf13/viper v1.12.0
+	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
-	github.com/xanzy/go-gitlab v0.72.0
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
-	golang.org/x/oauth2 v0.0.0-20220808172628-8227340efae7
-	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4
+	github.com/xanzy/go-gitlab v0.73.1
+	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90
+	golang.org/x/oauth2 v0.0.0-20220909003341-f21342109be1
+	golang.org/x/sync v0.0.0-20220907140024-f12130a52804
 	golang.org/x/text v0.3.7
-	google.golang.org/grpc v1.48.0
+	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/sqlite v1.3.6
@@ -70,14 +70,14 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
-	github.com/pelletier/go-toml/v2 v2.0.1 // indirect
+	github.com/pelletier/go-toml/v2 v2.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/subosito/gotenv v1.3.0 // indirect
+	github.com/subosito/gotenv v1.4.1 // indirect
 	github.com/tcnksm/go-gitconfig v0.1.2 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
@@ -90,6 +90,6 @@ require (
 	golang.org/x/time v0.0.0-20220722155302-e5dcc9cfc0b9 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220519153652-3a47de7e79bd // indirect
-	gopkg.in/ini.v1 v1.66.4 // indirect
+	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
