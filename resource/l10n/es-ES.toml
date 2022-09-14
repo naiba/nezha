@@ -224,7 +224,7 @@ other = "Cubriendo todo"
 other = "Ignora todo"
 
 [ByTrigger]
-other = "触发执行"
+other = "Ejecución activada por notificación"
 
 [DeleteScheduledTask]
 other = "Eliminar la tarea programada"
