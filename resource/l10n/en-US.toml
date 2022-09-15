@@ -71,7 +71,7 @@ other = "Ignore All, Only execute by specific servers"
 other = "Cover All, Only ignore specific servers"
 
 [ExecuteByTriggerServer]
-other = "由触发的服务器执行"
+other = "Executed by the triggered servers"
 
 [SpecificServers]
 other = "Specific Servers"
@@ -86,13 +86,13 @@ other = "Notification Group"
 other = "Send Success Notification"
 
 [TaskType]
-other = "任务类型"
+other = "Task type"
 
 [CronTask]
-other = "计划任务"
+other = "Scheduled Task"
 
 [TriggerTask]
-other = "触发任务"
+other = "Trigger task"
 
 [TheFormaOfTheScheduleIs]
 other = "The Cron Expression is like:"
@@ -161,19 +161,19 @@ other = "Add Alarm Rule"
 other = "Rules"
 
 [NotificationTriggerMode]
-other = "通知触发模式"
+other = "Method for triggering notification"
 
 [ModeAlwaysTrigger]
-other = "始终触发"
+other = "Always triggered"
 
 [ModeOnetimeTrigger]
-other = "单次触发"
+other = "Triggered only once"
 
 [FailTriggerTasks]
-other = "故障时触发任务"
+other = "Tasks to be triggered in case of failure"
 
 [RecoverTriggerTasks]
-other = "恢复时触发任务"
+other = "Tasks to be triggered after fault recovery"
 
 [Enable]
 other = "Enable"
@@ -224,7 +224,7 @@ other = "Cover All"
 other = "Ignore All"
 
 [ByTrigger]
-other = "触发执行"
+other = "Execution triggered by notification"
 
 [DeleteScheduledTask]
 other = "Delete Scheduled Task"
