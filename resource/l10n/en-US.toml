@@ -71,7 +71,7 @@ other = "Ignore All, Only execute by specific servers"
 other = "Cover All, Only ignore specific servers"
 
 [ExecuteByTriggerServer]
-other = "Executed by the triggered servers"
+other = "Only servers that are included in the notification rule"
 
 [SpecificServers]
 other = "Specific Servers"
@@ -89,7 +89,7 @@ other = "Send Success Notification"
 other = "Task type"
 
 [CronTask]
-other = "Scheduled Task"
+other = "Scheduled task"
 
 [TriggerTask]
 other = "Trigger task"
@@ -161,7 +161,7 @@ other = "Add Alarm Rule"
 other = "Rules"
 
 [NotificationTriggerMode]
-other = "Method for triggering notification"
+other = "Mode of triggering notification"
 
 [ModeAlwaysTrigger]
 other = "Always triggered"
@@ -224,7 +224,7 @@ other = "Cover All"
 other = "Ignore All"
 
 [ByTrigger]
-other = "Execution triggered by notification"
+other = "Execute when triggered"
 
 [DeleteScheduledTask]
 other = "Delete Scheduled Task"
