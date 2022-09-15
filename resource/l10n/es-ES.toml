@@ -71,7 +71,7 @@ other = "Ignorar todo y ejecutar sólo a través de servidores específicos"
 other = "Todos los servidores, sólo los específicos no ejecutan comandos"
 
 [ExecuteByTriggerServer]
-other = "Ejecutado por el servidor activado"
+other = "Ejecutado por los servidores activados"
 
 [SpecificServers]
 other = "Servidores específicos"
@@ -89,10 +89,10 @@ other = "Enviar el mensaje con éxito"
 other = "Tipo de tarea"
 
 [CronTask]
-other = "Tareas programadas"
+other = "Tarea programada"
 
 [TriggerTask]
-other = "Tareas activas"
+other = "Tarea activa"
 
 [TheFormaOfTheScheduleIs]
 other = "El formato del plan es:"
@@ -161,7 +161,7 @@ other = "Añadir reglas de notificación"
 other = "Reglas"
 
 [NotificationTriggerMode]
-other = "Métodos para activar las notificaciones"
+other = "Método para activar la notificación"
 
 [ModeAlwaysTrigger]
 other = "Siempre se activa"
@@ -170,10 +170,10 @@ other = "Siempre se activa"
 other = "Se activa sólo una vez"
 
 [FailTriggerTasks]
-other = "Se activa en caso de fallo"
+other = "Tareas que se activan en caso de fallo"
 
 [RecoverTriggerTasks]
-other = "Se activa cuando se recupera el fallo"
+other = "Tareas que se activan tras la recuperación del fallo"
 
 [Enable]
 other = "Activar"
