@@ -71,7 +71,7 @@ other = "Ignorar todo y ejecutar sólo a través de servidores específicos"
 other = "Todos los servidores, sólo los específicos no ejecutan comandos"
 
 [ExecuteByTriggerServer]
-other = "Ejecutado por los servidores activados"
+other = "Sólo los servidores incluidos en las reglas de notificación"
 
 [SpecificServers]
 other = "Servidores específicos"
@@ -161,7 +161,7 @@ other = "Añadir reglas de notificación"
 other = "Reglas"
 
 [NotificationTriggerMode]
-other = "Método para activar la notificación"
+other = "Modo de activar la notificación"
 
 [ModeAlwaysTrigger]
 other = "Siempre se activa"
@@ -224,7 +224,7 @@ other = "Cubriendo todo"
 other = "Ignora todo"
 
 [ByTrigger]
-other = "Ejecución activada por notificación"
+other = "Ejecutar cuando se activa"
 
 [DeleteScheduledTask]
 other = "Eliminar la tarea programada"
