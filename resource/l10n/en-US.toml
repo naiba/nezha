@@ -89,10 +89,10 @@ other = "Send Success Notification"
 other = "Task type"
 
 [CronTask]
-other = "Scheduled Tasks"
+other = "Scheduled Task"
 
 [TriggerTask]
-other = "Trigger tasks"
+other = "Trigger task"
 
 [TheFormaOfTheScheduleIs]
 other = "The Cron Expression is like:"
@@ -161,7 +161,7 @@ other = "Add Alarm Rule"
 other = "Rules"
 
 [NotificationTriggerMode]
-other = "Methods for triggering notifications"
+other = "Method for triggering notification"
 
 [ModeAlwaysTrigger]
 other = "Always triggered"
@@ -170,10 +170,10 @@ other = "Always triggered"
 other = "Triggered only once"
 
 [FailTriggerTasks]
-other = "Triggered on failure"
+other = "Tasks to be triggered in case of failure"
 
 [RecoverTriggerTasks]
-other = "Triggered when fault is recovered"
+other = "Tasks to be triggered after fault recovery"
 
 [Enable]
 other = "Enable"
