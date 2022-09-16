@@ -181,6 +181,12 @@ other = "Activar"
 [AddServer]
 other = "Añadir un servidor"
 
+[BatchEditServerGroup]
+other = "批量修改分组"
+
+[InputServerGroupName]
+other = "输入分组名称"
+
 [ServerGroup]
 other = "Grupos de servidores"
 
