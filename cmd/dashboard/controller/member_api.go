@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
@@ -39,6 +40,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/cron", ma.addOrEditCron)
 	mr.GET("/cron/:id/manual", ma.manualTrigger)
 	mr.POST("/force-update", ma.forceUpdate)
+	mr.POST("/batch-update-server-group", ma.batchUpdateServerGroup)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -531,6 +533,67 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 	}
 
 	singleton.ManualTrigger(cr)
+
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type BatchUpdateServerGroupRequest struct {
+	Servers []uint64
+	Group   string
+}
+
+func (ma *memberAPI) batchUpdateServerGroup(c *gin.Context) {
+	var req BatchUpdateServerGroupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", req.Servers).Update("tag", req.Group).Error; err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	singleton.ServerLock.Lock()
+
+	for i := 0; i < len(req.Servers); i++ {
+		serverId := req.Servers[i]
+		var s model.Server
+		copier.Copy(&s, singleton.ServerList[serverId])
+		s.Tag = req.Group
+		// 如果修改了Tag
+		if s.Tag != singleton.ServerList[s.ID].Tag {
+			index := -1
+			for i := 0; i < len(singleton.ServerTagToIDList[s.Tag]); i++ {
+				if singleton.ServerTagToIDList[s.Tag][i] == s.ID {
+					index = i
+					break
+				}
+			}
+			if index > -1 {
+				// 删除旧 Tag-ID 绑定关系
+				singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag] = append(singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][:index], singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][index+1:]...)
+			}
+			// 设置新的 Tag-ID 绑定关系
+			singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
+			if len(singleton.ServerTagToIDList[s.Tag]) == 0 {
+				delete(singleton.ServerTagToIDList, s.Tag)
+			}
+		}
+		singleton.ServerList[s.ID] = &s
+	}
+
+	singleton.ServerLock.Unlock()
+
+	singleton.ReSortServer()
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,

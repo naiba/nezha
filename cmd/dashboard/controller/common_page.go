@@ -167,6 +167,8 @@ type Data struct {
 	Servers []*model.Server `json:"servers,omitempty"`
 }
 
+var cloudflareCookiesValidator = regexp.MustCompile("^[A-Za-z0-9-_]+$")
+
 func (cp *commonPage) ws(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -285,7 +287,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			encodedCookies := strings.Split(cloudflareCookies, ".")
 			if len(encodedCookies) == 3 {
 				for i := 0; i < 3; i++ {
-					if valid, _ := regexp.MatchString("^[A-Za-z0-9-_]+$", encodedCookies[i]); !valid {
+					if !cloudflareCookiesValidator.MatchString(encodedCookies[i]) {
 						cloudflareCookies = ""
 						break
 					}

@@ -13,7 +13,7 @@ import (
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/oauth2"
 	GitHubOauth2 "golang.org/x/oauth2/github"
-	GitlabOauth2 "golang.org/x/oauth2/github"
+	GitlabOauth2 "golang.org/x/oauth2/gitlab"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
@@ -156,7 +156,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	}
 	var isAdmin bool
 	for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
-		if admin != "" && strings.ToLower(user.Login) == strings.ToLower(admin) {
+		if admin != "" && strings.EqualFold(user.Login, admin) {
 			isAdmin = true
 			break
 		}
