@@ -131,19 +131,19 @@ other = "segundos"
 other = "Activar la notificación de fallos"
 
 [FailureNotification]
-other = "故障通知"
+other = "Notificación de fallos"
 
 [MaxLatency]
-other = "最大延迟(ms)"
+other = "Retardo máximo (ms)"
 
 [MinLatency]
-other = "最小延迟(ms)"
+other = "Retardo mínimo (ms)"
 
 [EnableLatencyNotification]
-other = "启用延迟通知"
+other = "Activar las notificaciones de retraso de la red"
 
 [LatencyNotification]
-other = "延迟通知"
+other = "Notificación de retraso de la red"
 
 [IntroductionOfMonitor]
 other = """
@@ -443,7 +443,7 @@ other = "Estado"
 other = "Disponibilidad"
 
 [AverageLatency]
-other = "Latencia media"
+other = "Retardo medio"
 
 [CycleTransferStats]
 other = "Estadísticas del ciclo de consumo de datos"
