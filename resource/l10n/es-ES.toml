@@ -131,19 +131,19 @@ other = "segundos"
 other = "Activar la notificación de fallos"
 
 [FailureNotification]
-other = "故障通知"
+other = "Notificación de fallos"
 
 [MaxLatency]
-other = "最大延迟(ms)"
+other = "Latencia máxima (ms)"
 
 [MinLatency]
-other = "最小延迟(ms)"
+other = "Latencia mínima (ms)"
 
 [EnableLatencyNotification]
-other = "启用延迟通知"
+other = "Activar la notificación de latencia"
 
 [LatencyNotification]
-other = "延迟通知"
+other = "Notificación de latencia"
 
 [IntroductionOfMonitor]
 other = """
