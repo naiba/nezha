@@ -130,6 +130,21 @@ other = "秒"
 [EnableFailureNotification]
 other = "启用故障通知"
 
+[FailureNotification]
+other = "故障通知"
+
+[MaxLatency]
+other = "最大延迟(ms)"
+
+[MinLatency]
+other = "最小延迟(ms)"
+
+[EnableLatencyNotification]
+other = "启用延迟通知"
+
+[LatencyNotification]
+other = "延迟通知"
+
 [IntroductionOfMonitor]
 other = """
 类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS协议的会顺带监控SSL证书)；<br>
