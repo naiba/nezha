@@ -134,16 +134,16 @@ other = "Activar la notificación de fallos"
 other = "Notificación de fallos"
 
 [MaxLatency]
-other = "Latencia máxima (ms)"
+other = "Retardo máximo (ms)"
 
 [MinLatency]
-other = "Latencia mínima (ms)"
+other = "Retardo mínimo (ms)"
 
 [EnableLatencyNotification]
-other = "Activar la notificación de latencia"
+other = "Activar las notificaciones de retraso de la red"
 
 [LatencyNotification]
-other = "Notificación de latencia"
+other = "Notificación de retraso de la red"
 
 [IntroductionOfMonitor]
 other = """
@@ -443,7 +443,7 @@ other = "Estado"
 other = "Disponibilidad"
 
 [AverageLatency]
-other = "Latencia media"
+other = "Retardo medio"
 
 [CycleTransferStats]
 other = "Estadísticas del ciclo de consumo de datos"
