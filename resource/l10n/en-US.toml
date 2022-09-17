@@ -130,6 +130,21 @@ other = "Seconds"
 [EnableFailureNotification]
 other = "Enable Failure Notification"
 
+[FailureNotification]
+other = "Incident Notification"
+
+[MaxLatency]
+other = "Max delay (ms)"
+
+[MinLatency]
+other = "Min delay (ms)"
+
+[EnableLatencyNotification]
+other = "Enable latency notifications"
+
+[LatencyNotification]
+other = "Latency Notifications"
+
 [IntroductionOfMonitor]
 other = """
 Input URL(With http/https prefix) for type <b>HTTP-GET</b>, SSL Certificate will be monitored automatically when URL has https prefix;<br>

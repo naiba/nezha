@@ -130,6 +130,21 @@ other = "segundos"
 [EnableFailureNotification]
 other = "Activar la notificación de fallos"
 
+[FailureNotification]
+other = "故障通知"
+
+[MaxLatency]
+other = "最大延迟(ms)"
+
+[MinLatency]
+other = "最小延迟(ms)"
+
+[EnableLatencyNotification]
+other = "启用延迟通知"
+
+[LatencyNotification]
+other = "延迟通知"
+
 [IntroductionOfMonitor]
 other = """
 Introduzca la URL cuando el tipo sea <b>HTTP-GET</b> (si es con protocolo HTTPS, por cierto, monitorizará el certificado SSL) <br>
