@@ -393,6 +393,9 @@ type monitorForm struct {
 	NotificationTag string
 	SkipServersRaw  string
 	Duration        uint64
+	MinLatency      float32
+	MaxLatency      float32
+	LatencyNotify   string
 }
 
 func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
@@ -409,6 +412,9 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.Notify = mf.Notify == "on"
 		m.NotificationTag = mf.NotificationTag
 		m.Duration = mf.Duration
+		m.LatencyNotify = mf.LatencyNotify == "on"
+		m.MinLatency = mf.MinLatency
+		m.MaxLatency = mf.MaxLatency
 		err = m.InitSkipServers()
 	}
 	if err == nil {

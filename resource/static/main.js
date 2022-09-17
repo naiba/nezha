@@ -77,6 +77,8 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "Duration"
               ) {
                 obj[item.name] = parseInt(item.value);
+              } else if (item.name.endsWith("Latency")) {
+                obj[item.name] = parseFloat(item.value);
               } else {
                 obj[item.name] = item.value;
               }
@@ -94,9 +96,9 @@ function showFormModal(modelSelector, formID, URL, getData) {
               if (item.name.endsWith("TasksRaw")) {
                 if (item.value.length > 2) {
                   obj[item.name] = JSON.stringify(
-                      [...item.value.matchAll(/\d+/gm)].map((k) =>
-                          parseInt(k[0])
-                      )
+                    [...item.value.matchAll(/\d+/gm)].map((k) =>
+                      parseInt(k[0])
+                    )
                   );
                 }
               }
@@ -163,29 +165,29 @@ function addOrEditAlertRule(rule) {
     const node2 = modal.find("i.dropdown.icon.2");
     for (let i = 0; i < failTriggerTasksList.length; i++) {
       node1.after(
-          '<a class="ui label transition visible" data-value="' +
-          failTriggerTasksList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          failTriggerTasksList[i] +
-          '<i class="delete icon"></i></a>'
+        '<a class="ui label transition visible" data-value="' +
+        failTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        failTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
     for (let i = 0; i < recoverTriggerTasksList.length; i++) {
       node2.after(
-          '<a class="ui label transition visible" data-value="' +
-          recoverTriggerTasksList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          recoverTriggerTasksList[i] +
-          '<i class="delete icon"></i></a>'
+        '<a class="ui label transition visible" data-value="' +
+        recoverTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        recoverTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
   }
   modal
-      .find("input[name=FailTriggerTasksRaw]")
-      .val(rule ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
+    .find("input[name=FailTriggerTasksRaw]")
+    .val(rule ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
   modal
-      .find("input[name=RecoverTriggerTasksRaw]")
-      .val(rule ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
+    .find("input[name=RecoverTriggerTasksRaw]")
+    .val(rule ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
 
   showFormModal(".rule.modal", "#ruleForm", "/api/alert-rule");
 }
@@ -257,10 +259,10 @@ function issueNewApiToken(apiToken) {
   const modal = $(".api.modal");
   modal.children(".header").text((apiToken ? LANG.Edit : LANG.Add) + ' ' + "API Token");
   modal
-      .find(".nezha-primary-btn.button")
-      .html(
-          apiToken ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
-      );
+    .find(".nezha-primary-btn.button")
+    .html(
+      apiToken ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
+    );
   modal.find("textarea[name=Note]").val(apiToken ? apiToken.Note : null);
   showFormModal(".api.modal", "#apiForm", "/api/token");
 }
@@ -312,6 +314,13 @@ function addOrEditMonitor(monitor) {
     modal.find(".ui.nb-notify.checkbox").checkbox("set checked");
   } else {
     modal.find(".ui.nb-notify.checkbox").checkbox("set unchecked");
+  }
+  modal.find("input[name=MaxLatency]").val(monitor ? monitor.MaxLatency : null);
+  modal.find("input[name=MinLatency]").val(monitor ? monitor.MinLatency : null);
+  if (monitor && monitor.LatencyNotify) {
+    modal.find(".ui.nb-lt-notify.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.nb-lt-notify.checkbox").checkbox("set unchecked");
   }
   modal.find("a.ui.label.visible").each((i, el) => {
     el.remove();

@@ -20,7 +20,8 @@
           <th>{{tr "Type"}}</th>
           <th>{{tr "Duration"}}</th>
           <th>{{tr "NotificationMethodGroup"}}</th>
-          <th>{{tr "Notification"}}</th>
+          <th>{{tr "FailureNotification"}}</th>
+          <th>{{tr "LatencyNotification"}}</th>
           <th>{{tr "Administration"}}</th>
         </tr>
       </thead>
@@ -39,6 +40,7 @@
           <td>{{$monitor.Duration}} {{tr "Seconds"}}</td>
           <td>{{$monitor.NotificationTag}}</td>
           <td>{{$monitor.Notify}}</td>
+          <td>{{$monitor.LatencyNotify}}</td>
           <td>
             <div class="ui mini icon buttons">
               <button class="ui button" onclick="addOrEditMonitor({{$monitor}})">

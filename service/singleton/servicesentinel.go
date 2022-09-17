@@ -82,10 +82,10 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 }
 
 /*
-   使用缓存 channel，处理上报的 Service 请求结果，然后判断是否需要报警
-   需要记录上一次的状态信息
+使用缓存 channel，处理上报的 Service 请求结果，然后判断是否需要报警
+需要记录上一次的状态信息
 
-   加锁顺序：serviceResponseDataStoreLock > monthlyStatusLock > monitorsLock
+加锁顺序：serviceResponseDataStoreLock > monthlyStatusLock > monitorsLock
 */
 type ServiceSentinel struct {
 	// 服务监控任务上报通道
@@ -364,6 +364,20 @@ func (ss *ServiceSentinel) worker() {
 				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
 			}
 		}
+		// 延迟报警
+		if mh.Delay > 0 {
+			ss.monitorsLock.RLock()
+			if ss.monitors[mh.MonitorID].LatencyNotify {
+				if mh.Delay > ss.monitors[mh.MonitorID].MaxLatency {
+					go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[Latency] %s %2f > %2f", ss.monitors[mh.MonitorID].Name, mh.Delay, ss.monitors[mh.MonitorID].MaxLatency), true)
+				}
+				if mh.Delay < ss.monitors[mh.MonitorID].MinLatency {
+					go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f", ss.monitors[mh.MonitorID].Name, mh.Delay, ss.monitors[mh.MonitorID].MinLatency), true)
+				}
+			}
+			ss.monitorsLock.RUnlock()
+		}
+		// 故障报警
 		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.MonitorID] {
 			ss.monitorsLock.RLock()
 			isNeedSendNotification := (ss.lastStatus[mh.MonitorID] != 0 || stateCode == StatusDown) && ss.monitors[mh.MonitorID].Notify

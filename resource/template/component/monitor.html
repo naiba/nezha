@@ -54,6 +54,20 @@
           <label>{{tr "EnableFailureNotification"}}</label>
         </div>
       </div>
+      <div class="field">
+        <label>{{tr "MaxLatency"}}</label>
+        <input type="number" name="MaxLatency" placeholder="100.88" />
+      </div>
+      <div class="field">
+        <label>{{tr "MinLatency"}}</label>
+        <input type="number" name="MinLatency" placeholder="100.88" />
+      </div>
+      <div class="field">
+        <div class="ui nb-lt-notify checkbox">
+          <input name="LatencyNotify" type="checkbox" tabindex="0" class="hidden" />
+          <label>{{tr "EnableLatencyNotification"}}</label>
+        </div>
+      </div>
     </form>
     <div class="ui warning message">
       <p>

@@ -48,6 +48,10 @@ type Monitor struct {
 	NotificationTag string // 当前服务监控所属的通知组
 	Cover           uint8
 
+	MinLatency    float32
+	MaxLatency    float32
+	LatencyNotify bool
+
 	SkipServers map[uint64]bool `gorm:"-" json:"-"`
 	CronJobID   cron.EntryID    `gorm:"-" json:"-"`
 }
