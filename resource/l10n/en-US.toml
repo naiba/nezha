@@ -182,10 +182,10 @@ other = "Enable"
 other = "Add Server"
 
 [BatchEditServerGroup]
-other = "批量修改分组"
+other = "Batch Modify Groups"
 
 [InputServerGroupName]
-other = "输入分组名称"
+other = "Enter the name of the group"
 
 [ServerGroup]
 other = "Server Group"
