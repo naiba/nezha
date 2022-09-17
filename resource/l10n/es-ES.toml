@@ -181,6 +181,12 @@ other = "Activar"
 [AddServer]
 other = "Añadir un servidor"
 
+[BatchEditServerGroup]
+other = "Modificación de grupos por lotes"
+
+[InputServerGroupName]
+other = "Introduzca un nombre de grupo"
+
 [ServerGroup]
 other = "Grupos de servidores"
 

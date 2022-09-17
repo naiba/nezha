@@ -181,6 +181,12 @@ other = "Enable"
 [AddServer]
 other = "Add Server"
 
+[BatchEditServerGroup]
+other = "Batch Modify Groups"
+
+[InputServerGroupName]
+other = "Enter the name of the group"
+
 [ServerGroup]
 other = "Server Group"
 
