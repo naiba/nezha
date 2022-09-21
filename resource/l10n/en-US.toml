@@ -140,10 +140,10 @@ other = "Max delay (ms)"
 other = "Min delay (ms)"
 
 [EnableLatencyNotification]
-other = "Enable latency notifications"
+other = "Enable delay notifications"
 
 [LatencyNotification]
-other = "Latency Notifications"
+other = "Delay Notification"
 
 [IntroductionOfMonitor]
 other = """
