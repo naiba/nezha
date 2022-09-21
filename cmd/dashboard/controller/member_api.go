@@ -348,23 +348,25 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 			delete(singleton.SecretToID, singleton.ServerList[s.ID].Secret)
 		}
 		// 如果修改了Tag
-		if s.Tag != singleton.ServerList[s.ID].Tag {
+		oldTag := singleton.ServerList[s.ID].Tag
+		newTag := s.Tag
+		if newTag != oldTag {
 			index := -1
-			for i := 0; i < len(singleton.ServerTagToIDList[s.Tag]); i++ {
-				if singleton.ServerTagToIDList[s.Tag][i] == s.ID {
+			for i := 0; i < len(singleton.ServerTagToIDList[oldTag]); i++ {
+				if singleton.ServerTagToIDList[oldTag][i] == s.ID {
 					index = i
 					break
 				}
 			}
 			if index > -1 {
 				// 删除旧 Tag-ID 绑定关系
-				singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag] = append(singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][:index], singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][index+1:]...)
+				singleton.ServerTagToIDList[oldTag] = append(singleton.ServerTagToIDList[oldTag][:index], singleton.ServerTagToIDList[oldTag][index+1:]...)
+				if len(singleton.ServerTagToIDList[oldTag]) == 0 {
+					delete(singleton.ServerTagToIDList, oldTag)
+				}
 			}
 			// 设置新的 Tag-ID 绑定关系
-			singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
-			if len(singleton.ServerTagToIDList[s.Tag]) == 0 {
-				delete(singleton.ServerTagToIDList, s.Tag)
-			}
+			singleton.ServerTagToIDList[newTag] = append(singleton.ServerTagToIDList[newTag], s.ID)
 		}
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerLock.Unlock()
@@ -575,24 +577,26 @@ func (ma *memberAPI) batchUpdateServerGroup(c *gin.Context) {
 		var s model.Server
 		copier.Copy(&s, singleton.ServerList[serverId])
 		s.Tag = req.Group
-		// 如果修改了Tag
-		if s.Tag != singleton.ServerList[s.ID].Tag {
+		// 如果修改了Ta
+		oldTag := singleton.ServerList[serverId].Tag
+		newTag := s.Tag
+		if newTag != oldTag {
 			index := -1
-			for i := 0; i < len(singleton.ServerTagToIDList[s.Tag]); i++ {
-				if singleton.ServerTagToIDList[s.Tag][i] == s.ID {
+			for i := 0; i < len(singleton.ServerTagToIDList[oldTag]); i++ {
+				if singleton.ServerTagToIDList[oldTag][i] == s.ID {
 					index = i
 					break
 				}
 			}
 			if index > -1 {
 				// 删除旧 Tag-ID 绑定关系
-				singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag] = append(singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][:index], singleton.ServerTagToIDList[singleton.ServerList[s.ID].Tag][index+1:]...)
+				singleton.ServerTagToIDList[oldTag] = append(singleton.ServerTagToIDList[oldTag][:index], singleton.ServerTagToIDList[oldTag][index+1:]...)
+				if len(singleton.ServerTagToIDList[oldTag]) == 0 {
+					delete(singleton.ServerTagToIDList, oldTag)
+				}
 			}
 			// 设置新的 Tag-ID 绑定关系
-			singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
-			if len(singleton.ServerTagToIDList[s.Tag]) == 0 {
-				delete(singleton.ServerTagToIDList, s.Tag)
-			}
+			singleton.ServerTagToIDList[newTag] = append(singleton.ServerTagToIDList[newTag], s.ID)
 		}
 		singleton.ServerList[s.ID] = &s
 	}
