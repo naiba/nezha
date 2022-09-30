@@ -101,6 +101,7 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 		return
 	}
 
+	c.Set(model.CtxKeyViewPasswordVerified, true)
 	c.Next()
 }
 
@@ -125,20 +126,32 @@ func (p *commonPage) service(c *gin.Context) {
 	}))
 }
 
-func (cp *commonPage) getServerStat() ([]byte, error) {
+func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
 	v, err, _ := cp.requestGroup.Do("serverStats", func() (any, error) {
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
+
+		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+		_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+
+		var servers []*model.Server
+
+		if isMember || isViewPasswordVerfied {
+			servers = singleton.SortedServerList
+		} else {
+			servers = singleton.SortedServerListForGuest
+		}
+
 		return utils.Json.Marshal(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: singleton.SortedServerList,
+			Servers: servers,
 		})
 	})
 	return v.([]byte), err
 }
 
 func (cp *commonPage) home(c *gin.Context) {
-	stat, err := cp.getServerStat()
+	stat, err := cp.getServerStat(c)
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
@@ -186,7 +199,7 @@ func (cp *commonPage) ws(c *gin.Context) {
 	defer conn.Close()
 	count := 0
 	for {
-		stat, err := cp.getServerStat()
+		stat, err := cp.getServerStat(c)
 		if err != nil {
 			continue
 		}

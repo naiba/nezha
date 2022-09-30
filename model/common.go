@@ -5,7 +5,7 @@ import (
 )
 
 const CtxKeyAuthorizedUser = "ckau"
-
+const CtxKeyViewPasswordVerified = "ckvpv"
 const CacheKeyOauth2State = "p:a:state"
 
 type Common struct {

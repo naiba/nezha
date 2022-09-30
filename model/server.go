@@ -16,6 +16,7 @@ type Server struct {
 	Secret       string `gorm:"uniqueIndex" json:"-"`
 	Note         string `json:"-"` // 管理员可见备注
 	DisplayIndex int    // 展示排序，越大越靠前
+	HideForGuest bool   // 对游客隐藏
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
@@ -38,10 +39,17 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 	s.PrevHourlyTransferOut = old.PrevHourlyTransferOut
 }
 
+func boolToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
 func (s Server) Marshal() template.JS {
 	name, _ := utils.Json.Marshal(s.Name)
 	tag, _ := utils.Json.Marshal(s.Tag)
 	note, _ := utils.Json.Marshal(s.Note)
 	secret, _ := utils.Json.Marshal(s.Secret)
-	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s}`, s.ID, name, secret, s.DisplayIndex, tag, note)) // #nosec
+	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest))) // #nosec
 }

@@ -292,6 +292,11 @@ function addOrEditServer(server, conf) {
     modal.find(".command.field").attr("style", "display:none");
     modal.find("input[name=secret]").val("");
   }
+  if (server && server.HideForGuest) {
+    modal.find(".ui.hideforguest.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
+  }
   showFormModal(".server.modal", "#serverForm", "/api/server");
 }
 

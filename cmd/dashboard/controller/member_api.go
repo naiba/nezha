@@ -306,6 +306,7 @@ type serverForm struct {
 	Secret       string
 	Tag          string
 	Note         string
+	HideForGuest string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -321,6 +322,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.ID = sf.ID
 		s.Tag = sf.Tag
 		s.Note = sf.Note
+		s.HideForGuest = sf.HideForGuest == "on"
 		if s.ID == 0 {
 			s.Secret = utils.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
 			s.Secret = s.Secret[:18]

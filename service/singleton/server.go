@@ -13,8 +13,9 @@ var (
 	ServerTagToIDList map[string][]uint64      // [ServerTag] -> ServerID
 	ServerLock        sync.RWMutex
 
-	SortedServerList []*model.Server // 用于存储服务器列表的 slice，按照服务器 ID 排序
-	SortedServerLock sync.RWMutex
+	SortedServerList         []*model.Server // 用于存储服务器列表的 slice，按照服务器 ID 排序
+	SortedServerListForGuest []*model.Server
+	SortedServerLock         sync.RWMutex
 )
 
 // InitServer 初始化 ServerID <-> Secret 的映射
@@ -24,7 +25,7 @@ func InitServer() {
 	ServerTagToIDList = make(map[string][]uint64)
 }
 
-//LoadServers 加载服务器列表并根据ID排序
+// LoadServers 加载服务器列表并根据ID排序
 func LoadServers() {
 	InitServer()
 	var servers []model.Server
@@ -48,8 +49,12 @@ func ReSortServer() {
 	defer SortedServerLock.Unlock()
 
 	SortedServerList = []*model.Server{}
+	SortedServerListForGuest = []*model.Server{}
 	for _, s := range ServerList {
 		SortedServerList = append(SortedServerList, s)
+		if !s.HideForGuest {
+			SortedServerListForGuest = append(SortedServerListForGuest, s)
+		}
 	}
 
 	// 按照服务器 ID 排序的具体实现（ID越大越靠前）
@@ -58,5 +63,12 @@ func ReSortServer() {
 			return SortedServerList[i].ID < SortedServerList[j].ID
 		}
 		return SortedServerList[i].DisplayIndex > SortedServerList[j].DisplayIndex
+	})
+
+	sort.SliceStable(SortedServerListForGuest, func(i, j int) bool {
+		if SortedServerListForGuest[i].DisplayIndex == SortedServerListForGuest[j].DisplayIndex {
+			return SortedServerListForGuest[i].ID < SortedServerListForGuest[j].ID
+		}
+		return SortedServerListForGuest[i].DisplayIndex > SortedServerListForGuest[j].DisplayIndex
 	})
 }

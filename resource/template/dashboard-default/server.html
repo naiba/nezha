@@ -25,6 +25,7 @@
                     <th>{{tr "ServerGroup"}}</th>
                     <th>IP</th>
                     <th>{{tr "VersionNumber"}}</th>
+                    <th>{{tr "HideForGuest"}}</th>
                     <th>{{tr "Secret"}}</th>
                     <th>{{tr "OneKeyInstall"}}</th>
                     <th>{{tr "Note"}}</th>
@@ -40,7 +41,12 @@
                     <td>{{$server.Tag}}</td>
                     <td>{{$server.Host.IP}}</td>
                     <td>{{$server.Host.Version}}</td>
-                    <td>{{$server.Secret}}</td>
+                    <td>{{$server.HideForGuest}}</td>
+                    <td>
+                        <button class="ui icon green mini button" data-clipboard-text="{{$server.Secret}}">
+                            <i class="copy icon"></i>
+                        </button>
+                    </td>
                     <td>
                         <button class="ui icon green mini button"
                             data-clipboard-text="{{if $.Conf.GRPCHost}}{{if eq $.Conf.Language "zh-CN"}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh{{else}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh{{end}} -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
