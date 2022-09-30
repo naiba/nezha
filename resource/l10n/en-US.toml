@@ -585,3 +585,6 @@ other = "Data remaining"
 
 [DashboardTheme]
 other = "Dasboard Theme"
+
+[HideForGuest]
+other = "对游客隐藏"
