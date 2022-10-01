@@ -587,4 +587,4 @@ other = "Data remaining"
 other = "Dasboard Theme"
 
 [HideForGuest]
-other = "对游客隐藏"
+other = "Hide for guest"

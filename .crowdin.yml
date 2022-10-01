@@ -1,3 +1,0 @@
-files:
-  - source: /resource/l10n/zh-CN.toml
-    translation: /resource/l10n/%locale%.%file_extension%

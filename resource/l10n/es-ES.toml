@@ -587,4 +587,4 @@ other = "Datos restantes"
 other = "Temas del panel de administración"
 
 [HideForGuest]
-other = "对游客隐藏"
+other = "Ocultar para invitados"

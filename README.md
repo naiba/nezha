@@ -30,8 +30,6 @@
 
 ## Supported Languages
 
-Help us improve translation [![Crowdin](https://badges.crowdin.net/nezha/localized.svg)](https://crowdin.com/project/nezha)
-
 - English
 - 简体中文
 - Español
