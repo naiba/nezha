@@ -86,7 +86,7 @@ other = "Notification Group"
 other = "Send Success Notification"
 
 [TaskType]
-other = "Task type"
+other = "Task Type"
 
 [CronTask]
 other = "Scheduled task"
@@ -134,16 +134,16 @@ other = "Enable Failure Notification"
 other = "Incident Notification"
 
 [MaxLatency]
-other = "Max delay (ms)"
+other = "Max Latency (ms)"
 
 [MinLatency]
-other = "Min delay (ms)"
+other = "Min Latency (ms)"
 
 [EnableLatencyNotification]
-other = "Enable delay notifications"
+other = "Enable Latency Notifications"
 
 [LatencyNotification]
-other = "Delay Notification"
+other = "Latency Notification"
 
 [IntroductionOfMonitor]
 other = """
@@ -170,7 +170,7 @@ other = "Request Type"
 other = "Verify SSL"
 
 [AddNotificationRule]
-other = "Add Alarm Rule"
+other = "Add Notification Rule"
 
 [Rules]
 other = "Rules"
@@ -212,7 +212,7 @@ other = "Einstein Light Speed 1"
 other = "Display Index"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "A larger index will be ranked previous"
+other = "Greater numbers will be displayed first"
 
 [Secret]
 other = "Secret"
@@ -230,7 +230,7 @@ other = "Set CDN bypassed Domain/IP in setting before using this function"
 other = "Send Success Notification"
 
 [LastExecution]
-other = "Last Execution"
+other = "Last run on"
 
 [LastResult]
 other = "Last Result"
@@ -332,13 +332,13 @@ other = "Access Password"
 other = "CDN Bypassed Domain/IP"
 
 [IPChangeAlert]
-other = "IP Change Alert"
+other = "IP Change Notification"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
 other = "Cover All, Only ignore specific servers"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "Ignore All, Only alert specific servers"
+other = "Ignore all, cover only specific servers"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
 other = "Skip All Servers, Only send requests via specific servers"
@@ -353,7 +353,7 @@ other = "Server ID, separated by comma"
 other = "Send Notification To Specific Notification Group"
 
 [NotificationMessagesDoNotHideIP]
-other = "Do NOT desensitize Server IP In Notification Messages"
+other = "Do NOT hide the IP in the notification"
 
 [Save]
 other = "Save"
@@ -584,7 +584,7 @@ other = "IP Changed"
 other = "Data remaining"
 
 [DashboardTheme]
-other = "Dasboard Theme"
+other = "Admin Panel Theme"
 
 [HideForGuest]
-other = "Hide for guest"
+other = "No display to visitors"

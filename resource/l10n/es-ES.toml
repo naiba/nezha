@@ -212,7 +212,7 @@ other = "Einstein - Velocidad de la luz 1"
 other = "Índice de visualización"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "Un índice mayor se clasificará antes"
+other = "Los números más grandes se mostrarán primero"
 
 [Secret]
 other = "Clave"
@@ -230,7 +230,7 @@ other = "Por favor, configure el dominio o IP del servidor del panel que no est�
 other = "Enviado correctamente"
 
 [LastExecution]
-other = "Última ejecución"
+other = "Última ejecución en"
 
 [LastResult]
 other = "Resultado final"
@@ -320,7 +320,7 @@ other = "Título del sitio"
 other = "Lista de administradores"
 
 [Theme]
-other = "Temas"
+other = "Tema"
 
 [CustomCodes]
 other = "Códigos personalizados"
@@ -332,13 +332,13 @@ other = "Contraseña de acceso"
 other = "El dominio o IP del servidor del panel no está conectado a la CDN"
 
 [IPChangeAlert]
-other = "Alerta de cambio de IP"
+other = "Notificación de cambio de IP"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
 other = "Cubrir todo, ignorar sólo servidores específicos"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "Omitir todo, notificar sólo a los servidores específicos"
+other = "Omitir todo, cubrir sólo servidores específicos"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
 other = "Omitir todos los servidores, sólo enviar peticiones a través de servidores específicos"
@@ -584,7 +584,7 @@ other = "Cambio de IP"
 other = "Datos restantes"
 
 [DashboardTheme]
-other = "Temas del panel de administración"
+other = "Tema del panel de administración"
 
 [HideForGuest]
-other = "Ocultar para invitados"
+other = "No se muestra a los visitantes"
