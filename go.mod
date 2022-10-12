@@ -31,11 +31,11 @@ require (
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.0
 	github.com/xanzy/go-gitlab v0.73.1
-	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be
+	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 	golang.org/x/oauth2 v0.0.0-20221006150949-b44042a4b9c1
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0
-	golang.org/x/text v0.3.7
-	google.golang.org/grpc v1.49.0
+	golang.org/x/text v0.3.8
+	google.golang.org/grpc v1.50.0
 	google.golang.org/protobuf v1.28.1
 	gorm.io/driver/sqlite v1.4.2
 	gorm.io/gorm v1.24.0

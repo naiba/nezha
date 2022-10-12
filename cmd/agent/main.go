@@ -358,7 +358,7 @@ func handleHttpGetTask(task *pb.Task, result *pb.TaskResult) {
 		// 检查 SSL 证书信息
 		if resp.TLS != nil && len(resp.TLS.PeerCertificates) > 0 {
 			c := resp.TLS.PeerCertificates[0]
-			result.Data = c.Issuer.CommonName + "|" + c.NotAfter.In(time.Local).String()
+			result.Data = c.Issuer.CommonName + "|" + c.NotAfter.String()
 		}
 		result.Successful = true
 	} else {

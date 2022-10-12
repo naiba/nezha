@@ -13,8 +13,8 @@ import (
 
 func init() {
 	// 初始化 dao 包
-	singleton.Init()
 	singleton.InitConfigFromPath("data/config.yaml")
+	singleton.InitTimezoneAndCache()
 	singleton.InitDBFromPath("data/sqlite.db")
 	singleton.InitLocalizer()
 	initSystem()

@@ -34,15 +34,16 @@ type _TodayStatsOfMonitor struct {
 // NewServiceSentinel 创建服务监控器
 func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	ServiceSentinelShared = &ServiceSentinel{
-		serviceReportChannel:                make(chan ReportData, 200),
-		serviceStatusToday:                  make(map[uint64]*_TodayStatsOfMonitor),
-		serviceCurrentStatusIndex:           make(map[uint64]int),
-		serviceCurrentStatusData:            make(map[uint64][]model.MonitorHistory),
-		lastStatus:                          make(map[uint64]int),
-		serviceResponseDataStoreCurrentUp:   make(map[uint64]uint64),
-		serviceResponseDataStoreCurrentDown: make(map[uint64]uint64),
-		monitors:                            make(map[uint64]*model.Monitor),
-		sslCertCache:                        make(map[uint64]string),
+		serviceReportChannel:                    make(chan ReportData, 200),
+		serviceStatusToday:                      make(map[uint64]*_TodayStatsOfMonitor),
+		serviceCurrentStatusIndex:               make(map[uint64]int),
+		serviceCurrentStatusData:                make(map[uint64][]*pb.TaskResult),
+		lastStatus:                              make(map[uint64]int),
+		serviceResponseDataStoreCurrentUp:       make(map[uint64]uint64),
+		serviceResponseDataStoreCurrentDown:     make(map[uint64]uint64),
+		serviceResponseDataStoreCurrentAvgDelay: make(map[uint64]float32),
+		monitors:                                make(map[uint64]*model.Monitor),
+		sslCertCache:                            make(map[uint64]string),
 		// 30天数据缓存
 		monthlyStatus: make(map[uint64]*model.ServiceItemResponse),
 		dispatchBus:   serviceSentinelDispatchBus,
@@ -51,24 +52,23 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	ServiceSentinelShared.loadMonitorHistory()
 
 	year, month, day := time.Now().Date()
-	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+	today := time.Date(year, month, day, 0, 0, 0, 0, Loc)
 
 	var mhs []model.MonitorHistory
 	// 加载当日记录
 	DB.Where("created_at >= ?", today).Find(&mhs)
 	totalDelay := make(map[uint64]float32)
+	totalDelayCount := make(map[uint64]float32)
 	for i := 0; i < len(mhs); i++ {
-		if mhs[i].Successful {
-			ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Up++
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
-			totalDelay[mhs[i].MonitorID] += mhs[i].Delay
-		} else {
-			ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Down++
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown++
-		}
+		totalDelay[mhs[i].MonitorID] += mhs[i].AvgDelay
+		totalDelayCount[mhs[i].MonitorID]++
+		ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Up += int(mhs[i].Up)
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp += mhs[i].Up
+		ServiceSentinelShared.serviceStatusToday[mhs[i].MonitorID].Down += int(mhs[i].Down)
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown += mhs[i].Down
 	}
 	for id, delay := range totalDelay {
-		ServiceSentinelShared.serviceStatusToday[id].Delay = delay / float32(ServiceSentinelShared.serviceStatusToday[id].Up)
+		ServiceSentinelShared.serviceStatusToday[id].Delay = delay / float32(totalDelayCount[id])
 	}
 
 	// 启动服务监控器
@@ -93,14 +93,15 @@ type ServiceSentinel struct {
 	// 服务监控任务调度通道
 	dispatchBus chan<- model.Monitor
 
-	serviceResponseDataStoreLock        sync.RWMutex
-	serviceStatusToday                  map[uint64]*_TodayStatsOfMonitor  // [monitor_id] -> _TodayStatsOfMonitor
-	serviceCurrentStatusIndex           map[uint64]int                    // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
-	serviceCurrentStatusData            map[uint64][]model.MonitorHistory // [monitor_id] -> []model.MonitorHistory
-	serviceResponseDataStoreCurrentUp   map[uint64]uint64                 // [monitor_id] -> 当前服务在线计数
-	serviceResponseDataStoreCurrentDown map[uint64]uint64                 // [monitor_id] -> 当前服务离线计数
-	lastStatus                          map[uint64]int
-	sslCertCache                        map[uint64]string
+	serviceResponseDataStoreLock            sync.RWMutex
+	serviceStatusToday                      map[uint64]*_TodayStatsOfMonitor // [monitor_id] -> _TodayStatsOfMonitor
+	serviceCurrentStatusIndex               map[uint64]int                   // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
+	serviceCurrentStatusData                map[uint64][]*pb.TaskResult      // [monitor_id] -> []model.MonitorHistory
+	serviceResponseDataStoreCurrentUp       map[uint64]uint64                // [monitor_id] -> 当前服务在线计数
+	serviceResponseDataStoreCurrentDown     map[uint64]uint64                // [monitor_id] -> 当前服务离线计数
+	serviceResponseDataStoreCurrentAvgDelay map[uint64]float32               // [monitor_id] -> 当前服务离线计数
+	lastStatus                              map[uint64]int
+	sslCertCache                            map[uint64]string
 
 	monitorsLock sync.RWMutex
 	monitors     map[uint64]*model.Monitor // [monitor_id] -> model.Monitor
@@ -133,6 +134,7 @@ func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
 		// 清理前一天数据
 		ss.serviceResponseDataStoreCurrentUp[k] = 0
 		ss.serviceResponseDataStoreCurrentDown[k] = 0
+		ss.serviceResponseDataStoreCurrentAvgDelay[k] = 0
 		ss.serviceStatusToday[k].Delay = 0
 		ss.serviceStatusToday[k].Up = 0
 		ss.serviceStatusToday[k].Down = 0
@@ -187,12 +189,12 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 			panic(err)
 		}
 		ss.monitors[monitors[i].ID] = monitors[i]
-		ss.serviceCurrentStatusData[monitors[i].ID] = make([]model.MonitorHistory, _CurrentStatusSize)
+		ss.serviceCurrentStatusData[monitors[i].ID] = make([]*pb.TaskResult, _CurrentStatusSize)
 		ss.serviceStatusToday[monitors[i].ID] = &_TodayStatsOfMonitor{}
 	}
 
 	year, month, day := time.Now().Date()
-	today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+	today := time.Date(year, month, day, 0, 0, 0, 0, Loc)
 
 	for i := 0; i < len(monitors); i++ {
 		ServiceSentinelShared.monthlyStatus[monitors[i].ID] = &model.ServiceItemResponse{
@@ -206,16 +208,15 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	// 加载服务监控历史记录
 	var mhs []model.MonitorHistory
 	DB.Where("created_at >= ? AND created_at < ?", today.AddDate(0, 0, -29), today).Find(&mhs)
+	var delayCount = make(map[int]int)
 	for i := 0; i < len(mhs); i++ {
 		dayIndex := 28 - (int(today.Sub(mhs[i].CreatedAt).Hours()) / 24)
-		if mhs[i].Successful {
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex] = (ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex]*float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]) + mhs[i].Delay) / float32(ss.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]+1)
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex]++
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp++
-		} else {
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex]++
-			ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown++
-		}
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex] = (ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Delay[dayIndex]*float32(delayCount[dayIndex]) + mhs[i].AvgDelay) / float32(delayCount[dayIndex]+1)
+		delayCount[dayIndex]++
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Up[dayIndex] += int(mhs[i].Up)
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalUp += mhs[i].Up
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].Down[dayIndex] += int(mhs[i].Down)
+		ServiceSentinelShared.monthlyStatus[mhs[i].MonitorID].TotalDown += mhs[i].Down
 	}
 }
 
@@ -246,7 +247,7 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		}
-		ss.serviceCurrentStatusData[m.ID] = make([]model.MonitorHistory, _CurrentStatusSize)
+		ss.serviceCurrentStatusData[m.ID] = make([]*pb.TaskResult, _CurrentStatusSize)
 		ss.serviceStatusToday[m.ID] = &_TodayStatsOfMonitor{}
 	}
 	// 更新这个任务
@@ -267,6 +268,7 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	delete(ss.lastStatus, id)
 	delete(ss.serviceResponseDataStoreCurrentUp, id)
 	delete(ss.serviceResponseDataStoreCurrentDown, id)
+	delete(ss.serviceResponseDataStoreCurrentAvgDelay, id)
 	delete(ss.sslCertCache, id)
 	delete(ss.serviceStatusToday, id)
 
@@ -300,6 +302,7 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 		ss.monthlyStatus[k].Down[29] = v.Down
 		ss.monthlyStatus[k].Delay[29] = v.Delay
 	}
+
 	// 最后 5 分钟的状态 与 monitor 对象填充
 	for k, v := range ss.serviceResponseDataStoreCurrentDown {
 		ss.monthlyStatus[k].CurrentDown = v
@@ -307,6 +310,7 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {
 	for k, v := range ss.serviceResponseDataStoreCurrentUp {
 		ss.monthlyStatus[k].CurrentUp = v
 	}
+
 	return ss.monthlyStatus
 }
 
@@ -318,48 +322,49 @@ func (ss *ServiceSentinel) worker() {
 			log.Printf("NEZAH>> 错误的服务监控上报 %+v", r)
 			continue
 		}
-		mh := model.PB2MonitorHistory(r.Data)
+		mh := r.Data
 		ss.serviceResponseDataStoreLock.Lock()
 		// 写入当天状态
 		if mh.Successful {
-			ss.serviceStatusToday[mh.MonitorID].Delay = (ss.serviceStatusToday[mh.
-				MonitorID].Delay*float32(ss.serviceStatusToday[mh.MonitorID].Up) +
-				mh.Delay) / float32(ss.serviceStatusToday[mh.MonitorID].Up+1)
-			ss.serviceStatusToday[mh.MonitorID].Up++
+			ss.serviceStatusToday[mh.GetId()].Delay = (ss.serviceStatusToday[mh.
+				GetId()].Delay*float32(ss.serviceStatusToday[mh.GetId()].Up) +
+				mh.Delay) / float32(ss.serviceStatusToday[mh.GetId()].Up+1)
+			ss.serviceStatusToday[mh.GetId()].Up++
 		} else {
-			ss.serviceStatusToday[mh.MonitorID].Down++
-			ServerLock.RLock()
-			log.Println("NEZHA>> Services Incident:", ss.monitors[mh.MonitorID].Target, "Reporter:", ServerList[r.Reporter].Name, "Error:", mh.Data)
-			ServerLock.RUnlock()
+			ss.serviceStatusToday[mh.GetId()].Down++
 		}
 		// 写入当前数据
-		ss.serviceCurrentStatusData[mh.MonitorID][ss.serviceCurrentStatusIndex[mh.MonitorID]] = mh
-		ss.serviceCurrentStatusIndex[mh.MonitorID]++
+		ss.serviceCurrentStatusData[mh.GetId()][ss.serviceCurrentStatusIndex[mh.GetId()]] = mh
+		ss.serviceCurrentStatusIndex[mh.GetId()]++
 		// 更新当前状态
-		ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] = 0
-		ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] = 0
-		for i := 0; i < len(ss.serviceCurrentStatusData[mh.MonitorID]); i++ {
-			if ss.serviceCurrentStatusData[mh.MonitorID][i].MonitorID > 0 {
-				if ss.serviceCurrentStatusData[mh.MonitorID][i].Successful {
-					ss.serviceResponseDataStoreCurrentUp[mh.MonitorID]++
+		ss.serviceResponseDataStoreCurrentUp[mh.GetId()] = 0
+		ss.serviceResponseDataStoreCurrentDown[mh.GetId()] = 0
+		ss.serviceResponseDataStoreCurrentAvgDelay[mh.GetId()] = 0
+		// 永远是最新的 30 个数据的状态 [01:00, 02:00, 03:00] -> [04:00, 02:00, 03: 00]
+		for i := 0; i < len(ss.serviceCurrentStatusData[mh.GetId()]); i++ {
+			if ss.serviceCurrentStatusData[mh.GetId()][i].GetId() > 0 {
+				if ss.serviceCurrentStatusData[mh.GetId()][i].Successful {
+					ss.serviceResponseDataStoreCurrentUp[mh.GetId()]++
+					ss.serviceResponseDataStoreCurrentAvgDelay[mh.GetId()] = (ss.serviceResponseDataStoreCurrentAvgDelay[mh.GetId()]*float32(ss.serviceResponseDataStoreCurrentUp[mh.GetId()]-1) + ss.serviceCurrentStatusData[mh.GetId()][i].Delay) / float32(ss.serviceResponseDataStoreCurrentUp[mh.GetId()])
 				} else {
-					ss.serviceResponseDataStoreCurrentDown[mh.MonitorID]++
+					ss.serviceResponseDataStoreCurrentDown[mh.GetId()]++
 				}
 			}
 		}
 		var upPercent uint64 = 0
-		if ss.serviceResponseDataStoreCurrentDown[mh.MonitorID]+ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] > 0 {
-			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.MonitorID] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.MonitorID] + ss.serviceResponseDataStoreCurrentUp[mh.MonitorID])
+		if ss.serviceResponseDataStoreCurrentDown[mh.GetId()]+ss.serviceResponseDataStoreCurrentUp[mh.GetId()] > 0 {
+			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.GetId()] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.GetId()] + ss.serviceResponseDataStoreCurrentUp[mh.GetId()])
 		}
 		stateCode := GetStatusCode(upPercent)
 		// 数据持久化
-		if ss.serviceCurrentStatusIndex[mh.MonitorID] == _CurrentStatusSize {
-			ss.serviceCurrentStatusIndex[mh.MonitorID] = 0
+		if ss.serviceCurrentStatusIndex[mh.GetId()] == _CurrentStatusSize {
+			ss.serviceCurrentStatusIndex[mh.GetId()] = 0
 			if err := DB.Create(&model.MonitorHistory{
-				MonitorID:  mh.MonitorID,
-				Delay:      ss.serviceStatusToday[mh.MonitorID].Delay,
-				Successful: stateCode == StatusGood,
-				Data:       mh.Data,
+				MonitorID: mh.GetId(),
+				AvgDelay:  ss.serviceResponseDataStoreCurrentAvgDelay[mh.GetId()],
+				Data:      mh.Data,
+				Up:        ss.serviceResponseDataStoreCurrentUp[mh.GetId()],
+				Down:      ss.serviceResponseDataStoreCurrentDown[mh.GetId()],
 			}).Error; err != nil {
 				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
 			}
@@ -367,23 +372,29 @@ func (ss *ServiceSentinel) worker() {
 		// 延迟报警
 		if mh.Delay > 0 {
 			ss.monitorsLock.RLock()
-			if ss.monitors[mh.MonitorID].LatencyNotify {
-				if mh.Delay > ss.monitors[mh.MonitorID].MaxLatency {
-					go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[Latency] %s %2f > %2f", ss.monitors[mh.MonitorID].Name, mh.Delay, ss.monitors[mh.MonitorID].MaxLatency), true)
+			if ss.monitors[mh.GetId()].LatencyNotify {
+				if mh.Delay > ss.monitors[mh.GetId()].MaxLatency {
+					ServerLock.RLock()
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, ServerList[r.Reporter].Name), true)
+					ServerLock.RUnlock()
 				}
-				if mh.Delay < ss.monitors[mh.MonitorID].MinLatency {
-					go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f", ss.monitors[mh.MonitorID].Name, mh.Delay, ss.monitors[mh.MonitorID].MinLatency), true)
+				if mh.Delay < ss.monitors[mh.GetId()].MinLatency {
+					ServerLock.RLock()
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, ServerList[r.Reporter].Name), true)
+					ServerLock.RUnlock()
 				}
 			}
 			ss.monitorsLock.RUnlock()
 		}
 		// 故障报警
-		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.MonitorID] {
+		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.GetId()] {
 			ss.monitorsLock.RLock()
-			isNeedSendNotification := (ss.lastStatus[mh.MonitorID] != 0 || stateCode == StatusDown) && ss.monitors[mh.MonitorID].Notify
-			ss.lastStatus[mh.MonitorID] = stateCode
+			isNeedSendNotification := (ss.lastStatus[mh.GetId()] != 0 || stateCode == StatusDown) && ss.monitors[mh.GetId()].Notify
+			ss.lastStatus[mh.GetId()] = stateCode
 			if isNeedSendNotification {
-				go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[%s] %s", StatusCodeToString(stateCode), ss.monitors[mh.MonitorID].Name), true)
+				ServerLock.RLock()
+				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, ServerList[r.Reporter].Name, mh.Data), true)
+				ServerLock.RUnlock()
 			}
 			ss.monitorsLock.RUnlock()
 		}
@@ -400,8 +411,8 @@ func (ss *ServiceSentinel) worker() {
 		} else {
 			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
-				if ss.sslCertCache[mh.MonitorID] == "" {
-					ss.sslCertCache[mh.MonitorID] = mh.Data
+				if ss.sslCertCache[mh.GetId()] == "" {
+					ss.sslCertCache[mh.GetId()] = mh.Data
 				}
 				expiresNew, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", newCert[1])
 				// 证书过期提醒
@@ -411,13 +422,13 @@ func (ss *ServiceSentinel) worker() {
 						expiresNew.Format("2006-01-02 15:04:05"))
 				}
 				// 证书变更提醒
-				var oldCert = strings.Split(ss.sslCertCache[mh.MonitorID], "|")
+				var oldCert = strings.Split(ss.sslCertCache[mh.GetId()], "|")
 				var expiresOld time.Time
 				if len(oldCert) > 1 {
 					expiresOld, _ = time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
 				}
 				if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
-					ss.sslCertCache[mh.MonitorID] = mh.Data
+					ss.sslCertCache[mh.GetId()] = mh.Data
 					errMsg = fmt.Sprintf(
 						"SSL certificate changed, old: %s, %s expired; new: %s, %s expired.",
 						oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
@@ -426,8 +437,8 @@ func (ss *ServiceSentinel) worker() {
 		}
 		if errMsg != "" {
 			ss.monitorsLock.RLock()
-			if ss.monitors[mh.MonitorID].Notify {
-				go SendNotification(ss.monitors[mh.MonitorID].NotificationTag, fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.MonitorID].Name, errMsg), true)
+			if ss.monitors[mh.GetId()].Notify {
+				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.GetId()].Name, errMsg), true)
 			}
 			ss.monitorsLock.RUnlock()
 		}

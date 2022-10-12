@@ -21,11 +21,9 @@ var (
 	Loc   *time.Location
 )
 
-// Init 初始化singleton
-func Init() {
-	// 初始化时区至上海 UTF+8
+func InitTimezoneAndCache() {
 	var err error
-	Loc, err = time.LoadLocation("Asia/Shanghai")
+	Loc, err = time.LoadLocation(Conf.Location)
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +73,7 @@ func RecordTransferHourlyUsage() {
 	ServerLock.Lock()
 	defer ServerLock.Unlock()
 	now := time.Now()
-	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, time.Local)
+	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, Loc)
 	var txs []model.Transfer
 	for id, server := range ServerList {
 		tx := model.Transfer{

@@ -1,23 +1,11 @@
 package model
 
-import (
-	pb "github.com/naiba/nezha/proto"
-)
-
 // MonitorHistory 历史监控记录
 type MonitorHistory struct {
 	Common
-	MonitorID  uint64
-	Delay      float32 // 延迟，毫秒
-	Data       string
-	Successful bool // 是否成功
-}
-
-func PB2MonitorHistory(r *pb.TaskResult) MonitorHistory {
-	return MonitorHistory{
-		Delay:      r.GetDelay(),
-		Successful: r.GetSuccessful(),
-		MonitorID:  r.GetId(),
-		Data:       r.GetData(),
-	}
+	MonitorID uint64
+	AvgDelay  float32 // 平均延迟，毫秒
+	Up        uint64  // 检查状态良好计数
+	Down      uint64  // 检查状态异常计数
+	Data      string
 }

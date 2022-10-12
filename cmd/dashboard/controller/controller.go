@@ -183,7 +183,7 @@ var funcMap = template.FuncMap{
 	},
 	"dayBefore": func(i int) string {
 		year, month, day := time.Now().Date()
-		today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+		today := time.Date(year, month, day, 0, 0, 0, 0, singleton.Loc)
 		return today.AddDate(0, 0, i-29).Format("01/02")
 	},
 	"className": func(percent float32) string {
