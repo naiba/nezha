@@ -7,8 +7,9 @@ import (
 	"net/http"
 	"strings"
 
+	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
-	GitHubAPI "github.com/google/go-github/github"
+	GitHubAPI "github.com/google/go-github/v47/github"
 	"github.com/patrickmn/go-cache"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/oauth2"
@@ -58,6 +59,16 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  "https://jihulab.com/oauth/authorize",
 				TokenURL: "https://jihulab.com/oauth/token",
+			},
+			RedirectURL: oa.getRedirectURL(c),
+		}
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeGitea {
+		return &oauth2.Config{
+			ClientID:     singleton.Conf.Oauth2.ClientID,
+			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", singleton.Conf.Oauth2.Endpoint),
+				TokenURL: fmt.Sprintf("%s/login/oauth/access_token", singleton.Conf.Oauth2.Endpoint),
 			},
 			RedirectURL: oa.getRedirectURL(c),
 		}
@@ -123,6 +134,16 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 			}
 			if err == nil {
 				user = model.NewUserFromGitlab(u)
+			}
+		} else if singleton.Conf.Oauth2.Type == model.ConfigTypeGitea {
+			var giteaApiClient *gitea.Client
+			giteaApiClient, err = gitea.NewClient(singleton.Conf.Oauth2.Endpoint, gitea.SetToken(otk.AccessToken))
+			var u *gitea.User
+			if err == nil {
+				u, _, err = giteaApiClient.GetMyUserInfo()
+			}
+			if err == nil {
+				user = model.NewUserFromGitea(u)
 			}
 		} else {
 			var client *GitHubAPI.Client

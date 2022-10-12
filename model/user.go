@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/go-github/github"
+	"code.gitea.io/sdk/gitea"
+	"github.com/google/go-github/v47/github"
 	"github.com/xanzy/go-gitlab"
 
 	"github.com/naiba/nezha/pkg/utils"
@@ -23,6 +24,21 @@ type User struct {
 	Token        string    `json:"-"`                       // 认证 Token
 	TokenExpired time.Time `json:"token_expired,omitempty"` // Token 过期时间
 	SuperAdmin   bool      `json:"super_admin,omitempty"`   // 超级管理员
+}
+
+func NewUserFromGitea(gu *gitea.User) User {
+	var u User
+	u.ID = uint64(gu.ID)
+	u.Login = gu.UserName
+	u.AvatarURL = gu.AvatarURL
+	u.Name = gu.FullName
+	if u.Name == "" {
+		u.Name = u.Login
+	}
+	u.Blog = gu.Website
+	u.Email = gu.Email
+	u.Bio = gu.Description
+	return u
 }
 
 func NewUserFromGitlab(gu *gitlab.User) User {
