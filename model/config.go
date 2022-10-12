@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 )
 
 var Languages = map[string]string{
@@ -33,6 +33,7 @@ const (
 	ConfigTypeGitee   = "gitee"
 	ConfigTypeGitlab  = "gitlab"
 	ConfigTypeJihulab = "jihulab"
+	ConfigTypeGitea   = "gitea"
 )
 
 const (
@@ -86,6 +87,7 @@ type Config struct {
 		Admin        string // 管理员用户名列表
 		ClientID     string
 		ClientSecret string
+		Endpoint     string
 	}
 	HTTPPort      uint
 	GRPCPort      uint

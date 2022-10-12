@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -45,6 +46,9 @@ func (gp *guestPage) login(c *gin.Context) {
 	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeJihulab {
 		LoginType = "Jihulab"
 		RegistrationLink = "https://jihulab.com/users/sign_up"
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeGitea {
+		LoginType = "Gitea"
+		RegistrationLink = fmt.Sprintf("%s/user/sign_up", singleton.Conf.Oauth2.Endpoint)
 	}
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/login", mygin.CommonEnvironment(c, gin.H{
 		"Title":            singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),
