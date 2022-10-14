@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"code.gitea.io/sdk/gitea"
@@ -149,7 +150,11 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 			var client *GitHubAPI.Client
 			oc := oauth2Config.Client(ctx, otk)
 			if singleton.Conf.Oauth2.Type == model.ConfigTypeGitee {
-				client, err = GitHubAPI.NewEnterpriseClient("https://gitee.com/api/v5/", "https://gitee.com/api/v5/", oc)
+				baseURL, _ := url.Parse("https://gitee.com/api/v5/")
+				uploadURL, _ := url.Parse("https://gitee.com/api/v5/uploads/")
+				client = GitHubAPI.NewClient(oc)
+				client.BaseURL = baseURL
+				client.UploadURL = uploadURL
 			} else {
 				client = GitHubAPI.NewClient(oc)
 			}
