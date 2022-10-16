@@ -298,8 +298,8 @@ other = "Número de versión"
 [OneKeyInstall]
 other = "Instalación con un solo clic"
 
-[ClickToCopyTheInstallationCommand]
-other = "Haga clic para copiar el comando de instalación"
+[ClickToCopy]
+other = "Haga clic para copiar"
 
 [DeleteServer]
 other = "Eliminar el servidor"

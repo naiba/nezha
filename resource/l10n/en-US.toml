@@ -298,8 +298,8 @@ other = "Version"
 [OneKeyInstall]
 other = "One-click installation"
 
-[ClickToCopyTheInstallationCommand]
-other = "Click To Copy Install Command"
+[ClickToCopy]
+other = "Click To Copy"
 
 [DeleteServer]
 other = "Delete Server"

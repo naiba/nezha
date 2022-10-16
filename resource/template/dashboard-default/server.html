@@ -43,19 +43,19 @@
                     <td>{{$server.Host.Version}}</td>
                     <td>{{$server.HideForGuest}}</td>
                     <td>
-                        <button class="ui icon green mini button" data-clipboard-text="{{$server.Secret}}">
+                        <button class="ui icon green mini button" data-clipboard-text="{{$server.Secret}}" data-tooltip="{{tr "ClickToCopy"}}">
                             <i class="copy icon"></i>
                         </button>
                     </td>
                     <td>
                         <button class="ui icon green mini button"
                             data-clipboard-text="{{if $.Conf.GRPCHost}}{{if eq $.Conf.Language "zh-CN"}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh{{else}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install_en.sh{{end}} -o nezha.sh && chmod +x nezha.sh && sudo ./nezha.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
-                            data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
+                            data-tooltip="{{tr "ClickToCopy"}}">
                             <i class="linux icon"></i>
                         </button>
                         <button class="ui icon green mini button"
                             data-clipboard-text="{{if $.Conf.GRPCHost}}[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Ssl3 -bor [Net.SecurityProtocolType]::Tls -bor [Net.SecurityProtocolType]::Tls11 -bor [Net.SecurityProtocolType]::Tls12;set-ExecutionPolicy RemoteSigned;Invoke-WebRequest https://raw.githubusercontent.com/naiba/nezha/master/script/install.ps1 -OutFile C:\install.ps1;powershell.exe C:\install.ps1 {{$.Conf.GRPCHost}}:{{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
-                            data-tooltip="{{tr "ClickToCopyTheInstallationCommand"}}">
+                            data-tooltip="{{tr "ClickToCopy"}}">
                             <i class="windows icon"></i>
                         </button>
                     </td>
