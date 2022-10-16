@@ -95,6 +95,9 @@
                   </div>
                 </div>
               </div>
+              <div class="extra content">
+                <div :id="server.ID + '-chart'" style="width:100%; height: 180px;"></div>
+              </div>
               <div class="content" v-else>
                 <p>@#server.Name#@</p>
                 <p>{{tr "ServerIsOffline"}}</p>
@@ -106,6 +109,7 @@
     </div>
   </div>
 </div>
+<div id="chart" style="width: 100%; height: 300px;margin-top: 5px;"></div>
 {{template "common/footer" .}}
 <script>
   const initData = JSON.parse('{{.Servers}}').servers;
@@ -320,5 +324,134 @@
   connect();
 
   $('.ui.accordion').accordion({ "exclusive": false });
+</script>
+<script src="/static/echarts.js"></script>
+<script>
+  function humanize(value){
+    let unitIndex=0;
+    let unitArr=['bytes', ' kB', ' MB', ' GB', ' TB', ' PB', ' EB', ' ZB', ' YB'];
+    while(value>1024&&unitIndex<unitArr.length){
+      unitIndex++;
+      value /= 1024;
+    }
+
+    return value.toFixed(2) + unitArr[unitIndex];
+  }
+  function parseData(params){
+    var htmlStr = '';
+    for(var i = 0; i < params.length; i++){
+      var param = params[i];
+      var xName = param.name;//x轴的名称
+      var seriesName = param.seriesName;//图例名称
+
+      var value = humanize(param.data);
+      var color = param.color;//图例颜色
+      if(i===0){
+        htmlStr += xName + '<br/>';//x轴的名称
+      }
+      htmlStr +='<div>';
+      htmlStr += '<span style="display:inline-block;margin-right:5px;border-radius:10px;width:9px;height:9px;background-color:'+color+'"></span>';
+      htmlStr += seriesName + ' : ' + value;
+      htmlStr += '</div>';
+    }
+    return htmlStr
+  };
+
+  let option = {
+    title: {
+      text: '本月流量',
+      subtext: '',
+      // 小号字体
+      textStyle: {
+        fontSize: 14,
+      },
+    },
+    legend: {
+      data: ['下行', '上行']
+    },
+    toolbox: {
+      feature: {
+        saveAsImage: {}
+      }
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: []
+    },
+    yAxis: {
+      type: 'value',
+      name: '流量',
+      axisLine: {
+        lineStyle: {
+          color: '#fff'
+        }
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross',
+        label: {
+          backgroundColor: '#6a7985'
+        }
+      },
+      // 把bytes流量进行单位转换
+      formatter: parseData
+    },
+    series: [
+      {
+        name: '下行',
+        type: 'line',
+        data: [],
+        itemStyle: {
+          color: '#0a94f2'
+        }
+      },
+      {
+        name: '上行',
+        type: 'line',
+        data: [],
+        itemStyle: {
+          color: 'orange'
+        }
+      }
+    ],
+    grid: {
+      x: 40,
+      y: 25,
+      x2: 30,
+      y2: 25
+    },
+  };
+  // let cardHeaders = document.querySelectorAll('.ui.card div.header');
+  // 获取父节点
+  let cards = document.querySelectorAll('.ui.card');
+  // let myChart = echarts.init(document.getElementById('chart'));
+  for (i = 0; i < cards.length; i++) {
+    // let cardHeader = cardHeaders[i];
+    let card = cards[i];
+    let cardHeader = card.childNodes[0].childNodes[0];
+    const id = card.id;
+
+    cardHeader.addEventListener('click', function () {
+      // 成功后绘制图形
+      $.ajax({
+        url: "/chart",
+        type: "GET",
+        data: {"id": id},
+        success: function (resp) {
+          let myChart = echarts.init(document.getElementById(id + '-chart'));
+          // draw line chart
+          // document.getElementById(id + '-chart').setAttribute('style', 'height: 300px; width: 100%;');
+          option.xAxis.data = resp["xAxis"];
+          option.series[0].data = resp["in"];
+          option.series[1].data = resp["out"];
+          option.title.subtext = `总下行：${humanize(resp["totalIn"])} 总上行：${humanize(resp["totalOut"])}`;
+          myChart.setOption(option);
+        }
+      })
+    })
+  };
 </script>
 {{end}}

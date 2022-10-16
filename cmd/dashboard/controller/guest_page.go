@@ -3,6 +3,8 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -27,11 +29,54 @@ func (gp *guestPage) serve() {
 	}))
 
 	gr.GET("/login", gp.login)
-
+	gr.GET("/chart", gp.chart)
 	oauth := &oauth2controller{
 		r: gr,
 	}
 	oauth.serve()
+}
+
+type TransferRecord struct {
+	Date string `gorm:"date" json:"date"`
+	In   uint64 `gorm:"in" json:"in"`
+	Out  uint64 `gorm:"out" json:"out"`
+}
+
+func (gp *guestPage) chart(c *gin.Context) {
+	// 获取 GET 请求参数 并转化为 uint64
+	serverId, _ := strconv.ParseUint(c.Query("id"), 10, 64)
+	// 获取server_id对应的本周所有 Transfer 记录
+	var trs []TransferRecord
+	// 获取本月第一天
+	monthFirstDay := time.Date(time.Now().Year(), time.Now().Month(), 1, 0, 0, 0, 0, singleton.Loc)
+
+	// 获取一个月内，每天的 Transfer In Out 的总和
+	singleton.DB.Model(&model.Transfer{}).
+		Select(`date(created_at) as date, sum("in") as "in", sum(out) as out`).
+		Where("server_id = ? AND created_at > ?", serverId, monthFirstDay).
+		Group("date(created_at)").Scan(&trs)
+	// 获取 Transfer 记录的 created_at in out
+	recordLen := len(trs)
+	xAxis := make([]string, recordLen)
+	in := make([]uint64, recordLen)
+	out := make([]uint64, recordLen)
+	var totalIn, totalOut uint64
+	for i := 0; i < recordLen; i++ {
+		xAxis[i] = trs[i].Date
+		in[i] = trs[i].In
+		out[i] = trs[i].Out
+		totalIn += trs[i].In
+		totalOut += trs[i].Out
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":     0,
+		"message":  "success",
+		"xAxis":    xAxis,
+		"in":       in,
+		"out":      out,
+		"totalIn":  totalIn,
+		"totalOut": totalOut,
+	})
 }
 
 func (gp *guestPage) login(c *gin.Context) {

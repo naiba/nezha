@@ -59,7 +59,7 @@ func routers(r *gin.Engine) {
 	gp := guestPage{r}
 	gp.serve()
 	// 会员页面
-	mp := &memberPage{r}
+	mp := memberPage{r}
 	mp.serve()
 	// API
 	api := r.Group("api")

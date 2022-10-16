@@ -2,6 +2,7 @@ package singleton
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/patrickmn/go-cache"
@@ -41,6 +42,10 @@ func LoadSingleton() {
 
 // InitConfigFromPath 从给出的文件路径中加载配置
 func InitConfigFromPath(path string) {
+	str, _ := os.Getwd()
+	log.Println("-------------------")
+	log.Println(str)
+	log.Println("-------------------")
 	Conf = &model.Config{}
 	err := Conf.Read(path)
 	if err != nil {
