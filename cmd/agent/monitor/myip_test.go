@@ -1,7 +1,7 @@
 package monitor
 
 import (
-	"io/ioutil"
+	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,7 +13,7 @@ func TestGeoIPApi(t *testing.T) {
 	for i := 0; i < len(geoIPApiList); i++ {
 		resp, err := httpGetWithUA(httpClientV4, geoIPApiList[i])
 		assert.Nil(t, err)
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		assert.Nil(t, err)
 		resp.Body.Close()
 		var ip geoIP

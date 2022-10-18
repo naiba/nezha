@@ -2,7 +2,7 @@ package monitor
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -46,7 +46,7 @@ var (
 		// "https://ip.seeip.org/geoip", // 不精确
 		// "https://freegeoip.app/json/", // 需要 Key
 	}
-	cachedIP, cachedCountry string
+	CachedIP, cachedCountry string
 	httpClientV4            = utils.NewSingleStackHTTPClient(time.Second*20, time.Second*5, time.Second*10, false)
 	httpClientV6            = utils.NewSingleStackHTTPClient(time.Second*20, time.Second*5, time.Second*10, true)
 )
@@ -61,9 +61,9 @@ func UpdateIP() {
 			continue
 		}
 		if ipv4.IP == "" || ipv6.IP == "" {
-			cachedIP = fmt.Sprintf("%s%s", ipv4.IP, ipv6.IP)
+			CachedIP = fmt.Sprintf("%s%s", ipv4.IP, ipv6.IP)
 		} else {
-			cachedIP = fmt.Sprintf("%s/%s", ipv4.IP, ipv6.IP)
+			CachedIP = fmt.Sprintf("%s/%s", ipv4.IP, ipv6.IP)
 		}
 		if ipv4.CountryCode != "" {
 			cachedCountry = ipv4.CountryCode
@@ -86,7 +86,7 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 			resp, err = httpClientV4.Get(servers[i])
 		}
 		if err == nil {
-			body, err := ioutil.ReadAll(resp.Body)
+			body, err := io.ReadAll(resp.Body)
 			if err != nil {
 				continue
 			}

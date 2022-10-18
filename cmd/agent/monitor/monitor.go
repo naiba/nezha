@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Erope/goss"
+	"github.com/nezhahq/goss"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
@@ -80,7 +80,7 @@ func GetHost(agentConfig *model.AgentConfig) *model.Host {
 		Arch:            hi.KernelArch,
 		Virtualization:  hi.VirtualizationSystem,
 		BootTime:        hi.BootTime,
-		IP:              cachedIP,
+		IP:              CachedIP,
 		CountryCode:     strings.ToLower(cachedCountry),
 		Version:         Version,
 	}
@@ -116,12 +116,21 @@ func GetState(agentConfig *model.AgentConfig, skipConnectionCount bool, skipProc
 	if !skipConnectionCount {
 		ss_err := true
 		if runtime.GOOS == "linux" {
-			tcpStat, err_tcp := goss.ConnectionsWithProtocol(syscall.IPPROTO_TCP)
-			udpStat, err_udp := goss.ConnectionsWithProtocol(syscall.IPPROTO_UDP)
+			tcpStat, err_tcp := goss.ConnectionsWithProtocol(goss.AF_INET, syscall.IPPROTO_TCP)
+			udpStat, err_udp := goss.ConnectionsWithProtocol(goss.AF_INET, syscall.IPPROTO_UDP)
 			if err_tcp == nil && err_udp == nil {
 				ss_err = false
 				tcpConnCount = uint64(len(tcpStat))
 				udpConnCount = uint64(len(udpStat))
+			}
+			if strings.Contains(CachedIP, ":") {
+				tcpStat6, err_tcp := goss.ConnectionsWithProtocol(goss.AF_INET6, syscall.IPPROTO_TCP)
+				udpStat6, err_udp := goss.ConnectionsWithProtocol(goss.AF_INET6, syscall.IPPROTO_UDP)
+				if err_tcp == nil && err_udp == nil {
+					ss_err = false
+					tcpConnCount = uint64(len(tcpStat6))
+					udpConnCount = uint64(len(udpStat6))
+				}
 			}
 		}
 		if ss_err {

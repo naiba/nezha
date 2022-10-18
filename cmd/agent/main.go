@@ -19,7 +19,7 @@ import (
 	"github.com/blang/semver"
 	"github.com/go-ping/ping"
 	"github.com/gorilla/websocket"
-	"github.com/naiba/go-github-selfupdate/selfupdate"
+	"github.com/nezhahq/go-github-selfupdate/selfupdate"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
 	psnet "github.com/shirou/gopsutil/v3/net"
