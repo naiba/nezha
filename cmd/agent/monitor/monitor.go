@@ -128,8 +128,8 @@ func GetState(agentConfig *model.AgentConfig, skipConnectionCount bool, skipProc
 				udpStat6, err_udp := goss.ConnectionsWithProtocol(goss.AF_INET6, syscall.IPPROTO_UDP)
 				if err_tcp == nil && err_udp == nil {
 					ss_err = false
-					tcpConnCount = uint64(len(tcpStat6))
-					udpConnCount = uint64(len(udpStat6))
+					tcpConnCount += uint64(len(tcpStat6))
+					udpConnCount += uint64(len(udpStat6))
 				}
 			}
 		}
