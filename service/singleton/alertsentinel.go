@@ -163,7 +163,7 @@ func checkStatus() {
 						MessageID: "Incident",
 					}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
 					go SendTriggerTasks(alert.FailTriggerTasks, curServer.ID)
-					go SendNotification(alert.NotificationTag, message, true, &curServer)
+					go SendNotification(alert.NotificationTag, message, NotificationMuteLabel.ServerIncident(server.ID, alert.ID), &curServer)
 				}
 			} else {
 				// 本次通过检查但上一次的状态为失败，则发送恢复通知
@@ -172,7 +172,7 @@ func checkStatus() {
 						MessageID: "Resolved",
 					}), server.Name, IPDesensitize(server.Host.IP), alert.Name)
 					go SendTriggerTasks(alert.RecoverTriggerTasks, curServer.ID)
-					go SendNotification(alert.NotificationTag, message, true, &curServer)
+					go SendNotification(alert.NotificationTag, message, NotificationMuteLabel.ServerIncidentResolved(server.ID, alert.ID), &curServer)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
 			}

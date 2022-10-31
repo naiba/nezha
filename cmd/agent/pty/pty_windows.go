@@ -4,7 +4,7 @@ package pty
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -21,36 +21,47 @@ type Pty struct {
 }
 
 func DownloadDependency() {
+	executablePath, err := getExecutableFilePath()
+	if err != nil {
+		fmt.Println("NEZHA>> wintty 获取文件路径失败", err)
+		return
+	}
+
+	winptyAgentExe := filepath.Join(executablePath, "winpty-agent.exe")
+	winptyAgentDll := filepath.Join(executablePath, "winpty.dll")
+
+	fe, errFe := os.Stat(winptyAgentExe)
+	fd, errFd := os.Stat(winptyAgentDll)
+	if errFe == nil && fe.Size() > 300000 && errFd == nil && fd.Size() > 300000 {
+		return
+	}
+
 	resp, err := http.Get("https://dn-dao-github-mirror.daocloud.io/rprichard/winpty/releases/download/0.4.3/winpty-0.4.3-msvc2015.zip")
 	if err != nil {
-		log.Println("wintty 下载失败", err)
+		log.Println("NEZHA>> wintty 下载失败", err)
 		return
 	}
 	defer resp.Body.Close()
-	content, err := ioutil.ReadAll(resp.Body)
+	content, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("wintty 下载失败", err)
+		log.Println("NEZHA>> wintty 下载失败", err)
 		return
 	}
-	if err := ioutil.WriteFile("./wintty.zip", content, os.FileMode(0777)); err != nil {
-		log.Println("wintty 写入失败", err)
+	if err := os.WriteFile("./wintty.zip", content, os.FileMode(0777)); err != nil {
+		log.Println("NEZHA>> wintty 写入失败", err)
 		return
 	}
 	if err := unzip.New("./wintty.zip", "./wintty").Extract(); err != nil {
-		fmt.Println("wintty 解压失败", err)
+		fmt.Println("NEZHA>> wintty 解压失败", err)
 		return
 	}
 	arch := "x64"
 	if runtime.GOARCH != "amd64" {
 		arch = "ia32"
 	}
-	executablePath, err := getExecutableFilePath()
-	if err != nil {
-		fmt.Println("wintty 获取文件路径失败", err)
-		return
-	}
-	os.Rename("./wintty/"+arch+"/bin/winpty-agent.exe", filepath.Join(executablePath, "winpty-agent.exe"))
-	os.Rename("./wintty/"+arch+"/bin/winpty.dll", filepath.Join(executablePath, "winpty.dll"))
+
+	os.Rename("./wintty/"+arch+"/bin/winpty-agent.exe", winptyAgentExe)
+	os.Rename("./wintty/"+arch+"/bin/winpty.dll", winptyAgentDll)
 	os.RemoveAll("./wintty")
 	os.RemoveAll("./wintty.zip")
 }

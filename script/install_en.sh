@@ -11,7 +11,7 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_VERSION="v0.10.7"
+NZ_VERSION="v0.11.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -144,18 +144,6 @@ install_dashboard() {
         systemctl enable docker.service
         systemctl start docker.service
         echo -e "${green}Docker${plain} installed successfully"
-    fi
-
-    command -v docker-compose >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "Installing Docker Compose"
-        wget -t 2 -T 10 -O /usr/local/bin/docker-compose "https://${GITHUB_URL}/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" >/dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_URL}${plain}"
-            return 0
-        fi
-        chmod +x /usr/local/bin/docker-compose
-        echo -e "${green}Docker Compose${plain} installed successfully"
     fi
 
     modify_dashboard_config 0
@@ -344,9 +332,9 @@ restart_and_update() {
     echo -e "> Restart and Update the Panel"
 
     cd $NZ_DASHBOARD_PATH
-    docker-compose pull
-    docker-compose down
-    docker-compose up -d
+    docker compose pull
+    docker compose down
+    docker compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Restart Successful${plain}"
         echo -e "Default panel address: ${yellow}domain:Site_access_port${plain}"
@@ -362,7 +350,7 @@ restart_and_update() {
 start_dashboard() {
     echo -e "> Start Panel"
 
-    cd $NZ_DASHBOARD_PATH && docker-compose up -d
+    cd $NZ_DASHBOARD_PATH && docker compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Start Successful${plain}"
     else
@@ -377,7 +365,7 @@ start_dashboard() {
 stop_dashboard() {
     echo -e "> Stop Panel"
 
-    cd $NZ_DASHBOARD_PATH && docker-compose down
+    cd $NZ_DASHBOARD_PATH && docker compose down
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Stop Successful${plain}"
     else
@@ -392,7 +380,7 @@ stop_dashboard() {
 show_dashboard_log() {
     echo -e "> View Panel Log"
 
-    cd $NZ_DASHBOARD_PATH && docker-compose logs -f
+    cd $NZ_DASHBOARD_PATH && docker compose logs -f
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -402,8 +390,7 @@ show_dashboard_log() {
 uninstall_dashboard() {
     echo -e "> Uninstall Panel"
 
-    cd $NZ_DASHBOARD_PATH &&
-        docker-compose down
+    cd $NZ_DASHBOARD_PATH && docker compose down
     rm -rf $NZ_DASHBOARD_PATH
     docker rmi -f ghcr.io/naiba/nezha-dashboard > /dev/null 2>&1
     clean_all

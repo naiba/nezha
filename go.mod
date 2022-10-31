@@ -6,7 +6,7 @@ require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
 	code.gitea.io/sdk/gitea v0.15.1
 	github.com/AlecAivazis/survey/v2 v2.3.6
-	github.com/BurntSushi/toml v1.2.0
+	github.com/BurntSushi/toml v1.2.1
 	github.com/artdarek/go-unzip v1.0.0
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/creack/pty v1.1.18
@@ -29,10 +29,10 @@ require (
 	github.com/shirou/gopsutil/v3 v3.22.9
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.13.0
-	github.com/stretchr/testify v1.8.0
-	github.com/xanzy/go-gitlab v0.73.1
-	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
-	golang.org/x/oauth2 v0.0.0-20221014153046-6fdb5e3db783
+	github.com/stretchr/testify v1.8.1
+	github.com/xanzy/go-gitlab v0.74.0
+	golang.org/x/crypto v0.1.0
+	golang.org/x/oauth2 v0.1.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/text v0.4.0
 	google.golang.org/grpc v1.50.1
@@ -87,9 +87,9 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
-	golang.org/x/net v0.0.0-20221017152216-f25eb7ecb193 // indirect
+	golang.org/x/net v0.1.0 // indirect
 	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/term v0.0.0-20221017184919-83659145692c // indirect
+	golang.org/x/term v0.1.0 // indirect
 	golang.org/x/time v0.1.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221018143404-92eef740a0dc // indirect

@@ -1,8 +1,9 @@
 package singleton
 
 import (
-	"crypto/md5" // #nosec
-	"encoding/hex"
+	// #nosec
+
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -48,7 +49,7 @@ func LoadNotifications() {
 func SetDefaultNotificationTagInDB(n *model.Notification) {
 	n.Tag = "default"
 	if err := DB.Save(n).Error; err != nil {
-		log.Println("[ERROR]", err)
+		log.Println("NEZHA>> SetDefaultNotificationTagInDB 错误: ", err)
 	}
 }
 
@@ -102,12 +103,13 @@ func OnDeleteNotification(id uint64) {
 }
 
 // SendNotification 向指定的通知方式组的所有通知方式发送通知
-func SendNotification(notificationTag string, desc string, mutable bool, ext ...*model.Server) {
-	if mutable {
+func SendNotification(notificationTag string, desc string, muteLabel *string, ext ...*model.Server) {
+	if muteLabel != nil {
+		// 将通知方式组名称加入静音标志
+		muteLabel := fmt.Sprintf("%s:%s", *muteLabel, notificationTag)
 		// 通知防骚扰策略
-		nID := hex.EncodeToString(md5.New().Sum([]byte(desc))) // #nosec
 		var flag bool
-		if cacheN, has := Cache.Get(nID); has {
+		if cacheN, has := Cache.Get(muteLabel); has {
 			nHistory := cacheN.(NotificationHistory)
 			// 每次提醒都增加一倍等待时间，最后每天最多提醒一次
 			if time.Now().After(nHistory.Until) {
@@ -118,12 +120,12 @@ func SendNotification(notificationTag string, desc string, mutable bool, ext ...
 				}
 				nHistory.Until = time.Now().Add(nHistory.Duration)
 				// 缓存有效期加 10 分钟
-				Cache.Set(nID, nHistory, nHistory.Duration+time.Minute*10)
+				Cache.Set(muteLabel, nHistory, nHistory.Duration+time.Minute*10)
 			}
 		} else {
 			// 新提醒直接通知
 			flag = true
-			Cache.Set(nID, NotificationHistory{
+			Cache.Set(muteLabel, NotificationHistory{
 				Duration: firstNotificationDelay,
 				Until:    time.Now().Add(firstNotificationDelay),
 			}, firstNotificationDelay+time.Minute*10)
@@ -131,7 +133,7 @@ func SendNotification(notificationTag string, desc string, mutable bool, ext ...
 
 		if !flag {
 			if Conf.Debug {
-				log.Println("NEZHA>> 静音的重复通知：", desc, mutable)
+				log.Println("NEZHA>> 静音的重复通知：", desc, muteLabel)
 			}
 			return
 		}
@@ -140,7 +142,7 @@ func SendNotification(notificationTag string, desc string, mutable bool, ext ...
 	notificationsLock.RLock()
 	defer notificationsLock.RUnlock()
 	for _, n := range NotificationList[notificationTag] {
-		log.Println("尝试通知", n.Name)
+		log.Println("NEZHA>> 尝试通知", n.Name)
 	}
 	for _, n := range NotificationList[notificationTag] {
 		ns := model.NotificationServerBundle{
@@ -156,4 +158,43 @@ func SendNotification(notificationTag string, desc string, mutable bool, ext ...
 			log.Println("NEZHA>> 向 ", n.Name, " 发送通知成功：")
 		}
 	}
+}
+
+type _NotificationMuteLabel struct{}
+
+var NotificationMuteLabel _NotificationMuteLabel
+
+func (_NotificationMuteLabel) IPChanged(serverId uint64) *string {
+	label := fmt.Sprintf("bf::ic-%d", serverId)
+	return &label
+}
+
+func (_NotificationMuteLabel) ServerIncident(alertId uint64, serverId uint64) *string {
+	label := fmt.Sprintf("bf::sei-%d-%d", alertId, serverId)
+	return &label
+}
+
+func (_NotificationMuteLabel) ServerIncidentResolved(alertId uint64, serverId uint64) *string {
+	label := fmt.Sprintf("bf::seir-%d-%d", alertId, serverId)
+	return &label
+}
+
+func (_NotificationMuteLabel) ServiceLatencyMin(serviceId uint64) *string {
+	label := fmt.Sprintf("bf::sln-%d", serviceId)
+	return &label
+}
+
+func (_NotificationMuteLabel) ServiceLatencyMax(serviceId uint64) *string {
+	label := fmt.Sprintf("bf::slm-%d", serviceId)
+	return &label
+}
+
+func (_NotificationMuteLabel) ServiceStateChanged(serviceId uint64) *string {
+	label := fmt.Sprintf("bf::ssc-%d", serviceId)
+	return &label
+}
+
+func (_NotificationMuteLabel) ServiceSSL(serviceId uint64) *string {
+	label := fmt.Sprintf("bf::sssl-%d", serviceId)
+	return &label
 }

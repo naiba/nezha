@@ -375,12 +375,12 @@ func (ss *ServiceSentinel) worker() {
 			if ss.monitors[mh.GetId()].LatencyNotify {
 				if mh.Delay > ss.monitors[mh.GetId()].MaxLatency {
 					ServerLock.RLock()
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, ServerList[r.Reporter].Name), true)
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, ServerList[r.Reporter].Name), NotificationMuteLabel.ServiceLatencyMin(mh.GetId()))
 					ServerLock.RUnlock()
 				}
 				if mh.Delay < ss.monitors[mh.GetId()].MinLatency {
 					ServerLock.RLock()
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, ServerList[r.Reporter].Name), true)
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, ServerList[r.Reporter].Name), NotificationMuteLabel.ServiceLatencyMax(mh.GetId()))
 					ServerLock.RUnlock()
 				}
 			}
@@ -393,7 +393,7 @@ func (ss *ServiceSentinel) worker() {
 			ss.lastStatus[mh.GetId()] = stateCode
 			if isNeedSendNotification {
 				ServerLock.RLock()
-				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, ServerList[r.Reporter].Name, mh.Data), true)
+				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, ServerList[r.Reporter].Name, mh.Data), NotificationMuteLabel.ServiceStateChanged(mh.GetId()))
 				ServerLock.RUnlock()
 			}
 			ss.monitorsLock.RUnlock()
@@ -438,7 +438,7 @@ func (ss *ServiceSentinel) worker() {
 		if errMsg != "" {
 			ss.monitorsLock.RLock()
 			if ss.monitors[mh.GetId()].Notify {
-				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.GetId()].Name, errMsg), true)
+				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.GetId()].Name, errMsg), NotificationMuteLabel.ServiceSSL(mh.GetId()))
 			}
 			ss.monitorsLock.RUnlock()
 		}
