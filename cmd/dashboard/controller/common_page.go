@@ -20,13 +20,14 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/pkg/websocketx"
 	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
 )
 
 type terminalContext struct {
-	agentConn *websocket.Conn
-	userConn  *websocket.Conn
+	agentConn *websocketx.Conn
+	userConn  *websocketx.Conn
 	serverID  uint64
 	host      string
 	useSSL    bool
@@ -294,7 +295,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			return
 		}
 		cloudflareCookies, _ := c.Cookie("CF_Authorization")
-		// CloudflareCookies合法性验证
+		// Cloudflare Cookies 合法性验证
 		// 其应该包含.分隔的三组BASE64-URL编码
 		if cloudflareCookies != "" {
 			encodedCookies := strings.Split(cloudflareCookies, ".")
@@ -330,7 +331,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}
 	}
 
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
@@ -343,7 +344,8 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}, true)
 		return
 	}
-	defer conn.Close()
+	defer wsConn.Close()
+	conn := &websocketx.Conn{Conn: wsConn}
 
 	log.Printf("NEZHA>> terminal connected %t %q", isAgent, c.Request.URL)
 	defer log.Printf("NEZHA>> terminal disconnected %t %q", isAgent, c.Request.URL)
@@ -402,7 +404,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	}()
 
 	var dataBuffer [][]byte
-	var distConn *websocket.Conn
+	var distConn *websocketx.Conn
 	checkDistConn := func() {
 		if distConn == nil {
 			if isAgent {

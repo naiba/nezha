@@ -465,6 +465,7 @@ func handleTerminalTask(task *pb.Task) {
 			read, err := tty.Read(buf)
 			if err != nil {
 				conn.WriteMessage(websocket.TextMessage, []byte(err.Error()))
+				conn.Close()
 				return
 			}
 			conn.WriteMessage(websocket.BinaryMessage, buf[:read])

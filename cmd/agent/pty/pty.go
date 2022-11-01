@@ -61,7 +61,7 @@ func (pty *Pty) killChildProcess(c *exec.Cmd) error {
 		c.Process.Kill()
 	}
 	// Kill the whole process group.
-	syscall.Kill(-pgid, syscall.SIGTERM)
+	syscall.Kill(-pgid, syscall.SIGKILL) // SIGKILL 直接杀掉 SIGTERM 发送信号，等待进程自己退出
 	return c.Wait()
 }
 
