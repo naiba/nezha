@@ -363,9 +363,9 @@ restart_and_update() {
     echo -e "> 重启并更新面板"
 
     cd $NZ_DASHBOARD_PATH
-    docker compose pull
-    docker compose down
-    docker compose up -d
+    docker-compose pull
+    docker-compose down
+    docker-compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒监控 重启成功${plain}"
         echo -e "默认管理面板地址：${yellow}域名:站点访问端口${plain}"
@@ -381,7 +381,7 @@ restart_and_update() {
 start_dashboard() {
     echo -e "> 启动面板"
 
-    cd $NZ_DASHBOARD_PATH && docker compose up -d
+    cd $NZ_DASHBOARD_PATH && docker-compose up -d
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒监控 启动成功${plain}"
     else
@@ -396,7 +396,7 @@ start_dashboard() {
 stop_dashboard() {
     echo -e "> 停止面板"
 
-    cd $NZ_DASHBOARD_PATH && docker compose down
+    cd $NZ_DASHBOARD_PATH && docker-compose down
     if [[ $? == 0 ]]; then
         echo -e "${green}哪吒监控 停止成功${plain}"
     else
@@ -411,7 +411,7 @@ stop_dashboard() {
 show_dashboard_log() {
     echo -e "> 获取面板日志"
 
-    cd $NZ_DASHBOARD_PATH && docker compose logs -f
+    cd $NZ_DASHBOARD_PATH && docker-compose logs -f
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -421,7 +421,7 @@ show_dashboard_log() {
 uninstall_dashboard() {
     echo -e "> 卸载管理面板"
 
-    cd $NZ_DASHBOARD_PATH && docker compose down
+    cd $NZ_DASHBOARD_PATH && docker-compose down
     rm -rf $NZ_DASHBOARD_PATH
     docker rmi -f ghcr.io/naiba/nezha-dashboard > /dev/null 2>&1
     docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard > /dev/null 2>&1
