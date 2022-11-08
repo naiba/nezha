@@ -332,9 +332,18 @@ restart_and_update() {
     echo -e "> Restart and Update the Panel"
 
     cd $NZ_DASHBOARD_PATH
-    docker compose pull
-    docker compose down
-    docker compose up -d
+    
+    docker compose version
+    if [[ $? == 0 ]]; then
+        docker compose pull
+        docker compose down
+        docker compose up -d
+    else
+        docker-compose pull
+        docker-compose down
+        docker-compose up -d
+    fi
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Restart Successful${plain}"
         echo -e "Default panel address: ${yellow}domain:Site_access_port${plain}"
@@ -350,7 +359,13 @@ restart_and_update() {
 start_dashboard() {
     echo -e "> Start Panel"
 
-    cd $NZ_DASHBOARD_PATH && docker compose up -d
+    docker compose version
+    if [[ $? == 0 ]]; then
+        cd $NZ_DASHBOARD_PATH && docker compose up -d
+    else
+        cd $NZ_DASHBOARD_PATH && docker-compose up -d
+    fi
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Start Successful${plain}"
     else
@@ -365,7 +380,13 @@ start_dashboard() {
 stop_dashboard() {
     echo -e "> Stop Panel"
 
-    cd $NZ_DASHBOARD_PATH && docker compose down
+    docker compose version
+    if [[ $? == 0 ]]; then
+        cd $NZ_DASHBOARD_PATH && docker compose down
+    else
+        cd $NZ_DASHBOARD_PATH && docker-compose down
+    fi
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Stop Successful${plain}"
     else
@@ -380,7 +401,12 @@ stop_dashboard() {
 show_dashboard_log() {
     echo -e "> View Panel Log"
 
-    cd $NZ_DASHBOARD_PATH && docker compose logs -f
+    docker compose version
+    if [[ $? == 0 ]]; then
+        cd $NZ_DASHBOARD_PATH && docker compose logs -f
+    else
+        cd $NZ_DASHBOARD_PATH && docker-compose logs -f
+    fi
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -390,7 +416,13 @@ show_dashboard_log() {
 uninstall_dashboard() {
     echo -e "> Uninstall Panel"
 
-    cd $NZ_DASHBOARD_PATH && docker compose down
+    docker compose version
+    if [[ $? == 0 ]]; then
+        cd $NZ_DASHBOARD_PATH && docker compose down
+    else
+        cd $NZ_DASHBOARD_PATH && docker-compose down
+    fi
+
     rm -rf $NZ_DASHBOARD_PATH
     docker rmi -f ghcr.io/naiba/nezha-dashboard > /dev/null 2>&1
     clean_all
