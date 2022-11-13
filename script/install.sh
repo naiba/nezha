@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #========================================================
-#   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+ /
+#   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+ / Alpine 3+ /
 #     Arch 未测试
 #   Description: 哪吒监控安装脚本
 #   Github: https://github.com/naiba/nezha
@@ -20,13 +20,10 @@ plain='\033[0m'
 export PATH=$PATH:/usr/local/bin
 
 os_arch=""
+[ -e /etc/os-release ] && cat /etc/os-release | grep -i "PRETTY_NAME" | grep -qi "alpine" && os_alpine='1'
 
 pre_check() {
-    command -v systemctl >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo "不支持此系统：未找到 systemctl 命令"
-        exit 1
-    fi
+    [ "$os_alpine" != 1 ] && ! command -v systemctl >/dev/null 2>&1 && echo "不支持此系统：未找到 systemctl 命令" && exit 1
 
     # check root
     [[ $EUID -ne 0 ]] && echo -e "${red}错误: ${plain} 必须使用root用户运行此脚本！\n" && exit 1
@@ -133,7 +130,8 @@ install_soft() {
     (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
         (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
         (command -v pacman >/dev/null 2>&1 && pacman -Syu $*) ||
-        (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y)
+        (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y) ||
+        (command -v apk >/dev/null 2>&1 && apk update && apk add $* -f)
 }
 
 install_dashboard() {
@@ -186,12 +184,14 @@ install_dashboard() {
 
 selinux(){
     #判断当前的状态
-    getenforce | grep '[Ee]nfor'
-    if [ $? -eq 0 ];then
-        echo -e "SELinux是开启状态，正在关闭！" 
-        setenforce 0 &>/dev/null
-        find_key="SELINUX="
-        sed -ri "/^$find_key/c${find_key}disabled" /etc/selinux/config
+    if [ "$os_alpine" != 1 ];then
+      getenforce | grep '[Ee]nfor'
+      if [ $? -eq 0 ];then
+          echo -e "SELinux是开启状态，正在关闭！" 
+          setenforce 0 &>/dev/null
+          find_key="SELINUX="
+          sed -ri "/^$find_key/c${find_key}disabled" /etc/selinux/config
+      fi
     fi
 }
 
@@ -247,10 +247,12 @@ install_agent() {
 modify_agent_config() {
     echo -e "> 修改Agent配置"
 
-    wget -t 2 -T 10 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
-        return 0
+    if [ "$os_alpine" != 1 ];then
+      wget -t 2 -T 10 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
+      if [[ $? != 0 ]]; then
+          echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
+          return 0
+      fi
     fi
 
     if [ $# -lt 3 ]; then
@@ -272,21 +274,30 @@ modify_agent_config() {
         nz_client_secret=$3
     fi
 
-    sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
-    sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
-    sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
+    if [ "$os_alpine" != 1 ];then
+      sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
+      sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
+      sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
 
-    shift 3
-    if [ $# -gt 0 ]; then
-        args=" $*"
-        sed -i "/ExecStart/ s/$/${args}/" ${NZ_AGENT_SERVICE}
+      shift 3
+      if [ $# -gt 0 ]; then
+          args=" $*"
+          sed -i "/ExecStart/ s/$/${args}/" ${NZ_AGENT_SERVICE}
+      fi
+    else
+      echo "@reboot nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} >/dev/null 2>&1 &" >> /etc/crontabs/root
+      crond
     fi
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
 
-    systemctl daemon-reload
-    systemctl enable nezha-agent
-    systemctl restart nezha-agent
+    if [ "$os_alpine" != 1 ];then
+      systemctl daemon-reload
+      systemctl enable nezha-agent
+      systemctl restart nezha-agent
+    else
+      nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} >/dev/null 2>&1 &
+    fi
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -477,10 +488,15 @@ show_agent_log() {
 uninstall_agent() {
     echo -e "> 卸载Agent"
 
-    systemctl disable nezha-agent.service
-    systemctl stop nezha-agent.service
-    rm -rf $NZ_AGENT_SERVICE
-    systemctl daemon-reload
+    if [ "$os_alpine" != 1 ];then
+      systemctl disable nezha-agent.service
+      systemctl stop nezha-agent.service
+      rm -rf $NZ_AGENT_SERVICE
+      systemctl daemon-reload
+    else
+      sed -i "/nezha-agent/d" /etc/crontabs/root
+      pkill nezha
+    fi
 
     rm -rf $NZ_AGENT_PATH
     clean_all
