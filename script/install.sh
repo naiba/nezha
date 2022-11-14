@@ -509,8 +509,13 @@ uninstall_agent() {
 restart_agent() {
     echo -e "> 重启Agent"
 
-    systemctl restart nezha-agent.service
-
+    
+    if [ "$os_alpine" != 1 ];then
+      systemctl restart nezha-agent.service
+    else
+      kill -9 $(pidof nezha-agent)
+      nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} >/dev/null 2>&1 &
+    fi
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
