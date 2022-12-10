@@ -2,7 +2,7 @@
 
 #========================================================
 #   System Required: CentOS 7+ / Debian 8+ / Ubuntu 16+ / Alpine 3+ /
-#     Arch not tested
+#     Arch only tested once. Screenshot Feedback dysf888@pm.me
 #   Description: Nezha Monitoring Install Script
 #   Github: https://github.com/naiba/nezha
 #========================================================
@@ -96,10 +96,9 @@ install_base() {
 }
 
 install_soft() {
-    # The official Arch library does not contain selinux components
-    (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
+        (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
         (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
-        (command -v pacman >/dev/null 2>&1 && pacman -Syu $*) ||
+        (command -v pacman >/dev/null 2>&1 && pacman -Syu $* yay --noconfirm) && echo -e "${red}Tips: ${plain} When the input box appears, please enter nezha and press Enter    ${red}!!!three times in total!!!${plain}\n" && useradd -m nezha && passwd nezha && [[ $(egrep "^[^#]*nezha.*ALL)" /etc/sudoers) ]] || sed -i "$ a\nezha ALL=(ALL) ALL" /etc/sudoers && (command -v yay >/dev/null 2>&1 && sudo -iu nezha yay -S libselinux --noconfirm) && pkill -u nezha && userdel nezha && echo -e "${red}Tips: ${plain}User nezha has been deleted\n"||
         (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y) ||
         (command -v apk >/dev/null 2>&1 && apk update && apk add $* -f)
 }
