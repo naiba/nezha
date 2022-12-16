@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
@@ -92,7 +93,15 @@ func (oa *oauth2controller) getRedirectURL(c *gin.Context) string {
 }
 
 func (oa *oauth2controller) login(c *gin.Context) {
-	randomString := utils.RandStringBytesMaskImprSrcUnsafe(32)
+	randomString, err := utils.GenerateRandomString(32)
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusBadRequest,
+			Title: "Something Wrong",
+			Msg:   err.Error(),
+		}, true)
+		return
+	}
 	state, stateKey := randomString[:16], randomString[16:]
 	singleton.Cache.Set(fmt.Sprintf("%s%s", model.CacheKeyOauth2State, stateKey), state, cache.DefaultExpiration)
 	url := oa.getCommonOauth2Config(c).AuthCodeURL(state, oauth2.AccessTypeOnline)
@@ -195,7 +204,16 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 		}, true)
 		return
 	}
-	user.IssueNewToken()
+	user.Token, err = utils.GenerateRandomString(32)
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusBadRequest,
+			Title: "Something wrong",
+			Msg:   err.Error(),
+		}, true)
+		return
+	}
+	user.TokenExpired = time.Now().AddDate(0, 2, 0)
 	singleton.DB.Save(&user)
 	c.SetCookie(singleton.Conf.Site.CookieName, user.Token, 60*60*24, "", "", false, false)
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/redirect", mygin.CommonEnvironment(c, gin.H{

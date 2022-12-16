@@ -1,14 +1,11 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/google/go-github/v47/github"
 	"github.com/xanzy/go-gitlab"
-
-	"github.com/naiba/nezha/pkg/utils"
 )
 
 type User struct {
@@ -71,9 +68,4 @@ func NewUserFromGitHub(gu *github.User) User {
 	u.Hireable = gu.GetHireable()
 	u.Bio = gu.GetBio()
 	return u
-}
-
-func (u *User) IssueNewToken() {
-	u.Token = utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login))
-	u.TokenExpired = time.Now().AddDate(0, 2, 0)
 }

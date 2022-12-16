@@ -1,52 +1,16 @@
 package utils
 
 import (
-	"crypto/md5" // #nosec
-	"encoding/hex"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"regexp"
 	"strings"
-	"time"
-	"unsafe"
 
 	jsoniter "github.com/json-iterator/go"
 )
 
 var Json = jsoniter.ConfigCompatibleWithStandardLibrary
-
-const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const (
-	letterIdxBits = 6                    // 6 bits to represent a letter index
-	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
-	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
-)
-
-func RandStringBytesMaskImprSrcUnsafe(n int) string {
-	var src = rand.NewSource(time.Now().UnixNano())
-	b := make([]byte, n)
-
-	// A src.Int63() generates 63 random bits, enough for letterIdxMax characters!
-	for i, cache, remain := n-1, src.Int63(), letterIdxMax; i >= 0; {
-		if remain == 0 {
-			cache, remain = src.Int63(), letterIdxMax
-		}
-		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
-			b[i] = letterBytes[idx]
-			i--
-		}
-		cache >>= letterIdxBits
-		remain--
-	}
-
-	return *(*string)(unsafe.Pointer(&b)) //#nosec
-}
-
-func MD5(plantext string) string {
-	hash := md5.New() // #nosec
-	hash.Write([]byte(plantext))
-	return hex.EncodeToString(hash.Sum(nil))
-}
 
 func IsWindows() bool {
 	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
@@ -97,4 +61,18 @@ func SplitIPAddr(v4v6Bundle string) (string, string, string) {
 func IsFileExists(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+func GenerateRandomString(n int) (string, error) {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	lettersLength := big.NewInt(int64(len(letters)))
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, lettersLength)
+		if err != nil {
+			return "", err
+		}
+		ret[i] = letters[num.Int64()]
+	}
+	return string(ret), nil
 }

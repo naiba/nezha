@@ -100,9 +100,17 @@ func (ma *memberAPI) issueNewToken(c *gin.Context) {
 		})
 		return
 	}
+	secureToken, err := utils.GenerateRandomString(32)
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
 	token := &model.ApiToken{
 		UserID: u.ID,
-		Token:  utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login)),
+		Token:  secureToken,
 		Note:   tf.Note,
 	}
 	singleton.DB.Create(token)
@@ -310,7 +318,6 @@ type serverForm struct {
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
-	admin := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
 	var sf serverForm
 	var s model.Server
 	var isEdit bool
@@ -324,9 +331,10 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Note = sf.Note
 		s.HideForGuest = sf.HideForGuest == "on"
 		if s.ID == 0 {
-			s.Secret = utils.MD5(fmt.Sprintf("%s%s%d", time.Now(), sf.Name, admin.ID))
-			s.Secret = s.Secret[:18]
-			err = singleton.DB.Create(&s).Error
+			s.Secret, err = utils.GenerateRandomString(18)
+			if err == nil {
+				err = singleton.DB.Create(&s).Error
+			}
 		} else {
 			isEdit = true
 			err = singleton.DB.Save(&s).Error

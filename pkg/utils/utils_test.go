@@ -39,3 +39,14 @@ func TestNotification(t *testing.T) {
 		assert.Equal(t, IPDesensitize(c.input), c.output)
 	}
 }
+
+func TestGenerGenerateRandomString(t *testing.T) {
+	generatedString := make(map[string]bool)
+	for i := 0; i < 100; i++ {
+		str, err := GenerateRandomString(32)
+		assert.Nil(t, err)
+		assert.Equal(t, len(str), 32)
+		assert.False(t, generatedString[str])
+		generatedString[str] = true
+	}
+}
