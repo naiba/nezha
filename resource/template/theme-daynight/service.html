@@ -8,7 +8,7 @@
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
     <link rel="stylesheet" href="/static/theme-daynight/css/service.css?v202108042286" />
-
+    <link rel="stylesheet" href="https://cdn.staticfile.org/mdui/1.0.2/css/mdui.min.css"/>
     <link href="https://cdn.staticfile.org/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
 
@@ -82,6 +82,46 @@
           </section>
           {{end}}
         </section>
+        {{if .CycleTransferStats}}
+    <h2 class="mdui-m-t-5 mdui-text-center">{{tr "CycleTransferStats"}}</h2>
+    <div class="mdui-table-fluid">
+      <table class="mdui-table mdui-table-hoverable">
+        <thead>
+          <tr>
+            <th class="mdui-text-center">ID</th>
+            <th class="mdui-text-center">{{tr "Rules"}}</th>
+            <th class="mdui-text-center">{{tr "Server"}}</th>
+            <th class="mdui-text-center">{{tr "From"}}</th>
+            <th class="mdui-text-center">{{tr "To"}}</th>
+            <th class="mdui-text-center">MAX</th>
+            <th class="mdui-text-center">MIN</th>
+            <th class="mdui-text-center">{{tr "NextCheck"}}</th>
+            <th class="mdui-text-center">{{tr "CurrentUsage"}}</th>
+            <th class='mdui-text-center' style='padding: 0px 31px 0px 31px;'>{{tr "Transleft"}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{range $id, $stats := .CycleTransferStats}}
+          {{range $innerId, $transfer := $stats.Transfer}}
+          {{$TransLeftPercent := TransLeftPercent (UintToFloat $transfer) (UintToFloat $stats.Max)}}
+          <tr>
+            <td class="mdui-text-center">{{$id}}</td>
+            <td class="mdui-text-center">{{$stats.Name}}</td>
+            <td class="mdui-text-center">{{index $stats.ServerName $innerId}}</td>
+            <td class="mdui-text-center">{{$stats.From|tf}}</td>
+            <td class="mdui-text-center">{{$stats.To|tf}}</td>
+            <td class="mdui-text-center">{{$stats.Max|bf}}</td>
+            <td class="mdui-text-center">{{$stats.Min|bf}}</td>
+            <td class="mdui-text-center">{{(index $stats.NextUpdate $innerId)|sft}}</td>
+            <td class="mdui-text-center">{{$transfer|bf}}</td>
+            <td class="mdui-text-center">{{TransLeft $stats.Max $transfer}} / {{$TransLeftPercent}} %</td>
+          </tr>
+          {{end}}
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{end}}
       </main>
       
       <div class="sidebar-container">
