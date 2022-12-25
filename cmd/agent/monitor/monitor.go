@@ -66,9 +66,7 @@ func GetHost(agentConfig *model.AgentConfig) *model.Host {
 		swapMemTotal = mv.SwapTotal
 	}
 
-	if cachedBootTime.IsZero() {
-		cachedBootTime = time.Unix(int64(hi.BootTime), 0)
-	}
+	cachedBootTime = time.Unix(int64(hi.BootTime), 0)
 
 	return &model.Host{
 		Platform:        hi.Platform,
