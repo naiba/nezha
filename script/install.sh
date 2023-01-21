@@ -131,7 +131,10 @@ install_arch(){
         [yY][eE][sS] | [yY])
             useradd -m nezha-agent
             sed -i "$ a\nezha-agent ALL=(ALL ) NOPASSWD:ALL" /etc/sudoers
-            sudo -iu nezha-agent yay -S libselinux --noconfirm
+            sudo -iu nezha-agent bash -c 'gpg --keyserver keys.gnupg.net --recv-keys BE22091E3EF62275;
+                                        cd /tmp; git clone https://aur.archlinux.org/libsepol.git; cd libsepol; makepkg -si --noconfirm --asdeps; cd ..;
+                                        git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..; 
+                                        rm -rf libsepol libselinux'
             sed -i '/nezha-agent/d'  /etc/sudoers && sleep 30s && killall -u nezha-agent&&userdel nezha-agent
             echo -e "${red}提示: ${plain}已删除用户nezha-agent，请务必手动核查一遍！\n"
         ;;
@@ -148,7 +151,7 @@ install_arch(){
 install_soft() {
     (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
     (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
-    (command -v pacman >/dev/null 2>&1 && pacman -Syu $* yay --noconfirm && install_arch)  ||
+    (command -v pacman >/dev/null 2>&1 && pacman -Syu $* base-devel git --noconfirm && install_arch)  ||
     (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y) ||
     (command -v apk >/dev/null 2>&1 && apk update && apk add $* -f)
 }
