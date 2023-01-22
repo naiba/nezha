@@ -122,7 +122,7 @@ install_arch(){
 install_soft() {
     (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
     (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
-    (command -v pacman >/dev/null 2>&1 && pacman -Syu $* base-devel git --noconfirm && install_arch)  ||
+    (command -v pacman >/dev/null 2>&1 && pacman -Syu $* base-devel --noconfirm && install_arch)  ||
     (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y) ||
     (command -v apk >/dev/null 2>&1 && apk update && apk add $* -f)
 }
