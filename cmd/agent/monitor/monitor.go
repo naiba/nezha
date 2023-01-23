@@ -55,8 +55,8 @@ func GetHost(agentConfig *model.AgentConfig) *model.Host {
 		cpuModelCount[ci[i].ModelName]++
 	}
 	var cpus []string
-	for model, count := range cpuModelCount {
-		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
+	for cpuModel, count := range cpuModelCount {
+		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", cpuModel, count, cpuType))
 	}
 	mv, _ := mem.VirtualMemory()
 	diskTotal, _ := getDiskTotalAndUsed(agentConfig)
