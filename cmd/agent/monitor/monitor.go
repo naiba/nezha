@@ -39,7 +39,10 @@ var (
 
 // GetHost 获取主机硬件信息
 func GetHost(agentConfig *model.AgentConfig) *model.Host {
-	hi, _ := host.Info()
+	hi, err := host.Info()
+	if err != nil {
+		panic(err)
+	}
 	var cpuType string
 	if hi.VirtualizationSystem != "" {
 		cpuType = "Virtual"
