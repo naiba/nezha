@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"runtime"
 	"strconv"
@@ -41,7 +42,8 @@ var (
 func GetHost(agentConfig *model.AgentConfig) *model.Host {
 	hi, err := host.Info()
 	if err != nil {
-		panic(err)
+		log.Println(err)
+		return &model.Host{}
 	}
 	var cpuType string
 	if hi.VirtualizationSystem != "" {
