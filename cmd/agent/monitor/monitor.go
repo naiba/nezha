@@ -39,76 +39,117 @@ var (
 
 // GetHost 获取主机硬件信息
 func GetHost(agentConfig *model.AgentConfig) *model.Host {
-	hi, _ := host.Info()
-	var cpuType string
-	if hi.VirtualizationSystem != "" {
-		cpuType = "Virtual"
-	} else {
-		cpuType = "Physical"
-	}
-	cpuModelCount := make(map[string]int)
-	ci, _ := cpu.Info()
-	for i := 0; i < len(ci); i++ {
-		cpuModelCount[ci[i].ModelName]++
-	}
-	var cpus []string
-	for model, count := range cpuModelCount {
-		cpus = append(cpus, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
-	}
-	mv, _ := mem.VirtualMemory()
-	diskTotal, _ := getDiskTotalAndUsed(agentConfig)
+	var ret model.Host
 
-	var swapMemTotal uint64
-	if runtime.GOOS == "windows" {
-		ms, _ := mem.SwapMemory()
-		swapMemTotal = ms.Total
+	var cpuType string
+	hi, err := host.Info()
+	if err != nil {
+		println("host.Info error:", err)
 	} else {
-		swapMemTotal = mv.SwapTotal
+		if hi.VirtualizationSystem != "" {
+			cpuType = "Virtual"
+		} else {
+			cpuType = "Physical"
+		}
+		ret.Platform = hi.Platform
+		ret.PlatformVersion = hi.PlatformVersion
+		ret.Arch = hi.KernelArch
+		ret.Virtualization = hi.VirtualizationSystem
+		ret.BootTime = hi.BootTime
+	}
+
+	cpuModelCount := make(map[string]int)
+	ci, err := cpu.Info()
+	if err != nil {
+		println("cpu.Info error:", err)
+	} else {
+		for i := 0; i < len(ci); i++ {
+			cpuModelCount[ci[i].ModelName]++
+		}
+		for model, count := range cpuModelCount {
+			ret.CPU = append(ret.CPU, fmt.Sprintf("%s %d %s Core", model, count, cpuType))
+		}
+	}
+
+	ret.DiskTotal, _ = getDiskTotalAndUsed(agentConfig)
+
+	mv, err := mem.VirtualMemory()
+	if err != nil {
+		println("mem.VirtualMemory error:", err)
+	} else {
+		ret.MemTotal = mv.Total
+		if runtime.GOOS != "windows" {
+			ret.SwapTotal = mv.SwapTotal
+		}
+	}
+
+	if runtime.GOOS == "windows" {
+		ms, err := mem.SwapMemory()
+		if err != nil {
+			println("mem.SwapMemory error:", err)
+		} else {
+			ret.SwapTotal = ms.Total
+		}
 	}
 
 	cachedBootTime = time.Unix(int64(hi.BootTime), 0)
 
-	return &model.Host{
-		Platform:        hi.Platform,
-		PlatformVersion: hi.PlatformVersion,
-		CPU:             cpus,
-		MemTotal:        mv.Total,
-		SwapTotal:       swapMemTotal,
-		DiskTotal:       diskTotal,
-		Arch:            hi.KernelArch,
-		Virtualization:  hi.VirtualizationSystem,
-		BootTime:        hi.BootTime,
-		IP:              CachedIP,
-		CountryCode:     strings.ToLower(cachedCountry),
-		Version:         Version,
-	}
+	ret.IP = CachedIP
+	ret.CountryCode = strings.ToLower(cachedCountry)
+	ret.Version = Version
+
+	return &ret
 }
 
 func GetState(agentConfig *model.AgentConfig, skipConnectionCount bool, skipProcsCount bool) *model.HostState {
-	var procs []int32
-	if !skipProcsCount {
-		procs, _ = process.Pids()
+	var ret model.HostState
+
+	cp, err := cpu.Percent(0, false)
+	if err != nil {
+		println("cpu.Percent error:", err)
+	} else {
+		ret.CPU = cp[0]
 	}
 
-	mv, _ := mem.VirtualMemory()
-
-	var swapMemUsed uint64
+	vm, err := mem.VirtualMemory()
+	if err != nil {
+		println("mem.VirtualMemory error:", err)
+	} else {
+		ret.MemUsed = vm.Total - vm.Available
+		if runtime.GOOS != "windows" {
+			ret.SwapUsed = vm.SwapTotal - vm.SwapFree
+		}
+	}
 	if runtime.GOOS == "windows" {
 		// gopsutil 在 Windows 下不能正确取 swap
-		ms, _ := mem.SwapMemory()
-		swapMemUsed = ms.Used
+		ms, err := mem.SwapMemory()
+		if err != nil {
+			println("mem.SwapMemory error:", err)
+		} else {
+			ret.SwapUsed = ms.Used
+		}
+	}
+
+	_, ret.DiskUsed = getDiskTotalAndUsed(agentConfig)
+
+	loadStat, err := load.Avg()
+	if err != nil {
+		println("load.Avg error:", err)
 	} else {
-		swapMemUsed = mv.SwapTotal - mv.SwapFree
+		ret.Load1 = loadStat.Load1
+		ret.Load5 = loadStat.Load5
+		ret.Load15 = loadStat.Load15
 	}
 
-	var cpuPercent float64
-	cp, err := cpu.Percent(0, false)
-	if err == nil {
-		cpuPercent = cp[0]
+	var procs []int32
+	if !skipProcsCount {
+		procs, err = process.Pids()
+		if err != nil {
+			println("process.Pids error:", err)
+		} else {
+			ret.ProcessCount = uint64(len(procs))
+		}
 	}
-
-	_, diskUsed := getDiskTotalAndUsed(agentConfig)
-	loadStat, _ := load.Avg()
 
 	var tcpConnCount, udpConnCount uint64
 	if !skipConnectionCount {
@@ -144,23 +185,12 @@ func GetState(agentConfig *model.AgentConfig, skipConnectionCount bool, skipProc
 		}
 	}
 
-	return &model.HostState{
-		CPU:            cpuPercent,
-		MemUsed:        mv.Total - mv.Available,
-		SwapUsed:       swapMemUsed,
-		DiskUsed:       diskUsed,
-		NetInTransfer:  netInTransfer,
-		NetOutTransfer: netOutTransfer,
-		NetInSpeed:     netInSpeed,
-		NetOutSpeed:    netOutSpeed,
-		Uptime:         uint64(time.Since(cachedBootTime).Seconds()),
-		Load1:          loadStat.Load1,
-		Load5:          loadStat.Load5,
-		Load15:         loadStat.Load15,
-		TcpConnCount:   tcpConnCount,
-		UdpConnCount:   udpConnCount,
-		ProcessCount:   uint64(len(procs)),
-	}
+	ret.NetInTransfer, ret.NetOutTransfer = netInTransfer, netOutTransfer
+	ret.NetInSpeed, ret.NetOutSpeed = netInSpeed, netOutSpeed
+	ret.Uptime = uint64(time.Since(cachedBootTime).Seconds())
+	ret.TcpConnCount, ret.UdpConnCount = tcpConnCount, udpConnCount
+
+	return &ret
 }
 
 // TrackNetworkSpeed NIC监控，统计流量与速度
@@ -252,4 +282,9 @@ func isListContainsStr(list []string, str string) bool {
 		}
 	}
 	return false
+}
+
+func println(v ...interface{}) {
+	fmt.Printf("NEZHA@%s>> ", time.Now().Format("2006-01-02 15:04:05"))
+	fmt.Println(v...)
 }
