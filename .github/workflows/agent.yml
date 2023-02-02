@@ -25,3 +25,10 @@ jobs:
           args: release --rm-dist
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Sync release
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.EVENT_DISPATCHER }}
+          repository: naibahq/release
+          event-type: sync-release
+          client-payload: '{"tag": "${{ github.ref_name }}"}'

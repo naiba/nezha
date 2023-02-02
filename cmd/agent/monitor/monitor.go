@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/nezhahq/goss"
+	"github.com/dean2021/goss"
 	"github.com/shirou/gopsutil/v3/cpu"
 	"github.com/shirou/gopsutil/v3/disk"
 	"github.com/shirou/gopsutil/v3/host"
