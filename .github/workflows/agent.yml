@@ -29,6 +29,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.EVENT_DISPATCHER }}
-          repository: naibahq/release
+          repository: nezhahq/release
           event-type: sync-release
           client-payload: '{"tag": "${{ github.ref_name }}"}'
