@@ -146,7 +146,7 @@ other = "啟用延遲通知"
 other = "延遲通知"
 
 [IntroductionOfMonitor]
-other = ""
+other = """
 類型為 <b>HTTP-GET</b> 時輸入URL(帶 http/https, HTTPS協議的會順帶監控SSL證書)；<br>
 類型為 <b>ICMP-Ping</b> 時輸入主機名/IP，不帶端口；<br>
 類型為 <b>TCP-Ping</b> 時輸入主機名/IP + 端口號：example.com:22"""
