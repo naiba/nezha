@@ -149,7 +149,9 @@ func (ns *NotificationServerBundle) Send(message string) error {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		defer resp.Body.Close()
+		defer func() {
+			_ = resp.Body.Close()
+		}()
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("%d@%s %s", resp.StatusCode, resp.Status, string(body))
 	}
