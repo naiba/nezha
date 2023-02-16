@@ -7,8 +7,8 @@
 <img src="https://img.shields.io/github/actions/workflow/status/naiba/nezha/dashboard.yml?branch=master&label=Dash%20v0.14.11&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/actions/workflow/status/naiba/nezha/agent.yml?branch=v0.14.7&label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.12.0-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
-  <p>:trollface: <b>Nezha Monitoring: Self-hosted, lightweight server and website monitoring and O&M tool.</b></p>
-  <p>Supports <b>monitoring</b> system status, HTTP (SSL certificate change, upcoming expiration, expired), TCP, Ping and supports <b>raising alerts</b>, execute scheduled tasks and <b>web terminal</b>.</p>
+  <p>:trollface: <b>Nezha Monitoring: Self-hostable, lightweight, servers and websites monitoring and O&M tool.</b></p>
+  <p>Supports <b>monitoring</b> system status, HTTP (SSL certificate change, upcoming expiration, expired), TCP, Ping and supports <b>push alerts</b>, run scheduled tasks and <b>web terminal</b>.</p>
 </div>
 
 \>> Telegram Group: [Nezha Monitoring Global (English Only)](https://t.me/nezhamonitoring_global), [哪吒监控（中文群组）](https://t.me/nezhamonitoring)
@@ -41,7 +41,11 @@ You can change the dashboard language in the settings page (`/setting`) after th
 - [@JackieSung](https://github.com/JackieSung4ev) for our first community-contributed front-end theme.
 - [@Erope](https://github.com/Erope) for contributed a lot to our installation scripts and community building.
 - [@MikoyChinese](https://github.com/MikoyChinese) for our second community-contributed front-end theme.
-- [@AkkiaS7](https://github.com/AkkiaS7) and [@hhhkkk520](https://github.com/hhhkkk520) for the excellent contribution in the early days of globalization.
+- [@AkkiaS7](https://github.com/AkkiaS7) and [@Cantoblanco](https://github.com/cantoblanco) for the excellent contribution in the early days of globalization.
 - [@dysf888](https://github.com/dysf888) for the installation script in Windows.
 - [@MartijnLindeman](https://github.com/MartijnLindeman) for his perseverance has taken us to the international market.
 - and other [contributors](https://github.com/naiba/nezha/graphs/contributors).
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=naiba/nezha&type=Timeline)](https://star-history.com/#naiba/nezha&Timeline)
