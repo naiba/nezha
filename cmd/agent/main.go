@@ -337,7 +337,12 @@ func handleIcmpPingTask(task *pb.Task, result *pb.TaskResult) {
 		err = pinger.Run() // Blocks until finished.
 	}
 	if err == nil {
-		result.Delay = float32(pinger.Statistics().AvgRtt.Microseconds()) / 1000.0
+		stat := pinger.Statistics()
+		if stat.PacketsRecv == 0 {
+			result.Data = "pockets recv 0"
+			return
+		} 
+		result.Delay = float32(stat.AvgRtt.Microseconds()) / 1000.0
 		result.Successful = true
 	} else {
 		result.Data = err.Error()
