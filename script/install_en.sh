@@ -58,8 +58,7 @@ pre_check() {
                     echo "No Use China Mirror"
                 ;;
                 *)
-                    echo "Use China Mirror"
-                    CN=true
+                    echo "No Use China Mirror"
                 ;;
             esac
         fi
