@@ -43,11 +43,41 @@ pre_check() {
         os_arch="riscv64"
     fi
     
-    GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
-    GITHUB_URL="github.com"
-    Get_Docker_URL="get.docker.com"
-    Get_Docker_Argu=" "
-    Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
+    ## China_IP
+    if [[ -z "${CN}" ]]; then
+        if [[ $(curl -m 10 -s https://ipapi.co/json | grep 'China') != "" ]]; then
+            echo "According to the information provided by ipapi.co, the current IP may be in China"
+            read -e -r -p "Is the installation done with a Chinese Mirror? [Y/n] " input
+            case $input in
+                [yY][eE][sS] | [yY])
+                    echo "Use China Mirror"
+                    CN=true
+                ;;
+                
+                [nN][oO] | [nN])
+                    echo "No Use China Mirror"
+                ;;
+                *)
+                    echo "Use China Mirror"
+                    CN=true
+                ;;
+            esac
+        fi
+    fi
+    
+    if [[ -z "${CN}" ]]; then
+        GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
+        GITHUB_URL="github.com"
+        Get_Docker_URL="get.docker.com"
+        Get_Docker_Argu=" "
+        Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
+    else
+        GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
+        GITHUB_URL="dn-dao-github-mirror.daocloud.io"
+        Get_Docker_URL="get.daocloud.io/docker"
+        Get_Docker_Argu=" -s docker --mirror Aliyun"
+        Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
+    fi
 }
 
 confirm() {
