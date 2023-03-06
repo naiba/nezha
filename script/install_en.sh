@@ -64,19 +64,22 @@ pre_check() {
         fi
     fi
     
-    if [[ -z "${CN}" ]]; then
-        GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
-        GITHUB_URL="github.com"
-        Get_Docker_URL="get.docker.com"
-        Get_Docker_Argu=" "
-        Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
-    else
+    if [[ -n "${CN}" && "${CN}" == true ]]; then
+        # Use Chinese mirrors
         GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.daocloud.io/docker"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
         Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
+    else
+        # Use default
+        GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
+        GITHUB_URL="github.com"
+        Get_Docker_URL="get.docker.com"
+        Get_Docker_Argu=" "
+        Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
     fi
+
 }
 
 confirm() {
