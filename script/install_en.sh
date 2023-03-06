@@ -50,36 +50,33 @@ pre_check() {
             read -e -r -p "Is the installation done with a Chinese Mirror? [Y/n] " input
             case $input in
                 [yY][eE][sS] | [yY])
-                    echo "Use China Mirror"
+                    echo "Use Chinese Mirror"
                     CN=true
                 ;;
                 
                 [nN][oO] | [nN])
-                    echo "No Use China Mirror"
+                    echo "No Use Chinese Mirror"
                 ;;
                 *)
-                    echo "No Use China Mirror"
+                    echo "No Use Chinese Mirror"
                 ;;
             esac
         fi
     fi
     
-    if [[ -n "${CN}" && "${CN}" == true ]]; then
-        # Use Chinese mirrors
-        GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
-        GITHUB_URL="dn-dao-github-mirror.daocloud.io"
-        Get_Docker_URL="get.daocloud.io/docker"
-        Get_Docker_Argu=" -s docker --mirror Aliyun"
-        Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
-    else
-        # Use default
+    if [[ -z "${CN}" ]]; then
         GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
         GITHUB_URL="github.com"
         Get_Docker_URL="get.docker.com"
         Get_Docker_Argu=" "
         Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
+    else
+        GITHUB_RAW_URL="cdn.jsdelivr.net/gh/naiba/nezha@master"
+        GITHUB_URL="dn-dao-github-mirror.daocloud.io"
+        Get_Docker_URL="get.daocloud.io/docker"
+        Get_Docker_Argu=" -s docker --mirror Aliyun"
+        Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
     fi
-
 }
 
 confirm() {
