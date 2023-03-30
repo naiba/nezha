@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	fakeUa "github.com/EDDYCJY/fake-useragent"
+
 	"github.com/naiba/nezha/pkg/utils"
 )
 
@@ -78,12 +80,13 @@ func fetchGeoIP(servers []string, isV6 bool) geoIP {
 	var ip geoIP
 	var resp *http.Response
 	var err error
+
 	// 双栈支持参差不齐，不能随机请求，有些 IPv6 取不到 IP
 	for i := 0; i < len(servers); i++ {
 		if isV6 {
-			resp, err = httpClientV6.Get(servers[i])
+			resp, err = httpGetWithUA(httpClientV6, servers[i])
 		} else {
-			resp, err = httpClientV4.Get(servers[i])
+			resp, err = httpGetWithUA(httpClientV4, servers[i])
 		}
 		if err == nil {
 			body, err := io.ReadAll(resp.Body)
@@ -117,6 +120,6 @@ func httpGetWithUA(client *http.Client, url string) (*http.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Safari/537.36")
+	req.Header.Add("User-Agent", fakeUa.Random())
 	return client.Do(req)
 }
