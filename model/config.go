@@ -17,11 +17,12 @@ var Languages = map[string]string{
 }
 
 var Themes = map[string]string{
-	"default":  "Default",
-	"daynight": "JackieSung DayNight",
-	"mdui":     "Neko Mdui",
-	"hotaru":   "Hotaru",
-	"custom":   "Custom(local)",
+	"default":      "Default",
+	"daynight":     "JackieSung DayNight",
+	"mdui":         "Neko Mdui",
+	"hotaru":       "Hotaru",
+	"angel-kanade": "AngelKanade",
+	"custom":       "Custom(local)",
 }
 
 var DashboardThemes = map[string]string{
