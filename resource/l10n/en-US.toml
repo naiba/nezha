@@ -588,3 +588,6 @@ other = "Admin Panel Theme"
 
 [HideForGuest]
 other = "No display to visitors"
+
+[Info]
+other = "Info"
