@@ -1,9 +1,8 @@
-{{define "theme-AngelKanade/menu"}}
+{{define "theme-angel-kanade/menu"}}
 <div class="ui large top fixed menu nb-menu">
     <div class="ui container">
-        <div class="item" style=""><i class="server blue icon"></i></div>
         <a class="item" href="/">
-            <img src="/static/logo.svg?v20210804">
+            <img class="ui" style="height: 2rem" src="/static/logo.svg?v20210804">
         </a>
         {{if .IsAdminPage}}
         <a class='item{{if eq .MatchedPath "/server"}} active{{end}}' href="/server"><i class="server icon"></i>{{tr "Server"}}</a>
