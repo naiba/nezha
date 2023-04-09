@@ -586,5 +586,8 @@ other = "流量剩余"
 [DashboardTheme]
 other = "管理后台主题"
 
+[Info]
+other = "信息"
+
 [HideForGuest]
 other = "对游客隐藏"
