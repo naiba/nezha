@@ -588,3 +588,6 @@ other = "管理後臺主題"
 
 [HideForGuest]
 other = "對遊客隱藏"
+
+[Info]
+other = "訊息"
