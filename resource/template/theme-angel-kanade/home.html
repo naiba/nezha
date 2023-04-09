@@ -79,7 +79,7 @@
                       <i class="arrow alternate circle up outline icon"></i>
                       @#formatByteSize(server.State.NetOutSpeed)#@/s
                     </div>
-                    <div class="three wide column">流量</div>
+                    <div class="three wide column">{{tr "NetTransfer"}}</div>
                     <div class="thirteen wide column">
                       <i class="arrow circle down icon"></i>
                       @#formatByteSize(server.State.NetInTransfer)#@
@@ -96,7 +96,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class="three wide column">信息</div>
+                    <div class="three wide column">{{tr "Info}}</div>
                     <div class="thirteen wide column">
                       <i class="bi bi-cpu-fill" style="font-size: 1.1rem; color: #4a86e8;"></i> @#getCoreAndGHz(server.Host.CPU)#@
                       &nbsp;
