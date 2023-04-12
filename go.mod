@@ -3,7 +3,7 @@ module github.com/naiba/nezha
 go 1.19
 
 require (
-	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5
+	code.cloudfoundry.org/bytefmt v0.0.0-20230406175530-3579ae0680eb
 	code.gitea.io/sdk/gitea v0.15.1
 	github.com/AlecAivazis/survey/v2 v2.3.6
 	github.com/BurntSushi/toml v1.2.1
@@ -32,15 +32,15 @@ require (
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
-	github.com/xanzy/go-gitlab v0.81.0
-	golang.org/x/crypto v0.7.0
-	golang.org/x/oauth2 v0.6.0
+	github.com/xanzy/go-gitlab v0.82.0
+	golang.org/x/crypto v0.8.0
+	golang.org/x/oauth2 v0.7.0
 	golang.org/x/sync v0.1.0
-	golang.org/x/text v0.8.0
+	golang.org/x/text v0.9.0
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
-	gorm.io/driver/sqlite v1.4.4
-	gorm.io/gorm v1.24.6
+	gorm.io/driver/sqlite v1.5.0
+	gorm.io/gorm v1.25.0
 	sigs.k8s.io/yaml v1.3.0
 )
 
@@ -97,9 +97,9 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/exp v0.0.0-20230131160201-f062dba9d201 // indirect
-	golang.org/x/net v0.8.0 // indirect
-	golang.org/x/sys v0.6.0 // indirect
-	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/term v0.7.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230131230820-1c016267d619 // indirect
