@@ -48,6 +48,12 @@ type Monitor struct {
 	NotificationTag string // 当前服务监控所属的通知组
 	Cover           uint8
 
+	EnableTriggerTask      bool     `gorm:"default: false"`
+	FailTriggerTasksRaw    string   `gorm:"default:'[]'"`
+	RecoverTriggerTasksRaw string   `gorm:"default:'[]'"`
+	FailTriggerTasks       []uint64 `gorm:"-" json:"-"` // 失败时执行的触发任务id
+	RecoverTriggerTasks    []uint64 `gorm:"-" json:"-"` // 恢复时执行的触发任务id
+
 	MinLatency    float32
 	MaxLatency    float32
 	LatencyNotify bool
@@ -73,6 +79,21 @@ func (m *Monitor) CronSpec() string {
 	return fmt.Sprintf("@every %ds", m.Duration)
 }
 
+func (m *Monitor) BeforeSave(tx *gorm.DB) error {
+
+	if data, err := utils.Json.Marshal(m.FailTriggerTasks); err != nil {
+		return err
+	} else {
+		m.FailTriggerTasksRaw = string(data)
+	}
+	if data, err := utils.Json.Marshal(m.RecoverTriggerTasks); err != nil {
+		return err
+	} else {
+		m.RecoverTriggerTasksRaw = string(data)
+	}
+	return nil
+}
+
 func (m *Monitor) AfterFind(tx *gorm.DB) error {
 	m.SkipServers = make(map[uint64]bool)
 	var skipServers []uint64
@@ -83,6 +104,15 @@ func (m *Monitor) AfterFind(tx *gorm.DB) error {
 	for i := 0; i < len(skipServers); i++ {
 		m.SkipServers[skipServers[i]] = true
 	}
+
+	// 加载触发任务列表
+	if err := utils.Json.Unmarshal([]byte(m.FailTriggerTasksRaw), &m.FailTriggerTasks); err != nil {
+		return err
+	}
+	if err := utils.Json.Unmarshal([]byte(m.RecoverTriggerTasksRaw), &m.RecoverTriggerTasks); err != nil {
+		return err
+	}
+
 	return nil
 }
 

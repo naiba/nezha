@@ -396,18 +396,21 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 }
 
 type monitorForm struct {
-	ID              uint64
-	Name            string
-	Target          string
-	Type            uint8
-	Cover           uint8
-	Notify          string
-	NotificationTag string
-	SkipServersRaw  string
-	Duration        uint64
-	MinLatency      float32
-	MaxLatency      float32
-	LatencyNotify   string
+	ID                     uint64
+	Name                   string
+	Target                 string
+	Type                   uint8
+	Cover                  uint8
+	Notify                 string
+	NotificationTag        string
+	SkipServersRaw         string
+	Duration               uint64
+	MinLatency             float32
+	MaxLatency             float32
+	LatencyNotify          string
+	EnableTriggerTask      string
+	FailTriggerTasksRaw    string
+	RecoverTriggerTasksRaw string
 }
 
 func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
@@ -427,12 +430,21 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.LatencyNotify = mf.LatencyNotify == "on"
 		m.MinLatency = mf.MinLatency
 		m.MaxLatency = mf.MaxLatency
+		m.EnableTriggerTask = mf.EnableTriggerTask == "on"
+		m.RecoverTriggerTasksRaw = mf.RecoverTriggerTasksRaw
+		m.FailTriggerTasksRaw = mf.FailTriggerTasksRaw
 		err = m.InitSkipServers()
 	}
 	if err == nil {
 		// 保证NotificationTag不为空
 		if m.NotificationTag == "" {
 			m.NotificationTag = "default"
+		}
+		if err == nil {
+			err = utils.Json.Unmarshal([]byte(mf.FailTriggerTasksRaw), &m.FailTriggerTasks)
+		}
+		if err == nil {
+			err = utils.Json.Unmarshal([]byte(mf.RecoverTriggerTasksRaw), &m.RecoverTriggerTasks)
 		}
 		if m.ID == 0 {
 			err = singleton.DB.Create(&m).Error

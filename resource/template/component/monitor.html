@@ -39,7 +39,7 @@
         <label>{{tr "SpecificServers"}}</label>
         <div class="ui fluid multiple servers search selection dropdown">
           <input type="hidden" name="SkipServersRaw" />
-          <i class="dropdown icon"></i>
+          <i class="dropdown icon specificServer"></i>
           <div class="default text">{{tr "EnterIdAndNameToSearch"}}</div>
           <div class="menu"></div>
         </div>
@@ -68,6 +68,33 @@
           <label>{{tr "EnableLatencyNotification"}}</label>
         </div>
       </div>
+
+      <div class="field">
+        <div class="ui nb-EnableTriggerTask checkbox">
+          <input name="EnableTriggerTask" type="checkbox" tabindex="0" class="hidden" />
+          <label>{{tr "EnableTriggerTask"}}</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>{{tr "FailTriggerTasks"}}</label>
+        <div class="ui fluid multiple tasks search selection dropdown">
+          <input type="hidden" name="FailTriggerTasksRaw">
+          <i class="dropdown icon failTask"></i>
+          <div class="default text">{{tr "EnterIdAndNameToSearch"}}</div>
+          <div class="menu"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label>{{tr "RecoverTriggerTasks"}}</label>
+        <div class="ui fluid multiple tasks search selection dropdown">
+          <input type="hidden" name="RecoverTriggerTasksRaw">
+          <i class="dropdown icon recoverTask"></i>
+          <div class="default text">{{tr "EnterIdAndNameToSearch"}}</div>
+          <div class="menu"></div>
+        </div>
+      </div>
+
     </form>
     <div class="ui warning message">
       <p>
