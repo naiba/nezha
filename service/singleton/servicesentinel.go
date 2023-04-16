@@ -339,10 +339,12 @@ func (ss *ServiceSentinel) worker() {
 		// 写入当前数据
 		ss.serviceCurrentStatusData[mh.GetId()][ss.serviceCurrentStatusIndex[mh.GetId()]] = mh
 		ss.serviceCurrentStatusIndex[mh.GetId()]++
+
 		// 更新当前状态
 		ss.serviceResponseDataStoreCurrentUp[mh.GetId()] = 0
 		ss.serviceResponseDataStoreCurrentDown[mh.GetId()] = 0
 		ss.serviceResponseDataStoreCurrentAvgDelay[mh.GetId()] = 0
+
 		// 永远是最新的 30 个数据的状态 [01:00, 02:00, 03:00] -> [04:00, 02:00, 03: 00]
 		for i := 0; i < len(ss.serviceCurrentStatusData[mh.GetId()]); i++ {
 			if ss.serviceCurrentStatusData[mh.GetId()][i].GetId() > 0 {
@@ -354,11 +356,14 @@ func (ss *ServiceSentinel) worker() {
 				}
 			}
 		}
+
+		// 计算在线率，
 		var upPercent uint64 = 0
 		if ss.serviceResponseDataStoreCurrentDown[mh.GetId()]+ss.serviceResponseDataStoreCurrentUp[mh.GetId()] > 0 {
 			upPercent = ss.serviceResponseDataStoreCurrentUp[mh.GetId()] * 100 / (ss.serviceResponseDataStoreCurrentDown[mh.GetId()] + ss.serviceResponseDataStoreCurrentUp[mh.GetId()])
 		}
 		stateCode := GetStatusCode(upPercent)
+
 		// 数据持久化
 		if ss.serviceCurrentStatusIndex[mh.GetId()] == _CurrentStatusSize {
 			ss.serviceCurrentStatusIndex[mh.GetId()] = 0
@@ -372,34 +377,63 @@ func (ss *ServiceSentinel) worker() {
 				log.Println("NEZHA>> 服务监控数据持久化失败：", err)
 			}
 		}
+
 		// 延迟报警
 		if mh.Delay > 0 {
 			ss.monitorsLock.RLock()
 			if ss.monitors[mh.GetId()].LatencyNotify {
 				if mh.Delay > ss.monitors[mh.GetId()].MaxLatency {
 					ServerLock.RLock()
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, ServerList[r.Reporter].Name), NotificationMuteLabel.ServiceLatencyMin(mh.GetId()))
+					reporterServer := ServerList[r.Reporter]
+					msg := fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, reporterServer.Name)
+					muteLabel := NotificationMuteLabel.ServiceLatencyMin(mh.GetId())
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, msg, muteLabel)
 					ServerLock.RUnlock()
 				}
 				if mh.Delay < ss.monitors[mh.GetId()].MinLatency {
 					ServerLock.RLock()
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, ServerList[r.Reporter].Name), NotificationMuteLabel.ServiceLatencyMax(mh.GetId()))
+					reporterServer := ServerList[r.Reporter]
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, reporterServer.Name), NotificationMuteLabel.ServiceLatencyMax(mh.GetId()))
 					ServerLock.RUnlock()
 				}
 			}
 			ss.monitorsLock.RUnlock()
 		}
-		// 故障报警
+
+		// 状态变更报警
 		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.GetId()] {
-			ss.monitorsLock.RLock()
-			isNeedSendNotification := (ss.lastStatus[mh.GetId()] != 0 || stateCode == StatusDown) && ss.monitors[mh.GetId()].Notify
+			ss.monitorsLock.Lock()
+			lastStatus := ss.lastStatus[mh.GetId()]
+			// 存储新的状态值
 			ss.lastStatus[mh.GetId()] = stateCode
+
+			// 判断是否需要发送提醒
+			isNeedSendNotification := ss.monitors[mh.GetId()].Notify && (lastStatus != 0 || stateCode == StatusDown)
 			if isNeedSendNotification {
 				ServerLock.RLock()
-				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, ServerList[r.Reporter].Name, mh.Data), NotificationMuteLabel.ServiceStateChanged(mh.GetId()))
+				reporterServer := ServerList[r.Reporter]
+				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, reporterServer.Name, mh.Data), NotificationMuteLabel.ServiceStateChanged(mh.GetId()))
+
 				ServerLock.RUnlock()
 			}
-			ss.monitorsLock.RUnlock()
+
+			// 判断是否需要触发任务
+			if ss.monitors[mh.GetId()].EnableTriggerTask && lastStatus != 0 {
+				ServerLock.RLock()
+				reporterServer := ServerList[r.Reporter]
+				ServerLock.RUnlock()
+
+				if stateCode == StatusGood && lastStatus != stateCode {
+					// 当前状态正常 前序状态异常时 触发恢复任务
+					go SendTriggerTasks(ss.monitors[mh.GetId()].RecoverTriggerTasks, reporterServer.ID)
+				} else if lastStatus == StatusGood && lastStatus != stateCode {
+					// 前序状态正常 当前状态异常时 触发失败任务
+					go SendTriggerTasks(ss.monitors[mh.GetId()].FailTriggerTasks, reporterServer.ID)
+				}
+			}
+			// 当前状态正常 前序状态非正常时触发恢复任务
+
+			ss.monitorsLock.Unlock()
 		}
 		ss.serviceResponseDataStoreLock.Unlock()
 		// SSL 证书报警

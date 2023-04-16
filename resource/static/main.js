@@ -330,22 +330,61 @@ function addOrEditMonitor(monitor) {
   modal.find("a.ui.label.visible").each((i, el) => {
     el.remove();
   });
+  if (monitor && monitor.EnableTriggerTask) {
+    modal.find(".ui.nb-EnableTriggerTask.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.nb-EnableTriggerTask.checkbox").checkbox("set unchecked");
+  }
   var servers;
+  var failTriggerTasks;
+  var recoverTriggerTasks;
   if (monitor) {
     servers = monitor.SkipServersRaw;
     const serverList = JSON.parse(servers || "[]");
-    const node = modal.find("i.dropdown.icon");
+    const node = modal.find("i.dropdown.icon.specificServer");
     for (let i = 0; i < serverList.length; i++) {
       node.after(
-        '<a class="ui label transition visible" data-value="' +
-        serverList[i] +
-        '" style="display: inline-block !important;">ID:' +
-        serverList[i] +
-        '<i class="delete icon"></i></a>'
+          '<a class="ui label transition visible" data-value="' +
+          serverList[i] +
+          '" style="display: inline-block !important;">ID:' +
+          serverList[i] +
+          '<i class="delete icon"></i></a>'
+      );
+    }
+
+    failTriggerTasks = monitor.FailTriggerTasksRaw;
+    recoverTriggerTasks = monitor.RecoverTriggerTasksRaw;
+    const failTriggerTasksList = JSON.parse(failTriggerTasks || "[]");
+    const recoverTriggerTasksList = JSON.parse(recoverTriggerTasks || "[]");
+    const node1 = modal.find("i.dropdown.icon.failTask");
+    const node2 = modal.find("i.dropdown.icon.recoverTask");
+    for (let i = 0; i < failTriggerTasksList.length; i++) {
+      node1.after(
+          '<a class="ui label transition visible" data-value="' +
+          failTriggerTasksList[i] +
+          '" style="display: inline-block !important;">ID:' +
+          failTriggerTasksList[i] +
+          '<i class="delete icon"></i></a>'
+      );
+    }
+    for (let i = 0; i < recoverTriggerTasksList.length; i++) {
+      node2.after(
+          '<a class="ui label transition visible" data-value="' +
+          recoverTriggerTasksList[i] +
+          '" style="display: inline-block !important;">ID:' +
+          recoverTriggerTasksList[i] +
+          '<i class="delete icon"></i></a>'
       );
     }
   }
-  modal
+modal
+    .find("input[name=FailTriggerTasksRaw]")
+    .val(monitor ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
+modal
+    .find("input[name=RecoverTriggerTasksRaw]")
+    .val(monitor ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
+
+modal
     .find("input[name=SkipServersRaw]")
     .val(monitor ? "[]," + servers.substr(1, servers.length - 2) : "[]");
   showFormModal(".monitor.modal", "#monitorForm", "/api/monitor");
