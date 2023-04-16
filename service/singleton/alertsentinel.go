@@ -165,8 +165,8 @@ func checkStatus() {
 					go SendTriggerTasks(alert.FailTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationTag, message, NotificationMuteLabel.ServerIncident(server.ID, alert.ID), &curServer)
 					// 清除恢复通知的静音缓存
-					resolvedMuteLabel := fmt.Sprintf("%s:%s", *NotificationMuteLabel.ServerIncidentResolved(server.ID, alert.ID), alert.NotificationTag)
-					Cache.Delete(resolvedMuteLabel)
+					resolvedMuteLabel := NotificationMuteLabel.AppendNotificationTag(NotificationMuteLabel.ServerIncidentResolved(server.ID, alert.ID), alert.NotificationTag)
+					Cache.Delete(*resolvedMuteLabel)
 				}
 			} else {
 				// 本次通过检查但上一次的状态为失败，则发送恢复通知
@@ -177,8 +177,8 @@ func checkStatus() {
 					go SendTriggerTasks(alert.RecoverTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationTag, message, NotificationMuteLabel.ServerIncidentResolved(server.ID, alert.ID), &curServer)
 					// 清除失败通知的静音缓存
-					incidentMuteLabel := fmt.Sprintf("%s:%s", *NotificationMuteLabel.ServerIncident(server.ID, alert.ID), alert.NotificationTag)
-					Cache.Delete(incidentMuteLabel)
+					incidentMuteLabel := NotificationMuteLabel.AppendNotificationTag(NotificationMuteLabel.ServerIncident(server.ID, alert.ID), alert.NotificationTag)
+					Cache.Delete(*incidentMuteLabel)
 				}
 				alertsPrevState[alert.ID][server.ID] = _RuleCheckPass
 			}

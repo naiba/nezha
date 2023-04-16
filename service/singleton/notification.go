@@ -106,7 +106,7 @@ func OnDeleteNotification(id uint64) {
 func SendNotification(notificationTag string, desc string, muteLabel *string, ext ...*model.Server) {
 	if muteLabel != nil {
 		// 将通知方式组名称加入静音标志
-		muteLabel := fmt.Sprintf("%s:%s", *muteLabel, notificationTag)
+		muteLabel := *NotificationMuteLabel.AppendNotificationTag(muteLabel, notificationTag)
 		// 通知防骚扰策略
 		var flag bool
 		if cacheN, has := Cache.Get(muteLabel); has {
@@ -177,6 +177,11 @@ func (_NotificationMuteLabel) ServerIncident(alertId uint64, serverId uint64) *s
 func (_NotificationMuteLabel) ServerIncidentResolved(alertId uint64, serverId uint64) *string {
 	label := fmt.Sprintf("bf::seir-%d-%d", alertId, serverId)
 	return &label
+}
+
+func (_NotificationMuteLabel) AppendNotificationTag(label *string, notificationTag string) *string {
+	newLabel := fmt.Sprintf("%s:%s", *label, notificationTag)
+	return &newLabel
 }
 
 func (_NotificationMuteLabel) ServiceLatencyMin(serviceId uint64) *string {
