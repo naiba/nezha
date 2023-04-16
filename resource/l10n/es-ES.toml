@@ -184,6 +184,9 @@ other = "Siempre se activa"
 [ModeOnetimeTrigger]
 other = "Se activa sólo una vez"
 
+[EnableTriggerTask]
+other = "Activar tareas de activación"
+
 [FailTriggerTasks]
 other = "Tareas que se activan en caso de fallo"
 
@@ -586,8 +589,8 @@ other = "Datos restantes"
 [DashboardTheme]
 other = "Tema del panel de administración"
 
-[HideForGuest]
-other = "No se muestra a los visitantes"
-
 [Info]
 other = "Información"
+
+[HideForGuest]
+other = "No se muestra a los visitantes"

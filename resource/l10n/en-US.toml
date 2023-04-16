@@ -184,6 +184,9 @@ other = "Always triggered"
 [ModeOnetimeTrigger]
 other = "Triggered only once"
 
+[EnableTriggerTask]
+other = "Enable trigger tasks"
+
 [FailTriggerTasks]
 other = "Tasks to be triggered in case of failure"
 
@@ -586,8 +589,8 @@ other = "Data remaining"
 [DashboardTheme]
 other = "Admin Panel Theme"
 
-[HideForGuest]
-other = "No display to visitors"
-
 [Info]
 other = "Info"
+
+[HideForGuest]
+other = "No display to visitors"

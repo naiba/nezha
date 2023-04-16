@@ -184,6 +184,9 @@ other = "始終觸發"
 [ModeOnetimeTrigger]
 other = "單次觸發"
 
+[EnableTriggerTask]
+other = "啟用觸發任務"
+
 [FailTriggerTasks]
 other = "故障時觸發任務"
 
@@ -586,8 +589,8 @@ other = "流量剩餘"
 [DashboardTheme]
 other = "管理後臺主題"
 
-[HideForGuest]
-other = "對遊客隱藏"
-
 [Info]
 other = "訊息"
+
+[HideForGuest]
+other = "對遊客隱藏"
