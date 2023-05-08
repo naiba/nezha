@@ -36,15 +36,16 @@
 
 You can change the dashboard language in the settings page (`/setting`) after the dashboard is installed.
 
-## Special Thanks
+## Contributors
 
-- [@JackieSung](https://github.com/JackieSung4ev) for our first community-contributed front-end theme.
-- [@Erope](https://github.com/Erope) for contributed a lot to our installation scripts and community building.
-- [@MikoyChinese](https://github.com/MikoyChinese) for our second community-contributed front-end theme.
-- [@AkkiaS7](https://github.com/AkkiaS7) and [@Cantoblanco](https://github.com/cantoblanco) for the excellent contribution in the early days of globalization.
-- [@dysf888](https://github.com/dysf888) for the installation script in Windows.
-- [@MartijnLindeman](https://github.com/MartijnLindeman) for his perseverance has taken us to the international market.
-- and other [contributors](https://github.com/naiba/nezha/graphs/contributors).
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## Star History
 
