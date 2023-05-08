@@ -2,7 +2,7 @@ name: contributors
 
 on:
   push:
-    branches: [main]
+    branches: [master]
 
 jobs:
   contributors:
@@ -14,7 +14,7 @@ jobs:
         with:
           filter-author: (renovate\[bot\]|renovate-bot|dependabot\[bot\])
           hideName: 'false' # Hide names in htmlTable
-          avatarSize: 66  # Set the avatar size.
+          avatarSize: 33  # Set the avatar size.
           truncate: 6
           avatarMargin: 6
 
