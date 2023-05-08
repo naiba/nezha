@@ -38,14 +38,7 @@ You can change the dashboard language in the settings page (`/setting`) after th
 
 ## Contributors
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+<!--GAMFC_DELIMITER--><!--GAMFC_DELIMITER_END-->
 
 ## Star History
 
