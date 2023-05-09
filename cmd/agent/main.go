@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+	bpc "github.com/DaRealFreak/cloudflare-bp-go"
 	"github.com/blang/semver"
 	"github.com/go-ping/ping"
 	"github.com/gorilla/websocket"
@@ -74,8 +75,10 @@ const (
 )
 
 func init() {
-	http.DefaultClient.Timeout = time.Second * 5
 	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
+
+	http.DefaultClient.Timeout = time.Second * 5
+	httpClient.Transport = bpc.AddCloudFlareByPass(httpClient.Transport)
 
 	ex, err := os.Executable()
 	if err != nil {
@@ -341,7 +344,7 @@ func handleIcmpPingTask(task *pb.Task, result *pb.TaskResult) {
 		if stat.PacketsRecv == 0 {
 			result.Data = "pockets recv 0"
 			return
-		} 
+		}
 		result.Delay = float32(stat.AvgRtt.Microseconds()) / 1000.0
 		result.Successful = true
 	} else {
