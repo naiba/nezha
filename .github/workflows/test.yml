@@ -5,7 +5,6 @@ on:
     branches:
       - master
     paths-ignore:
-      - ".github/workflows/agent.yml"
       - ".github/workflows/codeql-analysis.yml"
       - ".github/workflows/test-on-pr.yml"
       - ".github/workflows/contributors.yml"
@@ -28,7 +27,6 @@ jobs:
       - name: Build test
         run: |
           go build cmd/dashboard/main.go
-          go build cmd/agent/main.go
       - name: Run Gosec Security Scanner
         run: |
           go install github.com/securego/gosec/v2/cmd/gosec@latest

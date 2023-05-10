@@ -16,7 +16,6 @@
 /dist
 .DS_Store
 /main
-/cmd/agent/main
 /cmd/dashboard/main
 /config.yml
 /resource/template/theme-custom
