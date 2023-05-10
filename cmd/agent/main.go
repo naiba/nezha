@@ -300,7 +300,7 @@ func doSelfUpdate(useLocalVersion bool) {
 		v = semver.MustParse(version)
 	}
 	println("检查更新：", v)
-	latest, err := selfupdate.UpdateSelf(v, "naiba/nezha")
+	latest, err := selfupdate.UpdateSelf(v, "nezhahq/agent")
 	if err != nil {
 		println("更新失败：", err)
 		return
