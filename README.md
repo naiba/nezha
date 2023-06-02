@@ -74,8 +74,8 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/hhhkkk520" title="Kris">
   <img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/>
 </a>
-<a href="https://github.com/spiritLHLS" title="spiritLHLS">
-  <img src="https://avatars.githubusercontent.com/u/103393591?v=4" width="50;" alt="spiritLHLS"/>
+<a href="https://github.com/spiritLHLS" title="spiritlhl">
+  <img src="https://avatars.githubusercontent.com/u/103393591?v=4" width="50;" alt="spiritlhl"/>
 </a>
 <a href="https://github.com/rootmelo92118" title="rootmelo92118">
   <img src="https://avatars.githubusercontent.com/u/32770959?v=4" width="50;" alt="rootmelo92118"/>
@@ -109,6 +109,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 </a>
 <a href="https://github.com/MartijnLindeman" title="Martijn Lindeman">
   <img src="https://avatars.githubusercontent.com/u/78365708?v=4" width="50;" alt="Martijn Lindeman"/>
+</a>
+<a href="https://github.com/nickfox-taterli" title="Tater Li">
+  <img src="https://avatars.githubusercontent.com/u/19658596?v=4" width="50;" alt="Tater Li"/>
 </a>
 <a href="https://github.com/hmsjy2017" title="Tony">
   <img src="https://avatars.githubusercontent.com/u/42692274?v=4" width="50;" alt="Tony"/>
