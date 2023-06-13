@@ -41,6 +41,7 @@ func (ma *memberAPI) serve() {
 	mr.GET("/cron/:id/manual", ma.manualTrigger)
 	mr.POST("/force-update", ma.forceUpdate)
 	mr.POST("/batch-update-server-group", ma.batchUpdateServerGroup)
+	mr.POST("/batch-delete-server", ma.batchDeleteServer)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -187,37 +188,9 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		if err == nil {
 			// 删除服务器
 			singleton.ServerLock.Lock()
-			tag := singleton.ServerList[id].Tag
-			delete(singleton.SecretToID, singleton.ServerList[id].Secret)
-			delete(singleton.ServerList, id)
-			index := -1
-			for i := 0; i < len(singleton.ServerTagToIDList[tag]); i++ {
-				if singleton.ServerTagToIDList[tag][i] == id {
-					index = i
-					break
-				}
-			}
-			if index > -1 {
-				// 删除旧 Tag-ID 绑定关系
-				singleton.ServerTagToIDList[tag] = append(singleton.ServerTagToIDList[tag][:index], singleton.ServerTagToIDList[tag][index+1:]...)
-				if len(singleton.ServerTagToIDList[tag]) == 0 {
-					delete(singleton.ServerTagToIDList, tag)
-				}
-			}
+			onServerDelete(id)
 			singleton.ServerLock.Unlock()
 			singleton.ReSortServer()
-			// 删除循环流量状态中的此服务器相关的记录
-			singleton.AlertsLock.Lock()
-			for i := 0; i < len(singleton.Alerts); i++ {
-				if singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID] != nil {
-					delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].ServerName, id)
-					delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].Transfer, id)
-					delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].NextUpdate, id)
-				}
-			}
-			singleton.AlertsLock.Unlock()
-			// 删除服务器相关循环流量记录
-			singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", id)
 		}
 	case "notification":
 		err = singleton.DB.Unscoped().Delete(&model.Notification{}, "id = ?", id).Error
@@ -446,10 +419,12 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		if err == nil {
 			err = utils.Json.Unmarshal([]byte(mf.RecoverTriggerTasksRaw), &m.RecoverTriggerTasks)
 		}
-		if m.ID == 0 {
-			err = singleton.DB.Create(&m).Error
-		} else {
-			err = singleton.DB.Save(&m).Error
+		if err == nil {
+			if m.ID == 0 {
+				err = singleton.DB.Create(&m).Error
+			} else {
+				err = singleton.DB.Save(&m).Error
+			}
 		}
 	}
 	if err == nil {
@@ -932,4 +907,64 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
+}
+
+func (ma *memberAPI) batchDeleteServer(c *gin.Context) {
+	var servers []uint64
+	if err := c.ShouldBindJSON(&servers); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+	if err := singleton.DB.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+	singleton.ServerLock.Lock()
+	for i := 0; i < len(servers); i++ {
+		id := servers[i]
+		onServerDelete(id)
+	}
+	singleton.ServerLock.Unlock()
+	singleton.ReSortServer()
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+func onServerDelete(id uint64) {
+	tag := singleton.ServerList[id].Tag
+	delete(singleton.SecretToID, singleton.ServerList[id].Secret)
+	delete(singleton.ServerList, id)
+	index := -1
+	for i := 0; i < len(singleton.ServerTagToIDList[tag]); i++ {
+		if singleton.ServerTagToIDList[tag][i] == id {
+			index = i
+			break
+		}
+	}
+	if index > -1 {
+
+		singleton.ServerTagToIDList[tag] = append(singleton.ServerTagToIDList[tag][:index], singleton.ServerTagToIDList[tag][index+1:]...)
+		if len(singleton.ServerTagToIDList[tag]) == 0 {
+			delete(singleton.ServerTagToIDList, tag)
+		}
+	}
+
+	singleton.AlertsLock.Lock()
+	for i := 0; i < len(singleton.Alerts); i++ {
+		if singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID] != nil {
+			delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].ServerName, id)
+			delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].Transfer, id)
+			delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].NextUpdate, id)
+		}
+	}
+	singleton.AlertsLock.Unlock()
+
+	singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", id)
 }

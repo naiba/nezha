@@ -44,6 +44,30 @@ function showConfirm(title, content, callFn, extData) {
     .modal("show");
 }
 
+function postJson(url, data) {
+  return $.ajax({
+    url: url,
+    type: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(data),
+  }).done((resp) => {
+    if (resp.code == 200) {
+      if (resp.message) {
+        alert(resp.message);
+      } else {
+        alert("删除成功");
+      }
+      window.location.reload();
+    } else {
+      alert("删除失败 " + resp.code + "：" + resp.message);
+      confirmBtn.toggleClass("loading");
+    }
+  })
+    .fail((err) => {
+      alert("网络错误：" + err.responseText);
+    });
+}
+
 function showFormModal(modelSelector, formID, URL, getData) {
   $(modelSelector)
     .modal({
@@ -344,11 +368,11 @@ function addOrEditMonitor(monitor) {
     const node = modal.find("i.dropdown.icon.specificServer");
     for (let i = 0; i < serverList.length; i++) {
       node.after(
-          '<a class="ui label transition visible" data-value="' +
-          serverList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          serverList[i] +
-          '<i class="delete icon"></i></a>'
+        '<a class="ui label transition visible" data-value="' +
+        serverList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        serverList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
 
@@ -360,31 +384,31 @@ function addOrEditMonitor(monitor) {
     const node2 = modal.find("i.dropdown.icon.recoverTask");
     for (let i = 0; i < failTriggerTasksList.length; i++) {
       node1.after(
-          '<a class="ui label transition visible" data-value="' +
-          failTriggerTasksList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          failTriggerTasksList[i] +
-          '<i class="delete icon"></i></a>'
+        '<a class="ui label transition visible" data-value="' +
+        failTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        failTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
     for (let i = 0; i < recoverTriggerTasksList.length; i++) {
       node2.after(
-          '<a class="ui label transition visible" data-value="' +
-          recoverTriggerTasksList[i] +
-          '" style="display: inline-block !important;">ID:' +
-          recoverTriggerTasksList[i] +
-          '<i class="delete icon"></i></a>'
+        '<a class="ui label transition visible" data-value="' +
+        recoverTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        recoverTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
       );
     }
   }
-modal
+  modal
     .find("input[name=FailTriggerTasksRaw]")
     .val(monitor ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
-modal
+  modal
     .find("input[name=RecoverTriggerTasksRaw]")
     .val(monitor ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
 
-modal
+  modal
     .find("input[name=SkipServersRaw]")
     .val(monitor ? "[]," + servers.substr(1, servers.length - 2) : "[]");
   showFormModal(".monitor.modal", "#monitorForm", "/api/monitor");

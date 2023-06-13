@@ -202,6 +202,9 @@ other = "添加服務器"
 [BatchEditServerGroup]
 other = "批量修改分組"
 
+[BatchDeleteServer]
+other = "批量删除服务器"
+
 [InputServerGroupName]
 other = "輸入分組名稱"
 
@@ -307,8 +310,8 @@ other = "點擊複製"
 [DeleteServer]
 other = "刪除主機"
 
-[ConfirmToDeleteThisServer]
-other = "確認刪除此主機？"
+[ConfirmToDeleteServer]
+other = "確認刪除主機？"
 
 [NoServerSelected]
 other = "當前沒有選中的服務器"

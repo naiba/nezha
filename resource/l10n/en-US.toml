@@ -202,6 +202,9 @@ other = "Add Server"
 [BatchEditServerGroup]
 other = "Batch Modify Groups"
 
+[BatchDeleteServer]
+other = "Batch Delete Server"
+
 [InputServerGroupName]
 other = "Enter the name of the group"
 
@@ -307,7 +310,7 @@ other = "Click To Copy"
 [DeleteServer]
 other = "Delete Server"
 
-[ConfirmToDeleteThisServer]
+[ConfirmToDeleteServer]
 other = "Confirm Delete?"
 
 [NoServerSelected]

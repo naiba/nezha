@@ -202,6 +202,9 @@ other = "Añadir un servidor"
 [BatchEditServerGroup]
 other = "Modificación de grupos por lotes"
 
+[BatchDeleteServer]
+other = "Batch Delete Server"
+
 [InputServerGroupName]
 other = "Introduzca un nombre de grupo"
 
@@ -307,8 +310,8 @@ other = "Haga clic para copiar"
 [DeleteServer]
 other = "Eliminar el servidor"
 
-[ConfirmToDeleteThisServer]
-other = "¿Confirma que quiere eliminar este servidor?"
+[ConfirmToDeleteServer]
+other = "¿Confirma que quiere eliminar servidor?"
 
 [NoServerSelected]
 other = "No hay servidores seleccionados actualmente"

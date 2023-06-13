@@ -202,6 +202,9 @@ other = "添加服务器"
 [BatchEditServerGroup]
 other = "批量修改分组"
 
+[BatchDeleteServer]
+other = "批量删除服务器"
+
 [InputServerGroupName]
 other = "输入分组名称"
 
@@ -307,8 +310,8 @@ other = "点击复制"
 [DeleteServer]
 other = "删除主机"
 
-[ConfirmToDeleteThisServer]
-other = "确认删除此主机？"
+[ConfirmToDeleteServer]
+other = "确认删除主机？"
 
 [NoServerSelected]
 other = "当前没有选中的服务器"

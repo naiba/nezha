@@ -8,6 +8,9 @@
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="batchEditServerGroup()"><i
                         class="edit icon"></i> {{tr "BatchEditServerGroup"}}
                 </button>
+                <button class="ui right labeled nezha-primary-btn icon button" onclick="batchDeleteServer()"><i
+                        class="trash icon"></i> {{tr "BatchDeleteServer"}}
+                </button>
                 <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditServer()"><i
                         class="add icon"></i> {{tr "AddServer"}}
                 </button>
@@ -69,7 +72,7 @@
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"
-                                onclick="showConfirm('{{tr "DeleteServer"}}','{{tr "ConfirmToDeleteThisServer"}}',deleteRequest,'/api/server/'+{{$server.ID}})">
+                                onclick="showConfirm('{{tr "DeleteServer"}}','{{tr "ConfirmToDeleteServer"}}',deleteRequest,'/api/server/'+{{$server.ID}})">
                                 <i class="trash alternate outline icon"></i>
                             </button>
                         </div>
@@ -187,6 +190,25 @@
                     position: 'top-center',
                 });
             })
+    }
+    function batchDeleteServer() {
+        const servers = []
+        checkBoxList.forEach(cb => {
+            if (cb.checked) {
+                servers.push(parseInt(cb.value))
+            }
+        })
+        if (servers.length == 0) {
+            $.suiAlert({
+                title: '{{tr "NoServerSelected"}}',
+                description: '',
+                type: 'warning',
+                time: '2',
+                position: 'top-center',
+            });
+            return
+        }
+        showConfirm('{{tr "DeleteServer"}}', '{{tr "ConfirmToDeleteServer"}}', () => postJson('/api/batch-delete-server', servers), '')
     }
 </script>
 {{end}}
