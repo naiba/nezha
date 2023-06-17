@@ -400,42 +400,53 @@ func (ss *ServiceSentinel) worker() {
 			ss.monitorsLock.RUnlock()
 		}
 
-		// 状态变更报警
+		// 状态变更报警+触发任务执行
 		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.GetId()] {
 			ss.monitorsLock.Lock()
 			lastStatus := ss.lastStatus[mh.GetId()]
 			// 存储新的状态值
 			ss.lastStatus[mh.GetId()] = stateCode
 
-			// 判断是否需要发送提醒
-			isNeedSendNotification := ss.monitors[mh.GetId()].Notify && (lastStatus != 0 || stateCode == StatusDown)
+			// 判断是否需要发送通知
+			isNeedSendNotification := ss.monitors[mh.GetId()].Notify && lastStatus != 0
 			if isNeedSendNotification {
 				ServerLock.RLock()
-				reporterServer := ServerList[r.Reporter]
-				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, reporterServer.Name, mh.Data), NotificationMuteLabel.ServiceStateChanged(mh.GetId()))
 
+				reporterServer := ServerList[r.Reporter]
+				notificationTag := ss.monitors[mh.GetId()].NotificationTag
+				notificationMsg := fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, reporterServer.Name, mh.Data)
+				muteLabel := NotificationMuteLabel.ServiceStateChanged(mh.GetId())
+
+				// 状态变更时，清除静音缓存
+				if stateCode != lastStatus {
+					fullLabel := *NotificationMuteLabel.AppendNotificationTag(muteLabel, notificationTag)
+					Cache.Delete(fullLabel)
+				}
+
+				go SendNotification(notificationTag, notificationMsg, muteLabel)
 				ServerLock.RUnlock()
 			}
 
 			// 判断是否需要触发任务
-			if ss.monitors[mh.GetId()].EnableTriggerTask && lastStatus != 0 {
+			isNeedTriggerTask := ss.monitors[mh.GetId()].EnableTriggerTask && lastStatus != 0
+			if isNeedTriggerTask {
 				ServerLock.RLock()
 				reporterServer := ServerList[r.Reporter]
 				ServerLock.RUnlock()
 
 				if stateCode == StatusGood && lastStatus != stateCode {
-					// 当前状态正常 前序状态异常时 触发恢复任务
+					// 当前状态正常 前序状态非正常时 触发恢复任务
 					go SendTriggerTasks(ss.monitors[mh.GetId()].RecoverTriggerTasks, reporterServer.ID)
 				} else if lastStatus == StatusGood && lastStatus != stateCode {
-					// 前序状态正常 当前状态异常时 触发失败任务
+					// 前序状态正常 当前状态非正常时 触发失败任务
 					go SendTriggerTasks(ss.monitors[mh.GetId()].FailTriggerTasks, reporterServer.ID)
 				}
 			}
-			// 当前状态正常 前序状态非正常时触发恢复任务
 
 			ss.monitorsLock.Unlock()
 		}
 		ss.serviceResponseDataStoreLock.Unlock()
+
 		// SSL 证书报警
 		var errMsg string
 		if strings.HasPrefix(mh.Data, "SSL证书错误：") {
