@@ -416,7 +416,7 @@ func (ss *ServiceSentinel) worker() {
 			ss.lastStatus[mh.GetId()] = stateCode
 
 			// 判断是否需要发送通知
-			isNeedSendNotification := ss.monitors[mh.GetId()].Notify && lastStatus != 0
+			isNeedSendNotification := ss.monitors[mh.GetId()].Notify && (lastStatus != 0 || stateCode == StatusDown)
 			if isNeedSendNotification {
 				ServerLock.RLock()
 
