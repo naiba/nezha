@@ -118,12 +118,16 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		host.IP != "" &&
 		singleton.ServerList[clientID].Host.IP != host.IP {
 
-		singleton.SendNotification(singleton.Conf.IPChangeNotificationTag, fmt.Sprintf(
-			"[%s] %s, %s => %s",
-			singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "IPChanged",
-			}),
-			singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP), singleton.IPDesensitize(host.IP)), singleton.NotificationMuteLabel.IPChanged(clientID), nil)
+		singleton.SendNotification(singleton.Conf.IPChangeNotificationTag,
+			fmt.Sprintf(
+				"[%s] %s, %s => %s",
+				singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+					MessageID: "IPChanged",
+				}),
+				singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP),
+				singleton.IPDesensitize(host.IP),
+			),
+			nil)
 	}
 
 	// 判断是否是机器重启，如果是机器重启要录入最后记录的流量里面

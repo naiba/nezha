@@ -382,19 +382,27 @@ func (ss *ServiceSentinel) worker() {
 		if mh.Delay > 0 {
 			ss.monitorsLock.RLock()
 			if ss.monitors[mh.GetId()].LatencyNotify {
+				notificationTag := ss.monitors[mh.GetId()].NotificationTag
+				minMuteLabel := NotificationMuteLabel.ServiceLatencyMin(mh.GetId())
+				maxMuteLabel := NotificationMuteLabel.ServiceLatencyMax(mh.GetId())
 				if mh.Delay > ss.monitors[mh.GetId()].MaxLatency {
+					// 延迟超过最大值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
 					msg := fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, reporterServer.Name)
-					muteLabel := NotificationMuteLabel.ServiceLatencyMin(mh.GetId())
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, msg, muteLabel)
+					go SendNotification(notificationTag, msg, minMuteLabel)
 					ServerLock.RUnlock()
-				}
-				if mh.Delay < ss.monitors[mh.GetId()].MinLatency {
+				} else if mh.Delay < ss.monitors[mh.GetId()].MinLatency {
+					// 延迟低于最小值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, reporterServer.Name), NotificationMuteLabel.ServiceLatencyMax(mh.GetId()))
+					msg := fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, reporterServer.Name)
+					go SendNotification(notificationTag, msg, maxMuteLabel)
 					ServerLock.RUnlock()
+				} else {
+					// 正常延迟， 清除静音缓存
+					UnMuteNotification(notificationTag, minMuteLabel)
+					UnMuteNotification(notificationTag, maxMuteLabel)
 				}
 			}
 			ss.monitorsLock.RUnlock()
@@ -419,8 +427,7 @@ func (ss *ServiceSentinel) worker() {
 
 				// 状态变更时，清除静音缓存
 				if stateCode != lastStatus {
-					fullLabel := *NotificationMuteLabel.AppendNotificationTag(muteLabel, notificationTag)
-					Cache.Delete(fullLabel)
+					UnMuteNotification(notificationTag, muteLabel)
 				}
 
 				go SendNotification(notificationTag, notificationMsg, muteLabel)
@@ -450,45 +457,75 @@ func (ss *ServiceSentinel) worker() {
 		// SSL 证书报警
 		var errMsg string
 		if strings.HasPrefix(mh.Data, "SSL证书错误：") {
-			// 排除 i/o timeout、connection timeout、EOF 错误
+			// i/o timeout、connection timeout、EOF 错误
 			if !strings.HasSuffix(mh.Data, "timeout") &&
 				!strings.HasSuffix(mh.Data, "EOF") &&
 				!strings.HasSuffix(mh.Data, "timed out") {
 				errMsg = mh.Data
+				ss.monitorsLock.RLock()
+				if ss.monitors[mh.GetId()].Notify {
+					muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), "network")
+					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[SSL] Fetch cert info failed, %s %s", ss.monitors[mh.GetId()].Name, errMsg), muteLabel)
+				}
+				ss.monitorsLock.RUnlock()
+
 			}
 		} else {
+			// 清除网络错误静音缓存
+			UnMuteNotification(ss.monitors[mh.GetId()].NotificationTag, NotificationMuteLabel.ServiceSSL(mh.GetId(), "network"))
+
 			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
+				ss.monitorsLock.Lock()
+				enableNotify := ss.monitors[mh.GetId()].Notify
+
+				// 首次获取证书信息时，缓存证书信息
 				if ss.sslCertCache[mh.GetId()] == "" {
 					ss.sslCertCache[mh.GetId()] = mh.Data
 				}
+
+				oldCert := strings.Split(ss.sslCertCache[mh.GetId()], "|")
+				isCertChanged := false
+				expiresOld, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
 				expiresNew, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", newCert[1])
-				// 证书过期提醒
-				if expiresNew.Before(time.Now().AddDate(0, 0, 7)) {
-					errMsg = fmt.Sprintf(
-						"The SSL certificate will expire within seven days. Expiration time: %s",
-						expiresNew.Format("2006-01-02 15:04:05"))
-				}
-				// 证书变更提醒
-				var oldCert = strings.Split(ss.sslCertCache[mh.GetId()], "|")
-				var expiresOld time.Time
-				if len(oldCert) > 1 {
-					expiresOld, _ = time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
-				}
+
+				// 证书变更时，更新缓存
 				if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
+					isCertChanged = true
 					ss.sslCertCache[mh.GetId()] = mh.Data
-					errMsg = fmt.Sprintf(
-						"SSL certificate changed, old: %s, %s expired; new: %s, %s expired.",
-						oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
+				}
+
+				notificationTag := ss.monitors[mh.GetId()].NotificationTag
+				serviceName := ss.monitors[mh.GetId()].Name
+				ss.monitorsLock.Unlock()
+
+				// 需要发送提醒
+				if enableNotify {
+					// 证书过期提醒
+					if expiresNew.Before(time.Now().AddDate(0, 0, 7)) {
+						expiresTimeStr := expiresNew.Format("2006-01-02 15:04:05")
+						errMsg = fmt.Sprintf(
+							"The SSL certificate will expire within seven days. Expiration time: %s",
+							expiresTimeStr,
+						)
+
+						// 静音规则： 服务id+证书过期时间
+						// 用于避免多个监测点对相同证书同时报警
+						muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), fmt.Sprintf("expire_%s", expiresTimeStr))
+						go SendNotification(notificationTag, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), muteLabel)
+					}
+
+					// 证书变更提醒
+					if isCertChanged {
+						errMsg = fmt.Sprintf(
+							"SSL certificate changed, old: %s, %s expired; new: %s, %s expired.",
+							oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
+
+						// 证书变更后会自动更新缓存，所以不需要静音
+						go SendNotification(notificationTag, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), nil)
+					}
 				}
 			}
-		}
-		if errMsg != "" {
-			ss.monitorsLock.RLock()
-			if ss.monitors[mh.GetId()].Notify {
-				go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[SSL] %s %s", ss.monitors[mh.GetId()].Name, errMsg), NotificationMuteLabel.ServiceSSL(mh.GetId()))
-			}
-			ss.monitorsLock.RUnlock()
 		}
 	}
 }
