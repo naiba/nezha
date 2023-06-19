@@ -102,6 +102,11 @@ func OnDeleteNotification(id uint64) {
 	delete(NotificationIDToTag, id)
 }
 
+func UnMuteNotification(notificationTag string, muteLabel *string) {
+	fullMuteLabel := *NotificationMuteLabel.AppendNotificationTag(muteLabel, notificationTag)
+	Cache.Delete(fullMuteLabel)
+}
+
 // SendNotification 向指定的通知方式组的所有通知方式发送通知
 func SendNotification(notificationTag string, desc string, muteLabel *string, ext ...*model.Server) {
 	if muteLabel != nil {
@@ -199,7 +204,7 @@ func (_NotificationMuteLabel) ServiceStateChanged(serviceId uint64) *string {
 	return &label
 }
 
-func (_NotificationMuteLabel) ServiceSSL(serviceId uint64) *string {
-	label := fmt.Sprintf("bf::sssl-%d", serviceId)
+func (_NotificationMuteLabel) ServiceSSL(serviceId uint64, extraInfo string) *string {
+	label := fmt.Sprintf("bf::sssl-%d-%s", serviceId, extraInfo)
 	return &label
 }
