@@ -15,6 +15,10 @@
 
 \>> [Use Cases | 我们的用户](https://www.google.com/search?q=%22powered+by+Nezha+Monitoring%22+OR+%22powered+by+%E5%93%AA%E5%90%92%E7%9B%91%E6%8E%A7%22) (Google)  
 
+\>> **欢迎正在使用本项目且想要改进的 UI 设计师、Web 前端工程师、Go 工程师 联系 hi#nai.ba 一起参与下个版本贡献。**
+
+\>> **Welcome UI designers, Web front-end engineers, and Go engineers who are using this project and want to improve it contact hi#nai.ba and contribute to THE NEXT VERSION together.**
+
 ## User Guide
 
 - [English](https://nezhahq.github.io/en_US/index.html)
