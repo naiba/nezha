@@ -83,6 +83,7 @@ func execCase(t *testing.T, item testSt) {
 	ns := NotificationServerBundle{
 		Notification: &n,
 		Server:       &server,
+		Loc:          time.Local,
 	}
 	assert.Equal(t, item.expectURL, ns.reqURL(msg))
 	reqBody, err := ns.reqBody(msg)

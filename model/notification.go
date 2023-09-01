@@ -28,6 +28,7 @@ const (
 type NotificationServerBundle struct {
 	Notification *Notification
 	Server       *Server
+	Loc          *time.Location
 }
 
 type Notification struct {
@@ -44,7 +45,7 @@ type Notification struct {
 
 func (ns *NotificationServerBundle) reqURL(message string) string {
 	n := ns.Notification
-	return replaceParamsInString(ns.Server, n.URL, message, func(msg string) string {
+	return ns.replaceParamsInString(n.URL, message, func(msg string) string {
 		return url.QueryEscape(msg)
 	})
 }
@@ -66,7 +67,7 @@ func (ns *NotificationServerBundle) reqBody(message string) (string, error) {
 	}
 	switch n.RequestType {
 	case NotificationRequestTypeJSON:
-		return replaceParamsInString(ns.Server, n.RequestBody, message, func(msg string) string {
+		return ns.replaceParamsInString(n.RequestBody, message, func(msg string) string {
 			msgBytes, _ := utils.Json.Marshal(msg)
 			return string(msgBytes)[1 : len(msgBytes)-1]
 		}), nil
@@ -77,7 +78,7 @@ func (ns *NotificationServerBundle) reqBody(message string) (string, error) {
 		}
 		params := url.Values{}
 		for k, v := range data {
-			params.Add(k, replaceParamsInString(ns.Server, v, message, nil))
+			params.Add(k, ns.replaceParamsInString(v, message, nil))
 		}
 		return params.Encode(), nil
 	}
@@ -160,13 +161,34 @@ func (ns *NotificationServerBundle) Send(message string) error {
 }
 
 // replaceParamInString 替换字符串中的占位符
-func replaceParamsInString(s *Server, str string, message string, mod func(string) string) string {
-	// IP处理
-	ipv4 := ""
-	ipv6 := ""
-	validIP := ""
-	if s != nil {
-		ipList := strings.Split(s.Host.IP, "/")
+func (ns *NotificationServerBundle) replaceParamsInString(str string, message string, mod func(string) string) string {
+	if mod == nil {
+		mod = func(s string) string {
+			return s
+		}
+	}
+
+	str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
+	str = strings.ReplaceAll(str, "#DATETIME#", mod(time.Now().In(ns.Loc).String()))
+
+	if ns.Server != nil {
+		str = strings.ReplaceAll(str, "#SERVER.NAME#", mod(ns.Server.Name))
+		str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%f", ns.Server.State.CPU)))
+		str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%d", ns.Server.State.MemUsed)))
+		str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%d", ns.Server.State.SwapUsed)))
+		str = strings.ReplaceAll(str, "#SERVER.DISK#", mod(fmt.Sprintf("%d", ns.Server.State.DiskUsed)))
+		str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", mod(fmt.Sprintf("%d", ns.Server.State.NetInSpeed)))
+		str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", mod(fmt.Sprintf("%d", ns.Server.State.NetOutSpeed)))
+		str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", mod(fmt.Sprintf("%d", ns.Server.State.NetInTransfer)))
+		str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", mod(fmt.Sprintf("%d", ns.Server.State.NetOutTransfer)))
+		str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%f", ns.Server.State.Load1)))
+		str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%f", ns.Server.State.Load5)))
+		str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%f", ns.Server.State.Load15)))
+		str = strings.ReplaceAll(str, "#SERVER.TCPCONNCOUNT#", mod(fmt.Sprintf("%d", ns.Server.State.TcpConnCount)))
+		str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", mod(fmt.Sprintf("%d", ns.Server.State.UdpConnCount)))
+
+		var ipv4, ipv6, validIP string
+		ipList := strings.Split(ns.Server.Host.IP, "/")
 		if len(ipList) > 1 {
 			// 双栈
 			ipv4 = ipList[0]
@@ -182,51 +204,11 @@ func replaceParamsInString(s *Server, str string, message string, mod func(strin
 				validIP = ipv4
 			}
 		}
+
+		str = strings.ReplaceAll(str, "#SERVER.IP#", mod(validIP))
+		str = strings.ReplaceAll(str, "#SERVER.IPV4#", mod(ipv4))
+		str = strings.ReplaceAll(str, "#SERVER.IPV6#", mod(ipv6))
 	}
 
-	if mod != nil {
-		str = strings.ReplaceAll(str, "#NEZHA#", mod(message))
-		if s != nil {
-
-			str = strings.ReplaceAll(str, "#SERVER.NAME#", mod(s.Name))
-			str = strings.ReplaceAll(str, "#SERVER.IP#", mod(validIP))
-			str = strings.ReplaceAll(str, "#SERVER.IPV4#", mod(ipv4))
-			str = strings.ReplaceAll(str, "#SERVER.IPV6#", mod(ipv6))
-			str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%f", s.State.CPU)))
-			str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%d", s.State.MemUsed)))
-			str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%d", s.State.SwapUsed)))
-			str = strings.ReplaceAll(str, "#SERVER.DISK#", mod(fmt.Sprintf("%d", s.State.DiskUsed)))
-			str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", mod(fmt.Sprintf("%d", s.State.NetInSpeed)))
-			str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", mod(fmt.Sprintf("%d", s.State.NetOutSpeed)))
-			str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", mod(fmt.Sprintf("%d", s.State.NetInTransfer)))
-			str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", mod(fmt.Sprintf("%d", s.State.NetOutTransfer)))
-			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%f", s.State.Load1)))
-			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%f", s.State.Load5)))
-			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%f", s.State.Load15)))
-			str = strings.ReplaceAll(str, "#SERVER.TCPCONNCOUNT#", mod(fmt.Sprintf("%d", s.State.TcpConnCount)))
-			str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", mod(fmt.Sprintf("%d", s.State.UdpConnCount)))
-		}
-	} else {
-		str = strings.ReplaceAll(str, "#NEZHA#", message)
-		if s != nil {
-			str = strings.ReplaceAll(str, "#SERVER.NAME#", s.Name)
-			str = strings.ReplaceAll(str, "#SERVER.IP#", validIP)
-			str = strings.ReplaceAll(str, "#SERVER.IPV4#", ipv4)
-			str = strings.ReplaceAll(str, "#SERVER.IPV6#", ipv6)
-			str = strings.ReplaceAll(str, "#SERVER.CPU#", fmt.Sprintf("%f", s.State.CPU))
-			str = strings.ReplaceAll(str, "#SERVER.MEM#", fmt.Sprintf("%d", s.State.MemUsed))
-			str = strings.ReplaceAll(str, "#SERVER.SWAP#", fmt.Sprintf("%d", s.State.SwapUsed))
-			str = strings.ReplaceAll(str, "#SERVER.DISK#", fmt.Sprintf("%d", s.State.DiskUsed))
-			str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", fmt.Sprintf("%d", s.State.NetInSpeed))
-			str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", fmt.Sprintf("%d", s.State.NetOutSpeed))
-			str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", fmt.Sprintf("%d", s.State.NetInTransfer))
-			str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", fmt.Sprintf("%d", s.State.NetOutTransfer))
-			str = strings.ReplaceAll(str, "#SERVER.LOAD1#", fmt.Sprintf("%f", s.State.Load1))
-			str = strings.ReplaceAll(str, "#SERVER.LOAD5#", fmt.Sprintf("%f", s.State.Load5))
-			str = strings.ReplaceAll(str, "#SERVER.LOAD15#", fmt.Sprintf("%f", s.State.Load15))
-			str = strings.ReplaceAll(str, "#SERVER.TCPCONNCOUNT#", fmt.Sprintf("%d", s.State.TcpConnCount))
-			str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", fmt.Sprintf("%d", s.State.UdpConnCount))
-		}
-	}
 	return str
 }

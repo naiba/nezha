@@ -673,6 +673,7 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		ns := model.NotificationServerBundle{
 			Notification: &n,
 			Server:       nil,
+			Loc:          singleton.Loc,
 		}
 		// 勾选了跳过检查
 		if nf.SkipCheck != "on" {

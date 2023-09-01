@@ -153,6 +153,7 @@ func SendNotification(notificationTag string, desc string, muteLabel *string, ex
 		ns := model.NotificationServerBundle{
 			Notification: n,
 			Server:       nil,
+			Loc:          Loc,
 		}
 		if len(ext) > 0 {
 			ns.Server = ext[0]
