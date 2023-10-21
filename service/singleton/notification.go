@@ -1,8 +1,6 @@
 package singleton
 
 import (
-	// #nosec
-
 	"fmt"
 	"log"
 	"sync"
