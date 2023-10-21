@@ -28,7 +28,7 @@ jobs:
       - name: xgo build
         uses: crazy-max/ghaction-xgo@v2
         with:
-          xgo_version: 1.21
+          xgo_version: latest
           go_version: 1.21
           dest: dist
           pkg: cmd/dashboard
