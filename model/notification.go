@@ -118,7 +118,9 @@ func (ns *NotificationServerBundle) Send(message string) error {
 	}
 
 	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifySSL}, // #nosec G402
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: verifySSL, // #nosec G402
+		},
 	}
 
 	client := &http.Client{Transport: transCfg, Timeout: time.Minute * 10}
