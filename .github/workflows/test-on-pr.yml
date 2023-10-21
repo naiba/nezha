@@ -10,10 +10,10 @@ jobs:
     env:
       GO111MODULE: on
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
         with:
-          go-version: "^1.20.0"
+          go-version: "^1.21.3"
       - name: Unit test
         run: |
           go test -v ./...
@@ -21,6 +21,6 @@ jobs:
         run: |
           go build cmd/dashboard/main.go
       - name: Run Gosec Security Scanner
-        run: |
-          go install github.com/securego/gosec/v2/cmd/gosec@latest
-          gosec -exclude=G104 ./...
+        uses: securego/gosec@master
+        with:
+          args: --exclude=G104 ./...

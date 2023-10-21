@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v4
 
       - name: Extract branch name
         run: |
@@ -29,7 +29,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v2
         with:
           xgo_version: latest
-          go_version: 1.19
+          go_version: 1.21.3
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
@@ -59,10 +59,10 @@ jobs:
           password: ${{ secrets.ALI_PAT }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
 
       - name: Set up image name
         run: |
@@ -76,7 +76,7 @@ jobs:
         id: image-name
 
       - name: Build dasbboard image And Push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
