@@ -100,9 +100,9 @@
                     <div class="thirteen wide column">
                       <i class="bi bi-cpu-fill" style="font-size: 1.1rem; color: #4a86e8;"></i> @#getCoreAndGHz(server.Host.CPU)#@
                       &nbsp;
-                      <i class="bi bi-memory" style="font-size: 1.1rem; color: #00ac0d;"></i> @#getK2Gb(server.Host.MemTotal)#@
+                      <i class="bi bi-memory" style="font-size: 1.1rem; color: #00ac0d;"></i> @#getByteToGB(server.Host.MemTotal)#@
                       &nbsp;
-                      <i class="bi bi-hdd-rack-fill" style="font-size: 1.1rem; color: #980000"></i> @#getK2Gb(server.Host.DiskTotal)#@
+                      <i class="bi bi-hdd-rack-fill" style="font-size: 1.1rem; color: #980000"></i> @#getByteToGB(server.Host.DiskTotal)#@
                     </div>
                     <div class="three wide column">{{tr "Uptime"}}</div>
                     <div class="thirteen wide column">
@@ -274,8 +274,8 @@
 	    return Core.replace('Physical','Core');
 	   
       },
-      getK2Gb(bs){
-        return (bs/1024/1024).toFixed(2) + 'GB'
+      getByteToGB(bs){
+        return (bs/1024/1024/1024).toFixed(2) + 'GB'
       },
       listTipsMouseenter(obj,strs,tipsNum=1){
           this.layerIndex = layer.tips(strs, '#'+obj,{tips: [tipsNum, 'rgb(0 0 0 / 85%)'],time:0});
