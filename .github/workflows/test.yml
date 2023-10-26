@@ -8,6 +8,7 @@ on:
       - ".github/workflows/codeql-analysis.yml"
       - ".github/workflows/test-on-pr.yml"
       - ".github/workflows/contributors.yml"
+      - ".github/workflows/sync.yml"
       - "README.md"
       - ".goreleaser.yml"
 
