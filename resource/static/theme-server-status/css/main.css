@@ -1,0 +1,252 @@
+body {
+    padding-top: 70px !important;
+    padding-bottom: 30px !important;
+}
+
+/* 导航部分 开始*/
+.navbar {
+    min-height: 40px !important;
+}
+
+.navbar-collapse:not([aria-expanded]) .navbar-nav .dropdown-toggle {
+    margin-top: 18px;
+    padding: 0 !important;
+}
+
+.navbar-brand {
+    font-size: 20px;
+    text-align: center;
+}
+
+.node-cell-expand {
+    max-width: 420px;
+    word-break: break-all;
+}
+
+.node-cell-expand-label {
+    margin-right: 5px;
+}
+
+.dropdown .dropdown-toggle {
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.dropdown {
+    margin-right: 10px;
+}
+
+.navbar-inverse, .nav.navbar-nav {
+    background-image: linear-gradient(rgb(60, 60, 60) 0px, rgb(34, 34, 34) 100%) !important;
+}
+
+.navbar-inverse .navbar-brand {
+    font-size: 20px;
+}
+
+/* 导航部分 结束 */
+
+/* 正文部分 开始 */
+.content {
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.table {
+    margin-bottom: 0;
+    border-collapse: collapse;
+    border-radius: 3px;
+}
+
+.table th, .table td {
+    text-align: left;
+}
+
+.progress {
+    margin-bottom: 0;
+}
+
+.progress-bar {
+    text-align: center !important;
+    padding-left: 5px;
+}
+
+
+.expandRow > td {
+    padding: 0 !important;
+    border-top: 0 !important;
+}
+
+.node-cell.center {
+    text-align: center !important;
+}
+
+.node-cell.status .status-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 20px
+}
+
+.node-cell.status .status-icon {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    text-align: center;
+}
+
+.node-cell.os .icon.windows {
+    margin-right: 0 !important;
+    width: 14px;
+}
+
+.node-cell.location .flag {
+    margin-right: 0 !important;
+}
+
+.node-cell.network {
+    min-width: 110px;
+    max-width: 110px;
+}
+
+.node-cell.cpu, .node-cell.ram, .node-cell.hdd {
+    min-width: 45px;
+    max-width: 90px;
+}
+
+/*正文结束*/
+
+/* 服务页 正文*/
+.service-status .delay-today {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+}
+
+.service-status .delay-today > i {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    text-align: center;
+    background-color: grey;
+    margin-right: 0.3em;
+}
+
+.service-day-status-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+    border-radius: 3px;
+    box-shadow: inset 0 2px 2px rgba(0, 0, 0, .1);
+}
+
+.service-status {
+
+}
+
+/* 服务页 正文结束 */
+
+@media only screen and (max-width: 1200px) {
+    .node-cell.os,
+    .node-cell.location,
+    .node-cell.uptime {
+        display: none;
+        visibility: hidden;
+    }
+}
+
+@media only screen and (max-width: 720px) {
+    body {
+        font-size: 10px !important;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .node-cell.os,
+    .node-cell.location,
+    .node-cell.uptime {
+        display: none;
+        visibility: hidden;
+    }
+
+    .service-day-status-icon {
+        width: 8px;
+        height: 8px;
+        margin-right: 2px;
+        border-radius: 3px;
+    }
+}
+
+@media only screen and (max-width: 620px) {
+    body {
+        font-size: 10px !important;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .node-cell.type,
+    .node-cell.location,
+    .node-cell.uptime,
+    .node-cell.traffic {
+        display: none;
+        visibility: hidden;
+    }
+
+    .service-day-status-icon {
+    }
+}
+
+@media only screen and (max-width: 533px) {
+    body {
+        font-size: 10px !important;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .node-cell.os,
+    .node-cell.location,
+    .node-cell.uptime,
+    .node-cell.traffic {
+        display: none;
+        visibility: hidden;
+    }
+
+    .service-day-status-icon {
+    }
+}
+
+@media only screen and (max-width: 450px) {
+    body {
+        font-size: 10px !important;
+    }
+
+    .content {
+        padding: 0;
+    }
+
+    .node-cell.type,
+    .node-cell.location,
+    .node-cell.uptime,
+    .node-cell.traffic {
+        display: none;
+        visibility: hidden;
+    }
+
+    .node-cell.cpu,
+    .node-cell.ram,
+    .node-cell.hdd {
+        min-width: 25px;
+        max-width: 50px;
+    }
+
+    .service-day-status-icon {
+    }
+}

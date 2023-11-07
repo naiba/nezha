@@ -388,6 +388,12 @@ other = "硬盘"
 [MemUsed]
 other = "内存"
 
+[CpuUsed]
+other = "核心"
+
+[Virtualization]
+other = "虚拟化"
+
 [SwapUsed]
 other = "交换"
 
@@ -474,6 +480,9 @@ other = "白昼模式"
 
 [DarkMode]
 other = "暗黑模式"
+
+[SystemMode]
+other = "跟随系统"
 
 [GridLayout]
 other = "网格视图"
@@ -597,3 +606,18 @@ other = "信息"
 
 [HideForGuest]
 other = "对游客隐藏"
+
+[Feature]
+other = "功能"
+
+[SitePV]
+other = "本站总访问量"
+
+[SitePVUnit]
+other = "次"
+
+[SiteUV]
+other = "本站总访客数"
+
+[SiteUVUnit]
+other = "人次"

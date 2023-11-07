@@ -388,6 +388,12 @@ other = "Disco"
 [MemUsed]
 other = "Memoria"
 
+[CpuUsed]
+other = "CPU"
+
+[Virtualization]
+other = "Virtualización"
+
 [SwapUsed]
 other = "Swap"
 
@@ -474,6 +480,9 @@ other = "Modo luminoso"
 
 [DarkMode]
 other = "Modo oscuro"
+
+[SystemMode]
+other = "Modo del sistema"
 
 [GridLayout]
 other = "Grid Layout"
@@ -597,3 +606,18 @@ other = "Información"
 
 [HideForGuest]
 other = "No se muestra a los visitantes"
+
+[Feature]
+other = "Características"
+
+[SitePV]
+other = "Número total de visitas al sitio"
+
+[SitePVUnit]
+other = "visitas"
+
+[SiteUV]
+other = "Número total de visitantes únicos al sitio"
+
+[SiteUVUnit]
+other = "visitantes únicos"
