@@ -9,28 +9,30 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a href="#" class="navbar-brand">{{ .Title }}</a>
+                <a href="/" class="navbar-brand">{{.Conf.Site.Brand}}</a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
+                    <li><a href="/">{{tr "Home" }}</a></li>
+                    <li><a href="/service">{{tr "Services" }}</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
                     <li class="dropdown">
-                        <a data-toggle="dropdown" class="dropdown-toggle" href="#">{{tr "Feature" }}<b class="caret"></b></a>
+                        <a data-toggle="dropdown" href="#">{{tr "Menu" }}<b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a href="/">{{tr "Home" }}</a></li>
-                            <li><a href="/service">{{tr "Services" }}</a></li>
                             {{if .Admin}}
                             <li><a href="/server">{{tr "AdminPanel" }} ({{.Admin.Name}})</a></li>
                             {{else}}
                             <li><a href="/login">{{tr "Login" }}</a></li>
                             {{end}}
                             <li><a href="#" @click="setSystemTheme">{{tr "SystemMode" }}
-                                <span style="color: #fff" v-if="isSystemTheme"> ✔️</span></a>
+                                    <span style="color: #fff" v-if="isSystemTheme"> ✔️</span></a>
                             </li>
                             <li><a href="#" @click="setTheme('dark', true)">{{tr "DarkMode" }}
-                                <span v-if="theme === 'dark' && !isSystemTheme"> ✔️</span></a>
+                                    <span v-if="theme === 'dark' && !isSystemTheme"> ✔️</span></a>
                             </li>
                             <li><a href="#" @click="setTheme('light', true)">{{tr "LightMode" }}
-                                <span v-if="theme === 'light' && !isSystemTheme"> ✔️</span></a>
+                                    <span v-if="theme === 'light' && !isSystemTheme"> ✔️</span></a>
                             </li>
                         </ul>
                     </li>

@@ -607,17 +607,5 @@ other = "Info"
 [HideForGuest]
 other = "No display to visitors"
 
-[Feature]
+[Menu]
 other = "Menu"
-
-[SitePV]
-other = "Total page views"
-
-[SitePVUnit]
-other = "Page views"
-
-[SiteUV]
-other = "Total visitors"
-
-[SiteUVUnit]
-other = "Visitors"

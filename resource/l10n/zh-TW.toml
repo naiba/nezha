@@ -607,7 +607,7 @@ other = "訊息"
 [HideForGuest]
 other = "對遊客隱藏"
 
-[Feature]
+[Menu]
 other = "功能"
 
 [SitePV]

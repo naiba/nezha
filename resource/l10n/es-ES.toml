@@ -607,17 +607,5 @@ other = "Información"
 [HideForGuest]
 other = "No se muestra a los visitantes"
 
-[Feature]
-other = "Características"
-
-[SitePV]
-other = "Número total de visitas al sitio"
-
-[SitePVUnit]
-other = "visitas"
-
-[SiteUV]
-other = "Número total de visitantes únicos al sitio"
-
-[SiteUVUnit]
-other = "visitantes únicos"
+[Menu]
+other = "Menú"

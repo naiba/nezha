@@ -607,17 +607,5 @@ other = "信息"
 [HideForGuest]
 other = "对游客隐藏"
 
-[Feature]
-other = "功能"
-
-[SitePV]
-other = "本站总访问量"
-
-[SitePVUnit]
-other = "次"
-
-[SiteUV]
-other = "本站总访客数"
-
-[SiteUVUnit]
-other = "人次"
+[Menu]
+other = "菜单"

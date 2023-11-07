@@ -2,12 +2,7 @@
 <div class="container">
     <p style="text-align: center; font-size: 10px;">
         {{ .Title }} | Theme <a href="https://github.com/cppla/ServerStatus">ServerStatus</a> | Powered by <a
-            href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a>
-    </p>
-    <p style="text-align: center; font-size: 10px;">
-        <span id="busuanzi_container_site_pv" style="display: none">
-            {{tr "SitePV" }} <span id="busuanzi_value_site_pv"></span> {{tr "SitePVUnit" }} | {{tr "SiteUV" }} <span id="busuanzi_value_site_uv"></span> {{tr "SiteUVUnit" }}
-        </span>
+            href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a> {{.Version}}
     </p>
 </div>
 {{end}}

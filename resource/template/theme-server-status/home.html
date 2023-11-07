@@ -214,7 +214,7 @@
             secondToDate(s) {
                 const d = Math.floor(s / 3600 / 24);
                 if (d > 0) {
-                    return d + "天"
+                    return d + ' {{tr "Day"}}'
                 }
                 const h = Math.floor(s / 3600 % 24);
                 const m = Math.floor(s / 60 % 60);
@@ -269,7 +269,7 @@
                 ws.onmessage = (evt) => {
                     let jsonData = evt.data
                     const data = JSON.parse(jsonData)
-                    for (let i = 0; i < data.servers.length; i++) {
+                    for (let i = 0; i < data.servers?.length; i++) {
                         const ns = data.servers[i];
                         if (!ns.Host) {
                             data.servers[i].live = false
@@ -291,7 +291,7 @@
             },
             handleNodes(servers) {
                 let nodes = []
-                servers.forEach(server => {
+                servers?.forEach(server => {
                     let platform = server.Host.Platform
                     if (this.isWindowsPlatform(server.Host.Platform)) {
                         platform = "windows"
