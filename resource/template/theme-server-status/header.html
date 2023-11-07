@@ -1,0 +1,35 @@
+{{define "theme-server-status/header"}}
+<!DOCTYPE html>
+<html lang="{{.Conf.Language}}">
+<head>
+    <title>{{ .Title }}</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/theme-server-status/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/theme-server-status/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/theme-server-status/css/main.css">
+    <link rel="stylesheet" href="/static/theme-server-status/css/dark.css">
+    <link rel="stylesheet" href="/static/theme-server-status/css/light.css">
+    <link href="https://cdn.staticfile.org/font-logos/0.17/font-logos.min.css" type="text/css"
+          rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.staticfile.org/semantic-ui/2.4.1/semantic.min.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="/static/theme-server-status/js/html5shiv.js"></script>
+    <script src="/static/theme-server-status/js/respond.min.js"></script>
+    <![endif]-->
+    {{if ts .CustomCode}}
+    {{.CustomCode|safe}}
+    {{end}}
+
+    <script src="/static/theme-server-status/js/jquery.min.js"></script>
+    <script src="/static/theme-server-status/js/bootstrap.min.js"></script>
+    <script src="https://cdn.staticfile.org/vue/2.6.14/vue.min.js"></script>
+    <script src="/static/theme-server-status/js/mixin.js"></script>
+    <!-- custom code 引入这段代码即可开启卜算子统计 -->
+    <!--<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>-->
+</head>
+<body>
+{{end}}

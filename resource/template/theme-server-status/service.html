@@ -1,0 +1,237 @@
+{{define "theme-server-status/service"}}
+{{template "theme-server-status/header" .}}
+<div id="app">
+    {{template "theme-server-status/content-nav" .}}
+    <div class="container content" style="max-width: 95vw">
+        <table class="table table-striped table-condensed service-status">
+            <thead>
+            <tr>
+                <th class="node-cell" style="min-width: 60px">🍀 {{tr "Status"}}</th>
+                <th class="node-cell" style="min-width: 60px">🚀 {{tr "Name"}}</th>
+                <th class="node-cell center">🗂 {{tr "Details"}}</th>
+                <th class="node-cell center" style="min-width: 80px">⚡️{{tr "AverageLatency"}}</th>
+                <th class="node-cell center" style="min-width: 80px">⏱️ {{tr "30DaysOnline"}}</th>
+            </tr>
+            </thead>
+            <tbody id="servers">
+            <template v-for="service in services">
+                <tr>
+                    <td style="text-align: left" class="node-cell">
+                        <div class="delay-today">
+                            <i class="delay-today" :class="service.health.className"></i>
+                            @#service.health.text#@
+                        </div>
+                    </td>
+                    <td class="node-cell">@#service.name#@</td>
+                    <td class="node-cell center">
+                        <template v-for="(item,index) in service.dayDetail">
+                            <div class="service-day-status-icon" :class="item.className"
+                                 :data-tooltip="item.text">
+                            </div>
+                        </template>
+                    </td>
+                    <td class="node-cell center">@#service.avgDelay#@</td>
+                    <td class="node-cell center">
+                        <div class="progress">
+                            <div :style="service.totalUpTime.style" :class="service.totalUpTime.className">
+                                <small>@#service.totalUpTime.percent#@%</small>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </template>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="ui container">
+        <div class="service-status">
+            {{if .CycleTransferStats}}
+
+            <h2 style="text-align: center;">{{tr "CycleTransferStats"}}</h2>
+
+            <table class="ui celled table">
+                <thead>
+                <tr>
+                    <th class="ui center aligned">ID</th>
+                    <th class="ui center aligned">{{tr "Rules"}}</th>
+                    <th class="ui center aligned">{{tr "Server"}}</th>
+                    <th class="ui center aligned">{{tr "From"}}</th>
+                    <th class="ui center aligned">{{tr "To"}}</th>
+                    <th class="ui center aligned">MAX</th>
+                    <th class="ui center aligned">MIN</th>
+                    <th class="ui center aligned">{{tr "NextCheck"}}</th>
+                    <th class="ui center aligned">{{tr "CurrentUsage"}}</th>
+                    <th class='ui center aligned' style='padding: 0px 31px 0px 31px;'>{{tr "Transleft"}}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range $id, $stats := .CycleTransferStats}}
+                {{range $innerId, $transfer := $stats.Transfer}}
+                {{$TransLeftPercent := TransLeftPercent (UintToFloat $transfer) (UintToFloat $stats.Max)}}
+                <tr>
+                    <td class="ui center aligned">{{$id}}</td>
+                    <td class="ui center aligned">{{$stats.Name}}</td>
+                    <td class="ui center aligned">{{index $stats.ServerName $innerId}}</td>
+                    <td class="ui center aligned">{{$stats.From|tf}}</td>
+                    <td class="ui center aligned">{{$stats.To|tf}}</td>
+                    <td class="ui center aligned">{{$stats.Max|bf}}</td>
+                    <td class="ui center aligned">{{$stats.Min|bf}}</td>
+                    <td class="ui center aligned">{{(index $stats.NextUpdate $innerId)|sft}}</td>
+                    <td class="ui center aligned">{{$transfer|bf}}</td>
+                    <td class="ui center aligned" style="padding: 14px 0px 0px 0px; position: relative;">
+                        <div class="thirteen wide column">
+                            <div class="ui progress {{TransClassName $TransLeftPercent}}"
+                                 style=" background: rgba(0,0,0,.1); background-color: rgba(0,0,0,.1)!important; height: 25px;">
+                                <div class="bar"
+                                     style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{$TransLeftPercent}}% !important;"></div>
+                                <small style="position: relative; top: -2em;">{{TransLeft $stats.Max $transfer}} /
+                                    {{$TransLeftPercent}} %</small></div>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+                {{end}}
+                </tbody>
+            </table>
+
+            {{end}}
+        </div>
+    </div>
+    {{template "theme-server-status/content-footer" .}}
+</div>
+<script>
+
+</script>
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['@#', '#@'],
+        data: {
+            services: []
+        },
+        created() {
+            this.initData()
+        },
+        mounted() {
+        },
+        mixins: [mixinsVue],
+        methods: {
+            initData() {
+                // @formatter:off
+                const services = []
+                {{range $service := .Services}}
+                services.push({
+                    name: '{{$service.Monitor.Name}}',
+                    currentUp: parseInt('{{$service.CurrentUp}}'),
+                    currentDown: parseInt('{{$service.CurrentDown}}'),
+                    totalUp: parseInt('{{$service.TotalUp}}'),
+                    totalDown: parseInt('{{$service.TotalDown}}'),
+                    delay: '{{$service.Delay}}'.replaceAll("[","").replaceAll("]","").split(" "),
+                    up: '{{$service.Up}}'.replaceAll("[","").replaceAll("]","").split(" "),
+                    down: '{{$service.Down}}'.replaceAll("[","").replaceAll("]","").split(" "),
+                })
+                {{end}}
+                // @formatter:on
+                for (let i = 0; i < services.length; i++) {
+                    const service = services[i];
+                    service.avgDelay = parseInt(service.delay[service.delay.length - 1]) + "ms"
+                    service.health = this.getStateInfo(this.getPercent(service.currentUp, service.currentDown))
+                    service.dayDetail = this.getDayTails(service)
+                    service.totalUpTime = this.getProgressInfo(this.getPercent(service.totalUp, service.totalDown))
+                }
+                this.services = services
+            },
+            getPercent(up, down) {
+                if (!up) {
+                    up = 0;
+                }
+                if (!down) {
+                    down = 0
+                }
+                const currentUp = parseInt(up)
+                const currentDown = parseInt(down)
+                const total = currentUp + currentDown
+                if (total === 0) {
+                    if (currentUp > 0) {
+                        return 100
+                    }
+                    return 0
+                } else if (currentUp === 0) {
+                    return 0.00001 / total * 100
+                }
+                return this.toFixed2(currentUp / total * 100)
+            },
+            getDayTails(service) {
+                const result = []
+                for (let i = 0; i < service.up.length; i++) {
+                    const up = service.up[i]
+                    const down = service.down[i]
+                    const delay = service.delay[i]
+                    let percent = this.getPercent(up, down)
+                    if (percent <= 0) {
+                        percent = 0;
+                    }
+                    let className = this.getStateInfo(percent).className
+                    let available = '{{tr "Availability"}}'
+                    let averageLatency = '{{tr "AverageLatency"}}'
+                    const text = `${this.beforeDay(service.up.length - i - 1)}，${available}：${percent}%，${averageLatency}：${delay}ms`
+                    result.push({
+                        text, className
+                    })
+                }
+                return result
+            },
+            beforeDay(days) {
+                const today = new Date();
+                today.setDate(today.getDate() - days);
+                // 获取月份和日期并格式化
+                const month = (today.getMonth() + 1).toString().padStart(2, '0');
+                const day = today.getDate().toString().padStart(2, '0');
+                return `${month}-${day}`;
+            },
+            getStateInfo(percent) {
+                if (percent < 0) {
+                    percent = 0;
+                }
+                const result = {
+                    className: "good",
+                    text: "",
+                    percent
+                }
+                if (percent === 0) {
+                    result.className = ""
+                    result.text = '{{tr "StatusNoData"}}'
+                } else if (percent > 95) {
+                    result.className = "good"
+                    result.text = '{{tr "StatusGood"}}'
+                } else if (percent > 80) {
+                    result.className = "warning"
+                    result.text = '{{tr "StatusLowAvailability"}}'
+                } else {
+                    result.className = "danger"
+                    result.text = '{{tr "StatusDown"}}'
+                }
+                return result;
+            },
+            getProgressInfo(percent) {
+                const result = this.getStateInfo(percent)
+                result.style = `width: ${parseInt(percent)}%`;
+                const className = result.className;
+                if (className === "good") {
+                    result.className = 'progress-bar progress-bar-success'
+                } else if (className === "waining") {
+                    result.className = 'progress-bar progress-bar-warning'
+                } else if (className === "danger") {
+                    result.className = 'progress-bar progress-bar-danger'
+                } else {
+                    result.className = ""
+                    result.style = "width: 100%"
+                }
+                return result
+            },
+        }
+    })
+</script>
+{{template "theme-server-status/footer" .}}
+{{end}}

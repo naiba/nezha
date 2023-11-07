@@ -388,6 +388,12 @@ other = "Disk"
 [MemUsed]
 other = "RAM"
 
+[CpuUsed]
+other = "CPU"
+
+[Virtualization]
+other = "Virtualization"
+
 [SwapUsed]
 other = "Swap"
 
@@ -474,6 +480,9 @@ other = "Light Mode"
 
 [DarkMode]
 other = "Dark Mode"
+
+[SystemMode]
+other = "System Mode"
 
 [GridLayout]
 other = "Grid Layout"
@@ -597,3 +606,18 @@ other = "Info"
 
 [HideForGuest]
 other = "No display to visitors"
+
+[Feature]
+other = "Menu"
+
+[SitePV]
+other = "Total page views"
+
+[SitePVUnit]
+other = "Page views"
+
+[SiteUV]
+other = "Total visitors"
+
+[SiteUVUnit]
+other = "Visitors"
