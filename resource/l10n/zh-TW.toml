@@ -481,8 +481,8 @@ other = "白晝模式"
 [DarkMode]
 other = "暗黑模式"
 
-[SystemMode]
-other = "系統模式"
+[FollowSystem]
+other = "跟隨系統"
 
 [GridLayout]
 other = "網格視圖"

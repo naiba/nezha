@@ -481,8 +481,8 @@ other = "Modo luminoso"
 [DarkMode]
 other = "Modo oscuro"
 
-[SystemMode]
-other = "Modo del sistema"
+[FollowSystem]
+other = "Seguir el sistema"
 
 [GridLayout]
 other = "Grid Layout"
