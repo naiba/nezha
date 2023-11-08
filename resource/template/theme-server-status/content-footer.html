@@ -1,8 +1,8 @@
 {{define "theme-server-status/content-footer"}}
-<div class="container">
+<footer class="container" style="padding-bottom: 2rem;">
     <p style="text-align: center; font-size: 10px;">
-        {{ .Title }} | Theme <a href="https://github.com/cppla/ServerStatus">ServerStatus</a> | Powered by <a
+        {{ .Conf.Site.Brand }} | Theme <a href="https://github.com/cppla/ServerStatus">ServerStatus</a> | Powered by <a
             href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a> {{.Version}}
     </p>
-</div>
+</footer>
 {{end}}
