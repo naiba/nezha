@@ -51,16 +51,16 @@
             <table class="table table-striped table-condensed">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>{{tr "Rules"}}</th>
-                        <th>{{tr "Server"}}</th>
-                        <th>{{tr "From"}}</th>
-                        <th>{{tr "To"}}</th>
-                        <th>MAX</th>
-                        <th>MIN</th>
-                        <th>{{tr "NextCheck"}}</th>
-                        <th>{{tr "CurrentUsage"}}</th>
-                        <th class='ui center aligned'>{{tr "Transleft"}}</th>
+                        <th class="node-cell center">ID</th>
+                        <th class="node-cell center">{{tr "Rules"}}</th>
+                        <th class="node-cell center">{{tr "Server"}}</th>
+                        <th class="node-cell center">{{tr "From"}}</th>
+                        <th class="node-cell center">{{tr "To"}}</th>
+                        <th class="node-cell center">MAX</th>
+                        <th class="node-cell center">MIN</th>
+                        <th class="node-cell center">{{tr "NextCheck"}}</th>
+                        <th class="node-cell center">{{tr "CurrentUsage"}}</th>
+                        <th class="node-cell center">{{tr "Transleft"}}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,23 +68,20 @@
                     {{range $innerId, $transfer := $stats.Transfer}}
                     {{$TransLeftPercent := TransLeftPercent (UintToFloat $transfer) (UintToFloat $stats.Max)}}
                     <tr>
-                        <td>{{$id}}</td>
-                        <td>{{$stats.Name}}</td>
-                        <td>{{index $stats.ServerName $innerId}}</td>
-                        <td>{{$stats.From|tf}}</td>
-                        <td>{{$stats.To|tf}}</td>
-                        <td>{{$stats.Max|bf}}</td>
-                        <td>{{$stats.Min|bf}}</td>
-                        <td>{{(index $stats.NextUpdate $innerId)|sft}}</td>
-                        <td>{{$transfer|bf}}</td>
-                        <td>
-                            <div class="ui progress {{TransClassName $TransLeftPercent}}"
-                                style=" background: rgba(0,0,0,.1); background-color: rgba(0,0,0,.1)!important; height: 25px; margin: unset !important">
-                                <div class="bar"
-                                    style="transition-duration: 300ms; min-width: unset; background-color: rgb(10, 148, 242); width: {{$TransLeftPercent}}% !important">
+                        <td class="node-cell center">{{$id}}</td>
+                        <td class="node-cell center">{{$stats.Name}}</td>
+                        <td class="node-cell center">{{index $stats.ServerName $innerId}}</td>
+                        <td class="node-cell center">{{$stats.From|tf}}</td>
+                        <td class="node-cell center">{{$stats.To|tf}}</td>
+                        <td class="node-cell center">{{$stats.Max|bf}}</td>
+                        <td class="node-cell center">{{$stats.Min|bf}}</td>
+                        <td class="node-cell center">{{(index $stats.NextUpdate $innerId)|sft}}</td>
+                        <td class="node-cell center">{{$transfer|bf}}</td>
+                        <td class="node-cell center">
+                            <div class="progress">
+                                <div style="width: '{{$TransLeftPercent}}%'" :class="'progress-bar-' + toSSBar('{{TransClassName $TransLeftPercent}}')">
+                                    <small>{{TransLeft $stats.Max $transfer}} / {{$TransLeftPercent}} %</small>
                                 </div>
-                                <small style="position: relative; top: -2em;">{{TransLeft $stats.Max $transfer}} /
-                                    {{$TransLeftPercent}} %</small>
                             </div>
                         </td>
                     </tr>
@@ -114,6 +111,19 @@
         },
         mixins: [mixinsVue],
         methods: {
+            toSSBar(n) {
+                switch (n) {
+                    case "fine":
+                        return "success"
+                    case "offline":
+                        return "danger"
+                    case "error":
+                        return "danger"
+                    case "warning":
+                        return "warning"
+                }
+                return n
+            },
             initData() {
                 // @formatter:off
                 const services = []

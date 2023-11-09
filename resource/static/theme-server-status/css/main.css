@@ -246,7 +246,10 @@ body {
         min-width: 25px;
         max-width: 50px;
     }
+}
 
-    .service-day-status-icon {
+@media only screen and (min-width: 768px) {
+    .pl-md-unset {
+        padding-left: unset !important;
     }
 }
