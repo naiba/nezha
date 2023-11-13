@@ -24,10 +24,10 @@ os_arch=""
 
 pre_check() {
     [ "$os_alpine" != 1 ] && ! command -v systemctl >/dev/null 2>&1 && echo "This system is not supported: systemctl not found" && exit 1
-    
+
     # check root
     [[ $EUID -ne 0 ]] && echo -e "${red}ERROR: ${plain} This script must be run with the root user!\n" && exit 1
-    
+
     ## os_arch
     if [[ $(uname -m | grep 'x86_64') != "" ]]; then
         os_arch="amd64"
@@ -42,7 +42,7 @@ pre_check() {
         elif [[ $(uname -m | grep 'riscv64') != "" ]]; then
         os_arch="riscv64"
     fi
-    
+
     ## China_IP
     if [[ -z "${CN}" ]]; then
         if [[ $(curl -m 10 -s https://ipapi.co/json | grep 'China') != "" ]]; then
@@ -53,7 +53,7 @@ pre_check() {
                     echo "Use Chinese Mirror"
                     CN=true
                 ;;
-                
+
                 [nN][oO] | [nN])
                     echo "No Use Chinese Mirror"
                 ;;
@@ -63,7 +63,7 @@ pre_check() {
             esac
         fi
     fi
-    
+
     if [[ -z "${CN}" ]]; then
         GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
         GITHUB_URL="github.com"
@@ -97,7 +97,7 @@ confirm() {
 
 update_script() {
     echo -e "> Update Script"
-    
+
     curl -sL https://${GITHUB_RAW_URL}/script/install_en.sh -o /tmp/nezha.sh
     new_version=$(cat /tmp/nezha.sh | grep "NZ_VERSION" | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$new_version" ]; then
@@ -106,7 +106,7 @@ update_script() {
     fi
     echo -e "The current latest version is: ${new_version}"
     mv -f /tmp/nezha.sh ./nezha.sh && chmod a+x ./nezha.sh
-    
+
     echo -e "Execute new script after 3s"
     sleep 3s
     clear
@@ -132,7 +132,7 @@ install_arch(){
             sed -i "$ a\nezha-agent ALL=(ALL ) NOPASSWD:ALL" /etc/sudoers
                         sudo -iu nezha-agent bash -c 'gpg --keyserver keys.gnupg.net --recv-keys BE22091E3EF62275;
                                         cd /tmp; git clone https://aur.archlinux.org/libsepol.git; cd libsepol; makepkg -si --noconfirm --asdeps; cd ..;
-                                        git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..; 
+                                        git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..;
                                         rm -rf libsepol libselinux'
             sed -i '/nezha-agent/d'  /etc/sudoers && sleep 30s && killall -u nezha-agent&&userdel nezha-agent
             echo -e "${red}Info: ${plain}user nezha-agent has been deleted, Be sure to check it manually!\n"
@@ -158,9 +158,9 @@ install_soft() {
 
 install_dashboard() {
     install_base
-    
+
     echo -e "> Install Panel"
-    
+
     # Nezha Monitoring Folder
     if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
         mkdir -p $NZ_DASHBOARD_PATH
@@ -182,7 +182,7 @@ install_dashboard() {
         esac
     fi
     chmod 777 -R $NZ_DASHBOARD_PATH
-    
+
     command -v docker >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "Installing Docker"
@@ -195,9 +195,9 @@ install_dashboard() {
         systemctl start docker.service
         echo -e "${green}Docker${plain} installed successfully"
     fi
-    
+
     modify_dashboard_config 0
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -219,11 +219,11 @@ selinux(){
 install_agent() {
     install_base
     selinux
-    
+
     echo -e "> Install Nezha Agent"
-    
+
     echo -e "Obtaining Agent version"
-    
+
     local version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$version" ]; then
         version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
@@ -231,35 +231,35 @@ install_agent() {
     if [ ! -n "$version" ]; then
         version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
-    
+
     if [ ! -n "$version" ]; then
         echo -e "Fail to obtaine agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
         return 0
     else
         echo -e "The current latest version is: ${version}"
     fi
-    
+
     # Nezha Monitoring Folder
     mkdir -p $NZ_AGENT_PATH
     chmod 777 -R $NZ_AGENT_PATH
-    
+
     echo -e "Downloading Agent"
     wget -t 2 -T 10 -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Fail to download agent, please check if the network can link ${GITHUB_URL}${plain}"
         return 0
     fi
-    
+
     unzip -qo nezha-agent_linux_${os_arch}.zip &&
     mv nezha-agent $NZ_AGENT_PATH &&
     rm -rf nezha-agent_linux_${os_arch}.zip README.md
-    
+
     if [ $# -ge 3 ]; then
         modify_agent_config "$@"
     else
         modify_agent_config 0
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -267,7 +267,7 @@ install_agent() {
 
 modify_agent_config() {
     echo -e "> Modify Agent Configuration"
-    
+
     if [ "$os_alpine" != 1 ];then
         wget -t 2 -T 10 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
         if [[ $? != 0 ]]; then
@@ -275,12 +275,14 @@ modify_agent_config() {
             return 0
         fi
     fi
-    
+
     if [ $# -lt 3 ]; then
         echo "Please add Agent in the admin panel first, record the secret" &&
         read -ep "Please enter a domain that resolves to the IP where the panel is located (no CDN sets): " nz_grpc_host &&
-        read -ep "Please enter the panel RPC port: (5555)" nz_grpc_port &&
-        read -ep "Please enter the Agent secret: " nz_client_secret
+        read -ep "Please enter the panel RPC port (default 5555): " nz_grpc_port &&
+        read -ep "Please enter the Agent secret: " nz_client_secret &&
+        read -ep "Do you want to enable SSL/TLS encryption for the gRPC port (--tls)? Press [y] if yes, the default is not required, and users can press Enter to skip if you don't understand: " nz_grpc_proxy
+        grep -qiw 'Y' <<< "${nz_grpc_proxy}" && args='--tls'
         if [[ -z "${nz_grpc_host}" || -z "${nz_client_secret}" ]]; then
             echo -e "${red}All options cannot be empty${plain}"
             before_show_menu
@@ -293,33 +295,32 @@ modify_agent_config() {
         nz_grpc_host=$1
         nz_grpc_port=$2
         nz_client_secret=$3
+        shift 3
+        if [ $# -gt 0 ]; then
+            args=" $*"
+        fi
     fi
-    
+
     if [ "$os_alpine" != 1 ];then
         sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
         sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
         sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
-        
-        shift 3
-        if [ $# -gt 0 ]; then
-            args=" $*"
-            sed -i "/ExecStart/ s/$/${args}/" ${NZ_AGENT_SERVICE}
-        fi
+        [ -n "${args}" ] && sed -i "/ExecStart/ s/$/ ${args}/" ${NZ_AGENT_SERVICE}
     else
-        echo "@reboot nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} >/dev/null 2>&1 &" >> /etc/crontabs/root
+        echo "@reboot ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} ${args}" >> /etc/crontabs/root
         crond
     fi
-    
+
     echo -e "Agent configuration ${green} modified successfully, please wait for agent self-restart to take effect${plain}"
-    
+
     if [ "$os_alpine" != 1 ];then
         systemctl daemon-reload
         systemctl enable nezha-agent
         systemctl restart nezha-agent
     else
-        nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} >/dev/null 2>&1 &
+        nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} ${args} >/dev/null 2>&1 &
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -327,20 +328,20 @@ modify_agent_config() {
 
 modify_dashboard_config() {
     echo -e "> Modify Panel Configuration"
-    
+
     echo -e "Download Docker Script"
     wget -t 2 -T 10 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
-    
+
     wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
-    
+
     echo "About the GitHub Oauth2 application: create it at https://github.com/settings/developers, no review required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
     echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
     read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
@@ -350,13 +351,13 @@ modify_dashboard_config() {
     read -ep "Please enter the site title: " nz_site_title &&
     read -ep "Please enter the site access port: (default 8008)" nz_site_port &&
     read -ep "Please enter the RPC port to be used for Agent access: (default 5555)" nz_grpc_port
-    
+
     if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}All options cannot be empty${plain}"
         before_show_menu
         return 1
     fi
-    
+
     if [[ -z "${nz_site_port}" ]]; then
         nz_site_port=8008
     fi
@@ -366,7 +367,7 @@ modify_dashboard_config() {
     if [[ -z "${nz_oauth2_type}" ]]; then
         nz_oauth2_type=github
     fi
-    
+
     sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
     sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
     sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
@@ -377,15 +378,15 @@ modify_dashboard_config() {
     sed -i "s/nz_site_port/${nz_site_port}/" /tmp/nezha-docker-compose.yaml
     sed -i "s/nz_grpc_port/${nz_grpc_port}/g" /tmp/nezha-docker-compose.yaml
     sed -i "s/nz_image_url/${Docker_IMG}/" /tmp/nezha-docker-compose.yaml
-    
+
     mkdir -p $NZ_DASHBOARD_PATH/data
     mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
     mv -f /tmp/nezha-docker-compose.yaml ${NZ_DASHBOARD_PATH}/docker-compose.yaml
-    
+
     echo -e "Dashboard configuration ${green} modified successfully, please wait for Dashboard self-restart to take effect${plain}"
-    
+
     restart_and_update
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -393,9 +394,9 @@ modify_dashboard_config() {
 
 restart_and_update() {
     echo -e "> Restart and Update the Panel"
-    
+
     cd $NZ_DASHBOARD_PATH
-    
+
     docker compose version
     if [[ $? == 0 ]]; then
         docker compose pull
@@ -406,14 +407,14 @@ restart_and_update() {
         docker-compose down
         docker-compose up -d
     fi
-    
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Restart Successful${plain}"
         echo -e "Default panel address: ${yellow}domain:Site_access_port${plain}"
     else
         echo -e "${red}The restart failed, probably because the boot time exceeded two seconds, please check the log information later${plain}"
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -421,20 +422,20 @@ restart_and_update() {
 
 start_dashboard() {
     echo -e "> Start Panel"
-    
+
     docker compose version
     if [[ $? == 0 ]]; then
         cd $NZ_DASHBOARD_PATH && docker compose up -d
     else
         cd $NZ_DASHBOARD_PATH && docker-compose up -d
     fi
-    
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Start Successful${plain}"
     else
         echo -e "${red}Failed to start, please check the log message later${plain}"
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -442,20 +443,20 @@ start_dashboard() {
 
 stop_dashboard() {
     echo -e "> Stop Panel"
-    
+
     docker compose version
     if [[ $? == 0 ]]; then
         cd $NZ_DASHBOARD_PATH && docker compose down
     else
         cd $NZ_DASHBOARD_PATH && docker-compose down
     fi
-    
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Stop Successful${plain}"
     else
         echo -e "${red}Failed to stop, please check the log message later${plain}"
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -463,14 +464,14 @@ stop_dashboard() {
 
 show_dashboard_log() {
     echo -e "> View Panel Log"
-    
+
     docker compose version
     if [[ $? == 0 ]]; then
         cd $NZ_DASHBOARD_PATH && docker compose logs -f
     else
         cd $NZ_DASHBOARD_PATH && docker-compose logs -f
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -478,18 +479,18 @@ show_dashboard_log() {
 
 uninstall_dashboard() {
     echo -e "> Uninstall Panel"
-    
+
     docker compose version
     if [[ $? == 0 ]]; then
         cd $NZ_DASHBOARD_PATH && docker compose down
     else
         cd $NZ_DASHBOARD_PATH && docker-compose down
     fi
-    
+
     rm -rf $NZ_DASHBOARD_PATH
     docker rmi -f ghcr.io/naiba/nezha-dashboard > /dev/null 2>&1
     clean_all
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -497,9 +498,9 @@ uninstall_dashboard() {
 
 show_agent_log() {
     echo -e "> View Agent Log"
-    
+
     journalctl -xf -u nezha-agent.service
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -507,20 +508,20 @@ show_agent_log() {
 
 uninstall_agent() {
     echo -e "> Uninstall Agent"
-    
+
     if [ "$os_alpine" != 1 ];then
         systemctl disable nezha-agent.service
         systemctl stop nezha-agent.service
         rm -rf $NZ_AGENT_SERVICE
         systemctl daemon-reload
     else
-        sed -i "/nezha-agent/d" /etc/crontabs/root
-        pkill nezha
+        grep -q 'nezha-agent' /var/spool/cron/crontabs/root && sed -i "/nezha-agent/d" /var/spool/cron/crontabs/root
+        pkill nezha-agent
     fi
-    
+
     rm -rf $NZ_AGENT_PATH
     clean_all
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -528,9 +529,9 @@ uninstall_agent() {
 
 restart_agent() {
     echo -e "> Restart Agent"
-    
+
     systemctl restart nezha-agent.service
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -586,7 +587,7 @@ show_menu() {
     ${green}0.${plain}  Exit Script
     "
     echo && read -ep "Please enter [0-13]: " num
-    
+
     case "${num}" in
         0)
             exit 0
