@@ -2,7 +2,7 @@
 other = "哪吒监控"
 
 [Server]
-other = "主机"
+other = "服务器"
 
 [Services]
 other = "服务"
@@ -11,7 +11,7 @@ other = "服务"
 other = "任务"
 
 [Notification]
-other = "报警"
+other = "告警"
 
 [Settings]
 other = "设置"
@@ -32,10 +32,10 @@ other = "注销登录"
 other = "登录"
 
 [ConfirmLogout]
-other = "确认注销？"
+other = "确定要注销吗？"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "注销后您必须重新登录才能使用"
+other = "注销后需重新登录以继续使用"
 
 [Cancel]
 other = "取消"
@@ -44,7 +44,7 @@ other = "取消"
 other = "确认"
 
 [AddScheduledTasks]
-other = "添加计划任务"
+other = "新增计划任务"
 
 [Name]
 other = "名称"
@@ -104,10 +104,10 @@ other = "秒 分 时 天 月 星期，详情见"
 other = "计划表达式格式"
 
 [IntroductionOfCommands]
-other = "命令：就像写 shell/bat 脚本一样，但是不推荐换行，多个命令使用 <code>&&</code>/<code>&</code> 连接，如果遇到 xxx 命令找不到，可能是<code>PATH</code> 环境变量的问题，<code>Linux</code> 主机在命令开头加入<code>source ~/.bashrc</code>或者使用绝对路径执行。"
+other = "命令说明：编写命令时类似于 shell/bat 脚本。建议不要换行，多个命令可用 <code>&&</code> 或 <code>&</code> 连接，若出现命令无法找到的情况，可能是由于 <code>PATH</code> 环境变量配置问题。在 <code>Linux</code> 服务器上，可在命令开头加入 <code>source ~/.bashrc</code>，或使用命令的绝对路径执行。"
 
 [AddMonitor]
-other = "添加监控"
+other = "新增监控"
 
 [Blog]
 other = "博客"
@@ -148,11 +148,11 @@ other = "延迟通知"
 [IntroductionOfMonitor]
 other = """
 类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS协议的会顺带监控SSL证书)；<br>
-类型为 <b>ICMP-Ping</b> 时输入主机名/IP，不带端口；<br>
-类型为 <b>TCP-Ping</b> 时输入主机名/IP + 端口号：example.com:22"""
+类型为 <b>ICMP-Ping</b> 时输入域名/IP，不带端口；<br>
+类型为 <b>TCP-Ping</b> 时输入域名/IP + 端口号：example.com:22"""
 
 [AddNotificationMethod]
-other = "添加通知方式"
+other = "新增通知方式"
 
 [Tag]
 other = "分组"
@@ -170,7 +170,7 @@ other = "请求类型"
 other = "验证SSL"
 
 [AddNotificationRule]
-other = "添加报警规则"
+other = "新增告警规则"
 
 [Rules]
 other = "规则"
@@ -188,7 +188,7 @@ other = "单次触发"
 other = "启用触发任务"
 
 [FailTriggerTasks]
-other = "故障时触发任务"
+other = "告警时触发任务"
 
 [RecoverTriggerTasks]
 other = "恢复时触发任务"
@@ -197,7 +197,7 @@ other = "恢复时触发任务"
 other = "启用"
 
 [AddServer]
-other = "添加服务器"
+other = "新增服务器"
 
 [BatchEditServerGroup]
 other = "批量修改分组"
@@ -233,10 +233,10 @@ other = "Linux 一键安装"
 other = "请先在设置页面配置 未接入CDN的面板服务器域名/IP"
 
 [PushSuccessfully]
-other = "成功推送"
+other = "推送成功"
 
 [LastExecution]
-other = "最后执行"
+other = "最近执行"
 
 [LastResult]
 other = "最后结果"
@@ -260,7 +260,7 @@ other = "删除计划任务"
 other = "确认删除此计划任务？"
 
 [AccessDenied]
-other = "访问受限"
+other = "访问被拒绝"
 
 [Use]
 other = "使用"
@@ -281,7 +281,7 @@ other = "HTTP(S)/SSL证书"
 other = "TCP 端口"
 
 [DeleteService]
-other = "删除服务"
+other = "移除服务"
 
 [ConfirmToDeleteThisService]
 other = "确认删除此服务？"
@@ -293,7 +293,7 @@ other = "删除通知方式"
 other = "确认删除此通知方式？"
 
 [ForceUpdate]
-other = "强制更新"
+other = "立即更新"
 
 [SelectAll]
 other = "全选"
@@ -308,10 +308,10 @@ other = "一键安装"
 other = "点击复制"
 
 [DeleteServer]
-other = "删除主机"
+other = "删除服务器"
 
 [ConfirmToDeleteServer]
-other = "确认删除主机？"
+other = "确认删除服务器？"
 
 [NoServerSelected]
 other = "当前没有选中的服务器"
@@ -320,25 +320,25 @@ other = "当前没有选中的服务器"
 other = "执行结果"
 
 [SiteTitle]
-other = "站点标题"
+other = "网站标题"
 
 [AdministratorList]
 other = "管理员列表"
 
 [Theme]
-other = "主题"
+other = "前台界面主题"
 
 [CustomCodes]
-other = "自定义代码(style、script 都可以)"
+other = "自定义代码（包括 style 和 script）"
 
 [AccessPassword]
-other = "前台查看密码"
+other = "前台访问密码"
 
 [PanelServerDomainAndIP]
 other = "未接入CDN的面板服务器域名/IP"
 
 [IPChangeAlert]
-other = "IP 变更提醒"
+other = "IP 变动通知"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
 other = "覆盖所有，仅特定服务器不提醒"
@@ -356,10 +356,10 @@ other = "覆盖所有，仅特定服务器不请求"
 other = "服务器ID 以逗号隔开"
 
 [IPChangeNotificationTag]
-other = "提醒发送至指定的通知分组"
+other = "将提醒发送至指定通知分组"
 
 [NotificationMessagesDoNotHideIP]
-other = "通知信息IP不打码"
+other = "通知信息中显示完整IP地址"
 
 [Save]
 other = "保存"
@@ -371,7 +371,7 @@ other = "修改成功"
 other = "Terminal 连接超时或会话已结束"
 
 [TerminalConnectionFailed]
-other = "Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反代情况"
+other = "Terminal 连接失败，请检查 /terminal/* 的 WebSocket 反向代理配置"
 
 [Default]
 other = "默认"
@@ -425,25 +425,25 @@ other = "网络"
 other = "在线"
 
 [ServerIsOffline]
-other = "节点已离线"
+other = "服务器已离线"
 
 [Day]
 other = "天"
 
 [RealtimeChannelEstablished]
-other = "实时通道建立"
+other = "实时通道已建立"
 
 [GetTheLatestMonitoringDataInRealTime]
 other = "可以实时获取最新监控数据啦"
 
 [RealtimeChannelDisconnect]
-other = "实时通道断开"
+other = "实时通道已断开"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
 other = "无法实时获取最新监控数据咯"
 
 [30DaysOnline]
-other = "30天在线率"
+other = "近30天可用性"
 
 [Details]
 other = "详情"
@@ -452,22 +452,22 @@ other = "详情"
 other = "状态"
 
 [Availability]
-other = "在线率"
+other = "可用性"
 
 [AverageLatency]
-other = "平均延迟"
+other = "平均响应时间"
 
 [CycleTransferStats]
-other = "循环流量统计"
+other = "周期性流量统计"
 
 [From]
-other = "自"
+other = "起始"
 
 [To]
-other = "至"
+other = "结束"
 
 [NextCheck]
-other = "下次检查"
+other = "下一次检测"
 
 [CurrentUsage]
 other = "当前用量"
@@ -476,25 +476,25 @@ other = "当前用量"
 other = "验证查看密码"
 
 [LightMode]
-other = "白昼模式"
+other = "亮色模式"
 
 [DarkMode]
-other = "暗黑模式"
+other = "暗色模式"
 
 [FollowSystem]
 other = "跟随系统"
 
 [GridLayout]
-other = "网格视图"
+other = "网格布局"
 
 [ListLayout]
-other = "列表视图"
+other = "列表布局"
 
 [EnterPassword]
-other = "输入密码"
+other = "请输入密码"
 
 [Location]
-other = "地区"
+other = "位置"
 
 [Running]
 other = "运行中"
@@ -512,10 +512,10 @@ other = "总上行"
 other = "总下行"
 
 [WrongPassword]
-other = "密码错误"
+other = "输入的密码错误"
 
 [AnErrorEccurred]
-other = "出现错误"
+other = "发生错误"
 
 [SystemError]
 other = "系统错误"
@@ -536,10 +536,10 @@ other = "服务监控"
 other = "计划任务"
 
 [ApiManagement]
-other = "API"
+other = "API 管理"
 
 [IssueNewApiToken]
-other = "添加Token"
+other = "生成Token"
 
 [Token]
 other = "Token"
@@ -554,22 +554,22 @@ other = "确认删除Token"
 other = "此页面需要登录"
 
 [WrongAccessPassword]
-other = "查看密码错误"
+other = "访问密码错误"
 
 [Add]
-other = "添加"
+other = "新增"
 
 [Edit]
 other = "修改"
 
 [AlarmRule]
-other = "报警规则"
+other = "告警规则"
 
 [NotificationMethod]
 other = "通知方式"
 
 [Incident]
-other = "故障"
+other = "事件"
 
 [Resolved]
 other = "恢复"
@@ -581,25 +581,25 @@ other = "故障"
 other = "无数据"
 
 [StatusGood]
-other = "良好"
+other = "正常"
 
 [StatusLowAvailability]
 other = "低可用"
 
 [ScheduledTaskExecutedSuccessfully]
-other = "任务成功"
+other = "任务执行成功"
 
 [ScheduledTaskExecutedFailed]
-other = "任务失败"
+other = "任务执行失败"
 
 [IPChanged]
 other = "IP变更"
 
 [Transleft]
-other = "流量剩余"
+other = "剩余流量"
 
 [DashboardTheme]
-other = "管理后台主题"
+other = "后台界面主题"
 
 [Info]
 other = "信息"
