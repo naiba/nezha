@@ -14,28 +14,28 @@ other = "Tareas"
 other = "Notificaciones"
 
 [Settings]
-other = "Ajustes"
+other = "Configuraciones"
 
 [Home]
-other = "Página de inicio"
+other = "Inicio"
 
 [BackToHomepage]
-other = "Volver a la página de inicio"
+other = "Volver al Inicio"
 
 [AdminPanel]
-other = "Panel de administración"
+other = "Panel de Administración"
 
 [Logout]
-other = "Cerrar sesión"
+other = "Cerrar Sesión"
 
 [Login]
-other = "Iniciar sesión"
+other = "Iniciar Sesión"
 
 [ConfirmLogout]
-other = "¿Confirma que queire cierre de sesión?"
+other = "¿Confirmar Cierre de Sesión?"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "Después de cerrar la sesión, debe volver a iniciar la sesión para utilizar"
+other = "Después de cerrar sesión, debe iniciar sesión nuevamente para continuar"
 
 [Cancel]
 other = "Cancelar"
@@ -44,7 +44,7 @@ other = "Cancelar"
 other = "Confirmar"
 
 [AddScheduledTasks]
-other = "Añadir tareas programadas"
+other = "Agregar Tareas Programadas"
 
 [Name]
 other = "Nombre"
@@ -53,10 +53,10 @@ other = "Nombre"
 other = "Plan"
 
 [BackUp]
-other = "Copia de seguridad"
+other = "Respaldo"
 
 [3amDaily]
-other = "(Las 3: 00 de todos los días)"
+other = "(Diariamente a las 3 a.m.)"
 
 [Command]
 other = "Comandos"
@@ -65,214 +65,214 @@ other = "Comandos"
 other = "Cobertura"
 
 [IgnoreAllAndExecuteOnlyThroughSpecificServers]
-other = "Ignorar todo y ejecutar sólo a través de servidores específicos"
+other = "Ignorar todo, ejecutar solo a través de servidores específicos"
 
 [AllIncludedOnlySpecificServersAreNotExecuted]
-other = "Todos los servidores, sólo los específicos no ejecutan comandos"
+other = "Incluir todo, excepto servidores específicos"
 
 [ExecuteByTriggerServer]
-other = "Sólo los servidores incluidos en las reglas de notificación"
+other = "Ejecutar por servidor disparador"
 
 [SpecificServers]
-other = "Servidores específicos"
+other = "Servidores Específicos"
 
 [EnterIdAndNameToSearch]
-other = "Introduzca ID o nombre para buscar"
+other = "Ingrese ID/Nombre para buscar"
 
 [NotificationMethodGroup]
-other = "Grupo de métodos de notificación"
+other = "Grupo de Métodos de Notificación"
 
 [PushSuccessMessages]
-other = "Enviar el mensaje con éxito"
+other = "Enviar el mensaje de éxito"
 
 [TaskType]
-other = "Tipo de tarea"
+other = "Tipo de Tarea"
 
 [CronTask]
-other = "Tarea programada"
+other = "Tarea Cron"
 
 [TriggerTask]
-other = "Tarea activa"
+other = "Tarea Disparadora"
 
 [TheFormaOfTheScheduleIs]
 other = "El formato del plan es:"
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
-other = "Segundos, minutos, horas, días, meses, semanas, ver detalles a"
+other = "Segundos, Minutos, Horas, Días, Meses, Semanas - Ver detalles a"
 
 [ScheduleExpressionFormat]
-other = "Formato de expresiones cron"
+other = "Formato de Expresión de Cron"
 
 [IntroductionOfCommands]
-other = "Comandos: al igual que la escritura de un script shell/bat, pero no se recomiendan los saltos de línea. Los comandos múltiples se enlazan mediante <code>&&</code>/<code>&</code>, si el comando no se encuentra, es posible que haya un problema con la variable de entorno <code>PATH</code>, los servidores <code>Linux</code> añaden <code>source ~/.bashrc</code> al inicio del comando o utilizan una ruta absoluta para ejecutarlo."
+other = "Introducción de Comandos: Escriba comandos como en scripts shell/bat. Evite saltos de línea; conecte múltiples comandos con <code>&&</code> o <code>&</code>. Si no se encuentra un comando, verifique la variable de entorno <code>PATH</code>. En servidores <code>Linux</code>, antepóngale <code>source ~/.bashrc</code> a los comandos, o use rutas absolutas."
 
 [AddMonitor]
-other = "Añadir un monitor de servicio"
+other = "Agregar Monitor de Servicio"
 
 [Blog]
 other = "Blog"
 
 [Target]
-other = "Objetivos"
+other = "Objetivo"
 
 [Type]
 other = "Tipo"
 
 [SslExpirationOrChange]
-other = "(Expiración o cambio de SSL)"
+other = "(Expiración o Cambio de SSL)"
 
 [Duration]
-other = "Intervalo"
+other = "Intervalo de Solicitud"
 
 [Seconds]
-other = "segundos"
+other = "Segundos"
 
 [EnableFailureNotification]
-other = "Activar la notificación de fallos"
+other = "Habilitar Notificación de Fallo"
 
 [FailureNotification]
-other = "Notificación de fallos"
+other = "Notificación de Fallo"
 
 [MaxLatency]
-other = "Retardo máximo (ms)"
+other = "Máxima Latencia (ms)"
 
 [MinLatency]
-other = "Retardo mínimo (ms)"
+other = "Mínima Latencia (ms)"
 
 [EnableLatencyNotification]
-other = "Activar las notificaciones de retraso de la red"
+other = "Habilitar Notificación de Latencia"
 
 [LatencyNotification]
-other = "Notificación de retraso de la red"
+other = "Notificación de Latencia"
 
 [IntroductionOfMonitor]
 other = """
-Introduzca la URL cuando el tipo sea <b>HTTP-GET</b> (si es con protocolo HTTPS, por cierto, monitorizará el certificado SSL) <br>
-Introduzca el nombre de host o IP sin puerto cuando el tipo es <b>ICMP-Ping</b> <br>
-Introduzca el nombre de host o IP y puerto cuando el tipo es <b>TCP-Ping</b>: example.com:22"""
+Para tipo <b>HTTP-GET</b>, ingrese URL (http/https, HTTPS también monitorea el certificado SSL);<br>
+Para tipo <b>ICMP-Ping</b>, ingrese dominio/IP sin puerto;<br>
+Para tipo <b>TCP-Ping</b>, ingrese dominio/IP + puerto: ejemplo.com:22"""
 
 [AddNotificationMethod]
-other = "Añadir un método de notificación"
+other = "Agregar Método de Notificación"
 
 [Tag]
 other = "Grupo de servidores"
 
 [DoNotSendTestMessages]
-other = "No se envía ningún mensaje de prueba"
+other = "No Enviar Mensajes de Prueba"
 
 [RequestMethod]
-other = "Método de petición"
+other = "Método de Solicitud"
 
 [RequestType]
-other = "Tipo de petición"
+other = "Tipo de Solicitud"
 
 [VerifySSL]
 other = "Validar SSL"
 
 [AddNotificationRule]
-other = "Añadir reglas de notificación"
+other = "Agregar Regla de Notificación"
 
 [Rules]
 other = "Reglas"
 
 [NotificationTriggerMode]
-other = "Modo de activar la notificación"
+other = "Modo de Disparo de Notificación"
 
 [ModeAlwaysTrigger]
-other = "Siempre se activa"
+other = "Siempre Activar"
 
 [ModeOnetimeTrigger]
-other = "Se activa sólo una vez"
+other = "Activación Única"
 
 [EnableTriggerTask]
-other = "Activar tareas de activación"
+other = "Habilitar Tarea Disparadora"
 
 [FailTriggerTasks]
-other = "Tareas que se activan en caso de fallo"
+other = "Tareas Disparadas por Fallo"
 
 [RecoverTriggerTasks]
-other = "Tareas que se activan tras la recuperación del fallo"
+other = "Tareas Disparadas por Recuperación"
 
 [Enable]
-other = "Activar"
+other = "Habilitar"
 
 [AddServer]
-other = "Añadir un servidor"
+other = "Agregar Servidor"
 
 [BatchEditServerGroup]
-other = "Modificación de grupos por lotes"
+other = "Editar Grupo de Servidores en Lote"
 
 [BatchDeleteServer]
-other = "Batch Delete Server"
+other = "Eliminar Servidores en Lote""
 
 [InputServerGroupName]
-other = "Introduzca un nombre de grupo"
+other = "Ingrese Nombre del Grupo de Servidores"
 
 [ServerGroup]
-other = "Grupos de servidores"
+other = "Grupos de Servidores"
 
 [EinsteinLightspeed1]
-other = "Einstein - Velocidad de la luz 1"
+other = "Einstein - Velocidad de luz 1"
 
 [DisplayIndex]
-other = "Índice de visualización"
+other = "Índice de Visualización"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "Los números más grandes se mostrarán primero"
+other = "A mayor número, mayor prioridad"
 
 [Secret]
-other = "Clave"
+other = "Secreto"
 
 [Note]
 other = "Nota"
 
 [LinuxOneKeyInstall]
-other = "Linux Instalación con un solo clic"
+other = "Instalación Linux con Un Solo Clic"
 
 [NoDomainAlert]
 other = "Por favor, configure el dominio o IP del servidor del panel que no está conectado a la CDN en la página de configuración"
 
 [PushSuccessfully]
-other = "Enviado correctamente"
+other = "Envío Exitoso"
 
 [LastExecution]
-other = "Última ejecución en"
+other = "Última Ejecución en"
 
 [LastResult]
-other = "Resultado final"
+other = "Último Resultado"
 
 [Administration]
-other = "Gestionar"
+other = "Administración"
 
 [CoverAll]
-other = "Cubriendo todo"
+other = "Cubrir Todo"
 
 [IgnoreAll]
-other = "Ignora todo"
+other = "Ignorar Todo"
 
 [ByTrigger]
-other = "Ejecutar cuando se activa"
+other = "Ejecutar por Disparador"
 
 [DeleteScheduledTask]
-other = "Eliminar la tarea programada"
+other = "Eliminar Tarea Programada"
 
 [ConfirmToDeleteThisScheduledTask]
-other = "¿Confirma que quiere eliminar esta tarea programada?"
+other = "¿Confirmar para eliminar esta Tarea Programada?"
 
 [AccessDenied]
-other = "Acceso denegado"
+other = "Acceso Denegado"
 
 [Use]
-other = "Utiliza"
+other = "Usar"
 
 [AccountToLogin]
-other = "Acceder a la cuenta"
+other = "Iniciar Sesión con Cuenta"
 
 [SignUp]
-other = "Regístrate"
+other = "Registrarse"
 
 [DontHaveAnAccount]
-other = "¿No tiene la cuenta?"
+other = "¿No tiene una cuenta?"
 
 [SSLCertificate]
 other = "Certificados HTTP(S)/SSL"
@@ -281,106 +281,106 @@ other = "Certificados HTTP(S)/SSL"
 other = "Puerto TCP"
 
 [DeleteService]
-other = "Eliminar un servicio"
+other = "Eliminar Servicio"
 
 [ConfirmToDeleteThisService]
-other = "¿Confirma que quiere eliminar este servicio?"
+other = "¿Confirmar para eliminar este Servicio?"
 
 [DeleteNotificationMethod]
-other = "Eliminar un método de notificación"
+other = "Eliminar Método de Notificación"
 
 [ConfirmToDeleteThisNotificationMethod]
-other = "¿Confirma que quiere eliminar este método de notificación?"
+other = "¿Confirmar para eliminar este Método de Notificación?"
 
 [ForceUpdate]
-other = "Actualizaciones forzosas"
+other = "Actualizar Ahora"
 
 [SelectAll]
-other = "Seleccionar todo"
+other = "Seleccionar Todo"
 
 [VersionNumber]
-other = "Número de versión"
+other = "Número de Versión"
 
 [OneKeyInstall]
-other = "Instalación con un solo clic"
+other = "Instalación con Un Solo Clic"
 
 [ClickToCopy]
-other = "Haga clic para copiar"
+other = "Hacer Clic para Copiar"
 
 [DeleteServer]
-other = "Eliminar el servidor"
+other = "Eliminar Servidor"
 
 [ConfirmToDeleteServer]
-other = "¿Confirma que quiere eliminar servidor?"
+other = "¿Confirmar para eliminar este Servidor?"
 
 [NoServerSelected]
-other = "No hay servidores seleccionados actualmente"
+other = "No hay Servidores Seleccionados"
 
 [ExecutionResults]
-other = "Resultados de la ejecución"
+other = "Resultados de Ejecución"
 
 [SiteTitle]
-other = "Título del sitio"
+other = "Título del Sitio"
 
 [AdministratorList]
-other = "Lista de administradores"
+other = "Lista de Administradores"
 
 [Theme]
-other = "Tema"
+other = "Tema de Frontend"
 
 [CustomCodes]
-other = "Códigos personalizados"
+other = "Códigos Personalizados (Incluye style y script)"
 
 [AccessPassword]
-other = "Contraseña de acceso"
+other = "Contraseña de Acceso al Frontend"
 
 [PanelServerDomainAndIP]
-other = "El dominio o IP del servidor del panel no está conectado a la CDN"
+other = "Dominio/IP del Servidor del Panel sin CDN"
 
 [IPChangeAlert]
-other = "Notificación de cambio de IP"
+other = "Notificación de Cambio de IP"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
-other = "Cubrir todo, ignorar sólo servidores específicos"
+other = "Incluir Todo, Excepto Servidores Específicos"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "Omitir todo, cubrir sólo servidores específicos"
+other = "Ignorar Todo, Alertar Solo Servidores Específicos"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
-other = "Omitir todos los servidores, sólo enviar peticiones a través de servidores específicos"
+other = "Ignorar Todo, Solicitar Solo a Través de Servidores Específicos"
 
 [AllIncludedOnlySpecificServersAreNotRequest]
-other = "Enviar peticiones de todos los servidores, omitir sólo servidores específicos"
+other = "Incluir Todo, Solo Los Servidores Específicos No Solicitan"
 
 [ServerIDSeparatedByCommas]
-other = "ID del servidor separado por una coma"
+other = "IDs de Servidores Separados por Comas"
 
 [IPChangeNotificationTag]
-other = "Enviar una notificación al grupo de notificación especificado"
+other = "Enviar Alerta a Grupo de Notificación Específico"
 
 [NotificationMessagesDoNotHideIP]
-other = "No se oculta la IP en los mensajes de notificación"
+other = "Mostrar Dirección IP Completa en Mensajes de Notificación"
 
 [Save]
 other = "Guardar"
 
 [ModifiedSuccessfully]
-other = "Modificado con éxito"
+other = "Modificado con Éxito"
 
 [TerminalConnectionTimeOutOrSessionEnded]
-other = "La conexión del Terminal ha expirado o la sesión ha terminado"
+other = "Tiempo de Conexión del Terminal Agotado o Sesión Finalizada"
 
 [TerminalConnectionFailed]
-other = "Fallo en la conexión del terminal, por favor, revise el proxy inverso de WebSocket"
+other = "Fallo en la Conexión del Terminal, Verifique la Configuración de Proxy Inverso de WebSocket en /terminal/*"
 
 [Default]
-other = "Por defecto"
+other = "Predeterminado"
 
 [Offline]
-other = "Desconexión"
+other = "Desconectado"
 
 [Platform]
-other = "Plataforma"
+other = "Sistema"
 
 [DiskUsed]
 other = "Disco"
@@ -398,52 +398,52 @@ other = "Virtualización"
 other = "Swap"
 
 [NetTransfer]
-other = "Tráfico de red"
+other = "Transferencia de Red"
 
 [Load]
 other = "Carga"
 
 [ProcessCount]
-other = "Número de procesos"
+other = "Cantidad de Procesos"
 
 [ConnCount]
-other = "Número de conexiones"
+other = "Cantidad de Conexiones"
 
 [BootTime]
-other = "Tiempo de arranque"
+other = "Tiempo de Arranque"
 
 [LastActive]
-other = "Último activo"
+other = "Última Actividad"
 
 [Version]
-other = "Versiones"
+other = "Versión"
 
 [NetSpeed]
 other = "Red"
 
 [Uptime]
-other = "Activo"
+other = "Uptime"
 
 [ServerIsOffline]
-other = "El servidor está desconectado"
+other = "El Servidor está Desconectado"
 
 [Day]
 other = "Días"
 
 [RealtimeChannelEstablished]
-other = "Canal en tiempo real está conectados"
+other = "Canal en Tiempo Real Establecido"
 
 [GetTheLatestMonitoringDataInRealTime]
-other = "¡Ahora puede obtener los últimos datos de monitorización en tiempo real!"
+other = "¡Ahora Puede Obtener los Últimos Datos de Monitoreo en Tiempo Real!"
 
 [RealtimeChannelDisconnect]
-other = "Canal en tiempo real desconectado"
+other = "Canal en Tiempo Real Desconectado"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
-other = "¡No puede obtener los últimos datos de monitorización en tiempo real!"
+other = "¡No se Pueden Obtener los Últimos Datos de Monitoreo en Tiempo Real!"
 
 [30DaysOnline]
-other = "Disponibilidad en los últimos 30 días"
+other = "Disponibilidad de 30 Días"
 
 [Details]
 other = "Detalles"
@@ -455,10 +455,10 @@ other = "Estado"
 other = "Disponibilidad"
 
 [AverageLatency]
-other = "Retardo medio"
+other = "Latencia Promedio"
 
 [CycleTransferStats]
-other = "Estadísticas del ciclo de consumo de datos"
+other = "Estadísticas de Transferencia Periódica"
 
 [From]
 other = "Desde"
@@ -467,103 +467,103 @@ other = "Desde"
 other = "Hasta"
 
 [NextCheck]
-other = "Siguiente prueba"
+other = "Próxima Verificación"
 
 [CurrentUsage]
-other = "Consumo"
+other = "Uso Actual"
 
 [VerifyPassword]
-other = "Verificar contraseña"
+other = "Verificar Contraseña"
 
 [LightMode]
-other = "Modo luminoso"
+other = "Modo Claro"
 
 [DarkMode]
-other = "Modo oscuro"
+other = "Modo Oscuro"
 
 [FollowSystem]
-other = "Seguir el sistema"
+other = "Seguir al Sistema"
 
 [GridLayout]
-other = "Grid Layout"
+other = "Diseño de Cuadrícula"
 
 [ListLayout]
-other = "List Layout"
+other = "Diseño de Lista"
 
 [EnterPassword]
-other = "Introduzca su contraseña"
+other = "Ingrese Contraseña"
 
 [Location]
-other = "Localización"
+other = "Ubicación"
 
 [Running]
-other = "En línea"
+other = "En Funcionamiento"
 
 [UpNetTransfer]
-other = "Tráfico de salida"
+other = "Red Ascendente"
 
 [DownNetTransfer]
-other = "Tráfico de entrada"
+other = "Red Descendente"
 
 [TotalUpNetTransfer]
-other = "Tráfico de salida total"
+other = "Total Ascendente"
 
 [TotalDownNetTransfer]
-other = "Tráfico de entrada total"
+other = "Total Descendente"
 
 [WrongPassword]
-other = "Contraseña incorrecta"
+other = "Contraseña Incorrecta"
 
 [AnErrorEccurred]
-other = "Ha ocurrido un error"
+other = "Ocurrió un Error"
 
 [SystemError]
-other = "Error del sistema"
+other = "Error del Sistema"
 
 [NetworkError]
-other = "Error de red"
+other = "Error de Red"
 
 [ServicesStatus]
-other = "Estado del servicio"
+other = "Estado de los Servicios"
 
 [ServersManagement]
-other = "Gestión de servidores"
+other = "Gestión de Servidores"
 
 [ServicesManagement]
-other = "Monitorización del servicio"
+other = "Gestión de Servicios"
 
 [ScheduledTasks]
-other = "Tareas programadas"
+other = "Tareas Programadas"
 
 [ApiManagement]
-other = "API"
+other = "Gestión de API"
 
 [IssueNewApiToken]
-other = "Añadir un token"
+other = "Emitir Nuevo Token"
 
 [Token]
 other = "Token"
 
 [DeleteToken]
-other = "Borrar el token"
+other = "Eliminar Token"
 
 [ConfirmToDeleteThisToken]
-other = "¿Confirmar para borrar este Token?"
+other = "¿Confirmar para Eliminar este Token?"
 
 [YouAreNotAuthorized]
-other = "Esta página requiere un acceso"
+other = "No Autorizado para esta Página"
 
 [WrongAccessPassword]
-other = "Contraseña de acceso incorrecta"
+other = "Contraseña de Acceso Incorrecta"
 
 [Add]
-other = "Añadir"
+other = "Agregar"
 
 [Edit]
-other = "Modificar"
+other = "Editar"
 
 [AlarmRule]
-other = "Reglas de notificación"
+other = "Reglas de Alarma"
 
 [NotificationMethod]
 other = "Método de notificación"
@@ -575,37 +575,37 @@ other = "Incidente"
 other = "Resuelto"
 
 [StatusDown]
-other = "Fallo"
+other = "Caído"
 
 [StatusNoData]
-other = "No hay datos disponibles"
+other = "Sin Datos"
 
 [StatusGood]
-other = "Buen"
+other = "Bueno"
 
 [StatusLowAvailability]
-other = "Baja disponibilidad"
+other = "Baja Disponibilidad"
 
 [ScheduledTaskExecutedSuccessfully]
-other = "Tarea ejecutada con éxito"
+other = "Tarea Programada Ejecutada con Éxito"
 
 [ScheduledTaskExecutedFailed]
-other = "Tarea ejecutada fallida"
+other = "Fallo en la Ejecución de la Tarea Programada"
 
 [IPChanged]
 other = "Cambio de IP"
 
 [Transleft]
-other = "Datos restantes"
+other = "Transferencia Restante"
 
 [DashboardTheme]
-other = "Tema del panel de administración"
+other = "Tema del Panel de Administración"
 
 [Info]
 other = "Información"
 
 [HideForGuest]
-other = "No se muestra a los visitantes"
+other = "Ocultar para Invitados"
 
 [Menu]
 other = "Menú"
