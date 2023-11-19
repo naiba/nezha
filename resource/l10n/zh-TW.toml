@@ -2,7 +2,7 @@
 other = "哪吒監控"
 
 [Server]
-other = "主機"
+other = "伺服器"
 
 [Services]
 other = "服務"
@@ -11,7 +11,7 @@ other = "服務"
 other = "任務"
 
 [Notification]
-other = "報警"
+other = "告警"
 
 [Settings]
 other = "設置"
@@ -20,10 +20,10 @@ other = "設置"
 other = "首頁"
 
 [BackToHomepage]
-other = "返回前臺"
+other = "返回前台"
 
 [AdminPanel]
-other = "管理後臺"
+other = "管理後台"
 
 [Logout]
 other = "登出"
@@ -32,10 +32,10 @@ other = "登出"
 other = "登入"
 
 [ConfirmLogout]
-other = "確認登出？"
+other = "確定要登出嗎？"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "登出後您必須重新登入才能使用"
+other = "登出後需重新登入以繼續使用"
 
 [Cancel]
 other = "取消"
@@ -44,7 +44,7 @@ other = "取消"
 other = "確認"
 
 [AddScheduledTasks]
-other = "添加計劃任務"
+other = "新增計劃任務"
 
 [Name]
 other = "名稱"
@@ -65,19 +65,19 @@ other = "命令"
 other = "覆蓋範圍"
 
 [IgnoreAllAndExecuteOnlyThroughSpecificServers]
-other = "忽略全部，僅通過特定服務器執行"
+other = "忽略所有，僅通過特定伺服器執行"
 
 [AllIncludedOnlySpecificServersAreNotExecuted]
-other = "覆蓋全部，僅特定服務器不執行"
+other = "覆蓋所有，僅特定伺服器不執行"
 
 [ExecuteByTriggerServer]
-other = "由觸發的服務器執行"
+other = "由觸發的伺服器執行"
 
 [SpecificServers]
-other = "特定服務器"
+other = "特定伺服器"
 
 [EnterIdAndNameToSearch]
-other = "輸入ID/名稱以搜索"
+other = "輸入ID/名稱以搜尋"
 
 [NotificationMethodGroup]
 other = "通知方式組"
@@ -95,7 +95,7 @@ other = "計劃任務"
 other = "觸發任務"
 
 [TheFormaOfTheScheduleIs]
-other = "計劃的格式爲："
+other = "計劃的格式為："
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
 other = "秒 分 時 天 月 星期，詳情見"
@@ -104,10 +104,10 @@ other = "秒 分 時 天 月 星期，詳情見"
 other = "計劃表達式格式"
 
 [IntroductionOfCommands]
-other = "命令：就像寫 shell/bat 腳本一樣，但是不推薦換行，多個命令使用 <code>&&</code>/<code>&</code> 連接，如果遇到 xxx 命令找不到，可能是<code>PATH</code> 環境變量的問題，<code>Linux</code> 主機在命令開頭加入<code>source ~/.bashrc</code>或者使用絕對路徑執行。"
+other = "命令說明：編寫命令時類似於 shell/bat 腳本。建議不要換行，多個命令可用 <code>&&</code> 或 <code>&</code> 連接，若出現命令無法找到的情況，可能是由於 <code>PATH</code> 環境變量配置問題。在 <code>Linux</code> 伺服器上，可在命令開頭加入 <code>source ~/.bashrc</code>，或使用命令的絕對路徑執行。"
 
 [AddMonitor]
-other = "添加監控"
+other = "新增監控"
 
 [Blog]
 other = "博客"
@@ -148,17 +148,17 @@ other = "延遲通知"
 [IntroductionOfMonitor]
 other = """
 類型為 <b>HTTP-GET</b> 時輸入URL(帶 http/https, HTTPS協議的會順帶監控SSL證書)；<br>
-類型為 <b>ICMP-Ping</b> 時輸入主機名/IP，不帶端口；<br>
-類型為 <b>TCP-Ping</b> 時輸入主機名/IP + 端口號：example.com:22"""
+類型為 <b>ICMP-Ping</b> 時輸入域名/IP，不帶端口；<br>
+類型為 <b>TCP-Ping</b> 時輸入域名/IP + 端口號：example.com:22"""
 
 [AddNotificationMethod]
-other = "添加通知方式"
+other = "新增通知方式"
 
 [Tag]
 other = "分組"
 
 [DoNotSendTestMessages]
-other = "不發送測試訊息"
+other = "不發送測試信息"
 
 [RequestMethod]
 other = "請求方式"
@@ -170,7 +170,7 @@ other = "請求類型"
 other = "驗證SSL"
 
 [AddNotificationRule]
-other = "添加報警規則"
+other = "新增告警規則"
 
 [Rules]
 other = "規則"
@@ -188,7 +188,7 @@ other = "單次觸發"
 other = "啟用觸發任務"
 
 [FailTriggerTasks]
-other = "故障時觸發任務"
+other = "告警時觸發任務"
 
 [RecoverTriggerTasks]
 other = "恢復時觸發任務"
@@ -197,19 +197,19 @@ other = "恢復時觸發任務"
 other = "啟用"
 
 [AddServer]
-other = "添加服務器"
+other = "新增伺服器"
 
 [BatchEditServerGroup]
 other = "批量修改分組"
 
 [BatchDeleteServer]
-other = "批量删除服务器"
+other = "批量刪除伺服器"
 
 [InputServerGroupName]
 other = "輸入分組名稱"
 
 [ServerGroup]
-other = "服務器分組"
+other = "伺服器分組"
 
 [EinsteinLightspeed1]
 other = "愛因斯坦-光速1號"
@@ -230,13 +230,13 @@ other = "備註"
 other = "Linux 一鍵安裝"
 
 [NoDomainAlert]
-other = "請先在設置頁面配置 未接入CDN的面板服務器域名/IP"
+other = "請先在設置頁面配置 未接入CDN的面板伺服器域名/IP"
 
 [PushSuccessfully]
-other = "成功推送"
+other = "推送成功"
 
 [LastExecution]
-other = "最後執行"
+other = "最近執行"
 
 [LastResult]
 other = "最後結果"
@@ -245,10 +245,10 @@ other = "最後結果"
 other = "管理"
 
 [CoverAll]
-other = "覆蓋全部"
+other = "覆蓋所有"
 
 [IgnoreAll]
-other = "忽略全部"
+other = "忽略所有"
 
 [ByTrigger]
 other = "觸發執行"
@@ -260,19 +260,19 @@ other = "刪除計劃任務"
 other = "確認刪除此計劃任務？"
 
 [AccessDenied]
-other = "訪問受限"
+other = "訪問被拒絕"
 
 [Use]
 other = "使用"
 
 [AccountToLogin]
-other = "賬號登入"
+other = "帳號登入"
 
 [SignUp]
 other = "註冊"
 
 [DontHaveAnAccount]
-other = "沒有賬號？"
+other = "沒有帳號？"
 
 [SSLCertificate]
 other = "HTTP(S)/SSL證書"
@@ -281,7 +281,7 @@ other = "HTTP(S)/SSL證書"
 other = "TCP 端口"
 
 [DeleteService]
-other = "刪除服務"
+other = "移除服務"
 
 [ConfirmToDeleteThisService]
 other = "確認刪除此服務？"
@@ -293,7 +293,7 @@ other = "刪除通知方式"
 other = "確認刪除此通知方式？"
 
 [ForceUpdate]
-other = "強制更新"
+other = "立即更新"
 
 [SelectAll]
 other = "全選"
@@ -308,58 +308,58 @@ other = "一鍵安裝"
 other = "點擊複製"
 
 [DeleteServer]
-other = "刪除主機"
+other = "刪除伺服器"
 
 [ConfirmToDeleteServer]
-other = "確認刪除主機？"
+other = "確認刪除伺服器？"
 
 [NoServerSelected]
-other = "當前沒有選中的服務器"
+other = "當前沒有選中的伺服器"
 
 [ExecutionResults]
 other = "執行結果"
 
 [SiteTitle]
-other = "站點標題"
+other = "網站標題"
 
 [AdministratorList]
 other = "管理員列表"
 
 [Theme]
-other = "主題"
+other = "前台界面主題"
 
 [CustomCodes]
-other = "自定義代碼(style、script 都可以)"
+other = "自定義代碼（包括 style 和 script）"
 
 [AccessPassword]
-other = "前臺查看密碼"
+other = "前台訪問密碼"
 
 [PanelServerDomainAndIP]
-other = "未接入CDN的面板服務器域名/IP"
+other = "未接入CDN的面板伺服器域名/IP"
 
 [IPChangeAlert]
-other = "IP 變更提醒"
+other = "IP 變動通知"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
-other = "覆蓋全部，僅特定服務器不提醒"
+other = "覆蓋所有，僅特定伺服器不提醒"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "忽略全部，僅提醒特定服務器"
+other = "忽略所有，僅提醒特定伺服器"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
-other = "忽略全部，僅通過特定服務器請求"
+other = "忽略所有，僅通過特定伺服器請求"
 
 [AllIncludedOnlySpecificServersAreNotRequest]
-other = "覆蓋全部，僅特定服務器不請求"
+other = "覆蓋所有，僅特定伺服器不請求"
 
 [ServerIDSeparatedByCommas]
-other = "服務器ID 以逗號隔開"
+other = "伺服器ID 以逗號隔開"
 
 [IPChangeNotificationTag]
-other = "提醒發送至指定的通知分組"
+other = "將提醒發送至指定通知分組"
 
 [NotificationMessagesDoNotHideIP]
-other = "通知訊息IP不打碼"
+other = "通知信息中顯示完整IP地址"
 
 [Save]
 other = "保存"
@@ -371,7 +371,7 @@ other = "修改成功"
 other = "Terminal 連接超時或會話已結束"
 
 [TerminalConnectionFailed]
-other = "Terminal 連接失敗，請檢查 /terminal/* 的 WebSocket 反代情況"
+other = "Terminal 連接失敗，請檢查 /terminal/* 的 WebSocket 反向代理配置"
 
 [Default]
 other = "默認"
@@ -383,13 +383,13 @@ other = "已離線"
 other = "系統"
 
 [DiskUsed]
-other = "硬盤"
+other = "硬碟"
 
 [MemUsed]
-other = "內存"
+other = "記憶體"
 
 [CpuUsed]
-other = "CPU"
+other = "核心"
 
 [Virtualization]
 other = "虛擬化"
@@ -410,7 +410,7 @@ other = "進程數"
 other = "連接數"
 
 [BootTime]
-other = "啓動"
+other = "啟動"
 
 [LastActive]
 other = "活動"
@@ -425,25 +425,25 @@ other = "網絡"
 other = "在線"
 
 [ServerIsOffline]
-other = "節點已離線"
+other = "伺服器已離線"
 
 [Day]
 other = "天"
 
 [RealtimeChannelEstablished]
-other = "實時通道建立"
+other = "實時通道已建立"
 
 [GetTheLatestMonitoringDataInRealTime]
 other = "可以實時獲取最新監控數據啦"
 
 [RealtimeChannelDisconnect]
-other = "實時通道斷開"
+other = "實時通道已斷開"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
 other = "無法實時獲取最新監控數據咯"
 
 [30DaysOnline]
-other = "30天在線率"
+other = "近30天可用性"
 
 [Details]
 other = "詳情"
@@ -452,22 +452,22 @@ other = "詳情"
 other = "狀態"
 
 [Availability]
-other = "在線率"
+other = "可用性"
 
 [AverageLatency]
-other = "平均延遲"
+other = "平均響應時間"
 
 [CycleTransferStats]
-other = "循環流量統計"
+other = "周期性流量統計"
 
 [From]
-other = "自"
+other = "起始"
 
 [To]
-other = "至"
+other = "結束"
 
 [NextCheck]
-other = "下次檢查"
+other = "下一次檢測"
 
 [CurrentUsage]
 other = "當前用量"
@@ -476,25 +476,25 @@ other = "當前用量"
 other = "驗證查看密碼"
 
 [LightMode]
-other = "白晝模式"
+other = "亮色模式"
 
 [DarkMode]
-other = "暗黑模式"
+other = "暗色模式"
 
 [FollowSystem]
 other = "跟隨系統"
 
 [GridLayout]
-other = "網格視圖"
+other = "網格佈局"
 
 [ListLayout]
-other = "列表視圖"
+other = "列表佈局"
 
 [EnterPassword]
-other = "輸入密碼"
+other = "請輸入密碼"
 
 [Location]
-other = "地區"
+other = "位置"
 
 [Running]
 other = "運行中"
@@ -512,10 +512,10 @@ other = "總上行"
 other = "總下行"
 
 [WrongPassword]
-other = "密碼錯誤"
+other = "輸入的密碼錯誤"
 
 [AnErrorEccurred]
-other = "出現錯誤"
+other = "發生錯誤"
 
 [SystemError]
 other = "系統錯誤"
@@ -527,7 +527,7 @@ other = "網絡錯誤"
 other = "服務狀態"
 
 [ServersManagement]
-other = "服務器管理"
+other = "伺服器管理"
 
 [ServicesManagement]
 other = "服務監控"
@@ -536,10 +536,10 @@ other = "服務監控"
 other = "計劃任務"
 
 [ApiManagement]
-other = "API"
+other = "API 管理"
 
 [IssueNewApiToken]
-other = "添加Token"
+other = "生成Token"
 
 [Token]
 other = "Token"
@@ -554,22 +554,22 @@ other = "確認刪除Token"
 other = "此頁面需要登入"
 
 [WrongAccessPassword]
-other = "查看密碼錯誤"
+other = "訪問密碼錯誤"
 
 [Add]
-other = "添加"
+other = "新增"
 
 [Edit]
 other = "修改"
 
 [AlarmRule]
-other = "報警規則"
+other = "告警規則"
 
 [NotificationMethod]
 other = "通知方式"
 
 [Incident]
-other = "故障"
+other = "事件"
 
 [Resolved]
 other = "恢復"
@@ -578,46 +578,34 @@ other = "恢復"
 other = "故障"
 
 [StatusNoData]
-other = "沒有數據"
+other = "無數據"
 
 [StatusGood]
-other = "良好"
+other = "正常"
 
 [StatusLowAvailability]
 other = "低可用"
 
 [ScheduledTaskExecutedSuccessfully]
-other = "任務成功"
+other = "任務執行成功"
 
 [ScheduledTaskExecutedFailed]
-other = "任務失敗"
+other = "任務執行失敗"
 
 [IPChanged]
 other = "IP變更"
 
 [Transleft]
-other = "流量剩餘"
+other = "剩餘流量"
 
 [DashboardTheme]
-other = "管理後臺主題"
+other = "後台界面主題"
 
 [Info]
-other = "訊息"
+other = "信息"
 
 [HideForGuest]
 other = "對遊客隱藏"
 
 [Menu]
-other = "功能"
-
-[SitePV]
-other = "本站總訪問量"
-
-[SitePVUnit]
-other = "次"
-
-[SiteUV]
-other = "本站總訪問人數"
-
-[SiteUVUnit]
-other = "人次"
+other = "菜單"

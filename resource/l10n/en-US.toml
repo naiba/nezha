@@ -20,22 +20,22 @@ other = "Settings"
 other = "Home"
 
 [BackToHomepage]
-other = "Back to home"
+other = "Back to Homepage"
 
 [AdminPanel]
-other = "Admin"
+other = "Admin Panel"
 
 [Logout]
-other = "Log out"
+other = "Logout"
 
 [Login]
-other = "Log in"
+other = "Login"
 
 [ConfirmLogout]
 other = "Confirm Logout?"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "You must log in before accessing the admin area"
+other = "You need to login again after logout to continue"
 
 [Cancel]
 other = "Cancel"
@@ -56,7 +56,7 @@ other = "Cron Expression"
 other = "Backup"
 
 [3amDaily]
-other = "(Every day at 3 o'clock)"
+other = "(Daily at 3 AM)"
 
 [Command]
 other = "Command"
@@ -65,46 +65,46 @@ other = "Command"
 other = "Coverage"
 
 [IgnoreAllAndExecuteOnlyThroughSpecificServers]
-other = "Ignore All, Only execute by specific servers"
+other = "Ignore All, Execute Only on Specific Servers"
 
 [AllIncludedOnlySpecificServersAreNotExecuted]
-other = "Cover All, Only ignore specific servers"
+other = "Cover All, Except Specific Servers"
 
 [ExecuteByTriggerServer]
-other = "Only servers that are included in the notification rule"
+other = "Execute on Trigger Server"
 
 [SpecificServers]
 other = "Specific Servers"
 
 [EnterIdAndNameToSearch]
-other = "Input Server ID/Name to search"
+other = "Enter ID/Name to search"
 
 [NotificationMethodGroup]
-other = "Notification Group"
+other = "Notification Method Group"
 
 [PushSuccessMessages]
-other = "Send Success Notification"
+other = "Send Success Messages"
 
 [TaskType]
 other = "Task Type"
 
 [CronTask]
-other = "Scheduled task"
+other = "Cron Task"
 
 [TriggerTask]
-other = "Trigger task"
+other = "Trigger Task"
 
 [TheFormaOfTheScheduleIs]
 other = "The Cron Expression is like:"
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
-other = "sec min hour day month week, details in "
+other = "Sec Min Hour Day Month Week, see details in "
 
 [ScheduleExpressionFormat]
 other = "CRON Expression Format"
 
 [IntroductionOfCommands]
-other = "Command: Just like writing shell/bat scripts, but line wrap is not recommended. Multiple Commands should be connected with <code>&&</code>/<code>&</code>. Command not found may cause by missing <code>PATH</code> environment variable, for <code>Linux</code> Server, you may try adding <code>source ~/.bashrc</code> at beginning of your command or execute by absolute path."
+other = "Introduction of Commands: Writing commands is similar to shell/bat scripts. It's advised not to break lines, and multiple commands can be connected with <code>&&</code> or <code>&</code>. If a command cannot be found, it might be due to <code>PATH</code> environment variable configuration issues. On <code>Linux</code> servers, you can add <code>source ~/.bashrc</code> at the beginning of the command, or use the command's absolute path."
 
 [AddMonitor]
 other = "Add Service Monitor"
@@ -119,7 +119,7 @@ other = "Target"
 other = "Type"
 
 [SslExpirationOrChange]
-other = "(SSL Certificate Expired/Changed)"
+other = "(SSL Expiration or Change)"
 
 [Duration]
 other = "Interval"
@@ -131,7 +131,7 @@ other = "Seconds"
 other = "Enable Failure Notification"
 
 [FailureNotification]
-other = "Incident Notification"
+other = "Failure Notification"
 
 [MaxLatency]
 other = "Max Latency (ms)"
@@ -140,16 +140,16 @@ other = "Max Latency (ms)"
 other = "Min Latency (ms)"
 
 [EnableLatencyNotification]
-other = "Enable Latency Notifications"
+other = "Enable Latency Notification"
 
 [LatencyNotification]
 other = "Latency Notification"
 
 [IntroductionOfMonitor]
 other = """
-Input URL(With http/https prefix) for type <b>HTTP-GET</b>, SSL Certificate will be monitored automatically when URL has https prefix;<br>
-Input hostname/IP for type <b>ICMP-Ping</b>: example.com;<br>
-Input hostname/IP:Port for type <b>TCP-Ping</b>: example.com:22;"""
+For type <b>HTTP-GET</b>, enter URL (with http/https, HTTPS protocol will also monitor SSL certificate);<br>
+For type <b>ICMP-Ping</b>, enter domain/IP without port: example.com;<br>
+For type <b>TCP-Ping</b>, enter domain/IP + port number: example.com:22"""
 
 [AddNotificationMethod]
 other = "Add Notification Method"
@@ -176,22 +176,22 @@ other = "Add Notification Rule"
 other = "Rules"
 
 [NotificationTriggerMode]
-other = "Mode of triggering notification"
+other = "Notification Trigger Mode"
 
 [ModeAlwaysTrigger]
-other = "Always triggered"
+other = "Always Trigger"
 
 [ModeOnetimeTrigger]
-other = "Triggered only once"
+other = "Always Trigger"
 
 [EnableTriggerTask]
-other = "Enable trigger tasks"
+other = "Enable Trigger Task"
 
 [FailTriggerTasks]
-other = "Tasks to be triggered in case of failure"
+other = "Tasks triggered during an alarm"
 
 [RecoverTriggerTasks]
-other = "Tasks to be triggered after fault recovery"
+other = "Tasks triggered during recovery"
 
 [Enable]
 other = "Enable"
@@ -200,25 +200,25 @@ other = "Enable"
 other = "Add Server"
 
 [BatchEditServerGroup]
-other = "Batch Modify Groups"
+other = "Batch Edit Server Group"
 
 [BatchDeleteServer]
 other = "Batch Delete Server"
 
 [InputServerGroupName]
-other = "Enter the name of the group"
+other = "Input Server Group Name"
 
 [ServerGroup]
 other = "Server Group"
 
 [EinsteinLightspeed1]
-other = "Einstein Light Speed 1"
+other = "Einstein Lightspeed 1"
 
 [DisplayIndex]
 other = "Display Index"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "Greater numbers will be displayed first"
+other = "Higher Number, Higher Priority"
 
 [Secret]
 other = "Secret"
@@ -227,7 +227,7 @@ other = "Secret"
 other = "Note"
 
 [LinuxOneKeyInstall]
-other = "One-click installation on Linux"
+other = "Linux One-Key Install"
 
 [NoDomainAlert]
 other = "Set CDN bypassed Domain/IP in setting before using this function"
@@ -236,7 +236,7 @@ other = "Set CDN bypassed Domain/IP in setting before using this function"
 other = "Send Success Notification"
 
 [LastExecution]
-other = "Last run on"
+other = "Last Execution"
 
 [LastResult]
 other = "Last Result"
@@ -251,7 +251,7 @@ other = "Cover All"
 other = "Ignore All"
 
 [ByTrigger]
-other = "Execute when triggered"
+other = "Execute by Trigger"
 
 [DeleteScheduledTask]
 other = "Delete Scheduled Task"
@@ -266,13 +266,13 @@ other = "Access Denied"
 other = "Use"
 
 [AccountToLogin]
-other = "account to login"
+other = "Account Login"
 
 [SignUp]
 other = "Sign up"
 
 [DontHaveAnAccount]
-other = "Don't have an account yet?"
+other = "Don't Have an Account?"
 
 [SSLCertificate]
 other = "HTTP(S)/SSL Certificate"
@@ -281,16 +281,16 @@ other = "HTTP(S)/SSL Certificate"
 other = "TCP Port"
 
 [DeleteService]
-other = "Delete Service Monitor"
+other = "Remove Service Monitor"
 
 [ConfirmToDeleteThisService]
-other = "Confirm Delete?"
+other = "Confirm to Delete This Service?"
 
 [DeleteNotificationMethod]
 other = "Delete Notification Method"
 
 [ConfirmToDeleteThisNotificationMethod]
-other = "Confirm Delete?"
+other = "Confirm to Delete This Notification Method?"
 
 [ForceUpdate]
 other = "Force Update"
@@ -302,7 +302,7 @@ other = "Select All"
 other = "Version"
 
 [OneKeyInstall]
-other = "One-click installation"
+other = "One-Key Install"
 
 [ClickToCopy]
 other = "Click To Copy"
@@ -311,7 +311,7 @@ other = "Click To Copy"
 other = "Delete Server"
 
 [ConfirmToDeleteServer]
-other = "Confirm Delete?"
+other = "Confirm to Delete Server?"
 
 [NoServerSelected]
 other = "No Server Selected"
@@ -323,43 +323,43 @@ other = "Execute Results"
 other = "Site Title"
 
 [AdministratorList]
-other = "Admin List"
+other = "Administrator List"
 
 [Theme]
-other = "Theme"
+other = "Frontend Theme"
 
 [CustomCodes]
-other = "Custom code (style, script)"
+other = "Custom Codes (Style and Script)"
 
 [AccessPassword]
-other = "Access Password"
+other = "Frontend Access Password"
 
 [PanelServerDomainAndIP]
-other = "CDN Bypassed Domain/IP"
+other = "Dashboard Server Domain/IP without CDN"
 
 [IPChangeAlert]
 other = "IP Change Notification"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
-other = "Cover All, Only ignore specific servers"
+other = "Cover All, Only ignore Specific Servers"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "Ignore all, cover only specific servers"
+other = "Ignore All, Cover only Specific Servers"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
-other = "Skip All Servers, Only send requests via specific servers"
+other = "Ignore All, Request Only Through Specific Servers"
 
 [AllIncludedOnlySpecificServersAreNotRequest]
-other = "Send requests from All servers, Only skip specific servers"
+other = "Cover All, Only Specific Servers do not request."
 
 [ServerIDSeparatedByCommas]
-other = "Server ID, separated by comma"
+other = "Server IDs Separated by Commas"
 
 [IPChangeNotificationTag]
 other = "Send Notification To Specific Notification Group"
 
 [NotificationMessagesDoNotHideIP]
-other = "Do NOT hide the IP in the notification"
+other = "Show Full IP Address in Notification Messages"
 
 [Save]
 other = "Save"
@@ -368,10 +368,10 @@ other = "Save"
 other = "Modified successfully"
 
 [TerminalConnectionTimeOutOrSessionEnded]
-other = "Terminal connection timeout or session ended"
+other = "Terminal Connection Timeout or Session Ended"
 
 [TerminalConnectionFailed]
-other = "Terminal connection failed, check reverse proxy for WebSocket connection on /terminal/* path"
+other = "The terminal connection failed. Please check the WebSocket reverse proxy configuration for /terminal/*."
 
 [Default]
 other = "Default"
@@ -380,7 +380,7 @@ other = "Default"
 other = "Offline"
 
 [Platform]
-other = "Platform"
+other = "System"
 
 [DiskUsed]
 other = "Disk"
@@ -398,16 +398,16 @@ other = "Virtualization"
 other = "Swap"
 
 [NetTransfer]
-other = "Transfer"
+other = "Network Transfer"
 
 [Load]
 other = "Load"
 
 [ProcessCount]
-other = "Processes Count"
+other = "Process Count"
 
 [ConnCount]
-other = "Connections Count"
+other = "Connection Count"
 
 [BootTime]
 other = "Boot Time"
@@ -419,31 +419,31 @@ other = "Last Active"
 other = "Version"
 
 [NetSpeed]
-other = "Network"
+other = "Network Speed"
 
 [Uptime]
 other = "Uptime"
 
 [ServerIsOffline]
-other = "Server is offline"
+other = "Server is Offline"
 
 [Day]
 other = "Days"
 
 [RealtimeChannelEstablished]
-other = "Real-time Channel Established"
+other = "Realtime Channel Established"
 
 [GetTheLatestMonitoringDataInRealTime]
-other = "You can get the latest monitoring data in real-time!"
+other = "You Can Get the Latest Monitoring Data in Real Time!"
 
 [RealtimeChannelDisconnect]
-other = "Real-time Channel Disconnect"
+other = "Realtime Channel Disconnect"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
-other = "Unable to get the latest monitoring data in real-time!"
+other = "Cannot Get the Latest Monitoring Data in Real Time!"
 
 [30DaysOnline]
-other = "Last 30 days availability"
+other = "30-Day Availability"
 
 [Details]
 other = "Details"
@@ -455,10 +455,10 @@ other = "Status"
 other = "Availability"
 
 [AverageLatency]
-other = "Average delay"
+other = "Average Latency"
 
 [CycleTransferStats]
-other = "Cycle Transfer Statistics"
+other = "Periodic Transfer Stats"
 
 [From]
 other = "From"
@@ -491,7 +491,7 @@ other = "Grid Layout"
 other = "List Layout"
 
 [EnterPassword]
-other = "Enter password"
+other = "Enter Password"
 
 [Location]
 other = "Location"
@@ -515,7 +515,7 @@ other = "Total Inbound"
 other = "Incorrect Password"
 
 [AnErrorEccurred]
-other = "An error occurred"
+other = "An Error Occurred"
 
 [SystemError]
 other = "System Error"
@@ -536,25 +536,25 @@ other = "Services"
 other = "Scheduled Tasks"
 
 [ApiManagement]
-other = "API"
+other = "API Management"
 
 [IssueNewApiToken]
-other = "Add a token"
+other = "Issue New API Token"
 
 [Token]
 other = "Token"
 
 [DeleteToken]
-other = "Remove Token"
+other = "Delete Token"
 
 [ConfirmToDeleteThisToken]
-other = "Confirm remove this token?"
+other = "Confirm to Delete This Token?"
 
 [YouAreNotAuthorized]
-other = "You are not authorized"
+other = "Not Authorized for This Page"
 
 [WrongAccessPassword]
-other = "Wrong access password"
+other = "Wrong Access Password"
 
 [Add]
 other = "Add"
@@ -575,7 +575,7 @@ other = "Incident"
 other = "Resolved"
 
 [StatusDown]
-other = "Failure"
+other = "Down"
 
 [StatusNoData]
 other = "No Data"
@@ -584,19 +584,19 @@ other = "No Data"
 other = "Good"
 
 [StatusLowAvailability]
-other = "Low Available"
+other = "Low Availability"
 
 [ScheduledTaskExecutedSuccessfully]
-other = "Task succeeded"
+other = "Scheduled Task Executed Successfully"
 
 [ScheduledTaskExecutedFailed]
-other = "Task Failed"
+other = "Scheduled Task Execution Failed"
 
 [IPChanged]
 other = "IP Changed"
 
 [Transleft]
-other = "Data remaining"
+other = "Remaining Data"
 
 [DashboardTheme]
 other = "Admin Panel Theme"
@@ -605,7 +605,7 @@ other = "Admin Panel Theme"
 other = "Info"
 
 [HideForGuest]
-other = "No display to visitors"
+other = "Hide for Guest"
 
 [Menu]
 other = "Menu"
