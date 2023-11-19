@@ -62,14 +62,14 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/lemoeo" title="Lemoe">
   <img src="https://avatars.githubusercontent.com/u/18618627?v=4" width="50;" alt="Lemoe"/>
 </a>
+<a href="https://github.com/cantoblanco" title="Kris">
+  <img src="https://avatars.githubusercontent.com/u/116849421?v=4" width="50;" alt="Kris"/>
+</a>
 <a href="https://github.com/CosmosZ-code" title="CosmosZ-code">
   <img src="https://avatars.githubusercontent.com/u/81398224?v=4" width="50;" alt="CosmosZ-code"/>
 </a>
 <a href="https://github.com/liuyanxi975" title="刘颜溪">
   <img src="https://avatars.githubusercontent.com/u/24417037?v=4" width="50;" alt="刘颜溪"/>
-</a>
-<a href="https://github.com/cantoblanco" title="Kris">
-  <img src="https://avatars.githubusercontent.com/u/116849421?v=4" width="50;" alt="Kris"/>
 </a>
 <a href="https://github.com/hhhkkk520" title="Kris">
   <img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/>
