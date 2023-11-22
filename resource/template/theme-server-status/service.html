@@ -80,7 +80,7 @@
                         <td class="node-cell center">
                             <div class="progress">
                                 <div style="width: {{$TransLeftPercent}}%" :class="'progress-bar progress-bar-' + toSSBar('{{TransClassName $TransLeftPercent}}')">
-                                    <small>{{TransLeft $stats.Max $transfer}} / {{$TransLeftPercent}} %</small>
+                                    <small style="display: inline-block;width: max-content;">{{TransLeft $stats.Max $transfer}} / {{$TransLeftPercent}} %</small>
                                 </div>
                             </div>
                         </td>
