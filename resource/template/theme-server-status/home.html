@@ -73,7 +73,11 @@
                                     <span class="node-cell-expand-label">{{tr "Platform"}}:</span>
                                     @#node.host.Platform#@
                                 </span>
-                                    <span class="node-cell-expand" v-if="node.host.CPU">
+                                <span class="node-cell-expand">
+                                    <span class="node-cell-expand-label">{{tr "Location"}}:</span>
+                                    <i :class="node.location + ' flag'"></i>
+                                </span>
+                                <span class="node-cell-expand" v-if="node.host.CPU">
                                     <span class="node-cell-expand-label">CPU:</span>
                                     @#node.host.CPU.join(",")#@
                                 </span>
