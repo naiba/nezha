@@ -1,17 +1,13 @@
 name: Release
 
 on:
-  workflow_run:
-    workflows: ["Run Tests"]
-    types:
-      - completed
+  push:
     tags:
       - "v*"
   workflow_dispatch:
 
 jobs:
   on-success:
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -98,10 +94,10 @@ jobs:
           done
 
       - name: Release
-        - uses: ncipollo/release-action@v1
-          with:
-            artifacts: "dist/*.zip"
-            generateReleaseNotes: true
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "dist/*.zip"
+          generateReleaseNotes: true
 
       - name: Purge jsdelivr cache
         run: |
