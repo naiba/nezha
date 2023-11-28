@@ -14,12 +14,8 @@ jobs:
 
       - name: Extract branch name
         run: |
-          export BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})
-          echo "##[set-output name=branch;]$BRANCH_NAME"
-          if [ $BRANCH_NAME = "main" ] || [ $BRANCH_NAME = "master" ]
-            then echo "##[set-output name=tag;]latest"
-            else echo "##[set-output name=tag;]$BRANCH_NAME"
-          fi
+          export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         id: extract_branch
 
       - name: xgo build
