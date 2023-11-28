@@ -9,6 +9,7 @@ on:
       - ".github/workflows/test-on-pr.yml"
       - ".github/workflows/contributors.yml"
       - ".github/workflows/sync.yml"
+      - ".github/workflows/release.yml"
       - "README.md"
       - ".goreleaser.yml"
 

@@ -16,6 +16,7 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/resource"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -29,9 +30,11 @@ func ServeWeb(port uint) *http.Server {
 	if err != nil {
 		panic(err)
 	}
-	tmpl, err = tmpl.ParseGlob("resource/template/**/*.html")
-	if err != nil {
-		panic(err)
+	if utils.IsFileExists("resource/template") {
+		tmpl, err = tmpl.ParseGlob("resource/template/**/*.html")
+		if err != nil {
+			panic(err)
+		}
 	}
 	r.SetHTMLTemplate(tmpl)
 	if singleton.Conf.Debug {
