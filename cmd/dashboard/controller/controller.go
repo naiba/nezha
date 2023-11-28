@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,20 +16,34 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/resource"
 	"github.com/naiba/nezha/service/singleton"
 )
 
 func ServeWeb(port uint) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	tmpl := template.New("").Funcs(funcMap)
+	var err error
+	tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")
+	if err != nil {
+		panic(err)
+	}
+	tmpl, err = tmpl.ParseGlob("resource/template/**/*.html")
+	if err != nil {
+		panic(err)
+	}
+	r.SetHTMLTemplate(tmpl)
 	if singleton.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
 		pprof.Register(r)
 	}
 	r.Use(mygin.RecordPath)
-	r.SetFuncMap(funcMap)
-	r.Static("/static", "resource/static")
-	r.LoadHTMLGlob("resource/template/**/*.html")
+	staticFs, err := fs.Sub(resource.StaticFS, "static")
+	if err != nil {
+		panic(err)
+	}
+	r.StaticFS("/static", http.FS(staticFs))
 	routers(r)
 
 	page404 := func(c *gin.Context) {

@@ -1,11 +1,12 @@
-name: Dashboard image
+name: Release
 
 on:
   workflow_run:
     workflows: ["Run Tests"]
-    branches: [master]
     types:
       - completed
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:
@@ -37,7 +38,7 @@ jobs:
           v: true
           x: false
           race: false
-          ldflags: -s -w
+          ldflags: -s -w -X github.com/naiba/nezha/service/singleton.Version=${{ steps.extract_branch.outputs.tag }}
           buildmode: default
 
       - name: fix dist
@@ -83,8 +84,24 @@ jobs:
           platforms: linux/amd64,linux/arm64,linux/arm,linux/s390x,linux/riscv64 # linux/386,
           push: true
           tags: |
+            ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:latest
             ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
+            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:latest
             ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
+
+      - name: Compress dist files
+        run: |
+          for file in dist/*; do
+            if [ -f "$file" ]; then
+              zip -r "$file.zip" "$file"
+            fi
+          done
+
+      - name: Release
+        - uses: ncipollo/release-action@v1
+          with:
+            artifacts: "dist/*.zip"
+            generateReleaseNotes: true
 
       - name: Purge jsdelivr cache
         run: |
