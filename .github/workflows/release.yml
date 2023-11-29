@@ -35,7 +35,7 @@ jobs:
 
       - name: fix dist
         run: |
-          cp dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
+          mv dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
 
       - name: Log in to the GHCR
         uses: docker/login-action@master

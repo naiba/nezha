@@ -19,4 +19,4 @@
 /cmd/dashboard/main
 /config.yml
 /resource/template/theme-custom
-/resource/static/theme-custom
+/resource/static/custom

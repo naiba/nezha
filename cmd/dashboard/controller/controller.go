@@ -43,6 +43,7 @@ func ServeWeb(port uint) *http.Server {
 		panic(err)
 	}
 	r.StaticFS("/static", http.FS(staticFs))
+	r.Static("/static-custom", "resource/static/custom")
 	routers(r)
 
 	page404 := func(c *gin.Context) {
