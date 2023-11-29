@@ -11,6 +11,9 @@ NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
+NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
+NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
+NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
 NZ_VERSION="v0.15.0"
 
 red='\033[0;31m'
@@ -71,12 +74,14 @@ pre_check() {
         Get_Docker_URL="get.docker.com"
         Get_Docker_Argu=" "
         Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
+        GITHUB_RELEASE_URL="github.com/naiba/nezha/releases/latest/download"
     else
         GITHUB_RAW_URL="jihulab.com/nezha/dashboard/-/raw/master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.daocloud.io/docker"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
         Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
+        GITHUB_RELEASE_URL="hub.fgit.cf/naiba/nezha/releases/latest/download"
     fi
 }
 
@@ -124,6 +129,7 @@ install_base() {
     (command -v git >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v wget >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1) ||
     (install_soft curl wget git unzip)
 }
+
 install_arch(){
     echo -e "${green}提示: ${plain} Arch安装libselinux需添加nezha-agent用户，安装完会自动删除，建议手动检查一次\n"
     read -e -r -p "是否安装libselinux? [Y/n] " input
@@ -204,6 +210,41 @@ install_dashboard() {
     fi
 }
 
+install_dashboard_standalone() {
+    install_base
+    
+    echo -e "> 安装面板"
+    
+    # 哪吒监控文件夹
+    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+        mkdir -p $NZ_DASHBOARD_PATH
+    else
+        echo "您可能已经安装过面板端，重复安装会覆盖数据，请注意备份。"
+        read -e -r -p "是否退出安装? [Y/n] " input
+        case $input in
+            [yY][eE][sS] | [yY])
+                echo "退出安装"
+                exit 0
+            ;;
+            [nN][oO] | [nN])
+                echo "继续安装"
+            ;;
+            *)
+                echo "退出安装"
+                exit 0
+            ;;
+        esac
+    fi
+    
+    chmod 777 -R $NZ_DASHBOARD_PATH
+    
+    modify_dashboard_config_standalone 0
+    
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
 selinux(){
     #判断当前的状态
     if [ "$os_alpine" != 1 ];then
@@ -275,6 +316,13 @@ modify_agent_config() {
             echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
             return 0
         fi
+    else
+        wget -t 2 -T 10 -O $NZ_AGENT_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-agent >/dev/null 2>&1
+        chmod +x $NZ_AGENT_SERVICERC
+        if [[ $? != 0 ]]; then
+            echo -e "${red}Fail to download service, please check if the network can link ${GITHUB_RAW_URL}${plain}"
+            return 0
+        fi
     fi
 
     if [ $# -lt 3 ]; then
@@ -308,8 +356,10 @@ modify_agent_config() {
         sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
         [ -n "${args}" ] && sed -i "/ExecStart/ s/$/ ${args}/" ${NZ_AGENT_SERVICE}
     else
-        echo "@reboot ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} ${args}" >> /etc/crontabs/root
-        crond
+        sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICERC}
+        sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICERC}
+        sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICERC}
+        [ -n "${args}" ] && sed -i "/command_args/ s/$/ \"${args}\"/" ${NZ_AGENT_SERVICERC}
     fi
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
@@ -319,7 +369,8 @@ modify_agent_config() {
         systemctl enable nezha-agent
         systemctl restart nezha-agent
     else
-        nohup ${NZ_AGENT_PATH}/nezha-agent -s ${nz_grpc_host}:${nz_grpc_port} -p ${nz_client_secret} ${args} >/dev/null 2>&1 &
+        rc-update add nezha-agent
+        rc-service nezha-agent restart
     fi
 
     if [[ $# == 0 ]]; then
@@ -393,6 +444,78 @@ modify_dashboard_config() {
     fi
 }
 
+modify_dashboard_config_standalone() {
+    echo -e "> 修改面板配置"
+    
+    echo -e "正在下载配置模板"
+    
+    wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo -e "${red}下载文件失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
+        return 0
+    fi
+    
+    echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+    echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+    read -ep "请输入 OAuth2 提供商(github/gitlab/jihulab/gitee，默认 github): " nz_oauth2_type &&
+    read -ep "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
+    read -ep "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
+    read -ep "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
+    read -ep "请输入站点标题: " nz_site_title &&
+    read -ep "请输入站点访问端口: (默认 8008)" nz_site_port &&
+    read -ep "请输入用于 Agent 接入的 RPC 端口: (默认 5555)" nz_grpc_port
+    
+    if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
+        echo -e "${red}所有选项都不能为空${plain}"
+        before_show_menu
+        return 1
+    fi
+    
+    if [[ -z "${nz_site_port}" ]]; then
+        nz_site_port=8008
+    fi
+    if [[ -z "${nz_grpc_port}" ]]; then
+        nz_grpc_port=5555
+    fi
+    if [[ -z "${nz_oauth2_type}" ]]; then
+        nz_oauth2_type=github
+    fi
+    
+    sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_language/zh-CN/" /tmp/nezha-config.yaml
+    sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
+    sed -i "s/80/${nz_site_port}/" /tmp/nezha-config.yaml
+    
+    mkdir -p $NZ_DASHBOARD_PATH/data
+    mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
+
+    echo -e "正在下载服务文件"
+
+    if [ "$os_alpine" != 1 ];then
+        wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
+        else
+        wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
+        chmod +x $NZ_DASHBOARD_SERVICERC
+        if [[ $? != 0 ]]; then
+            echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
+            return 0
+        fi
+    fi
+
+    
+    echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
+    
+    restart_and_update_standalone
+    
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
 restart_and_update() {
     echo -e "> 重启并更新面板"
 
@@ -421,6 +544,40 @@ restart_and_update() {
     fi
 }
 
+restart_and_update_standalone() {
+    echo -e "> 重启并更新面板"
+    
+    cd $NZ_DASHBOARD_PATH
+
+    if [ "$os_alpine" != 1 ]; then
+        systemctl stop nezha-dashboard
+    else
+        rc-service nezha-dashboard stop
+    fi
+
+    wget -qO app.zip $GITHUB_RELEASE_URL/dashboard-linux-$os_arch.zip >/dev/null 2>&1 && unzip -qq app.zip && mv dist/dashboard-linux-$os_arch app && rm -r app.zip dist
+
+    if [ "$os_alpine" != 1 ];then
+        systemctl daemon-reload
+        systemctl enable nezha-dashboard
+        systemctl restart nezha-dashboard
+    else
+        rc-update add nezha-dashboard
+        rc-service nezha-dashboard restart
+    fi
+    
+    if [[ $? == 0 ]]; then
+        echo -e "${green}哪吒监控 重启成功${plain}"
+        echo -e "默认管理面板地址：${yellow}域名:站点访问端口${plain}"
+    else
+        echo -e "${red}重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
+    fi
+    
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
 start_dashboard() {
     echo -e "> 启动面板"
 
@@ -437,6 +594,26 @@ start_dashboard() {
         echo -e "${red}启动失败，请稍后查看日志信息${plain}"
     fi
 
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+start_dashboard_standalone() {
+    echo -e "> 启动面板"
+    
+    if [ "$os_alpine" != 1 ]; then
+        systemctl start nezha-dashboard
+    else
+        rc-service nezha-dashboard start
+    fi
+    
+    if [[ $? == 0 ]]; then
+        echo -e "${green}哪吒监控 启动成功${plain}"
+    else
+        echo -e "${red}启动失败，请稍后查看日志信息${plain}"
+    fi
+    
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -463,6 +640,26 @@ stop_dashboard() {
     fi
 }
 
+stop_dashboard_standalone() {
+    echo -e "> 停止面板"
+    
+    if [ "$os_alpine" != 1 ]; then
+        systemctl stop nezha-dashboard
+    else
+        rc-service nezha-dashboard stop
+    fi
+    
+    if [[ $? == 0 ]]; then
+        echo -e "${green}哪吒监控 停止成功${plain}"
+    else
+        echo -e "${red}停止失败，请稍后查看日志信息${plain}"
+    fi
+    
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
 show_dashboard_log() {
     echo -e "> 获取面板日志"
 
@@ -471,6 +668,20 @@ show_dashboard_log() {
         cd $NZ_DASHBOARD_PATH && docker compose logs -f
     else
         cd $NZ_DASHBOARD_PATH && docker-compose logs -f
+    fi
+
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+}
+
+show_dashboard_log_standalone() {
+    echo -e "> 获取面板日志"
+    
+    if [ "$os_alpine" != 1 ]; then
+        journalctl -xf -u nezha-dashboard.service
+    else
+        echo "很抱歉，OpenRC 无此功能"
     fi
 
     if [[ $# == 0 ]]; then
@@ -496,12 +707,46 @@ uninstall_dashboard() {
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
+
+    sed -i '/IS_DOCKER_NEZHA/d' ~/.bashrc
+
+}
+
+uninstall_dashboard_standalone() {
+    echo -e "> 卸载管理面板"
+    
+    rm -rf $NZ_DASHBOARD_PATH
+
+    if [ "$os_alpine" != 1 ]; then
+        systemctl stop nezha-dashboard
+    else
+        rc-service nezha-dashboard stop
+    fi
+
+    if [ "$os_alpine" != 1 ]; then
+        rm $NZ_DASHBOARD_SERVICE
+    else
+        rm $NZ_DASHBOARD_SERVICERC
+    fi
+
+    clean_all
+    
+    if [[ $# == 0 ]]; then
+        before_show_menu
+    fi
+
+    sed -i '/IS_DOCKER_NEZHA/d' ~/.bashrc
+
 }
 
 show_agent_log() {
     echo -e "> 获取Agent日志"
 
-    journalctl -xf -u nezha-agent.service
+    if [ "$os_alpine" != 1 ]; then
+        journalctl -xf -u nezha-agent.service
+    else
+        echo "很抱歉，OpenRC 无此功能"
+    fi
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -517,8 +762,9 @@ uninstall_agent() {
         rm -rf $NZ_AGENT_SERVICE
         systemctl daemon-reload
     else
-        grep -q 'nezha-agent' /var/spool/cron/crontabs/root && sed -i "/nezha-agent/d" /var/spool/cron/crontabs/root
-        pkill nezha-agent
+        rc-update del nezha-agent
+        rc-service nezha-agent stop
+        rm -rf $NZ_AGENT_SERVICERC
     fi
 
     rm -rf $NZ_AGENT_PATH
@@ -532,7 +778,11 @@ uninstall_agent() {
 restart_agent() {
     echo -e "> 重启Agent"
 
-    systemctl restart nezha-agent.service
+    if [ "$os_alpine" != 1 ];then
+        systemctl restart nezha-agent.service
+    else
+        rc-service nezha-agent restart
+    fi
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -542,6 +792,16 @@ restart_agent() {
 clean_all() {
     if [ -z "$(ls -A ${NZ_BASE_PATH})" ]; then
         rm -rf ${NZ_BASE_PATH}
+    fi
+}
+
+select_version() {
+    if command -v docker compose >/dev/null 2>&1; then
+        if docker compose ls | grep -q "dashboard" >/dev/null 2>&1; then
+            IS_DOCKER_NEZHA=1
+        fi
+    elif [ -d /opt/nezha/dashboard ]; then
+        IS_DOCKER_NEZHA=0
     fi
 }
 
@@ -589,106 +849,208 @@ show_menu() {
     ${green}0.${plain}  退出脚本
     "
     echo && read -ep "请输入选择 [0-13]: " num
-
-    case "${num}" in
-        0)
-            exit 0
-        ;;
-        1)
-            install_dashboard
-        ;;
-        2)
-            modify_dashboard_config
-        ;;
-        3)
-            start_dashboard
-        ;;
-        4)
-            stop_dashboard
-        ;;
-        5)
-            restart_and_update
-        ;;
-        6)
-            show_dashboard_log
-        ;;
-        7)
-            uninstall_dashboard
-        ;;
-        8)
-            install_agent
-        ;;
-        9)
-            modify_agent_config
-        ;;
-        10)
-            show_agent_log
-        ;;
-        11)
-            uninstall_agent
-        ;;
-        12)
-            restart_agent
-        ;;
-        13)
-            update_script
-        ;;
-        *)
-            echo -e "${red}请输入正确的数字 [0-13]${plain}"
-        ;;
-    esac
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        case "${num}" in
+            0)
+                exit 0
+            ;;
+            1)
+                install_dashboard
+            ;;
+            2)
+                modify_dashboard_config
+            ;;
+            3)
+                start_dashboard
+            ;;
+            4)
+                stop_dashboard
+            ;;
+            5)
+                restart_and_update
+            ;;
+            6)
+                show_dashboard_log
+            ;;
+            7)
+                uninstall_dashboard
+            ;;
+            8)
+                install_agent
+            ;;
+            9)
+                modify_agent_config
+            ;;
+            10)
+                show_agent_log
+            ;;
+            11)
+                uninstall_agent
+            ;;
+            12)
+                restart_agent
+            ;;
+            13)
+                update_script
+            ;;
+            *)
+                echo -e "${red}请输入正确的数字 [0-13]${plain}"
+            ;;
+        esac
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        case "${num}" in
+            0)
+                exit 0
+            ;;
+            1)
+                install_dashboard_standalone
+            ;;
+            2)
+                modify_dashboard_config_standalone
+            ;;
+            3)
+                start_dashboard_standalone
+            ;;
+            4)
+                stop_dashboard_standalone
+            ;;
+            5)
+                restart_and_update_standalone
+            ;;
+            6)
+                show_dashboard_log_standalone
+            ;;
+            7)
+                uninstall_dashboard_standalone
+            ;;
+            8)
+                install_agent
+            ;;
+            9)
+                modify_agent_config
+            ;;
+            10)
+                show_agent_log
+            ;;
+            11)
+                uninstall_agent
+            ;;
+            12)
+                restart_agent
+            ;;
+            13)
+                update_script
+            ;;
+            *)
+                echo -e "${red}请输入正确的数字 [0-13]${plain}"
+            ;;
+        esac
+    fi
 }
 
 pre_check
 
 if [[ $# > 0 ]]; then
-    case $1 in
-        "install_dashboard")
-            install_dashboard 0
-        ;;
-        "modify_dashboard_config")
-            modify_dashboard_config 0
-        ;;
-        "start_dashboard")
-            start_dashboard 0
-        ;;
-        "stop_dashboard")
-            stop_dashboard 0
-        ;;
-        "restart_and_update")
-            restart_and_update 0
-        ;;
-        "show_dashboard_log")
-            show_dashboard_log 0
-        ;;
-        "uninstall_dashboard")
-            uninstall_dashboard 0
-        ;;
-        "install_agent")
-            shift
-            if [ $# -ge 3 ]; then
-                install_agent "$@"
-            else
-                install_agent 0
-            fi
-        ;;
-        "modify_agent_config")
-            modify_agent_config 0
-        ;;
-        "show_agent_log")
-            show_agent_log 0
-        ;;
-        "uninstall_agent")
-            uninstall_agent 0
-        ;;
-        "restart_agent")
-            restart_agent 0
-        ;;
-        "update_script")
-            update_script 0
-        ;;
-        *) show_usage ;;
-    esac
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        case $1 in
+            "install_dashboard")
+                install_dashboard 0
+            ;;
+            "modify_dashboard_config")
+                modify_dashboard_config 0
+            ;;
+            "start_dashboard")
+                start_dashboard 0
+            ;;
+            "stop_dashboard")
+                stop_dashboard 0
+            ;;
+            "restart_and_update")
+                restart_and_update 0
+            ;;
+            "show_dashboard_log")
+                show_dashboard_log 0
+            ;;
+            "uninstall_dashboard")
+                uninstall_dashboard 0
+            ;;
+            "install_agent")
+                shift
+                if [ $# -ge 3 ]; then
+                    install_agent "$@"
+                else
+                    install_agent 0
+                fi
+            ;;
+            "modify_agent_config")
+                modify_agent_config 0
+            ;;
+            "show_agent_log")
+                show_agent_log 0
+            ;;
+            "uninstall_agent")
+                uninstall_agent 0
+            ;;
+            "restart_agent")
+                restart_agent 0
+            ;;
+            "update_script")
+                update_script 0
+            ;;
+            *) show_usage ;;
+        esac
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        case $1 in
+            "install_dashboard")
+                install_dashboard_standalone 0
+            ;;
+            "modify_dashboard_config")
+                modify_dashboard_config_standalone 0
+            ;;
+            "start_dashboard")
+                start_dashboard_standalone 0
+            ;;
+            "stop_dashboard")
+                stop_dashboard_standalone 0
+            ;;
+            "restart_and_update")
+                restart_and_update_standalone 0
+            ;;
+            "show_dashboard_log")
+                show_dashboard_log_standalone 0
+            ;;
+            "uninstall_dashboard")
+                uninstall_dashboard_standalone 0
+            ;;
+            "install_agent")
+                shift
+                if [ $# -ge 3 ]; then
+                    install_agent "$@"
+                else
+                    install_agent 0
+                fi
+            ;;
+            "modify_agent_config")
+                modify_agent_config 0
+            ;;
+            "show_agent_log")
+                show_agent_log 0
+            ;;
+            "uninstall_agent")
+                uninstall_agent 0
+            ;;
+            "restart_agent")
+                restart_agent 0
+            ;;
+            "update_script")
+                update_script 0
+            ;;
+            *) show_usage ;;
+        esac
+    else
+        echo "未检测到 IS_DOCKER_NEZHA 环境变量，请尝试在 Bash 环境下重新执行脚本，或者不带参数执行。"
+    fi
 else
+    select_version
     show_menu
 fi
