@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,7 +18,6 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"github.com/naiba/nezha/pkg/mygin"
-	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/resource"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -30,12 +31,7 @@ func ServeWeb(port uint) *http.Server {
 	if err != nil {
 		panic(err)
 	}
-	if utils.IsFileExists("resource/template") {
-		tmpl, err = tmpl.ParseGlob("resource/template/**/*.html")
-		if err != nil {
-			panic(err)
-		}
-	}
+	tmpl = loadThirdPartyTemplates(tmpl)
 	r.SetHTMLTemplate(tmpl)
 	if singleton.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
@@ -85,6 +81,28 @@ func routers(r *gin.Engine) {
 		ma := &memberAPI{api}
 		ma.serve()
 	}
+}
+
+func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
+	var ret = tmpl
+	themes, err := os.ReadDir("resource/template")
+	if err != nil {
+		log.Printf("NEZHA>> Error reading themes folder: %v", err)
+		return ret
+	}
+	for _, theme := range themes {
+		if !theme.IsDir() {
+			continue
+		}
+		// load templates
+		t, err := ret.ParseGlob(fmt.Sprintf("resource/template/%s/*.html", theme.Name()))
+		if err != nil {
+			log.Printf("NEZHA>> Error parsing templates %s error: %v", theme.Name(), err)
+			continue
+		}
+		ret = t
+	}
+	return ret
 }
 
 var funcMap = template.FuncMap{
