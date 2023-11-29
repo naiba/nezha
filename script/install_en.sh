@@ -233,7 +233,11 @@ install_dashboard_standalone() {
             ;;
         esac
     fi
-    
+
+    if [ ! -d "${NZ_DASHBOARD_PATH}/resource/template/theme-custom" ] || [ ! -d "${NZ_DASHBOARD_PATH}/resource/static/custom" ]; then
+        mkdir -p "${NZ_DASHBOARD_PATH}/resource/template/theme-custom" "${NZ_DASHBOARD_PATH}/resource/static/custom" >/dev/null 2>&1
+    fi
+
     chmod 777 -R $NZ_DASHBOARD_PATH
     
     modify_dashboard_config_standalone 0
@@ -505,7 +509,7 @@ modify_dashboard_config_standalone() {
     fi
 
     
-    echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
+    echo -e "Dashboard configuration ${green} modified successfully, please wait for Dashboard self-restart to take effect${plain}"
     
     restart_and_update_standalone
     
@@ -659,7 +663,7 @@ stop_dashboard_standalone() {
 }
 
 show_dashboard_log() {
-    echo -e "> 获取面板日志"
+    echo -e "> View Panel Log"
 
     docker compose version
     if [[ $? == 0 ]]; then
@@ -794,8 +798,9 @@ clean_all() {
 }
 
 select_version() {
+    cd $NZ_DASHBOARD_PATH
     if command -v docker compose >/dev/null 2>&1; then
-        if docker compose ls | grep -q "dashboard" >/dev/null 2>&1; then
+        if docker compose ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
             IS_DOCKER_NEZHA=1
         fi
     elif [ -d /opt/nezha/dashboard ]; then
