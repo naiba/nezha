@@ -17,10 +17,22 @@ jobs:
       - name: Unit test
         run: |
           go test -v ./...
-      - name: Build test
-        run: |
-          go build cmd/dashboard/main.go
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
           args: --exclude=G104,G402 ./...
+      - name: xgo build
+        uses: crazy-max/ghaction-xgo@v2
+        with:
+          xgo_version: latest
+          go_version: 1.21
+          dest: dist
+          pkg: cmd/dashboard
+          prefix: dashboard
+          targets: linux/amd64,linux/arm64,linux/arm-7,linux/s390x,linux/riscv64 # linux/386,
+          v: true
+          x: false
+          race: false
+          ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=test
+          buildmode: default
+

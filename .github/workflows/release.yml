@@ -30,7 +30,7 @@ jobs:
           v: true
           x: false
           race: false
-          ldflags: -s -w -X github.com/naiba/nezha/service/singleton.Version=${{ steps.extract_branch.outputs.tag }}
+          ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=${{ steps.extract_branch.outputs.tag }}
           buildmode: default
 
       - name: fix dist
