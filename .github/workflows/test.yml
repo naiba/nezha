@@ -4,14 +4,12 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - ".github/workflows/codeql-analysis.yml"
-      - ".github/workflows/test-on-pr.yml"
-      - ".github/workflows/contributors.yml"
-      - ".github/workflows/sync.yml"
-      - ".github/workflows/release.yml"
-      - "README.md"
-      - ".goreleaser.yml"
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "resource/**"
+      - ".github/workflows/test.yml"
 
 jobs:
   tests:
