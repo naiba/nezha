@@ -98,6 +98,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/iilemon" title="Sean">
   <img src="https://avatars.githubusercontent.com/u/33201711?v=4" width="50;" alt="Sean"/>
 </a>
+<a href="https://github.com/applexad" title="Applexad">
+  <img src="https://avatars.githubusercontent.com/u/35923940?v=4" width="50;" alt="Applexad"/>
+</a>
 <a href="https://github.com/Es-dese" title="Esdese">
   <img src="https://avatars.githubusercontent.com/u/71542548?v=4" width="50;" alt="Esdese"/>
 </a>
