@@ -168,7 +168,7 @@ install_dashboard() {
     echo -e "> 安装面板"
 
     # 哪吒监控文件夹
-    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+    if [ ! -d "${NZ_DASHBOARD_PATH}/docker-compose.yaml" ]; then
         mkdir -p $NZ_DASHBOARD_PATH
     else
         echo "您可能已经安装过面板端，重复安装会覆盖数据，请注意备份。"
@@ -216,7 +216,7 @@ install_dashboard_standalone() {
     echo -e "> 安装面板"
     
     # 哪吒监控文件夹
-    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+    if [ ! -d "${NZ_DASHBOARD_PATH}/app" ]; then
         mkdir -p $NZ_DASHBOARD_PATH
     else
         echo "您可能已经安装过面板端，重复安装会覆盖数据，请注意备份。"
@@ -800,13 +800,31 @@ clean_all() {
 }
 
 select_version() {
-    cd $NZ_DASHBOARD_PATH
     if command -v docker compose >/dev/null 2>&1; then
         if docker compose ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
             IS_DOCKER_NEZHA=1
         fi
-    elif [ -d /opt/nezha/dashboard ]; then
+    fi
+    if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
         IS_DOCKER_NEZHA=0
+    else
+        echo -e "${yellow}请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）：\n1. Docker\n2. 独立安装${plain}"
+        while true; do
+            read -e -r -p "请输入数字 [1-2]：" option
+            case "${option}" in
+                1)
+                    IS_DOCKER_NEZHA=1
+                    break
+                ;;
+                2)
+                    IS_DOCKER_NEZHA=0
+                    break
+                ;;
+                *)
+                    echo "输入有误，请重新输入"
+                ;;
+            esac
+        done
     fi
 }
 
@@ -950,6 +968,8 @@ show_menu() {
                 echo -e "${red}请输入正确的数字 [0-13]${plain}"
             ;;
         esac
+    else
+        select_version
     fi
 }
 
@@ -1053,7 +1073,32 @@ if [[ $# > 0 ]]; then
             *) show_usage ;;
         esac
     else
-        echo "未检测到 IS_DOCKER_NEZHA 环境变量，请尝试在 Bash 环境下重新执行脚本，或者不带参数执行。"
+        case $1 in
+            "install_agent")
+                shift
+                if [ $# -ge 3 ]; then
+                    install_agent "$@"
+                else
+                    install_agent 0
+                fi
+            ;;
+            "modify_agent_config")
+                modify_agent_config 0
+            ;;
+            "show_agent_log")
+                show_agent_log 0
+            ;;
+            "uninstall_agent")
+                uninstall_agent 0
+            ;;
+            "restart_agent")
+                restart_agent 0
+            ;;
+            "update_script")
+                update_script 0
+            ;;
+            *) show_usage ;;
+        esac
     fi
 else
     select_version
