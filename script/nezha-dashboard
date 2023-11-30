@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+pidfile="/run/${RC_SVCNAME}.pid"
+command="/opt/nezha/dashboard/app"
+command_args=""
+command_background=true
+directory="/opt/nezha/dashboard"
+
+depend() {
+	need net
+}
+
+reload() {
+  ebegin "Reloading ${RC_SVCNAME}"
+  start-stop-daemon --signal HUP --pidfile "${pidfile}"
+  eend $?
+}
