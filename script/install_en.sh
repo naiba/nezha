@@ -77,7 +77,7 @@ pre_check() {
     else
         GITHUB_RAW_URL="jihulab.com/nezha/dashboard/-/raw/master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
-        Get_Docker_URL="get.daocloud.io/docker"
+        Get_Docker_URL="get.docker.com"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
         Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
         GITHUB_RELEASE_URL="hub.fgit.cf/naiba/nezha/releases/latest/download"
@@ -167,7 +167,7 @@ install_dashboard() {
     echo -e "> Install Panel"
 
     # Nezha Monitoring Folder
-    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+    if [ ! -d "${NZ_DASHBOARD_PATH}/docker-compose.yaml" ]; then
         mkdir -p $NZ_DASHBOARD_PATH
     else
         echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
@@ -214,7 +214,7 @@ install_dashboard_standalone() {
     echo -e "> Install Panel"
     
     # Nezha Monitoring Folder
-    if [ ! -d "${NZ_DASHBOARD_PATH}" ]; then
+    if [ ! -d "${NZ_DASHBOARD_PATH}/app" ]; then
         mkdir -p $NZ_DASHBOARD_PATH
     else
         echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
@@ -798,13 +798,31 @@ clean_all() {
 }
 
 select_version() {
-    cd $NZ_DASHBOARD_PATH
     if command -v docker compose >/dev/null 2>&1; then
         if docker compose ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
             IS_DOCKER_NEZHA=1
         fi
-    elif [ -d /opt/nezha/dashboard ]; then
+    fi
+    if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
         IS_DOCKER_NEZHA=0
+    else
+        echo -e "${yellow}Select your installation method(Input anything is ok if you are installing agent):\n1. Docker\n2. Standalone${plain}"
+        while true; do
+            read -e -r -p "Input a number [1-2]: " option
+            case "${option}" in
+                1)
+                    IS_DOCKER_NEZHA=1
+                    break
+                ;;
+                2)
+                    IS_DOCKER_NEZHA=0
+                    break
+                ;;
+                *)
+                    echo "Wrong input, try again"
+                ;;
+            esac
+        done
     fi
 }
 
@@ -1051,7 +1069,32 @@ if [[ $# > 0 ]]; then
             *) show_usage ;;
         esac
     else
-        echo "Environment variable IS_DOCKER_NEZHA is not detected, Try run the script again in Bash or without arguments."
+        case $1 in
+            "install_agent")
+                shift
+                if [ $# -ge 3 ]; then
+                    install_agent "$@"
+                else
+                    install_agent 0
+                fi
+            ;;
+            "modify_agent_config")
+                modify_agent_config 0
+            ;;
+            "show_agent_log")
+                show_agent_log 0
+            ;;
+            "uninstall_agent")
+                uninstall_agent 0
+            ;;
+            "restart_agent")
+                restart_agent 0
+            ;;
+            "update_script")
+                update_script 0
+            ;;
+            *) show_usage ;;
+        esac
     fi
 else
     select_version
