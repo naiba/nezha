@@ -363,7 +363,7 @@ modify_agent_config() {
         sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICERC}
         sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICERC}
         sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICERC}
-        [ -n "${args}" ] && sed -i "/command_args/ s/$/ \"${args}\"/" ${NZ_AGENT_SERVICERC}
+        [ -n "${args}" ] && sed -i "/command_args/ s/\"$/ ${args}\"/" ${NZ_AGENT_SERVICERC}
     fi
 
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
@@ -377,9 +377,9 @@ modify_agent_config() {
         rc-service nezha-agent restart
     fi
 
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
+    #if [[ $# == 0 ]]; then
+    #    before_show_menu
+    #fi
 }
 
 modify_dashboard_config() {
@@ -711,9 +711,6 @@ uninstall_dashboard() {
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
-
-    sed -i '/IS_DOCKER_NEZHA/d' ~/.bashrc
-
 }
 
 uninstall_dashboard_standalone() {
@@ -738,9 +735,6 @@ uninstall_dashboard_standalone() {
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
-
-    sed -i '/IS_DOCKER_NEZHA/d' ~/.bashrc
-
 }
 
 show_agent_log() {
