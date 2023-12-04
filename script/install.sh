@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.1"
+NZ_VERSION="v0.15.2"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -76,7 +76,7 @@ pre_check() {
         Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
         GITHUB_RELEASE_URL="github.com/naiba/nezha/releases/latest/download"
     else
-        GITHUB_RAW_URL="jihulab.com/nezha/dashboard/-/raw/master"
+        GITHUB_RAW_URL="gitee.com/naibahq/nezha/raw/master"
         GITHUB_URL="dn-dao-github-mirror.daocloud.io"
         Get_Docker_URL="get.docker.com"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
