@@ -110,15 +110,9 @@ func (n *Notification) setRequestHeader(req *http.Request) error {
 }
 
 func (ns *NotificationServerBundle) Send(message string) error {
-	var verifySSL bool
+	var client *http.Client
 	n := ns.Notification
 	if n.VerifySSL != nil && *n.VerifySSL {
-		verifySSL = true
-	}
-
-	var client *http.Client
-
-	if verifySSL {
 		client = utils.HttpClient
 	} else {
 		client = utils.HttpClientSkipTlsVerify

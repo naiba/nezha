@@ -14,23 +14,23 @@ var (
 func init() {
 	HttpClientSkipTlsVerify = httpClient(_httpClient{
 		Transport: httpTransport(_httpTransport{
-			VerifySSL: true,
+			SkipVerifySSL: true,
 		}),
 	})
 	HttpClient = httpClient(_httpClient{
 		Transport: httpTransport(_httpTransport{
-			VerifySSL: false,
+			SkipVerifySSL: false,
 		}),
 	})
 }
 
 type _httpTransport struct {
-	VerifySSL bool
+	SkipVerifySSL bool
 }
 
 func httpTransport(conf _httpTransport) *http.Transport {
 	return &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.VerifySSL},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.SkipVerifySSL},
 		Proxy:           http.ProxyFromEnvironment,
 	}
 }
