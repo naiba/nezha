@@ -1,7 +1,6 @@
 package model
 
 import (
-	"crypto/tls"
 	"errors"
 	"fmt"
 	"io"
@@ -117,11 +116,14 @@ func (ns *NotificationServerBundle) Send(message string) error {
 		verifySSL = true
 	}
 
-	transCfg := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: verifySSL},
+	var client *http.Client
+
+	if verifySSL {
+		client = utils.HttpClient
+	} else {
+		client = utils.HttpClientSkipTlsVerify
 	}
 
-	client := &http.Client{Transport: transCfg, Timeout: time.Minute * 10}
 	reqBody, err := ns.reqBody(message)
 	if err != nil {
 		return err
@@ -147,13 +149,15 @@ func (ns *NotificationServerBundle) Send(message string) error {
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		defer func() {
-			_ = resp.Body.Close()
-		}()
 		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("%d@%s %s", resp.StatusCode, resp.Status, string(body))
+	} else {
+		_, _ = io.Copy(io.Discard, resp.Body)
 	}
 
 	return nil

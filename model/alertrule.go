@@ -85,13 +85,13 @@ func (r *AlertRule) Snapshot(cycleTransferStats *CycleTransferStats, server *Ser
 
 // Check 传入包含当前报警规则下所有type检查结果的空接口 返回报警持续时间与是否通过报警检查(通过则返回true)
 func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
-	var max int   // 报警持续时间
-	var count int // 检查未通过的个数
+	var maxNum int // 报警持续时间
+	var count int  // 检查未通过的个数
 	for i := 0; i < len(r.Rules); i++ {
 		if r.Rules[i].IsTransferDurationRule() {
 			// 循环区间流量报警
-			if max < 1 {
-				max = 1
+			if maxNum < 1 {
+				maxNum = 1
 			}
 			for j := len(points[i]) - 1; j >= 0; j-- {
 				if points[i][j] != nil {
@@ -104,8 +104,8 @@ func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
 			total := 0.0
 			fail := 0.0
 			num := int(r.Rules[i].Duration)
-			if num > max {
-				max = num
+			if num > maxNum {
+				maxNum = num
 			}
 			if len(points) < num {
 				continue
@@ -124,5 +124,5 @@ func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
 		}
 	}
 	// 仅当所有检查均未通过时 返回false
-	return max, count != len(r.Rules)
+	return maxNum, count != len(r.Rules)
 }
