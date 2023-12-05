@@ -31,6 +31,7 @@ type _httpTransport struct {
 func httpTransport(conf _httpTransport) *http.Transport {
 	return &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: conf.VerifySSL},
+		Proxy:           http.ProxyFromEnvironment,
 	}
 }
 
