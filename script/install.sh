@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.2"
+NZ_VERSION="v0.15.3"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -794,11 +794,20 @@ clean_all() {
 }
 
 select_version() {
+    DOCKER_COMPOSE_COMMAND=""
     if command -v docker compose >/dev/null 2>&1; then
-        if docker compose ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
+        DOCKER_COMPOSE_COMMAND="docker compose"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        DOCKER_COMPOSE_COMMAND="docker-compose"
+    fi
+
+    if [[ -n $DOCKER_COMPOSE_COMMAND ]]; then
+        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
             IS_DOCKER_NEZHA=1
+            return
         fi
     fi
+
     if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
         IS_DOCKER_NEZHA=0
     else
