@@ -92,6 +92,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/Creling" title="Creling">
   <img src="https://avatars.githubusercontent.com/u/43109504?v=4" width="50;" alt="Creling"/>
 </a>
+<a href="https://github.com/Mmx233" title="Mmx">
+  <img src="https://avatars.githubusercontent.com/u/36563672?v=4" width="50;" alt="Mmx"/>
+</a>
 <a href="https://github.com/ch8o" title="no-name-now">
   <img src="https://avatars.githubusercontent.com/u/9103372?v=4" width="50;" alt="no-name-now"/>
 </a>
@@ -115,9 +118,6 @@ You can change the dashboard language in the settings page (`/setting`) after th
 </a>
 <a href="https://github.com/MartijnLindeman" title="Martijn Lindeman">
   <img src="https://avatars.githubusercontent.com/u/78365708?v=4" width="50;" alt="Martijn Lindeman"/>
-</a>
-<a href="https://github.com/Mmx233" title="Mmx">
-  <img src="https://avatars.githubusercontent.com/u/36563672?v=4" width="50;" alt="Mmx"/>
 </a>
 <a href="https://github.com/nickfox-taterli" title="Tater Li">
   <img src="https://avatars.githubusercontent.com/u/19658596?v=4" width="50;" alt="Tater Li"/>
