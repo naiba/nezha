@@ -793,7 +793,7 @@ clean_all() {
 
 select_version() {
     DOCKER_COMPOSE_COMMAND=""
-    if command -v docker compose >/dev/null 2>&1; then
+    if docker compose version >/dev/null 2>&1; then
         DOCKER_COMPOSE_COMMAND="docker compose"
     elif command -v docker-compose >/dev/null 2>&1; then
         DOCKER_COMPOSE_COMMAND="docker-compose"
