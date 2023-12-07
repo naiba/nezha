@@ -6,23 +6,23 @@
         <table class="table table-striped table-condensed service-status">
             <thead>
             <tr>
-                <th class="node-cell" style="min-width: 60px">🍀 {{tr "Status"}}</th>
-                <th class="node-cell" style="min-width: 60px">🚀 {{tr "Name"}}</th>
-                <th class="node-cell center">🗂 {{tr "Details"}}</th>
-                <th class="node-cell center" style="min-width: 80px">⚡️{{tr "AverageLatency"}}</th>
-                <th class="node-cell center" style="min-width: 80px">⏱️ {{tr "30DaysOnline"}}</th>
+                <th class="node-cell center" style="min-width:60px">{{tr "Status"}}</th>
+                <th class="node-cell center" style="min-width:50px">{{tr "Name"}}</th>
+                <th class="node-cell center">{{tr "Details"}}</th>
+                <th class="node-cell center" style="min-width:80px">{{tr "AverageLatency"}}</th>
+                <th class="node-cell center" style="min-width:80px">{{tr "30DaysOnline"}}</th>
             </tr>
             </thead>
             <tbody id="servers">
             <template v-for="service in services">
                 <tr>
-                    <td style="text-align: left" class="node-cell">
+                    <td class="node-cell center">
                         <div class="delay-today">
                             <i class="delay-today" :class="service.health.className"></i>
                             @#service.health.text#@
                         </div>
                     </td>
-                    <td class="node-cell">@#service.name#@</td>
+                    <td class="node-cell center">@#service.name#@</td>
                     <td class="node-cell center">
                         <template v-for="(item,index) in service.dayDetail">
                             <div class="service-day-status-icon" :class="item.className"
@@ -44,7 +44,7 @@
         </table>
     </div>
 
-    <div class="container" style="margin-bottom: 20px;padding:unset;max-width: 95vw">
+    <div class="container" style="padding:unset;max-width: 95vw">
         {{if .CycleTransferStats}}
         <h4 style="text-align: center;">{{tr "CycleTransferStats"}}</h4>
         <div class="table-responsive content">
