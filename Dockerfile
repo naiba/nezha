@@ -1,18 +1,17 @@
-FROM ubuntu:focal-20221130
-
-ENV TZ="Asia/Shanghai"
+FROM alpine:edge
 
 ARG TARGETOS
 ARG TARGETARCH
 
-COPY ./script/entrypoint.sh /entrypoint.sh
+RUN apk update && \
+    apk upgrade --no-cache && \
+    apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo 'Asia/Shanghai' >/etc/timezone && \
+    rm -rf /var/cache/apk/*
 
-RUN export DEBIAN_FRONTEND="noninteractive" && \
-    apt update && apt install -y ca-certificates tzdata && \
-    update-ca-certificates && \
-    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
-    dpkg-reconfigure tzdata && \
-    chmod +x /entrypoint.sh
+COPY ./script/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 WORKDIR /dashboard
 COPY dist/dashboard-${TARGETOS}-${TARGETARCH} ./app
