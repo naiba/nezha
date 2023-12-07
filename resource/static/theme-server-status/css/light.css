@@ -15,10 +15,6 @@ body[theme="light"] .navbar-inverse .navbar-brand {
     color: #fff;
 }
 
-body[theme="light"] .toggleView i{
-    background-color: royalblue;
-}
-
 body[theme="light"] .content {
     background: #ffffff;
     border: 1px #cecece solid;

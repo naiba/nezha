@@ -41,10 +41,6 @@ body[theme="dark"] .navbar-inverse .navbar-nav > .open > a {
     background-color: transparent !important;
 }
 
-body[theme="dark"] .toggleView i {
-    background-color: rgba(0,0,0,0.5);
-}
-
 body[theme="dark"] .content {
     background-image: initial;
     background-color:#171A1B;

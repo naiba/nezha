@@ -1,5 +1,5 @@
 body {
-    padding-top:60px !important;
+    padding-top:70px !important;
     padding-bottom: 30px !important;
 }
 
@@ -57,33 +57,6 @@ body {
     font-size: 20px;
 }
 /* 导航部分 结束 */
-
-
-/* 视图切换 开始 */
-.toggleView {
-    position: fixed;
-    bottom:25px;
-    right: 18px;
-    z-index: 999999;
-}
-
-.toggleView i{
-    display: block;
-    color: #f1f1f1;
-    cursor: pointer;
-    border-radius: 5px;
-    font-size: 1.5rem;
-    height: 2.75rem;
-    width: 2.75rem;
-    line-height: 2.75rem;
-    text-align: center;
-}
-
-.toggleView i.show-nogroup {
-    font-size: 1.85rem;
-}
-/* 视图切换 结束 */
-
 
 /* 正文部分 开始 */
 .content {
@@ -212,9 +185,11 @@ body {
 @media only screen and (max-width: 720px) {
     body {
         font-size: 10px !important;
+        padding-top:60px !important;
     }
     .content {
         padding: 0;
+        margin-bottom: 10px;
     }
     .node-cell.os,
     .node-cell.uptime,
@@ -234,7 +209,7 @@ body {
         margin: 5px 0px 5px 10px;        
     }
     .table .node-group-tag {
-        font-size:16px;
+        font-size:12px;
         padding-bottom:6px;
     }
 }
