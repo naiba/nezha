@@ -1,7 +1,6 @@
 {{define "theme-server-status/header"}}
 <!DOCTYPE html>
 <html lang="{{.Conf.Language}}">
-
 <head>
     <title>{{ .Title }}</title>
     <meta charset="utf-8">
@@ -9,11 +8,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/theme-server-status/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/theme-server-status/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="/static/theme-server-status/css/main.css?v20231109">
+    <link rel="stylesheet" href="/static/theme-server-status/css/main.css?v20231207">
     <link rel="stylesheet" href="/static/theme-server-status/css/dark.css">
     <link rel="stylesheet" href="/static/theme-server-status/css/light.css">
-    <link href="https://cdn.staticfile.org/font-logos/0.17/font-logos.min.css" type="text/css" rel="stylesheet" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.staticfile.org/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-logos/0.17/font-logos.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/semantic-ui/2.4.1/semantic.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css">
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -23,12 +24,10 @@
     {{if ts .CustomCode}}
     {{.CustomCode|safe}}
     {{end}}
-
     <script src="/static/theme-server-status/js/jquery.min.js"></script>
     <script src="/static/theme-server-status/js/bootstrap.min.js"></script>
     <script src="https://cdn.staticfile.org/vue/2.6.14/vue.min.js"></script>
     <script src="/static/theme-server-status/js/mixin.js"></script>
 </head>
-
 <body>
-    {{end}}
+{{end}}

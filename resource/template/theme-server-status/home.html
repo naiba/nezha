@@ -2,26 +2,30 @@
 {{template "theme-server-status/header" .}}
 <div id="app">
     {{template "theme-server-status/content-nav" .}}
-    <div class="container table-responsive content" style="max-width: 95vw">
+    <div class="container table-responsive content" style="max-width: 95vw" v-for="group in nodes">
         <table class="table table-striped table-condensed table-hover">
             <thead>
             <tr>
-                <th class="node-cell status center">🍀 {{tr "Status"}}</th>
-                <th class="node-cell name">🚀 {{tr "Name"}}</th>
-                <th class="node-cell os">🗂 {{tr "Platform"}}</th>
-                <th class="node-cell location center">🌍 {{tr "Location"}}</th>
-                <th class="node-cell uptime center">⏱️ {{tr "Uptime"}}</th>
-                <th class="node-cell load center">📋{{tr "Load"}}</th>
-                <th class="node-cell network center">🚦 {{tr "NetSpeed"}}↓|↑</th>
-                <th class="node-cell traffic center">📊 {{tr "NetTransfer"}}↓|↑</th>
-                <th class="node-cell cpu center">🎯 {{tr "CpuUsed"}}</th>
-                <th class="node-cell ram center">⚡ {{tr "MemUsed"}}</th>
-                <th class="node-cell hdd center">💾 {{tr "DiskUsed"}}</th>
+                <th class="node-group-tag" colspan="16" style="border:none;">@#(group.Tag!==''?group.Tag:'{{tr "Default"}}')#@</th>
+                </th>
+            </tr>
+            <tr>
+                <th class="node-cell status center">{{tr "Status"}}</th>
+                <th class="node-cell name center">{{tr "Name"}}</th>
+                <th class="node-cell os center">{{tr "Platform"}}</th>
+                <th class="node-cell location center">{{tr "Location"}}</th>
+                <th class="node-cell uptime center">{{tr "Uptime"}}</th>
+                <th class="node-cell load center">{{tr "Load"}}</th>
+                <th class="node-cell network center">{{tr "NetSpeed"}}↓|↑</th>
+                <th class="node-cell traffic center">{{tr "NetTransfer"}}↓|↑</th>
+                <th class="node-cell cpu center">{{tr "CpuUsed"}}</th>
+                <th class="node-cell ram center">{{tr "MemUsed"}}</th>
+                <th class="node-cell hdd center">{{tr "DiskUsed"}}</th>
             </tr>
             </thead>
             <tbody id="servers">
-            <template v-for="(node,index) in nodes">
-                <tr :id="'r'+index" data-toggle="collapse" :data-target="'#rt'+index" class="accordion-toggle"
+            <template v-for="(node,index) in group.data">
+                <tr :id="'r'+node.ID" data-toggle="collapse" :data-target="'#rt'+node.ID" class="accordion-toggle"
                     :class="index % 2 === 0 ? 'odd': 'even'">
                     <td class="node-cell status center">
                         <div class="status-container">
@@ -29,36 +33,36 @@
                             <div v-else class="status-icon offline"></div>
                         </div>
                     </td>
-                    <td class="node-cell name">@#node.name#@</td>
-                    <td class="node-cell os">
+                    <td class="node-cell name center">@#node.name#@</td>
+                    <td class="node-cell os center">
                         <i v-if='node.os == "darwin"' class="apple icon"></i>
                         <i v-else-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
                         <i v-else :class="'fl-' + getFontLogoClass(node.host.Platform)"></i>
-                        @#node.os#@
+                        <span class="node-cell-os-text">@#node.os#@</span>
                     </td>
                     <td style="text-align: center;" class="node-cell location">
-                        <i :class="node.location + ' flag'"></i>&nbsp;
-                        <span class="text-uppercase">@#node.location#@</span>
+                        <i :class="'fi fi-' + node.location"></i>
+                        <span class="node-cell-location-text text-uppercase">&nbsp;@#node.location#@</span>
                     </td>
                     <td style="text-align: center;" class="node-cell uptime">@#node.uptime#@</td>
                     <td style="text-align: center;" class="node-cell load">@#node.load#@</td>
                     <td style="text-align: center;" class="node-cell network">@#node.network#@</td>
                     <td style="text-align: center;" class="node-cell traffic">@#node.traffic#@</td>
                     <td class="node-cell cpu">
-                        <div class="progress">
+                        <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
                             <div :style="node.cpu.style" :class="node.cpu.class"><small>@#node.cpu.percent#@%</small>
                             </div>
                         </div>
                     </td>
                     <td class="node-cell memory">
-                        <div class="progress">
+                        <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
                             <div :style="node.memory.style" :class="node.memory.class">
                                 <small>@#node.memory.percent#@%</small>
                             </div>
                         </div>
                     </td>
                     <td class="node-cell hdd">
-                        <div class="progress">
+                        <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
                             <div :style="node.hdd.style" :class="node.hdd.class"><small>@#node.hdd.percent#@%</small>
                             </div>
                         </div>
@@ -66,78 +70,72 @@
                 </tr>
                 <tr class="expandRow" :class="index % 2 === 0 ? 'odd': 'even'">
                     <td colspan="16">
-                        <div class="accordian-body collapse" :id="'rt'+index">
-                            <div style="display: flex;align-items: center;justify-content: center;flex-direction: column;">
-                                <div style="display: flex;align-items: flex-start;justify-content: center;flex-direction: column; width: 450px;max-width: 90vw">
+                        <div class="accordian-body collapse" :id="'rt'+node.ID">
+                            <div style="display: flex;left-items: center;justify-content: center;flex-direction: column; max-width: 89vw">
                                 <span class="node-cell-expand">
                                     <span class="node-cell-expand-label">{{tr "Platform"}}:</span>
-                                    @#node.host.Platform#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "Location"}}:</span>
-                                    <i :class="node.location + ' flag'"></i>
+                                    @#node.host.Platform#@-@#node.host.PlatformVersion#@
+                                    [<span v-if="node.host.Virtualization">@#node.host.Virtualization#@:</span>@#node.host.Arch#@]
                                 </span>
                                 <span class="node-cell-expand" v-if="node.host.CPU">
                                     <span class="node-cell-expand-label">CPU:</span>
                                     @#node.host.CPU.join(",")#@
                                 </span>
-                                    <span class="node-cell-expand load">
-                                    <span class="node-cell-expand-label">{{tr "Load"}}:</span>
-                                    @#toFixed2(node.state.Load1)#@ / @#toFixed2(node.state.Load5)#@ /@#toFixed2(node.state.Load15)#@
-                                </span>
-                                    <span class="node-cell-expand">
+                                <span class="node-cell-expand">
                                     <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
                                     @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@
                                 </span>
-                                    <span class="node-cell-expand">
+                                <span class="node-cell-expand">
                                     <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
                                     @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@(@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
                                 </span>
-                                    <span class="node-cell-expand">
+                                <span class="node-cell-expand">
+                                    <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
+                                    @#formatByteSize(node.state.SwapUsed)#@ / @#formatByteSize(node.host.SwapTotal)#@
+                                    <span v-if="node.host.SwapTotal">(@#toFixed2(node.state.SwapUsed / node.host.SwapTotal * 100)#@%)</span>
+                                </span>
+                                <span class="node-cell-expand">
                                     <span class="node-cell-expand-label">{{tr "NetTransfer"}}:</span>
                                     <i class="arrow alternate circle down outline icon"
                                        style="margin: 0"></i>@#formatByteSize(node.state.NetInTransfer)#@
                                     <i class="arrow alternate circle up outline icon"
                                        style="margin: 0"></i>@#formatByteSize(node.state.NetOutTransfer)#@
                                 </span>
-                                    <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
-                                    @#formatByteSize(node.state.SwapUsed)#@ / @#formatByteSize(node.host.SwapTotal)#@
-                                    <span v-if="node.host.SwapTotal">(@#toFixed2(node.state.SwapUsed / node.host.SwapTotal * 100)#@%)</span>
+                                <span class="node-cell-expand load">
+                                    <span class="node-cell-expand-label">{{tr "Load"}}:</span>
+                                    @#toFixed2(node.state.Load1)#@ / @#toFixed2(node.state.Load5)#@ / @#toFixed2(node.state.Load15)#@
                                 </span>
-                                    <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "BootTime"}}:</span>
-                                    @#formatTimestamp(node.host.BootTime)#@
-                                </span>
-                                    <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "LastActive"}}:</span>
-                                    @#new Date(node.lastActive).toLocaleString()#@
-                                </span>
-                                    <span class="node-cell-expand" v-if="node.host.Virtualization">
-                                    <span class="node-cell-expand-label">{{tr "Virtualization"}}:</span>
-                                    @#node.host.Virtualization#@
-                                </span>
-                                    <span class="node-cell-expand">
+                                <span class="node-cell-expand">
                                     <span class="node-cell-expand-label">{{tr "ProcessCount"}}:</span>
                                     @#node.state.ProcessCount#@
                                 </span>
-                                    <span class="node-cell-expand">
+                                <span class="node-cell-expand">
                                     <span class="node-cell-expand-label">{{tr "ConnCount"}}:</span>
                                     TCP @#node.state.TcpConnCount#@ / UDP @#node.state.UdpConnCount#@
                                 </span>
-                                </div>
+                                <span class="node-cell-expand">
+                                    <span class="node-cell-expand-label">{{tr "BootTime"}}:</span>
+                                    @#formatTimestamp(node.host.BootTime)#@
+                                </span>
+                                <span class="node-cell-expand">
+                                    <span class="node-cell-expand-label">{{tr "LastActive"}}:</span>
+                                    @#new Date(node.lastActive).toLocaleString()#@
+                                </span>
+                                <span class="node-cell-expand">
+                                    <span class="node-cell-expand-label">{{tr "Version"}}:</span>
+                                    @#node.host.Version#@
+                                </span>
                             </div>
                         </div>
                     </td>
                 </tr>
             </template>
-
             </tbody>
         </table>
-        <br/>
     </div>
     {{template "theme-server-status/content-footer" .}}
 </div>
+
 <script>
     new Vue({
         el: '#app',
@@ -147,8 +145,8 @@
         },
         mixins: [mixinsVue],
         created() {
-            const initData = JSON.parse('{{.Servers}}').servers;
-            this.nodes = this.handleNodes(initData);
+            const initData = JSON.parse('{{.Servers}}').servers;           
+            this.nodes = groupingData(this.handleNodes(initData),"Tag");
             this.initTheme()
         },
         mounted() {
@@ -233,17 +231,17 @@
                 return x !== "NaN undefined" ? x : '0B'
             },
             formatPercent(live, used, total) {
-                const percent = live ? (this.toFixed2(used / total * 100) || 0) : 1
+                const percent = live ? (this.toFixed2(used / total * 100) || 0) : 0
                 return this.formatPercents(percent)
             },
             formatPercents(percent) {
                 if (percent <= 0) {
-                    percent = 1;
+                    percent = 0;
                 }
                 if (!this.cache[percent]) {
                     this.cache[percent] = {
                         class: 'progress-bar progress-bar-success',
-                        style: `width: ${parseInt(percent)}%`,
+                        style: `width: ${parseInt(percent)+1}%`,
                         percent,
                     }
                     if (percent < 80) {
@@ -281,8 +279,8 @@
                             const lastActive = new Date(ns.LastActive).getTime()
                             data.servers[i].live = data.now - lastActive <= 10 * 1000;
                         }
-                    }
-                    this.nodes = this.handleNodes(data.servers)
+                    }              
+                    this.nodes = groupingData(this.handleNodes(data.servers),"Tag");
                 }
                 ws.onclose = () => {
                     setTimeout(function () {
@@ -296,13 +294,14 @@
             handleNodes(servers) {
                 let nodes = []
                 servers?.forEach(server => {
-                    let platform = server.Host.Platform
-                    if (this.isWindowsPlatform(server.Host.Platform)) {
+                    let platform = server.Host.Platform;
+                    if (this.isWindowsPlatform(platform)) {
                         platform = "windows"
                     }else if (platform === "immortalwrt") {
                         platform = "openwrt"
                     }
                     let node = {
+                        ID: server.ID,
                         name: server.Name,
                         os: platform,
                         location: server.Host.CountryCode,
@@ -317,6 +316,7 @@
                         state: server.State,
                         host: server.Host,
                         lastActive: server.LastActive,
+                        Tag: server.Tag,
                     }
                     nodes.push(node)
                 })
@@ -328,6 +328,25 @@
         }
 
     })
+
+    function groupingData(data, field) {
+        let map = new Map();
+        let dest = [];
+
+        data.forEach(item => {
+            if (!map.has(item[field])) {
+                dest.push({
+                    [field]: item[field],
+                    data: [item]
+                });
+                map.set(item[field], item);
+            } else {
+                dest.find(dItem => dItem[field] === item[field]).data.push(item);
+            }
+        });
+
+        return dest;
+    }
 </script>
 {{template "theme-server-status/footer" .}}
 {{end}}
