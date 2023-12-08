@@ -1,3 +1,4 @@
+# latest 镜像还没有 riscv64 https://hub.docker.com/_/alpine/tags
 FROM alpine:edge
 
 ARG TARGETOS
