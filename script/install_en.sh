@@ -795,14 +795,29 @@ select_version() {
     DOCKER_COMPOSE_COMMAND=""
     if docker compose version >/dev/null 2>&1; then
         DOCKER_COMPOSE_COMMAND="docker compose"
+        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
+            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
+            if [ -n "$NEZHA_IMAGES" ]; then
+                echo "Docker image with nezha-dashboard repository exists:"
+                echo "$NEZHA_IMAGES"
+                IS_DOCKER_NEZHA=1
+                return
+            else
+                echo "No Docker images with the nezha-dashboard repository were found."
+            fi
+        fi
     elif command -v docker-compose >/dev/null 2>&1; then
         DOCKER_COMPOSE_COMMAND="docker-compose"
-    fi
-
-    if [[ -n $DOCKER_COMPOSE_COMMAND ]]; then
-        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
-            IS_DOCKER_NEZHA=1
-            return
+        if $DOCKER_COMPOSE_COMMAND -f "$NZ_DASHBOARD_PATH/docker-compose.yaml" config >/dev/null 2>&1; then
+            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
+            if [ -n "$NEZHA_IMAGES" ]; then
+                echo "Docker image with nezha-dashboard repository exists:"
+                echo "$NEZHA_IMAGES"
+                IS_DOCKER_NEZHA=1
+                return
+            else
+                echo "No Docker images with the nezha-dashboard repository were found."
+            fi
         fi
     fi
 
