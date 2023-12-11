@@ -15,7 +15,7 @@
             <div v-for="server in group.data" :id="server.ID" class="ui card">
               <div class="content" v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                 <div class="header">
-                  <img v-if="server.Host.CountryCode" style="border-radius: 50%;box-shadow:-1px -1px 2px #eee, 1px 1px 2px #000;width:19px;" :src="'https://cdn.staticfile.org/flag-icon-css/6.6.5/flags/1x1/'+server.Host.CountryCode + '.svg'" alt="国家"/>&nbsp;<i v-if='server.Host.Platform == "darwin"'
+                  <img v-if="server.Host.CountryCode" style="border-radius: 50%;box-shadow:-1px -1px 2px #eee, 1px 1px 2px #000;width:19px;" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/flag-icon-css/4.1.5/flags/1x1/'+server.Host.CountryCode + '.svg'" alt="国家"/>&nbsp;<i v-if='server.Host.Platform == "darwin"'
                     class="apple icon"></i><i v-else-if='isWindowsPlatform(server.Host.Platform)'
                     class="windows icon"></i><i v-else :class="'fl-' + getFontLogoClass(server.Host.Platform)"></i>
                   @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@

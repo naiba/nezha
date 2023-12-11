@@ -9,7 +9,7 @@
   <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
 
   <!-- MDUI CSS -->
-  <link rel="stylesheet" href="https://cdn.staticfile.org/mdui/1.0.2/css/mdui.min.css"/>
+  <link rel="stylesheet" href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/mdui/1.0.2/css/mdui.min.css"/>
   <link rel="stylesheet" href="/static/theme-mdui/mdui.css" type="text/css">
   <style>
 	.mdui-table td, .mdui-table th{padding: 6px;}
@@ -37,7 +37,7 @@
         <div class="mdui-col" v-for='server in servers' :id="server.ID">
           <div :class="'mdui-card mt' + (server.live?'':' offline')">
             <div class="mdui-card-header">
-	      <img class="mdui-card-header-avatar" :src="'https://cdn.staticfile.org/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"/>
+	      <img class="mdui-card-header-avatar" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"/>
 	      <div class="mdui-card-header-title">@#server.Name#@</div>
 	      <div class="mdui-card-header-subtitle">@#server.Host.CountryCode.toUpperCase()#@ | @#server.Host.Platform#@ @#server.Host.PlatformVersion#@</div>
             </div>
@@ -153,9 +153,9 @@
 {{template "theme-mdui/footer" .}}
 
   <script src="/static/theme-mdui/mdui.js"></script>
-  <script src="https://cdn.staticfile.org/mdui/1.0.2/js/mdui.min.js"></script>
-  <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdn.staticfile.org/vue/2.6.14/vue.min.js"></script>
+  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/mdui/1.0.2/js/mdui.min.js"></script>
+  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/vue/2.6.14/vue.min.js"></script>
 
   <script>
     var container=document.querySelector("#container");
