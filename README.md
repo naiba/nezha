@@ -74,8 +74,8 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/spiritLHLS" title="spiritlhl">
   <img src="https://avatars.githubusercontent.com/u/103393591?v=4" width="50;" alt="spiritlhl"/>
 </a>
-<a href="https://github.com/applexad" title="Applexad">
-  <img src="https://avatars.githubusercontent.com/u/35923940?v=4" width="50;" alt="Applexad"/>
+<a href="https://github.com/uubulb" title="UUBulb">
+  <img src="https://avatars.githubusercontent.com/u/35923940?v=4" width="50;" alt="UUBulb"/>
 </a>
 <a href="https://github.com/hhhkkk520" title="Kris">
   <img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/>
@@ -103,6 +103,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 </a>
 <a href="https://github.com/iilemon" title="Sean">
   <img src="https://avatars.githubusercontent.com/u/33201711?v=4" width="50;" alt="Sean"/>
+</a>
+<a href="https://github.com/wwng2333" title="Crazy">
+  <img src="https://avatars.githubusercontent.com/u/17147265?v=4" width="50;" alt="Crazy"/>
 </a>
 <a href="https://github.com/Es-dese" title="Esdese">
   <img src="https://avatars.githubusercontent.com/u/71542548?v=4" width="50;" alt="Esdese"/>
