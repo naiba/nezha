@@ -1,4 +1,7 @@
 #!/sbin/openrc-run
+supervisor=supervise-daemon
+name=nezha-agent
+supervise_daemon_args="--stdout /var/log/${name}.log --stderr /var/log/${name}.err"
 SERVER="nz_grpc_host:nz_grpc_port" #Dashboard 地址 ip:port
 SECRET="nz_client_secret" #SECRET
 NZ_BASE_PATH="/opt/nezha"
