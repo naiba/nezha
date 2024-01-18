@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.4"
+NZ_VERSION="v0.15.5"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -34,15 +34,15 @@ pre_check() {
     ## os_arch
     if [[ $(uname -m | grep 'x86_64') != "" ]]; then
         os_arch="amd64"
-        elif [[ $(uname -m | grep 'i386\|i686') != "" ]]; then
+    elif [[ $(uname -m | grep 'i386\|i686') != "" ]]; then
         os_arch="386"
-        elif [[ $(uname -m | grep 'aarch64\|armv8b\|armv8l') != "" ]]; then
+    elif [[ $(uname -m | grep 'aarch64\|armv8b\|armv8l') != "" ]]; then
         os_arch="arm64"
-        elif [[ $(uname -m | grep 'arm') != "" ]]; then
+    elif [[ $(uname -m | grep 'arm') != "" ]]; then
         os_arch="arm"
-        elif [[ $(uname -m | grep 's390x') != "" ]]; then
+    elif [[ $(uname -m | grep 's390x') != "" ]]; then
         os_arch="s390x"
-        elif [[ $(uname -m | grep 'riscv64') != "" ]]; then
+    elif [[ $(uname -m | grep 'riscv64') != "" ]]; then
         os_arch="riscv64"
     fi
 
@@ -50,37 +50,54 @@ pre_check() {
     if [[ -z "${CN}" ]]; then
         if [[ $(curl -m 10 -s https://ipapi.co/json | grep 'China') != "" ]]; then
             echo "According to the information provided by ipapi.co, the current IP may be in China"
-            read -e -r -p "Is the installation done with a Chinese Mirror? [Y/n] " input
+            read -e -r -p "Is the installation done with a Chinese Mirror? [Y/n] (Custom Mirror Input 3):" input
             case $input in
-                [yY][eE][sS] | [yY])
-                    echo "Use Chinese Mirror"
-                    CN=true
+            [yY][eE][sS] | [yY])
+                echo "Use Chinese Mirror"
+                CN=true
                 ;;
 
-                [nN][oO] | [nN])
-                    echo "No Use Chinese Mirror"
+            [nN][oO] | [nN])
+                echo "No Use Chinese Mirror"
                 ;;
+
+            [3])
+                echo "Use Custom Mirror"
+                read -e -r -p "Please enter a custom image (e.g. :dn-dao-github-mirror.daocloud.io), leave blank to nouse: " input
+                case $input in
                 *)
-                    echo "No Use Chinese Mirror"
+                    CUSTOM_MIRROR=$input
+                    ;;
+                esac
+
+                ;;
+            *)
+                echo "No Use Chinese Mirror"
                 ;;
             esac
         fi
     fi
 
-    if [[ -z "${CN}" ]]; then
-        GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
-        GITHUB_URL="github.com"
-        Get_Docker_URL="get.docker.com"
-        Get_Docker_Argu=" "
-        Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
-        GITHUB_RELEASE_URL="github.com/naiba/nezha/releases/latest/download"
-    else
+    if [[ -n "${CUSTOM_MIRROR}" ]]; then
         GITHUB_RAW_URL="gitee.com/naibahq/nezha/raw/master"
-        GITHUB_URL="dn-dao-github-mirror.daocloud.io"
+        GITHUB_URL=$CUSTOM_MIRROR
         Get_Docker_URL="get.docker.com"
         Get_Docker_Argu=" -s docker --mirror Aliyun"
         Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
-        GITHUB_RELEASE_URL="hub.fgit.cf/naiba/nezha/releases/latest/download"
+    else
+        if [[ -z "${CN}" ]]; then
+            GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
+            GITHUB_URL="github.com"
+            Get_Docker_URL="get.docker.com"
+            Get_Docker_Argu=" "
+            Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
+        else
+            GITHUB_RAW_URL="gitee.com/naibahq/nezha/raw/master"
+            GITHUB_URL="hub.fgit.cf"
+            Get_Docker_URL="get.docker.com"
+            Get_Docker_Argu=" -s docker --mirror Aliyun"
+            Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
+        fi
     fi
 }
 
@@ -126,39 +143,39 @@ before_show_menu() {
 
 install_base() {
     (command -v git >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v wget >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1 && command -v getenforce >/dev/null 2>&1) ||
-    (install_soft curl wget git unzip tzdata)
+        (install_soft curl wget git unzip tzdata)
 }
 
-install_arch(){
+install_arch() {
     echo -e "${green}Info: ${plain} Archlinux needs to add nezha-agent user to install libselinux. It will be deleted automatically after installation. It is recommended to check manually\n"
     read -e -r -p "Do you need to install libselinux? [Y/n] " input
     case $input in
-        [yY][eE][sS] | [yY])
-            useradd -m nezha-agent
-            sed -i "$ a\nezha-agent ALL=(ALL ) NOPASSWD:ALL" /etc/sudoers
-                        sudo -iu nezha-agent bash -c 'gpg --keyserver keys.gnupg.net --recv-keys BE22091E3EF62275;
+    [yY][eE][sS] | [yY])
+        useradd -m nezha-agent
+        sed -i "$ a\nezha-agent ALL=(ALL ) NOPASSWD:ALL" /etc/sudoers
+        sudo -iu nezha-agent bash -c 'gpg --keyserver keys.gnupg.net --recv-keys BE22091E3EF62275;
                                         cd /tmp; git clone https://aur.archlinux.org/libsepol.git; cd libsepol; makepkg -si --noconfirm --asdeps; cd ..;
                                         git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..;
                                         rm -rf libsepol libselinux'
-            sed -i '/nezha-agent/d'  /etc/sudoers && sleep 30s && killall -u nezha-agent&&userdel nezha-agent
-            echo -e "${red}Info: ${plain}user nezha-agent has been deleted, Be sure to check it manually!\n"
+        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel nezha-agent
+        echo -e "${red}Info: ${plain}user nezha-agent has been deleted, Be sure to check it manually!\n"
         ;;
-        [nN][oO] | [nN])
-            echo "Libselinux will not be installed"
+    [nN][oO] | [nN])
+        echo "Libselinux will not be installed"
         ;;
-        *)
-            echo "Libselinux will not be installed"
-            exit 0
+    *)
+        echo "Libselinux will not be installed"
+        exit 0
         ;;
     esac
 }
 
 install_soft() {
     (command -v yum >/dev/null 2>&1 && yum makecache && yum install $* selinux-policy -y) ||
-    (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
-    (command -v pacman >/dev/null 2>&1 && pacman -Syu $* base-devel --noconfirm && install_arch)  ||
-    (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y) ||
-    (command -v apk >/dev/null 2>&1 && apk update && apk add $* -f)
+        (command -v apt >/dev/null 2>&1 && apt update && apt install $* selinux-utils -y) ||
+        (command -v pacman >/dev/null 2>&1 && pacman -Syu $* base-devel --noconfirm && install_arch) ||
+        (command -v apt-get >/dev/null 2>&1 && apt-get update && apt-get install $* selinux-utils -y) ||
+        (command -v apk >/dev/null 2>&1 && apk update && apk add $* -f)
 }
 
 install_dashboard() {
@@ -173,16 +190,16 @@ install_dashboard() {
         echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
         read -e -r -p "Exit the installation? [Y/n] " input
         case $input in
-            [yY][eE][sS] | [yY])
-                echo "Exit the installation."
-                exit 0
+        [yY][eE][sS] | [yY])
+            echo "Exit the installation."
+            exit 0
             ;;
-            [nN][oO] | [nN])
-                echo "Continue."
+        [nN][oO] | [nN])
+            echo "Continue."
             ;;
-            *)
-                echo "Exit the installation."
-                exit 0
+        *)
+            echo "Exit the installation."
+            exit 0
             ;;
         esac
     fi
@@ -210,9 +227,9 @@ install_dashboard() {
 
 install_dashboard_standalone() {
     install_base
-    
+
     echo -e "> Install Panel"
-    
+
     # Nezha Monitoring Folder
     if [ ! -d "${NZ_DASHBOARD_PATH}/app" ]; then
         mkdir -p $NZ_DASHBOARD_PATH
@@ -220,16 +237,16 @@ install_dashboard_standalone() {
         echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
         read -e -r -p "Exit the installation? [Y/n] " input
         case $input in
-            [yY][eE][sS] | [yY])
-                echo "Exit the installation."
-                exit 0
+        [yY][eE][sS] | [yY])
+            echo "Exit the installation."
+            exit 0
             ;;
-            [nN][oO] | [nN])
-                echo "Continue."
+        [nN][oO] | [nN])
+            echo "Continue."
             ;;
-            *)
-                echo "Exit the installation."
-                exit 0
+        *)
+            echo "Exit the installation."
+            exit 0
             ;;
         esac
     fi
@@ -239,19 +256,19 @@ install_dashboard_standalone() {
     fi
 
     chmod 777 -R $NZ_DASHBOARD_PATH
-    
+
     modify_dashboard_config_standalone 0
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
 }
 
-selinux(){
+selinux() {
     #Check SELinux
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         getenforce | grep '[Ee]nfor'
-        if [ $? -eq 0 ];then
+        if [ $? -eq 0 ]; then
             echo -e "SELinux running，closing now！"
             setenforce 0 &>/dev/null
             find_key="SELINUX="
@@ -295,8 +312,8 @@ install_agent() {
     fi
 
     unzip -qo nezha-agent_linux_${os_arch}.zip &&
-    mv nezha-agent $NZ_AGENT_PATH &&
-    rm -rf nezha-agent_linux_${os_arch}.zip README.md
+        mv nezha-agent $NZ_AGENT_PATH &&
+        rm -rf nezha-agent_linux_${os_arch}.zip README.md
 
     if [ $# -ge 3 ]; then
         modify_agent_config "$@"
@@ -312,7 +329,7 @@ install_agent() {
 modify_agent_config() {
     echo -e "> Modify Agent Configuration"
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         wget -t 2 -T 10 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
         if [[ $? != 0 ]]; then
             echo -e "${red}Fail to download service, please check if the network can link ${GITHUB_RAW_URL}${plain}"
@@ -329,11 +346,11 @@ modify_agent_config() {
 
     if [ $# -lt 3 ]; then
         echo "Please add Agent in the admin panel first, record the secret" &&
-        read -ep "Please enter a domain that resolves to the IP where the panel is located (no CDN sets): " nz_grpc_host &&
-        read -ep "Please enter the panel RPC port (default 5555): " nz_grpc_port &&
-        read -ep "Please enter the Agent secret: " nz_client_secret &&
-        read -ep "Do you want to enable SSL/TLS encryption for the gRPC port (--tls)? Press [y] if yes, the default is not required, and users can press Enter to skip if you don't understand: " nz_grpc_proxy
-        grep -qiw 'Y' <<< "${nz_grpc_proxy}" && args='--tls'
+            read -ep "Please enter a domain that resolves to the IP where the panel is located (no CDN sets): " nz_grpc_host &&
+            read -ep "Please enter the panel RPC port (default 5555): " nz_grpc_port &&
+            read -ep "Please enter the Agent secret: " nz_client_secret &&
+            read -ep "Do you want to enable SSL/TLS encryption for the gRPC port (--tls)? Press [y] if yes, the default is not required, and users can press Enter to skip if you don't understand: " nz_grpc_proxy
+        grep -qiw 'Y' <<<"${nz_grpc_proxy}" && args='--tls'
         if [[ -z "${nz_grpc_host}" || -z "${nz_client_secret}" ]]; then
             echo -e "${red}All options cannot be empty${plain}"
             before_show_menu
@@ -352,7 +369,7 @@ modify_agent_config() {
         fi
     fi
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
         sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
         sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
@@ -366,7 +383,7 @@ modify_agent_config() {
 
     echo -e "Agent configuration ${green} modified successfully, please wait for agent self-restart to take effect${plain}"
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         systemctl daemon-reload
         systemctl enable nezha-agent
         systemctl restart nezha-agent
@@ -397,14 +414,14 @@ modify_dashboard_config() {
     fi
 
     echo "About the GitHub Oauth2 application: create it at https://github.com/settings/developers, no review required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-    echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-    read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
-    read -ep "Please enter the Client ID of the Oauth2 application: " nz_github_oauth_client_id &&
-    read -ep "Please enter the Client Secret of the Oauth2 application: " nz_github_oauth_client_secret &&
-    read -ep "Please enter your GitHub/Gitee login name as the administrator, separated by commas: " nz_admin_logins &&
-    read -ep "Please enter the site title: " nz_site_title &&
-    read -ep "Please enter the site access port: (default 8008)" nz_site_port &&
-    read -ep "Please enter the RPC port to be used for Agent access: (default 5555)" nz_grpc_port
+        echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
+        read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
+        read -ep "Please enter the Client ID of the Oauth2 application: " nz_github_oauth_client_id &&
+        read -ep "Please enter the Client Secret of the Oauth2 application: " nz_github_oauth_client_secret &&
+        read -ep "Please enter your GitHub/Gitee login name as the administrator, separated by commas: " nz_admin_logins &&
+        read -ep "Please enter the site title: " nz_site_title &&
+        read -ep "Please enter the site access port: (default 8008)" nz_site_port &&
+        read -ep "Please enter the RPC port to be used for Agent access: (default 5555)" nz_grpc_port
 
     if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}All options cannot be empty${plain}"
@@ -448,31 +465,31 @@ modify_dashboard_config() {
 
 modify_dashboard_config_standalone() {
     echo -e "> Modify Panel Configuration"
-    
+
     echo -e "Download configuration template"
-    
+
     wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}File failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
         return 0
     fi
-    
+
     echo "About the GitHub Oauth2 application: create it at https://github.com/settings/developers, no review required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-    echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-    read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
-    read -ep "Please enter the Client ID of the Oauth2 application: " nz_github_oauth_client_id &&
-    read -ep "Please enter the Client Secret of the Oauth2 application: " nz_github_oauth_client_secret &&
-    read -ep "Please enter your GitHub/Gitee login name as the administrator, separated by commas: " nz_admin_logins &&
-    read -ep "Please enter the site title: " nz_site_title &&
-    read -ep "Please enter the site access port: (default 8008)" nz_site_port &&
-    read -ep "Please enter the RPC port to be used for Agent access: (default 5555)" nz_grpc_port
-    
+        echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
+        read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
+        read -ep "Please enter the Client ID of the Oauth2 application: " nz_github_oauth_client_id &&
+        read -ep "Please enter the Client Secret of the Oauth2 application: " nz_github_oauth_client_secret &&
+        read -ep "Please enter your GitHub/Gitee login name as the administrator, separated by commas: " nz_admin_logins &&
+        read -ep "Please enter the site title: " nz_site_title &&
+        read -ep "Please enter the site access port: (default 8008)" nz_site_port &&
+        read -ep "Please enter the RPC port to be used for Agent access: (default 5555)" nz_grpc_port
+
     if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
         echo -e "${red}All options cannot be empty${plain}"
         before_show_menu
         return 1
     fi
-    
+
     if [[ -z "${nz_site_port}" ]]; then
         nz_site_port=8008
     fi
@@ -482,7 +499,7 @@ modify_dashboard_config_standalone() {
     if [[ -z "${nz_oauth2_type}" ]]; then
         nz_oauth2_type=github
     fi
-    
+
     sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
     sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
     sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
@@ -491,15 +508,15 @@ modify_dashboard_config_standalone() {
     sed -i "s/nz_language/zh-CN/" /tmp/nezha-config.yaml
     sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
     sed -i "s/80/${nz_site_port}/" /tmp/nezha-config.yaml
-    
+
     mkdir -p $NZ_DASHBOARD_PATH/data
     mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
 
     echo -e "Downloading service file"
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
-        else
+    else
         wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
         chmod +x $NZ_DASHBOARD_SERVICERC
         if [[ $? != 0 ]]; then
@@ -508,11 +525,10 @@ modify_dashboard_config_standalone() {
         fi
     fi
 
-    
     echo -e "Dashboard configuration ${green} modified successfully, please wait for Dashboard self-restart to take effect${plain}"
-    
+
     restart_and_update_standalone
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -548,7 +564,7 @@ restart_and_update() {
 
 restart_and_update_standalone() {
     echo -e "> Restart and Update the Panel"
-    
+
     cd $NZ_DASHBOARD_PATH
 
     if [ "$os_alpine" != 1 ]; then
@@ -557,9 +573,9 @@ restart_and_update_standalone() {
         rc-service nezha-dashboard stop
     fi
 
-    wget -qO app.zip $GITHUB_RELEASE_URL/dashboard-linux-$os_arch.zip >/dev/null 2>&1 && unzip -qq app.zip && mv dist/dashboard-linux-$os_arch app && rm -r app.zip dist
+    wget -qO app.zip https://${GITHUB_URL}/naiba/nezha/releases/latest/download/dashboard-linux-$os_arch.zip >/dev/null 2>&1 && unzip -qq app.zip && mv dist/dashboard-linux-$os_arch app && rm -r app.zip dist
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         systemctl daemon-reload
         systemctl enable nezha-dashboard
         systemctl restart nezha-dashboard
@@ -567,14 +583,14 @@ restart_and_update_standalone() {
         rc-update add nezha-dashboard
         rc-service nezha-dashboard restart
     fi
-    
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Restart Successful${plain}"
         echo -e "Default panel address: ${yellow}domain:Site_access_port${plain}"
     else
         echo -e "${red}The restart failed, probably because the boot time exceeded two seconds, please check the log information later${plain}"
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -603,19 +619,19 @@ start_dashboard() {
 
 start_dashboard_standalone() {
     echo -e "> Start Panel"
-    
+
     if [ "$os_alpine" != 1 ]; then
         systemctl start nezha-dashboard
     else
         rc-service nezha-dashboard start
     fi
-    
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Start Successful${plain}"
     else
         echo -e "${red}Failed to start, please check the log message later${plain}"
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -644,19 +660,19 @@ stop_dashboard() {
 
 stop_dashboard_standalone() {
     echo -e "> Stop Panel"
-    
+
     if [ "$os_alpine" != 1 ]; then
         systemctl stop nezha-dashboard
     else
         rc-service nezha-dashboard stop
     fi
-    
+
     if [[ $? == 0 ]]; then
         echo -e "${green}Nezha Monitoring Stop Successful${plain}"
     else
         echo -e "${red}Failed to stop, please check the log message later${plain}"
     fi
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -679,7 +695,7 @@ show_dashboard_log() {
 
 show_dashboard_log_standalone() {
     echo -e "> View Panel Log"
-    
+
     if [ "$os_alpine" != 1 ]; then
         journalctl -xf -u nezha-dashboard.service
     else
@@ -702,8 +718,8 @@ uninstall_dashboard() {
     fi
 
     rm -rf $NZ_DASHBOARD_PATH
-    docker rmi -f ghcr.io/naiba/nezha-dashboard > /dev/null 2>&1
-    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard > /dev/null 2>&1
+    docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
+    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
     clean_all
 
     if [[ $# == 0 ]]; then
@@ -713,7 +729,7 @@ uninstall_dashboard() {
 
 uninstall_dashboard_standalone() {
     echo -e "> Uninstall Panel"
-    
+
     rm -rf $NZ_DASHBOARD_PATH
 
     if [ "$os_alpine" != 1 ]; then
@@ -729,7 +745,7 @@ uninstall_dashboard_standalone() {
     fi
 
     clean_all
-    
+
     if [[ $# == 0 ]]; then
         before_show_menu
     fi
@@ -752,7 +768,7 @@ show_agent_log() {
 uninstall_agent() {
     echo -e "> Uninstall Agent"
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         systemctl disable nezha-agent.service
         systemctl stop nezha-agent.service
         rm -rf $NZ_AGENT_SERVICE
@@ -774,7 +790,7 @@ uninstall_agent() {
 restart_agent() {
     echo -e "> Restart Agent"
 
-    if [ "$os_alpine" != 1 ];then
+    if [ "$os_alpine" != 1 ]; then
         systemctl restart nezha-agent.service
     else
         rc-service nezha-agent restart
@@ -828,16 +844,16 @@ select_version() {
         while true; do
             read -e -r -p "Input a number [1-2]: " option
             case "${option}" in
-                1)
-                    IS_DOCKER_NEZHA=1
-                    break
+            1)
+                IS_DOCKER_NEZHA=1
+                break
                 ;;
-                2)
-                    IS_DOCKER_NEZHA=0
-                    break
+            2)
+                IS_DOCKER_NEZHA=0
+                break
                 ;;
-                *)
-                    echo "Wrong input, try again"
+            *)
+                echo "Wrong input, try again"
                 ;;
             esac
         done
@@ -890,98 +906,98 @@ show_menu() {
     echo && read -ep "Please enter [0-13]: " num
     if [[ $IS_DOCKER_NEZHA == 1 ]]; then
         case "${num}" in
-            0)
-                exit 0
+        0)
+            exit 0
             ;;
-            1)
-                install_dashboard
+        1)
+            install_dashboard
             ;;
-            2)
-                modify_dashboard_config
+        2)
+            modify_dashboard_config
             ;;
-            3)
-                start_dashboard
+        3)
+            start_dashboard
             ;;
-            4)
-                stop_dashboard
+        4)
+            stop_dashboard
             ;;
-            5)
-                restart_and_update
+        5)
+            restart_and_update
             ;;
-            6)
-                show_dashboard_log
+        6)
+            show_dashboard_log
             ;;
-            7)
-                uninstall_dashboard
+        7)
+            uninstall_dashboard
             ;;
-            8)
-                install_agent
+        8)
+            install_agent
             ;;
-            9)
-                modify_agent_config
+        9)
+            modify_agent_config
             ;;
-            10)
-                show_agent_log
+        10)
+            show_agent_log
             ;;
-            11)
-                uninstall_agent
+        11)
+            uninstall_agent
             ;;
-            12)
-                restart_agent
+        12)
+            restart_agent
             ;;
-            13)
-                update_script
+        13)
+            update_script
             ;;
-            *)
-                echo -e "${red}Please enter the correct number [0-13]${plain}"
+        *)
+            echo -e "${red}Please enter the correct number [0-13]${plain}"
             ;;
         esac
     elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
         case "${num}" in
-            0)
-                exit 0
+        0)
+            exit 0
             ;;
-            1)
-                install_dashboard_standalone
+        1)
+            install_dashboard_standalone
             ;;
-            2)
-                modify_dashboard_config_standalone
+        2)
+            modify_dashboard_config_standalone
             ;;
-            3)
-                start_dashboard_standalone
+        3)
+            start_dashboard_standalone
             ;;
-            4)
-                stop_dashboard_standalone
+        4)
+            stop_dashboard_standalone
             ;;
-            5)
-                restart_and_update_standalone
+        5)
+            restart_and_update_standalone
             ;;
-            6)
-                show_dashboard_log_standalone
+        6)
+            show_dashboard_log_standalone
             ;;
-            7)
-                uninstall_dashboard_standalone
+        7)
+            uninstall_dashboard_standalone
             ;;
-            8)
-                install_agent
+        8)
+            install_agent
             ;;
-            9)
-                modify_agent_config
+        9)
+            modify_agent_config
             ;;
-            10)
-                show_agent_log
+        10)
+            show_agent_log
             ;;
-            11)
-                uninstall_agent
+        11)
+            uninstall_agent
             ;;
-            12)
-                restart_agent
+        12)
+            restart_agent
             ;;
-            13)
-                update_script
+        13)
+            update_script
             ;;
-            *)
-                echo -e "${red}Please enter the correct number [0-13]${plain}"
+        *)
+            echo -e "${red}Please enter the correct number [0-13]${plain}"
             ;;
         esac
     fi
@@ -992,126 +1008,126 @@ pre_check
 if [[ $# > 0 ]]; then
     if [[ $IS_DOCKER_NEZHA == 1 ]]; then
         case $1 in
-            "install_dashboard")
-                install_dashboard 0
+        "install_dashboard")
+            install_dashboard 0
             ;;
-            "modify_dashboard_config")
-                modify_dashboard_config 0
+        "modify_dashboard_config")
+            modify_dashboard_config 0
             ;;
-            "start_dashboard")
-                start_dashboard 0
+        "start_dashboard")
+            start_dashboard 0
             ;;
-            "stop_dashboard")
-                stop_dashboard 0
+        "stop_dashboard")
+            stop_dashboard 0
             ;;
-            "restart_and_update")
-                restart_and_update 0
+        "restart_and_update")
+            restart_and_update 0
             ;;
-            "show_dashboard_log")
-                show_dashboard_log 0
+        "show_dashboard_log")
+            show_dashboard_log 0
             ;;
-            "uninstall_dashboard")
-                uninstall_dashboard 0
+        "uninstall_dashboard")
+            uninstall_dashboard 0
             ;;
-            "install_agent")
-                shift
-                if [ $# -ge 3 ]; then
-                    install_agent "$@"
-                else
-                    install_agent 0
-                fi
+        "install_agent")
+            shift
+            if [ $# -ge 3 ]; then
+                install_agent "$@"
+            else
+                install_agent 0
+            fi
             ;;
-            "modify_agent_config")
-                modify_agent_config 0
+        "modify_agent_config")
+            modify_agent_config 0
             ;;
-            "show_agent_log")
-                show_agent_log 0
+        "show_agent_log")
+            show_agent_log 0
             ;;
-            "uninstall_agent")
-                uninstall_agent 0
+        "uninstall_agent")
+            uninstall_agent 0
             ;;
-            "restart_agent")
-                restart_agent 0
+        "restart_agent")
+            restart_agent 0
             ;;
-            "update_script")
-                update_script 0
+        "update_script")
+            update_script 0
             ;;
-            *) show_usage ;;
+        *) show_usage ;;
         esac
     elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
         case $1 in
-            "install_dashboard")
-                install_dashboard_standalone 0
+        "install_dashboard")
+            install_dashboard_standalone 0
             ;;
-            "modify_dashboard_config")
-                modify_dashboard_config_standalone 0
+        "modify_dashboard_config")
+            modify_dashboard_config_standalone 0
             ;;
-            "start_dashboard")
-                start_dashboard_standalone 0
+        "start_dashboard")
+            start_dashboard_standalone 0
             ;;
-            "stop_dashboard")
-                stop_dashboard_standalone 0
+        "stop_dashboard")
+            stop_dashboard_standalone 0
             ;;
-            "restart_and_update")
-                restart_and_update_standalone 0
+        "restart_and_update")
+            restart_and_update_standalone 0
             ;;
-            "show_dashboard_log")
-                show_dashboard_log_standalone 0
+        "show_dashboard_log")
+            show_dashboard_log_standalone 0
             ;;
-            "uninstall_dashboard")
-                uninstall_dashboard_standalone 0
+        "uninstall_dashboard")
+            uninstall_dashboard_standalone 0
             ;;
-            "install_agent")
-                shift
-                if [ $# -ge 3 ]; then
-                    install_agent "$@"
-                else
-                    install_agent 0
-                fi
+        "install_agent")
+            shift
+            if [ $# -ge 3 ]; then
+                install_agent "$@"
+            else
+                install_agent 0
+            fi
             ;;
-            "modify_agent_config")
-                modify_agent_config 0
+        "modify_agent_config")
+            modify_agent_config 0
             ;;
-            "show_agent_log")
-                show_agent_log 0
+        "show_agent_log")
+            show_agent_log 0
             ;;
-            "uninstall_agent")
-                uninstall_agent 0
+        "uninstall_agent")
+            uninstall_agent 0
             ;;
-            "restart_agent")
-                restart_agent 0
+        "restart_agent")
+            restart_agent 0
             ;;
-            "update_script")
-                update_script 0
+        "update_script")
+            update_script 0
             ;;
-            *) show_usage ;;
+        *) show_usage ;;
         esac
     else
         case $1 in
-            "install_agent")
-                shift
-                if [ $# -ge 3 ]; then
-                    install_agent "$@"
-                else
-                    install_agent 0
-                fi
+        "install_agent")
+            shift
+            if [ $# -ge 3 ]; then
+                install_agent "$@"
+            else
+                install_agent 0
+            fi
             ;;
-            "modify_agent_config")
-                modify_agent_config 0
+        "modify_agent_config")
+            modify_agent_config 0
             ;;
-            "show_agent_log")
-                show_agent_log 0
+        "show_agent_log")
+            show_agent_log 0
             ;;
-            "uninstall_agent")
-                uninstall_agent 0
+        "uninstall_agent")
+            uninstall_agent 0
             ;;
-            "restart_agent")
-                restart_agent 0
+        "restart_agent")
+            restart_agent 0
             ;;
-            "update_script")
-                update_script 0
+        "update_script")
+            update_script 0
             ;;
-            *) show_usage ;;
+        *) show_usage ;;
         esac
     fi
 else
