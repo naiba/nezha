@@ -38,8 +38,8 @@ $download = "https://github.com/$agentrepo/releases/download/$agenttag/$file"
 $nssmdownload="https://github.com/$nssmrepo/releases/download/$nssmtag/nssm.zip"
 Write-Host "Location:$region,connect directly!" -BackgroundColor DarkRed -ForegroundColor Green
 }else{
-$download = "https://dn-dao-github-mirror.daocloud.io/$agentrepo/releases/download/$agenttag/$file"
-$nssmdownload="https://dn-dao-github-mirror.daocloud.io/$nssmrepo/releases/download/$nssmtag/nssm.zip"
+$download = "https://kkgithub.com/$agentrepo/releases/download/$agenttag/$file"
+$nssmdownload="https://kkgithub.com/$nssmrepo/releases/download/$nssmtag/nssm.zip"
 Write-Host "Location:CN,use mirror address" -BackgroundColor DarkRed -ForegroundColor Green
 }
 echo $download
