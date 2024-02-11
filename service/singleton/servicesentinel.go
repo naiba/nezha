@@ -3,14 +3,16 @@ package singleton
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/nicksnyder/go-i18n/v2/i18n"
+
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
 const (
@@ -42,6 +44,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 		serviceResponseDataStoreCurrentUp:       make(map[uint64]uint64),
 		serviceResponseDataStoreCurrentDown:     make(map[uint64]uint64),
 		serviceResponseDataStoreCurrentAvgDelay: make(map[uint64]float32),
+		serviceResponsePing:                     make(map[uint64]map[uint64]*pingStore),
 		monitors:                                make(map[uint64]*model.Monitor),
 		sslCertCache:                            make(map[uint64]string),
 		// 30天数据缓存
@@ -100,6 +103,7 @@ type ServiceSentinel struct {
 	serviceResponseDataStoreCurrentUp       map[uint64]uint64                // [monitor_id] -> 当前服务在线计数
 	serviceResponseDataStoreCurrentDown     map[uint64]uint64                // [monitor_id] -> 当前服务离线计数
 	serviceResponseDataStoreCurrentAvgDelay map[uint64]float32               // [monitor_id] -> 当前服务离线计数
+	serviceResponsePing                     map[uint64]map[uint64]*pingStore // [monitor_id] -> ClientID -> delay
 	lastStatus                              map[uint64]int
 	sslCertCache                            map[uint64]string
 
@@ -109,6 +113,11 @@ type ServiceSentinel struct {
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
 	monthlyStatus     map[uint64]*model.ServiceItemResponse // [monitor_id] -> model.ServiceItemResponse
+}
+
+type pingStore struct {
+	count int
+	ping  float32
 }
 
 func (ss *ServiceSentinel) refreshMonthlyServiceStatus() {
@@ -326,6 +335,37 @@ func (ss *ServiceSentinel) worker() {
 			continue
 		}
 		mh := r.Data
+		if mh.Type == model.TaskTypeTCPPing || mh.Type == model.TaskTypeICMPPing {
+			monitorTcpMap, ok := ss.serviceResponsePing[mh.GetId()]
+			if !ok {
+				monitorTcpMap = make(map[uint64]*pingStore)
+				ss.serviceResponsePing[mh.GetId()] = monitorTcpMap
+			}
+			ts, ok := monitorTcpMap[r.Reporter]
+			if !ok {
+				ts = &pingStore{}
+			}
+			ts.count++
+			ts.ping = (ts.ping*float32(ts.count-1) + mh.Delay) / float32(ts.count)
+			if ts.count == Conf.AvgPingCount {
+				if ts.ping > float32(Conf.MaxTCPPingValue) {
+					ts.ping = float32(Conf.MaxTCPPingValue)
+				}
+				ts.count = 0
+				if err := DB.Create(&model.MonitorHistory{
+					MonitorID: mh.GetId(),
+					AvgDelay:  ts.ping,
+					Data:      mh.Data,
+					ServerID:  r.Reporter,
+				}).Error; err != nil {
+					log.Println("NEZHA>> 服务监控数据持久化失败：", err)
+				}
+			}
+			monitorTcpMap[r.Reporter] = ts
+			if !(rand.Intn(len(ServerList)) == 0) {
+				continue
+			}
+		}
 		ss.serviceResponseDataStoreLock.Lock()
 		// 写入当天状态
 		if mh.Successful {

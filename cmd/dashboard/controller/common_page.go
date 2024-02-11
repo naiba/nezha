@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -48,6 +49,9 @@ func (cp *commonPage) serve() {
 	cr.Use(cp.checkViewPassword) // 前端查看密码鉴权
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
+	// TODO: 界面直接跳转使用该接口
+	cr.GET("/network/:id", cp.network)
+	cr.GET("/network", cp.network)
 	cr.GET("/ws", cp.ws)
 	cr.POST("/terminal", cp.createTerminal)
 }
@@ -124,6 +128,112 @@ func (p *commonPage) service(c *gin.Context) {
 		"Services":           res.([]interface{})[0],
 		"CycleTransferStats": res.([]interface{})[1],
 		"CustomCode":         singleton.Conf.Site.CustomCode,
+	}))
+}
+
+func (cp *commonPage) network(c *gin.Context) {
+	var (
+		monitorHistory       = &model.MonitorHistory{}
+		servers              []*model.Server
+		serverIdsWithMonitor []uint64
+		monitorInfos         = []byte("{}")
+		id                   uint64
+	)
+	if len(singleton.SortedServerList) > 0 {
+		id = singleton.SortedServerList[0].ID
+	}
+	if err := singleton.DB.Model(&model.MonitorHistory{}).Select("monitor_id, server_id").
+		Where("monitor_id != 0 and server_id != 0").Limit(1).First(&monitorHistory).Error; err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "请求参数有误：" + "server monitor history not found",
+			Link:  "/",
+			Btn:   "返回重试",
+		}, true)
+		return
+	} else {
+		if monitorHistory == nil || monitorHistory.ServerID == 0 {
+			if len(singleton.SortedServerList) > 0 {
+				id = singleton.SortedServerList[0].ID
+			}
+		} else {
+			id = monitorHistory.ServerID
+		}
+	}
+
+	idStr := c.Param("id")
+	if idStr != "" {
+		var err error
+		id, err = strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusForbidden,
+				Title: "请求失败",
+				Msg:   "请求参数有误：" + err.Error(),
+				Link:  "/",
+				Btn:   "返回重试",
+			}, true)
+			return
+		}
+		_, ok := singleton.ServerList[id]
+		if !ok {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusForbidden,
+				Title: "请求失败",
+				Msg:   "请求参数有误：" + "server id not found",
+				Link:  "/",
+				Btn:   "返回重试",
+			}, true)
+			return
+		}
+	}
+	monitorHistories := singleton.MonitorAPI.GetMonitorHistories(map[string]any{"server_id": id})
+	monitorInfos, _ = utils.Json.Marshal(monitorHistories)
+	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+	_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+
+	if err := singleton.DB.Model(&model.MonitorHistory{}).
+		Select("distinct(server_id)").
+		Where("server_id != 0").
+		Find(&serverIdsWithMonitor).
+		Error; err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "请求参数有误：" + "no server with monitor histories",
+			Link:  "/",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+	if isMember || isViewPasswordVerfied {
+		for _, server := range singleton.SortedServerList {
+			for _, id := range serverIdsWithMonitor {
+				if server.ID == id {
+					servers = append(servers, server)
+				}
+			}
+		}
+	} else {
+		for _, server := range singleton.SortedServerListForGuest {
+			for _, id := range serverIdsWithMonitor {
+				if server.ID == id {
+					servers = append(servers, server)
+				}
+			}
+		}
+	}
+	serversBytes, _ := utils.Json.Marshal(Data{
+		Now:     time.Now().Unix() * 1000,
+		Servers: servers,
+	})
+
+	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/network", mygin.CommonEnvironment(c, gin.H{
+		"Servers":         string(serversBytes),
+		"MonitorInfos":    string(monitorInfos),
+		"CustomCode":      singleton.Conf.Site.CustomCode,
+		"MaxTCPPingValue": singleton.Conf.MaxTCPPingValue,
 	}))
 }
 

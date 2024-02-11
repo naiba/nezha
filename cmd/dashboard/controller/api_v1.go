@@ -1,11 +1,13 @@
 package controller
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/naiba/nezha/pkg/mygin"
-	"github.com/naiba/nezha/service/singleton"
 	"strconv"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+
+	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type apiV1 struct {
@@ -25,7 +27,8 @@ func (v *apiV1) serve() {
 	}))
 	r.GET("/server/list", v.serverList)
 	r.GET("/server/details", v.serverDetails)
-
+	mr := v.r.Group("monitor")
+	mr.GET("/:id", v.monitorHistoriesById)
 }
 
 // serverList 获取服务器列表 不传入Query参数则获取全部
@@ -64,4 +67,22 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 		return
 	}
 	c.JSON(200, singleton.ServerAPI.GetAllStatus())
+}
+
+func (v *apiV1) monitorHistoriesById(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"code": 400, "message": "id参数错误"})
+		return
+	}
+	server, ok := singleton.ServerList[id]
+	if !ok {
+		c.AbortWithStatusJSON(404, gin.H{
+			"code":    404,
+			"message": "id不存在",
+		})
+		return
+	}
+	c.JSON(200, singleton.MonitorAPI.GetMonitorHistories(map[string]any{"server_id": server.ID}))
 }

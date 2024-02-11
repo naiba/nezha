@@ -110,6 +110,8 @@ type Config struct {
 
 	v                              *viper.Viper
 	IgnoredIPNotificationServerIDs map[uint64]bool // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
+	MaxTCPPingValue                int32
+	AvgPingCount                   int
 }
 
 // Read 读取配置文件并应用
@@ -143,6 +145,12 @@ func (c *Config) Read(path string) error {
 	}
 	if c.Location == "" {
 		c.Location = "Asia/Shanghai"
+	}
+	if c.MaxTCPPingValue == 0 {
+		c.MaxTCPPingValue = 300
+	}
+	if c.AvgPingCount == 0 {
+		c.AvgPingCount = 2
 	}
 
 	c.updateIgnoredIPNotificationID()

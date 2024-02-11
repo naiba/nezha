@@ -609,3 +609,6 @@ other = "Ocultar para Invitados"
 
 [Menu]
 other = "Menú"
+
+[NetworkSpiter]
+other = "Supervisión De Redes"

@@ -609,3 +609,6 @@ other = "對遊客隱藏"
 
 [Menu]
 other = "菜單"
+
+[NetworkSpiter]
+other = "網絡監控"

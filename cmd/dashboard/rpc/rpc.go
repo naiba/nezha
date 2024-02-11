@@ -49,10 +49,20 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 				workedServerIndex++
 				continue
 			}
+			if task.Cover == model.MonitorCoverIgnoreAll && task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
+				singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+				workedServerIndex++
+				continue
+			}
+			if task.Cover == model.MonitorCoverAll && !task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
+				singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+				workedServerIndex++
+				continue
+			}
 			// 找到合适机器执行任务，跳出循环
-			singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
-			workedServerIndex++
-			break
+			// singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
+			// workedServerIndex++
+			// break
 		}
 		singleton.SortedServerLock.RUnlock()
 	}
