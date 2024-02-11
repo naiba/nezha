@@ -439,9 +439,9 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 			}
 		}
 		if m.Cover == 0 {
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id in (?)", m.ID, m.SkipServersRaw[1:len(m.SkipServersRaw)-1]).Error
+			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
 		} else {
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id not in (?)", m.ID, m.SkipServersRaw[1:len(m.SkipServersRaw)-1]).Error
+			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id not in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
 		}
 	}
 	if err == nil {
