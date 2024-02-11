@@ -3,7 +3,6 @@ package singleton
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"sort"
 	"strings"
 	"sync"
@@ -38,7 +37,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Monitor) {
 	ServiceSentinelShared = &ServiceSentinel{
 		serviceReportChannel:                    make(chan ReportData, 200),
 		serviceStatusToday:                      make(map[uint64]*_TodayStatsOfMonitor),
-		serviceCurrentStatusIndex:               make(map[uint64]int),
+		serviceCurrentStatusIndex:               make(map[uint64]*indexStore),
 		serviceCurrentStatusData:                make(map[uint64][]*pb.TaskResult),
 		lastStatus:                              make(map[uint64]int),
 		serviceResponseDataStoreCurrentUp:       make(map[uint64]uint64),
@@ -98,7 +97,7 @@ type ServiceSentinel struct {
 
 	serviceResponseDataStoreLock            sync.RWMutex
 	serviceStatusToday                      map[uint64]*_TodayStatsOfMonitor // [monitor_id] -> _TodayStatsOfMonitor
-	serviceCurrentStatusIndex               map[uint64]int                   // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
+	serviceCurrentStatusIndex               map[uint64]*indexStore           // [monitor_id] -> 该监控ID对应的 serviceCurrentStatusData 的最新索引下标
 	serviceCurrentStatusData                map[uint64][]*pb.TaskResult      // [monitor_id] -> []model.MonitorHistory
 	serviceResponseDataStoreCurrentUp       map[uint64]uint64                // [monitor_id] -> 当前服务在线计数
 	serviceResponseDataStoreCurrentDown     map[uint64]uint64                // [monitor_id] -> 当前服务离线计数
@@ -113,6 +112,11 @@ type ServiceSentinel struct {
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
 	monthlyStatus     map[uint64]*model.ServiceItemResponse // [monitor_id] -> model.ServiceItemResponse
+}
+
+type indexStore struct {
+	index int
+	t     time.Time
 }
 
 type pingStore struct {
@@ -362,9 +366,6 @@ func (ss *ServiceSentinel) worker() {
 				}
 			}
 			monitorTcpMap[r.Reporter] = ts
-			if !(rand.Intn(len(ServerList)) == 0) {
-				continue
-			}
 		}
 		ss.serviceResponseDataStoreLock.Lock()
 		// 写入当天状态
@@ -376,9 +377,20 @@ func (ss *ServiceSentinel) worker() {
 		} else {
 			ss.serviceStatusToday[mh.GetId()].Down++
 		}
+
+		currentTime := time.Now()
+		if ss.serviceCurrentStatusIndex[mh.GetId()] == nil {
+			ss.serviceCurrentStatusIndex[mh.GetId()] = &indexStore{
+				t:     currentTime,
+				index: 0,
+			}
+		}
 		// 写入当前数据
-		ss.serviceCurrentStatusData[mh.GetId()][ss.serviceCurrentStatusIndex[mh.GetId()]] = mh
-		ss.serviceCurrentStatusIndex[mh.GetId()]++
+		if ss.serviceCurrentStatusIndex[mh.GetId()].t.Before(currentTime) {
+			ss.serviceCurrentStatusIndex[mh.GetId()].t = currentTime.Add(30 * time.Second)
+			ss.serviceCurrentStatusData[mh.GetId()][ss.serviceCurrentStatusIndex[mh.GetId()].index] = mh
+			ss.serviceCurrentStatusIndex[mh.GetId()].index++
+		}
 
 		// 更新当前状态
 		ss.serviceResponseDataStoreCurrentUp[mh.GetId()] = 0
@@ -405,8 +417,11 @@ func (ss *ServiceSentinel) worker() {
 		stateCode := GetStatusCode(upPercent)
 
 		// 数据持久化
-		if ss.serviceCurrentStatusIndex[mh.GetId()] == _CurrentStatusSize {
-			ss.serviceCurrentStatusIndex[mh.GetId()] = 0
+		if ss.serviceCurrentStatusIndex[mh.GetId()].index == _CurrentStatusSize {
+			ss.serviceCurrentStatusIndex[mh.GetId()] = &indexStore{
+				index: 0,
+				t:     currentTime,
+			}
 			if err := DB.Create(&model.MonitorHistory{
 				MonitorID: mh.GetId(),
 				AvgDelay:  ss.serviceResponseDataStoreCurrentAvgDelay[mh.GetId()],
