@@ -15,6 +15,7 @@
         {{else}}
         <a class='item{{if eq .MatchedPath "/"}} active{{end}}' href="/"><i class="home icon"></i>{{tr "Home"}}</a>
         <a class='item{{if eq .MatchedPath "/service"}} active{{end}}' href="/service"><i class="rss icon"></i>{{tr "Services"}}</a>
+        <a class='item{{if eq .MatchedPath "/network"}} active{{end}}' href="/network"><i class="server icon"></i>{{tr "NetworkSpiter"}}</a>
         {{end}}
         <div class="right menu">
             <div class="item">

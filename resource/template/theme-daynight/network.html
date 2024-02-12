@@ -1,0 +1,268 @@
+{{define "theme-daynight/network"}}
+<!doctype html>
+<html lang="{{.Conf.Language}}">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>{{.Title}}</title>
+    <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
+
+    <link rel="stylesheet" href="/static/theme-daynight/css/main.css?v202108042286">
+    <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/echarts/5.3.0-rc.1/echarts.min.js"></script>
+
+    {{if ts .CustomCode}}
+    {{.CustomCode|safe}}
+    {{end}}
+</head>
+
+<body data-theme="light" data-gridlist="grid">
+<header>
+    <section class="nav-bar clearfix">
+        <figure class="logo">
+            <a href="/">
+                <img src="/static/logo.svg?v20210804" alt='{{tr "NezhaMonitoring"}}' width="50" height="50">
+            </a>
+            <a href="/">{{.Conf.Site.Brand}}</a>
+        </figure>
+        <div class="icon-container">
+            <div class="row cf">
+                <div class="three col">
+                    <div class="hamburger" id="hamburger-icon"><span class="line"></span><span
+                            class="line"></span><span class="line"></span></div>
+                </div>
+            </div>
+        </div>
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="/">{{tr "Home"}}</a></li>
+                <li><a href="/service">{{tr "Services"}}</a></li>
+                <li><a href="/network">{{tr "NetworkSpiter"}}</a></li>
+                {{if .Admin}}
+                <li><a href="/server">{{tr "AdminPanel"}}</a></li>
+                {{else}}
+                <li><a href="/login">{{tr "Login"}}</a></li>
+                {{end}}
+            </ul>
+        </nav>
+    </section>
+</header>
+
+<main>
+    <div id="network">
+        <div class="server-info-container" v-for='server in servers' :id="server.ID" style="font-size: .6em">
+            <div class="info-body" @click="redirectNetwork(server.ID)">
+                <ul class="server-info-body-container">
+                    <li>
+                        <h3>@#server.Name#@</h3>
+                    </li>
+                    <li><img :src="'/static/theme-daynight/img/flag/'+(server.Host&&server.Host.CountryCode?server.Host.CountryCode.toUpperCase():'CN')+'.png'"
+                             :title="server.Host.CountryCode.toUpperCase()" /></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="network-chart" style="height: 800px;overflow: hidden">
+        <div id="monitor-info-container" style="height: 520px;max-width: 1400px">
+        </div>
+    </div>
+    <div class="sidebar-container">
+        <ul>
+            <li><i class="fas fa-sun" title='{{tr "LightMode"}}'></i><span>{{tr "LightMode"}}</span></li>
+            <li><i class="fas fa-moon" title='{{tr "DarkMode"}}'></i><span>{{tr "DarkMode"}}</span></li>
+            <li><i class="fas fa-th" title='{{tr "GridLayout"}}'></i><span>{{tr "GridLayout"}}</span></li>
+            <li><i class="fas fa-list-ul" title='{{tr "ListLayout"}}'></i><span>{{tr "ListLayout"}}</span></li>
+        </ul>
+    </div>
+</main>
+
+<section class="dark-light-toggle">
+    <label class="switcher">
+        <input type="checkbox" name="theme" id="dark-light" />
+        <div>
+            <i class="fas fa-adjust"></i>
+        </div>
+    </label>
+</section>
+
+<!-- Back to top button -->
+<a id="back-to-top"></a>
+
+<footer>
+    <div class="footer-container">
+        <div><a href="https://github.com/naiba/nezha" target="_blank">Powered by {{tr "NezhaMonitoring"}} · {{.Version}}</a>
+            <p>&copy; <span id="copyright-date">
+                        <script>document.getElementById('copyright-date').appendChild(document.createTextNode(new Date().getFullYear()))</script>
+                    </span> · <a href="https://blog.jackiesung.com" target="_blank">Theme designed by Jackie Sung</a>
+            </p>
+        </div>
+    </div>
+</footer>
+
+<script src="/static/theme-daynight/js/main.js?v202102012266"></script>
+<script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/vue/2.6.14/vue.min.js"></script>
+<script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/limonte-sweetalert2/11.4.4/sweetalert2.all.min.js"></script>
+
+<script>
+        const monitorInfo =  JSON.parse('{{.MonitorInfos}}');
+        const initData = JSON.parse('{{.Servers}}').servers;
+        let MaxTCPPingValue = {{.MaxTCPPingValue}};
+	    if (MaxTCPPingValue == null) {
+	        MaxTCPPingValue = 300;
+	    }
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('monitor-info-container'));
+        // 使用刚指定的配置项和数据显示图表。
+        var statusCards = new Vue({
+            el: '#network',
+            delimiters: ['@#', '#@'],
+            data: {
+                servers: initData,
+                cache: [],
+                option: {
+                    tooltip: {
+                        trigger: 'axis',
+                        position: function (pt) {
+                            return [pt[0], '10%'];
+                        },
+                        formatter: function(params){
+                            let result = params[0].axisValueLabel + "<br />";
+                            params.forEach(function(item){
+                                result += item.marker + item.seriesName + ": " + item.value[1].toFixed(2) + " ms<br />";
+                             })
+                            return result;
+                        },
+                        confine: true,
+                        transitionDuration: 0
+                    },
+                    title: {
+                        left: 'center',
+                        text: "",
+                        textStyle: {}
+                    },
+                    legend: {
+                        top: '5%',
+                        data: [],
+                        textStyle: {
+                            fontSize: 14
+                        }
+                    },
+                    toolbox: {
+                        feature: {
+                            dataZoom: {
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {}
+                        }
+                    },
+                    dataZoom: [
+                        {
+                            start: 94,
+                            end: 100
+                        }
+                    ],
+                    xAxis: {
+                        type: 'time',
+                        boundaryGap: false
+                    },
+                    yAxis: {
+                        type: 'value',
+                        boundaryGap: [0, '100%']
+                    },
+                    series: [],
+                }
+            },
+            mounted() {
+                this.DarkMode();
+                this.parseMonitorInfo(monitorInfo);
+            },
+            methods: {
+                DarkMode() {
+                    const hour = new Date(Date.now()).getHours()
+                    if (hour > 17 || hour < 4) {
+                        document.querySelector("input[name=theme]").checked = true;
+                        document.getElementsByTagName("BODY")[0].setAttribute('data-theme', 'dark');
+                        document.getElementById("monitor-info-container").style.backgroundColor = "#1E1E1E";
+                    }
+                },
+                redirectNetwork(id) {
+                    this.getMonitorHistory(id)
+                    .then(function(monitorInfo) {
+                          var vm = network.__vue__;
+                          vm.parseMonitorInfo(monitorInfo);
+                    })
+                    .catch(function(error){
+                        window.location.href = "/404";
+                    })
+                },
+                getMonitorHistory(id) {
+                      return $.ajax({
+                        url: "/api/v1/monitor/"+id,
+                        method: "GET"
+                      });
+                },
+                parseMonitorInfo(monitorInfo) {
+                    let tSeries = [];
+                    let tLegendData = [];
+                    for (let i = 0; i < monitorInfo.result.length; i++) {
+                        let loss = 0;
+                        let data = [];
+                        for (let j = 0; j < monitorInfo.result[i].created_at.length; j++) {
+                            avgDelay = monitorInfo.result[i].avg_delay[j];
+                            if (avgDelay > 0.9 * MaxTCPPingValue) {
+                                loss += 1
+                            }
+                            data.push([monitorInfo.result[i].created_at[j], avgDelay]);
+                        }
+                        lossRate = ((loss / monitorInfo.result[i].created_at.length) * 100).toFixed(1);
+			            legendName = monitorInfo.result[i].monitor_name +" "+ lossRate + "%";
+                        tLegendData.push(legendName);
+                        tSeries.push({
+                                name: legendName,
+                                type: 'line',
+                                smooth: true,
+                                symbol: 'none',
+                                data: data
+                        });
+                    }
+                    this.option.title.text = monitorInfo.result[0].server_name;
+                    this.option.series = tSeries;
+                    this.option.legend.data = tLegendData;
+                    const hour = new Date(Date.now()).getHours()
+                    if (hour > 17 || hour < 4) {
+                        this.option.legend.textStyle.color = "#F1F1F2";
+                        this.option.title.textStyle.color = "#ccc";
+                    }
+                    myChart.clear();
+                    myChart.setOption(this.option);
+                }
+            }
+        });
+    </script>
+</body>
+<style>
+#network {
+    display: grid;
+    /*grid-template-columns: repeat(5, 1fr);*/
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-gap: 1em;
+    width: 100%;
+    width: calc(100vw - 6em);
+    max-width: 1400px;
+    margin: 1em auto;
+    align-content: start;
+}
+#monitor-info-container{
+    margin: 0em auto;
+    align-content: start;
+    background-color: #F1F1F2;
+}
+</style>
+
+</html>
+{{end}}
+

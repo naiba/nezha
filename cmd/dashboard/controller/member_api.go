@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
@@ -185,7 +186,17 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	var err error
 	switch c.Param("model") {
 	case "server":
-		err = singleton.DB.Unscoped().Delete(&model.Server{}, "id = ?", id).Error
+		err := singleton.DB.Transaction(func(tx *gorm.DB) error {
+			err = singleton.DB.Unscoped().Delete(&model.Server{}, "id = ?", id).Error
+			if err != nil {
+				return err
+			}
+			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "server_id = ?", id).Error
+			if err != nil {
+				return err
+			}
+			return nil
+		})
 		if err == nil {
 			// 删除服务器
 			singleton.ServerLock.Lock()
@@ -426,6 +437,11 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 			} else {
 				err = singleton.DB.Save(&m).Error
 			}
+		}
+		if m.Cover == 0 {
+			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
+		} else {
+			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id not in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
 		}
 	}
 	if err == nil {

@@ -1,9 +1,11 @@
 package singleton
 
 import (
+	"sync"
+	"time"
+
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
-	"sync"
 )
 
 var (
@@ -11,7 +13,10 @@ var (
 	UserIDToApiTokenList = make(map[uint64][]string)
 	ApiLock              sync.RWMutex
 
-	ServerAPI = &ServerAPIService{}
+	ServerAPI  = &ServerAPIService{}
+	MonitorAPI = &MonitorAPIService{}
+
+	once = &sync.Once{}
 )
 
 type ServerAPIService struct{}
@@ -49,6 +54,23 @@ type ServerStatusResponse struct {
 type ServerInfoResponse struct {
 	CommonResponse
 	Result []*CommonServerInfo `json:"result"`
+}
+
+type MonitorAPIService struct {
+}
+
+type MonitorInfoResponse struct {
+	CommonResponse
+	Result []*MonitorInfo `json:"result"`
+}
+
+type MonitorInfo struct {
+	MonitorID   uint64    `json:"monitor_id"`
+	ServerID    uint64    `json:"server_id"`
+	MonitorName string    `json:"monitor_name"`
+	ServerName  string    `json:"server_name"`
+	CreatedAt   []int64   `json:"created_at"`
+	AvgDelay    []float32 `json:"avg_delay"`
 }
 
 func InitAPI() {
@@ -200,6 +222,48 @@ func (s *ServerAPIService) GetAllList() *ServerInfoResponse {
 	res.CommonResponse = CommonResponse{
 		Code:    0,
 		Message: "success",
+	}
+	return res
+}
+
+func (m *MonitorAPIService) GetMonitorHistories(query map[string]any) *MonitorInfoResponse {
+	var (
+		resultMap        = make(map[uint64]*MonitorInfo)
+		monitorHistories []*model.MonitorHistory
+		sortedMonitorIDs []uint64
+	)
+	res := &MonitorInfoResponse{
+		CommonResponse: CommonResponse{
+			Code:    0,
+			Message: "success",
+		},
+	}
+	if err := DB.Model(&model.MonitorHistory{}).Select("monitor_id, created_at, server_id, avg_delay").
+		Where(query).Where("created_at >= ?", time.Now().Add(-24*time.Hour)).Order("monitor_id, created_at").
+		Scan(&monitorHistories).Error; err != nil {
+		res.CommonResponse = CommonResponse{
+			Code:    500,
+			Message: err.Error(),
+		}
+	} else {
+		for _, history := range monitorHistories {
+			infos, ok := resultMap[history.MonitorID]
+			if !ok {
+				infos = &MonitorInfo{
+					MonitorID:   history.MonitorID,
+					ServerID:    history.ServerID,
+					MonitorName: ServiceSentinelShared.monitors[history.MonitorID].Name,
+					ServerName:  ServerList[history.ServerID].Name,
+				}
+				resultMap[history.MonitorID] = infos
+				sortedMonitorIDs = append(sortedMonitorIDs, history.MonitorID)
+			}
+			infos.CreatedAt = append(infos.CreatedAt, history.CreatedAt.Truncate(time.Minute).Unix()*1000)
+			infos.AvgDelay = append(infos.AvgDelay, history.AvgDelay)
+		}
+		for _, monitorID := range sortedMonitorIDs {
+			res.Result = append(res.Result, resultMap[monitorID])
+		}
 	}
 	return res
 }

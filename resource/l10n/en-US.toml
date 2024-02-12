@@ -609,3 +609,6 @@ other = "Hide for Guest"
 
 [Menu]
 other = "Menu"
+
+[NetworkSpiter]
+other = "Network Monitor"
