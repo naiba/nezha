@@ -133,7 +133,7 @@ func (p *commonPage) service(c *gin.Context) {
 
 func (cp *commonPage) network(c *gin.Context) {
 	var (
-		monitorHistory       = &model.MonitorHistory{}
+		monitorHistory       *model.MonitorHistory
 		servers              []*model.Server
 		serverIdsWithMonitor []uint64
 		monitorInfos         = []byte("{}")
