@@ -149,7 +149,6 @@
                     service.totalUpTime = this.getProgressInfo(this.getPercent(service.totalUp, service.totalDown))
                 }
                 this.services = services
-                console.log(this.services);
             },
             getPercent(up, down) {
                 if (!up) {
