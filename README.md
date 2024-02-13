@@ -98,6 +98,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/ch8o" title="no-name-now">
   <img src="https://avatars.githubusercontent.com/u/9103372?v=4" width="50;" alt="no-name-now"/>
 </a>
+<a href="https://github.com/lvgj-stack" title="Ko no dio">
+  <img src="https://avatars.githubusercontent.com/u/38449861?v=4" width="50;" alt="Ko no dio"/>
+</a>
 <a href="https://github.com/Creling" title="Creling">
   <img src="https://avatars.githubusercontent.com/u/43109504?v=4" width="50;" alt="Creling"/>
 </a>
@@ -139,9 +142,6 @@ You can change the dashboard language in the settings page (`/setting`) after th
 </a>
 <a href="https://github.com/KorenKrita" title="KorenKrita">
   <img src="https://avatars.githubusercontent.com/u/22239339?v=4" width="50;" alt="KorenKrita"/>
-</a>
-<a href="https://github.com/lvgj-stack" title="Ko no dio">
-  <img src="https://avatars.githubusercontent.com/u/38449861?v=4" width="50;" alt="Ko no dio"/>
 </a>
 <a href="https://github.com/techotaku" title="Ian Li">
   <img src="https://avatars.githubusercontent.com/u/1948179?v=4" width="50;" alt="Ian Li"/>
