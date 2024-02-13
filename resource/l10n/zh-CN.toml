@@ -611,4 +611,7 @@ other = "对游客隐藏"
 other = "菜单"
 
 [NetworkSpiter]
-other = "网络监控"
+other = "网络"
+
+[EnableShowInService]
+other = "在服务中显示"

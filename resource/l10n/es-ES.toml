@@ -611,4 +611,7 @@ other = "Ocultar para Invitados"
 other = "Menú"
 
 [NetworkSpiter]
-other = "Supervisión De Redes"
+other = "Red"
+
+[EnableShowInService]
+other = "Mostrar en servicio"

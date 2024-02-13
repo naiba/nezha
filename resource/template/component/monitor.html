@@ -25,6 +25,12 @@
         </select>
       </div>
       <div class="field">
+        <div class="ui nb-show-in-service checkbox">
+          <input name="EnableShowInService" type="checkbox" tabindex="0" class="hidden" />
+          <label>{{tr "EnableShowInService"}}</label>
+        </div>
+      </div>
+      <div class="field">
         <label>{{tr "Duration"}}</label>
         <input type="number" name="Duration" placeholder="{{tr "Seconds"}}" />
       </div>
@@ -110,3 +116,4 @@
   </div>
 </div>
 {{end}}
+

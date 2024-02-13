@@ -611,4 +611,7 @@ other = "Hide for Guest"
 other = "Menu"
 
 [NetworkSpiter]
-other = "Network Monitor"
+other = "Network"
+
+[EnableShowInService]
+other = "Enable Show in Service"
