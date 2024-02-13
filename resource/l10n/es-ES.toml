@@ -612,3 +612,6 @@ other = "Menú"
 
 [NetworkSpiter]
 other = "Red"
+
+[EnableShowInService]
+other = "Mostrar en servicio"

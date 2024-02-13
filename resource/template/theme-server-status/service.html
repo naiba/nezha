@@ -15,7 +15,7 @@
             </thead>
             <tbody id="servers">
             <template v-for="service in services">
-                <tr>
+                <tr v-if="service.enableShow === 'true'">
                     <td class="node-cell center">
                         <div class="delay-today">
                             <i class="delay-today" :class="service.health.className"></i>
@@ -137,6 +137,7 @@
                     delay: '{{$service.Delay}}'.replaceAll("[","").replaceAll("]","").split(" "),
                     up: '{{$service.Up}}'.replaceAll("[","").replaceAll("]","").split(" "),
                     down: '{{$service.Down}}'.replaceAll("[","").replaceAll("]","").split(" "),
+                    enableShow: '{{$service.Monitor.EnableShowInService}}',
                 })
                 {{end}}
                 // @formatter:on
@@ -148,6 +149,7 @@
                     service.totalUpTime = this.getProgressInfo(this.getPercent(service.totalUp, service.totalDown))
                 }
                 this.services = services
+                console.log(this.services);
             },
             getPercent(up, down) {
                 if (!up) {

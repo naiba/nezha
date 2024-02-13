@@ -339,6 +339,11 @@ function addOrEditMonitor(monitor) {
   modal.find("select[name=Type]").val(monitor ? monitor.Type : 1);
   modal.find("select[name=Cover]").val(monitor ? monitor.Cover : 0);
   modal.find("input[name=NotificationTag]").val(monitor ? monitor.NotificationTag : null);
+  if (monitor && monitor.EnableShowInService) {
+    modal.find(".ui.nb-show-in-service.checkbox").checkbox("set checked")
+  } else {
+    modal.find(".ui.nb-show-in-service.checkbox").checkbox("set unchecked")
+  }
   if (monitor && monitor.Notify) {
     modal.find(".ui.nb-notify.checkbox").checkbox("set checked");
   } else {

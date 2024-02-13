@@ -612,3 +612,6 @@ other = "菜单"
 
 [NetworkSpiter]
 other = "网络"
+
+[EnableShowInService]
+other = "在服务中显示"

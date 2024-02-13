@@ -612,3 +612,6 @@ other = "菜單"
 
 [NetworkSpiter]
 other = "網絡"
+
+[EnableShowInService]
+other = "在服務中顯示"

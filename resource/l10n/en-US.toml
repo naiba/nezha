@@ -612,3 +612,6 @@ other = "Menu"
 
 [NetworkSpiter]
 other = "Network"
+
+[EnableShowInService]
+other = "Enable Show in Service"
