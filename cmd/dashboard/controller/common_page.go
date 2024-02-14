@@ -118,6 +118,11 @@ func (p *commonPage) service(c *gin.Context) {
 		var statsStore map[uint64]model.CycleTransferStats
 		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
 		copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
+		for k, service := range stats {
+			if !service.Monitor.EnableShowInService {
+				delete(stats, k)
+			}
+		}
 		return []interface {
 		}{
 			stats, statsStore,
