@@ -61,7 +61,6 @@
         </section>
         <section class="monitor-container">
           {{range $service := .Services}}
-          {{if $service.Monitor.EnableShowInService}}
           <section class="monitor-info-container">
             <div class="monitor-state">
               <span class="monitor-state-dot {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></span>
@@ -83,7 +82,6 @@
             </div>
           </section>
             {{end}}
-          {{end}}
         </section>
         {{if .CycleTransferStats}}
     <h2 class="mdui-m-t-5 mdui-text-center">{{tr "CycleTransferStats"}}</h2>

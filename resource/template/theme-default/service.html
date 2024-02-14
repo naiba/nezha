@@ -18,7 +18,6 @@
                 </thead>
                 <tbody>
                     {{range $service := .Services}}
-                    {{if $service.Monitor.EnableShowInService}}
                     <tr>
                         <td class="ui center aligned">{{$service.Monitor.Name}}</td>
                         <td class="ui center aligned">
@@ -34,7 +33,7 @@
                                 class="delay-today {{className (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}"></i>
                             {{statusName (divU64 $service.CurrentUp (addU64 $service.CurrentUp $service.CurrentDown))}}
                         </td>
-                    </tr> {{end}} {{end}}
+                    </tr> {{end}}
                 </tbody>
             </table>
 
