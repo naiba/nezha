@@ -147,7 +147,7 @@ func (c *Config) Read(path string) error {
 		c.Location = "Asia/Shanghai"
 	}
 	if c.MaxTCPPingValue == 0 {
-		c.MaxTCPPingValue = 300
+		c.MaxTCPPingValue = 1000
 	}
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2
