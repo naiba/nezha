@@ -77,11 +77,11 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/uubulb" title="UUBulb">
   <img src="https://avatars.githubusercontent.com/u/35923940?v=4" width="50;" alt="UUBulb"/>
 </a>
-<a href="https://github.com/hhhkkk520" title="Kris">
-  <img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/>
-</a>
 <a href="https://github.com/lvgj-stack" title="Ko no dio">
   <img src="https://avatars.githubusercontent.com/u/38449861?v=4" width="50;" alt="Ko no dio"/>
+</a>
+<a href="https://github.com/hhhkkk520" title="Kris">
+  <img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/>
 </a>
 <a href="https://github.com/Mmx233" title="Mmx">
   <img src="https://avatars.githubusercontent.com/u/36563672?v=4" width="50;" alt="Mmx"/>
