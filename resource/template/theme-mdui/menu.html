@@ -12,6 +12,7 @@
       {{else}}
       <a href="/" class='mdui-ripple mdui-ripple-white mdui-hoverable{{if eq .MatchedPath "/"}} mdui-tab-active{{end}}'><i class="mdui-icon material-icons">home</i>{{tr "Home"}}</a>
       <a href="/service" class='mdui-ripple mdui-ripple-white mdui-hoverable{{if eq .MatchedPath "/service"}} mdui-tab-active{{end}}'><i class="mdui-icon material-icons">accessibility</i>{{tr "Services"}}</a>
+      <a href="/network" class='mdui-ripple mdui-ripple-white mdui-hoverable{{if eq .MatchedPath "/network"}} mdui-tab-active{{end}}'><i class="mdui-icon material-icons">network_check</i>{{tr "NetworkSpiter"}}</a>
       {{end}}
       <div class="mdui-toolbar-spacer"></div>
       {{if .Admin}}
