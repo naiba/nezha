@@ -110,6 +110,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/colour93" title="玖叁">
   <img src="https://avatars.githubusercontent.com/u/64313711?v=4" width="50;" alt="玖叁"/>
 </a>
+<a href="https://github.com/arkylin" title="凌">
+  <img src="https://avatars.githubusercontent.com/u/35104502?v=4" width="50;" alt="凌"/>
+</a>
 <a href="https://github.com/ysicing" title="缘生">
   <img src="https://avatars.githubusercontent.com/u/8605565?v=4" width="50;" alt="缘生"/>
 </a>
