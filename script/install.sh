@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.6"
+NZ_VERSION="v0.15.7"
 
 red='\033[0;31m'
 green='\033[0;32m'
