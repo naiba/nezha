@@ -159,7 +159,7 @@ install_arch() {
                                         cd /tmp; git clone https://aur.archlinux.org/libsepol.git; cd libsepol; makepkg -si --noconfirm --asdeps; cd ..;
                                         git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..;
                                         rm -rf libsepol libselinux'
-        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel nezha-agent
+        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel -r nezha-agent
         echo -e "${red}提示: ${plain}已删除用户nezha-agent，请务必手动核查一遍！\n"
         ;;
     [nN][oO] | [nN])
