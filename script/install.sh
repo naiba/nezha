@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.6"
+NZ_VERSION="v0.15.7"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -159,7 +159,7 @@ install_arch() {
                                         cd /tmp; git clone https://aur.archlinux.org/libsepol.git; cd libsepol; makepkg -si --noconfirm --asdeps; cd ..;
                                         git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..;
                                         rm -rf libsepol libselinux'
-        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel nezha-agent
+        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel -r nezha-agent
         echo -e "${red}提示: ${plain}已删除用户nezha-agent，请务必手动核查一遍！\n"
         ;;
     [nN][oO] | [nN])
