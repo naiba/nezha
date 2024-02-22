@@ -17,6 +17,8 @@ type Server struct {
 	Note         string `json:"-"` // 管理员可见备注
 	DisplayIndex int    // 展示排序，越大越靠前
 	HideForGuest bool   // 对游客隐藏
+	EnableDDNS   bool   // 是否启用DDNS 未在配置文件中启用DDNS 或 DDNS检查时间为0时此项无效
+	DDNSPrefix   string // DDNS中的前缀 如基础域名为abc.oracle DDNSName为mjj 就会把mjj.abc.oracle解析服务器IP 为空则停用
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
@@ -37,6 +39,8 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 	s.TaskStream = old.TaskStream
 	s.PrevHourlyTransferIn = old.PrevHourlyTransferIn
 	s.PrevHourlyTransferOut = old.PrevHourlyTransferOut
+	s.EnableDDNS = old.EnableDDNS
+	s.DDNSPrefix = old.DDNSPrefix
 }
 
 func boolToString(b bool) string {
@@ -51,5 +55,6 @@ func (s Server) Marshal() template.JS {
 	tag, _ := utils.Json.Marshal(s.Tag)
 	note, _ := utils.Json.Marshal(s.Note)
 	secret, _ := utils.Json.Marshal(s.Secret)
-	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest))) // #nosec
+	ddnsPrefix, _ := utils.Json.Marshal(s.DDNSPrefix)
+	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"DDNSPrefix": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), ddnsPrefix)) // #nosec
 }

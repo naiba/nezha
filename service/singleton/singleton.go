@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -150,4 +151,26 @@ func IPDesensitize(ip string) string {
 		return ip
 	}
 	return utils.IPDesensitize(ip)
+}
+
+// RefreshDDNSRecords 检查并更新DDNS记录
+func RefreshDDNSRecords() {
+	ServerLock.RLock()
+	defer ServerLock.RUnlock()
+	for _, server := range ServerList {
+		if server.EnableDDNS && server.DDNSPrefix != "" {
+			provider, err := GetDDNSProviderFromString(Conf.DDNSProvider)
+			if err != nil {
+				continue
+			}
+			ipv4, ipv6, _ := utils.SplitIPAddr(server.Host.IP)
+			provider.UpdateDomain(&DDNSDomainConfig{
+				EnableIPv4: true,
+				EnableIpv6: true, // TODO: add an option
+				FullDomain: fmt.Sprintf("%s.%s", server.DDNSPrefix, Conf.DDNSBaseDomain),
+				Ipv4Addr:   ipv4,
+				Ipv6Addr:   ipv6,
+			})
+		}
+	}
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 
@@ -38,6 +39,20 @@ func init() {
 	initSystem()
 }
 
+func secondsToCronString(seconds uint32) (string, error) {
+	if seconds > 86400 {
+		return "", errors.New("时间不能超过24小时")
+	}
+
+	hours := seconds / 3600
+	minutes := (seconds % 3600) / 60
+	secondsRemainder := seconds % 60 // 保留剩余的秒数
+
+	cronExpr := fmt.Sprintf("%d %d %d * * *", secondsRemainder, minutes, hours)
+
+	return cronExpr, nil
+}
+
 func initSystem() {
 	// 启动 singleton 包下的所有服务
 	singleton.LoadSingleton()
@@ -50,6 +65,23 @@ func initSystem() {
 	// 每小时对流量记录进行打点
 	if _, err := singleton.Cron.AddFunc("0 0 * * * *", singleton.RecordTransferHourlyUsage); err != nil {
 		panic(err)
+	}
+
+	// 按用户设置的时间间隔更新DDNS信息
+	if singleton.Conf.EnableDDNS {
+		if singleton.Conf.DDNSCheckPeriod == 0 {
+			log.Printf("NEZHA>> DDNSCheckPeriod设置为0时不会启用DDNS")
+		}
+		if singleton.Conf.DDNSBaseDomain == "" {
+			panic(errors.New("启用DDNS时DDNSBaseDomain不能为空"))
+		}
+		ddnsCronString, err := secondsToCronString(singleton.Conf.DDNSCheckPeriod)
+		if err != nil {
+			panic(err)
+		}
+		if _, err := singleton.Cron.AddFunc(ddnsCronString, singleton.RefreshDDNSRecords); err != nil {
+			panic(err)
+		}
 	}
 }
 
