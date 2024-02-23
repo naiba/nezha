@@ -615,3 +615,9 @@ other = "网络"
 
 [EnableShowInService]
 other = "在服务中显示"
+
+[EnableDDNS]
+other = "启用DDNS"
+
+[DDNSDomain]
+other = "DDNS域名"
