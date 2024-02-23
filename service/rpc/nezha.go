@@ -112,33 +112,41 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	host := model.PB2Host(r)
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
-	cacheKey := fmt.Sprintf("ddns-created-%d", clientID)
-	_, found := singleton.Cache.Get(cacheKey)
+
+	// 检查并更新DDNS
 	if singleton.Conf.DDNS.Enable &&
 		singleton.ServerList[clientID].EnableDDNS &&
 		singleton.ServerList[clientID].Host != nil &&
 		host.IP != "" &&
-		(singleton.ServerList[clientID].Host.IP != host.IP || !found) {
-		//go func() {
+		singleton.ServerList[clientID].Host.IP != host.IP {
+
 		serverDomain := singleton.ServerList[clientID].DDNSDomain
 		provider, err := singleton.GetDDNSProviderFromString(singleton.Conf.DDNS.Provider)
-		if err == nil {
+		if err == nil && serverDomain != "" {
 			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
-			if provider.UpdateDomain(&singleton.DDNSDomainConfig{
-				EnableIPv4: true,
-				EnableIpv6: true,
-				FullDomain: serverDomain,
-				Ipv4Addr:   ipv4,
-				Ipv6Addr:   ipv6,
-			}) {
-				log.Printf("NEZHA>> 更新域名(%s)DDNS成功", serverDomain)
-				singleton.Cache.Set(cacheKey, true, 300*time.Second)
-			} else {
-				log.Printf("NEZHA>> 更新域名(%s)DDNS失败", serverDomain)
+			maxRetries := int(singleton.Conf.DDNS.MaxRetries)
+			for retries := 0; retries < maxRetries; retries++ {
+				if provider.UpdateDomain(&singleton.DDNSDomainConfig{
+					EnableIPv4: true,
+					EnableIpv6: true,
+					FullDomain: serverDomain,
+					Ipv4Addr:   ipv4,
+					Ipv6Addr:   ipv6,
+				}) {
+					log.Printf("NEZHA>> 更新域名(%s)DDNS成功(%d/%d)", serverDomain, retries+1, maxRetries)
+					break
+				} else {
+					log.Printf("NEZHA>> 更新域名(%s)DDNS失败(%d/%d)", serverDomain, retries+1, maxRetries)
+				}
 			}
+		} else {
+			// 虽然会在启动时panic, 可以断言不会走这个分支, 但是考虑到动态加载配置或者其它情况, 这里输出一下方便检查奇奇怪怪的BUG
+			log.Printf("NEZHA>> 未找到对应的DDNS提供者(%s), 请前往config.yml检查你的设置\n", singleton.Conf.DDNS.Provider)
 		}
-		//}()
+
 	}
+
+	// 发送IP变动通知
 	if singleton.Conf.EnableIPChangeNotification &&
 		((singleton.Conf.Cover == model.ConfigCoverAll && !singleton.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
 			(singleton.Conf.Cover == model.ConfigCoverIgnoreAll && singleton.Conf.IgnoredIPNotificationServerIDs[clientID])) &&

@@ -123,6 +123,7 @@ type Config struct {
 		WebhookMethod      string
 		WebhookRequestBody string
 		WebhookHeaders     string
+		MaxRetries         uint32
 	}
 }
 
@@ -169,6 +170,9 @@ func (c *Config) Read(path string) error {
 	}
 	if c.DDNS.WebhookMethod == "" {
 		c.DDNS.WebhookMethod = "POST"
+	}
+	if c.DDNS.MaxRetries == 0 {
+		c.DDNS.MaxRetries = 3
 	}
 
 	c.updateIgnoredIPNotificationID()

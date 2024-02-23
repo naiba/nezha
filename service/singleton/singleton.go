@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -45,6 +46,21 @@ func InitConfigFromPath(path string) {
 	err := Conf.Read(path)
 	if err != nil {
 		panic(err)
+	}
+	ValidateConfig()
+}
+
+// ValidateConfig 验证配置文件有效性
+func ValidateConfig() {
+	// 如果DDNS启用则检查Provider是否存在, 不存在直接退出
+	if Conf.DDNS.Enable {
+		_, err := GetDDNSProviderFromString(Conf.DDNS.Provider)
+		if err != nil {
+			panic(err)
+		}
+		if Conf.DDNS.MaxRetries < 1 || Conf.DDNS.MaxRetries > 10 {
+			panic(fmt.Errorf("DDNS.MaxRetries值域为[1, 10]的整数, 当前为 %d", Conf.DDNS.MaxRetries))
+		}
 	}
 }
 
@@ -150,27 +166,4 @@ func IPDesensitize(ip string) string {
 		return ip
 	}
 	return utils.IPDesensitize(ip)
-}
-
-// RefreshDDNSRecords 检查并更新DDNS记录
-func RefreshDDNSRecords() {
-	log.Println("NEZHA>> 更新DNS记录")
-	ServerLock.RLock()
-	defer ServerLock.RUnlock()
-	for _, server := range ServerList {
-		if server.EnableDDNS && server.DDNSDomain != "" {
-			provider, err := GetDDNSProviderFromString(Conf.DDNS.Provider)
-			if err != nil {
-				continue
-			}
-			ipv4, ipv6, _ := utils.SplitIPAddr(server.Host.IP)
-			provider.UpdateDomain(&DDNSDomainConfig{
-				EnableIPv4: true,
-				EnableIpv6: true, // TODO: add an option
-				FullDomain: server.DDNSDomain,
-				Ipv4Addr:   ipv4,
-				Ipv6Addr:   ipv6,
-			})
-		}
-	}
 }
