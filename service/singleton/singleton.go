@@ -154,6 +154,7 @@ func IPDesensitize(ip string) string {
 
 // RefreshDDNSRecords 检查并更新DDNS记录
 func RefreshDDNSRecords() {
+	log.Println("NEZHA>> 更新DNS记录")
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
 	for _, server := range ServerList {

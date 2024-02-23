@@ -113,7 +113,7 @@ func SetStringHeadersToRequest(req *http.Request, headers []string) {
 		return
 	}
 	for _, element := range headers {
-		kv := strings.SplitN(element, ":", 1)
+		kv := strings.SplitN(element, ":", 2)
 		if len(kv) == 2 {
 			req.Header.Add(kv[0], kv[1])
 		}
