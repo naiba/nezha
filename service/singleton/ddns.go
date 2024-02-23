@@ -267,6 +267,21 @@ func SplitDomain(domain string) (prefix string, topLevelDomain string) {
 	return "", domain // 当域名不包含子域名时，无前缀
 }
 
+func RetryableUpdateDomain(provider DDNSProvider, config *DDNSDomainConfig, maxRetries int) bool {
+	if nil == config {
+		return false
+	}
+	for retries := 0; retries < maxRetries; retries++ {
+		log.Printf("NEZHA>> 正在尝试更新域名(%s)DDNS(%d/%d)\n", config.FullDomain, retries+1, maxRetries)
+		if provider.UpdateDomain(config) {
+			log.Printf("NEZHA>> 尝试更新域名(%s)DDNS成功\n", config.FullDomain)
+			return true
+		}
+	}
+	log.Printf("NEZHA>> 尝试更新域名(%s)DDNS失败\n", config.FullDomain)
+	return false
+}
+
 func GetDDNSProviderFromString(provider string) (DDNSProvider, error) {
 	switch provider {
 	case "webhook":

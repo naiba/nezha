@@ -125,20 +125,15 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		if err == nil && serverDomain != "" {
 			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
 			maxRetries := int(singleton.Conf.DDNS.MaxRetries)
-			for retries := 0; retries < maxRetries; retries++ {
-				if provider.UpdateDomain(&singleton.DDNSDomainConfig{
-					EnableIPv4: true,
-					EnableIpv6: true,
-					FullDomain: serverDomain,
-					Ipv4Addr:   ipv4,
-					Ipv6Addr:   ipv6,
-				}) {
-					log.Printf("NEZHA>> 更新域名(%s)DDNS成功(%d/%d)", serverDomain, retries+1, maxRetries)
-					break
-				} else {
-					log.Printf("NEZHA>> 更新域名(%s)DDNS失败(%d/%d)", serverDomain, retries+1, maxRetries)
-				}
+			config := &singleton.DDNSDomainConfig{
+				EnableIPv4: true,
+				EnableIpv6: true,
+				FullDomain: serverDomain,
+				Ipv4Addr:   ipv4,
+				Ipv6Addr:   ipv6,
 			}
+			go singleton.RetryableUpdateDomain(provider, config, maxRetries)
+
 		} else {
 			// 虽然会在启动时panic, 可以断言不会走这个分支, 但是考虑到动态加载配置或者其它情况, 这里输出一下方便检查奇奇怪怪的BUG
 			log.Printf("NEZHA>> 未找到对应的DDNS提供者(%s), 请前往config.yml检查你的设置\n", singleton.Conf.DDNS.Provider)

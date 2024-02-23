@@ -14,7 +14,6 @@ site:
   theme: "default"
 ddns:
   enable: false
-  checkperiod: 60
   provider: "webhook"
   accessid: ""
   accesssecret: ""
