@@ -168,6 +168,9 @@ func (c *Config) Read(path string) error {
 	if c.DDNS.Provider == "" {
 		c.DDNS.Provider = "webhook"
 	}
+	if c.DDNS.WebhookMethod == "" {
+		c.DDNS.WebhookMethod = "POST"
+	}
 
 	c.updateIgnoredIPNotificationID()
 	return nil

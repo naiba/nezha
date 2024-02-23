@@ -3,6 +3,7 @@ package singleton
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -29,6 +30,10 @@ type DDNSProviderWebHook struct {
 }
 
 func (provider DDNSProviderWebHook) UpdateDomain(domainConfig *DDNSDomainConfig) bool {
+	if domainConfig == nil {
+		return false
+	}
+
 	if domainConfig.FullDomain == "" {
 		log.Println("NEZHA>> Failed to update an empty domain")
 		return false
@@ -41,7 +46,7 @@ func (provider DDNSProviderWebHook) UpdateDomain(domainConfig *DDNSDomainConfig)
 		header := provider.FormatWebhookString(provider.RequestHeader, domainConfig, "ipv4")
 		headers := strings.Split(header, "\n")
 		req, err := http.NewRequest(provider.RequestMethod, url, bytes.NewBufferString(body))
-		if err != nil {
+		if err == nil && req != nil {
 			SetStringHeadersToRequest(req, headers)
 			if _, err := client.Do(req); err != nil {
 				log.Printf("NEZHA>> Failed to update a domain: %s. Cause by: %s\n", domainConfig.FullDomain, err.Error())
@@ -55,7 +60,7 @@ func (provider DDNSProviderWebHook) UpdateDomain(domainConfig *DDNSDomainConfig)
 		header := provider.FormatWebhookString(provider.RequestHeader, domainConfig, "ipv6")
 		headers := strings.Split(header, "\n")
 		req, err := http.NewRequest(provider.RequestMethod, url, bytes.NewBufferString(body))
-		if err != nil {
+		if err == nil && req != nil {
 			SetStringHeadersToRequest(req, headers)
 			if _, err := client.Do(req); err != nil {
 				log.Printf("NEZHA>> Failed to update a domain: %s. Cause by: %s\n", domainConfig.FullDomain, err.Error())
@@ -73,10 +78,25 @@ func (provider DDNSProviderDummy) UpdateDomain(domainConfig *DDNSDomainConfig) b
 }
 
 func GetDDNSProviderFromString(provider string) (DDNSProvider, error) {
-	return DDNSProviderDummy{}, errors.New("")
+	switch provider {
+	case "webhook":
+		return DDNSProviderWebHook{
+			URL:           Conf.DDNS.WebhookURL,
+			RequestMethod: Conf.DDNS.WebhookMethod,
+			RequestBody:   Conf.DDNS.WebhookRequestBody,
+			RequestHeader: Conf.DDNS.WebhookHeaders,
+		}, nil
+	case "dummy":
+		return DDNSProviderDummy{}, nil
+	}
+	return DDNSProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider))
 }
 
 func (provider DDNSProviderWebHook) FormatWebhookString(s string, config *DDNSDomainConfig, ipType string) string {
+	if config == nil {
+		return s
+	}
+
 	result := strings.TrimSpace(s)
 	result = strings.Replace(provider.RequestBody, "{ip}", config.Ipv4Addr, -1)
 	result = strings.Replace(result, "{domain}", config.FullDomain, -1)
@@ -89,8 +109,13 @@ func (provider DDNSProviderWebHook) FormatWebhookString(s string, config *DDNSDo
 }
 
 func SetStringHeadersToRequest(req *http.Request, headers []string) {
+	if req == nil {
+		return
+	}
 	for _, element := range headers {
 		kv := strings.SplitN(element, ":", 1)
-		req.Header.Add(kv[0], kv[1])
+		if len(kv) == 2 {
+			req.Header.Add(kv[0], kv[1])
+		}
 	}
 }

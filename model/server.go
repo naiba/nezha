@@ -39,8 +39,6 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 	s.TaskStream = old.TaskStream
 	s.PrevHourlyTransferIn = old.PrevHourlyTransferIn
 	s.PrevHourlyTransferOut = old.PrevHourlyTransferOut
-	s.EnableDDNS = old.EnableDDNS
-	s.DDNSDomain = old.DDNSDomain
 }
 
 func boolToString(b bool) string {
