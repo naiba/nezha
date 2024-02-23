@@ -68,14 +68,11 @@ func initSystem() {
 	}
 
 	// 按用户设置的时间间隔更新DDNS信息
-	if singleton.Conf.EnableDDNS {
-		if singleton.Conf.DDNSCheckPeriod == 0 {
+	if singleton.Conf.DDNS.Enable {
+		if singleton.Conf.DDNS.CheckPeriod == 0 {
 			log.Printf("NEZHA>> DDNSCheckPeriod设置为0时不会启用DDNS")
 		}
-		if singleton.Conf.DDNSBaseDomain == "" {
-			panic(errors.New("启用DDNS时DDNSBaseDomain不能为空"))
-		}
-		ddnsCronString, err := secondsToCronString(singleton.Conf.DDNSCheckPeriod)
+		ddnsCronString, err := secondsToCronString(singleton.Conf.DDNS.CheckPeriod)
 		if err != nil {
 			panic(err)
 		}

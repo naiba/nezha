@@ -1,7 +1,6 @@
 package singleton
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -158,8 +157,8 @@ func RefreshDDNSRecords() {
 	ServerLock.RLock()
 	defer ServerLock.RUnlock()
 	for _, server := range ServerList {
-		if server.EnableDDNS && server.DDNSPrefix != "" {
-			provider, err := GetDDNSProviderFromString(Conf.DDNSProvider)
+		if server.EnableDDNS && server.DDNSDomain != "" {
+			provider, err := GetDDNSProviderFromString(Conf.DDNS.Provider)
 			if err != nil {
 				continue
 			}
@@ -167,7 +166,7 @@ func RefreshDDNSRecords() {
 			provider.UpdateDomain(&DDNSDomainConfig{
 				EnableIPv4: true,
 				EnableIpv6: true, // TODO: add an option
-				FullDomain: fmt.Sprintf("%s.%s", server.DDNSPrefix, Conf.DDNSBaseDomain),
+				FullDomain: server.DDNSDomain,
 				Ipv4Addr:   ipv4,
 				Ipv6Addr:   ipv6,
 			})

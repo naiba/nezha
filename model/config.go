@@ -114,15 +114,17 @@ type Config struct {
 	AvgPingCount                   int
 
 	// 动态域名解析更新
-	EnableDDNS             bool
-	DDNSBaseDomain         string
-	DDNSCheckPeriod        uint32 // in seconds
-	DDNSProvider           string
-	DDNSAccessID           string
-	DDNSAccessSecret       string
-	DDNSWebhookURL         string
-	DDNSWebhookRequestBody string
-	DDNSWebhookHeaders     string
+	DDNS struct {
+		Enable             bool
+		CheckPeriod        uint32 // in seconds
+		Provider           string
+		AccessID           string
+		AccessSecret       string
+		WebhookURL         string
+		WebhookMethod      string
+		WebhookRequestBody string
+		WebhookHeaders     string
+	}
 }
 
 // Read 读取配置文件并应用
@@ -163,11 +165,8 @@ func (c *Config) Read(path string) error {
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2
 	}
-	if c.DDNSCheckPeriod == 0 {
-		c.DDNSCheckPeriod = 30
-	}
-	if c.DDNSProvider == "" {
-		c.DDNSProvider = "webhook"
+	if c.DDNS.Provider == "" {
+		c.DDNS.Provider = "webhook"
 	}
 
 	c.updateIgnoredIPNotificationID()
