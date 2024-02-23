@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.7"
+NZ_VERSION="v0.15.8"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -266,7 +266,8 @@ install_dashboard_standalone() {
 
 selinux() {
     #Check SELinux
-    if [ "$os_alpine" != 1 ]; then
+    command -v getenforce >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
         getenforce | grep '[Ee]nfor'
         if [ $? -eq 0 ]; then
             echo -e "SELinux running，closing now！"
