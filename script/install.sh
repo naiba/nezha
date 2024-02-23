@@ -269,7 +269,8 @@ install_dashboard_standalone() {
 
 selinux() {
     #判断当前的状态
-    if [ "$os_alpine" != 1 ]; then
+    command -v getenforce >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
         getenforce | grep '[Ee]nfor'
         if [ $? -eq 0 ]; then
             echo -e "SELinux是开启状态，正在关闭！"

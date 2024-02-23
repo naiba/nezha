@@ -266,7 +266,8 @@ install_dashboard_standalone() {
 
 selinux() {
     #Check SELinux
-    if [ "$os_alpine" != 1 ]; then
+    command -v getenforce >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
         getenforce | grep '[Ee]nfor'
         if [ $? -eq 0 ]; then
             echo -e "SELinux running，closing now！"
