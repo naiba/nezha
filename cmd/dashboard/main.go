@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 
@@ -37,20 +36,6 @@ func init() {
 	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
 	singleton.InitLocalizer()
 	initSystem()
-}
-
-func secondsToCronString(seconds uint32) (string, error) {
-	if seconds > 86400 {
-		return "", errors.New("时间不能超过24小时")
-	}
-
-	//hours := seconds / 3600
-	//minutes := (seconds % 3600) / 60
-	//secondsRemainder := seconds % 60 // 保留剩余的秒数
-
-	cronExpr := fmt.Sprintf("%d * * * * *", seconds)
-
-	return cronExpr, nil
 }
 
 func initSystem() {
