@@ -66,20 +66,6 @@ func initSystem() {
 	if _, err := singleton.Cron.AddFunc("0 0 * * * *", singleton.RecordTransferHourlyUsage); err != nil {
 		panic(err)
 	}
-
-	// 按用户设置的时间间隔更新DDNS信息
-	if singleton.Conf.DDNS.Enable {
-		if singleton.Conf.DDNS.CheckPeriod == 0 {
-			log.Printf("NEZHA>> DDNSCheckPeriod设置为0时不会启用DDNS")
-		}
-		ddnsCronString, err := secondsToCronString(singleton.Conf.DDNS.CheckPeriod)
-		if err != nil {
-			panic(err)
-		}
-		if _, err := singleton.Cron.AddFunc(ddnsCronString, singleton.RefreshDDNSRecords); err != nil {
-			panic(err)
-		}
-	}
 }
 
 func main() {

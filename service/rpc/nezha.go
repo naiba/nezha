@@ -3,6 +3,8 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/naiba/nezha/pkg/utils"
+	"log"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -110,6 +112,33 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	host := model.PB2Host(r)
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
+	cacheKey := fmt.Sprintf("ddns-created-%d", clientID)
+	_, found := singleton.Cache.Get(cacheKey)
+	if singleton.Conf.DDNS.Enable &&
+		singleton.ServerList[clientID].EnableDDNS &&
+		singleton.ServerList[clientID].Host != nil &&
+		host.IP != "" &&
+		(singleton.ServerList[clientID].Host.IP != host.IP || !found) {
+		//go func() {
+		serverDomain := singleton.ServerList[clientID].DDNSDomain
+		provider, err := singleton.GetDDNSProviderFromString(singleton.Conf.DDNS.Provider)
+		if err == nil {
+			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
+			if provider.UpdateDomain(&singleton.DDNSDomainConfig{
+				EnableIPv4: true,
+				EnableIpv6: true,
+				FullDomain: serverDomain,
+				Ipv4Addr:   ipv4,
+				Ipv6Addr:   ipv6,
+			}) {
+				log.Printf("NEZHA>> 更新域名(%s)DDNS成功", serverDomain)
+				singleton.Cache.Set(cacheKey, true, 300*time.Second)
+			} else {
+				log.Printf("NEZHA>> 更新域名(%s)DDNS失败", serverDomain)
+			}
+		}
+		//}()
+	}
 	if singleton.Conf.EnableIPChangeNotification &&
 		((singleton.Conf.Cover == model.ConfigCoverAll && !singleton.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
 			(singleton.Conf.Cover == model.ConfigCoverIgnoreAll && singleton.Conf.IgnoredIPNotificationServerIDs[clientID])) &&

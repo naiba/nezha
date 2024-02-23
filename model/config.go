@@ -116,7 +116,6 @@ type Config struct {
 	// 动态域名解析更新
 	DDNS struct {
 		Enable             bool
-		CheckPeriod        uint32 // in seconds
 		Provider           string
 		AccessID           string
 		AccessSecret       string
