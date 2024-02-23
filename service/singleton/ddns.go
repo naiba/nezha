@@ -98,7 +98,7 @@ func (provider DDNSProviderWebHook) FormatWebhookString(s string, config *DDNSDo
 	}
 
 	result := strings.TrimSpace(s)
-	result = strings.Replace(provider.RequestBody, "{ip}", config.Ipv4Addr, -1)
+	result = strings.Replace(s, "{ip}", config.Ipv4Addr, -1)
 	result = strings.Replace(result, "{domain}", config.FullDomain, -1)
 	result = strings.Replace(result, "{type}", ipType, -1)
 	result = strings.Replace(result, "{access_id}", Conf.DDNS.AccessID, -1)
