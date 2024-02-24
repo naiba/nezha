@@ -8,6 +8,7 @@ import (
 
 const CtxKeyAuthorizedUser = "ckau"
 const CtxKeyViewPasswordVerified = "ckvpv"
+const CtxKeyPreferredTheme = "ckpt"
 const CacheKeyOauth2State = "p:a:state"
 
 type Common struct {

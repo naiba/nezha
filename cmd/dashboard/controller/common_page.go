@@ -44,6 +44,7 @@ type commonPage struct {
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
 	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
+	cr.Use(mygin.PreferredTheme)
 	cr.GET("/terminal/:id", cp.terminal)
 	cr.POST("/view-password", cp.issueViewPassword)
 	cr.Use(cp.checkViewPassword) // 前端查看密码鉴权
@@ -98,7 +99,7 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 	// 验证查看密码
 	viewPassword, _ := c.Cookie(singleton.Conf.Site.CookieName + "-vp")
 	if err := bcrypt.CompareHashAndPassword([]byte(viewPassword), []byte(singleton.Conf.Site.ViewPassword)); err != nil {
-		c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/viewpassword", mygin.CommonEnvironment(c, gin.H{
+		c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/viewpassword"), mygin.CommonEnvironment(c, gin.H{
 			"Title":      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "VerifyPassword"}),
 			"CustomCode": singleton.Conf.Site.CustomCode,
 		}))
@@ -128,7 +129,7 @@ func (p *commonPage) service(c *gin.Context) {
 			stats, statsStore,
 		}, nil
 	})
-	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/service"), mygin.CommonEnvironment(c, gin.H{
 		"Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
 		"Services":           res.([]interface{})[0],
 		"CycleTransferStats": res.([]interface{})[1],
@@ -234,7 +235,7 @@ func (cp *commonPage) network(c *gin.Context) {
 		Servers: servers,
 	})
 
-	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/network", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/network"), mygin.CommonEnvironment(c, gin.H{
 		"Servers":         string(serversBytes),
 		"MonitorInfos":    string(monitorInfos),
 		"CustomCode":      singleton.Conf.Site.CustomCode,
@@ -280,7 +281,7 @@ func (cp *commonPage) home(c *gin.Context) {
 		}, true)
 		return
 	}
-	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/home"), mygin.CommonEnvironment(c, gin.H{
 		"Servers":    string(stat),
 		"CustomCode": singleton.Conf.Site.CustomCode,
 	}))
