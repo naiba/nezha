@@ -43,11 +43,12 @@ type commonPage struct {
 
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
-	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
+	cr.Use(mygin.Authorize(mygin.AuthorizeOption{
+		ValidateViewPassword: true,
+	}))
 	cr.Use(mygin.PreferredTheme)
 	cr.GET("/terminal/:id", cp.terminal)
 	cr.POST("/view-password", cp.issueViewPassword)
-	cr.Use(cp.checkViewPassword) // 前端查看密码鉴权
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
 	// TODO: 界面直接跳转使用该接口
@@ -84,31 +85,6 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 	}
 	c.SetCookie(singleton.Conf.Site.CookieName+"-vp", string(hash), 60*60*24, "", "", false, false)
 	c.Redirect(http.StatusFound, c.Request.Referer())
-}
-
-func (p *commonPage) checkViewPassword(c *gin.Context) {
-	if singleton.Conf.Site.ViewPassword == "" {
-		c.Next()
-		return
-	}
-	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); authorized {
-		c.Next()
-		return
-	}
-
-	// 验证查看密码
-	viewPassword, _ := c.Cookie(singleton.Conf.Site.CookieName + "-vp")
-	if err := bcrypt.CompareHashAndPassword([]byte(viewPassword), []byte(singleton.Conf.Site.ViewPassword)); err != nil {
-		c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/viewpassword"), mygin.CommonEnvironment(c, gin.H{
-			"Title":      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "VerifyPassword"}),
-			"CustomCode": singleton.Conf.Site.CustomCode,
-		}))
-		c.Abort()
-		return
-	}
-
-	c.Set(model.CtxKeyViewPasswordVerified, true)
-	c.Next()
 }
 
 func (p *commonPage) service(c *gin.Context) {

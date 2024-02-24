@@ -17,11 +17,11 @@ type memberPage struct {
 func (mp *memberPage) serve() {
 	mr := mp.r.Group("")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
-		Member:   true,
-		IsPage:   true,
-		Msg:      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "YouAreNotAuthorized"}),
-		Btn:      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),
-		Redirect: "/login",
+		MemberOnly: true,
+		IsPage:     true,
+		Msg:        singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "YouAreNotAuthorized"}),
+		Btn:        singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),
+		Redirect:   "/login",
 	}))
 	mr.GET("/server", mp.server)
 	mr.GET("/monitor", mp.monitor)
