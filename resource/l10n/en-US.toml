@@ -615,3 +615,9 @@ other = "Network"
 
 [EnableShowInService]
 other = "Enable Show in Service"
+
+[EnableDDNS]
+other = "Enable DDNS"
+
+[DDNSDomain]
+other = "DDNS Domain"

@@ -615,3 +615,9 @@ other = "Red"
 
 [EnableShowInService]
 other = "Mostrar en servicio"
+
+[EnableDDNS]
+other = "Habilitar DDNS"
+
+[DDNSDomain]
+other = "Dominio DDNS"

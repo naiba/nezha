@@ -300,6 +300,8 @@ type serverForm struct {
 	Tag          string
 	Note         string
 	HideForGuest string
+	EnableDDNS   string
+	DDNSDomain   string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -315,6 +317,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Tag = sf.Tag
 		s.Note = sf.Note
 		s.HideForGuest = sf.HideForGuest == "on"
+		s.EnableDDNS = sf.EnableDDNS == "on"
+		s.DDNSDomain = sf.DDNSDomain
 		if s.ID == 0 {
 			s.Secret, err = utils.GenerateRandomString(18)
 			if err == nil {
