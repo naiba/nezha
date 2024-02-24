@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/service/singleton/ddns"
 	"log"
 	"time"
 
@@ -125,7 +126,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		if err == nil && serverDomain != "" {
 			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
 			maxRetries := int(singleton.Conf.DDNS.MaxRetries)
-			config := &singleton.DDNSDomainConfig{
+			config := &ddns.DomainConfig{
 				EnableIPv4: true,
 				EnableIpv6: true,
 				FullDomain: serverDomain,
