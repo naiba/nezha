@@ -95,6 +95,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/iilemon" title="Sean">
   <img src="https://avatars.githubusercontent.com/u/33201711?v=4" width="50;" alt="Sean"/>
 </a>
+<a href="https://github.com/nap0o" title="nap0o">
+  <img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/>
+</a>
 <a href="https://github.com/fscarmen" title="fscarmen">
   <img src="https://avatars.githubusercontent.com/u/62703343?v=4" width="50;" alt="fscarmen"/>
 </a>
@@ -121,9 +124,6 @@ You can change the dashboard language in the settings page (`/setting`) after th
 </a>
 <a href="https://github.com/unclezs" title="unclezs">
   <img src="https://avatars.githubusercontent.com/u/42318775?v=4" width="50;" alt="unclezs"/>
-</a>
-<a href="https://github.com/nap0o" title="nap0o">
-  <img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/>
 </a>
 <a href="https://github.com/yuanweize" title="I">
   <img src="https://avatars.githubusercontent.com/u/30067203?v=4" width="50;" alt="I"/>
