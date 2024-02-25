@@ -89,18 +89,23 @@ td {
 .status.cards .wide.column {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  height:3.3rem !important;
+  height:2.7rem !important;
 }
 
 .status.cards .wide.column:nth-child(1) {
-  margin-top:2rem !important;
+  margin-top:1.5rem !important;
 }
 
 .status.cards .wide.column:nth-child(2) {
-  margin-top:2rem !important;
+  margin-top:1.5rem !important;
 }
 
+.status.cards .three.wide.column {
+  text-align: center;
+  width: 22%!important;
+}
 .status.cards .thirteen.wide.column{
+  width: 78%!important;
   padding-left:0;
 }
 

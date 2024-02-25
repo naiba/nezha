@@ -5,14 +5,14 @@ const mixinsVue = {
         isSystemTheme: false,
         showGroup: false,
         showGoTop: false,
-        preferredTemplate: 'default',
+        preferredTemplate: null,
         isMobile: false
     },
     created() {
         this.isMobile = this.checkIsMobile();
         this.initTheme();
         this.storedShowGroup();
-        this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : 'default';
+        this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : this.$root.defaultTemplate;
         window.addEventListener('scroll', this.handleScroll);
     },
     destroyed() {
