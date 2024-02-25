@@ -621,3 +621,9 @@ other = "Habilitar DDNS"
 
 [DDNSDomain]
 other = "Dominio DDNS"
+
+[Feature]
+other = "Característica"
+
+[Template]
+other = "Plantilla"

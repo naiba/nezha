@@ -621,3 +621,9 @@ other = "启用DDNS"
 
 [DDNSDomain]
 other = "DDNS域名"
+
+[Feature]
+other = "功能"
+
+[Template]
+other = "主题"

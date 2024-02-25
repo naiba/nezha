@@ -1,153 +1,40 @@
 {{define "theme-server-status/home"}}
 {{template "theme-server-status/header" .}}
 <div id="app">
-    {{template "theme-server-status/content-nav" .}}
-    <div class="container table-responsive content" style="max-width: 95vw" v-for="group in nodes">
-        <table class="table table-striped table-condensed table-hover">
-            <thead>
-            <tr>
-                <th class="node-group-tag" colspan="16" style="border:none;">@#(group.Tag!==''?group.Tag:'{{tr "Default"}}')#@</th>
-                </th>
-            </tr>
-            <tr>
-                <th class="node-cell status center">{{tr "Status"}}</th>
-                <th class="node-cell name center">{{tr "Name"}}</th>
-                <th class="node-cell os center">{{tr "Platform"}}</th>
-                <th class="node-cell location center">{{tr "Location"}}</th>
-                <th class="node-cell uptime center">{{tr "Uptime"}}</th>
-                <th class="node-cell load center">{{tr "Load"}}</th>
-                <th class="node-cell network center">{{tr "NetSpeed"}}↓|↑</th>
-                <th class="node-cell traffic center">{{tr "NetTransfer"}}↓|↑</th>
-                <th class="node-cell cpu center">{{tr "CpuUsed"}}</th>
-                <th class="node-cell ram center">{{tr "MemUsed"}}</th>
-                <th class="node-cell hdd center">{{tr "DiskUsed"}}</th>
-            </tr>
-            </thead>
-            <tbody id="servers">
-            <template v-for="(node,index) in group.data">
-                <tr :id="'r'+node.ID" data-toggle="collapse" :data-target="'#rt'+node.ID" class="accordion-toggle"
-                    :class="index % 2 === 0 ? 'odd': 'even'">
-                    <td class="node-cell status center">
-                        <div class="status-container">
-                            <div v-if="node.online" class="status-icon online"></div>
-                            <div v-else class="status-icon offline"></div>
-                        </div>
-                    </td>
-                    <td class="node-cell name center">@#node.name#@</td>
-                    <td class="node-cell os center">
-                        <i v-if='node.os == "darwin"' class="apple icon"></i>
-                        <i v-else-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
-                        <i v-else :class="'fl-' + getFontLogoClass(node.host.Platform)"></i>
-                        <span class="node-cell-os-text">@#node.os#@</span>
-                    </td>
-                    <td style="text-align: center;" class="node-cell location">
-                        <i :class="'fi fi-' + node.location"></i>
-                        <span class="node-cell-location-text text-uppercase">&nbsp;@#node.location#@</span>
-                    </td>
-                    <td style="text-align: center;" class="node-cell uptime">@#node.uptime#@</td>
-                    <td style="text-align: center;" class="node-cell load">@#node.load#@</td>
-                    <td style="text-align: center;" class="node-cell network">@#node.network#@</td>
-                    <td style="text-align: center;" class="node-cell traffic">@#node.traffic#@</td>
-                    <td class="node-cell cpu">
-                        <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
-                            <div :style="node.cpu.style" :class="node.cpu.class"><small>@#node.cpu.percent#@%</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="node-cell memory">
-                        <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
-                            <div :style="node.memory.style" :class="node.memory.class">
-                                <small>@#node.memory.percent#@%</small>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="node-cell hdd">
-                        <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
-                            <div :style="node.hdd.style" :class="node.hdd.class"><small>@#node.hdd.percent#@%</small>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="expandRow" :class="index % 2 === 0 ? 'odd': 'even'">
-                    <td colspan="16">
-                        <div class="accordian-body collapse" :id="'rt'+node.ID">
-                            <div style="display: flex;left-items: center;justify-content: center;flex-direction: column; max-width: 89vw">
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "Platform"}}:</span>
-                                    @#node.host.Platform#@-@#node.host.PlatformVersion#@
-                                    [<span v-if="node.host.Virtualization">@#node.host.Virtualization#@:</span>@#node.host.Arch#@]
-                                </span>
-                                <span class="node-cell-expand" v-if="node.host.CPU">
-                                    <span class="node-cell-expand-label">CPU:</span>
-                                    @#node.host.CPU.join(",")#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
-                                    @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
-                                    @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@(@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
-                                    @#formatByteSize(node.state.SwapUsed)#@ / @#formatByteSize(node.host.SwapTotal)#@
-                                    <span v-if="node.host.SwapTotal">(@#toFixed2(node.state.SwapUsed / node.host.SwapTotal * 100)#@%)</span>
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "NetTransfer"}}:</span>
-                                    <i class="arrow alternate circle down outline icon"
-                                       style="margin: 0"></i>@#formatByteSize(node.state.NetInTransfer)#@
-                                    <i class="arrow alternate circle up outline icon"
-                                       style="margin: 0"></i>@#formatByteSize(node.state.NetOutTransfer)#@
-                                </span>
-                                <span class="node-cell-expand load">
-                                    <span class="node-cell-expand-label">{{tr "Load"}}:</span>
-                                    @#toFixed2(node.state.Load1)#@ / @#toFixed2(node.state.Load5)#@ / @#toFixed2(node.state.Load15)#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "ProcessCount"}}:</span>
-                                    @#node.state.ProcessCount#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "ConnCount"}}:</span>
-                                    TCP @#node.state.TcpConnCount#@ / UDP @#node.state.UdpConnCount#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "BootTime"}}:</span>
-                                    @#formatTimestamp(node.host.BootTime)#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "LastActive"}}:</span>
-                                    @#new Date(node.lastActive).toLocaleString()#@
-                                </span>
-                                <span class="node-cell-expand">
-                                    <span class="node-cell-expand-label">{{tr "Version"}}:</span>
-                                    @#node.host.Version#@
-                                </span>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </template>
-            </tbody>
-        </table>
-    </div>
+    {{template "theme-server-status/content-nav" .}}   
+    <!--  showGroup true -->
+    <template v-if="showGroup">
+        <section class="container table-responsive content" style="max-width: 95vw" v-for="group in nodesTag">
+            {{template "theme-server-status/home-group-true" .}} 
+        </section>
+    </template>
+    <!--  showGroup false -->
+    <template v-else>
+        <section class="container table-responsive content" style="max-width: 95vw">
+            {{template "theme-server-status/home-group-false" .}}
+        </section>
+    </template>
     {{template "theme-server-status/content-footer" .}}
 </div>
-
 <script>
     new Vue({
         el: '#app',
         delimiters: ['@#', '#@'],
         data: {
-            nodes: [],
+            page: 'index',
+            templates: {{.Themes}},
+            nodesTag: [],
+            nodesNoTag: [],
+            chartDataList: []
         },
         mixins: [mixinsVue],
         created() {
-            const initData = JSON.parse('{{.Servers}}').servers;           
-            this.nodes = groupingData(this.handleNodes(initData),"Tag");
-            this.initTheme()
+            initData = JSON.parse('{{.Servers}}').servers;
+            if(this.showGroup) {
+                this.nodesTag = this.groupingData(this.handleNodes(initData),"Tag");
+            } else {
+                this.nodesNoTag = this.handleNodes(initData);
+            }
         },
         mounted() {
             this.connect();
@@ -231,12 +118,17 @@
                 return x !== "NaN undefined" ? x : '0B'
             },
             formatPercent(live, used, total) {
-                const percent = live ? (this.toFixed2(used / total * 100) || 0) : 0
-                return this.formatPercents(percent)
+                //const percent = live ? (this.toFixed2(used / total * 100) || 0) : 0
+                const percent = (this.toFixed2(used / total * 100) || 0)
+                return this.formatPercents(live,percent)
             },
-            formatPercents(percent) {
+            formatPercents(live,percent) {
+                //if(!live) { percent = 0; }
                 if (percent <= 0) {
                     percent = 0;
+                }
+                if (percent >= 100) {
+                    percent = 100;
                 }
                 if (!this.cache[percent]) {
                     this.cache[percent] = {
@@ -279,8 +171,12 @@
                             const lastActive = new Date(ns.LastActive).getTime()
                             data.servers[i].live = data.now - lastActive <= 10 * 1000;
                         }
-                    }              
-                    this.nodes = groupingData(this.handleNodes(data.servers),"Tag");
+                    }
+                    if(this.showGroup) {
+                        this.nodesTag = this.groupingData(this.handleNodes(data.servers),"Tag");
+                    } else {
+                        this.nodesNoTag = this.handleNodes(data.servers);
+                    }
                 }
                 ws.onclose = () => {
                     setTimeout(function () {
@@ -309,7 +205,7 @@
                         load: this.toFixed2(server.State.Load1),
                         network: this.getNetworkSpeed(server.State.NetInSpeed, server.State.NetOutSpeed),
                         traffic: this.formatByteSize(server.State.NetInTransfer) + ' | ' + this.formatByteSize(server.State.NetOutTransfer),
-                        cpu: this.formatPercents(this.toFixed2(server.State.CPU)),
+                        cpu: this.formatPercents(server.live, this.toFixed2(server.State.CPU)),
                         memory: this.formatPercent(server.live, server.State.MemUsed, server.Host.MemTotal),
                         hdd: this.formatPercent(server.live, server.State.DiskUsed, server.Host.DiskTotal),
                         online: server.live,
@@ -324,29 +220,173 @@
             },
             getNetworkSpeed(netInSpeed, netOutSpeed) {
                 return this.formatByteSize(netInSpeed) + ' | ' + this.formatByteSize(netOutSpeed)
+            },
+            showCharts(event, id) {
+                const chartContainer = this.$refs[`chart${id}`][0];
+                const chartboxShow = chartContainer.getAttribute('chartbox-show');
+                chartContainer.setAttribute('chartbox-show', chartboxShow === '0' ? '1' : '0');
+                const isAriaExpandedFalse = event.currentTarget.getAttribute('aria-expanded') === 'false';
+                if (!isAriaExpandedFalse) return;
+                // 发起数据请求
+                const url = `/api/v1/monitor/${id}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.result) { // 数据请求成功，更新数据并渲染图表
+                            this.chartDataList[id - 1] = data.result;
+                            this.$nextTick(() => {
+                                this.renderCharts(id);
+                            });
+                        } else {
+                            console.log('this agent (id:'+ id + ') has no monitor.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            },
+            renderCharts(id, reload = false) {
+                if (!this.chartDataList[id - 1]) return;
+                const chartData = this.chartDataList[id - 1];
+                const chartContainer = this.$refs[`chart${id}`][0];
+                if (reload) { //点击切换亮色/暗色风格模式时,重新载入echarts图表的逻辑,
+                    // 第一步,查找已经渲染出的图表容器,并销毁它
+                    const existingChart = echarts.getInstanceByDom(chartContainer);
+                    if (existingChart) existingChart.dispose();
+                    // 第二步,如果图表容器处于不可见状态chartboxShow=0,不重新渲染出新的图表,
+                    // 如果图表容器处于可见状态chartboxShow=1,重新渲染出新的图表
+                    const chartboxShow = chartContainer.getAttribute('chartbox-show');
+                    if ( chartboxShow === '0' ) return; 
+                }
+                // 定义图表参数值
+                const MaxTCPPingValue = {{.MaxTCPPingValue}} ? {{.MaxTCPPingValue}} : 300;
+                const isMobile = this.checkIsMobile();
+                const fontSize = isMobile ? 10 : 14;
+                const gridLeft = isMobile ? 25 : 36;
+                const gridRight = isMobile ? 5 : 20;
+                const legendLeft = isMobile ? 'center' : 'center';
+                const legendTop = isMobile ? 5 : 5;
+                const legendPadding= isMobile ? [5,0,5,0] : [5,0,5,0];
+                const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const theme = localStorage.getItem("theme") ? localStorage.getItem("theme") : systemDarkMode;
+                const chartTheme = theme == "dark" ? "dark" : "default";
+                const fontColor = theme == "dark" ? "#f1f1f1" : "#000000";
+                const backgroundColor = theme == "dark" ? "#1C1D26" : '';
+                const tooltipBackgroundColor = theme == "dark" ? "#1C1D26" : '#ffffff';
+                const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
+                // 渲染图表
+                const chart = echarts.init(chartContainer, chartTheme, {
+                    renderer: 'canvas',
+                    useDirtyRect: false,
+                    width: 'auto',
+                    height: 300,
+                });
+                const xAxisData = chartData[0].created_at.map(time => new Date(time).toLocaleString());
+                const seriesData = chartData.map(item => {
+                    let loss = 0;
+                    const data = item.avg_delay.map((avgDelay, index) => {
+                        if (avgDelay > 0.9 * MaxTCPPingValue) {
+                            loss += 1;
+                        }
+                        return [new Date(item.created_at[index]).toLocaleString(), avgDelay];
+                    });
+                    const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
+                    if (!item.monitor_name.includes("%")) {
+                        item.monitor_name = item.monitor_name + " " + lossRate + "%";
+                    }                        
+                    return {
+                        name: item.monitor_name,
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'none',
+                        data: data
+                    };
+                });
+                const option = {
+                    backgroundColor: backgroundColor,
+                    title: {
+                        text: '三网监测:',
+                        show: false,
+                        left: 0,
+                        top: 5,
+                        textStyle: {
+                            color: fontColor,
+                            fontSize: fontSize,
+                            fontFamily: 'Lato,"Helvetica Neue",Arial,Helvetica,sans-serif',
+                            fontWeight: 'normal'
+                        }
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: tooltipBackgroundColor,
+                        borderColor: tooltipBorderColor,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        }
+                    },
+                    legend: {
+                        data: chartData.map(item => item.monitor_name),
+                        show: true,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        },
+                        top: legendTop,
+                        bottom: 0,
+                        left: legendLeft,
+                        padding: legendPadding
+                    },
+                    xAxis: {
+                        type: 'time',
+                        data: xAxisData,
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: fontSize
+                            }
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: fontSize
+                            }
+                        }
+                    },
+                    dataZoom: [
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100
+                        }
+                    ],
+                    series: seriesData,
+                    textStyle: {
+                        fontSize: fontSize,
+                        color: fontColor
+                    },
+                    grid: {
+                        top: '40',
+                        left: gridLeft,
+                        right: gridRight
+                    }
+                };
+                chart.setOption(option);
+            },
+            reloadCharts() { // 重新加载所有图表
+                const data = JSON.parse('{{.Servers}}').servers;
+                data.forEach(node => {
+                    const id = node.ID;
+                    const chartData = this.chartDataList[id - 1];
+                    if (chartData) {
+                        this.renderCharts(id,true);
+                    }
+                });
             }
         }
-
     })
-
-    function groupingData(data, field) {
-        let map = new Map();
-        let dest = [];
-
-        data.forEach(item => {
-            if (!map.has(item[field])) {
-                dest.push({
-                    [field]: item[field],
-                    data: [item]
-                });
-                map.set(item[field], item);
-            } else {
-                dest.find(dItem => dItem[field] === item[field]).data.push(item);
-            }
-        });
-
-        return dest;
-    }
 </script>
 {{template "theme-server-status/footer" .}}
 {{end}}
+

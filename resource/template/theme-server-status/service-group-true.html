@@ -1,0 +1,51 @@
+{{define "theme-server-status/service-group-true"}}
+<table class="table table-striped table-condensed table-hover service-status">
+    <thead>
+    <tr class="node-group-tag">
+        <th colspan="16" style="border:none;">
+            <span v-if="group.type == 1">HTTP-GET</span> 
+            <span v-if="group.type == 2">ICMP-Ping</span>
+            <span v-if="group.type == 3">TCP-Ping</span> 
+        </th>
+    </tr>
+    <tr class="node-group-cell">
+        <th class="node-cell center service-status-th">{{tr "Status"}}</th>
+        <th class="node-cell center service-name-th">{{tr "Name"}}</th>
+        <th class="node-cell center service-details-th">{{tr "Details"}}</th>
+        <th class="node-cell center service-averagelatency-th">{{tr "AverageLatency"}}</th>
+        <th class="node-cell center service-30daysonline-th">{{tr "30DaysOnline"}}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <template v-for="service in group.data">
+        <tr>
+            <td class="node-cell center">
+                <div class="delay-today">
+                    <i class="delay-today-icon" :class="service.health.className"></i>
+                    <span class="delay-today-text">@#service.health.text#@</span>
+                </div>
+            </td>
+            <td class="node-cell center">@#service.name#@</td>
+            <td class="node-cell center service-details-td">
+                <template v-for="(item,index) in service.dayDetail">
+                    <div data-toggle="tooltip" data-placement="top" class="service-day-status-icon" :class="item.className"
+                         :title="item.text">
+                    </div>
+                </template>
+            </td>
+            <td class="node-cell center">@#service.avgDelay#@</td>
+            <td class="node-cell center">
+                <div class="progress">
+                    <div :style="service.totalUpTime.style" :class="service.totalUpTime.className">
+                        <small>@#service.totalUpTime.percent#@%</small>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </template>
+    </tbody>
+</table>
+{{end}}
+
+
+
