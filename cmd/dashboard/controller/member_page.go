@@ -81,7 +81,6 @@ func (mp *memberPage) setting(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/setting", mygin.CommonEnvironment(c, gin.H{
 		"Title":           singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Settings"}),
 		"Languages":       model.Languages,
-		"Themes":          model.Themes,
 		"DashboardThemes": model.DashboardThemes,
 	}))
 }
