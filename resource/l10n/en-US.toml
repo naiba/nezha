@@ -621,3 +621,9 @@ other = "Enable DDNS"
 
 [DDNSDomain]
 other = "DDNS Domain"
+
+[Feature]
+other = "Feature"
+
+[Template]
+other = "Template"

@@ -1,7 +1,20 @@
 {{define "theme-server-status/content-footer"}}
 <footer class="container" style="padding-bottom: 2rem;">
     <p style="text-align: center; font-size: 10px;">
-        {{ .Conf.Site.Brand }} | Theme <a target="_blank" href="https://github.com/cppla/ServerStatus">ServerStatus</a> | Powered by <a target="_blank" href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a> {{.Version}}
+        {{ .Conf.Site.Brand }} | Theme ServerStatus | Powered by <a target="_blank" href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a> {{.Version}}
     </p>
 </footer>
+<aside class="toolbox">
+    <span class="toggleView">
+        <i v-if="showGroup" @click="toggleView" class="show-nogroup bi bi-justify"></i>
+        <i v-else @click="toggleView" class="show-group bi bi-view-stacked"></i>
+    </span>
+    <span class="setTheme">
+        <i v-if="theme === 'light'" @click="setTheme('dark', true)" class="setTheme-dark bi bi-moon-fill"></i>
+        <i v-else @click="setTheme('light', true)" class="setTheme-light bi bi-brightness-high-fill"></i>
+    </span>
+    <span v-if="showGoTop" class="showGoTop">
+        <i @click="goTop" class="goTop bi bi-arrow-up"></i>
+    </span>
+</aside>
 {{end}}
