@@ -1,0 +1,230 @@
+{{define "theme-default/network"}}
+{{template "theme-default/header" .}}
+{{if ts .CustomCode}}
+{{.CustomCode|safe}}
+{{end}}
+{{template "theme-default/menu" .}}
+<div class="nb-container">
+    <div class="ui container">
+        <div class="service-status">
+            <table class="ui celled table">
+                <button class="ui nezha-primary-btn button"
+                        v-for="server in servers"
+                        style="margin-top: 3px"
+                        @click="redirectNetwork(server.ID)">
+                    @#server.Name#@ &nbsp;<i :class="server.Host.CountryCode + ' flag'"></i>
+                </button>
+            </table>
+        </div>
+    </div>
+    <div class="ui container" style="max-width: 95vw">
+        <div ref="chartDom" style="border-radius: 28px; margin-top: 15px;height: 520px;max-width: 1400px;overflow: hidden"></div>
+    </div>
+</div>
+
+{{template "theme-default/footer" .}}
+
+<script>
+    const monitorInfo =  JSON.parse('{{.MonitorInfos}}');
+    const initData = JSON.parse('{{.Servers}}').servers;
+    let MaxTCPPingValue = {{.MaxTCPPingValue}};
+    if (MaxTCPPingValue == null) {
+        MaxTCPPingValue = 1000;
+    }
+    new Vue({
+        el: '#app',
+        delimiters: ['@#', '#@'],
+        data: {
+            page: 'network',
+            defaultTemplate: {{.Conf.Site.Theme}},
+            templates: {{.Themes}},
+            servers: initData,
+            option: {
+                tooltip: {
+                    trigger: 'axis',
+                    position: function (pt) {
+                        return [pt[0], '10%'];
+                    },
+                    formatter: function(params){
+                        let result = params[0].axisValueLabel + "<br />";
+                        params.forEach(function(item){
+                            result += item.marker + item.seriesName + ": " + item.value[1].toFixed(2) + " ms<br />";
+                         })
+                        return result;
+                    },
+                    confine: true,
+                    transitionDuration: 0
+                },
+                title: {
+                    left: 'center',
+                    text: "",
+                    textStyle: {}
+                },
+                legend: {
+                    top: '5%',
+                    data: [],
+                    textStyle: {
+                        fontSize: 14
+                    }
+                },
+                backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                toolbox: {
+                    feature: {
+                        dataZoom: {
+                            yAxisIndex: 'none'
+                        },
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                },
+                dataZoom: [
+                    {
+                        start: 0,
+                        end: 100
+                    }
+                ],
+                xAxis: {
+                    type: 'time',
+                    boundaryGap: false
+                },
+                yAxis: {
+                    type: 'value',
+                    boundaryGap: false
+                },
+                series: [],
+            },
+            chartOnOff: true,
+        },
+        mixins: [mixinsVue],
+        mounted() {
+            this.renderChart();
+             this.parseMonitorInfo(monitorInfo);
+        },
+        methods: {
+            getFontLogoClass(str) {
+                if (["almalinux",
+                        "alpine",
+                        "aosc",
+                        "apple",
+                        "archlinux",
+                        "archlabs",
+                        "artix",
+                        "budgie",
+                        "centos",
+                        "coreos",
+                        "debian",
+                        "deepin",
+                        "devuan",
+                        "docker",
+                        "elementary",
+                        "fedora",
+                        "ferris",
+                        "flathub",
+                        "freebsd",
+                        "gentoo",
+                        "gnu-guix",
+                        "illumos",
+                        "kali-linux",
+                        "linuxmint",
+                        "mageia",
+                        "mandriva",
+                        "manjaro",
+                        "nixos",
+                        "openbsd",
+                        "opensuse",
+                        "pop-os",
+                        "raspberry-pi",
+                        "redhat",
+                        "rocky-linux",
+                        "sabayon",
+                        "slackware",
+                        "snappy",
+                        "solus",
+                        "tux",
+                        "ubuntu",
+                        "void",
+                        "zorin"].indexOf(str)
+                    > -1) {
+                    return str;
+                }
+                if (['openwrt', 'linux', "immortalwrt"].indexOf(str) > -1) {
+                    return 'tux';
+                }
+                if (str == 'amazon') {
+                    return 'redhat';
+                }
+                if (str == 'arch') {
+                    return 'archlinux';
+                }
+                return '';
+            },
+            redirectNetwork(id) {
+                    this.getMonitorHistory(id)
+                    .then(function(monitorInfo) {
+                          var vm = app.__vue__;
+                          vm.parseMonitorInfo(monitorInfo);
+                    })
+                    .catch(function(error){
+                        window.location.href = "/404";
+                    })
+                },
+            getMonitorHistory(id) {
+                  return $.ajax({
+                    url: "/api/v1/monitor/"+id,
+                    method: "GET"
+                  });
+            },
+            parseMonitorInfo(monitorInfo) {
+                let tSeries = [];
+                let tLegendData = [];
+                for (let i = 0; i < monitorInfo.result.length; i++) {
+                    let loss = 0;
+                    let data = [];
+                    for (let j = 0; j < monitorInfo.result[i].created_at.length; j++) {
+                        avgDelay = Math.round(monitorInfo.result[i].avg_delay[j]);
+                        if (avgDelay > 0.9 * MaxTCPPingValue) {
+                            loss += 1
+                        }
+                        if (avgDelay > 0) {
+                            data.push([monitorInfo.result[i].created_at[j], avgDelay]);
+                        }
+                    }
+                    lossRate = ((loss / monitorInfo.result[i].created_at.length) * 100).toFixed(1);
+                    legendName = monitorInfo.result[i].monitor_name +" "+ lossRate + "%";
+                    tLegendData.push(legendName);
+                    tSeries.push({
+                            name: legendName,
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            data: data,
+                            markPoint: {
+                                data: [
+                                    { type: 'max', symbol: 'pin', name: 'Max', itemStyle: { color: '#f00' } },
+                                    { type: 'min', symbol: 'pin', name: 'Min', itemStyle: { color: '#0f0' } }
+                                ]
+                            }
+                    });
+                }
+                this.option.title.text = monitorInfo.result[0].server_name;
+                this.option.series = tSeries;
+                this.option.legend.data = tLegendData;
+                this.myChart.clear();
+                this.myChart.setOption(this.option);
+            },
+            isWindowsPlatform(str) {
+                return str.includes('Windows')
+            },
+            renderChart() {
+              this.myChart = echarts.init(this.$refs.chartDom);
+              this.myChart.setOption(this.option);
+            },
+        },
+        beforeDestroy() {
+            this.myChart.dispose();
+            this.myChart = null;
+        },
+    });
+</script>
+
+{{end}}

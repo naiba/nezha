@@ -1,0 +1,384 @@
+{{define "theme-server-status/home"}}
+{{template "theme-server-status/header" .}}
+<div id="app">
+    {{template "theme-server-status/content-nav" .}}   
+    <!--  showGroup true -->
+    <template v-if="showGroup">
+        <section class="container table-responsive content" style="max-width: 95vw" v-for="group in nodesTag">
+            {{template "theme-server-status/home-group-true" .}} 
+        </section>
+    </template>
+    <!--  showGroup false -->
+    <template v-else>
+        <section class="container table-responsive content" style="max-width: 95vw">
+            {{template "theme-server-status/home-group-false" .}}
+        </section>
+    </template>
+    {{template "theme-server-status/content-footer" .}}
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['@#', '#@'],
+        data: {
+            page: 'index',
+            defaultTemplate: {{.Conf.Site.Theme}},
+            templates: {{.Themes}},
+            nodesTag: [],
+            nodesNoTag: [],
+            chartDataList: []
+        },
+        mixins: [mixinsVue],
+        created() {
+            initData = JSON.parse('{{.Servers}}').servers;
+            if(this.showGroup) {
+                this.nodesTag = this.groupingData(this.handleNodes(initData),"Tag");
+            } else {
+                this.nodesNoTag = this.handleNodes(initData);
+            }
+        },
+        mounted() {
+            this.connect();
+        },
+        methods: {
+            isWindowsPlatform(str) {
+                return str.includes('Windows')
+            },
+            getFontLogoClass(str) {
+                if (["almalinux",
+                        "alpine",
+                        "aosc",
+                        "apple",
+                        "archlinux",
+                        "archlabs",
+                        "artix",
+                        "budgie",
+                        "centos",
+                        "coreos",
+                        "debian",
+                        "deepin",
+                        "devuan",
+                        "docker",
+                        "elementary",
+                        "fedora",
+                        "ferris",
+                        "flathub",
+                        "freebsd",
+                        "gentoo",
+                        "gnu-guix",
+                        "illumos",
+                        "kali-linux",
+                        "linuxmint",
+                        "mageia",
+                        "mandriva",
+                        "manjaro",
+                        "nixos",
+                        "openbsd",
+                        "opensuse",
+                        "pop-os",
+                        "raspberry-pi",
+                        "redhat",
+                        "rocky-linux",
+                        "sabayon",
+                        "slackware",
+                        "snappy",
+                        "solus",
+                        "tux",
+                        "ubuntu",
+                        "void",
+                        "zorin"].indexOf(str)
+                    > -1) {
+                    return str;
+                }
+                if (['openwrt', 'linux', "immortalwrt"].indexOf(str) > -1) {
+                    return 'tux';
+                }
+                if (str == 'amazon') {
+                    return 'redhat';
+                }
+                if (str == 'arch') {
+                    return 'archlinux';
+                }
+                return '';
+            },
+            secondToDate(s) {
+                const d = Math.floor(s / 3600 / 24);
+                if (d > 0) {
+                    return d + ' {{tr "Day"}}'
+                }
+                const h = Math.floor(s / 3600 % 24);
+                const m = Math.floor(s / 60 % 60);
+                const second = Math.floor(s % 60);
+                return h + ":" + ("0" + m).slice(-2) + ":" + ("0" + second).slice(-2);
+            },
+            formatTimestamp(t) {
+                return new Date(t * 1000).toLocaleString()
+            },
+            formatByteSize(bs) {
+                const x = this.readableBytes(bs)
+                return x !== "NaN undefined" ? x : '0B'
+            },
+            formatPercent(live, used, total) {
+                //const percent = live ? (this.toFixed2(used / total * 100) || 0) : 0
+                const percent = (this.toFixed2(used / total * 100) || 0)
+                return this.formatPercents(live,percent)
+            },
+            formatPercents(live,percent) {
+                //if(!live) { percent = 0; }
+                if (percent <= 0) {
+                    percent = 0;
+                }
+                if (percent >= 100) {
+                    percent = 100;
+                }
+                if (!this.cache[percent]) {
+                    this.cache[percent] = {
+                        class: 'progress-bar progress-bar-success',
+                        style: `width: ${parseInt(percent)+1}%`,
+                        percent,
+                    }
+                    if (percent < 80) {
+                        this.cache[percent].class = 'progress-bar progress-bar-success'
+                    } else if (percent < 90) {
+                        this.cache[percent].class = 'progress-bar progress-bar-warning'
+                    } else {
+                        this.cache[percent].class = 'progress-bar progress-bar-danger'
+                    }
+                }
+                return this.cache[percent]
+            },
+            readableBytes(bytes) {
+                if (!bytes) {
+                    return '0B'
+                }
+                const i = Math.floor(Math.log(bytes) / Math.log(1024)),
+                    sizes = ["B", "K", "M", "G", "T", "P", "E", "Z", "Y"];
+                return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + sizes[i];
+            },
+            connect() {
+                const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws"
+                const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
+                ws.onopen = function () {
+                    console.log("Connection open ...")
+                }
+                ws.onmessage = (evt) => {
+                    let jsonData = evt.data
+                    const data = JSON.parse(jsonData)
+                    for (let i = 0; i < data.servers?.length; i++) {
+                        const ns = data.servers[i];
+                        if (!ns.Host) {
+                            data.servers[i].live = false
+                        } else {
+                            const lastActive = new Date(ns.LastActive).getTime()
+                            data.servers[i].live = data.now - lastActive <= 10 * 1000;
+                        }
+                    }
+                    if(this.showGroup) {
+                        this.nodesTag = this.groupingData(this.handleNodes(data.servers),"Tag");
+                    } else {
+                        this.nodesNoTag = this.handleNodes(data.servers);
+                    }
+                }
+                ws.onclose = () => {
+                    setTimeout(function () {
+                        this.connect()
+                    }, 5000);
+                }
+                ws.onerror = function () {
+                    ws.close()
+                }
+            },
+            handleNodes(servers) {
+                let nodes = []
+                servers?.forEach(server => {
+                    let platform = server.Host.Platform;
+                    if (this.isWindowsPlatform(platform)) {
+                        platform = "windows"
+                    }else if (platform === "immortalwrt") {
+                        platform = "openwrt"
+                    }
+                    let node = {
+                        ID: server.ID,
+                        name: server.Name,
+                        os: platform,
+                        location: server.Host.CountryCode,
+                        uptime: this.secondToDate(server.State.Uptime),
+                        load: this.toFixed2(server.State.Load1),
+                        network: this.getNetworkSpeed(server.State.NetInSpeed, server.State.NetOutSpeed),
+                        traffic: this.formatByteSize(server.State.NetInTransfer) + ' | ' + this.formatByteSize(server.State.NetOutTransfer),
+                        cpu: this.formatPercents(server.live, this.toFixed2(server.State.CPU)),
+                        memory: this.formatPercent(server.live, server.State.MemUsed, server.Host.MemTotal),
+                        hdd: this.formatPercent(server.live, server.State.DiskUsed, server.Host.DiskTotal),
+                        online: server.live,
+                        state: server.State,
+                        host: server.Host,
+                        lastActive: server.LastActive,
+                        Tag: server.Tag,
+                    }
+                    nodes.push(node)
+                })
+                return nodes;
+            },
+            getNetworkSpeed(netInSpeed, netOutSpeed) {
+                return this.formatByteSize(netInSpeed) + ' | ' + this.formatByteSize(netOutSpeed)
+            },
+            showCharts(event, id) {
+                const chartContainer = this.$refs[`chart${id}`][0];
+                const chartboxShow = chartContainer.getAttribute('chartbox-show');
+                chartContainer.setAttribute('chartbox-show', chartboxShow === '0' ? '1' : '0');
+                const isAriaExpandedFalse = event.currentTarget.getAttribute('aria-expanded') === 'false';
+                if (!isAriaExpandedFalse) return;
+                // 发起数据请求
+                const url = `/api/v1/monitor/${id}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.result) { // 数据请求成功，更新数据并渲染图表
+                            this.chartDataList[id - 1] = data.result;
+                            this.$nextTick(() => {
+                                this.renderCharts(id);
+                            });
+                        } else {
+                            console.log('this agent (id:'+ id + ') has no monitor.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            },
+            renderCharts(id, reload = false) {
+                if (!this.chartDataList[id - 1]) return;
+                const chartData = this.chartDataList[id - 1];
+                const chartContainer = this.$refs[`chart${id}`][0];
+                if (reload) { //点击切换亮色/暗色风格模式时,重新载入echarts图表的逻辑,
+                    // 第一步,查找已经渲染出的图表容器,并销毁它
+                    const existingChart = echarts.getInstanceByDom(chartContainer);
+                    if (existingChart) existingChart.dispose();
+                    // 第二步,如果图表容器处于不可见状态chartboxShow=0,不重新渲染出新的图表,
+                    // 如果图表容器处于可见状态chartboxShow=1,重新渲染出新的图表
+                    const chartboxShow = chartContainer.getAttribute('chartbox-show');
+                    if ( chartboxShow === '0' ) return; 
+                }
+                // 定义图表参数值
+                const MaxTCPPingValue = {{.MaxTCPPingValue}} ? {{.MaxTCPPingValue}} : 300;
+                const isMobile = this.checkIsMobile();
+                const fontSize = isMobile ? 10 : 14;
+                const gridLeft = isMobile ? 25 : 36;
+                const gridRight = isMobile ? 5 : 20;
+                const legendLeft = isMobile ? 'center' : 'center';
+                const legendTop = isMobile ? 5 : 5;
+                const legendPadding= isMobile ? [5,0,5,0] : [5,0,5,0];
+                const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                const theme = localStorage.getItem("theme") ? localStorage.getItem("theme") : systemDarkMode;
+                const chartTheme = theme == "dark" ? "dark" : "default";
+                const fontColor = theme == "dark" ? "#f1f1f1" : "#000000";
+                const backgroundColor = theme == "dark" ? "#1C1D26" : '';
+                const tooltipBackgroundColor = theme == "dark" ? "#1C1D26" : '#ffffff';
+                const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
+                // 渲染图表
+                const chart = echarts.init(chartContainer, chartTheme, {
+                    renderer: 'canvas',
+                    useDirtyRect: false,
+                    width: 'auto',
+                    height: 300,
+                });
+                const xAxisData = chartData[0].created_at.map(time => new Date(time).toLocaleString());
+                const seriesData = chartData.map(item => {
+                    let loss = 0;
+                    const data = item.avg_delay.map((avgDelay, index) => {
+                        if (avgDelay > 0.9 * MaxTCPPingValue) {
+                            loss += 1;
+                        }
+                        return [new Date(item.created_at[index]).toLocaleString(), avgDelay];
+                    });
+                    const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
+                    if (!item.monitor_name.includes("%")) {
+                        item.monitor_name = item.monitor_name + " " + lossRate + "%";
+                    }                        
+                    return {
+                        name: item.monitor_name,
+                        type: 'line',
+                        smooth: true,
+                        symbol: 'none',
+                        data: data
+                    };
+                });
+                const option = {
+                    backgroundColor: backgroundColor,
+                    title: {
+                        show: false
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: tooltipBackgroundColor,
+                        borderColor: tooltipBorderColor,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        }
+                    },
+                    legend: {
+                        data: chartData.map(item => item.monitor_name),
+                        show: true,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        },
+                        top: legendTop,
+                        bottom: 0,
+                        left: legendLeft,
+                        padding: legendPadding
+                    },
+                    xAxis: {
+                        type: 'time',
+                        data: xAxisData,
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: fontSize
+                            }
+                        }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: fontSize
+                            }
+                        }
+                    },
+                    dataZoom: [
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100
+                        }
+                    ],
+                    series: seriesData,
+                    textStyle: {
+                        fontSize: fontSize,
+                        color: fontColor
+                    },
+                    grid: {
+                        top: '40',
+                        left: gridLeft,
+                        right: gridRight
+                    }
+                };
+                chart.setOption(option);
+            },
+            reloadCharts() { // 重新加载所有图表
+                const data = JSON.parse('{{.Servers}}').servers;
+                data.forEach(node => {
+                    const id = node.ID;
+                    const chartData = this.chartDataList[id - 1];
+                    if (chartData) {
+                        this.renderCharts(id,true);
+                    }
+                });
+            }
+        }
+    })
+</script>
+{{template "theme-server-status/footer" .}}
+{{end}}
+

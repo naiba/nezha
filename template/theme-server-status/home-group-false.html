@@ -1,0 +1,134 @@
+{{define "theme-server-status/home-group-false"}}
+<table class="table table-striped table-condensed table-hover">
+    <thead>
+    <tr>
+        <th class="node-cell status center">{{tr "Status"}}</th>
+        <th class="node-cell name center">{{tr "Name"}}</th>
+        <th class="node-cell os center">{{tr "Platform"}}</th>
+        <th class="node-cell location center">{{tr "Location"}}</th>
+        <th class="node-cell uptime center">{{tr "Uptime"}}</th>
+        <th class="node-cell load center">{{tr "Load"}}</th>
+        <th class="node-cell network center">{{tr "NetSpeed"}}↓|↑</th>
+        <th class="node-cell traffic center">{{tr "NetTransfer"}}↓|↑</th>
+        <th class="node-cell cpu center">{{tr "CpuUsed"}}</th>
+        <th class="node-cell memory center">{{tr "MemUsed"}}</th>
+        <th class="node-cell hdd center">{{tr "DiskUsed"}}</th>
+    </tr>
+    </thead>
+    <tbody id="servers">
+    <template v-for="(node,index) in nodesNoTag">
+        <tr :id="'r'+node.ID" data-toggle="collapse" :data-target="'#rt'+node.ID" class="accordion-toggle" :class="index % 2 === 0 ? 'odd': 'even'" 
+        aria-expanded="false" @click="showCharts($event, node.ID)">
+            <td class="node-cell status center">
+                <div class="status-container">
+                    <div v-if="node.online" class="status-icon online"></div>
+                    <div v-else class="status-icon offline"></div>
+                </div>
+            </td>
+            <td class="node-cell name center">@#node.name#@</td>
+            <td class="node-cell os center">
+                <i v-if='node.os == "darwin"' class="apple icon"></i>
+                <i v-else-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
+                <i v-else :class="'fl-' + getFontLogoClass(node.host.Platform)"></i>
+                <span class="node-cell-os-text">@#node.os#@</span>
+            </td>
+            <td style="text-align: center;" class="node-cell location">
+                <i :class="'fi fi-' + node.location"></i>
+                <span class="node-cell-location-text text-uppercase">@#node.location#@</span>
+            </td>
+            <td style="text-align: center;" class="node-cell uptime">@#node.uptime#@</td>
+            <td style="text-align: center;" class="node-cell load">@#node.load#@</td>
+            <td style="text-align: center;" class="node-cell network">@#node.network#@</td>
+            <td style="text-align: center;" class="node-cell traffic">@#node.traffic#@</td>
+            <td class="node-cell cpu">
+                <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
+                    <div :style="node.cpu.style" :class="node.cpu.class"><small>@#node.cpu.percent#@%</small>
+                    </div>
+                </div>
+            </td>
+            <td class="node-cell memory">
+                <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
+                    <div :style="node.memory.style" :class="node.memory.class">
+                        <small>@#node.memory.percent#@%</small>
+                    </div>
+                </div>
+            </td>
+            <td class="node-cell hdd">
+                <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
+                    <div :style="node.hdd.style" :class="node.hdd.class"><small>@#node.hdd.percent#@%</small>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr class="expandRow" :class="index % 2 === 0 ? 'odd': 'even'">
+            <td colspan="16">
+                <div class="accordian-body collapse" :id="'rt'+node.ID">
+                    <div style="display: flex;left-items: center;justify-content: center;flex-direction: column; max-width: 89vw">
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "Platform"}}:</span>
+                            @#node.host.Platform#@-@#node.host.PlatformVersion#@
+                            [<span v-if="node.host.Virtualization">@#node.host.Virtualization#@:</span>@#node.host.Arch#@]
+                        </span>
+                        <span class="node-cell-expand" v-if="node.host.CPU">
+                            <span class="node-cell-expand-label">CPU:</span>
+                            @#node.host.CPU.join(",")#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
+                            @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
+                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@(@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
+                            @#formatByteSize(node.state.SwapUsed)#@ / @#formatByteSize(node.host.SwapTotal)#@
+                            <span v-if="node.host.SwapTotal">(@#toFixed2(node.state.SwapUsed / node.host.SwapTotal * 100)#@%)</span>
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "NetTransfer"}}:</span>
+                            <i class="arrow alternate circle down outline icon"
+                               style="margin: 0"></i>@#formatByteSize(node.state.NetInTransfer)#@
+                            <i class="arrow alternate circle up outline icon"
+                               style="margin: 0"></i>@#formatByteSize(node.state.NetOutTransfer)#@
+                        </span>
+                        <span class="node-cell-expand load">
+                            <span class="node-cell-expand-label">{{tr "Load"}}:</span>
+                            @#toFixed2(node.state.Load1)#@ / @#toFixed2(node.state.Load5)#@ / @#toFixed2(node.state.Load15)#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "ProcessCount"}}:</span>
+                            @#node.state.ProcessCount#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "ConnCount"}}:</span>
+                            TCP @#node.state.TcpConnCount#@ / UDP @#node.state.UdpConnCount#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "BootTime"}}:</span>
+                            @#formatTimestamp(node.host.BootTime)#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "LastActive"}}:</span>
+                            @#new Date(node.lastActive).toLocaleString()#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "Uptime"}}:</span>
+                            @#node.uptime#@
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "Version"}}:</span>
+                            @#node.host.Version#@
+                        </span>
+                        <span class="node-echarts-expand">
+                            <div class="chartbox" chartbox-show="0" :key="node.ID" :ref="`chart${node.ID}`" style="width: 100%; height: auto;"></div>
+                        </span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </template>
+    </tbody>
+</table>
+{{end}}
