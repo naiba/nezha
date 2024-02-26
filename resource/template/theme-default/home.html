@@ -19,7 +19,7 @@
                     class="apple icon"></i><i v-else-if='isWindowsPlatform(server.Host.Platform)'
                     class="windows icon"></i><i v-else :class="'fl-' + getFontLogoClass(server.Host.Platform)"></i>
                   @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@
-                  <i @click="togglePopup($event, server.ID)" aria-expanded="false" class="nezha-secondary-font info circle icon" style="height: 28px"></i>                 
+                  <i @click="togglePopup($event, server.ID)" aria-expanded="false" class="nezha-secondary-font info circle icon"></i>                 
                   <div class="ui content popup" :class="{ 'visible': isActive(server.ID) }" style="margin-bottom: 0;">
                     <i class="closePopup window close icon" @click="closePopup(server.ID)"></i>
                     {{tr "Platform"}}: @#server.Host.Platform#@-@#server.Host.PlatformVersion#@

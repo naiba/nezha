@@ -1,4 +1,5 @@
 const mixinsVue = {
+    delimiters: ['@#', '#@'],
     data: {
         preferredTemplate: null,
         isMobile: false
