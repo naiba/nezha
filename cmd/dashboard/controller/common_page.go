@@ -43,12 +43,14 @@ type commonPage struct {
 
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
-	cr.Use(mygin.Authorize(mygin.AuthorizeOption{
-		ValidateViewPassword: true,
-	}))
+	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
 	cr.Use(mygin.PreferredTheme)
-	cr.GET("/terminal/:id", cp.terminal)
 	cr.POST("/view-password", cp.issueViewPassword)
+	cr.GET("/terminal/:id", cp.terminal)
+	cr.Use(mygin.ValidateViewPassword(mygin.ValidateViewPasswordOption{
+		IsPage:        true,
+		AbortWhenFail: true,
+	}))
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
 	// TODO: 界面直接跳转使用该接口
@@ -65,6 +67,7 @@ type viewPasswordForm struct {
 func (p *commonPage) issueViewPassword(c *gin.Context) {
 	var vpf viewPasswordForm
 	err := c.ShouldBind(&vpf)
+	log.Println("bingo", vpf)
 	var hash []byte
 	if err == nil && vpf.Password != singleton.Conf.Site.ViewPassword {
 		err = errors.New(singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "WrongAccessPassword"}))

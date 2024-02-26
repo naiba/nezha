@@ -31,13 +31,16 @@ func (v *apiV1) serve() {
 	// 不强制认证的 API
 	mr := v.r.Group("monitor")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
-		MemberOnly:           false,
-		IsPage:               false,
-		ValidateViewPassword: true,
-		AllowAPI:             true,
-		Msg:                  "访问此接口需要认证",
-		Btn:                  "点此登录",
-		Redirect:             "/login",
+		MemberOnly: false,
+		IsPage:     false,
+		AllowAPI:   true,
+		Msg:        "访问此接口需要认证",
+		Btn:        "点此登录",
+		Redirect:   "/login",
+	}))
+	mr.Use(mygin.ValidateViewPassword(mygin.ValidateViewPasswordOption{
+		IsPage:        false,
+		AbortWhenFail: true,
 	}))
 	mr.GET("/:id", v.monitorHistoriesById)
 }
