@@ -89,14 +89,14 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/Mmx233" title="Mmx">
   <img src="https://avatars.githubusercontent.com/u/36563672?v=4" width="50;" alt="Mmx"/>
 </a>
+<a href="https://github.com/nap0o" title="nap0o">
+  <img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/>
+</a>
 <a href="https://github.com/rootmelo92118" title="rootmelo92118">
   <img src="https://avatars.githubusercontent.com/u/32770959?v=4" width="50;" alt="rootmelo92118"/>
 </a>
 <a href="https://github.com/iilemon" title="Sean">
   <img src="https://avatars.githubusercontent.com/u/33201711?v=4" width="50;" alt="Sean"/>
-</a>
-<a href="https://github.com/nap0o" title="nap0o">
-  <img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/>
 </a>
 <a href="https://github.com/fscarmen" title="fscarmen">
   <img src="https://avatars.githubusercontent.com/u/62703343?v=4" width="50;" alt="fscarmen"/>
