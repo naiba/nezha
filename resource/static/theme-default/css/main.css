@@ -3,6 +3,7 @@
   .ui.container {
     width:95% !important;
     font-size: 90% !important;
+    max-width: 1300px !important;
   }
 }
 @media only screen and (max-width:767px) {
