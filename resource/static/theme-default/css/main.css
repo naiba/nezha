@@ -86,21 +86,35 @@ td {
   margin-right: 0;
 }
 
+.ui.grid {
+  margin-bottom:-0.5em
+}
+
+.ui.card>.content>.header:not(.ui), .ui.cards>.card>.content>.header:not(.ui){
+  line-height: 1em;
+}
+
 .status.cards .wide.column {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  height:3.3rem !important;
+  height:2.3rem !important;
 }
 
 .status.cards .wide.column:nth-child(1) {
-  margin-top:2rem !important;
+  margin-top:1.2rem !important;
 }
 
 .status.cards .wide.column:nth-child(2) {
-  margin-top:2rem !important;
+  margin-top:1.2rem !important;
+}
+
+.status.cards .three.wide.column {
+  text-align: center;
+  width: 22%!important;
 }
 
 .status.cards .thirteen.wide.column{
+  width: 78%!important;
   padding-left:0;
 }
 
@@ -124,7 +138,7 @@ td {
 .closePopup{
   color:rgb(10, 148, 242) !important;
   position: absolute;
-  top: 10px;
+  top: 7px;
   right: 10px;
   cursor: pointer;
   z-index: 9999;
@@ -194,6 +208,7 @@ td {
 }
 
 .nezha-secondary-font {
+  height: 1em;
   color: rgb(10, 148, 242) !important;
 }
 

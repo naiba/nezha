@@ -627,3 +627,6 @@ other = "功能"
 
 [Template]
 other = "主題"
+
+[Stat]
+other = "信息"

@@ -627,3 +627,6 @@ other = "Característica"
 
 [Template]
 other = "Plantilla"
+
+[Stat]
+other = "Stat"

@@ -14,7 +14,7 @@ func PreferredTheme(c *gin.Context) {
 	if theme, err := c.Cookie("preferred_theme"); err == nil {
 		if _, has := model.Themes[theme]; has {
 			// 检验自定义主题
-			if theme == "custom" && singleton.Conf.Site.Theme != "custom" && !utils.IsFileExists("resource/template/custom/home.html") {
+			if theme == "custom" && singleton.Conf.Site.Theme != "custom" && !utils.IsFileExists("resource/template/theme-custom/home.html") {
 				return
 			}
 			c.Set(model.CtxKeyPreferredTheme, theme)
