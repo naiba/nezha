@@ -3,8 +3,8 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/naiba/nezha/pkg/ddns"
 	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/service/singleton/ddns"
 	"log"
 	"time"
 

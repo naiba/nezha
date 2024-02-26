@@ -3,11 +3,11 @@ package singleton
 import (
 	"errors"
 	"fmt"
-	"github.com/naiba/nezha/service/singleton/ddns"
+	ddns2 "github.com/naiba/nezha/pkg/ddns"
 	"log"
 )
 
-func RetryableUpdateDomain(provider ddns.Provider, config *ddns.DomainConfig, maxRetries int) bool {
+func RetryableUpdateDomain(provider ddns2.Provider, config *ddns2.DomainConfig, maxRetries int) bool {
 	if nil == config {
 		return false
 	}
@@ -22,21 +22,21 @@ func RetryableUpdateDomain(provider ddns.Provider, config *ddns.DomainConfig, ma
 	return false
 }
 
-func GetDDNSProviderFromString(provider string) (ddns.Provider, error) {
+func GetDDNSProviderFromString(provider string) (ddns2.Provider, error) {
 	switch provider {
 	case "webhook":
-		return ddns.ProviderWebHook{
+		return ddns2.ProviderWebHook{
 			URL:           Conf.DDNS.WebhookURL,
 			RequestMethod: Conf.DDNS.WebhookMethod,
 			RequestBody:   Conf.DDNS.WebhookRequestBody,
 			RequestHeader: Conf.DDNS.WebhookHeaders,
 		}, nil
 	case "dummy":
-		return ddns.ProviderDummy{}, nil
+		return ddns2.ProviderDummy{}, nil
 	case "cloudflare":
-		return ddns.ProviderCloudflare{
+		return ddns2.ProviderCloudflare{
 			Secret: Conf.DDNS.AccessSecret,
 		}, nil
 	}
-	return ddns.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider))
+	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider))
 }
