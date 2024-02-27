@@ -76,10 +76,20 @@
                     {{end}}
                 </tbody>
             </table>
-
             {{end}}
         </div>
     </div>
 </div>
 {{template "theme-angel-kanade/footer" .}}
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['@#', '#@'],
+        data: {
+            defaultTemplate: {{.Conf.Site.Theme}},
+            templates: {{.Themes}}
+        },
+        mixins: [mixinsVue]
+    })
+</script>
 {{end}}

@@ -24,17 +24,18 @@
             page: 'index',
             defaultTemplate: {{.Conf.Site.Theme}},
             templates: {{.Themes}},
+            servers: [],
             nodesTag: [],
             nodesNoTag: [],
             chartDataList: []
         },
         mixins: [mixinsVue],
         created() {
-            initData = JSON.parse('{{.Servers}}').servers;
+            this.servers = JSON.parse('{{.Servers}}').servers;
             if(this.showGroup) {
-                this.nodesTag = this.groupingData(this.handleNodes(initData),"Tag");
+                this.nodesTag = this.groupingData(this.handleNodes(this.servers),"Tag");
             } else {
-                this.nodesNoTag = this.handleNodes(initData);
+                this.nodesNoTag = this.handleNodes(this.servers);
             }
         },
         mounted() {
@@ -367,8 +368,7 @@
                 chart.setOption(option);
             },
             reloadCharts() { // 重新加载所有图表
-                const data = JSON.parse('{{.Servers}}').servers;
-                data.forEach(node => {
+                this.servers.forEach(node => {
                     const id = node.ID;
                     const chartData = this.chartDataList[id - 1];
                     if (chartData) {
