@@ -203,7 +203,7 @@ other = "Agregar Servidor"
 other = "Editar Grupo de Servidores en Lote"
 
 [BatchDeleteServer]
-other = "Eliminar Servidores en Lote""
+other = "Eliminar Servidores en Lote"
 
 [InputServerGroupName]
 other = "Ingrese Nombre del Grupo de Servidores"
@@ -630,3 +630,6 @@ other = "Plantilla"
 
 [Stat]
 other = "Stat"
+
+[DisableSwitchTemplateInFrontend]
+other = "Deshabilitar Cambio de Plantilla en Frontend"

@@ -98,7 +98,8 @@ type Config struct {
 	ProxyGRPCPort uint
 	TLS           bool
 
-	EnablePlainIPInNotification bool // 通知信息IP不打码
+	EnablePlainIPInNotification     bool // 通知信息IP不打码
+	DisableSwitchTemplateInFrontend bool // 前台禁用切换模板功能
 
 	// IP变更提醒
 	EnableIPChangeNotification bool

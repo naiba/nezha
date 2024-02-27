@@ -630,3 +630,6 @@ other = "Template"
 
 [Stat]
 other = "Stat"
+
+[DisableSwitchTemplateInFrontend]
+other = "Disable Switch Template in Frontend"
