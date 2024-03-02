@@ -199,7 +199,8 @@
         const chartData = this.chartDataList[id - 1];
         const chartContainer = this.$refs[`chart${id}`][0];
         const chart = echarts.init(chartContainer, null, {
-            renderer: 'svg',
+            renderer: 'canvas',
+            useDirtyRect: false,
             width: 'auto',
             height: 120,
         }); 
