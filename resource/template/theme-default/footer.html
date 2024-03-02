@@ -11,6 +11,7 @@
 <script>
     function showSwitchTemplate(list, currentBackendTheme) {
         console.log(list, currentBackendTheme);
+        console.log("currentBackendTheme:",currentBackendTheme);
     }
     showSwitchTemplate({{ .Themes }}, {{ .Conf.Site.Theme }})
 </script>
