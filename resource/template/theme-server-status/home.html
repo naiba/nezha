@@ -297,7 +297,8 @@
                 const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
                 // 渲染图表
                 const chart = echarts.init(chartContainer, chartTheme, {
-                    renderer: 'svg',
+                    renderer: 'canvas',
+                    useDirtyRect: false,
                     width: 'auto',
                     height: 300,
                 });
