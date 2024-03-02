@@ -140,7 +140,7 @@
       page: 'index',
       defaultTemplate: {{.Conf.Site.Theme}},
       templates: {{.Themes}},
-      data: [],
+      servers: [],
       groups: [],
       cache: [],
       chartDataList: [], 
@@ -148,7 +148,7 @@
     },
     mixins: [mixinsVue],
     created() {
-      this.data = JSON.parse('{{.Servers}}').servers;
+      this.servers = JSON.parse('{{.Servers}}').servers;
       this.group()
     },
     methods: {
@@ -189,7 +189,8 @@
         const isMobile = this.checkIsMobile();
         const fontSize = isMobile ? 10 : 9;
         const itemGap = isMobile ? 5 : 2;
-        const itemWidth = isMobile ? 20 : 15;
+        const itemWidth = isMobile ? 10 : 10;
+        const itemHeight = isMobile ? 10 : 10;
         const gridLeft = 25;
         const gridRight = 12;
         const fontColor = "rgba(0, 0, 0, 0.68)";
@@ -198,8 +199,7 @@
         const chartData = this.chartDataList[id - 1];
         const chartContainer = this.$refs[`chart${id}`][0];
         const chart = echarts.init(chartContainer, null, {
-            renderer: 'canvas',
-            useDirtyRect: false,
+            renderer: 'svg',
             width: 'auto',
             height: 120,
         }); 
@@ -210,10 +210,10 @@
             if (avgDelay > 0.9 * MaxTCPPingValue) {
               loss += 1;
             }
-            return [new Date(item.created_at[index]).toLocaleString(), avgDelay];
+            return [item.created_at[index], avgDelay];
           });
           const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
-          item.monitor_name = item.monitor_name + " " + lossRate + "%";
+          item.monitor_name = item.monitor_name.includes("%") ? item.monitor_name : `${item.monitor_name} ${lossRate}%`;
           return {
             name: item.monitor_name,
             type: 'line',
@@ -236,6 +236,7 @@
             }
           },
           legend: {
+            icon: 'rect',
             data: chartData.map(item => item.monitor_name),
             show: true,
             textStyle: {
@@ -249,6 +250,7 @@
             bottom: 0,
             itemGap: itemGap,
             itemWidth: itemWidth,
+            itemHeight: itemHeight,
             padding: [5,0,5,0]
           },
           xAxis: {
@@ -282,7 +284,7 @@
             color: fontColor
           },
           grid: {
-            top: '40',
+            top: '30',
             bottom: '20',
             left: gridLeft,
             right: gridRight
@@ -357,7 +359,7 @@
         return '';
       },
       group() {
-        this.groups = groupingData(this.data, "Tag")
+        this.groups = groupingData(this.servers, "Tag")
       },
       formatPercent(live, used, total) {
         const percent = live ? (parseInt(used / total * 100) || 0) : -1

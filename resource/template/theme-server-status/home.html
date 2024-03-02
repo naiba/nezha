@@ -24,10 +24,12 @@
             page: 'index',
             defaultTemplate: {{.Conf.Site.Theme}},
             templates: {{.Themes}},
+            cache: [],
             servers: [],
             nodesTag: [],
             nodesNoTag: [],
-            chartDataList: []
+            chartDataList: [],
+            ws: null
         },
         mixins: [mixinsVue],
         created() {
@@ -39,7 +41,18 @@
             }
         },
         mounted() {
+            // 初始化时建立WebSocket连接
             this.connect();
+            // 监听页面可见性变化
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") {
+                    setTimeout(() => {
+                        if (document.hasFocus()) {
+                            this.connect();
+                        }
+                    }, 200);
+                }
+            });
         },
         methods: {
             isWindowsPlatform(str) {
@@ -157,12 +170,18 @@
                 return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + sizes[i];
             },
             connect() {
-                const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws"
-                const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
-                ws.onopen = function () {
+                // 如果已经存在 WebSocket 连接并且处于开启状态，则不重复建立连接
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    console.log('Closing old WebSocket connection...');
+                    this.ws.close();
+                }
+                const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+                this.ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
+
+                this.ws.onopen = function () {
                     console.log("Connection open ...")
                 }
-                ws.onmessage = (evt) => {
+                this.ws.onmessage = (evt) => {
                     let jsonData = evt.data
                     const data = JSON.parse(jsonData)
                     for (let i = 0; i < data.servers?.length; i++) {
@@ -180,13 +199,13 @@
                         this.nodesNoTag = this.handleNodes(data.servers);
                     }
                 }
-                ws.onclose = () => {
-                    setTimeout(function () {
-                        this.connect()
+                this.ws.onclose = () => {
+                    setTimeout(() => {
+                        this.connect();
                     }, 5000);
-                }
-                ws.onerror = function () {
-                    ws.close()
+                };
+                this.ws.onerror = () => {
+                    this.ws.close()
                 }
             },
             handleNodes(servers) {
@@ -278,8 +297,7 @@
                 const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
                 // 渲染图表
                 const chart = echarts.init(chartContainer, chartTheme, {
-                    renderer: 'canvas',
-                    useDirtyRect: false,
+                    renderer: 'svg',
                     width: 'auto',
                     height: 300,
                 });
@@ -290,12 +308,10 @@
                         if (avgDelay > 0.9 * MaxTCPPingValue) {
                             loss += 1;
                         }
-                        return [new Date(item.created_at[index]).toLocaleString(), avgDelay];
+                        return [item.created_at[index], avgDelay];
                     });
                     const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
-                    if (!item.monitor_name.includes("%")) {
-                        item.monitor_name = item.monitor_name + " " + lossRate + "%";
-                    }                        
+                    item.monitor_name = item.monitor_name.includes("%") ? item.monitor_name : `${item.monitor_name} ${lossRate}%`;
                     return {
                         name: item.monitor_name,
                         type: 'line',
