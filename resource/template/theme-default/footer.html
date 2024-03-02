@@ -7,6 +7,16 @@
             {{.Version}}</small>
     </div>
 </div>
+{{ if not .Conf.DisableSwitchTemplateInFrontend }}
+<script>
+    function showSwitchTemplate(list, currentBackendTheme) {
+        console.log(list, currentBackendTheme);
+    }
+    showSwitchTemplate({{ .Themes }}, {{ .Conf.Site.Theme }})
+</script>
+{{ end }}
+<script>
+</script>
 </body>
 </html>
 {{end}}

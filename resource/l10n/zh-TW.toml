@@ -630,3 +630,6 @@ other = "主題"
 
 [Stat]
 other = "信息"
+
+[DisableSwitchTemplateInFrontend]
+other = "禁止前台切換主題"
