@@ -280,7 +280,7 @@
                     if ( chartboxShow === '0' ) return; 
                 }
                 // 定义图表参数值
-                const MaxTCPPingValue = {{.MaxTCPPingValue}} ? {{.MaxTCPPingValue}} : 300;
+                const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const isMobile = this.checkIsMobile();
                 const fontSize = isMobile ? 10 : 14;
                 const gridLeft = isMobile ? 25 : 36;
@@ -306,7 +306,7 @@
                 const seriesData = chartData.map(item => {
                     let loss = 0;
                     const data = item.avg_delay.map((avgDelay, index) => {                        
-                        if(avgDelay>0){
+                        if(avgDelay > 0 && avgDelay < MaxTCPPingValue){
                             loss += avgDelay > 0.9 * MaxTCPPingValue ? 1 : 0;
                             return [item.created_at[index], avgDelay];
                         }else{
