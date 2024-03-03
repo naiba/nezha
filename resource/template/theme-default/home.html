@@ -208,10 +208,12 @@
         const seriesData = chartData.map(item => {
           let loss = 0;
           const data = item.avg_delay.map((avgDelay, index) => {
-            if (avgDelay > 0.9 * MaxTCPPingValue) {
+            if(avgDelay>0){
+              loss += avgDelay > 0.9 * MaxTCPPingValue ? 1 : 0;
+              return [item.created_at[index], avgDelay];
+            }else{
               loss += 1;
             }
-            return [item.created_at[index], avgDelay];
           });
           const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
           item.monitor_name = item.monitor_name.includes("%") ? item.monitor_name : `${item.monitor_name} ${lossRate}%`;
