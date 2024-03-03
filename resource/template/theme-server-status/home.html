@@ -305,14 +305,12 @@
                 const xAxisData = chartData[0].created_at.map(time => new Date(time).toLocaleString());
                 const seriesData = chartData.map(item => {
                     let loss = 0;
-                    const avgDelayMean = item.avg_delay.reduce((acc, cur) => acc + cur, 0) / item.avg_delay.length;
                     const data = item.avg_delay.map((avgDelay, index) => {                        
                         if(avgDelay>0){
                             loss += avgDelay > 0.9 * MaxTCPPingValue ? 1 : 0;
                             return [item.created_at[index], avgDelay];
                         }else{
                             loss += 1;
-                            return [item.created_at[index], avgDelayMean];
                         }
                     });
                     const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
@@ -322,7 +320,8 @@
                         type: 'line',
                         smooth: true,
                         symbol: 'none',
-                        data: data
+                        data: data,
+                        connectNulls: true
                     };
                 });
                 const option = {
