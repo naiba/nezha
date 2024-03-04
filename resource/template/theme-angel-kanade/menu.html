@@ -16,14 +16,17 @@
         {{else}}
         <a class='item{{if eq .MatchedPath "/"}} active{{end}}' href="/"><i class="home icon"></i>{{tr "Home"}}</a>
         <a class='item{{if eq .MatchedPath "/service"}} active{{end}}' href="/service"><i class="rss icon"></i>{{tr "Services"}}</a>
-        <div class="item ui simple dropdown">
-            <div class="text"><i class="bi bi-incognito icon" style="margin-right:3px;"></i>{{tr "Template" }}<i class="dropdown icon" style="margin-right:0px;"></i></div>
-            <div class="menu">
-                <a v-for="(value, key) in templates" :key="key" @click="toggleTemplate(key)" class="item"><i class="th large icon"></i>@#value#@
-                    <i class="check icon" v-if="preferredTemplate === key"></i>
-                </a>
+            {{ if not .Conf.DisableSwitchTemplateInFrontend }}        
+            <div class="item ui simple dropdown">
+                <div class="text"><i class="bi bi-incognito icon" style="margin-right:3px;"></i>{{tr "Template" }}<i class="dropdown icon" style="margin-right:0px;"></i></div>
+                <div class="menu"> 
+                    <a v-for="(item, index) in adaptedTemplates" :key="index" @click="toggleTemplate(item.key)" class="item">
+                        <i :class="item.icon + ' icon'"></i>@#item.name#@
+                        <i class="check icon" v-if="preferredTemplate === item.key"></i>
+                    </a>
+                </div>
             </div>
-        </div>
+            {{ end }}
         {{end}}
         <div class="right menu">
             <div class="item">

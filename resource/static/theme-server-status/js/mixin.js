@@ -6,7 +6,12 @@ const mixinsVue = {
         showGroup: false,
         showGoTop: false,
         preferredTemplate: null,
-        isMobile: false
+        isMobile: false,
+        adaptedTemplates: [
+            { key: 'default', name: 'Default', icon: 'th large' },
+            { key: 'angel-kanade', name: 'AngelKanade', icon: 'square' },
+            { key: 'server-status', name: 'SeverStatus', icon: 'list' }
+        ]
     },
     created() {
         this.isMobile = this.checkIsMobile();

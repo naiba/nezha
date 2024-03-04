@@ -27,7 +27,7 @@
 <script>
     const monitorInfo =  JSON.parse('{{.MonitorInfos}}');
     const initData = JSON.parse('{{.Servers}}').servers;
-    let MaxTCPPingValue = {{.MaxTCPPingValue}};
+    let MaxTCPPingValue = {{.Conf.MaxTCPPingValue}};
     if (MaxTCPPingValue == null) {
         MaxTCPPingValue = 1000;
     }

@@ -29,17 +29,19 @@
                     <li><a href="/service"><i class="rss icon"></i>{{tr "Services" }}</a></li>
                     <li><a href="/network"><i class="bi bi-hdd-network icon"></i>{{tr "NetworkSpiter"}}</a></li>
                 </template>
-                <li class="dropdown">
-                    <a data-toggle="dropdown"><i class="bi bi-incognito" style="position:relative;top:1px;margin-right:3px;font-size:1.2rem;vertical-align:top;"></i>{{tr "Template" }}<b class="caret"></b></a>
-                    <ul class="dropdown-menu">
-                        <li v-for="(value, key) in templates" :key="key">
-                            <a @click="toggleTemplate(key)">
-                                <i class="list icon"></i>@#value#@
-                                <i class="check icon" v-if="preferredTemplate === key"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
+                {{ if not .Conf.DisableSwitchTemplateInFrontend }}
+                    <li class="dropdown">
+                        <a data-toggle="dropdown"><i class="bi bi-incognito" style="position:relative;top:1px;margin-right:3px;font-size:1.2rem;vertical-align:top;"></i>{{tr "Template" }}<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li v-for="(item, index) in adaptedTemplates" :key="index">
+                                <a @click="toggleTemplate(item.key)">
+                                    <i :class="item.icon + ' icon'" style="font-size:1em"></i>@#item.name#@
+                                    <i class="check icon" v-if="preferredTemplate === item.key"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                {{ end }}
             </ul>
             <ul class="nav navbar-nav navbar-right">
                 {{if .Admin}}
