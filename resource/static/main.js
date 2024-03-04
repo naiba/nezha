@@ -302,6 +302,7 @@ function addOrEditServer(server, conf) {
   modal.find("input[name=id]").val(server ? server.ID : null);
   modal.find("input[name=name]").val(server ? server.Name : null);
   modal.find("input[name=Tag]").val(server ? server.Tag : null);
+  modal.find("input[name=DDNSDomain]").val(server ? server.DDNSDomain : null);
   modal
     .find("input[name=DisplayIndex]")
     .val(server ? server.DisplayIndex : null);
@@ -320,6 +321,11 @@ function addOrEditServer(server, conf) {
     modal.find(".ui.hideforguest.checkbox").checkbox("set checked");
   } else {
     modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
+  }
+  if (server && server.EnableDDNS) {
+    modal.find(".ui.enableddns.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.enableddns.checkbox").checkbox("set unchecked");
   }
   showFormModal(".server.modal", "#serverForm", "/api/server");
 }

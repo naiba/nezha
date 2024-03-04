@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.6"
+NZ_VERSION="v0.15.9"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -94,7 +94,7 @@ pre_check() {
             Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
         else
             GITHUB_RAW_URL="gitee.com/naibahq/nezha/raw/master"
-            GITHUB_URL="kkgithub.com"
+            GITHUB_URL="dn-dao-github-mirror.daocloud.io"
             Get_Docker_URL="get.docker.com"
             Get_Docker_Argu=" -s docker --mirror Aliyun"
             Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
@@ -159,7 +159,7 @@ install_arch() {
                                         cd /tmp; git clone https://aur.archlinux.org/libsepol.git; cd libsepol; makepkg -si --noconfirm --asdeps; cd ..;
                                         git clone https://aur.archlinux.org/libselinux.git; cd libselinux; makepkg -si --noconfirm; cd ..;
                                         rm -rf libsepol libselinux'
-        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel nezha-agent
+        sed -i '/nezha-agent/d' /etc/sudoers && sleep 30s && killall -u nezha-agent && userdel -r nezha-agent
         echo -e "${red}提示: ${plain}已删除用户nezha-agent，请务必手动核查一遍！\n"
         ;;
     [nN][oO] | [nN])
@@ -269,7 +269,8 @@ install_dashboard_standalone() {
 
 selinux() {
     #判断当前的状态
-    if [ "$os_alpine" != 1 ]; then
+    command -v getenforce >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
         getenforce | grep '[Ee]nfor'
         if [ $? -eq 0 ]; then
             echo -e "SELinux是开启状态，正在关闭！"

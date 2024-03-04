@@ -44,9 +44,13 @@ type commonPage struct {
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
 	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
-	cr.GET("/terminal/:id", cp.terminal)
+	cr.Use(mygin.PreferredTheme)
 	cr.POST("/view-password", cp.issueViewPassword)
-	cr.Use(cp.checkViewPassword) // 前端查看密码鉴权
+	cr.GET("/terminal/:id", cp.terminal)
+	cr.Use(mygin.ValidateViewPassword(mygin.ValidateViewPasswordOption{
+		IsPage:        true,
+		AbortWhenFail: true,
+	}))
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
 	// TODO: 界面直接跳转使用该接口
@@ -63,6 +67,7 @@ type viewPasswordForm struct {
 func (p *commonPage) issueViewPassword(c *gin.Context) {
 	var vpf viewPasswordForm
 	err := c.ShouldBind(&vpf)
+	log.Println("bingo", vpf)
 	var hash []byte
 	if err == nil && vpf.Password != singleton.Conf.Site.ViewPassword {
 		err = errors.New(singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "WrongAccessPassword"}))
@@ -85,31 +90,6 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
-func (p *commonPage) checkViewPassword(c *gin.Context) {
-	if singleton.Conf.Site.ViewPassword == "" {
-		c.Next()
-		return
-	}
-	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); authorized {
-		c.Next()
-		return
-	}
-
-	// 验证查看密码
-	viewPassword, _ := c.Cookie(singleton.Conf.Site.CookieName + "-vp")
-	if err := bcrypt.CompareHashAndPassword([]byte(viewPassword), []byte(singleton.Conf.Site.ViewPassword)); err != nil {
-		c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/viewpassword", mygin.CommonEnvironment(c, gin.H{
-			"Title":      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "VerifyPassword"}),
-			"CustomCode": singleton.Conf.Site.CustomCode,
-		}))
-		c.Abort()
-		return
-	}
-
-	c.Set(model.CtxKeyViewPasswordVerified, true)
-	c.Next()
-}
-
 func (p *commonPage) service(c *gin.Context) {
 	res, _, _ := p.requestGroup.Do("servicePage", func() (interface{}, error) {
 		singleton.AlertsLock.RLock()
@@ -128,7 +108,7 @@ func (p *commonPage) service(c *gin.Context) {
 			stats, statsStore,
 		}, nil
 	})
-	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/service", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/service"), mygin.CommonEnvironment(c, gin.H{
 		"Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
 		"Services":           res.([]interface{})[0],
 		"CycleTransferStats": res.([]interface{})[1],
@@ -234,7 +214,7 @@ func (cp *commonPage) network(c *gin.Context) {
 		Servers: servers,
 	})
 
-	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/network", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/network"), mygin.CommonEnvironment(c, gin.H{
 		"Servers":         string(serversBytes),
 		"MonitorInfos":    string(monitorInfos),
 		"CustomCode":      singleton.Conf.Site.CustomCode,
@@ -280,7 +260,7 @@ func (cp *commonPage) home(c *gin.Context) {
 		}, true)
 		return
 	}
-	c.HTML(http.StatusOK, "theme-"+singleton.Conf.Site.Theme+"/home", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/home"), mygin.CommonEnvironment(c, gin.H{
 		"Servers":    string(stat),
 		"CustomCode": singleton.Conf.Site.CustomCode,
 	}))

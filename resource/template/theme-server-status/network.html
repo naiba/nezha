@@ -21,14 +21,17 @@
 <script>
     const monitorInfo =  JSON.parse('{{.MonitorInfos}}');
     const initData = JSON.parse('{{.Servers}}').servers;
-    let MaxTCPPingValue = {{.MaxTCPPingValue}};
+    let MaxTCPPingValue = {{.Conf.MaxTCPPingValue}};
     if (MaxTCPPingValue == null) {
-        MaxTCPPingValue = 300;
+        MaxTCPPingValue = 1000;
     }
     new Vue({
         el: '#app',
         delimiters: ['@#', '#@'],
         data: {
+            page: 'network',
+            defaultTemplate: {{.Conf.Site.Theme}},
+            templates: {{.Themes}},
             servers: initData,
             option: {
                 tooltip: {
@@ -70,7 +73,7 @@
                 },
                 dataZoom: [
                     {
-                        start: 94,
+                        start: 0,
                         end: 100
                     }
                 ],
@@ -80,19 +83,16 @@
                 },
                 yAxis: {
                     type: 'value',
-                    boundaryGap: [0, '100%']
+                    boundaryGap: false
                 },
                 series: [],
             },
             chartOnOff: true,
         },
         mixins: [mixinsVue],
-        created() {
-            this.initTheme();
-        },
         mounted() {
             this.renderChart();
-             this.parseMonitorInfo(monitorInfo);
+            this.parseMonitorInfo(monitorInfo);
         },
         methods: {
             getFontLogoClass(str) {
@@ -153,15 +153,15 @@
                 return '';
             },
             redirectNetwork(id) {
-                    this.getMonitorHistory(id)
-                    .then(function(monitorInfo) {
-                          var vm = app.__vue__;
-                          vm.parseMonitorInfo(monitorInfo);
-                    })
-                    .catch(function(error){
-                        window.location.href = "/404";
-                    })
-                },
+                this.getMonitorHistory(id)
+                .then(function(monitorInfo) {
+                      var vm = app.__vue__;
+                      vm.parseMonitorInfo(monitorInfo);
+                })
+                .catch(function(error){
+                    window.location.href = "/404";
+                })
+            },
             getMonitorHistory(id) {
                   return $.ajax({
                     url: "/api/v1/monitor/"+id,
@@ -175,11 +175,13 @@
                     let loss = 0;
                     let data = [];
                     for (let j = 0; j < monitorInfo.result[i].created_at.length; j++) {
-                        avgDelay = monitorInfo.result[i].avg_delay[j];
+                        avgDelay = Math.round(monitorInfo.result[i].avg_delay[j]);
                         if (avgDelay > 0.9 * MaxTCPPingValue) {
                             loss += 1
                         }
-                        data.push([monitorInfo.result[i].created_at[j], avgDelay]);
+                        if (avgDelay > 0) {
+                            data.push([monitorInfo.result[i].created_at[j], avgDelay]);
+                        }
                     }
                     lossRate = ((loss / monitorInfo.result[i].created_at.length) * 100).toFixed(1);
                     legendName = monitorInfo.result[i].monitor_name +" "+ lossRate + "%";
@@ -189,7 +191,13 @@
                             type: 'line',
                             smooth: true,
                             symbol: 'none',
-                            data: data
+                            data: data,
+                            markPoint: {
+                                data: [
+                                    { type: 'max', symbol: 'pin', name: 'Max', itemStyle: { color: '#f00' } },
+                                    { type: 'min', symbol: 'pin', name: 'Min', itemStyle: { color: '#0f0' } }
+                                ]
+                            }
                     });
                 }
                 this.option.title.text = monitorInfo.result[0].server_name;
@@ -214,4 +222,3 @@
 </script>
 {{template "theme-server-status/footer" .}}
 {{end}}
-

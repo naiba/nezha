@@ -1,10 +1,10 @@
 {{define "theme-default/network"}}
-{{template "common/header" .}}
+{{template "theme-default/header" .}}
 {{if ts .CustomCode}}
 {{.CustomCode|safe}}
 {{end}}
-{{template "common/menu" .}}
-<div class="nb-container" id="app">
+{{template "theme-default/menu" .}}
+<div class="nb-container">
     <div class="ui container">
         <div class="service-status">
             <table class="ui celled table">
@@ -22,13 +22,12 @@
     </div>
 </div>
 
-{{template "common/footer" .}}
-<script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/echarts/5.3.0-rc.1/echarts.min.js"></script>
+{{template "theme-default/footer" .}}
 
 <script>
     const monitorInfo =  JSON.parse('{{.MonitorInfos}}');
     const initData = JSON.parse('{{.Servers}}').servers;
-    let MaxTCPPingValue = {{.MaxTCPPingValue}};
+    let MaxTCPPingValue = {{.Conf.MaxTCPPingValue}};
     if (MaxTCPPingValue == null) {
         MaxTCPPingValue = 1000;
     }
@@ -36,6 +35,9 @@
         el: '#app',
         delimiters: ['@#', '#@'],
         data: {
+            page: 'network',
+            defaultTemplate: {{.Conf.Site.Theme}},
+            templates: {{.Themes}},
             servers: initData,
             option: {
                 tooltip: {
@@ -93,6 +95,7 @@
             },
             chartOnOff: true,
         },
+        mixins: [mixinsVue],
         mounted() {
             this.renderChart();
              this.parseMonitorInfo(monitorInfo);

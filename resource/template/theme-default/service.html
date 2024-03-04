@@ -1,9 +1,9 @@
 {{define "theme-default/service"}}
-{{template "common/header" .}}
+{{template "theme-default/header" .}}
 {{if ts .CustomCode}}
 {{.CustomCode|safe}}
 {{end}}
-{{template "common/menu" .}}
+{{template "theme-default/menu" .}}
 <div class="nb-container">
     <div class="ui container">
         <div class="service-status">
@@ -76,10 +76,21 @@
                     {{end}}
                 </tbody>
             </table>
-
             {{end}}
         </div>
     </div>
 </div>
-{{template "common/footer" .}}
+{{template "theme-default/footer" .}}
+<script>
+    new Vue({
+        el: '#app',
+        delimiters: ['@#', '#@'],
+        data: {
+            page: 'service',
+            defaultTemplate: {{.Conf.Site.Theme}},
+            templates: {{.Themes}}
+        },
+        mixins: [mixinsVue]
+    })
+</script>
 {{end}}

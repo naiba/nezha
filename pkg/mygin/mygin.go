@@ -24,6 +24,7 @@ func CommonEnvironment(c *gin.Context, data map[string]interface{}) gin.H {
 	data["MatchedPath"] = c.MustGet("MatchedPath")
 	data["Version"] = singleton.Version
 	data["Conf"] = singleton.Conf
+	data["Themes"] = model.Themes
 	// 是否是管理页面
 	data["IsAdminPage"] = adminPage[data["MatchedPath"].(string)]
 	// 站点标题

@@ -615,3 +615,21 @@ other = "网络"
 
 [EnableShowInService]
 other = "在服务中显示"
+
+[EnableDDNS]
+other = "启用DDNS"
+
+[DDNSDomain]
+other = "DDNS域名"
+
+[Feature]
+other = "功能"
+
+[Template]
+other = "主题"
+
+[Stat]
+other = "信息"
+
+[DisableSwitchTemplateInFrontend]
+other = "禁止前台切换模板"

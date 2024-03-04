@@ -12,19 +12,19 @@ import (
 )
 
 type AuthorizeOption struct {
-	Guest    bool
-	Member   bool
-	IsPage   bool
-	AllowAPI bool
-	Msg      string
-	Redirect string
-	Btn      string
+	GuestOnly  bool
+	MemberOnly bool
+	IsPage     bool
+	AllowAPI   bool
+	Msg        string
+	Redirect   string
+	Btn        string
 }
 
 func Authorize(opt AuthorizeOption) func(*gin.Context) {
 	return func(c *gin.Context) {
 		var code = http.StatusForbidden
-		if opt.Guest {
+		if opt.GuestOnly {
 			code = http.StatusBadRequest
 		}
 
@@ -67,13 +67,15 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 				}
 			}
 		}
+
 		// 已登录且只能游客访问
-		if isLogin && opt.Guest {
+		if isLogin && opt.GuestOnly {
 			ShowErrorPage(c, commonErr, opt.IsPage)
 			return
 		}
+
 		// 未登录且需要登录
-		if !isLogin && opt.Member {
+		if !isLogin && opt.MemberOnly {
 			ShowErrorPage(c, commonErr, opt.IsPage)
 			return
 		}

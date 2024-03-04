@@ -398,7 +398,7 @@ other = "Virtualization"
 other = "Swap"
 
 [NetTransfer]
-other = "Network Transfer"
+other = "Transfer"
 
 [Load]
 other = "Load"
@@ -419,7 +419,7 @@ other = "Last Active"
 other = "Version"
 
 [NetSpeed]
-other = "Network Speed"
+other = "Speed"
 
 [Uptime]
 other = "Uptime"
@@ -615,3 +615,21 @@ other = "Network"
 
 [EnableShowInService]
 other = "Enable Show in Service"
+
+[EnableDDNS]
+other = "Enable DDNS"
+
+[DDNSDomain]
+other = "DDNS Domain"
+
+[Feature]
+other = "Feature"
+
+[Template]
+other = "Template"
+
+[Stat]
+other = "Stat"
+
+[DisableSwitchTemplateInFrontend]
+other = "Disable Switch Template in Frontend"

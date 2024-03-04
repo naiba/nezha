@@ -3,6 +3,9 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/naiba/nezha/pkg/ddns"
+	"github.com/naiba/nezha/pkg/utils"
+	"log"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -110,6 +113,36 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	host := model.PB2Host(r)
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
+
+	// 检查并更新DDNS
+	if singleton.Conf.DDNS.Enable &&
+		singleton.ServerList[clientID].EnableDDNS &&
+		singleton.ServerList[clientID].Host != nil &&
+		host.IP != "" &&
+		singleton.ServerList[clientID].Host.IP != host.IP {
+
+		serverDomain := singleton.ServerList[clientID].DDNSDomain
+		provider, err := singleton.GetDDNSProviderFromString(singleton.Conf.DDNS.Provider)
+		if err == nil && serverDomain != "" {
+			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
+			maxRetries := int(singleton.Conf.DDNS.MaxRetries)
+			config := &ddns.DomainConfig{
+				EnableIPv4: true,
+				EnableIpv6: true,
+				FullDomain: serverDomain,
+				Ipv4Addr:   ipv4,
+				Ipv6Addr:   ipv6,
+			}
+			go singleton.RetryableUpdateDomain(provider, config, maxRetries)
+
+		} else {
+			// 虽然会在启动时panic, 可以断言不会走这个分支, 但是考虑到动态加载配置或者其它情况, 这里输出一下方便检查奇奇怪怪的BUG
+			log.Printf("NEZHA>> 未找到对应的DDNS提供者(%s), 请前往config.yml检查你的设置\n", singleton.Conf.DDNS.Provider)
+		}
+
+	}
+
+	// 发送IP变动通知
 	if singleton.Conf.EnableIPChangeNotification &&
 		((singleton.Conf.Cover == model.ConfigCoverAll && !singleton.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
 			(singleton.Conf.Cover == model.ConfigCoverIgnoreAll && singleton.Conf.IgnoredIPNotificationServerIDs[clientID])) &&

@@ -28,11 +28,11 @@ type memberAPI struct {
 func (ma *memberAPI) serve() {
 	mr := ma.r.Group("")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
-		Member:   true,
-		IsPage:   false,
-		Msg:      "访问此接口需要登录",
-		Btn:      "点此登录",
-		Redirect: "/login",
+		MemberOnly: true,
+		IsPage:     false,
+		Msg:        "访问此接口需要登录",
+		Btn:        "点此登录",
+		Redirect:   "/login",
 	}))
 
 	mr.GET("/search-server", ma.searchServer)
@@ -300,6 +300,8 @@ type serverForm struct {
 	Tag          string
 	Note         string
 	HideForGuest string
+	EnableDDNS   string
+	DDNSDomain   string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -315,6 +317,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Tag = sf.Tag
 		s.Note = sf.Note
 		s.HideForGuest = sf.HideForGuest == "on"
+		s.EnableDDNS = sf.EnableDDNS == "on"
+		s.DDNSDomain = sf.DDNSDomain
 		if s.ID == 0 {
 			s.Secret, err = utils.GenerateRandomString(18)
 			if err == nil {
@@ -440,10 +444,12 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 				err = singleton.DB.Save(&m).Error
 			}
 		}
-		if m.Cover == 0 {
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
-		} else {
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id not in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
+		if err == nil {
+			if m.Cover == 0 {
+				err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
+			} else {
+				err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id not in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
+			}
 		}
 	}
 	if err == nil {
@@ -852,8 +858,9 @@ type settingForm struct {
 	GRPCHost                string
 	Cover                   uint8
 
-	EnableIPChangeNotification  string
-	EnablePlainIPInNotification string
+	EnableIPChangeNotification      string
+	EnablePlainIPInNotification     string
+	DisableSwitchTemplateInFrontend string
 }
 
 func (ma *memberAPI) updateSetting(c *gin.Context) {
@@ -901,6 +908,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.Language = sf.Language
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
+	singleton.Conf.DisableSwitchTemplateInFrontend = sf.DisableSwitchTemplateInFrontend == "on"
 	singleton.Conf.Cover = sf.Cover
 	singleton.Conf.GRPCHost = sf.GRPCHost
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification

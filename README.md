@@ -4,7 +4,7 @@
   <br>
   <small><i>LOGO designed by <a href="https://xio.ng" target="_blank">熊大</a> .</i></small>
   <br><br>
-<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&style=for-the-badge&logo=github&label=Dashboard">&nbsp;<img src="https://img.shields.io/github/v/release/nezhahq/agent?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/actions/workflow/status/nezhahq/agent/agent.yml?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.15.6-brightgreen?style=for-the-badge&logo=linux">
+<img alt="GitHub release (with filter)" src="https://img.shields.io/github/v/release/naiba/nezha?color=brightgreen&style=for-the-badge&logo=github&label=Dashboard">&nbsp;<img src="https://img.shields.io/github/v/release/nezhahq/agent?color=brightgreen&label=Agent&style=for-the-badge&logo=github">&nbsp;<img src="https://img.shields.io/github/actions/workflow/status/nezhahq/agent/agent.yml?label=Agent%20CI&logo=github&style=for-the-badge">&nbsp;<img src="https://img.shields.io/badge/Installer-v0.15.9-brightgreen?style=for-the-badge&logo=linux">
   <br>
   <br>
   <p>:trollface: <b>Nezha Monitoring: Self-hostable, lightweight, servers and websites monitoring and O&M tool.</b></p>
@@ -68,6 +68,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/spiritLHLS" title="spiritlhl">
   <img src="https://avatars.githubusercontent.com/u/103393591?v=4" width="50;" alt="spiritlhl"/>
 </a>
+<a href="https://github.com/nap0o" title="nap0o">
+  <img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/>
+</a>
 <a href="https://github.com/liuyanxi975" title="刘颜溪">
   <img src="https://avatars.githubusercontent.com/u/24417037?v=4" width="50;" alt="刘颜溪"/>
 </a>
@@ -83,14 +86,14 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/hhhkkk520" title="Kris">
   <img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/>
 </a>
+<a href="https://github.com/1ridic" title="1ridic">
+  <img src="https://avatars.githubusercontent.com/u/88495501?v=4" width="50;" alt="1ridic"/>
+</a>
 <a href="https://github.com/Mmx233" title="Mmx">
   <img src="https://avatars.githubusercontent.com/u/36563672?v=4" width="50;" alt="Mmx"/>
 </a>
 <a href="https://github.com/rootmelo92118" title="rootmelo92118">
   <img src="https://avatars.githubusercontent.com/u/32770959?v=4" width="50;" alt="rootmelo92118"/>
-</a>
-<a href="https://github.com/1ridic" title="1ridic">
-  <img src="https://avatars.githubusercontent.com/u/88495501?v=4" width="50;" alt="1ridic"/>
 </a>
 <a href="https://github.com/iilemon" title="Sean">
   <img src="https://avatars.githubusercontent.com/u/33201711?v=4" width="50;" alt="Sean"/>
@@ -101,6 +104,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/ch8o" title="no-name-now">
   <img src="https://avatars.githubusercontent.com/u/9103372?v=4" width="50;" alt="no-name-now"/>
 </a>
+<a href="https://github.com/DarcJC" title="Darc Z.">
+  <img src="https://avatars.githubusercontent.com/u/53445798?v=4" width="50;" alt="Darc Z."/>
+</a>
 <a href="https://github.com/Creling" title="Creling">
   <img src="https://avatars.githubusercontent.com/u/43109504?v=4" width="50;" alt="Creling"/>
 </a>
@@ -110,14 +116,17 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/colour93" title="玖叁">
   <img src="https://avatars.githubusercontent.com/u/64313711?v=4" width="50;" alt="玖叁"/>
 </a>
+<a href="https://github.com/arkylin" title="凌">
+  <img src="https://avatars.githubusercontent.com/u/35104502?v=4" width="50;" alt="凌"/>
+</a>
 <a href="https://github.com/ysicing" title="缘生">
   <img src="https://avatars.githubusercontent.com/u/8605565?v=4" width="50;" alt="缘生"/>
 </a>
+<a href="https://github.com/xykt" title="xykt">
+  <img src="https://avatars.githubusercontent.com/u/152045469?v=4" width="50;" alt="xykt"/>
+</a>
 <a href="https://github.com/unclezs" title="unclezs">
   <img src="https://avatars.githubusercontent.com/u/42318775?v=4" width="50;" alt="unclezs"/>
-</a>
-<a href="https://github.com/nap0o" title="nap0o">
-  <img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/>
 </a>
 <a href="https://github.com/yuanweize" title="I">
   <img src="https://avatars.githubusercontent.com/u/30067203?v=4" width="50;" alt="I"/>
@@ -145,6 +154,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 </a>
 <a href="https://github.com/techotaku" title="Ian Li">
   <img src="https://avatars.githubusercontent.com/u/1948179?v=4" width="50;" alt="Ian Li"/>
+</a>
+<a href="https://github.com/HsukqiLee" title="HsukqiLee">
+  <img src="https://avatars.githubusercontent.com/u/79034142?v=4" width="50;" alt="HsukqiLee"/>
 </a>
 <a href="https://github.com/GreenTeodoro839" title="GreenTeodoro839">
   <img src="https://avatars.githubusercontent.com/u/77104800?v=4" width="50;" alt="GreenTeodoro839"/>

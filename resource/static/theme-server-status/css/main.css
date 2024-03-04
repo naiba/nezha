@@ -6,57 +6,119 @@ body {
 /* 导航部分 开始*/
 .navbar {
     min-height: 40px !important;
-}
-
-.navbar-inner{
     margin:0 auto;
+    font-size: 14px;
 }
 
-.pl-md-unset {
+.navbar .container{
     max-width: 95vw;
+    margin: 0 auto;
 }
 
-.navbar-collapse:not([aria-expanded]) .navbar-nav .dropdown-toggle {
+.navbar-inverse{
+    background-image: none;
+    background-color: #1C2127;
+    box-shadow: 0 1px 40px -8px #00000080;
+}
+
+.navbar-inverse .navbar-toggle:focus,
+.navbar-inverse .navbar-toggle:hover {
+    background-color: #1C2127;
+}
+
+.navbar .navbar-collapse:not([aria-expanded]) .navbar-nav .dropdown-toggle {
     margin-top: 18px;
     padding: 0 !important;
 }
 
-.navbar-toggle {
+.navbar .navbar-toggle {
     margin-right:0
 }
 
-.navbar-brand {
+.navbar .navbar-brand {
     font-size: 20px;
     text-align: center;
     padding:12px 0 0 0;
+    margin-right:30px;
 }
 
-.node-cell-expand {
-    max-width: 420px;
+.navbar .node-cell-expand {
     word-break: break-all;
 }
 
-.node-cell-expand-label {
-    margin-right: 5px;
+.navbar .node-cell-expand-label {
+    /*margin-right: 5px;*/
 }
 
-.dropdown .dropdown-toggle {
+.navbar .dropdown .dropdown-toggle {
     padding-bottom: 10px;
     padding-top: 10px;
 }
 
-.navbar-inverse, .nav.navbar-nav {
-    background-image: linear-gradient(rgb(60, 60, 60) 0px, rgb(34, 34, 34) 100%) !important;
+.navbar .navbar-nav {
+    margin:0px -15px;
 }
 
-.navbar-inverse .navbar-nav>li>a {
+.navbar .navbar-nav>li>a {
     color:#f1f1f1;
 }
 
-.navbar-inverse .navbar-brand {
-    font-size: 20px;
+.navbar-nav li a span{
+    margin-right: 4px;
 }
+
+.navbar .navbar-collapse{
+    max-height: 500px;
+}
+
 /* 导航部分 结束 */
+
+
+/* toolbox 开始 */
+
+.toolbox {
+    position: fixed;
+    bottom:20px;
+    right: 12px;
+    z-index: 999999;
+}
+
+.toolbox span{
+    display: block;
+    width: 2.75rem;
+    margin-bottom: 10px;
+}
+
+.toolbox i{
+    display: block;
+    color: rgba(241,241,241,1);
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 1.5rem;
+    height: 2.75rem;
+    width: 2.75rem;
+    line-height: 2.75rem;
+    text-align: center;
+}
+
+.toolbox .toggleView i.show-nogroup {
+    font-size: 1.85rem;
+}
+
+.toolbox .setTheme i.setTheme-dark {
+    font-size: 1.35rem;
+}
+
+.toolbox .setTheme i.setTheme-light {
+    font-size: 1.45rem;
+}
+
+.toolbox .showGoTop i.goTop {
+    font-size: 1.55rem;
+}
+
+/* toolbox 结束 */
+
 
 /* 正文部分 开始 */
 .content {
@@ -75,13 +137,38 @@ body {
     text-align: left;
 }
 
-.table>thead>tr>th{
-  border:none;  
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th {
+    position: relative;
+    border:none; 
+    line-height:20px;
 }
 
-.table .node-group-tag {
+.table > tbody > tr > td:before,
+.table > tbody > tr > th:before,
+.table > tfoot > tr > td:before,
+.table > tfoot > tr > th:before,
+.table > thead > tr > td:before,
+.table > thead > tr > th:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 0.7px;
+}
+
+.table .node-group-tag th{
     font-size: 18px;
     padding-bottom:15px;
+}
+
+.table .node-cell-os-text {
+    text-transform: capitalize;
 }
 
 .progress {
@@ -92,7 +179,6 @@ body {
     text-align: center !important;
     padding-left: 5px;
 }
-
 
 .expandRow > td {
     padding: 0 !important;
@@ -131,25 +217,49 @@ body {
 }
 
 .node-cell.network {
-    min-width: 110px;
-    max-width: 110px;
+    min-width: 100px;
+    max-width: 100px;
 }
 
-.node-cell.cpu, .node-cell.ram, .node-cell.hdd {
-    min-width: 45px;
-    max-width: 90px;
+.node-cell.traffic {
+    min-width: 100px;   
+}
+
+.node-cell.cpu, .node-cell.ram, .node-cell.hdd, .node-cell.memory {
+    min-width: 50px;
+    max-width: 50px;
 }
 
 /*正文结束*/
 
 /* 服务页 正文*/
+.service-status {
+
+}
+
+.service-status .service-status-th{
+    min-width:60px;
+}
+
+.service-status .service-name-th{
+    min-width:50px;
+}
+
+.service-status .service-averagelatency-th{
+    min-width:80px;
+}
+
+.service-status .service-30daysonline-th{
+    min-width:80px;
+}
+
 .service-status .delay-today {
     display: flex;
     align-items: center;
     justify-content: left;
 }
 
-.service-status .delay-today > i {
+.service-status .delay-today i {
     width: 12px;
     height: 12px;
     border-radius: 50%;
@@ -163,26 +273,29 @@ body {
     width: 18px;
     height: 18px;
     margin-right: 4px;
+    margin-bottom: -3.25px;
     border-radius: 3px;
     box-shadow: inset 0 2px 2px rgba(0, 0, 0, .1);
 }
 
-.service-status {
-
+.service-status .tooltip-inner {
+    max-width: 500px;
 }
+
+
 
 /* 服务页 正文结束 */
 @media only screen and (max-width: 1200px) {
     .accordian-body{
         margin: 5px 0px 5px 10px;        
     }
-    .table .node-group-tag {
+    .table .node-group-tag th{
         font-size:16px;
         padding-bottom:6px;
     }
 }
 
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 767px) {
     body {
         font-size: 10px !important;
         padding-top:60px !important;
@@ -190,6 +303,23 @@ body {
     .content {
         padding: 0;
         margin-bottom: 10px;
+    }
+    .navbar .navbar-nav .open .dropdown-menu>li>a {
+        color: #f1f1f1;
+    }
+    .navbar .navbar-nav .open .dropdown-menu {
+        list-style-image: initial;
+        background-color: #181a1b;
+        border-color: rgba(140, 130, 115, 0.15);
+        box-shadow: rgba(0, 0, 0, 0.18) 0px 6px 12px;
+    }
+    .table > tbody > tr > td:before,
+    .table > tbody > tr > th:before,
+    .table > tfoot > tr > td:before,
+    .table > tfoot > tr > th:before,
+    .table > thead > tr > td:before,
+    .table > thead > tr > th:before {
+        height: 0.5px;
     }
     .node-cell.os,
     .node-cell.uptime,
@@ -208,9 +338,32 @@ body {
     .accordian-body{
         margin: 5px 0px 5px 10px;        
     }
-    .table .node-group-tag {
-        font-size:12px;
+    .table .node-group-tag th{
+        font-size:16px;
         padding-bottom:6px;
+    }
+    .service-status .service-status-th{
+        min-width:30px;
+    }
+    .service-status .delay-today{
+        margin-top:4px;
+        justify-content: center;
+    }
+    .service-status .delay-today i{
+        margin-right:0px;
+    }
+    .service-status .delay-today-text{
+        display: none;
+        visibility: hidden;
+    }
+    .service-status .service-averagelatency-th{
+        min-width:70px;
+    }
+    .service-status .service-30daysonline-th{
+        min-width:75px;
+    }
+    .toolbox {
+        right: 18px;
     }
 }
 
