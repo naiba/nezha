@@ -29,7 +29,7 @@ require (
 	golang.org/x/sync v0.5.0
 	golang.org/x/text v0.14.0
 	google.golang.org/grpc v1.59.0
-	google.golang.org/protobuf v1.31.0
+	google.golang.org/protobuf v1.33.0
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.5
 	sigs.k8s.io/yaml v1.4.0
