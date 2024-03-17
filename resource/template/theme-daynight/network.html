@@ -111,7 +111,7 @@
         const initData = JSON.parse('{{.Servers}}').servers;
         let MaxTCPPingValue = {{.Conf.MaxTCPPingValue}};
 	    if (MaxTCPPingValue == null) {
-	        MaxTCPPingValue = 300;
+	        MaxTCPPingValue = 1000;
 	    }
         // 基于准备好的dom，初始化echarts实例
         var myChart = echarts.init(document.getElementById('monitor-info-container'));
@@ -179,6 +179,10 @@
             mounted() {
                 this.DarkMode();
                 this.parseMonitorInfo(monitorInfo);
+		window.addEventListener('resize', this.resizeHandle);
+            },
+	    destroyed () {
+                window.removeEventListener('resize', this.resizeHandle)
             },
             methods: {
                 DarkMode() {
@@ -239,7 +243,10 @@
                     }
                     myChart.clear();
                     myChart.setOption(this.option);
-                }
+                },
+	        resizeHandle () {
+                    this.myChart.resize();
+                },
             }
         });
     </script>
