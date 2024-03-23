@@ -10,6 +10,14 @@
   .ui.card>.content>.header:not(.ui),.ui.cards>.card>.content>.header:not(.ui) {
     margin-top:0.4em !important;
   }
+  .ui.card>.content>.header,.ui.cards>.card>.content>.header {
+    padding-top: 0.5rem;
+    display: flex;
+    color: rgba(0, 0, 0, .85);
+    align-items: center;
+    padding-bottom: .2em;
+    border-bottom: 1px solid rgba(0, 0, 0, .2);
+  }
   .ui.menu .item>img:not(.ui){
     width: 2.2rem;
   }
