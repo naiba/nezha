@@ -17,7 +17,7 @@
             </table>
         </div>
     </div>
-    <div class="ui container" style="max-width: 95vw">
+    <div class="ui container">
         <div ref="chartDom" style="border-radius: 28px; margin-top: 15px;height: 520px;max-width: 1400px;overflow: hidden"></div>
     </div>
 </div>
@@ -67,6 +67,10 @@
                         fontSize: 14
                     }
                 },
+                grid: {
+                    left: '8%',
+                    right: '8%',
+                },
                 backgroundColor: 'rgba(255, 255, 255, 0.8)',
                 toolbox: {
                     feature: {
@@ -98,7 +102,11 @@
         mixins: [mixinsVue],
         mounted() {
             this.renderChart();
-             this.parseMonitorInfo(monitorInfo);
+            this.parseMonitorInfo(monitorInfo);
+            window.addEventListener('resize', this.resizeHandle);
+        },
+        destroyed () {
+            window.removeEventListener('resize', this.resizeHandle)
         },
         methods: {
             getFontLogoClass(str) {
@@ -218,6 +226,9 @@
             renderChart() {
               this.myChart = echarts.init(this.$refs.chartDom);
               this.myChart.setOption(this.option);
+            },
+            resizeHandle () {
+              this.myChart.resize();
             },
         },
         beforeDestroy() {
