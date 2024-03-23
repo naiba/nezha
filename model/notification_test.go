@@ -5,8 +5,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-
-	"github.com/stretchr/testify/assert"
 )
 
 var (
@@ -85,21 +83,37 @@ func execCase(t *testing.T, item testSt) {
 		Server:       &server,
 		Loc:          time.Local,
 	}
-	assert.Equal(t, item.expectURL, ns.reqURL(msg))
+	if item.expectURL != ns.reqURL(msg) {
+		t.Fatalf("Expected %s, but got %s", item.expectURL, ns.reqURL(msg))
+	}
 	reqBody, err := ns.reqBody(msg)
-	assert.Nil(t, err)
-	assert.Equal(t, item.expectBody, reqBody)
+	if err != nil {
+		t.Fatalf("Error: %s", err)
+	}
+	if item.expectBody != reqBody {
+		t.Fatalf("Expected %s, but got %s", item.expectBody, reqBody)
+	}
 	reqMethod, err := n.reqMethod()
-	assert.Nil(t, err)
-	assert.Equal(t, item.expectMethod, reqMethod)
+	if err != nil {
+		t.Fatalf("Error: %s", err)
+	}
+	if item.expectMethod != reqMethod {
+		t.Fatalf("Expected %s, but got %s", item.expectMethod, reqMethod)
+	}
 
 	req, err := http.NewRequest("", "", strings.NewReader(""))
-	assert.Nil(t, err)
+	if err != nil {
+		t.Fatalf("Error: %s", err)
+	}
 	n.setContentType(req)
-	assert.Equal(t, item.expectContentType, req.Header.Get("Content-Type"))
+	if item.expectContentType != req.Header.Get("Content-Type") {
+		t.Fatalf("Expected %s, but got %s", item.expectContentType, req.Header.Get("Content-Type"))
+	}
 	n.setRequestHeader(req)
 	for k, v := range item.expectHeader {
-		assert.Equal(t, v, req.Header.Get(k))
+		if v != req.Header.Get(k) {
+			t.Fatalf("Expected %s, but got %s", v, req.Header.Get(k))
+		}
 	}
 }
 
