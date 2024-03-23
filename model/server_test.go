@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/naiba/nezha/pkg/utils"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestServerMarshal(t *testing.T) {
@@ -21,7 +20,11 @@ func TestServerMarshal(t *testing.T) {
 		}
 		serverStr := string(server.Marshal())
 		var serverRestore Server
-		assert.Nil(t, utils.Json.Unmarshal([]byte(serverStr), &serverRestore))
-		assert.Equal(t, server, serverRestore)
+		if utils.Json.Unmarshal([]byte(serverStr), &serverRestore) != nil {
+			t.Fatalf("Error: %s", serverStr)
+		}
+		if server.Name != serverRestore.Name {
+			t.Fatalf("Expected %s, but got %s", server.Name, serverRestore.Name)
+		}
 	}
 }

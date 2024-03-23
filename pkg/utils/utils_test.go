@@ -2,8 +2,6 @@ package utils
 
 import (
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 type testSt struct {
@@ -36,7 +34,9 @@ func TestNotification(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		assert.Equal(t, IPDesensitize(c.input), c.output)
+		if c.output != IPDesensitize(c.input) {
+			t.Fatalf("Expected %s, but got %s", c.output, IPDesensitize(c.input))
+		}
 	}
 }
 
@@ -44,9 +44,15 @@ func TestGenerGenerateRandomString(t *testing.T) {
 	generatedString := make(map[string]bool)
 	for i := 0; i < 100; i++ {
 		str, err := GenerateRandomString(32)
-		assert.Nil(t, err)
-		assert.Equal(t, len(str), 32)
-		assert.False(t, generatedString[str])
+		if err != nil {
+			t.Fatalf("Error: %s", err)
+		}
+		if len(str) != 32 {
+			t.Fatalf("Expected 32, but got %d", len(str))
+		}
+		if generatedString[str] {
+			t.Fatalf("Duplicated string: %s", str)
+		}
 		generatedString[str] = true
 	}
 }
