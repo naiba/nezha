@@ -15,7 +15,7 @@
             <div v-for="server in group.data" :id="server.ID" class="ui card">
               <div class="content" v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                 <div class="header">
-                <i :class="'fi fi-' + server.Host.CountryCode"></i>&nbsp;<i v-if='server.Host.Platform == "darwin"'
+                <i style="width: 22px;border-radius: 4px;" :class="'fi fi-' + server.Host.CountryCode"></i>&nbsp;<i v-if='server.Host.Platform == "darwin"'
                     class="apple icon"></i><i v-else-if='isWindowsPlatform(server.Host.Platform)'
                     class="windows icon"></i><i v-else :class="'fl-' + getFontLogoClass(server.Host.Platform)"></i>
                   @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@
