@@ -143,7 +143,7 @@ select_version() {
     if [[ -z $IS_DOCKER_NEZHA ]]; then
         echo -e "${yellow}请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）：\n1. Docker\n2. 独立安装${plain}"
         while true; do
-            read -e -r -p "请输入数字 [1-2]：" option
+            read -e -r -p "请输入选择 [1-2]：" option
             case "${option}" in
                 1)
                     IS_DOCKER_NEZHA=1
@@ -154,7 +154,7 @@ select_version() {
                     break
                     ;;
                 *)
-                    echo "输入有误，请重新输入"
+                    echo "${red}请输入正确的数字 [1-2]${plain}"
                     ;;
             esac
         done
