@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.9"
+NZ_VERSION="v0.16.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -100,22 +100,64 @@ pre_check() {
             Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
         fi
     fi
-
 }
 
-confirm() {
-    if [[ $# > 1 ]]; then
-        echo && read -e -p "$1 [默认$2]: " temp
-        if [[ x"${temp}" == x"" ]]; then
-            temp=$2
+installation_check() {
+    if docker compose version >/dev/null 2>&1; then
+        DOCKER_COMPOSE_COMMAND="docker compose"
+        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
+            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
+            if [ -n "$NEZHA_IMAGES" ]; then
+                echo "存在带有 nezha-dashboard 仓库的 Docker 镜像："
+                echo "$NEZHA_IMAGES"
+                IS_DOCKER_NEZHA=1
+                FRESH_INSTALL=0
+                return
+            else
+                echo "未找到带有 nezha-dashboard 仓库的 Docker 镜像。"
+            fi
         fi
-    else
-        read -e -p "$1 [y/n]: " temp
+    elif command -v docker-compose >/dev/null 2>&1; then
+        DOCKER_COMPOSE_COMMAND="docker-compose"
+        if $DOCKER_COMPOSE_COMMAND -f "$NZ_DASHBOARD_PATH/docker-compose.yaml" config >/dev/null 2>&1; then
+            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
+            if [ -n "$NEZHA_IMAGES" ]; then
+                echo "存在带有 nezha-dashboard 仓库的 Docker 镜像："
+                echo "$NEZHA_IMAGES"
+                IS_DOCKER_NEZHA=1
+                FRESH_INSTALL=0
+                return
+            else
+                echo "未找到带有 nezha-dashboard 仓库的 Docker 镜像。"
+            fi
+        fi
     fi
-    if [[ x"${temp}" == x"y" || x"${temp}" == x"Y" ]]; then
-        return 0
-    else
-        return 1
+
+    if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
+        IS_DOCKER_NEZHA=0
+        FRESH_INSTALL=0
+    fi
+}
+
+select_version() {
+    if [[ -z $IS_DOCKER_NEZHA ]]; then
+        echo -e "${yellow}请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）：\n1. Docker\n2. 独立安装${plain}"
+        while true; do
+            read -e -r -p "请输入选择 [1-2]：" option
+            case "${option}" in
+                1)
+                    IS_DOCKER_NEZHA=1
+                    break
+                    ;;
+                2)
+                    IS_DOCKER_NEZHA=0
+                    break
+                    ;;
+                *)
+                    echo "${red}请输入正确的数字 [1-2]${plain}"
+                    ;;
+            esac
+        done
     fi
 }
 
@@ -186,7 +228,7 @@ install_dashboard() {
     echo -e "> 安装面板"
 
     # 哪吒监控文件夹
-    if [ ! -d "${NZ_DASHBOARD_PATH}/docker-compose.yaml" ]; then
+    if [[ ! $FRESH_INSTALL == 0 ]]; then
         mkdir -p $NZ_DASHBOARD_PATH
     else
         echo "您可能已经安装过面板端，重复安装会覆盖数据，请注意备份。"
@@ -208,17 +250,10 @@ install_dashboard() {
 
     chmod 777 -R $NZ_DASHBOARD_PATH
 
-    command -v docker >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "正在安装 Docker"
-        bash <(curl -sL https://${Get_Docker_URL}) ${Get_Docker_Argu} >/dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echo -e "${red}下载脚本失败，请检查本机能否连接 ${Get_Docker_URL}${plain}"
-            return 0
-        fi
-        systemctl enable docker.service
-        systemctl start docker.service
-        echo -e "${green}Docker${plain} 安装成功"
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        install_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        install_dashboard_standalone
     fi
 
     modify_dashboard_config 0
@@ -228,42 +263,33 @@ install_dashboard() {
     fi
 }
 
-install_dashboard_standalone() {
-    install_base
-
-    echo -e "> 安装面板"
-
-    # 哪吒监控文件夹
-    if [ ! -d "${NZ_DASHBOARD_PATH}/app" ]; then
-        mkdir -p $NZ_DASHBOARD_PATH
-    else
-        echo "您可能已经安装过面板端，重复安装会覆盖数据，请注意备份。"
-        read -e -r -p "是否退出安装? [Y/n] " input
-        case $input in
-        [yY][eE][sS] | [yY])
-            echo "退出安装"
-            exit 0
-            ;;
-        [nN][oO] | [nN])
-            echo "继续安装"
-            ;;
-        *)
-            echo "退出安装"
-            exit 0
-            ;;
-        esac
+install_dashboard_docker() {
+    if [[ ! $FRESH_INSTALL == 0 ]]; then
+        command -v docker >/dev/null 2>&1
+        if [[ $? != 0 ]]; then
+            echo -e "正在安装 Docker"
+            if [ "$os_alpine" != 1 ]; then
+                bash <(curl -sL https://${Get_Docker_URL}) ${Get_Docker_Argu} >/dev/null 2>&1
+                if [[ $? != 0 ]]; then
+                    echo -e "${red}下载脚本失败，请检查本机能否连接 ${Get_Docker_URL}${plain}"
+                    return 0
+                fi
+                systemctl enable docker.service
+                systemctl start docker.service
+            else
+                apk add docker docker-compose >/dev/null 2>&1
+                rc-update add docker
+                rc-service docker start
+            fi
+            echo -e "${green}Docker${plain} 安装成功"
+            installation_check
+        fi
     fi
+}
 
+install_dashboard_standalone() {
     if [ ! -d "${NZ_DASHBOARD_PATH}/resource/template/theme-custom" ] || [ ! -d "${NZ_DASHBOARD_PATH}/resource/static/custom" ]; then
         mkdir -p "${NZ_DASHBOARD_PATH}/resource/template/theme-custom" "${NZ_DASHBOARD_PATH}/resource/static/custom" >/dev/null 2>&1
-    fi
-
-    chmod 777 -R $NZ_DASHBOARD_PATH
-
-    modify_dashboard_config_standalone 0
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
     fi
 }
 
@@ -404,134 +430,85 @@ modify_agent_config() {
 modify_dashboard_config() {
     echo -e "> 修改面板配置"
 
-    echo -e "正在下载 Docker 脚本"
-    wget -t 2 -T 10 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
-        return 0
-    fi
-
-    wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
-        return 0
-    fi
-
-    echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
-        echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
-        read -ep "请输入 OAuth2 提供商(github/gitlab/jihulab/gitee，默认 github): " nz_oauth2_type &&
-        read -ep "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
-        read -ep "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
-        read -ep "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
-        read -ep "请输入站点标题: " nz_site_title &&
-        read -ep "请输入站点访问端口: (默认 8008)" nz_site_port &&
-        read -ep "请输入用于 Agent 接入的 RPC 端口: (默认 5555)" nz_grpc_port
-
-    if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
-        echo -e "${red}所有选项都不能为空${plain}"
-        before_show_menu
-        return 1
-    fi
-
-    if [[ -z "${nz_site_port}" ]]; then
-        nz_site_port=8008
-    fi
-    if [[ -z "${nz_grpc_port}" ]]; then
-        nz_grpc_port=5555
-    fi
-    if [[ -z "${nz_oauth2_type}" ]]; then
-        nz_oauth2_type=github
-    fi
-
-    sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_language/zh-CN/" /tmp/nezha-config.yaml
-    sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_site_port/${nz_site_port}/" /tmp/nezha-docker-compose.yaml
-    sed -i "s/nz_grpc_port/${nz_grpc_port}/g" /tmp/nezha-docker-compose.yaml
-    sed -i "s/nz_image_url/${Docker_IMG}/" /tmp/nezha-docker-compose.yaml
-
-    mkdir -p $NZ_DASHBOARD_PATH/data
-    mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
-    mv -f /tmp/nezha-docker-compose.yaml ${NZ_DASHBOARD_PATH}/docker-compose.yaml
-
-    echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
-
-    restart_and_update
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
-}
-
-modify_dashboard_config_standalone() {
-    echo -e "> 修改面板配置"
-
-    echo -e "正在下载配置模板"
-
-    wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}下载文件失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
-        return 0
-    fi
-
-    echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
-        echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
-        read -ep "请输入 OAuth2 提供商(github/gitlab/jihulab/gitee，默认 github): " nz_oauth2_type &&
-        read -ep "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
-        read -ep "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
-        read -ep "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
-        read -ep "请输入站点标题: " nz_site_title &&
-        read -ep "请输入站点访问端口: (默认 8008)" nz_site_port &&
-        read -ep "请输入用于 Agent 接入的 RPC 端口: (默认 5555)" nz_grpc_port
-
-    if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
-        echo -e "${red}所有选项都不能为空${plain}"
-        before_show_menu
-        return 1
-    fi
-
-    if [[ -z "${nz_site_port}" ]]; then
-        nz_site_port=8008
-    fi
-    if [[ -z "${nz_grpc_port}" ]]; then
-        nz_grpc_port=5555
-    fi
-    if [[ -z "${nz_oauth2_type}" ]]; then
-        nz_oauth2_type=github
-    fi
-
-    sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_language/zh-CN/" /tmp/nezha-config.yaml
-    sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
-    sed -i "s/80/${nz_site_port}/" /tmp/nezha-config.yaml
-
-    mkdir -p $NZ_DASHBOARD_PATH/data
-    mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
-
-    echo -e "正在下载服务文件"
-
-    if [ "$os_alpine" != 1 ]; then
-        wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
-    else
-        wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
-        chmod +x $NZ_DASHBOARD_SERVICERC
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        echo -e "正在下载 Docker 脚本"
+        wget -t 2 -T 10 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
         if [[ $? != 0 ]]; then
-            echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
+            echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
             return 0
+        fi
+    fi
+
+    wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
+    if [[ $? != 0 ]]; then
+        echo -e "${red}下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
+        return 0
+    fi
+
+    echo "关于 GitHub Oauth2 应用：在 https://github.com/settings/developers 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+        echo "关于 Gitee Oauth2 应用：在 https://gitee.com/oauth/applications 创建，无需审核，Callback 填 http(s)://域名或IP/oauth2/callback" &&
+        read -ep "请输入 OAuth2 提供商(github/gitlab/jihulab/gitee，默认 github): " nz_oauth2_type &&
+        read -ep "请输入 Oauth2 应用的 Client ID: " nz_github_oauth_client_id &&
+        read -ep "请输入 Oauth2 应用的 Client Secret: " nz_github_oauth_client_secret &&
+        read -ep "请输入 GitHub/Gitee 登录名作为管理员，多个以逗号隔开: " nz_admin_logins &&
+        read -ep "请输入站点标题: " nz_site_title &&
+        read -ep "请输入站点访问端口: (默认 8008)" nz_site_port &&
+        read -ep "请输入用于 Agent 接入的 RPC 端口: (默认 5555)" nz_grpc_port
+
+    if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
+        echo -e "${red}所有选项都不能为空${plain}"
+        before_show_menu
+        return 1
+    fi
+
+    if [[ -z "${nz_site_port}" ]]; then
+        nz_site_port=8008
+    fi
+    if [[ -z "${nz_grpc_port}" ]]; then
+        nz_grpc_port=5555
+    fi
+    if [[ -z "${nz_oauth2_type}" ]]; then
+        nz_oauth2_type=github
+    fi
+
+    sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" /tmp/nezha-config.yaml
+    sed -i "s/nz_language/zh-CN/" /tmp/nezha-config.yaml
+    sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        sed -i "s/nz_site_port/${nz_site_port}/" /tmp/nezha-docker-compose.yaml
+        sed -i "s/nz_grpc_port/${nz_grpc_port}/g" /tmp/nezha-docker-compose.yaml
+        sed -i "s/nz_image_url/${Docker_IMG}/" /tmp/nezha-docker-compose.yaml
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        sed -i "s/80/${nz_site_port}/" /tmp/nezha-config.yaml
+    fi
+
+    mkdir -p $NZ_DASHBOARD_PATH/data
+    mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        mv -f /tmp/nezha-docker-compose.yaml ${NZ_DASHBOARD_PATH}/docker-compose.yaml
+    fi
+
+    if [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        echo -e "正在下载服务文件"
+        if [ "$os_alpine" != 1 ]; then
+            wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
+        else
+            wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
+            chmod +x $NZ_DASHBOARD_SERVICERC
+            if [[ $? != 0 ]]; then
+                echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
+                return 0
+            fi
         fi
     fi
 
     echo -e "面板配置 ${green}修改成功，请稍等重启生效${plain}"
 
-    restart_and_update_standalone
+    restart_and_update
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -543,15 +520,10 @@ restart_and_update() {
 
     cd $NZ_DASHBOARD_PATH
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        docker compose pull
-        docker compose down
-        docker compose up -d
-    else
-        docker-compose pull
-        docker-compose down
-        docker-compose up -d
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        restart_and_update_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        restart_and_update_standalone
     fi
 
     if [[ $? == 0 ]]; then
@@ -566,11 +538,13 @@ restart_and_update() {
     fi
 }
 
+restart_and_update_docker() {
+    $DOCKER_COMPOSE_COMMAND pull
+    $DOCKER_COMPOSE_COMMAND down
+    $DOCKER_COMPOSE_COMMAND up -d
+}
+
 restart_and_update_standalone() {
-    echo -e "> 重启并更新面板"
-
-    cd $NZ_DASHBOARD_PATH
-
     if [ "$os_alpine" != 1 ]; then
         systemctl stop nezha-dashboard
     else
@@ -587,27 +561,15 @@ restart_and_update_standalone() {
         rc-update add nezha-dashboard
         rc-service nezha-dashboard restart
     fi
-
-    if [[ $? == 0 ]]; then
-        echo -e "${green}哪吒监控 重启成功${plain}"
-        echo -e "默认管理面板地址：${yellow}域名:站点访问端口${plain}"
-    else
-        echo -e "${red}重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息${plain}"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
 }
 
 start_dashboard() {
     echo -e "> 启动面板"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose up -d
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose up -d
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        start_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        start_dashboard_standalone
     fi
 
     if [[ $? == 0 ]]; then
@@ -621,34 +583,25 @@ start_dashboard() {
     fi
 }
 
-start_dashboard_standalone() {
-    echo -e "> 启动面板"
+start_dashboard_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND up -d
+}
 
+start_dashboard_standalone() {
     if [ "$os_alpine" != 1 ]; then
         systemctl start nezha-dashboard
     else
         rc-service nezha-dashboard start
-    fi
-
-    if [[ $? == 0 ]]; then
-        echo -e "${green}哪吒监控 启动成功${plain}"
-    else
-        echo -e "${red}启动失败，请稍后查看日志信息${plain}"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
     fi
 }
 
 stop_dashboard() {
     echo -e "> 停止面板"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose down
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose down
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        stop_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        stop_dashboard_standalone
     fi
 
     if [[ $? == 0 ]]; then
@@ -662,34 +615,25 @@ stop_dashboard() {
     fi
 }
 
-stop_dashboard_standalone() {
-    echo -e "> 停止面板"
+stop_dashboard_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND down
+}
 
+stop_dashboard_standalone() {
     if [ "$os_alpine" != 1 ]; then
         systemctl stop nezha-dashboard
     else
         rc-service nezha-dashboard stop
-    fi
-
-    if [[ $? == 0 ]]; then
-        echo -e "${green}哪吒监控 停止成功${plain}"
-    else
-        echo -e "${red}停止失败，请稍后查看日志信息${plain}"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
     fi
 }
 
 show_dashboard_log() {
     echo -e "> 获取面板日志"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose logs -f
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose logs -f
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        show_dashboard_log_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        show_dashboard_log_standalone
     fi
 
     if [[ $# == 0 ]]; then
@@ -697,33 +641,27 @@ show_dashboard_log() {
     fi
 }
 
-show_dashboard_log_standalone() {
-    echo -e "> 获取面板日志"
+show_dashboard_log_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND logs -f
+}
 
+show_dashboard_log_standalone() {
     if [ "$os_alpine" != 1 ]; then
         journalctl -xf -u nezha-dashboard.service
     else
-        echo "很抱歉，OpenRC 无此功能"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
+        tail -n 10 /var/log/nezha-dashboard.err
     fi
 }
 
 uninstall_dashboard() {
     echo -e "> 卸载管理面板"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose down
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose down
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        uninstall_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        uninstall_dashboard_standalone
     fi
 
-    rm -rf $NZ_DASHBOARD_PATH
-    docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
-    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
     clean_all
 
     if [[ $# == 0 ]]; then
@@ -731,9 +669,14 @@ uninstall_dashboard() {
     fi
 }
 
-uninstall_dashboard_standalone() {
-    echo -e "> 卸载管理面板"
+uninstall_dashboard_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND down
+    rm -rf $NZ_DASHBOARD_PATH
+    docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
+    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
+}
 
+uninstall_dashboard_standalone() {
     rm -rf $NZ_DASHBOARD_PATH
 
     if [ "$os_alpine" != 1 ]; then
@@ -747,12 +690,6 @@ uninstall_dashboard_standalone() {
     else
         rm $NZ_DASHBOARD_SERVICERC
     fi
-
-    clean_all
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
 }
 
 show_agent_log() {
@@ -761,7 +698,7 @@ show_agent_log() {
     if [ "$os_alpine" != 1 ]; then
         journalctl -xf -u nezha-agent.service
     else
-        echo "很抱歉，OpenRC 无此功能"
+        tail -n 10 /var/log/nezha-agent.err
     fi
 
     if [[ $# == 0 ]]; then
@@ -811,59 +748,6 @@ clean_all() {
     fi
 }
 
-select_version() {
-    DOCKER_COMPOSE_COMMAND=""
-    if docker compose version >/dev/null 2>&1; then
-        DOCKER_COMPOSE_COMMAND="docker compose"
-        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
-            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
-            if [ -n "$NEZHA_IMAGES" ]; then
-                echo "存在带有 nezha-dashboard 仓库的 Docker 镜像："
-                echo "$NEZHA_IMAGES"
-                IS_DOCKER_NEZHA=1
-                return
-            else
-                echo "未找到带有 nezha-dashboard 仓库的 Docker 镜像。"
-            fi
-        fi
-    elif command -v docker-compose >/dev/null 2>&1; then
-        DOCKER_COMPOSE_COMMAND="docker-compose"
-        if $DOCKER_COMPOSE_COMMAND -f "$NZ_DASHBOARD_PATH/docker-compose.yaml" config >/dev/null 2>&1; then
-            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
-            if [ -n "$NEZHA_IMAGES" ]; then
-                echo "存在带有 nezha-dashboard 仓库的 Docker 镜像："
-                echo "$NEZHA_IMAGES"
-                IS_DOCKER_NEZHA=1
-                return
-            else
-                echo "未找到带有 nezha-dashboard 仓库的 Docker 镜像。"
-            fi
-        fi
-    fi
-
-    if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
-        IS_DOCKER_NEZHA=0
-    else
-        echo -e "${yellow}请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）：\n1. Docker\n2. 独立安装${plain}"
-        while true; do
-            read -e -r -p "请输入数字 [1-2]：" option
-            case "${option}" in
-            1)
-                IS_DOCKER_NEZHA=1
-                break
-                ;;
-            2)
-                IS_DOCKER_NEZHA=0
-                break
-                ;;
-            *)
-                echo "输入有误，请重新输入"
-                ;;
-            esac
-        done
-    fi
-}
-
 show_usage() {
     echo "哪吒监控 管理脚本使用方法: "
     echo "--------------------------------------------------------"
@@ -908,8 +792,7 @@ show_menu() {
     ${green}0.${plain}  退出脚本
     "
     echo && read -ep "请输入选择 [0-13]: " num
-    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
-        case "${num}" in
+    case "${num}" in
         0)
             exit 0
             ;;
@@ -955,65 +838,14 @@ show_menu() {
         *)
             echo -e "${red}请输入正确的数字 [0-13]${plain}"
             ;;
-        esac
-    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
-        case "${num}" in
-        0)
-            exit 0
-            ;;
-        1)
-            install_dashboard_standalone
-            ;;
-        2)
-            modify_dashboard_config_standalone
-            ;;
-        3)
-            start_dashboard_standalone
-            ;;
-        4)
-            stop_dashboard_standalone
-            ;;
-        5)
-            restart_and_update_standalone
-            ;;
-        6)
-            show_dashboard_log_standalone
-            ;;
-        7)
-            uninstall_dashboard_standalone
-            ;;
-        8)
-            install_agent
-            ;;
-        9)
-            modify_agent_config
-            ;;
-        10)
-            show_agent_log
-            ;;
-        11)
-            uninstall_agent
-            ;;
-        12)
-            restart_agent
-            ;;
-        13)
-            update_script
-            ;;
-        *)
-            echo -e "${red}请输入正确的数字 [0-13]${plain}"
-            ;;
-        esac
-    else
-        select_version
-    fi
+    esac
 }
 
 pre_check
+installation_check
 
 if [[ $# > 0 ]]; then
-    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
-        case $1 in
+    case $1 in
         "install_dashboard")
             install_dashboard 0
             ;;
@@ -1059,83 +891,7 @@ if [[ $# > 0 ]]; then
             update_script 0
             ;;
         *) show_usage ;;
-        esac
-    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
-        case $1 in
-        "install_dashboard")
-            install_dashboard_standalone 0
-            ;;
-        "modify_dashboard_config")
-            modify_dashboard_config_standalone 0
-            ;;
-        "start_dashboard")
-            start_dashboard_standalone 0
-            ;;
-        "stop_dashboard")
-            stop_dashboard_standalone 0
-            ;;
-        "restart_and_update")
-            restart_and_update_standalone 0
-            ;;
-        "show_dashboard_log")
-            show_dashboard_log_standalone 0
-            ;;
-        "uninstall_dashboard")
-            uninstall_dashboard_standalone 0
-            ;;
-        "install_agent")
-            shift
-            if [ $# -ge 3 ]; then
-                install_agent "$@"
-            else
-                install_agent 0
-            fi
-            ;;
-        "modify_agent_config")
-            modify_agent_config 0
-            ;;
-        "show_agent_log")
-            show_agent_log 0
-            ;;
-        "uninstall_agent")
-            uninstall_agent 0
-            ;;
-        "restart_agent")
-            restart_agent 0
-            ;;
-        "update_script")
-            update_script 0
-            ;;
-        *) show_usage ;;
-        esac
-    else
-        case $1 in
-        "install_agent")
-            shift
-            if [ $# -ge 3 ]; then
-                install_agent "$@"
-            else
-                install_agent 0
-            fi
-            ;;
-        "modify_agent_config")
-            modify_agent_config 0
-            ;;
-        "show_agent_log")
-            show_agent_log 0
-            ;;
-        "uninstall_agent")
-            uninstall_agent 0
-            ;;
-        "restart_agent")
-            restart_agent 0
-            ;;
-        "update_script")
-            update_script 0
-            ;;
-        *) show_usage ;;
-        esac
-    fi
+    esac
 else
     select_version
     show_menu
