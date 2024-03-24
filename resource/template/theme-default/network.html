@@ -246,12 +246,6 @@
                 this.myChart.clear();
                 this.myChart.setOption(this.option);
             },
-                this.option.title.text = monitorInfo.result[0].server_name;
-                this.option.series = tSeries;
-                this.option.legend.data = tLegendData;
-                this.myChart.clear();
-                this.myChart.setOption(this.option);
-            },
             isWindowsPlatform(str) {
                 return str.includes('Windows')
             },
