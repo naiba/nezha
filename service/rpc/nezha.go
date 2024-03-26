@@ -127,8 +127,8 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
 			maxRetries := int(singleton.Conf.DDNS.MaxRetries)
 			config := &ddns.DomainConfig{
-				EnableIPv4: true,
-				EnableIpv6: true,
+				EnableIPv4: singleton.ServerList[clientID].EnableIPv4,
+				EnableIpv6: singleton.ServerList[clientID].EnableIpv6,
 				FullDomain: serverDomain,
 				Ipv4Addr:   ipv4,
 				Ipv6Addr:   ipv6,

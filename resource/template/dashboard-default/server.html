@@ -30,6 +30,8 @@
                     <th>{{tr "VersionNumber"}}</th>
                     <th>{{tr "HideForGuest"}}</th>
                     <th>{{tr "EnableDDNS"}}</th>
+                    <th>{{tr "EnableIPv4"}}</th>
+                    <th>{{tr "EnableIpv6"}}</th>
                     <th>{{tr "DDNSDomain"}}</th>
                     <th>{{tr "Secret"}}</th>
                     <th>{{tr "OneKeyInstall"}}</th>
@@ -48,6 +50,8 @@
                     <td>{{$server.Host.Version}}</td>
                     <td>{{$server.HideForGuest}}</td>
                     <td>{{$server.EnableDDNS}}</td>
+                    <td>{{$server.EnableIPv4}}</td>
+                    <td>{{$server.EnableIpv6}}</td>
                     <td>{{$server.DDNSDomain}}</td>
                     <td>
                         <button class="ui icon green mini button" data-clipboard-text="{{$server.Secret}}" data-tooltip="{{tr "ClickToCopy"}}">

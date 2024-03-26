@@ -619,6 +619,12 @@ other = "在服務中顯示"
 [EnableDDNS]
 other = "啟用DDNS"
 
+[EnableIPv4]
+other = "啟用DDNS IPv4"
+
+[EnableIpv6]
+other = "啟用DDNS IPv6"
+
 [DDNSDomain]
 other = "DDNS網域"
 
