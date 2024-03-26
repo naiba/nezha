@@ -322,10 +322,15 @@ function addOrEditServer(server, conf) {
   } else {
     modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
   }
-  if (server && server.EnableDDNS) {
-    modal.find(".ui.enableddns.checkbox").checkbox("set checked");
+  if (server && server.EnableIPv4) {
+    modal.find(".ui.enableipv4.checkbox").checkbox("set checked");
   } else {
-    modal.find(".ui.enableddns.checkbox").checkbox("set unchecked");
+    modal.find(".ui.enableipv4.checkbox").checkbox("set unchecked");
+  }
+  if (server && server.EnableIpv6) {
+    modal.find(".ui.enableipv6.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.enableipv6.checkbox").checkbox("set unchecked");
   }
   showFormModal(".server.modal", "#serverForm", "/api/server");
 }

@@ -619,6 +619,12 @@ other = "Enable Show in Service"
 [EnableDDNS]
 other = "Enable DDNS"
 
+[EnableIPv4]
+other = "Enable DDNS IPv4"
+
+[EnableIpv6]
+other = "Enable DDNS IPv6"
+
 [DDNSDomain]
 other = "DDNS Domain"
 
