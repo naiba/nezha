@@ -322,6 +322,11 @@ function addOrEditServer(server, conf) {
   } else {
     modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
   }
+  if (server && server.EnableDDNS) {
+    modal.find(".ui.enableddns.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.enableddns.checkbox").checkbox("set unchecked");
+  }
   if (server && server.EnableIPv4) {
     modal.find(".ui.enableipv4.checkbox").checkbox("set checked");
   } else {
