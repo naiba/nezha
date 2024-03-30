@@ -301,6 +301,8 @@ type serverForm struct {
 	Note         string
 	HideForGuest string
 	EnableDDNS   string
+	EnableIPv4   string
+	EnableIpv6   string
 	DDNSDomain   string
 }
 
@@ -318,6 +320,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.Note = sf.Note
 		s.HideForGuest = sf.HideForGuest == "on"
 		s.EnableDDNS = sf.EnableDDNS == "on"
+		s.EnableIPv4 = sf.EnableIPv4 == "on"
+		s.EnableIpv6 = sf.EnableIpv6 == "on"
 		s.DDNSDomain = sf.DDNSDomain
 		if s.ID == 0 {
 			s.Secret, err = utils.GenerateRandomString(18)
