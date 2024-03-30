@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.3
 
 require (
-	code.cloudfoundry.org/bytefmt v0.0.0-20240322144145-4816192cb114
+	code.cloudfoundry.org/bytefmt v0.0.0-20240329144308-0c372429d24b
 	code.gitea.io/sdk/gitea v0.17.1
 	github.com/BurntSushi/toml v1.3.2
 	github.com/gin-contrib/pprof v1.4.0
@@ -22,7 +22,7 @@ require (
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
-	github.com/xanzy/go-gitlab v0.100.0
+	github.com/xanzy/go-gitlab v0.101.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/oauth2 v0.18.0
 	golang.org/x/sync v0.6.0
@@ -30,7 +30,7 @@ require (
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
 	gorm.io/driver/sqlite v1.5.5
-	gorm.io/gorm v1.25.8
+	gorm.io/gorm v1.25.9
 	sigs.k8s.io/yaml v1.4.0
 )
 
