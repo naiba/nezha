@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.15.9"
+NZ_VERSION="v0.16.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -101,19 +101,60 @@ pre_check() {
     fi
 }
 
-confirm() {
-    if [[ $# > 1 ]]; then
-        echo && read -e -p "$1 [默认$2]: " temp
-        if [[ x"${temp}" == x"" ]]; then
-            temp=$2
+installation_check() {
+    if docker compose version >/dev/null 2>&1; then
+        DOCKER_COMPOSE_COMMAND="docker compose"
+        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
+            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
+            if [ -n "$NEZHA_IMAGES" ]; then
+                echo "Docker image with nezha-dashboard repository exists:"
+                echo "$NEZHA_IMAGES"
+                IS_DOCKER_NEZHA=1
+                return
+            else
+                echo "No Docker images with the nezha-dashboard repository were found."
+            fi
         fi
-    else
-        read -e -p "$1 [y/n]: " temp
+    elif command -v docker-compose >/dev/null 2>&1; then
+        DOCKER_COMPOSE_COMMAND="docker-compose"
+        if $DOCKER_COMPOSE_COMMAND -f "$NZ_DASHBOARD_PATH/docker-compose.yaml" config >/dev/null 2>&1; then
+            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
+            if [ -n "$NEZHA_IMAGES" ]; then
+                echo "Docker image with nezha-dashboard repository exists:"
+                echo "$NEZHA_IMAGES"
+                IS_DOCKER_NEZHA=1
+                return
+            else
+                echo "No Docker images with the nezha-dashboard repository were found."
+            fi
+        fi
     fi
-    if [[ x"${temp}" == x"y" || x"${temp}" == x"Y" ]]; then
-        return 0
-    else
-        return 1
+
+    if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
+        IS_DOCKER_NEZHA=0
+        FRESH_INSTALL=0
+    fi
+}
+
+select_version() {
+    if [[ -z $IS_DOCKER_NEZHA ]]; then
+        echo -e "${yellow}Select your installation method(Input anything is ok if you are installing agent):\n1. Docker\n2. Standalone${plain}"
+        while true; do
+            read -e -r -p "Please enter [1-2]: " option
+            case "${option}" in
+                1)
+                    IS_DOCKER_NEZHA=1
+                    break
+                    ;;
+                2)
+                    IS_DOCKER_NEZHA=0
+                    break
+                    ;;
+                *)
+                    echo "${red}Please enter the correct number [1-2]${plain}"
+                    ;;
+            esac
+        done
     fi
 }
 
@@ -184,7 +225,7 @@ install_dashboard() {
     echo -e "> Install Panel"
 
     # Nezha Monitoring Folder
-    if [ ! -d "${NZ_DASHBOARD_PATH}/docker-compose.yaml" ]; then
+    if [[ ! $FRESH_INSTALL == 0 ]]; then
         mkdir -p $NZ_DASHBOARD_PATH
     else
         echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
@@ -205,17 +246,10 @@ install_dashboard() {
     fi
     chmod 777 -R $NZ_DASHBOARD_PATH
 
-    command -v docker >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "Installing Docker"
-        bash <(curl -sL https://${Get_Docker_URL}) ${Get_Docker_Argu} >/dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echo -e "${red}Script failed to get, please check if the network can link ${Get_Docker_URL}${plain}"
-            return 0
-        fi
-        systemctl enable docker.service
-        systemctl start docker.service
-        echo -e "${green}Docker${plain} installed successfully"
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        install_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        install_dashboard_standalone
     fi
 
     modify_dashboard_config 0
@@ -225,42 +259,33 @@ install_dashboard() {
     fi
 }
 
-install_dashboard_standalone() {
-    install_base
-
-    echo -e "> Install Panel"
-
-    # Nezha Monitoring Folder
-    if [ ! -d "${NZ_DASHBOARD_PATH}/app" ]; then
-        mkdir -p $NZ_DASHBOARD_PATH
-    else
-        echo "You may have already installed the dashboard, repeated installation will overwrite the data, please pay attention to backup."
-        read -e -r -p "Exit the installation? [Y/n] " input
-        case $input in
-        [yY][eE][sS] | [yY])
-            echo "Exit the installation."
-            exit 0
-            ;;
-        [nN][oO] | [nN])
-            echo "Continue."
-            ;;
-        *)
-            echo "Exit the installation."
-            exit 0
-            ;;
-        esac
+install_dashboard_docker() {
+    if [[ ! $FRESH_INSTALL == 0 ]]; then
+        command -v docker >/dev/null 2>&1
+        if [[ $? != 0 ]]; then
+            echo -e "Installing Docker"
+            if [ "$os_alpine" != 1 ]; then
+                bash <(curl -sL https://${Get_Docker_URL}) ${Get_Docker_Argu} >/dev/null 2>&1
+                if [[ $? != 0 ]]; then
+                    echo -e "${red}Script failed to get, please check if the network can link ${Get_Docker_URL}${plain}"
+                    return 0
+                fi
+                systemctl enable docker.service
+                systemctl start docker.service
+            else
+                apk add docker docker-compose >/dev/null 2>&1
+                rc-update add docker
+                rc-service docker start
+            fi
+            echo -e "${green}Docker${plain} installed successfully"
+            installation_check
+        fi
     fi
+}
 
+install_dashboard_standalone() {
     if [ ! -d "${NZ_DASHBOARD_PATH}/resource/template/theme-custom" ] || [ ! -d "${NZ_DASHBOARD_PATH}/resource/static/custom" ]; then
         mkdir -p "${NZ_DASHBOARD_PATH}/resource/template/theme-custom" "${NZ_DASHBOARD_PATH}/resource/static/custom" >/dev/null 2>&1
-    fi
-
-    chmod 777 -R $NZ_DASHBOARD_PATH
-
-    modify_dashboard_config_standalone 0
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
     fi
 }
 
@@ -401,11 +426,13 @@ modify_agent_config() {
 modify_dashboard_config() {
     echo -e "> Modify Panel Configuration"
 
-    echo -e "Download Docker Script"
-    wget -t 2 -T 10 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
-        return 0
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        echo -e "Download Docker Script"
+        wget -t 2 -T 10 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
+        if [[ $? != 0 ]]; then
+            echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
+            return 0
+        fi
     fi
 
     wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
@@ -447,88 +474,37 @@ modify_dashboard_config() {
     sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" /tmp/nezha-config.yaml
     sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
     sed -i "s/nz_language/en-US/" /tmp/nezha-config.yaml
-    sed -i "s/nz_site_port/${nz_site_port}/" /tmp/nezha-docker-compose.yaml
-    sed -i "s/nz_grpc_port/${nz_grpc_port}/g" /tmp/nezha-docker-compose.yaml
-    sed -i "s/nz_image_url/${Docker_IMG}/" /tmp/nezha-docker-compose.yaml
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        sed -i "s/nz_site_port/${nz_site_port}/" /tmp/nezha-docker-compose.yaml
+        sed -i "s/nz_grpc_port/${nz_grpc_port}/g" /tmp/nezha-docker-compose.yaml
+        sed -i "s/nz_image_url/${Docker_IMG}/" /tmp/nezha-docker-compose.yaml
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        sed -i "s/80/${nz_site_port}/" /tmp/nezha-config.yaml
+    fi
 
     mkdir -p $NZ_DASHBOARD_PATH/data
     mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
-    mv -f /tmp/nezha-docker-compose.yaml ${NZ_DASHBOARD_PATH}/docker-compose.yaml
-
-    echo -e "Dashboard configuration ${green} modified successfully, please wait for Dashboard self-restart to take effect${plain}"
-
-    restart_and_update
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
-}
-
-modify_dashboard_config_standalone() {
-    echo -e "> Modify Panel Configuration"
-
-    echo -e "Download configuration template"
-
-    wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
-    if [[ $? != 0 ]]; then
-        echo -e "${red}File failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
-        return 0
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        mv -f /tmp/nezha-docker-compose.yaml ${NZ_DASHBOARD_PATH}/docker-compose.yaml
     fi
 
-    echo "About the GitHub Oauth2 application: create it at https://github.com/settings/developers, no review required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-        echo "(Not recommended) About the Gitee Oauth2 application: create it at https://gitee.com/oauth/applications, no auditing required, and fill in the http(s)://domain_or_IP/oauth2/callback" &&
-        read -ep "Please enter the OAuth2 provider (github/gitlab/jihulab/gitee, default github): " nz_oauth2_type &&
-        read -ep "Please enter the Client ID of the Oauth2 application: " nz_github_oauth_client_id &&
-        read -ep "Please enter the Client Secret of the Oauth2 application: " nz_github_oauth_client_secret &&
-        read -ep "Please enter your GitHub/Gitee login name as the administrator, separated by commas: " nz_admin_logins &&
-        read -ep "Please enter the site title: " nz_site_title &&
-        read -ep "Please enter the site access port: (default 8008)" nz_site_port &&
-        read -ep "Please enter the RPC port to be used for Agent access: (default 5555)" nz_grpc_port
-
-    if [[ -z "${nz_admin_logins}" || -z "${nz_github_oauth_client_id}" || -z "${nz_github_oauth_client_secret}" || -z "${nz_site_title}" ]]; then
-        echo -e "${red}All options cannot be empty${plain}"
-        before_show_menu
-        return 1
-    fi
-
-    if [[ -z "${nz_site_port}" ]]; then
-        nz_site_port=8008
-    fi
-    if [[ -z "${nz_grpc_port}" ]]; then
-        nz_grpc_port=5555
-    fi
-    if [[ -z "${nz_oauth2_type}" ]]; then
-        nz_oauth2_type=github
-    fi
-
-    sed -i "s/nz_oauth2_type/${nz_oauth2_type}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_admin_logins/${nz_admin_logins}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_grpc_port/${nz_grpc_port}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_github_oauth_client_id/${nz_github_oauth_client_id}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_github_oauth_client_secret/${nz_github_oauth_client_secret}/" /tmp/nezha-config.yaml
-    sed -i "s/nz_language/zh-CN/" /tmp/nezha-config.yaml
-    sed -i "s/nz_site_title/${nz_site_title}/" /tmp/nezha-config.yaml
-    sed -i "s/80/${nz_site_port}/" /tmp/nezha-config.yaml
-
-    mkdir -p $NZ_DASHBOARD_PATH/data
-    mv -f /tmp/nezha-config.yaml ${NZ_DASHBOARD_PATH}/data/config.yaml
-
-    echo -e "Downloading service file"
-
-    if [ "$os_alpine" != 1 ]; then
-        wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
-    else
-        wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
-        chmod +x $NZ_DASHBOARD_SERVICERC
-        if [[ $? != 0 ]]; then
-            echo -e "${red}File failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
-            return 0
+    if [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        echo -e "Downloading service file"
+        if [ "$os_alpine" != 1 ]; then
+            wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
+        else
+            wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
+            chmod +x $NZ_DASHBOARD_SERVICERC
+            if [[ $? != 0 ]]; then
+                echo -e "${red}File failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
+                return 0
+            fi
         fi
     fi
 
     echo -e "Dashboard configuration ${green} modified successfully, please wait for Dashboard self-restart to take effect${plain}"
 
-    restart_and_update_standalone
+    restart_and_update
 
     if [[ $# == 0 ]]; then
         before_show_menu
@@ -540,15 +516,10 @@ restart_and_update() {
 
     cd $NZ_DASHBOARD_PATH
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        docker compose pull
-        docker compose down
-        docker compose up -d
-    else
-        docker-compose pull
-        docker-compose down
-        docker-compose up -d
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        restart_and_update_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        restart_and_update_standalone
     fi
 
     if [[ $? == 0 ]]; then
@@ -563,11 +534,13 @@ restart_and_update() {
     fi
 }
 
+restart_and_update_docker() {
+    $DOCKER_COMPOSE_COMMAND pull
+    $DOCKER_COMPOSE_COMMAND down
+    $DOCKER_COMPOSE_COMMAND up -d
+}
+
 restart_and_update_standalone() {
-    echo -e "> Restart and Update the Panel"
-
-    cd $NZ_DASHBOARD_PATH
-
     if [ "$os_alpine" != 1 ]; then
         systemctl stop nezha-dashboard
     else
@@ -584,27 +557,15 @@ restart_and_update_standalone() {
         rc-update add nezha-dashboard
         rc-service nezha-dashboard restart
     fi
-
-    if [[ $? == 0 ]]; then
-        echo -e "${green}Nezha Monitoring Restart Successful${plain}"
-        echo -e "Default panel address: ${yellow}domain:Site_access_port${plain}"
-    else
-        echo -e "${red}The restart failed, probably because the boot time exceeded two seconds, please check the log information later${plain}"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
 }
 
 start_dashboard() {
     echo -e "> Start Panel"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose up -d
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose up -d
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        start_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        start_dashboard_standalone
     fi
 
     if [[ $? == 0 ]]; then
@@ -618,34 +579,25 @@ start_dashboard() {
     fi
 }
 
-start_dashboard_standalone() {
-    echo -e "> Start Panel"
+start_dashboard_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND up -d
+}
 
+start_dashboard_standalone() {
     if [ "$os_alpine" != 1 ]; then
         systemctl start nezha-dashboard
     else
         rc-service nezha-dashboard start
-    fi
-
-    if [[ $? == 0 ]]; then
-        echo -e "${green}Nezha Monitoring Start Successful${plain}"
-    else
-        echo -e "${red}Failed to start, please check the log message later${plain}"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
     fi
 }
 
 stop_dashboard() {
     echo -e "> Stop Panel"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose down
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose down
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        stop_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        stop_dashboard_standalone
     fi
 
     if [[ $? == 0 ]]; then
@@ -659,34 +611,25 @@ stop_dashboard() {
     fi
 }
 
-stop_dashboard_standalone() {
-    echo -e "> Stop Panel"
+stop_dashboard_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND down
+}
 
+stop_dashboard_standalone() {
     if [ "$os_alpine" != 1 ]; then
         systemctl stop nezha-dashboard
     else
         rc-service nezha-dashboard stop
-    fi
-
-    if [[ $? == 0 ]]; then
-        echo -e "${green}Nezha Monitoring Stop Successful${plain}"
-    else
-        echo -e "${red}Failed to stop, please check the log message later${plain}"
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
     fi
 }
 
 show_dashboard_log() {
     echo -e "> View Panel Log"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose logs -f
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose logs -f
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        show_dashboard_log_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        show_dashboard_log_standalone
     fi
 
     if [[ $# == 0 ]]; then
@@ -694,33 +637,27 @@ show_dashboard_log() {
     fi
 }
 
-show_dashboard_log_standalone() {
-    echo -e "> View Panel Log"
+show_dashboard_log_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND logs -f
+}
 
+show_dashboard_log_standalone() {
     if [ "$os_alpine" != 1 ]; then
         journalctl -xf -u nezha-dashboard.service
     else
-        echo "Sorry, OpenRC do not have this feature yet."
-    fi
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
+        tail -n 10 /var/log/nezha-dashboard.err
     fi
 }
 
 uninstall_dashboard() {
     echo -e "> Uninstall Panel"
 
-    docker compose version
-    if [[ $? == 0 ]]; then
-        cd $NZ_DASHBOARD_PATH && docker compose down
-    else
-        cd $NZ_DASHBOARD_PATH && docker-compose down
+    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
+        uninstall_dashboard_docker
+    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
+        uninstall_dashboard_standalone
     fi
 
-    rm -rf $NZ_DASHBOARD_PATH
-    docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
-    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
     clean_all
 
     if [[ $# == 0 ]]; then
@@ -728,9 +665,14 @@ uninstall_dashboard() {
     fi
 }
 
-uninstall_dashboard_standalone() {
-    echo -e "> Uninstall Panel"
+uninstall_dashboard_docker() {
+    cd $NZ_DASHBOARD_PATH && $DOCKER_COMPOSE_COMMAND down
+    rm -rf $NZ_DASHBOARD_PATH
+    docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
+    docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
+}
 
+uninstall_dashboard_standalone() {
     rm -rf $NZ_DASHBOARD_PATH
 
     if [ "$os_alpine" != 1 ]; then
@@ -744,12 +686,6 @@ uninstall_dashboard_standalone() {
     else
         rm $NZ_DASHBOARD_SERVICERC
     fi
-
-    clean_all
-
-    if [[ $# == 0 ]]; then
-        before_show_menu
-    fi
 }
 
 show_agent_log() {
@@ -758,7 +694,7 @@ show_agent_log() {
     if [ "$os_alpine" != 1 ]; then
         journalctl -xf -u nezha-agent.service
     else
-        echo "Sorry, OpenRC do not have this feature yet."
+        tail -n 10 /var/log/nezha-agent.err
     fi
 
     if [[ $# == 0 ]]; then
@@ -808,59 +744,6 @@ clean_all() {
     fi
 }
 
-select_version() {
-    DOCKER_COMPOSE_COMMAND=""
-    if docker compose version >/dev/null 2>&1; then
-        DOCKER_COMPOSE_COMMAND="docker compose"
-        if $DOCKER_COMPOSE_COMMAND ls | grep -qw "$NZ_DASHBOARD_PATH/docker-compose.yaml" >/dev/null 2>&1; then
-            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
-            if [ -n "$NEZHA_IMAGES" ]; then
-                echo "Docker image with nezha-dashboard repository exists:"
-                echo "$NEZHA_IMAGES"
-                IS_DOCKER_NEZHA=1
-                return
-            else
-                echo "No Docker images with the nezha-dashboard repository were found."
-            fi
-        fi
-    elif command -v docker-compose >/dev/null 2>&1; then
-        DOCKER_COMPOSE_COMMAND="docker-compose"
-        if $DOCKER_COMPOSE_COMMAND -f "$NZ_DASHBOARD_PATH/docker-compose.yaml" config >/dev/null 2>&1; then
-            NEZHA_IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep -w "nezha-dashboard")
-            if [ -n "$NEZHA_IMAGES" ]; then
-                echo "Docker image with nezha-dashboard repository exists:"
-                echo "$NEZHA_IMAGES"
-                IS_DOCKER_NEZHA=1
-                return
-            else
-                echo "No Docker images with the nezha-dashboard repository were found."
-            fi
-        fi
-    fi
-
-    if [[ -f $NZ_DASHBOARD_PATH/app ]]; then
-        IS_DOCKER_NEZHA=0
-    else
-        echo -e "${yellow}Select your installation method(Input anything is ok if you are installing agent):\n1. Docker\n2. Standalone${plain}"
-        while true; do
-            read -e -r -p "Input a number [1-2]: " option
-            case "${option}" in
-            1)
-                IS_DOCKER_NEZHA=1
-                break
-                ;;
-            2)
-                IS_DOCKER_NEZHA=0
-                break
-                ;;
-            *)
-                echo "Wrong input, try again"
-                ;;
-            esac
-        done
-    fi
-}
-
 show_usage() {
     echo "Nezha Monitor Management Script Usage: "
     echo "--------------------------------------------------------"
@@ -905,8 +788,7 @@ show_menu() {
     ${green}0.${plain}  Exit Script
     "
     echo && read -ep "Please enter [0-13]: " num
-    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
-        case "${num}" in
+    case "${num}" in
         0)
             exit 0
             ;;
@@ -952,63 +834,14 @@ show_menu() {
         *)
             echo -e "${red}Please enter the correct number [0-13]${plain}"
             ;;
-        esac
-    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
-        case "${num}" in
-        0)
-            exit 0
-            ;;
-        1)
-            install_dashboard_standalone
-            ;;
-        2)
-            modify_dashboard_config_standalone
-            ;;
-        3)
-            start_dashboard_standalone
-            ;;
-        4)
-            stop_dashboard_standalone
-            ;;
-        5)
-            restart_and_update_standalone
-            ;;
-        6)
-            show_dashboard_log_standalone
-            ;;
-        7)
-            uninstall_dashboard_standalone
-            ;;
-        8)
-            install_agent
-            ;;
-        9)
-            modify_agent_config
-            ;;
-        10)
-            show_agent_log
-            ;;
-        11)
-            uninstall_agent
-            ;;
-        12)
-            restart_agent
-            ;;
-        13)
-            update_script
-            ;;
-        *)
-            echo -e "${red}Please enter the correct number [0-13]${plain}"
-            ;;
-        esac
-    fi
+    esac
 }
 
 pre_check
+installation_check
 
 if [[ $# > 0 ]]; then
-    if [[ $IS_DOCKER_NEZHA == 1 ]]; then
-        case $1 in
+    case $1 in
         "install_dashboard")
             install_dashboard 0
             ;;
@@ -1054,83 +887,7 @@ if [[ $# > 0 ]]; then
             update_script 0
             ;;
         *) show_usage ;;
-        esac
-    elif [[ $IS_DOCKER_NEZHA == 0 ]]; then
-        case $1 in
-        "install_dashboard")
-            install_dashboard_standalone 0
-            ;;
-        "modify_dashboard_config")
-            modify_dashboard_config_standalone 0
-            ;;
-        "start_dashboard")
-            start_dashboard_standalone 0
-            ;;
-        "stop_dashboard")
-            stop_dashboard_standalone 0
-            ;;
-        "restart_and_update")
-            restart_and_update_standalone 0
-            ;;
-        "show_dashboard_log")
-            show_dashboard_log_standalone 0
-            ;;
-        "uninstall_dashboard")
-            uninstall_dashboard_standalone 0
-            ;;
-        "install_agent")
-            shift
-            if [ $# -ge 3 ]; then
-                install_agent "$@"
-            else
-                install_agent 0
-            fi
-            ;;
-        "modify_agent_config")
-            modify_agent_config 0
-            ;;
-        "show_agent_log")
-            show_agent_log 0
-            ;;
-        "uninstall_agent")
-            uninstall_agent 0
-            ;;
-        "restart_agent")
-            restart_agent 0
-            ;;
-        "update_script")
-            update_script 0
-            ;;
-        *) show_usage ;;
-        esac
-    else
-        case $1 in
-        "install_agent")
-            shift
-            if [ $# -ge 3 ]; then
-                install_agent "$@"
-            else
-                install_agent 0
-            fi
-            ;;
-        "modify_agent_config")
-            modify_agent_config 0
-            ;;
-        "show_agent_log")
-            show_agent_log 0
-            ;;
-        "uninstall_agent")
-            uninstall_agent 0
-            ;;
-        "restart_agent")
-            restart_agent 0
-            ;;
-        "update_script")
-            update_script 0
-            ;;
-        *) show_usage ;;
-        esac
-    fi
+    esac
 else
     select_version
     show_menu
