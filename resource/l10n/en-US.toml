@@ -32,10 +32,10 @@ other = "Logout"
 other = "Login"
 
 [ConfirmLogout]
-other = "Confirm Logout?"
+other = "Do you want to Logout?"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "You need to login again after logout to continue"
+other = "You need to Login again to continue"
 
 [Cancel]
 other = "Cancel"
@@ -227,7 +227,7 @@ other = "Secret"
 other = "Note"
 
 [LinuxOneKeyInstall]
-other = "Linux One-Key Install"
+other = "Linux One-Command Install"
 
 [NoDomainAlert]
 other = "Set CDN bypassed Domain/IP in setting before using this function"
@@ -257,7 +257,7 @@ other = "Execute by Trigger"
 other = "Delete Scheduled Task"
 
 [ConfirmToDeleteThisScheduledTask]
-other = "Confirm Delete?"
+other = "Are you sure you want to Delete?"
 
 [AccessDenied]
 other = "Access Denied"
@@ -293,7 +293,7 @@ other = "Delete Notification Method"
 other = "Confirm to Delete This Notification Method?"
 
 [ForceUpdate]
-other = "Force Update"
+other = "Force to Update"
 
 [SelectAll]
 other = "Select All"
@@ -302,7 +302,7 @@ other = "Select All"
 other = "Version"
 
 [OneKeyInstall]
-other = "One-Key Install"
+other = "One-Command Install"
 
 [ClickToCopy]
 other = "Click To Copy"
@@ -398,7 +398,7 @@ other = "Virtualization"
 other = "Swap"
 
 [NetTransfer]
-other = "Transfer"
+other = "Usage"
 
 [Load]
 other = "Load"
@@ -419,7 +419,7 @@ other = "Last Active"
 other = "Version"
 
 [NetSpeed]
-other = "Speed"
+other = "NIC"
 
 [Uptime]
 other = "Uptime"
@@ -473,7 +473,7 @@ other = "Next check"
 other = "Current Usage"
 
 [VerifyPassword]
-other = "Verify Password"
+other = "Please enter your password"
 
 [LightMode]
 other = "Light Mode"
@@ -482,7 +482,7 @@ other = "Light Mode"
 other = "Dark Mode"
 
 [FollowSystem]
-other = "Follow System"
+other = "System Auto"
 
 [GridLayout]
 other = "Grid Layout"
@@ -635,7 +635,7 @@ other = "Feature"
 other = "Template"
 
 [Stat]
-other = "Stat"
+other = "Asset"
 
 [DisableSwitchTemplateInFrontend]
 other = "Disable Switch Template in Frontend"
