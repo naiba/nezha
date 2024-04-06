@@ -25,7 +25,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v2
         with:
           xgo_version: latest
-          go_version: 1.20
+          go_version: 1.20.x
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
