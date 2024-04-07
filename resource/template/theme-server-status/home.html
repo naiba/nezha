@@ -18,7 +18,7 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="mapChartTitle">服务器世界分布图</h4>
+                    <h4 class="modal-title" id="mapChartTitle">{{tr "ServersOnWorldMap"}}</h4>
                     <i class="bi bi-x" data-dismiss="modal" aria-label="Close"></i>
                 </div>
                 <div class="modal-body">
@@ -87,7 +87,6 @@
                 let result = [];
                 let exist = {};
                 this.servers.forEach(item => {
-                    item.Host.CountryCode = 'cn';
                     if (item.Host.CountryCode) {
                         if(item.Host.CountryCode.toLowerCase() == 'tw' || item.Host.CountryCode.toLowerCase() == 'hk' || item.Host.CountryCode.toLowerCase() == 'mo') item.Host.CountryCode = 'cn';
                         if (!exist[item.Host.CountryCode]) {
