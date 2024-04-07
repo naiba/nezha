@@ -1,34 +1,32 @@
-{{define "theme-server-status/home"}}
-{{template "theme-server-status/header" .}}
-<div id="app">
-    {{template "theme-server-status/content-nav" .}}   
-    <!--  showGroup true -->
-    <template v-if="showGroup">
-        <section class="container table-responsive content" style="max-width: 95vw" v-for="group in nodesTag">
-            {{template "theme-server-status/home-group-true" .}} 
-        </section>
-    </template>
-    <!--  showGroup false -->
-    <template v-else>
-        <section class="container table-responsive content" style="max-width: 95vw">
-            {{template "theme-server-status/home-group-false" .}}
-        </section>
-    </template>
-    <div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="mapChartTitle">{{tr "ServersOnWorldMap"}}</h4>
-                    <i class="bi bi-x" data-dismiss="modal" aria-label="Close"></i>
-                </div>
-                <div class="modal-body">
-                    <div id="mapChart" style="width:100%;height:auto;"></div>
-                </div>
+{{define "theme-custom/server-status-home"}}
+{{template "theme-custom/server-status-header" .}}
+{{template "theme-custom/server-status-menu" .}}   
+<!--  showGroup true -->
+<template v-if="showGroup">
+    <section class="container-fluid table-responsive content" style="max-width: 95vw" v-for="group in nodesTag">
+        {{template "theme-custom/server-status-home-group-true" .}} 
+    </section>
+</template>
+<!--  showGroup false -->
+<template v-else>
+    <section class="container-fluid table-responsive content" style="max-width: 95vw">
+        {{template "theme-custom/server-status-home-group-false" .}}
+    </section>
+</template>
+<div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mapChartTitle">服务器世界分布图</h4>
+                <i class="bi bi-x" data-dismiss="modal" aria-label="Close"></i>
+            </div>
+            <div class="modal-body">
+                <div id="mapChart" style="width:100%;height:auto;"></div>
             </div>
         </div>
     </div>
-    {{template "theme-server-status/content-footer" .}}
 </div>
+{{template "theme-custom/server-status-footer" .}}
 <script>
     new Vue({
         el: '#app',
@@ -153,7 +151,8 @@
                         trigger: 'item',
                         formatter: function (params) {
                             if (params.data && params.data.value > 0) {
-                                return params.name + params.data.value + '台';
+                                const unit = this.language=='zh-CN' ? '台' : ' Servers';
+                                return params.name + ' ' + params.data.value + unit;
                             } else {
                                 return '';
                             }
@@ -306,7 +305,7 @@
                 return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + sizes[i];
             },
             connect() {
-                // 如果已经存在 WebSocket 连接并且处于开启状态，则不重复建立连接
+                // 如果已经存在 WebSocket 连接并且处于开启状态，则重新建立连接
                 if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                     console.log('Closing old WebSocket connection...');
                     this.ws.close();
@@ -350,7 +349,7 @@
                     let platform = server.Host.Platform;
                     if (this.isWindowsPlatform(platform)) {
                         platform = "windows"
-                    }else if (platform === "immortalwrt") {
+                    } else if (platform === "immortalwrt") {
                         platform = "openwrt"
                     }
                     let node = {
@@ -379,7 +378,7 @@
                 return this.formatByteSize(netInSpeed) + ' | ' + this.formatByteSize(netOutSpeed)
             },
             showCharts(event, id) {
-                const chartContainer = this.$refs[`chart${id}`][0];
+                const chartContainer = document.getElementById(`chart-${id}`);
                 const chartboxShow = chartContainer.getAttribute('chartbox-show');
                 chartContainer.setAttribute('chartbox-show', chartboxShow === '0' ? '1' : '0');
                 const isAriaExpandedFalse = event.currentTarget.getAttribute('aria-expanded') === 'false';
@@ -390,12 +389,12 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.result) { // 数据请求成功，更新数据并渲染图表
-                            this.chartDataList[id - 1] = data.result;
+                            this.chartDataList[id] = data.result;
                             this.$nextTick(() => {
                                 this.renderCharts(id);
                             });
                         } else {
-                            console.log('this agent (id:'+ id + ') has no monitor.');
+                            console.log('this server (id:'+ id + ') has no monitor.');
                         }
                     })
                     .catch(error => {
@@ -403,10 +402,11 @@
                     });
             },
             renderCharts(id, reload = false) {
-                if (!this.chartDataList[id - 1]) return;
-                const chartData = this.chartDataList[id - 1];
-                const chartContainer = this.$refs[`chart${id}`][0];
-                if (reload) { //点击切换亮色/暗色风格模式时,重新载入echarts图表的逻辑,
+                // 如果没有图表数据，则直接返回
+                if (!this.chartDataList[id]) return;  
+                // 获取图表容器元素
+                const chartContainer = document.getElementById(`chart-${id}`); 
+                if (reload) { // 点击切换亮色/暗色风格模式时,重新载入echarts图表的逻辑,
                     // 第一步,查找已经渲染出的图表容器,并销毁它
                     const existingChart = echarts.getInstanceByDom(chartContainer);
                     if (existingChart) existingChart.dispose();
@@ -416,6 +416,7 @@
                     if ( chartboxShow === '0' ) return; 
                 }
                 // 定义图表参数值
+                const chartData = this.chartDataList[id];
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const isMobile = this.checkIsMobile();
                 const fontSize = isMobile ? 10 : 14;
@@ -424,77 +425,158 @@
                 const legendLeft = isMobile ? 'center' : 'center';
                 const legendTop = isMobile ? 5 : 5;
                 const legendPadding= isMobile ? [5,0,5,0] : [5,0,5,0];
-                const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                const theme = localStorage.getItem("theme") ? localStorage.getItem("theme") : systemDarkMode;
-                const chartTheme = theme == "dark" ? "dark" : "default";
-                const fontColor = theme == "dark" ? "#f1f1f1" : "#000000";
-                const backgroundColor = theme == "dark" ? "#1C1D26" : '';
-                const tooltipBackgroundColor = theme == "dark" ? "#1C1D26" : '#ffffff';
-                const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
-                // 渲染图表
-                const chart = echarts.init(chartContainer, chartTheme, {
+                const chartTheme = this.theme == "dark" ? "dark" : "";
+                const fontColor = this.theme == "dark" ? "#f1f1f1" : "#000000";
+                const backgroundColor = this.theme == "dark" ? "#1C1D26" : '';
+                const tooltipBackgroundColor = this.theme == "dark" ? "#1C1D26" : '#ffffff';
+                const tooltipBorderColor = this.theme == "dark" ? "#31363B" : "#ffffff";
+                const areaStyleOpacity = this.theme == "dark" ? 0.25 : 0.15;
+                const chart = echarts.init(chartContainer, chartTheme, { // init图表
                     renderer: 'canvas',
                     useDirtyRect: false,
                     width: 'auto',
                     height: 300,
                 });
-                const xAxisData = chartData[0].created_at.map(time => new Date(time).toLocaleString());
-                const seriesData = chartData.map(item => {
+                // 获取图表数据
+                let legendData = [];
+                let seriesData = [];
+                chartData.forEach((item,key)=> {
                     let loss = 0;
-                    const data = item.avg_delay.map((avgDelay, index) => {                        
-                        if(avgDelay > 0 && avgDelay < MaxTCPPingValue){
-                            loss += avgDelay > 0.9 * MaxTCPPingValue ? 1 : 0;
-                            return [item.created_at[index], avgDelay];
-                        }else{
+                    let totalLossRate = 0;
+                    let legendName = '';
+                    let data = { main: [], stack: []};
+                    item.avg_delay.forEach((avgDelay, index) => {
+                        const additional = 30; // 堆积图stack的附加值
+                        const threshold = 0.9 * MaxTCPPingValue; // 定义阀值,用于判断是否丢包
+                        const filterAvgDelay = item.avg_delay.filter(value => value !== 0 && value !== MaxTCPPingValue);
+                        const max = Math.max(...filterAvgDelay).toFixed(1);
+                        const autoAvgDelay = 1.05 * max > 0.91 * MaxTCPPingValue ? 1.05 * max : 0.91 * MaxTCPPingValue;
+                        // 定义丢包 1. avgDelay==0  2. avgDelay>=MaxTCPPingValue 3. avgDelay>=threshold
+                        if(avgDelay == 0 || avgDelay >= MaxTCPPingValue){ //绝对丢包
                             loss += 1;
+                            const lossrate = 100 * loss / (index + 1);
+                            const stack = autoAvgDelay + additional + lossrate;
+                            data['stack'].push(
+                                [item.created_at[index], stack.toFixed(1)]
+                            );
+                            data['main'].push(
+                                [item.created_at[index], autoAvgDelay, lossrate]
+                            );
+                        } else if (avgDelay >= threshold && avgDelay < MaxTCPPingValue){ // 相对丢包
+                            loss += 1;
+                            const lossrate = 100 * loss / (index + 1);
+                            const stack = avgDelay + additional + lossrate;
+                            data['stack'].push(
+                                [item.created_at[index], stack.toFixed(1)]
+                            );
+                            data['main'].push(
+                                [item.created_at[index], avgDelay, lossrate]
+                            );
+                        } else { // 未丢包
+                            const lossrate = 100 * loss / (index + 1);
+                            const stack = 0;
+                            data['stack'].push(
+                                [item.created_at[index], stack.toFixed(1)]
+                            );
+                            data['main'].push(
+                                [item.created_at[index], avgDelay, lossrate]
+                            );
                         }
                     });
-                    const lossRate = ((loss / item.created_at.length) * 100).toFixed(1);
-                    item.monitor_name = item.monitor_name.includes("%") ? item.monitor_name : `${item.monitor_name} ${lossRate}%`;
-                    return {
-                        name: item.monitor_name,
-                        type: 'line',
-                        smooth: true,
-                        symbol: 'none',
-                        data: data,
-                        connectNulls: true
-                    };
+                    // 处理legendData
+                    totalLossRate = ((loss / item.created_at.length) * 100).toFixed(1);
+                    legendName = `${item.monitor_name} ${totalLossRate}%`;
+                    legendData.push(legendName);
+                    // 处理seriesData
+                    seriesData.push(
+                        {
+                            name: legendName,
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            connectNulls: true,
+                            data: data['main'],
+                        },
+                        {
+                            name: 'stack-' + legendName, 
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            connectNulls: true,
+                            legendHoverLink: false,
+                            stack: item.monitor_name,
+                            data: data['stack'],
+                            lineStyle: {
+                                opacity: 0
+                            },
+                            areaStyle: {
+                                opacity: 1.25 * areaStyleOpacity
+                            }
+                        },
+                    );
                 });
+                // 排序 series 和 legendData 数据,目的是能准确匹配全局调色盘
+                legendData.sort((a, b) => a.localeCompare(b));
+                seriesData.sort((a, b) => a.name.localeCompare(b.name)).flat()
+                // 根据排序，给stack-${name}堆积系列赋值相应的颜色，使stack-${name}和${name}系列颜色对应
+                legendData.forEach((item, key) => {
+                    const matchedItem = seriesData.find(v => v.name === 'stack-'+item);
+                    if (matchedItem) {
+                        if (matchedItem.areaStyle) {
+                            matchedItem.areaStyle.color = this.colors[key];
+                        }
+                    }
+                }); 
+                //console.log("legendData:",legendData);               
+                //console.log("seriesData:",seriesData);
+                const autoIncrement = Math.floor((legendData.length - 1) / (isMobile ? 3 : 6)) * (isMobile ? 20 : 28)
+                const height = 300 + autoIncrement;
+                const gridTop = 40 + autoIncrement;
+                const legendIcon = isMobile ? 'rect' : ""; 
+                const itemWidth = isMobile ? 10 : 25;
+                const itemHeight = isMobile ? 10 : 14;
+                // 设置图表配置项
                 const option = {
+                    // 全局调色盘
+                    color: this.colors,
+                    // 背景颜色
                     backgroundColor: backgroundColor,
-                    title: {
-                        show: false
+                    // 文字样式
+                    textStyle: {
+                        fontSize: fontSize,
+                        color: fontColor
                     },
-                    tooltip: {
-                        trigger: 'axis',
-                        backgroundColor: tooltipBackgroundColor,
-                        borderColor: tooltipBorderColor,
+                    // 图表网格设置
+                    grid: {
+                        top: gridTop,
+                        left: gridLeft,
+                        right: gridRight
+                    },
+                    // 图表标题设置
+                    title: {
+                        text: '三网监测:',
+                        show: false,
+                        left: 0,
+                        top: 5,
                         textStyle: {
+                            color: fontColor,
                             fontSize: fontSize,
-                            color: fontColor
+                            fontFamily: 'Lato,"Helvetica Neue",Arial,Helvetica,sans-serif',
+                            fontWeight: 'normal'
                         }
                     },
-                    legend: {
-                        data: chartData.map(item => item.monitor_name),
-                        show: true,
-                        textStyle: {
-                            fontSize: fontSize,
-                            color: fontColor
-                        },
-                        top: legendTop,
-                        bottom: 0,
-                        left: legendLeft,
-                        padding: legendPadding
-                    },
+                    // 图表系列数据设置
+                    series: seriesData.flat(),
+                    // X轴设置
                     xAxis: {
                         type: 'time',
-                        data: xAxisData,
                         axisLabel: {
                             textStyle: {
                                 fontSize: fontSize
                             }
                         }
                     },
+                    // Y轴设置
                     yAxis: {
                         type: 'value',
                         axisLabel: {
@@ -503,30 +585,79 @@
                             }
                         }
                     },
+                    // 图例设置
+                    legend: {
+                        data: legendData,
+                        show: true,
+                        icon: legendIcon,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        },
+                        top: legendTop,
+                        bottom: 0,
+                        left: legendLeft,
+                        padding: legendPadding,
+                        itemWidth: itemWidth,
+                        itemHeight: itemHeight,
+                    },
+                    // 提示框设置
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: tooltipBackgroundColor,
+                        borderColor: tooltipBorderColor,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        },
+                        formatter: function (params) {
+                            let tooltipContent = '';
+                            const formattedTime = new Date(params[0].value[0]).toLocaleString(); 
+                            tooltipContent += `<span style="line-height:2em">${formattedTime}</span><br>`;
+                            params.forEach(param => {
+                                const formattedTime = new Date(param.value[0]).toLocaleString();
+                                if (!param.seriesName.includes('stack')) {
+                                    const name = param.seriesName.replace(/\s\d+(\.\d+)?%$/, '');
+                                    tooltipContent += `<span style="line-height:2em">${param.marker} ${name} ${param.value[2].toFixed(1)}% ${param.value[1].toFixed(2)}</span><br>`;
+                                }
+                            });
+                            return tooltipContent;
+                        }
+                    },
+                    // 数据缩放设置
                     dataZoom: [
                         {
                             type: 'slider',
                             start: 0,
                             end: 100
                         }
-                    ],
-                    series: seriesData,
-                    textStyle: {
-                        fontSize: fontSize,
-                        color: fontColor
-                    },
-                    grid: {
-                        top: '40',
-                        left: gridLeft,
-                        right: gridRight
-                    }
+                    ]
                 };
+                // 设置图表的配置选项
                 chart.setOption(option);
+                // 图例切换触发事件
+                chart.on('legendselectchanged', function(params) {
+                    const selected = params.selected;
+                    const selectedName = params.name;
+                    const linkedSeriesName = 'stack-' + selectedName;
+                    option.series.forEach(function(series) {  
+                        if (series.name === linkedSeriesName) {
+                            series.areaStyle.opacity = selected[selectedName] ? 1.25 * areaStyleOpacity : 0;
+                            // const data = localStorage.getItem(linkedSeriesName);
+                            // if(data===null){
+                            //     localStorage.setItem(linkedSeriesName, JSON.stringify(series.data));
+                            // }                            
+                            // series.data = selected[selectedName] ? JSON.parse(data) : null;
+                        }
+                    });
+                    // 重新设置图表的配置选项
+                    chart.setOption(option);
+                });
             },
             reloadCharts() { // 重新加载所有图表
                 this.servers.forEach(node => {
                     const id = node.ID;
-                    const chartData = this.chartDataList[id - 1];
+                    const chartData = this.chartDataList[id];
                     if (chartData) {
                         this.renderCharts(id,true);
                     }
@@ -535,6 +666,4 @@
         }
     })
 </script>
-{{template "theme-server-status/footer" .}}
 {{end}}
-
