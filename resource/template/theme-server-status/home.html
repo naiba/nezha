@@ -14,6 +14,19 @@
             {{template "theme-server-status/home-group-false" .}}
         </section>
     </template>
+    <div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="mapChartTitle">服务器世界分布图</h4>
+                    <i class="bi bi-x" data-dismiss="modal" aria-label="Close"></i>
+                </div>
+                <div class="modal-body">
+                    <div id="mapChart" style="width:100%;height:auto;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     {{template "theme-server-status/content-footer" .}}
 </div>
 <script>
@@ -29,7 +42,11 @@
             nodesTag: [],
             nodesNoTag: [],
             chartDataList: [],
-            ws: null
+            ws: null,
+            countryMap: {"ad":{"flag":"🇦🇩","en":"Andorra","zh":"安道尔"},"ae":{"flag":"🇦🇪","en":"United Arab Emirates","zh":"阿联酋"},"af":{"flag":"🇦🇫","en":"Afghanistan","zh":"阿富汗"},"ag":{"flag":"🇦🇬","en":"Antigua and Barb.","zh":"安提瓜和巴布达"},"ai":{"flag":"🇦🇮","en":"Anguilla","zh":"安圭拉"},"al":{"flag":"🇦🇱","en":"Albania","zh":"阿尔巴尼亚"},"am":{"flag":"🇦🇲","en":"Armenia","zh":"亚美尼亚"},"ao":{"flag":"🇦🇴","en":"Angola","zh":"安哥拉"},"aq":{"flag":"🇦🇶","en":"Antarctica","zh":"南极洲"},"ar":{"flag":"🇦🇷","en":"Argentina","zh":"阿根廷"},"as":{"flag":"🇦🇸","en":"American Samoa","zh":"美属萨摩亚"},"Ashmore and Cartier Is.":{"flag":"","en":"Ashmore and Cartier Is.","zh":"阿什莫尔和卡捷群岛"},"at":{"flag":"🇦🇹","en":"Austria","zh":"奥地利"},"au":{"flag":"🇦🇺","en":"Australia","zh":"澳大利亚"},"aw":{"flag":"🇦🇼","en":"Aruba","zh":"阿鲁巴"},"ax":{"flag":"🇦🇽","en":"Åland","zh":"奥兰"},"az":{"flag":"🇦🇿","en":"Azerbaijan","zh":"阿塞拜疆"},"ba":{"flag":"🇧🇦","en":"Bosnia and Herz.","zh":"波黑"},"bb":{"flag":"🇧🇧","en":"Barbados","zh":"巴巴多斯"},"bd":{"flag":"🇧🇩","en":"Bangladesh","zh":"孟加拉国"},"be":{"flag":"🇧🇪","en":"Belgium","zh":"比利时"},"bf":{"flag":"🇧🇫","en":"Burkina Faso","zh":"布基纳法索"},"bg":{"flag":"🇧🇬","en":"Bulgaria","zh":"保加利亚"},"bh":{"flag":"🇧🇭","en":"Bahrain","zh":"巴林"},"bi":{"flag":"🇧🇮","en":"Burundi","zh":"布隆迪"},"bj":{"flag":"🇧🇯","en":"Benin","zh":"贝宁"},"bl":{"flag":"🇧🇱","en":"St-Barthélemy","zh":"圣巴泰勒米"},"bm":{"flag":"🇧🇲","en":"Bermuda","zh":"百慕大"},"bn":{"flag":"🇧🇳","en":"Brunei","zh":"文莱"},"bo":{"flag":"🇧🇴","en":"Bolivia","zh":"玻利维亚"},"bq":{"flag":"🇧🇶","en":"Bonaire, Sint Eustatius and Saba","zh":"荷兰加勒比区"},"br":{"flag":"🇧🇷","en":"Brazil","zh":"巴西"},"bs":{"flag":"🇧🇸","en":"Bahamas","zh":"巴哈马"},"bt":{"flag":"🇧🇹","en":"Bhutan","zh":"不丹"},"bv":{"flag":"🇧🇻","en":"Bouvet Island","zh":"布韦岛"},"bw":{"flag":"🇧🇼","en":"Botswana","zh":"博茨瓦纳"},"by":{"flag":"🇧🇾","en":"Belarus","zh":"白俄罗斯"},"bz":{"flag":"🇧🇿","en":"Belize","zh":"伯利兹"},"ca":{"flag":"🇨🇦","en":"Canada","zh":"加拿大"},"cc":{"flag":"🇨🇨","en":"Cocos (Keeling) Islands","zh":"科科斯（基林）群岛"},"cd":{"flag":"🇨🇩","en":"Dem. Rep. Congo","zh":"刚果民主共和国"},"cf":{"flag":"🇨🇫","en":"Central African Rep.","zh":"中非"},"cg":{"flag":"🇨🇬","en":"Congo","zh":"刚果共和国"},"ch":{"flag":"🇨🇭","en":"Switzerland","zh":"瑞士"},"ci":{"flag":"🇨🇮","en":"Côte d'Ivoire","zh":"科特迪瓦"},"ck":{"flag":"🇨🇰","en":"Cook Is.","zh":"库克群岛"},"cl":{"flag":"🇨🇱","en":"Chile","zh":"智利"},"cm":{"flag":"🇨🇲","en":"Cameroon","zh":"喀麦隆"},"cn":{"flag":"🇨🇳","en":"China","zh":"中国"},"co":{"flag":"🇨🇴","en":"Colombia","zh":"哥伦比亚"},"cr":{"flag":"🇨🇷","en":"Costa Rica","zh":"哥斯达黎加"},"cu":{"flag":"🇨🇺","en":"Cuba","zh":"古巴"},"cv":{"flag":"🇨🇻","en":"Cabo Verde","zh":"佛得角"},"cw":{"flag":"🇨🇼","en":"Curaçao","zh":"库拉索"},"cx":{"flag":"🇨🇽","en":"Christmas Island","zh":"圣诞岛"},"cy":{"flag":"🇨🇾","en":"Cyprus","zh":"塞浦路斯"},"cz":{"flag":"🇨🇿","en":"Czech Rep.","zh":"捷克"},"de":{"flag":"🇩🇪","en":"Germany","zh":"德国"},"dj":{"flag":"🇩🇯","en":"Djibouti","zh":"吉布提"},"dk":{"flag":"🇩🇰","en":"Denmark","zh":"丹麦"},"dm":{"flag":"🇩🇲","en":"Dominica","zh":"多米尼克"},"do":{"flag":"🇩🇴","en":"Dominican Rep.","zh":"多米尼加"},"dz":{"flag":"🇩🇿","en":"Algeria","zh":"阿尔及利亚"},"ec":{"flag":"🇪🇨","en":"Ecuador","zh":"厄瓜多尔"},"ee":{"flag":"🇪🇪","en":"Estonia","zh":"爱沙尼亚"},"eg":{"flag":"🇪🇬","en":"Egypt","zh":"埃及"},"eh":{"flag":"🇪🇭","en":"W. Sahara","zh":"西撒哈拉"},"er":{"flag":"🇪🇷","en":"Eritrea","zh":"厄立特里亚"},"es":{"flag":"🇪🇸","en":"Spain","zh":"西班牙"},"et":{"flag":"🇪🇹","en":"Ethiopia","zh":"埃塞俄比亚"},"fi":{"flag":"🇫🇮","en":"Finland","zh":"芬兰"},"fj":{"flag":"🇫🇯","en":"Fiji","zh":"斐济"},"fk":{"flag":"🇫🇰","en":"Falkland Is.","zh":"福克兰群岛"},"fm":{"flag":"🇫🇲","en":"Micronesia","zh":"密克罗尼西亚联邦"},"fo":{"flag":"🇫🇴","en":"Faeroe Is.","zh":"法罗群岛"},"fr":{"flag":"🇫🇷","en":"France","zh":"法国"},"ga":{"flag":"🇬🇦","en":"Gabon","zh":"加蓬"},"gb":{"flag":"🇬🇧","en":"United Kingdom","zh":"英国"},"gd":{"flag":"🇬🇩","en":"Grenada","zh":"格林纳达"},"ge":{"flag":"🇬🇪","en":"Georgia","zh":"格鲁吉亚"},"gf":{"flag":"🇬🇫","en":"French Guiana","zh":"法属圭亚那"},"gg":{"flag":"🇬🇬","en":"Guernsey","zh":"根西"},"gh":{"flag":"🇬🇭","en":"Ghana","zh":"加纳"},"gi":{"flag":"🇬🇮","en":"Gibraltar","zh":"直布罗陀"},"gl":{"flag":"🇬🇱","en":"Greenland","zh":"格陵兰"},"gm":{"flag":"🇬🇲","en":"Gambia","zh":"冈比亚"},"gn":{"flag":"🇬🇳","en":"Guinea","zh":"几内亚"},"gp":{"flag":"🇬🇵","en":"Guadeloupe","zh":"瓜德罗普"},"gq":{"flag":"🇬🇶","en":"Eq. Guinea","zh":"赤道几内亚"},"gr":{"flag":"🇬🇷","en":"Greece","zh":"希腊"},"gs":{"flag":"🇬🇸","en":"S. Geo. and the Is.","zh":"南乔治亚和南桑威奇群岛"},"gt":{"flag":"🇬🇹","en":"Guatemala","zh":"危地马拉"},"gu":{"flag":"🇬🇺","en":"Guam","zh":"关岛"},"gw":{"flag":"🇬🇼","en":"Guinea-Bissau","zh":"几内亚比绍"},"gy":{"flag":"🇬🇾","en":"Guyana","zh":"圭亚那"},"hk":{"flag":"🇭🇰","en":"Hong Kong","zh":"香港"},"hm":{"flag":"🇭🇲","en":"Heard I. and McDonald Is.","zh":"赫德岛和麦克唐纳群岛"},"hn":{"flag":"🇭🇳","en":"Honduras","zh":"洪都拉斯"},"hr":{"flag":"🇭🇷","en":"Croatia","zh":"克罗地亚"},"ht":{"flag":"🇭🇹","en":"Haiti","zh":"海地"},"hu":{"flag":"🇭🇺","en":"Hungary","zh":"匈牙利"},"id":{"flag":"🇮🇩","en":"Indonesia","zh":"印度尼西亚"},"ie":{"flag":"🇮🇪","en":"Ireland","zh":"爱尔兰"},"il":{"flag":"🇮🇱","en":"Israel","zh":"以色列"},"im":{"flag":"🇮🇲","en":"Isle of Man","zh":"马恩岛"},"in":{"flag":"🇮🇳","en":"India","zh":"印度"},"Indian Ocean Ter.":{"flag":"🇨🇽🇨🇨","en":"Indian Ocean Ter.","zh":"澳属印度洋领地"},"io":{"flag":"🇮🇴","en":"Br. Indian Ocean Ter.","zh":"英属印度洋领地"},"iq":{"flag":"🇮🇶","en":"Iraq","zh":"伊拉克"},"ir":{"flag":"🇮🇷","en":"Iran","zh":"伊朗"},"is":{"flag":"🇮🇸","en":"Iceland","zh":"冰岛"},"it":{"flag":"🇮🇹","en":"Italy","zh":"意大利"},"je":{"flag":"🇯🇪","en":"Jersey","zh":"泽西"},"jm":{"flag":"🇯🇲","en":"Jamaica","zh":"牙买加"},"jo":{"flag":"🇯🇴","en":"Jordan","zh":"约旦"},"jp":{"flag":"🇯🇵","en":"Japan","zh":"日本"},"ke":{"flag":"🇰🇪","en":"Kenya","zh":"肯尼亚"},"kg":{"flag":"🇰🇬","en":"Kyrgyzstan","zh":"吉尔吉斯斯坦"},"kh":{"flag":"🇰🇭","en":"Cambodia","zh":"柬埔寨"},"ki":{"flag":"🇰🇮","en":"Kiribati","zh":"基里巴斯"},"km":{"flag":"🇰🇲","en":"Comoros","zh":"科摩罗"},"kn":{"flag":"🇰🇳","en":"St. Kitts and Nevis","zh":"圣基茨和尼维斯"},"Kosovo":{"flag":"🇽🇰","en":"Kosovo","zh":"科索沃"},"kp":{"flag":"🇰🇵","en":"Dem. Rep. Korea","zh":"朝鲜"},"kr":{"flag":"🇰🇷","en":"Korea","zh":"韩国"},"kw":{"flag":"🇰🇼","en":"Kuwait","zh":"科威特"},"ky":{"flag":"🇰🇾","en":"Cayman Is.","zh":"开曼群岛"},"kz":{"flag":"🇰🇿","en":"Kazakhstan","zh":"哈萨克斯坦"},"la":{"flag":"🇱🇦","en":"Lao PDR","zh":"老挝"},"lb":{"flag":"🇱🇧","en":"Lebanon","zh":"黎巴嫩"},"lc":{"flag":"🇱🇨","en":"Saint Lucia","zh":"圣卢西亚"},"li":{"flag":"🇱🇮","en":"Liechtenstein","zh":"列支敦士登"},"lk":{"flag":"🇱🇰","en":"Sri Lanka","zh":"斯里兰卡"},"lr":{"flag":"🇱🇷","en":"Liberia","zh":"利比里亚"},"ls":{"flag":"🇱🇸","en":"Lesotho","zh":"莱索托"},"lt":{"flag":"🇱🇹","en":"Lithuania","zh":"立陶宛"},"lu":{"flag":"🇱🇺","en":"Luxembourg","zh":"卢森堡"},"lv":{"flag":"🇱🇻","en":"Latvia","zh":"拉脱维亚"},"ly":{"flag":"🇱🇾","en":"Libya","zh":"利比亚"},"ma":{"flag":"🇲🇦","en":"Morocco","zh":"摩洛哥"},"mc":{"flag":"🇲🇨","en":"Monaco","zh":"摩纳哥"},"md":{"flag":"🇲🇩","en":"Moldova","zh":"摩尔多瓦"},"me":{"flag":"🇲🇪","en":"Montenegro","zh":"黑山"},"mf":{"flag":"🇲🇫","en":"St-Martin","zh":"法属圣马丁"},"mg":{"flag":"🇲🇬","en":"Madagascar","zh":"马达加斯加"},"mh":{"flag":"🇲🇭","en":"Marshall Is.","zh":"马绍尔群岛"},"mk":{"flag":"🇲🇰","en":"Macedonia","zh":"北马其顿"},"ml":{"flag":"🇲🇱","en":"Mali","zh":"马里"},"mm":{"flag":"🇲🇲","en":"Myanmar","zh":"缅甸"},"mn":{"flag":"🇲🇳","en":"Mongolia","zh":"蒙古"},"mo":{"flag":"🇲🇴","en":"Macao","zh":"澳门"},"mp":{"flag":"🇲🇵","en":"N. Mariana Is.","zh":"北马里亚纳群岛"},"mq":{"flag":"🇲🇶","en":"Martinique","zh":"马提尼克"},"mr":{"flag":"🇲🇷","en":"Mauritania","zh":"毛里塔尼亚"},"ms":{"flag":"🇲🇸","en":"Montserrat","zh":"蒙特塞拉特"},"mt":{"flag":"🇲🇹","en":"Malta","zh":"马耳他"},"mu":{"flag":"🇲🇺","en":"Mauritius","zh":"毛里求斯"},"mv":{"flag":"🇲🇻","en":"Maldives","zh":"马尔代夫"},"mw":{"flag":"🇲🇼","en":"Malawi","zh":"马拉维"},"mx":{"flag":"🇲🇽","en":"Mexico","zh":"墨西哥"},"my":{"flag":"🇲🇾","en":"Malaysia","zh":"马来西亚"},"mz":{"flag":"🇲🇿","en":"Mozambique","zh":"莫桑比克"},"N. Cyprus":{"flag":"","en":"N. Cyprus","zh":"北塞浦路斯"},"na":{"flag":"🇳🇦","en":"Namibia","zh":"纳米比亚"},"nc":{"flag":"🇳🇨","en":"New Caledonia","zh":"新喀里多尼亚"},"ne":{"flag":"🇳🇪","en":"Niger","zh":"尼日尔"},"nf":{"flag":"🇳🇫","en":"Norfolk Island","zh":"诺福克岛"},"ng":{"flag":"🇳🇬","en":"Nigeria","zh":"尼日利亚"},"ni":{"flag":"🇳🇮","en":"Nicaragua","zh":"尼加拉瓜"},"nl":{"flag":"🇳🇱","en":"Netherlands","zh":"荷兰"},"no":{"flag":"🇳🇴","en":"Norway","zh":"挪威"},"np":{"flag":"🇳🇵","en":"Nepal","zh":"尼泊尔"},"nr":{"flag":"🇳🇷","en":"Nauru","zh":"瑙鲁"},"nu":{"flag":"🇳🇺","en":"Niue","zh":"纽埃"},"nz":{"flag":"🇳🇿","en":"New Zealand","zh":"新西兰"},"om":{"flag":"🇴🇲","en":"Oman","zh":"阿曼"},"pa":{"flag":"🇵🇦","en":"Panama","zh":"巴拿马"},"pe":{"flag":"🇵🇪","en":"Peru","zh":"秘鲁"},"pf":{"flag":"🇵🇫","en":"Fr. Polynesia","zh":"法属波利尼西亚"},"pg":{"flag":"🇵🇬","en":"Papua New Guinea","zh":"巴布亚新几内亚"},"ph":{"flag":"🇵🇭","en":"Philippines","zh":"菲律宾"},"pk":{"flag":"🇵🇰","en":"Pakistan","zh":"巴基斯坦"},"pl":{"flag":"🇵🇱","en":"Poland","zh":"波兰"},"pm":{"flag":"🇵🇲","en":"St. Pierre and Miquelon","zh":"圣皮埃尔和密克隆"},"pn":{"flag":"🇵🇳","en":"Pitcairn Is.","zh":"皮特凯恩群岛"},"pr":{"flag":"🇵🇷","en":"Puerto Rico","zh":"波多黎各"},"ps":{"flag":"🇵🇸","en":"Palestine","zh":"巴勒斯坦"},"pt":{"flag":"🇵🇹","en":"Portugal","zh":"葡萄牙"},"pw":{"flag":"🇵🇼","en":"Palau","zh":"帕劳"},"py":{"flag":"🇵🇾","en":"Paraguay","zh":"巴拉圭"},"qa":{"flag":"🇶🇦","en":"Qatar","zh":"卡塔尔"},"re":{"flag":"🇷🇪","en":"Réunion","zh":"留尼汪"},"ro":{"flag":"🇷🇴","en":"Romania","zh":"罗马尼亚"},"rs":{"flag":"🇷🇸","en":"Serbia","zh":"塞尔维亚"},"ru":{"flag":"🇷🇺","en":"Russia","zh":"俄罗斯"},"rw":{"flag":"🇷🇼","en":"Rwanda","zh":"卢旺达"},"sa":{"flag":"🇸🇦","en":"Saudi Arabia","zh":"沙特阿拉伯"},"sb":{"flag":"🇸🇧","en":"Solomon Is.","zh":"所罗门群岛"},"sc":{"flag":"🇸🇨","en":"Seychelles","zh":"塞舌尔"},"sd":{"flag":"🇸🇩","en":"Sudan","zh":"苏丹"},"se":{"flag":"🇸🇪","en":"Sweden","zh":"瑞典"},"sg":{"flag":"🇸🇬","en":"Singapore","zh":"新加坡"},"sh":{"flag":"🇸🇭","en":"Saint Helena","zh":"圣赫勒拿"},"si":{"flag":"🇸🇮","en":"Slovenia","zh":"斯洛文尼亚"},"Siachen Glacier":{"flag":"","en":"Siachen Glacier","zh":"锡亚琴冰川"},"sj":{"flag":"🇸🇯","en":"Svalbard and Jan Mayen","zh":"斯瓦尔巴和扬马延"},"sk":{"flag":"🇸🇰","en":"Slovakia","zh":"斯洛伐克"},"sl":{"flag":"🇸🇱","en":"Sierra Leone","zh":"塞拉利昂"},"sm":{"flag":"🇸🇲","en":"San Marino","zh":"圣马力诺"},"sn":{"flag":"🇸🇳","en":"Senegal","zh":"塞内加尔"},"so":{"flag":"🇸🇴","en":"Somalia","zh":"索马里"},"Somaliland":{"flag":"","en":"Somaliland","zh":"索马里兰"},"sr":{"flag":"🇸🇷","en":"Suriname","zh":"苏里南"},"ss":{"flag":"🇸🇸","en":"S. Sudan","zh":"南苏丹"},"st":{"flag":"🇸🇹","en":"São Tomé and Principe","zh":"圣多美和普林西比"},"sv":{"flag":"🇸🇻","en":"El Salvador","zh":"萨尔瓦多"},"sx":{"flag":"🇸🇽","en":"Sint Maarten","zh":"荷属圣马丁"},"sy":{"flag":"🇸🇾","en":"Syria","zh":"叙利亚"},"sz":{"flag":"🇸🇿","en":"Swaziland","zh":"斯威士兰"},"tc":{"flag":"🇹🇨","en":"Turks and Caicos Is.","zh":"特克斯和凯科斯群岛"},"td":{"flag":"🇹🇩","en":"Chad","zh":"乍得"},"tf":{"flag":"🇹🇫","en":"Fr. S. Antarctic Lands","zh":"法属南部和南极领地"},"tg":{"flag":"🇹🇬","en":"Togo","zh":"多哥"},"th":{"flag":"🇹🇭","en":"Thailand","zh":"泰国"},"tj":{"flag":"🇹🇯","en":"Tajikistan","zh":"塔吉克斯坦"},"tk":{"flag":"🇹🇰","en":"Tokelau","zh":"托克劳"},"tl":{"flag":"🇹🇱","en":"Timor-Leste","zh":"东帝汶"},"tm":{"flag":"🇹🇲","en":"Turkmenistan","zh":"土库曼斯坦"},"tn":{"flag":"🇹🇳","en":"Tunisia","zh":"突尼斯"},"to":{"flag":"🇹🇴","en":"Tonga","zh":"汤加"},"tr":{"flag":"🇹🇷","en":"Turkey","zh":"土耳其"},"tt":{"flag":"🇹🇹","en":"Trinidad and Tobago","zh":"特立尼达和多巴哥"},"tv":{"flag":"🇹🇻","en":"Tuvalu","zh":"图瓦卢"},"tw":{"flag":"🇹🇼","en":"Taiwan","zh":"台湾"},"tz":{"flag":"🇹🇿","en":"Tanzania","zh":"坦桑尼亚"},"ua":{"flag":"🇺🇦","en":"Ukraine","zh":"乌克兰"},"ug":{"flag":"🇺🇬","en":"Uganda","zh":"乌干达"},"um":{"flag":"🇺🇲","en":"U.S. Minor Outlying Is.","zh":"美国本土外小岛屿"},"us":{"flag":"🇺🇸","en":"United States","zh":"美国"},"uy":{"flag":"🇺🇾","en":"Uruguay","zh":"乌拉圭"},"uz":{"flag":"🇺🇿","en":"Uzbekistan","zh":"乌兹别克斯坦"},"va":{"flag":"🇻🇦","en":"Vatican","zh":"梵蒂冈"},"vc":{"flag":"🇻🇨","en":"St. Vin. and Gren.","zh":"圣文森特和格林纳丁斯"},"ve":{"flag":"🇻🇪","en":"Venezuela","zh":"委内瑞拉"},"vg":{"flag":"🇻🇬","en":"British Virgin Is.","zh":"英属维尔京群岛"},"vi":{"flag":"🇻🇮","en":"U.S. Virgin Is.","zh":"美属维尔京群岛"},"vn":{"flag":"🇻🇳","en":"Vietnam","zh":"越南"},"vu":{"flag":"🇻🇺","en":"Vanuatu","zh":"瓦努阿图"},"wf":{"flag":"🇼🇫","en":"Wallis and Futuna Is.","zh":"瓦利斯和富图纳"},"ws":{"flag":"🇼🇸","en":"Samoa","zh":"萨摩亚"},"ye":{"flag":"🇾🇪","en":"Yemen","zh":"也门"},"yt":{"flag":"🇾🇹","en":"Mayotte","zh":"马约特"},"za":{"flag":"🇿🇦","en":"South Africa","zh":"南非"},"zm":{"flag":"🇿🇲","en":"Zambia","zh":"赞比亚"},"zw":{"flag":"🇿🇼","en":"Zimbabwe","zh":"津巴布韦"}},
+            countryServer: [],
+            countryNameMap: {},
+            countryMapChartData: []
         },
         mixins: [mixinsVue],
         created() {
@@ -39,6 +56,9 @@
             } else {
                 this.nodesNoTag = this.handleNodes(this.servers);
             }
+            this.countryNameMap = this.initCountryNameMap();
+            this.countryServer = this.initCountryServer();
+            this.countryMapChartData = this.initCountryMapChartData();
         },
         mounted() {
             // 初始化时建立WebSocket连接
@@ -55,6 +75,122 @@
             });
         },
         methods: {
+            initCountryNameMap(){
+                const result = {};
+                for (const item in this.countryMap) {
+                    result[this.countryMap[item].en] = this.countryMap[item].zh;
+                }
+                return result;
+            },
+            initCountryServer() {
+                let count = {};
+                let result = [];
+                let exist = {};
+                this.servers.forEach(item => {
+                    item.Host.CountryCode = 'cn';
+                    if (item.Host.CountryCode) {
+                        if(item.Host.CountryCode.toLowerCase() == 'tw' || item.Host.CountryCode.toLowerCase() == 'hk' || item.Host.CountryCode.toLowerCase() == 'mo') item.Host.CountryCode = 'cn';
+                        if (!exist[item.Host.CountryCode]) {
+                            exist[item.Host.CountryCode] = true;
+                            count[item.Host.CountryCode] = 1;
+                            const obj = {
+                                'countryCode': item.Host.CountryCode,
+                                'count': count[item.Host.CountryCode]
+                            };
+                            result.push(obj);
+                        } else {
+                            count[item.Host.CountryCode]++;
+                            result.find(obj => obj.countryCode === item.Host.CountryCode).count = count[item.Host.CountryCode];
+                        }
+                    }
+                });
+                return result;
+            },
+            initCountryMapChartData(){
+                let result = [];
+                this.countryServer.forEach(item => {
+                    var obj = {
+                        "name": this.countryMap[item.countryCode].zh,
+                        "value": item.count
+                    }
+                    result.push(obj);
+                });
+                return result;
+            },
+            showMapChart(){
+                // 处理异常
+                if( this.countryMapChartData.length == 0 ) {
+                    console.log('init countryMapChartData not complete');
+                    return;
+                }
+                const isMobile = this.checkIsMobile();
+                const width = isMobile ? 338 : 1102;
+                const height = isMobile ? 200 : 500;
+                const backgroundColor = this.theme == "dark" ? '#1C1D26' : '#ffffff';
+                const inRangeColor = this.theme == "dark" ? '#D2B206' : '#FFDF32';
+                const tooltipBackgroundColor = this.theme == "dark" ? "#ffffff" : '#ffffff';
+                const tooltipBorderColor = this.theme == "dark" ? "#ffffff" : "#ffffff"; 
+                const fontSize = isMobile ? 10 : 12;
+                const fontColor = this.theme == "dark" ? "#000000" : "#000000";     
+                const chartContainer = document.getElementById('mapChart');
+                const mapChart = echarts.init(chartContainer, '', { // init图表
+                    renderer: 'canvas',
+                    useDirtyRect: false,
+                    width: width,
+                    height: height,
+                });
+                const option = {
+                    title: {
+                        show: false,
+                    },
+                    backgroundColor: backgroundColor,
+                    grid: {
+                        top: 0,
+                        left: 10,
+                        right: 10
+                    },
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: function (params) {
+                            if (params.data && params.data.value > 0) {
+                                return params.name + params.data.value + '台';
+                            } else {
+                                return '';
+                            }
+                        },
+                        backgroundColor: tooltipBackgroundColor,
+                        borderColor: tooltipBorderColor,
+                        padding: [4,10],
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        }
+                    },
+                    visualMap: {
+                        show: false,
+                        min: 0,
+                        max: 1000,
+                        calculable: false,
+                        inRange: {
+                            color: inRangeColor
+                        }
+                    },
+                    series: [
+                        {
+                            type: 'map',
+                            mapType: 'world',
+                            roam: true,
+                            label: {
+                                show: false,
+                                fontSize: 8
+                            },
+                            data: this.countryMapChartData,
+                            nameMap: this.countryNameMap,
+                        }
+                    ]
+                };
+                mapChart.setOption(option);
+            },
             isWindowsPlatform(str) {
                 return str.includes('Windows')
             },
