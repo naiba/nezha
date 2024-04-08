@@ -281,10 +281,42 @@ body {
 .service-status .tooltip-inner {
     max-width: 500px;
 }
-
-
-
 /* 服务页 正文结束 */
+
+
+/* 服务器分布图 */
+#mapChartBox{
+    z-index: 999999999;
+}
+
+.modal-content{
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+}
+
+.modal-dialog-centered{
+    margin: 0 auto;
+    width: 1134px;
+    max-width: 1134px;
+    display: flex;
+    align-items: center; /* 垂直居中 */
+    justify-content: center; /* 水平居中 */
+    min-height: calc(100%) /* 确保模态框占据整个视口高度 */
+}
+
+.modal-header{
+    position: relative;
+}
+
+.modal-header i{
+    cursor: pointer;
+    position: absolute;
+    font-size: 2em;
+    top: 13px;
+    right: 13px;
+}
+
 @media only screen and (max-width: 1200px) {
     .accordian-body{
         margin: 5px 0px 5px 10px;        
@@ -364,6 +396,16 @@ body {
     }
     .toolbox {
         right: 18px;
+    }
+    .modal-dialog-centered{
+        width: 95%;
+    }
+    .modal-title{
+        line-height: 0.5;
+    }
+    .modal-header i{
+        top: 8px;
+        right: 8px;
     }
 }
 

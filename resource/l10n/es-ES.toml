@@ -639,3 +639,6 @@ other = "Stat"
 
 [DisableSwitchTemplateInFrontend]
 other = "Deshabilitar Cambio de Plantilla en Frontend"
+
+[ServersOnWorldMap]
+other = "Servidores en el mapa mundial"

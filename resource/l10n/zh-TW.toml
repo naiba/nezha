@@ -639,3 +639,6 @@ other = "信息"
 
 [DisableSwitchTemplateInFrontend]
 other = "禁止前台切換主題"
+
+[ServersOnWorldMap]
+other = "伺服器世界分布圖"

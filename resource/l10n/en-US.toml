@@ -639,3 +639,6 @@ other = "Asset"
 
 [DisableSwitchTemplateInFrontend]
 other = "Disable Switch Template in Frontend"
+
+[ServersOnWorldMap]
+other = "Servers On World Map"

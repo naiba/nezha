@@ -132,3 +132,16 @@ body[theme="light"] footer p a:hover {
     color: #333333;
     text-decoration: none;
 }
+
+body[theme="light"] .modal-content{
+    background-color: #ffffff;
+    color: rgba(0, 0, 0, 0.87);
+}
+
+body[theme="light"] .modal-header{
+    border-bottom-color:#f1f1f1;
+}
+
+body[theme="light"] .modal-header i{
+    color: rgba(0, 0, 0, 0.87);
+}

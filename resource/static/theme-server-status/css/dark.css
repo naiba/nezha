@@ -157,3 +157,16 @@ body[theme="dark"] footer p a:hover {
     color: #f1f1f1;
     text-decoration: none;
 }
+
+body[theme="dark"] .modal-content{
+    background-color: #1c1d26;
+    color: #f1f1f1;
+}
+
+body[theme="dark"] .modal-header{
+    border-bottom-color:#080808;
+}
+
+body[theme="dark"] .modal-header i{
+    color: #f1f1f1;
+}
