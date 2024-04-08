@@ -172,7 +172,7 @@ func (ss *ServiceSentinel) Monitors() []*model.Monitor {
 	return monitors
 }
 
-// LoadStats 加载服务监控器的历史状态信息
+// loadMonitorHistory 加载服务监控器的历史状态信息
 func (ss *ServiceSentinel) loadMonitorHistory() {
 	var monitors []*model.Monitor
 	err := DB.Find(&monitors).Error
