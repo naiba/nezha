@@ -123,6 +123,7 @@
                     console.log('init countryMapChartData not complete');
                     return;
                 }
+                const unit = this.language=='zh-CN' ? '台' : 'servers';
                 const isMobile = this.checkIsMobile();
                 const width = isMobile ? 338 : 1102;
                 const height = isMobile ? 200 : 500;
@@ -153,8 +154,7 @@
                         trigger: 'item',
                         formatter: function (params) {
                             if (params.data && params.data.value > 0) {
-                                const unit = this.language=='zh-CN' ? '台' : ' Servers';
-                                return params.name + ' ' + params.data.value + unit;
+                                return params.name + ' ' + params.data.value + ' ' + unit;
                             } else {
                                 return '';
                             }
