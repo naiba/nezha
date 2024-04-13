@@ -14,7 +14,7 @@ NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
 NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.16.0"
+NZ_VERSION="v0.16.1"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -331,7 +331,7 @@ install_agent() {
     chmod 777 -R $NZ_AGENT_PATH
 
     echo -e "Downloading Agent"
-    wget -t 2 -T 10 -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
+    wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Fail to download agent, please check if the network can link ${GITHUB_URL}${plain}"
         return 0
@@ -356,13 +356,13 @@ modify_agent_config() {
     echo -e "> Modify Agent Configuration"
 
     if [ "$os_alpine" != 1 ]; then
-        wget -t 2 -T 10 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
+        wget -t 2 -T 60 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
         if [[ $? != 0 ]]; then
             echo -e "${red}Fail to download service, please check if the network can link ${GITHUB_RAW_URL}${plain}"
             return 0
         fi
     else
-        wget -t 2 -T 10 -O $NZ_AGENT_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-agent >/dev/null 2>&1
+        wget -t 2 -T 60 -O $NZ_AGENT_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-agent >/dev/null 2>&1
         chmod +x $NZ_AGENT_SERVICERC
         if [[ $? != 0 ]]; then
             echo -e "${red}Fail to download service, please check if the network can link ${GITHUB_RAW_URL}${plain}"
@@ -428,14 +428,14 @@ modify_dashboard_config() {
 
     if [[ $IS_DOCKER_NEZHA == 1 ]]; then
         echo -e "Download Docker Script"
-        wget -t 2 -T 10 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
+        wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
         if [[ $? != 0 ]]; then
             echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
             return 0
         fi
     fi
 
-    wget -t 2 -T 10 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
+    wget -t 2 -T 60 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
         return 0
@@ -491,9 +491,9 @@ modify_dashboard_config() {
     if [[ $IS_DOCKER_NEZHA == 0 ]]; then
         echo -e "Downloading service file"
         if [ "$os_alpine" != 1 ]; then
-            wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
+            wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
         else
-            wget -t 2 -T 10 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
+            wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
             chmod +x $NZ_DASHBOARD_SERVICERC
             if [[ $? != 0 ]]; then
                 echo -e "${red}File failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
