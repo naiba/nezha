@@ -303,6 +303,7 @@ function addOrEditServer(server, conf) {
   modal.find("input[name=name]").val(server ? server.Name : null);
   modal.find("input[name=Tag]").val(server ? server.Tag : null);
   modal.find("input[name=DDNSDomain]").val(server ? server.DDNSDomain : null);
+  modal.find("input[name=DDNSProfile]").val(server ? server.DDNSProfile : null);
   modal
     .find("input[name=DisplayIndex]")
     .val(server ? server.DisplayIndex : null);

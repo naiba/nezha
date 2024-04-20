@@ -20,6 +20,7 @@ require (
 	github.com/samber/lo v1.39.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.18.2
+	github.com/weppos/publicsuffix-go v0.30.2
 	github.com/xanzy/go-gitlab v0.102.0
 	golang.org/x/crypto v0.22.0
 	golang.org/x/oauth2 v0.19.0

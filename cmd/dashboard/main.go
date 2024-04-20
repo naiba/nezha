@@ -16,6 +16,7 @@ import (
 type DashboardCliParam struct {
 	Version          bool   // 当前版本号
 	ConfigFile       string // 配置文件路径
+	ConfigDDNSFile	 string // DDNS配置文件路径
 	DatebaseLocation string // Sqlite3 数据库文件路径
 }
 
@@ -27,11 +28,13 @@ func init() {
 	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
 	flag.BoolVarP(&dashboardCliParam.Version, "version", "v", false, "查看当前版本号")
 	flag.StringVarP(&dashboardCliParam.ConfigFile, "config", "c", "data/config.yaml", "配置文件路径")
+	flag.StringVar(&dashboardCliParam.ConfigDDNSFile, "ddns", "data/ddns.yaml", "DDNS配置文件路径")
 	flag.StringVar(&dashboardCliParam.DatebaseLocation, "db", "data/sqlite.db", "Sqlite3数据库文件路径")
 	flag.Parse()
 
 	// 初始化 dao 包
 	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
+	singleton.InitConfigDDNSFromPath(dashboardCliParam.ConfigDDNSFile)
 	singleton.InitTimezoneAndCache()
 	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
 	singleton.InitLocalizer()

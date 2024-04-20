@@ -436,6 +436,7 @@ modify_dashboard_config() {
     fi
 
     wget -t 2 -T 60 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
+    wget -t 2 -T 60 -O ${NZ_DASHBOARD_PATH}/data/ddns.yaml https://${GITHUB_RAW_URL}/script/ddns.yaml >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Script failed to get, please check if the network can link ${GITHUB_RAW_URL}${plain}"
         return 0
@@ -515,6 +516,10 @@ restart_and_update() {
     echo -e "> Restart and Update the Panel"
 
     cd $NZ_DASHBOARD_PATH
+
+    if [[ ! -f "${NZ_DASHBOARD_PATH}/data/ddns.yaml" ]]; then
+        wget -t 2 -T 60 -O ${NZ_DASHBOARD_PATH}/data/ddns.yaml https://${GITHUB_RAW_URL}/script/ddns.yaml >/dev/null 2>&1
+    fi
 
     if [[ $IS_DOCKER_NEZHA == 1 ]]; then
         restart_and_update_docker

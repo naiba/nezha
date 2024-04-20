@@ -114,16 +114,9 @@ type Config struct {
 	MaxTCPPingValue                int32
 	AvgPingCount                   int
 
-	// 动态域名解析更新
+	// 动态域名启用
 	DDNS struct {
 		Enable             bool
-		Provider           string
-		AccessID           string
-		AccessSecret       string
-		WebhookURL         string
-		WebhookMethod      string
-		WebhookRequestBody string
-		WebhookHeaders     string
 		MaxRetries         uint32
 	}
 }
@@ -165,12 +158,6 @@ func (c *Config) Read(path string) error {
 	}
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2
-	}
-	if c.DDNS.Provider == "" {
-		c.DDNS.Provider = "webhook"
-	}
-	if c.DDNS.WebhookMethod == "" {
-		c.DDNS.WebhookMethod = "POST"
 	}
 	if c.DDNS.MaxRetries == 0 {
 		c.DDNS.MaxRetries = 3

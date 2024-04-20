@@ -1,0 +1,10 @@
+Profiles:
+  example:
+    AccessSecret: ""
+    Provider: cloudflare
+  anotherexample:
+    Provider: webhook
+    WebhookHeaders: ""
+    WebhookMethod: POST
+    WebhookRequestBody: ""
+    WebhookURL: ""

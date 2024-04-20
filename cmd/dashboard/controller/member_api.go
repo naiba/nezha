@@ -304,6 +304,7 @@ type serverForm struct {
 	EnableIPv4   string
 	EnableIpv6   string
 	DDNSDomain   string
+	DDNSProfile   string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -323,6 +324,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.EnableIPv4 = sf.EnableIPv4 == "on"
 		s.EnableIpv6 = sf.EnableIpv6 == "on"
 		s.DDNSDomain = sf.DDNSDomain
+		s.DDNSProfile = sf.DDNSProfile
 		if s.ID == 0 {
 			s.Secret, err = utils.GenerateRandomString(18)
 			if err == nil {
