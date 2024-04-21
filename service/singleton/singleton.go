@@ -16,10 +16,10 @@ import (
 var Version = "debug"
 
 var (
-	Conf  *model.Config
-	Cache *cache.Cache
-	DB    *gorm.DB
-	Loc   *time.Location
+	Conf  	 *model.Config
+	Cache 	 *cache.Cache
+	DB    	 *gorm.DB
+	Loc   	 *time.Location
 )
 
 func InitTimezoneAndCache() {
@@ -52,12 +52,7 @@ func InitConfigFromPath(path string) {
 
 // ValidateConfig 验证配置文件有效性
 func ValidateConfig() {
-	// 如果DDNS启用则检查Provider是否存在, 不存在直接退出
 	if Conf.DDNS.Enable {
-		_, err := GetDDNSProviderFromString(Conf.DDNS.Provider)
-		if err != nil {
-			panic(err)
-		}
 		if Conf.DDNS.MaxRetries < 1 || Conf.DDNS.MaxRetries > 10 {
 			panic(fmt.Errorf("DDNS.MaxRetries值域为[1, 10]的整数, 当前为 %d", Conf.DDNS.MaxRetries))
 		}

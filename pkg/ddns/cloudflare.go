@@ -59,7 +59,7 @@ func (provider ProviderCloudflare) addDomainRecord(zoneID string, domainConfig *
 }
 
 func (provider ProviderCloudflare) getZoneID(domain string) (string, error) {
-	_, realDomain := SplitDomain(domain)
+	realDomain := SplitDomain(domain)
 	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones?name=%s", realDomain)
 	body, err := provider.sendRequest("GET", url, nil)
 	if err != nil {

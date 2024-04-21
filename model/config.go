@@ -125,7 +125,18 @@ type Config struct {
 		WebhookRequestBody string
 		WebhookHeaders     string
 		MaxRetries         uint32
+		Profiles map[string]DDNSProfile
 	}
+}
+
+type DDNSProfile struct {
+    Provider           string
+    AccessID           string
+    AccessSecret       string
+    WebhookURL         string
+    WebhookMethod      string
+    WebhookRequestBody string
+    WebhookHeaders     string
 }
 
 // Read 读取配置文件并应用
@@ -165,12 +176,6 @@ func (c *Config) Read(path string) error {
 	}
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2
-	}
-	if c.DDNS.Provider == "" {
-		c.DDNS.Provider = "webhook"
-	}
-	if c.DDNS.WebhookMethod == "" {
-		c.DDNS.WebhookMethod = "POST"
 	}
 	if c.DDNS.MaxRetries == 0 {
 		c.DDNS.MaxRetries = 3

@@ -1,9 +1,9 @@
 package ddns
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
+	"golang.org/x/net/publicsuffix"
 )
 
 func (provider ProviderWebHook) FormatWebhookString(s string, config *DomainConfig, ipType string) string {
@@ -32,30 +32,8 @@ func SetStringHeadersToRequest(req *http.Request, headers []string) {
 	}
 }
 
-// SplitDomain 分割域名为前缀和一级域名
-func SplitDomain(domain string) (prefix string, topLevelDomain string) {
-	// 带有二级TLD的一些常见例子，需要特别处理
-	secondLevelTLDs := map[string]bool{
-		".co.uk": true, ".com.cn": true, ".gov.cn": true, ".net.cn": true, ".org.cn": true,
-	}
-
-	// 分割域名为"."的各部分
-	parts := strings.Split(domain, ".")
-
-	// 处理特殊情况，例如 ".co.uk"
-	for i := len(parts) - 2; i > 0; i-- {
-		potentialTLD := fmt.Sprintf(".%s.%s", parts[i], parts[i+1])
-		if secondLevelTLDs[potentialTLD] {
-			if i > 1 {
-				return strings.Join(parts[:i-1], "."), strings.Join(parts[i-1:], ".")
-			}
-			return "", domain // 当域名仅为二级TLD时，无前缀
-		}
-	}
-
-	// 常规处理，查找最后一个"."前的所有内容作为前缀
-	if len(parts) > 2 {
-		return strings.Join(parts[:len(parts)-2], "."), strings.Join(parts[len(parts)-2:], ".")
-	}
-	return "", domain // 当域名不包含子域名时，无前缀
+// SplitDomain 获取顶级域
+func SplitDomain(domain string) (realDomain string) {
+	realDomain, _ = publicsuffix.EffectiveTLDPlusOne(domain)
+    return realDomain
 }

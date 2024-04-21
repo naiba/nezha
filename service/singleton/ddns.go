@@ -40,3 +40,27 @@ func GetDDNSProviderFromString(provider string) (ddns2.Provider, error) {
 	}
 	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider))
 }
+
+func GetDDNSProviderFromProfile(profileName string) (ddns2.Provider, error) {
+	profile, ok := Conf.DDNS.Profiles[profileName]
+    if !ok {
+        return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("未找到配置项 %s", profileName))
+    }
+
+	switch profile.Provider {
+	case "webhook":
+		return ddns2.ProviderWebHook{
+			URL:           profile.WebhookURL,
+			RequestMethod: profile.WebhookMethod,
+			RequestBody:   profile.WebhookRequestBody,
+			RequestHeader: profile.WebhookHeaders,
+		}, nil
+	case "dummy":
+		return ddns2.ProviderDummy{}, nil
+	case "cloudflare":
+		return ddns2.ProviderCloudflare{
+			Secret: profile.AccessSecret,
+		}, nil
+	}
+	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", profile.Provider))
+}

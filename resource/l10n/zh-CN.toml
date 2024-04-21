@@ -628,6 +628,9 @@ other = "启用DDNS IPv6"
 [DDNSDomain]
 other = "DDNS域名"
 
+[DDNSProfile]
+other = "DDNS配置名"
+
 [Feature]
 other = "功能"
 

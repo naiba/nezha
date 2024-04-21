@@ -14,7 +14,7 @@ site:
   theme: "default"
 ddns:
   enable: false
-  provider: "webhook"
+  provider: "webhook" # 如需使用多配置功能，请把此项留空
   accessid: ""
   accesssecret: ""
   webhookmethod: ""
@@ -22,3 +22,12 @@ ddns:
   webhookrequestbody: ""
   webhookheaders: ""
   maxretries: 3
+  profiles:
+    example:
+      provider: ""
+      accessid: ""
+      accesssecret: ""
+      webhookmethod: ""
+      webhookurl: ""
+      webhookrequestbody: ""
+      webhookheaders: ""    
