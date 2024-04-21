@@ -37,6 +37,11 @@ func GetDDNSProviderFromString(provider string) (ddns2.Provider, error) {
 		return ddns2.ProviderCloudflare{
 			Secret: Conf.DDNS.AccessSecret,
 		}, nil
+	case "tencentcloud":
+		return ddns2.ProviderTencentCloud{
+			SecretID: Conf.DDNS.AccessID,
+			SecretKey: Conf.DDNS.AccessSecret,
+		}, nil
 	}
 	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider))
 }
@@ -60,6 +65,11 @@ func GetDDNSProviderFromProfile(profileName string) (ddns2.Provider, error) {
 	case "cloudflare":
 		return ddns2.ProviderCloudflare{
 			Secret: profile.AccessSecret,
+		}, nil
+	case "tencentcloud":
+		return ddns2.ProviderTencentCloud{
+			SecretID: profile.AccessID,
+			SecretKey: profile.AccessSecret,
 		}, nil
 	}
 	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", profile.Provider))

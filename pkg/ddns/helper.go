@@ -32,8 +32,9 @@ func SetStringHeadersToRequest(req *http.Request, headers []string) {
 	}
 }
 
-// SplitDomain 获取顶级域
-func SplitDomain(domain string) (realDomain string) {
+// SplitDomain 分割域名为前缀和一级域名
+func SplitDomain(domain string) (prefix string, realDomain string) {
 	realDomain, _ = publicsuffix.EffectiveTLDPlusOne(domain)
-    return realDomain
+	prefix = domain[:len(domain)-len(realDomain)-1]
+    return prefix, realDomain
 }
