@@ -52,6 +52,15 @@ func InitConfigFromPath(path string) {
 
 // ValidateConfig 验证配置文件有效性
 func ValidateConfig() {
+	var err error
+	if Conf.DDNS.Provider == "" {
+		err = ValidateDDNSProvidersFromProfiles()
+	} else {
+		_, err = GetDDNSProviderFromString(Conf.DDNS.Provider)
+	}
+	if err != nil {
+		panic(err)
+	}
 	if Conf.DDNS.Enable {
 		if Conf.DDNS.MaxRetries < 1 || Conf.DDNS.MaxRetries > 10 {
 			panic(fmt.Errorf("DDNS.MaxRetries值域为[1, 10]的整数, 当前为 %d", Conf.DDNS.MaxRetries))
