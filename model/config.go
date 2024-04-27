@@ -125,18 +125,18 @@ type Config struct {
 		WebhookRequestBody string
 		WebhookHeaders     string
 		MaxRetries         uint32
-		Profiles map[string]DDNSProfile
+		Profiles           map[string]DDNSProfile
 	}
 }
 
 type DDNSProfile struct {
-    Provider           string
-    AccessID           string
-    AccessSecret       string
-    WebhookURL         string
-    WebhookMethod      string
-    WebhookRequestBody string
-    WebhookHeaders     string
+	Provider           string
+	AccessID           string
+	AccessSecret       string
+	WebhookURL         string
+	WebhookMethod      string
+	WebhookRequestBody string
+	WebhookHeaders     string
 }
 
 // Read 读取配置文件并应用

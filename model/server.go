@@ -21,7 +21,7 @@ type Server struct {
 	EnableIPv4   bool   // 是否启用DDNS IPv4
 	EnableIpv6   bool   // 是否启用DDNS IPv6
 	DDNSDomain   string // DDNS中的前缀 如基础域名为abc.oracle DDNSName为mjj 就会把mjj.abc.oracle解析服务器IP 为空则停用
-	DDNSProfile	 string // DDNS配置
+	DDNSProfile  string // DDNS配置
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`

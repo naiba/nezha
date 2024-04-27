@@ -16,10 +16,10 @@ import (
 var Version = "debug"
 
 var (
-	Conf  	 *model.Config
-	Cache 	 *cache.Cache
-	DB    	 *gorm.DB
-	Loc   	 *time.Location
+	Conf  *model.Config
+	Cache *cache.Cache
+	DB    *gorm.DB
+	Loc   *time.Location
 )
 
 func InitTimezoneAndCache() {

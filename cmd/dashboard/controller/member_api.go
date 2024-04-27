@@ -304,7 +304,7 @@ type serverForm struct {
 	EnableIPv4   string
 	EnableIpv6   string
 	DDNSDomain   string
-	DDNSProfile   string
+	DDNSProfile  string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {

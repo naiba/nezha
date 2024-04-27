@@ -2,16 +2,16 @@ package ddns
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
-	"crypto/hmac"
-    "crypto/sha256"
-    "encoding/hex"
 	"strconv"
-    "strings"
-    "time"
+	"strings"
+	"time"
 )
 
 const (
@@ -174,14 +174,14 @@ func (provider ProviderTencentCloud) sendRequest(action string, data []byte) ([]
 // https://github.com/jeessy2/ddns-go/blob/master/util/tencent_cloud_signer.go
 
 func (provider ProviderTencentCloud) sha256hex(s string) string {
-    b := sha256.Sum256([]byte(s))
-    return hex.EncodeToString(b[:])
+	b := sha256.Sum256([]byte(s))
+	return hex.EncodeToString(b[:])
 }
 
 func (provider ProviderTencentCloud) hmacsha256(s, key string) string {
-    hashed := hmac.New(sha256.New, []byte(key))
-    hashed.Write([]byte(s))
-    return string(hashed.Sum(nil))
+	hashed := hmac.New(sha256.New, []byte(key))
+	hashed.Write([]byte(s))
+	return string(hashed.Sum(nil))
 }
 
 func (provider ProviderTencentCloud) WriteString(strs ...string) string {
@@ -194,7 +194,7 @@ func (provider ProviderTencentCloud) WriteString(strs ...string) string {
 }
 
 func (provider ProviderTencentCloud) signRequest(secretId string, secretKey string, r *http.Request, action string, payload string) {
-    algorithm := "TC3-HMAC-SHA256"
+	algorithm := "TC3-HMAC-SHA256"
 	service := "dnspod"
 	host := provider.WriteString(service, ".tencentcloudapi.com")
 	timestamp := time.Now().Unix()

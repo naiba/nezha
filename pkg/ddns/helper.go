@@ -1,9 +1,9 @@
 package ddns
 
 import (
+	"golang.org/x/net/publicsuffix"
 	"net/http"
 	"strings"
-	"golang.org/x/net/publicsuffix"
 )
 
 func (provider ProviderWebHook) FormatWebhookString(s string, config *DomainConfig, ipType string) string {
@@ -36,5 +36,5 @@ func SetStringHeadersToRequest(req *http.Request, headers []string) {
 func SplitDomain(domain string) (prefix string, realDomain string) {
 	realDomain, _ = publicsuffix.EffectiveTLDPlusOne(domain)
 	prefix = domain[:len(domain)-len(realDomain)-1]
-    return prefix, realDomain
+	return prefix, realDomain
 }
