@@ -19,4 +19,3 @@ type MonitorHistory struct {
 	Down      uint64         // 检查状态异常计数
 	Data      string
 }
-

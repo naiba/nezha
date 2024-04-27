@@ -21,6 +21,7 @@ type Server struct {
 	EnableIPv4   bool   // 是否启用DDNS IPv4
 	EnableIpv6   bool   // 是否启用DDNS IPv6
 	DDNSDomain   string // DDNS中的前缀 如基础域名为abc.oracle DDNSName为mjj 就会把mjj.abc.oracle解析服务器IP 为空则停用
+	DDNSProfile  string // DDNS配置
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
@@ -56,5 +57,6 @@ func (s Server) Marshal() template.JS {
 	note, _ := utils.Json.Marshal(s.Note)
 	secret, _ := utils.Json.Marshal(s.Secret)
 	ddnsDomain, _ := utils.Json.Marshal(s.DDNSDomain)
-	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"EnableIPv4": %s,"EnableIpv6": %s,"DDNSDomain": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), boolToString(s.EnableIPv4), boolToString(s.EnableIpv6), ddnsDomain)) // #nosec
+	ddnsProfile, _ := utils.Json.Marshal(s.DDNSProfile)
+	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"EnableIPv4": %s,"EnableIpv6": %s,"DDNSDomain": %s,"DDNSProfile": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), boolToString(s.EnableIPv4), boolToString(s.EnableIpv6), ddnsDomain, ddnsProfile)) // #nosec
 }

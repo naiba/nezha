@@ -106,6 +106,7 @@ func (s *NezhaHandler) ReportSystemState(c context.Context, r *pb.State) (*pb.Re
 
 func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Receipt, error) {
 	var clientID uint64
+	var provider ddns.Provider
 	var err error
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
@@ -122,7 +123,11 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		singleton.ServerList[clientID].Host.IP != host.IP {
 
 		serverDomain := singleton.ServerList[clientID].DDNSDomain
-		provider, err := singleton.GetDDNSProviderFromString(singleton.Conf.DDNS.Provider)
+		if singleton.Conf.DDNS.Provider == "" {
+			provider, err = singleton.GetDDNSProviderFromProfile(singleton.ServerList[clientID].DDNSProfile)
+		} else {
+			provider, err = singleton.GetDDNSProviderFromString(singleton.Conf.DDNS.Provider)
+		}
 		if err == nil && serverDomain != "" {
 			ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
 			maxRetries := int(singleton.Conf.DDNS.MaxRetries)
@@ -137,7 +142,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 
 		} else {
 			// 虽然会在启动时panic, 可以断言不会走这个分支, 但是考虑到动态加载配置或者其它情况, 这里输出一下方便检查奇奇怪怪的BUG
-			log.Printf("NEZHA>> 未找到对应的DDNS提供者(%s), 请前往config.yml检查你的设置\n", singleton.Conf.DDNS.Provider)
+			log.Printf("NEZHA>> 未找到对应的DDNS配置(%s), 或者是provider填写不正确, 请前往config.yml检查你的设置\n", singleton.ServerList[clientID].DDNSProfile)
 		}
 
 	}
