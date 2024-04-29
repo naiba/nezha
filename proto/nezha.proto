@@ -23,6 +23,7 @@ message Host {
     string ip = 10;
     string country_code = 11;
     string version = 12;
+    repeated string gpu = 13;
 }
 
 message State {

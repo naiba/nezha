@@ -76,6 +76,10 @@
                             <span class="node-cell-expand-label">CPU:</span>
                             @#node.host.CPU.join(",")#@
                         </span>
+                        <span class="node-cell-expand" v-if="node.host.GPU">
+                            <span class="node-cell-expand-label">GPU:</span>
+                            @#node.host.GPU.join(",")#@
+                        </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
                             @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@
