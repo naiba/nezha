@@ -170,17 +170,17 @@ func (ns *NotificationServerBundle) replaceParamsInString(str string, message st
 
 	if ns.Server != nil {
 		str = strings.ReplaceAll(str, "#SERVER.NAME#", mod(ns.Server.Name))
-		str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%f", ns.Server.State.CPU)))
-		str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%d", ns.Server.State.MemUsed)))
-		str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%d", ns.Server.State.SwapUsed)))
-		str = strings.ReplaceAll(str, "#SERVER.DISK#", mod(fmt.Sprintf("%d", ns.Server.State.DiskUsed)))
-		str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", mod(fmt.Sprintf("%d", ns.Server.State.NetInSpeed)))
-		str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", mod(fmt.Sprintf("%d", ns.Server.State.NetOutSpeed)))
-		str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", mod(fmt.Sprintf("%d", ns.Server.State.NetInTransfer)))
-		str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", mod(fmt.Sprintf("%d", ns.Server.State.NetOutTransfer)))
-		str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%f", ns.Server.State.Load1)))
-		str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%f", ns.Server.State.Load5)))
-		str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%f", ns.Server.State.Load15)))
+		str = strings.ReplaceAll(str, "#SERVER.CPU#", mod(fmt.Sprintf("%.2f %%", ns.Server.State.CPU)))
+		str = strings.ReplaceAll(str, "#SERVER.MEM#", mod(fmt.Sprintf("%s / %s", formatBytes(ns.Server.State.MemUsed), formatBytes(ns.Server.Host.MemTotal))))
+		str = strings.ReplaceAll(str, "#SERVER.SWAP#", mod(fmt.Sprintf("%s / %s", formatBytes(ns.Server.State.SwapUsed), formatBytes(ns.Server.Host.SwapTotal))))
+		str = strings.ReplaceAll(str, "#SERVER.DISK#", mod(fmt.Sprintf("%s / %s", formatBytes(ns.Server.State.DiskUsed), formatBytes(ns.Server.Host.DiskTotal))))
+		str = strings.ReplaceAll(str, "#SERVER.NETINSPEED#", mod(fmt.Sprintf("%s/s", formatBytes(ns.Server.State.NetInSpeed))))
+		str = strings.ReplaceAll(str, "#SERVER.NETOUTSPEED#", mod(fmt.Sprintf("%s/s", formatBytes(ns.Server.State.NetOutSpeed))))
+		str = strings.ReplaceAll(str, "#SERVER.TRANSFERIN#", mod(fmt.Sprintf("%s", formatBytes(ns.Server.State.NetInTransfer))))
+		str = strings.ReplaceAll(str, "#SERVER.TRANSFEROUT#", mod(fmt.Sprintf("%s", formatBytes(ns.Server.State.NetOutTransfer))))
+		str = strings.ReplaceAll(str, "#SERVER.LOAD1#", mod(fmt.Sprintf("%.2f", ns.Server.State.Load1)))
+		str = strings.ReplaceAll(str, "#SERVER.LOAD5#", mod(fmt.Sprintf("%.2f", ns.Server.State.Load5)))
+		str = strings.ReplaceAll(str, "#SERVER.LOAD15#", mod(fmt.Sprintf("%.2f", ns.Server.State.Load15)))
 		str = strings.ReplaceAll(str, "#SERVER.TCPCONNCOUNT#", mod(fmt.Sprintf("%d", ns.Server.State.TcpConnCount)))
 		str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", mod(fmt.Sprintf("%d", ns.Server.State.UdpConnCount)))
 
@@ -208,4 +208,15 @@ func (ns *NotificationServerBundle) replaceParamsInString(str string, message st
 	}
 
 	return str
+}
+
+func formatBytes(bytes uint64) string {
+	units := []string{"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"}
+	result := float64(bytes)
+	i := 0
+	for result >= 1024 && i < len(units)-1 {
+		result /= 1024
+		i++
+	}
+	return fmt.Sprintf("%.2f %s", result, units[i])
 }
