@@ -2,8 +2,10 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/naiba/nezha/pkg/oidc/cloudflare"
 	"net/http"
 	"net/url"
 	"strings"
@@ -71,6 +73,17 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  fmt.Sprintf("%s/login/oauth/authorize", singleton.Conf.Oauth2.Endpoint),
 				TokenURL: fmt.Sprintf("%s/login/oauth/access_token", singleton.Conf.Oauth2.Endpoint),
+			},
+			RedirectURL: oa.getRedirectURL(c),
+		}
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeCloudflare {
+		return &oauth2.Config{
+			ClientID:     singleton.Conf.Oauth2.ClientID,
+			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
+			Scopes:       []string{"openid", "email", "profile", "groups"},
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  fmt.Sprintf("%s/cdn-cgi/access/sso/oidc/%s/authorization", singleton.Conf.Oauth2.Endpoint, singleton.Conf.Oauth2.ClientID),
+				TokenURL: fmt.Sprintf("%s/cdn-cgi/access/sso/oidc/%s/token", singleton.Conf.Oauth2.Endpoint, singleton.Conf.Oauth2.ClientID),
 			},
 			RedirectURL: oa.getRedirectURL(c),
 		}
@@ -155,6 +168,17 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 			if err == nil {
 				user = model.NewUserFromGitea(u)
 			}
+		} else if singleton.Conf.Oauth2.Type == model.ConfigTypeCloudflare {
+			client := oauth2Config.Client(context.Background(), otk)
+			resp, err := client.Get(fmt.Sprintf("%s/cdn-cgi/access/sso/oidc/%s/userinfo", singleton.Conf.Oauth2.Endpoint, singleton.Conf.Oauth2.ClientID))
+			if err == nil {
+				defer resp.Body.Close()
+				var cloudflareUserInfo *cloudflare.UserInfo
+				if err := json.NewDecoder(resp.Body).Decode(&cloudflareUserInfo); err == nil {
+					user = cloudflareUserInfo.MapToNezhaUser()
+				}
+			}
+
 		} else {
 			var client *GitHubAPI.Client
 			oc := oauth2Config.Client(ctx, otk)
