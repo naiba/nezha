@@ -49,6 +49,9 @@ func (gp *guestPage) login(c *gin.Context) {
 	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeGitea {
 		LoginType = "Gitea"
 		RegistrationLink = fmt.Sprintf("%s/user/sign_up", singleton.Conf.Oauth2.Endpoint)
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeCloudflare {
+		LoginType = "Cloudflare"
+		RegistrationLink = "https://dash.cloudflare.com/sign-up/teams"
 	}
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/login", mygin.CommonEnvironment(c, gin.H{
 		"Title":            singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),

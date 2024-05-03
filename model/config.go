@@ -32,11 +32,12 @@ var DashboardThemes = map[string]string{
 }
 
 const (
-	ConfigTypeGitHub  = "github"
-	ConfigTypeGitee   = "gitee"
-	ConfigTypeGitlab  = "gitlab"
-	ConfigTypeJihulab = "jihulab"
-	ConfigTypeGitea   = "gitea"
+	ConfigTypeGitHub     = "github"
+	ConfigTypeGitee      = "gitee"
+	ConfigTypeGitlab     = "gitlab"
+	ConfigTypeJihulab    = "jihulab"
+	ConfigTypeGitea      = "gitea"
+	ConfigTypeCloudflare = "cloudflare"
 )
 
 const (
