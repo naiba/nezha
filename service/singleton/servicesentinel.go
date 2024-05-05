@@ -335,7 +335,7 @@ func (ss *ServiceSentinel) worker() {
 	// 从服务状态汇报管道获取汇报的服务数据
 	for r := range ss.serviceReportChannel {
 		if ss.monitors[r.Data.GetId()] == nil || ss.monitors[r.Data.GetId()].ID == 0 {
-			log.Printf("NEZAH>> 错误的服务监控上报 %+v", r)
+			log.Printf("NEZHA>> 错误的服务监控上报 %+v", r)
 			continue
 		}
 		mh := r.Data
