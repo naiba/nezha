@@ -395,7 +395,7 @@ modify_agent_config() {
         nz_client_secret=$3
         shift 3
         if [ $# -gt 0 ]; then
-            args=" $*"
+            args="$*"
         fi
     fi
 
