@@ -69,6 +69,11 @@
                             data-tooltip="{{tr "ClickToCopy"}}">
                             <i class="windows icon"></i>
                         </button>
+                        <button class="ui icon green mini button"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.command -o nezha.command && chmod +x nezha.command && sudo ./nezha.command install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
+                            data-tooltip="{{tr "ClickToCopy"}}">
+                            <i class="apple icon"></i>
+                        </button>
                     </td>
                     <td style="word-break: break-word;white-space: pre-wrap;">{{$server.Note}}</td>
                     <td>

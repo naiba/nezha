@@ -10,11 +10,9 @@
 NZ_BASE_PATH="/opt/nezha"
 NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
-NZ_AGENT_SERVICE="/etc/systemd/system/nezha-agent.service"
-NZ_AGENT_SERVICERC="/etc/init.d/nezha-agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.16.2"
+NZ_VERSION="v0.16.3"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -359,21 +357,6 @@ install_agent() {
 modify_agent_config() {
     echo -e "> 修改Agent配置"
 
-    if [ "$os_alpine" != 1 ]; then
-        wget -t 2 -T 60 -O $NZ_AGENT_SERVICE https://${GITHUB_RAW_URL}/script/nezha-agent.service >/dev/null 2>&1
-        if [[ $? != 0 ]]; then
-            echo -e "${red}文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}${plain}"
-            return 0
-        fi
-    else
-        wget -t 2 -T 60 -O $NZ_AGENT_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-agent >/dev/null 2>&1
-        chmod +x $NZ_AGENT_SERVICERC
-        if [[ $? != 0 ]]; then
-            echo -e "${red}Fail to download service, please check if the network can link ${GITHUB_RAW_URL}${plain}"
-            return 0
-        fi
-    fi
-
     if [ $# -lt 3 ]; then
         echo "请先在管理面板上添加Agent，记录下密钥" &&
             read -ep "请输入一个解析到面板所在IP的域名（不可套CDN）: " nz_grpc_host &&
@@ -399,28 +382,14 @@ modify_agent_config() {
         fi
     fi
 
-    if [ "$os_alpine" != 1 ]; then
-        sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICE}
-        sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICE}
-        sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICE}
-        [ -n "${args}" ] && sed -i "/ExecStart/ s/$/ ${args}/" ${NZ_AGENT_SERVICE}
-    else
-        sed -i "s/nz_grpc_host/${nz_grpc_host}/" ${NZ_AGENT_SERVICERC}
-        sed -i "s/nz_grpc_port/${nz_grpc_port}/" ${NZ_AGENT_SERVICERC}
-        sed -i "s/nz_client_secret/${nz_client_secret}/" ${NZ_AGENT_SERVICERC}
-        [ -n "${args}" ] && sed -i "/command_args/ s/\"$/ ${args}\"/" ${NZ_AGENT_SERVICERC}
-    fi
+    ${NZ_AGENT_PATH}/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p $nz_client_secret $args >/dev/null 2>&1
 
+    if [ $? -ne 0 ]; then
+        ${NZ_AGENT_PATH}/nezha-agent service uninstall >/dev/null 2>&1
+        ${NZ_AGENT_PATH}/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p $nz_client_secret $args >/dev/null 2>&1
+    fi
+    
     echo -e "Agent配置 ${green}修改成功，请稍等重启生效${plain}"
-
-    if [ "$os_alpine" != 1 ]; then
-        systemctl daemon-reload
-        systemctl enable nezha-agent
-        systemctl restart nezha-agent
-    else
-        rc-update add nezha-agent
-        rc-service nezha-agent restart
-    fi
 
     #if [[ $# == 0 ]]; then
     #    before_show_menu
@@ -709,16 +678,7 @@ show_agent_log() {
 uninstall_agent() {
     echo -e "> 卸载Agent"
 
-    if [ "$os_alpine" != 1 ]; then
-        systemctl disable nezha-agent.service
-        systemctl stop nezha-agent.service
-        rm -rf $NZ_AGENT_SERVICE
-        systemctl daemon-reload
-    else
-        rc-update del nezha-agent
-        rc-service nezha-agent stop
-        rm -rf $NZ_AGENT_SERVICERC
-    fi
+    ${NZ_AGENT_PATH}/nezha-agent service uninstall
 
     rm -rf $NZ_AGENT_PATH
     clean_all
@@ -731,11 +691,7 @@ uninstall_agent() {
 restart_agent() {
     echo -e "> 重启Agent"
 
-    if [ "$os_alpine" != 1 ]; then
-        systemctl restart nezha-agent.service
-    else
-        rc-service nezha-agent restart
-    fi
+    ${NZ_AGENT_PATH}/nezha-agent service restart
 
     if [[ $# == 0 ]]; then
         before_show_menu
