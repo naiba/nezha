@@ -7,16 +7,20 @@ if($PSVersionTable.PSVersion.Major -lt 5){
     exit
 }
 $agentrepo = "nezhahq/agent"
-#  x86 or x64
+#  x86 or x64 or arm64
 if ([System.Environment]::Is64BitOperatingSystem) {
-    $file = "nezha-agent_windows_amd64.zip"
+    if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
+        $file = "nezha-agent_windows_arm64.zip"
+    } else {
+        $file = "nezha-agent_windows_amd64.zip"
+    }
 }
 else {
     $file = "nezha-agent_windows_386.zip"
 }
 $agentreleases = "https://api.github.com/repos/$agentrepo/releases"
 #重复运行自动更新
-if (Test-Path "C:\nezha") {
+if (Test-Path "C:\nezha\nezha-agent.exe") {
     Write-Host "Nezha monitoring already exists, delete and reinstall" -BackgroundColor DarkGreen -ForegroundColor White
     C:\nezha\nezha-agent.exe service uninstall
     Remove-Item "C:\nezha" -Recurse
@@ -25,7 +29,25 @@ if (Test-Path "C:\nezha") {
 Write-Host "Determining latest nezha release" -BackgroundColor DarkGreen -ForegroundColor White
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $agenttag = (Invoke-WebRequest -Uri $agentreleases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
-$nssmtag = (Invoke-WebRequest -Uri $nssmreleases -UseBasicParsing | ConvertFrom-Json)[0].tag_name
+if ([string]::IsNullOrWhiteSpace($agenttag)) {
+    $optionUrl = "https://fastly.jsdelivr.net/gh/nezhahq/agent/"
+    Try {
+        $response = Invoke-WebRequest -Uri $optionUrl -UseBasicParsing -TimeoutSec 10
+        if ($response.StatusCode -eq 200) {
+            $versiontext = $response.Content | findstr /c:"option.value"
+            $version = [regex]::Match($versiontext, "@(\d+\.\d+\.\d+)").Groups[1].Value
+            $agenttag = "v" + $version
+        }
+    } Catch {
+        $optionUrl = "https://gcore.jsdelivr.net/gh/nezhahq/agent/"
+        $response = Invoke-WebRequest -Uri $optionUrl -UseBasicParsing -TimeoutSec 10
+        if ($response.StatusCode -eq 200) {
+            $versiontext = $response.Content | findstr /c:"option.value"
+            $version = [regex]::Match($versiontext, "@(\d+\.\d+\.\d+)").Groups[1].Value
+            $agenttag = "v" + $version
+        }
+    }
+}
 #Region判断
 $ipapi= Invoke-RestMethod  -Uri "https://api.myip.com/" -UserAgent "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1"
 $region=$ipapi.cc
