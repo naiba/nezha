@@ -41,6 +41,12 @@ message State {
     uint64 tcp_conn_count = 14;
     uint64 udp_conn_count = 15;
     uint64 process_count = 16;
+    repeated State_SensorTemperature temperatures = 17;
+}
+
+message State_SensorTemperature {
+    string name = 1;
+    double temperature = 2;
 }
 
 message Task {

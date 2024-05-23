@@ -640,6 +640,9 @@ other = "Plantilla"
 [Stat]
 other = "Stat"
 
+[Temperature]
+other = "Temperatura"
+
 [DisableSwitchTemplateInFrontend]
 other = "Deshabilitar Cambio de Plantilla en Frontend"
 

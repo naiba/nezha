@@ -640,6 +640,9 @@ other = "Template"
 [Stat]
 other = "Asset"
 
+[Temperature]
+other = "Temperature"
+
 [DisableSwitchTemplateInFrontend]
 other = "Disable Switch Template in Frontend"
 
