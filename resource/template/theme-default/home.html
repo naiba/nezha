@@ -41,7 +41,12 @@
                     {{tr "ConnCount"}}: TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@<br />
                     {{tr "BootTime"}}: @# formatTimestamp(server.Host.BootTime) #@<br />
                     {{tr "LastActive"}}: @# new Date(server.LastActive).toLocaleString() #@<br />
-                    {{tr "Version"}}: @#server.Host.Version#@
+                    {{tr "Version"}}: @#server.Host.Version#@ <br/>
+                    {{tr "Temperature"}}: 
+                      <span v-for="temp in server.State.Temperatures">
+                        @#temp.Name#@: @#temp.Temperature#@°C &nbsp;
+                      </span>
+                    
                     <div class="chartbox" :key="server.ID" :ref="`chart${server.ID}`" style="width: 100%; height: auto; margin-bottom: 2px;"></div>
                   </div>
                   <div class="ui divider" style="margin-bottom: 5px"></div>

@@ -640,6 +640,9 @@ other = "主题"
 [Stat]
 other = "信息"
 
+[Temperature]
+other = "温度"
+
 [DisableSwitchTemplateInFrontend]
 other = "禁止前台切换模板"
 
