@@ -69,7 +69,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:latest
-            ${{ steps.image-name.outputs.GHRC_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
+            
             
 
       - name: Compress dist files
