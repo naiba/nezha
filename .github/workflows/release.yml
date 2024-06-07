@@ -44,12 +44,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Log in to the AliyunCS
-        uses: docker/login-action@master
-        with:
-          registry: registry.cn-shanghai.aliyuncs.com
-          username: ${{ secrets.ALI_USER }}
-          password: ${{ secrets.ALI_PAT }}
+      
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -60,10 +55,7 @@ jobs:
       - name: Set up image name
         run: |
           GHRC_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
-          if [ ${{ github.repository_owner }} = "naiba" ]
-            then ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard")
-            else ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
-          fi
+          
           echo "::set-output name=GHRC_IMAGE_NAME::$GHRC_IMAGE_NAME"
           echo "::set-output name=ALI_IMAGE_NAME::$ALI_IMAGE_NAME"
         id: image-name
