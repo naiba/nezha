@@ -31,7 +31,7 @@
                     {{tr "MemUsed"}}:
                     @#formatByteSize(server.State.MemUsed)#@/@#formatByteSize(server.Host.MemTotal)#@<br />
                     {{tr "SwapUsed"}}:
-                    @#formatByteSize(server.State.SwapUsed)#@/@#formatByteSize(server.Host.SwapTotal)#@<br />
+                    @#server.State&&server.Host.SwapTotal?formatByteSize(server.State.SwapUsed)+'/'+formatByteSize(server.Host.SwapTotal):tr "Disabled"#@<br />
                     {{tr "NetTransfer"}}: <i
                       class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@<i
                       class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@<br />
@@ -72,10 +72,10 @@
                     </div>
                     <div class="three wide column">{{tr "SwapUsed"}}</div>
                     <div class="thirteen wide column">
-                      <div :class="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).class">
+                      <div :class="formatPercent(server.live, server.State.SwapUsed, server.Host.SwapTotal).class">
                         <div class="bar"
-                          :style="formatPercent(server.live,server.State.SwapUsed, server.Host.SwapTotal).style">
-                          <small>@#parseInt(server.State&&server.Host.SwapTotal?server.State.SwapUsed/server.Host.SwapTotal*100:0)#@%</small>
+                          :style="formatPercent(server.live, server.State.SwapUsed, server.Host.SwapTotal).style">
+                          <small>@#server.State&&server.Host.SwapTotal?parseInt(server.State.SwapUsed/server.Host.SwapTotal*100+'%'):tr "Disabled"#@</small>
                         </div>
                       </div>
                     </div>
