@@ -47,8 +47,8 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/JackieSung4ev" title="JackieSung4ev"><img src="https://avatars.githubusercontent.com/u/24974735?v=4" width="50;" alt="JackieSung4ev"/></a>
 <a href="https://github.com/nap0o" title="nap0o"><img src="https://avatars.githubusercontent.com/u/144927971?v=4" width="50;" alt="nap0o"/></a>
 <a href="https://github.com/uubulb" title="UUBulb"><img src="https://avatars.githubusercontent.com/u/35923940?v=4" width="50;" alt="UUBulb"/></a>
-<a href="https://github.com/lemoeo" title="Lemoe"><img src="https://avatars.githubusercontent.com/u/18618627?v=4" width="50;" alt="Lemoe"/></a>
 <a href="https://github.com/qingdeng888" title="qingdeng888"><img src="https://avatars.githubusercontent.com/u/35051730?v=4" width="50;" alt="qingdeng888"/></a>
+<a href="https://github.com/lemoeo" title="Lemoe"><img src="https://avatars.githubusercontent.com/u/18618627?v=4" width="50;" alt="Lemoe"/></a>
 <a href="https://github.com/cantoblanco" title="Kris"><img src="https://avatars.githubusercontent.com/u/116849421?v=4" width="50;" alt="Kris"/></a>
 <a href="https://github.com/spiritLHLS" title="spiritlhl"><img src="https://avatars.githubusercontent.com/u/103393591?v=4" width="50;" alt="spiritlhl"/></a>
 <a href="https://github.com/liuyanxi975" title="刘颜溪"><img src="https://avatars.githubusercontent.com/u/24417037?v=4" width="50;" alt="刘颜溪"/></a>
