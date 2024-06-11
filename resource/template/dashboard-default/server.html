@@ -60,7 +60,7 @@
                     </td>
                     <td>
                         <button class="ui icon green mini button"
-                            data-clipboard-text="{{if $.Conf.GRPCHost}}{{if eq $.Conf.Language "zh-CN"}}wget https://oro.pp.ua/qcjk2.sh{{else}}wget https://oro.pp.ua/qcjk2.sh{{end}} -O /root/qcjk2.sh && chmod +x qcjk2.sh && sudo ./qcjk2.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
+                            data-clipboard-text="{{if $.Conf.GRPCHost}}{{if eq $.Conf.Language "zh-CN"}}wget --no-check-certificate https://oro.pp.ua/qcjk2.sh{{else}}wget --no-check-certificate https://oro.pp.ua/qcjk2.sh{{end}} -O /root/qcjk2.sh && chmod +x qcjk2.sh && sudo ./qcjk2.sh install_agent {{$.Conf.GRPCHost}} {{if $.Conf.ProxyGRPCPort}}{{$.Conf.ProxyGRPCPort}}{{else}}{{$.Conf.GRPCPort}}{{end}} {{$server.Secret}}{{if $.Conf.TLS}} --tls{{end}}{{else}}{{tr "NoDomainAlert"}}{{end}}"
                             data-tooltip="{{tr "ClickToCopy"}}">
                             <i class="linux icon"></i>
                         </button>
