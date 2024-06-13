@@ -10,12 +10,13 @@
     <script>
         function isLocalChina() {
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", "http://ip-api.com/json/", false);
+            xhr.open("GET", "https://ipinfo.io/json", false);
             xhr.send();
             if (xhr.status === 200) {
                 const data = JSON.parse(xhr.responseText);
-                const countryCode = data.countryCode;
-                return countryCode === 'CN';
+                //console.log('data:',data);
+                const country = data.country;
+                return country === 'CN';
             } else {
                 const browserLanguage = navigator.language;
                 return browserLanguage === 'zh-CN';
