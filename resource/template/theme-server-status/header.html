@@ -8,8 +8,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg" />
     <script>
-        const browserLanguage = navigator.language;
-        if (browserLanguage === 'zh-CN'){
+        function isLocalChina() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "http://ip-api.com/json/", false);
+            xhr.send();
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                const countryCode = data.countryCode;
+                return countryCode === 'CN';
+            } else {
+                const browserLanguage = navigator.language;
+                return browserLanguage === 'zh-CN';
+            }
+        }
+        const isLocalChina = isLocalChina();
+        if (isLocalChina()){
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">');
         } else {
             document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">');
@@ -20,7 +33,7 @@
     <link rel="stylesheet" href="/static/theme-server-status/css/dark.css?v20240407">
     <link rel="stylesheet" href="/static/theme-server-status/css/light.css?v20240407">
     <script>
-        if (browserLanguage === 'zh-CN'){
+        if (isLocalChina()){
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">');
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-logos/1.2.0/font-logos.css">');
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/flag-icons/7.2.3/css/flag-icons.min.css">');

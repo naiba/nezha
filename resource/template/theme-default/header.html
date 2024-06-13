@@ -9,9 +9,21 @@
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg" />
     <script>
-        const browserLanguage = navigator.language;
-        console.log('browserLanguage:',browserLanguage);
-        if (browserLanguage === 'zh-CN'){
+        function isLocalChina() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "http://ip-api.com/json/", false);
+            xhr.send();
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                const countryCode = data.countryCode;
+                return countryCode === 'CN';
+            } else {
+                const browserLanguage = navigator.language;
+                return browserLanguage === 'zh-CN';
+            }
+        }
+        const isLocalChina = isLocalChina();
+        if (isLocalChina()){
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css">');
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-logos/1.2.0/font-logos.min.css">');
             document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">');
@@ -26,7 +38,7 @@
     <link rel="stylesheet" type="text/css" href="/static/semantic-ui-alerts.min.css">
     <link rel="stylesheet" type="text/css" href="/static/theme-default/css/main.css?v20240226">
     <script>
-        if (browserLanguage === 'zh-CN'){
+        if (isLocalChina{
             document.write('<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"><\/script>');
             document.write('<script src="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.js"><\/script>');
             document.write('<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.14/vue.min.js"><\/script>');
