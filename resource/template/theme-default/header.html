@@ -8,50 +8,19 @@
     <meta content="telephone=no" name="format-detection">
     <title>{{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg" />
-    <script>
-        function isLocalChina() {
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", "https://ipinfo.io/json", false);
-            xhr.send();
-            if (xhr.status === 200) {
-                const data = JSON.parse(xhr.responseText);
-                //console.log('data:',data);
-                const country = data.country;
-                return country === 'CN';
-            } else {
-                const browserLanguage = navigator.language;
-                return browserLanguage === 'zh-CN';
-            }
-        }
-        if (isLocalChina()){
-            document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.css">');
-            document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-logos/1.2.0/font-logos.min.css">');
-            document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">');
-            document.write('<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/flag-icons/7.2.3/css/flag-icons.min.css">');
-        } else {
-            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.1/dist/semantic.min.css">');
-            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-logos@1.2.0/assets/font-logos.min.css">');
-            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">');
-            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flag-icons@7.2.3/css/flag-icons.min.css">');
-        }        
-    </script>
+    <link rel="stylesheet" href="https://unpkg.com/semantic-ui@2.4.1/dist/semantic.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/font-logos@1.2.0/assets/font-logos.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/flag-icons@7.2.3/css/flag-icons.min.css">
     <link rel="stylesheet" type="text/css" href="/static/semantic-ui-alerts.min.css">
     <link rel="stylesheet" type="text/css" href="/static/theme-default/css/main.css?v20240226">
-    <script>
-        if (isLocalChina()){
-            document.write('<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js"><\/script>');
-            document.write('<script src="https://cdn.bootcdn.net/ajax/libs/semantic-ui/2.4.1/semantic.min.js"><\/script>');
-            document.write('<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.14/vue.min.js"><\/script>');
-            document.write('<script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js"><\/script>');
-        } else {
-            document.write('<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"><\/script>');
-            document.write('<script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.1/dist/semantic.min.js"><\/script>');
-            document.write('<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"><\/script>');
-            document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"><\/script>');
-        }        
-    </script>    
+    <script src="https://unpkg.com/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://unpkg.com/semantic-ui@2.4.1/dist/semantic.min.js"></script>
+    <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
+    <script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="/static/semantic-ui-alerts.min.js"></script>
     <script src="/static/theme-default/js/mixin.js?v20240302"></script>
 </head>
 <body>
-{{end}}
+{{end}} 
+            

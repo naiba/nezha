@@ -39,6 +39,11 @@
                                     <i class="check icon" v-if="preferredTemplate === item.key"></i>
                                 </a>
                             </li>
+                            <li v-if="defaultTemplate === 'custom'">
+                                <a @click="toggleTemplate('custom')" class="item">
+                                    <i class="expand icon" style="font-size:1em"></i>Custom
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 {{ end }}
