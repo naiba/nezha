@@ -33,6 +33,7 @@ jobs:
           v: true
           x: false
           race: false
+          tags: timetzdata
           ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=test
           buildmode: default
 
