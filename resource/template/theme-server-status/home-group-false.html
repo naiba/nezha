@@ -27,10 +27,10 @@
             </td>
             <td class="node-cell name center">@#node.name#@</td>
             <td class="node-cell os center">
-                <i v-if='node.os == "darwin"' class="apple icon"></i>
+                <i v-if='getFontLogoClass(node.host.Platform) == "" && node.online' class="fl-tux"></i>
                 <i v-else-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
                 <i v-else :class="'fl-' + getFontLogoClass(node.host.Platform)"></i>
-                <span class="node-cell-os-text">@#node.os#@</span>
+                <span class="node-cell-os-text">@#getPlatformName(node.os)#@</span>
             </td>
             <td style="text-align: center;" class="node-cell location">
                 <i :class="'fi fi-' + node.location"></i>
@@ -71,20 +71,23 @@
                         </span>
                         <span class="node-cell-expand" v-if="node.host.CPU">
                             <span class="node-cell-expand-label">CPU:</span>
-                            @#node.host.CPU.join(",")#@
+                            @#node.host.CPU.join(",")#@ (@#node.cpu.percent#@%)
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
-                            @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@
+                            @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@ (@#node.hdd.percent#@%)
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
-                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@(@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
+                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
                         </span>
-                        <span class="node-cell-expand">
+                        <span v-if="node.host.SwapTotal > 0" class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
                             @#formatByteSize(node.state.SwapUsed)#@ / @#formatByteSize(node.host.SwapTotal)#@
-                            <span v-if="node.host.SwapTotal">(@#toFixed2(node.state.SwapUsed / node.host.SwapTotal * 100)#@%)</span>
+                            <span>(@#toFixed2(node.state.SwapUsed / node.host.SwapTotal * 100)#@%)</span>
+                        </span>
+                        <span v-else class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "SwapUsed"}}: OFF</span>
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "NetTransfer"}}:</span>

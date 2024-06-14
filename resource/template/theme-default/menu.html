@@ -27,6 +27,9 @@
                         <i :class="item.icon + ' icon'"></i>@#item.name#@
                         <i class="check icon" v-if="preferredTemplate === item.key"></i>
                     </a>
+                    <a v-if="defaultTemplate === 'custom'" @click="toggleTemplate('custom')" class="item">
+                        <i class="expand icon"></i>Custom
+                    </a>
                 </div>
             </div>
         {{ end }}

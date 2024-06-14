@@ -195,6 +195,12 @@
             isWindowsPlatform(str) {
                 return str.includes('Windows')
             },
+            getPlatformName(str){
+                if (str.toLowerCase().includes('opensuse')) {
+                    return 'openSUSE';
+                }
+                return str;
+            },
             getFontLogoClass(str) {
                 if (["almalinux",
                         "alpine",
@@ -241,6 +247,9 @@
                     > -1) {
                     return str;
                 }
+                if (str == 'darwin') {
+                    return 'apple';
+                }
                 if (['openwrt', 'linux', "immortalwrt"].indexOf(str) > -1) {
                     return 'tux';
                 }
@@ -249,6 +258,9 @@
                 }
                 if (str == 'arch') {
                     return 'archlinux';
+                }
+                if (str.toLowerCase().includes('opensuse')) {
+                    return 'opensuse';
                 }
                 return '';
             },
@@ -276,6 +288,9 @@
             },
             formatPercents(live,percent) {
                 //if(!live) { percent = 0; }
+                if (isNaN(percent)) {
+                    percent = 0;
+                }
                 if (percent <= 0) {
                     percent = 0;
                 }
