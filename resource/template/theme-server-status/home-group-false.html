@@ -27,8 +27,8 @@
             </td>
             <td class="node-cell name center">@#node.name#@</td>
             <td class="node-cell os center">
-                <i v-if='getFontLogoClass(node.host.Platform) == "" && node.online' class="fl-tux"></i>
-                <i v-else-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
+                <i v-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
+                <i v-else-if='getFontLogoClass(node.host.Platform) == "" && node.online' class="fl-tux"></i>
                 <i v-else :class="'fl-' + getFontLogoClass(node.host.Platform)"></i>
                 <span class="node-cell-os-text">@#getPlatformName(node.os)#@</span>
             </td>
