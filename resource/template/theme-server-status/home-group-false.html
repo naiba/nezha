@@ -121,6 +121,10 @@
                             @#node.uptime#@
                         </span>
                         <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "Temperature"}}:</span>
+                            @#node.state.Temperature#@°C
+                        </span>
+                        <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "Version"}}:</span>
                             @#node.host.Version#@
                         </span>
