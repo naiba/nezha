@@ -374,6 +374,7 @@
                         name: server.Name,
                         os: platform,
                         location: server.Host.CountryCode,
+                        stateuptime: server.State.Uptime,
                         uptime: this.secondToDate(server.State.Uptime),
                         load: this.toFixed2(server.State.Load1),
                         network: this.getNetworkSpeed(server.State.NetInSpeed, server.State.NetOutSpeed),

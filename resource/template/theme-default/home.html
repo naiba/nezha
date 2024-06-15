@@ -16,8 +16,8 @@
                             <div class="content" v-if="server.Host" style="margin-top: 10px; padding-bottom: 5px">
                                 <div class="header">
                                     <i style="width: 22px;border-radius: 4px;" :class="'fi fi-' + server.Host.CountryCode"></i>                                    
-                                    <i v-if='getFontLogoClass(server.Host.Platform) == "" && server.live' class="fl-tux"></i>
-                                    <i v-else-if='isWindowsPlatform(server.Host.Platform)' class="windows icon"></i>
+                                    <i v-if='isWindowsPlatform(server.Host.Platform)' class="windows icon"></i>
+                                    <i v-else-if='getFontLogoClass(server.Host.Platform) == "" && server.State.Uptime > 0' class="fl-tux"></i>
                                     <i v-else :class="'fl-' + getFontLogoClass(server.Host.Platform)"></i>
                                     @#server.Name + (server.live?'':'[{{tr "Offline"}}]')#@
                                     <i @click="togglePopup($event, server.ID)" aria-expanded="false" class="nezha-secondary-font info circle icon"></i>
