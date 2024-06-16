@@ -60,7 +60,7 @@
                                                 <i class="bi bi-chevron-double-down"></i>
                                             </span>
                                             <span v-else>
-                                                <span v-for="temp in server.State.Temperatures" :key="temp.Name">
+                                                <span v-for="temp in server.State.Temperatures" :key="temp.Name" v-if="temp.Temperature !== 0">
                                                     [ @#temp.Name#@: @#temp.Temperature#@°C ]
                                                 </span>
                                                 <i class="bi bi-chevron-double-up"></i>
