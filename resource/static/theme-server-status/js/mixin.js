@@ -10,7 +10,7 @@ const mixinsVue = {
         adaptedTemplates: [
             { key: 'default', name: 'Default', icon: 'th large' },
             { key: 'angel-kanade', name: 'AngelKanade', icon: 'square' },
-            { key: 'server-status', name: 'SeverStatus', icon: 'list' }
+            { key: 'server-status', name: 'ServerStatus', icon: 'list' }
         ]
     },
     created() {
