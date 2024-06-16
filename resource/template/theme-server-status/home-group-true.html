@@ -77,12 +77,12 @@
                             @#node.host.CPU.join(",")#@ (@#node.cpu.percent#@%)
                         </span>
                         <span class="node-cell-expand">
-                            <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
-                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#node.memory.percent#@%)
-                        </span>
-                        <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
                             @#formatByteSize(node.state.DiskUsed)#@ / @#formatByteSize(node.host.DiskTotal)#@ (@#node.hdd.percent#@%)
+                        </span>
+                        <span class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
+                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#node.memory.percent#@%)
                         </span>
                         <span v-if="node.host.SwapTotal > 0" class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
