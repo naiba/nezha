@@ -78,7 +78,7 @@
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
-                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
+                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#node.memory.percent#@%)
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "DiskUsed"}}:</span>
