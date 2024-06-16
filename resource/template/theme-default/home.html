@@ -56,8 +56,8 @@
                                         <template>
                                             <div>
                                                 <template v-if="server.State.Temperatures">
-                                                    <a href="#" @click.prevent="handleClick">
-                                                        {{tr "Temperature"}}: <span v-if="!showDetails">@#getTemperature(server.State.Temperatures, sensorList)#@°C</span>
+                                                    <a href="#" @click.prevent="toggleDetailedTemp">
+                                                        {{tr "Temperature"}}: <span v-if="!showDetailedTemp">@#getTemperature(server.State.Temperatures, sensorList)#@°C</span>
                                                         <span v-else>
                                                             <span v-for="temp in server.State.Temperatures" :key="temp.Name">
                                                                 @#temp.Name#@: @#temp.Temperature#@°C &nbsp;
@@ -186,7 +186,7 @@
                 'ACPI\\ThermalZone\\TZ001_0',
                 'ACPI\\ThermalZone\\THM0_0'
             ],
-            showDetails: false
+            showDetailedTemp: false
         },
         mixins: [mixinsVue],
             created() {
@@ -504,8 +504,8 @@
             listTipsMouseleave(obj){
                 layer.close(this.layerIndex)
             },
-            handleClick(){
-                this.showDetails = !this.showDetails;
+            toggleDetailedTemp(){
+                this.showDetailedTemp = !this.showDetailedTemp;
             },
             getTemperature(arr, sensorList) {
                 // 将 sensorList 中的所有项转换为小写
