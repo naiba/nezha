@@ -130,10 +130,10 @@
                                 <i class="bi bi-chevron-double-down"></i>
                             </span>
                             <span v-else class="node-cell-expand-label">
-                                    <span v-for="temp in node.state.Temperatures" :key="temp.Name">
-                                       [ @#temp.Name#@ : @#temp.Temperature#@°C ]
-                                    </span>
-                                    <i class="bi bi-chevron-double-up"></i>
+                                <span v-for="temp in node.state.Temperatures" :key="temp.Name">
+                                   [ @#temp.Name#@ : @#temp.Temperature#@°C ]
+                                </span>
+                                <i class="bi bi-chevron-double-up"></i>
                             </span>
                         </span>
                         <span class="node-cell-expand">
