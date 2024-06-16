@@ -48,7 +48,6 @@
             countryServer: [],
             countryNameMap: {},
             countryMapChartData: [],
-            showDetailedTemp: false,
             sensorList: [
                 'TC0D', //CPU Die 温度，代表 CPU 内部的温度
                 'TC0H', //CPU Heatsink 温度，代表 CPU 散热器的温度
@@ -412,8 +411,20 @@
             getNetworkSpeed(netInSpeed, netOutSpeed) {
                 return this.formatByteSize(netInSpeed) + ' | ' + this.formatByteSize(netOutSpeed)
             },
-            toggleDetailedTemp(){
-                this.showDetailedTemp = !this.showDetailedTemp;
+            toggleDetailedTemp(id){
+                const tempDom = document.getElementById(`temp-${id}`); 
+                const tempDetailShow = tempDom.getAttribute('temp-detail-show');
+                const tempMain = document.getElementById(`temp-main-${id}`); 
+                const tempDetail = document.getElementById(`temp-detail-${id}`); 
+                if (tempDetailShow == 0){
+                    tempMain.style.display = 'none';
+                    tempDetail.style.display = 'inline';
+                    tempDom.setAttribute('temp-detail-show', 1);
+                } else {
+                    tempMain.style.display = 'inline';
+                    tempDetail.style.display = 'none';
+                    tempDom.setAttribute('temp-detail-show', 0);
+                }
             },
             getTemperature(temperatureList, sensorList) {
                 // 将 sensorList 中的所有项转换为小写

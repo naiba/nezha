@@ -53,15 +53,15 @@
                                         <br />
                                         {{tr "LastActive"}}: @#new Date(server.LastActive).toLocaleString()#@
                                         <br />
-                                        <div v-if="server.State.Temperatures && getTemperature(server.State.Temperatures, sensorList) > 0" class="temp-detail" @click="toggleDetailedTemp">
+                                        <div v-if="server.State.Temperatures && getTemperature(server.State.Temperatures, sensorList) > 0" class="temp-detail" @click="toggleDetailedTemp(server.ID)" :id="`temp-${server.ID}`" temp-detail-show="0">
                                             {{tr "Temperature"}}: 
-                                            <span v-if="!showDetailedTemp">
+                                            <span :id="`temp-main-${server.ID}`">
                                                 @#getTemperature(server.State.Temperatures, sensorList)#@°C
                                                 <i class="bi bi-chevron-double-down"></i>
                                             </span>
-                                            <span v-else>
+                                            <span :id="`temp-detail-${server.ID}`" style="display:none">
                                                 <span v-for="temp in server.State.Temperatures" :key="temp.Name" v-if="temp.Temperature !== 0">
-                                                    [ @#temp.Name#@ : @#temp.Temperature#@°C ]
+                                                    [ @#temp.Name#@: @#temp.Temperature#@°C ]
                                                 </span>
                                                 <i class="bi bi-chevron-double-up"></i>
                                             </span>
@@ -171,7 +171,6 @@
             cache: [],
             chartDataList: [],
             activePopup: null,
-            showDetailedTemp: false,
             sensorList: [
                 'TC0D', //CPU Die 温度，代表 CPU 内部的温度
                 'TC0H', //CPU Heatsink 温度，代表 CPU 散热器的温度
@@ -505,8 +504,20 @@
             listTipsMouseleave(obj){
                 layer.close(this.layerIndex)
             },
-            toggleDetailedTemp(){
-                this.showDetailedTemp = !this.showDetailedTemp;
+            toggleDetailedTemp(id){
+                const tempDom = document.getElementById(`temp-${id}`); 
+                const tempDetailShow = tempDom.getAttribute('temp-detail-show');
+                const tempMain = document.getElementById(`temp-main-${id}`); 
+                const tempDetail = document.getElementById(`temp-detail-${id}`); 
+                if (tempDetailShow == 0){
+                    tempMain.style.display = 'none';
+                    tempDetail.style.display = 'inline';
+                    tempDom.setAttribute('temp-detail-show', 1);
+                } else {
+                    tempMain.style.display = 'inline';
+                    tempDetail.style.display = 'none';
+                    tempDom.setAttribute('temp-detail-show', 0);
+                }
             },
             getTemperature(temperatureList, sensorList) {
                 // 将 sensorList 中的所有项转换为小写

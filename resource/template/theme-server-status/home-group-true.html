@@ -123,13 +123,13 @@
                             <span class="node-cell-expand-label">{{tr "Uptime"}}:</span>
                             @#node.uptime#@
                         </span>
-                        <span v-if="node.state.Temperatures && getTemperature(node.state.Temperatures, sensorList) > 0" @click="toggleDetailedTemp" class="node-cell-expand temp-detail">
+                        <span v-if="node.state.Temperatures && getTemperature(node.state.Temperatures, sensorList) > 0" @click="toggleDetailedTemp(node.ID)" class="node-cell-expand temp-detail" :id="`temp-${node.ID}`" temp-detail-show="0">
                             <span class="node-cell-expand-label">{{tr "Temperature"}}:</span>
-                            <span v-if="!showDetailedTemp" class="node-cell-expand-label">
+                            <span :id="`temp-main-${node.ID}`" class="node-cell-expand-label">
                                 @#getTemperature(node.state.Temperatures, sensorList)#@°C
                                 <i class="bi bi-chevron-double-down"></i>
                             </span>
-                            <span v-else class="node-cell-expand-label">
+                            <span :id="`temp-detail-${node.ID}`" class="node-cell-expand-label" style="display:none">
                                 <span v-for="temp in node.state.Temperatures" :key="temp.Name" v-if="temp.Temperature !== 0">
                                    [ @#temp.Name#@ : @#temp.Temperature#@°C ]
                                 </span>
