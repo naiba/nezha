@@ -437,8 +437,8 @@
                     }, nonZeroTemps[0].Temperature);
                 }
 
-                // 如果所有元素的 Temperature 都为 0，则返回一个默认值，比如 0
-                return null;
+                // 如果所有元素的 Temperature 都为 0，则返回一个默认值 0
+                return 0;
             },
             showCharts(event, id) {
                 const chartContainer = this.$refs[`chart${id}`][0];

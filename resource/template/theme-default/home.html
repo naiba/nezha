@@ -53,7 +53,7 @@
                                         <br />
                                         {{tr "LastActive"}}: @#new Date(server.LastActive).toLocaleString()#@
                                         <br />
-                                        <div v-if="server.State.Temperatures && getTemperature(server.State.Temperatures, sensorList)" class="temp-detail" @click="toggleDetailedTemp">
+                                        <div v-if="server.State.Temperatures && getTemperature(server.State.Temperatures, sensorList) > 0" class="temp-detail" @click="toggleDetailedTemp">
                                             {{tr "Temperature"}}: 
                                             <span v-if="!showDetailedTemp">
                                                 @#getTemperature(server.State.Temperatures, sensorList)#@°C
@@ -533,8 +533,8 @@
                     }, nonZeroTemps[0].Temperature);
                 }
 
-                // 如果所有元素的 Temperature 都为 0，则返回一个默认值，比如 0
-                return null;
+                // 如果所有元素的 Temperature 都为 0，则返回一个默认值 0
+                return 0;
             }
         }
     })

@@ -120,7 +120,7 @@
                             <span class="node-cell-expand-label">{{tr "Uptime"}}:</span>
                             @#node.uptime#@
                         </span>
-                        <span v-if="node.state.Temperatures && getTemperature(node.state.Temperatures, sensorList)" @click="toggleDetailedTemp" class="node-cell-expand temp-detail">
+                        <span v-if="node.state.Temperatures && getTemperature(node.state.Temperatures, sensorList) > 0" @click="toggleDetailedTemp" class="node-cell-expand temp-detail">
                             <span class="node-cell-expand-label">{{tr "Temperature"}}:</span>
                             <span v-if="!showDetailedTemp" class="node-cell-expand-label">
                                 @#getTemperature(node.state.Temperatures, sensorList)#@°C
