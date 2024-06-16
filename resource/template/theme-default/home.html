@@ -42,23 +42,33 @@
                                         <i class="arrow alternate circle down outline icon"></i>@#formatByteSize(server.State.NetInTransfer)#@
                                         <i class="arrow alternate circle up outline icon"></i>@#formatByteSize(server.State.NetOutTransfer)#@
                                         <br />
-                                        {{tr "Load"}}: @# toFixed2(server.State.Load1) #@/@# toFixed2(server.State.Load5) #@/@#
-                                        toFixed2(server.State.Load15) #@
+                                        {{tr "Load"}}: @#toFixed2(server.State.Load1)#@/@#toFixed2(server.State.Load5)#@/@#
+                                        toFixed2(server.State.Load15)#@
                                         <br />
-                                        {{tr "ProcessCount"}}: @# server.State.ProcessCount #@
+                                        {{tr "ProcessCount"}}: @#server.State.ProcessCount#@
                                         <br />
-                                        {{tr "ConnCount"}}: TCP @# server.State.TcpConnCount #@ / UDP @# server.State.UdpConnCount #@
+                                        {{tr "ConnCount"}}: TCP @#server.State.TcpConnCount#@ / UDP @#server.State.UdpConnCount#@
                                         <br />
-                                        {{tr "BootTime"}}: @# formatTimestamp(server.Host.BootTime) #@
+                                        {{tr "BootTime"}}: @#formatTimestamp(server.Host.BootTime)#@
                                         <br />
-                                        {{tr "LastActive"}}: @# new Date(server.LastActive).toLocaleString() #@
+                                        {{tr "LastActive"}}: @#new Date(server.LastActive).toLocaleString()#@
                                         <br />
+                                        <template>
+                                            <div>
+                                                <template v-if="server.State.Temperatures">
+                                                    <a href="#" @click.prevent="toggleDetailedTemp">
+                                                        {{tr "Temperature"}}: <span v-if="!showDetailedTemp">@#getTemperature(server.State.Temperatures, sensorList)#@°C</span>
+                                                        <span v-else>
+                                                            <span v-for="temp in server.State.Temperatures" :key="temp.Name">
+                                                                @#temp.Name#@: @#temp.Temperature#@°C &nbsp;
+                                                            </span>
+                                                        </span>
+                                                    </a>
+                                                    <br />
+                                                </template>
+                                            </div>
+                                        </template>
                                         {{tr "Version"}}: @#server.Host.Version#@
-                                        <br />
-                                        {{tr "Temperature"}}:
-                                        <span v-for="temp in server.State.Temperatures">
-                                            @#temp.Name#@: @#temp.Temperature#@°C &nbsp;
-                                        </span>
                                         <div class="chartbox" :key="server.ID" :ref="`chart${server.ID}`" style="width: 100%; height: auto; margin-bottom: 2px;"></div>
                                     </div>
                                     <div class="ui divider" style="margin-bottom: 5px"></div>
@@ -127,9 +137,9 @@
                                         <div class="three wide column">{{tr "Load"}}</div>
                                         <div class="thirteen wide column">
                                             <i class="bi bi-activity" style="font-size: 1.1rem; color: #e41e10;"></i>
-                                            @# toFixed2(server.State.Load1) #@ |
-                                            @# toFixed2(server.State.Load5) #@ |
-                                            @# toFixed2(server.State.Load15) #@
+                                            @#toFixed2(server.State.Load1)#@ |
+                                            @#toFixed2(server.State.Load5)#@ |
+                                            @#toFixed2(server.State.Load15)#@
                                         </div>
                                         <div class="three wide column">{{tr "Uptime"}}</div>
                                         <div class="thirteen wide column">
@@ -163,6 +173,20 @@
             cache: [],
             chartDataList: [],
             activePopup: null,
+            sensorList: [
+                'TC0D', //CPU Die 温度，代表 CPU 内部的温度
+                'TC0H', //CPU Heatsink 温度，代表 CPU 散热器的温度
+                'TC0P', //CPU Proximity 温度，代表 CPU 附近的温度
+                'coretemp_package_id_0',
+                'soc_thermal',
+                'cpu_thermal_zone',
+                'ACPI\\ThermalZone\\TZ0__0',
+                'ACPI\\ThermalZone\\CPUZ_0',
+                'ACPI\\ThermalZone\\TZ00_0',
+                'ACPI\\ThermalZone\\TZ001_0',
+                'ACPI\\ThermalZone\\THM0_0'
+            ],
+            showDetailedTemp: false
         },
         mixins: [mixinsVue],
             created() {
@@ -479,6 +503,28 @@
             },
             listTipsMouseleave(obj){
                 layer.close(this.layerIndex)
+            },
+            toggleDetailedTemp(){
+                this.showDetailedTemp = !this.showDetailedTemp;
+            },
+            getTemperature(arr, sensorList) {
+                // 将 sensorList 中的所有项转换为小写
+                const lowerCaseSensorList = sensorList.map(sensor => sensor.toLowerCase());
+
+                // 过滤出 Name 在 sensorList 中的元素（忽略大小写）
+                const filtered = arr.filter(item => lowerCaseSensorList.includes(item.Name.toLowerCase()));
+
+                // 如果有匹配的元素，则计算这些元素的 Temperature 的最大值
+                if (filtered.length > 0) {
+                    return filtered.reduce((max, current) => {
+                        return current.Temperature > max ? current.Temperature : max;
+                    }, filtered[0].Temperature);
+                }
+
+                // 如果没有匹配的元素，则计算 arr 中所有元素的 Temperature 的最大值
+                return arr.reduce((max, current) => {
+                    return current.Temperature > max ? current.Temperature : max;
+                }, arr[0].Temperature);
             }
         }
     })
