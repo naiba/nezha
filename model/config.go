@@ -22,7 +22,7 @@ var Themes = map[string]string{
 	"mdui":          "Neko Mdui",
 	"hotaru":        "Hotaru",
 	"angel-kanade":  "AngelKanade",
-	"server-status": "SeverStatus",
+	"server-status": "ServerStatus",
 	"custom":        "Custom(local)",
 }
 
