@@ -230,6 +230,10 @@ body {
     max-width: 50px;
 }
 
+.temp-detail {
+    cursor: pointer;
+}
+
 /*正文结束*/
 
 /* 服务页 正文*/
