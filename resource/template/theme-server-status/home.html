@@ -380,6 +380,7 @@
                         network: this.getNetworkSpeed(server.State.NetInSpeed, server.State.NetOutSpeed),
                         traffic: this.formatByteSize(server.State.NetInTransfer) + ' | ' + this.formatByteSize(server.State.NetOutTransfer),
                         cpu: this.formatPercents(server.live, this.toFixed2(server.State.CPU)),
+                        gpu: this.formatPercents(server.live, this.toFixed2(server.State.GPU)),
                         memory: this.formatPercent(server.live, server.State.MemUsed, server.Host.MemTotal),
                         hdd: this.formatPercent(server.live, server.State.DiskUsed, server.Host.DiskTotal),
                         online: server.live,

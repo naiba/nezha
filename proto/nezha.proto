@@ -23,6 +23,7 @@ message Host {
     string ip = 10;
     string country_code = 11;
     string version = 12;
+    repeated string gpu = 13;
 }
 
 message State {
@@ -42,6 +43,7 @@ message State {
     uint64 udp_conn_count = 15;
     uint64 process_count = 16;
     repeated State_SensorTemperature temperatures = 17;
+    double gpu = 18;
 }
 
 message State_SensorTemperature {

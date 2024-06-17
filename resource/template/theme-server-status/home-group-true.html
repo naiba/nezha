@@ -76,6 +76,10 @@
                             <span class="node-cell-expand-label">CPU:</span>
                             @#node.host.CPU.join(",")#@ (@#node.cpu.percent#@%)
                         </span>
+                        <span class="node-cell-expand" v-if="node.host.GPU">
+                            <span class="node-cell-expand-label">GPU:</span>
+                            @#node.host.GPU.join(",")#@ (@#node.gpu.percent#@%)
+                        </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
                             @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
