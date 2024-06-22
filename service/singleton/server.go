@@ -53,7 +53,9 @@ func ReSortServer() {
 	for _, s := range ServerList {
 		SortedServerList = append(SortedServerList, s)
 		if !s.HideForGuest {
-			SortedServerListForGuest = append(SortedServerListForGuest, s)
+			filteredStat := *s
+			filteredStat.DDNSDomain = "redacted"
+			SortedServerListForGuest = append(SortedServerListForGuest, &filteredStat)
 		}
 	}
 
