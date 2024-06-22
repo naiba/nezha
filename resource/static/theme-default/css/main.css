@@ -145,6 +145,10 @@ td {
   z-index: 9999;
 }
 
+.temp-detail {
+  cursor: pointer;
+}
+
 .ui.content {
   margin:0 !important;
   padding:1em !important;

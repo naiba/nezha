@@ -79,7 +79,7 @@
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "MemUsed"}}:</span>
-                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#toFixed2(node.state.MemUsed / node.host.MemTotal * 100)#@%)
+                            @#formatByteSize(node.state.MemUsed)#@ / @#formatByteSize(node.host.MemTotal)#@ (@#node.memory.percent#@%)
                         </span>
                         <span v-if="node.host.SwapTotal > 0" class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "SwapUsed"}}:</span>
@@ -119,6 +119,19 @@
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "Uptime"}}:</span>
                             @#node.uptime#@
+                        </span>
+                        <span v-if="node.state.Temperatures && getTemperature(node.state.Temperatures, sensorList) > 0" @click="toggleDetailedTemp(node.ID)" class="node-cell-expand temp-detail" :id="`temp-${node.ID}`" temp-detail-show="0">
+                            <span class="node-cell-expand-label">{{tr "Temperature"}}:</span>
+                            <span :id="`temp-main-${node.ID}`" class="node-cell-expand-label">
+                                @#getTemperature(node.state.Temperatures, sensorList)#@°C
+                                <i class="bi bi-chevron-double-down"></i>
+                            </span>
+                            <span :id="`temp-detail-${node.ID}`" class="node-cell-expand-label" style="display:none">
+                                <span v-for="temp in node.state.Temperatures" :key="temp.Name" v-if="temp.Temperature !== 0">
+                                   [ @#temp.Name#@ : @#temp.Temperature#@°C ]
+                                </span>
+                                <i class="bi bi-chevron-double-up"></i>
+                            </span>
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "Version"}}:</span>

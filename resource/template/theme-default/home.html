@@ -53,21 +53,19 @@
                                         <br />
                                         {{tr "LastActive"}}: @#new Date(server.LastActive).toLocaleString()#@
                                         <br />
-                                        <template>
-                                            <div>
-                                                <template v-if="server.State.Temperatures">
-                                                    <a href="#" @click.prevent="toggleDetailedTemp">
-                                                        {{tr "Temperature"}}: <span v-if="!showDetailedTemp">@#getTemperature(server.State.Temperatures, sensorList)#@°C</span>
-                                                        <span v-else>
-                                                            <span v-for="temp in server.State.Temperatures" :key="temp.Name">
-                                                                @#temp.Name#@: @#temp.Temperature#@°C &nbsp;
-                                                            </span>
-                                                        </span>
-                                                    </a>
-                                                    <br />
-                                                </template>
-                                            </div>
-                                        </template>
+                                        <div v-if="server.State.Temperatures && getTemperature(server.State.Temperatures, sensorList) > 0" class="temp-detail" @click="toggleDetailedTemp(server.ID)" :id="`temp-${server.ID}`" temp-detail-show="0">
+                                            {{tr "Temperature"}}: 
+                                            <span :id="`temp-main-${server.ID}`">
+                                                @#getTemperature(server.State.Temperatures, sensorList)#@°C
+                                                <i class="bi bi-chevron-double-down"></i>
+                                            </span>
+                                            <span :id="`temp-detail-${server.ID}`" style="display:none">
+                                                <span v-for="temp in server.State.Temperatures" :key="temp.Name" v-if="temp.Temperature !== 0">
+                                                    [ @#temp.Name#@: @#temp.Temperature#@°C ]
+                                                </span>
+                                                <i class="bi bi-chevron-double-up"></i>
+                                            </span>
+                                        </div>
                                         {{tr "Version"}}: @#server.Host.Version#@
                                         <div class="chartbox" :key="server.ID" :ref="`chart${server.ID}`" style="width: 100%; height: auto; margin-bottom: 2px;"></div>
                                     </div>
@@ -177,16 +175,18 @@
                 'TC0D', //CPU Die 温度，代表 CPU 内部的温度
                 'TC0H', //CPU Heatsink 温度，代表 CPU 散热器的温度
                 'TC0P', //CPU Proximity 温度，代表 CPU 附近的温度
-                'coretemp_package_id_0',
-                'soc_thermal',
-                'cpu_thermal_zone',
-                'ACPI\\ThermalZone\\TZ0__0',
-                'ACPI\\ThermalZone\\CPUZ_0',
-                'ACPI\\ThermalZone\\TZ00_0',
-                'ACPI\\ThermalZone\\TZ001_0',
-                'ACPI\\ThermalZone\\THM0_0'
-            ],
-            showDetailedTemp: false
+                'k10temp', //AMD K10（Phenom、Athlon、Sempron 等）系列处理器的温度监测
+                'coretemp_package_id_0', //整个封装处理器温度
+                'cpu_thermal_zone', //全志
+                'cpu-thermal', //树莓派(博通)
+                'soc_thermal', //新瑞芯微
+                'cpu_thermal', //老瑞芯微
+                'ACPI\\ThermalZone\\TZ0__0', //Windows
+                'ACPI\\ThermalZone\\CPUZ_0', //Windows
+                'ACPI\\ThermalZone\\TZ00_0', //Windows
+                'ACPI\\ThermalZone\\TZ001_0', //Windows
+                'ACPI\\ThermalZone\\THM0_0' //Windows
+            ]
         },
         mixins: [mixinsVue],
             created() {
@@ -504,16 +504,29 @@
             listTipsMouseleave(obj){
                 layer.close(this.layerIndex)
             },
-            toggleDetailedTemp(){
-                this.showDetailedTemp = !this.showDetailedTemp;
+            toggleDetailedTemp(id){
+                const tempDom = document.getElementById(`temp-${id}`); 
+                const tempDetailShow = tempDom.getAttribute('temp-detail-show');
+                const tempMain = document.getElementById(`temp-main-${id}`); 
+                const tempDetail = document.getElementById(`temp-detail-${id}`); 
+                if (tempDetailShow == 0){
+                    tempMain.style.display = 'none';
+                    tempDetail.style.display = 'inline';
+                    tempDom.setAttribute('temp-detail-show', 1);
+                } else {
+                    tempMain.style.display = 'inline';
+                    tempDetail.style.display = 'none';
+                    tempDom.setAttribute('temp-detail-show', 0);
+                }
             },
-            getTemperature(arr, sensorList) {
+            getTemperature(temperatureList, sensorList) {
                 // 将 sensorList 中的所有项转换为小写
                 const lowerCaseSensorList = sensorList.map(sensor => sensor.toLowerCase());
 
-                // 过滤出 Name 在 sensorList 中的元素（忽略大小写）
-                const filtered = arr.filter(item => lowerCaseSensorList.includes(item.Name.toLowerCase()));
-
+                // 合并过滤逻辑：过滤出 Temperature 不为 0 且 Name 在 sensorList 中的元素（忽略大小写）
+                const filtered = temperatureList.filter(item => item.Temperature !== 0 && lowerCaseSensorList.includes(item.Name.toLowerCase()));
+                //console.log('filtered:',filtered);
+                
                 // 如果有匹配的元素，则计算这些元素的 Temperature 的最大值
                 if (filtered.length > 0) {
                     return filtered.reduce((max, current) => {
@@ -521,10 +534,18 @@
                     }, filtered[0].Temperature);
                 }
 
-                // 如果没有匹配的元素，则计算 arr 中所有元素的 Temperature 的最大值
-                return arr.reduce((max, current) => {
-                    return current.Temperature > max ? current.Temperature : max;
-                }, arr[0].Temperature);
+                // 如果没有匹配的元素，则计算 temperatureList 中所有 Temperature 不为 0 的元素的最大值
+                const nonZeroTemps = temperatureList.filter(item => item.Temperature !== 0);
+                //console.log('nonZeroTemps:',nonZeroTemps);
+
+                if (nonZeroTemps.length > 0) {
+                    return nonZeroTemps.reduce((max, current) => {
+                        return current.Temperature > max ? current.Temperature : max;
+                    }, nonZeroTemps[0].Temperature);
+                }
+
+                // 如果所有元素的 Temperature 都为 0，则返回一个默认值 0
+                return 0;
             }
         }
     })
