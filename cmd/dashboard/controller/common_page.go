@@ -238,9 +238,16 @@ func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
 			servers = singleton.SortedServerListForGuest
 		}
 
+		filteredServers := make([]*model.Server, len(servers))
+		for i, server := range servers {
+			filteredServer := *server
+			filteredServer.DDNSDomain = "redacted"
+			filteredServers[i] = &filteredServer
+		}
+
 		return utils.Json.Marshal(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: servers,
+			Servers: filteredServers,
 		})
 	})
 	return v.([]byte), err
