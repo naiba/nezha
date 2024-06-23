@@ -76,3 +76,10 @@ func GenerateRandomString(n int) (string, error) {
 	}
 	return string(ret), nil
 }
+
+func BoolToString(value bool, trueString string, falseString string) string {
+	if value {
+		return trueString
+	}
+	return falseString
+}

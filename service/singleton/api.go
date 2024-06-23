@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -266,4 +267,148 @@ func (m *MonitorAPIService) GetMonitorHistories(query map[string]any) *MonitorIn
 		}
 	}
 	return res
+}
+
+type ServerConfigData struct {
+	ID           uint64 `json:"ID,omitempty" form:"ID" example:"0"`
+	Name         string `binding:"required" json:"name" form:"name" example:"服务器名"`       // 服务器名称
+	DisplayIndex int    `json:"displayIndex,omitempty" form:"displayIndex" example:"0"`   // 展示排序，越大越靠前
+	Secret       string `json:"secret,omitempty" form:"secret" example:""`                // 服务器密钥, 默认18位随机字符串
+	Tag          string `json:"tag,omitempty" form:"tag" example:"服务器组"`                  // 服务器分组
+	Note         string `json:"note,omitempty" form:"note" example:"备注"`                  // 管理员可见备注
+	HideForGuest string `json:"hideForGuest,omitempty" form:"hideForGuest" example:"off"` // 对游客隐藏
+	EnableDDNS   string `json:"enableDDNS,omitempty" form:"enableDDNS" example:"off"`
+	EnableIPv4   string `json:"enableIPv4,omitempty" form:"enableIPv4" example:"off"`
+	EnableIpv6   string `json:"enableIpv6,omitempty" form:"enableIpv6" example:"off"`
+	DDNSDomain   string `json:"DDNSDomain,omitempty" form:"DDNSDomain" example:""`
+	DDNSProfile  string `json:"DDNSProfile,omitempty" form:"DDNSProfile" example:""`
+}
+
+type ServerConfigResponse struct {
+	CommonResponse
+	Result *ServerConfigData `json:"result"`
+}
+
+func (sf *ServerConfigData) MapToServer() model.Server {
+	var server model.Server
+	server.ID = sf.ID
+	server.Name = sf.Name
+	server.Secret = sf.Secret
+	server.DisplayIndex = sf.DisplayIndex
+	server.Tag = sf.Tag
+	server.Note = sf.Note
+	server.HideForGuest = sf.HideForGuest == "on"
+	server.EnableDDNS = sf.EnableDDNS == "on"
+	server.EnableIPv4 = sf.EnableIPv4 == "on"
+	server.EnableIpv6 = sf.EnableIpv6 == "on"
+	server.DDNSDomain = sf.DDNSDomain
+	server.DDNSProfile = sf.DDNSProfile
+	return server
+}
+
+func (sf *ServerConfigData) MapFromServer(server model.Server) {
+	sf.ID = server.ID
+	sf.Name = server.Name
+	sf.Secret = server.Secret
+	sf.DisplayIndex = server.DisplayIndex
+	sf.Tag = server.Tag
+	sf.Note = server.Note
+	sf.HideForGuest = utils.BoolToString(server.HideForGuest, "on", "off")
+	sf.EnableDDNS = utils.BoolToString(server.EnableDDNS, "on", "off")
+	sf.EnableIPv4 = utils.BoolToString(server.EnableIPv4, "on", "off")
+	sf.EnableIpv6 = utils.BoolToString(server.EnableIpv6, "on", "off")
+	sf.DDNSDomain = server.DDNSDomain
+	sf.DDNSProfile = server.DDNSProfile
+}
+
+func (s *ServerAPIService) AddServer(sf ServerConfigData) (*ServerConfigResponse, error) {
+	var err error
+
+	res := &ServerConfigResponse{
+		Result: &ServerConfigData{},
+	}
+	res.CommonResponse = CommonResponse{
+		Code:    0,
+		Message: "success",
+	}
+	server := sf.MapToServer()
+	if server.Secret, err = utils.GenerateRandomString(18); err != nil {
+		return nil, err
+	}
+
+	if err = DB.Create(&server).Error; err != nil {
+		return nil, err
+	}
+
+	res.Result.MapFromServer(server)
+
+	server.Host = &model.Host{}
+	server.State = &model.HostState{}
+
+	ServerLock.Lock()
+	SecretToID[server.Secret] = server.ID
+	ServerList[server.ID] = &server
+	ServerTagToIDList[server.Tag] = append(ServerTagToIDList[server.Tag], server.ID)
+	ServerLock.Unlock()
+
+	ReSortServer()
+	return res, nil
+}
+
+func (s *ServerAPIService) EditServer(sf ServerConfigData) (*ServerConfigResponse, error) {
+	if sf.Secret == "" {
+		return nil, errors.New("secret is required")
+	}
+
+	res := &ServerConfigResponse{
+		Result: &ServerConfigData{},
+	}
+	res.CommonResponse = CommonResponse{
+		Code:    0,
+		Message: "success",
+	}
+
+	server := sf.MapToServer()
+	err := DB.Save(&server).Error
+	if err != nil {
+		return nil, err
+	}
+
+	res.Result.MapFromServer(server)
+
+	ServerLock.Lock()
+	server.CopyFromRunningServer(ServerList[server.ID])
+	// 如果修改了 Secret
+	if server.Secret != ServerList[server.ID].Secret {
+		// 删除旧 Secret-ID 绑定关系
+		SecretToID[server.Secret] = server.ID
+		// 设置新的 Secret-ID 绑定关系
+		delete(SecretToID, ServerList[server.ID].Secret)
+	}
+	// 如果修改了Tag
+	oldTag := ServerList[server.ID].Tag
+	newTag := server.Tag
+	if newTag != oldTag {
+		index := -1
+		for i := 0; i < len(ServerTagToIDList[oldTag]); i++ {
+			if ServerTagToIDList[oldTag][i] == server.ID {
+				index = i
+				break
+			}
+		}
+		if index > -1 {
+			// 删除旧 Tag-ID 绑定关系
+			ServerTagToIDList[oldTag] = append(ServerTagToIDList[oldTag][:index], ServerTagToIDList[oldTag][index+1:]...)
+			if len(ServerTagToIDList[oldTag]) == 0 {
+				delete(ServerTagToIDList, oldTag)
+			}
+		}
+		// 设置新的 Tag-ID 绑定关系
+		ServerTagToIDList[newTag] = append(ServerTagToIDList[newTag], server.ID)
+	}
+	ServerList[server.ID] = &server
+	ServerLock.Unlock()
+
+	ReSortServer()
+	return res, nil
 }
