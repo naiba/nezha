@@ -76,7 +76,7 @@
                         <span class="node-cell-expand" v-if="node.host.GPU">
                             <span class="node-cell-expand-label">GPU:</span>
                             @#node.host.GPU.join(",")#@ 
-                            <span v-if="node.State.GPU >= 0">(@#node.State.GPU#@%)</span>
+                            <span v-if="node.state.GPU >= 0">(@#node.state.GPU#@%)</span>
                             <span v-else>(0%)</span>
                         </span>
                         <span class="node-cell-expand">
