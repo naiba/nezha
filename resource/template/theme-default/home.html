@@ -30,8 +30,6 @@
                                         <br />
                                         <template v-if="server.Host.GPU">
                                             GPU: @#server.Host.GPU#@
-                                            <span v-if="server.State.GPU >= 0">(@#server.State.GPU#@%)</span>
-                                            <span v-else>(0%)</span>
                                             <br />
                                         </template>
                                         {{tr "DiskUsed"}}:
