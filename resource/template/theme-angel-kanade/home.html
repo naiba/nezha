@@ -24,6 +24,7 @@
                   [<span
                     v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br />
                   CPU: @#server.Host.CPU#@<br />
+                  GPU: @#server.Host.GPU#@<br />
                   {{tr "DiskUsed"}}:
                   @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
                   {{tr "MemUsed"}}:

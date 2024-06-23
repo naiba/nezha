@@ -221,7 +221,7 @@
               var disk = this.formatByteSize(server.State.DiskUsed) + '/' + this.formatByteSize(server.Host.DiskTotal);
               var upTime = this.secondToDate(server.State.Uptime);
               var tooltip =
-`{content: 'System: ${server.Host.Platform}-${server.Host.PlatformVersion}[${server.Host.Arch}]<br>CPU: ${server.Host.CPU}<br>Disk: ${disk}<br>Online: ${upTime}<br>Version: ${server.Host.Version}'}`;
+`{content: 'System: ${server.Host.Platform}-${server.Host.PlatformVersion}[${server.Host.Arch}]<br>CPU: ${server.Host.CPU}<br>GPU: ${server.Host.GPU}<br>Disk: ${disk}<br>Online: ${upTime}<br>Version: ${server.Host.Version}'}`;
               return tooltip
             }
         }

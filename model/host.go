@@ -32,6 +32,7 @@ type HostState struct {
 	UdpConnCount   uint64
 	ProcessCount   uint64
 	Temperatures   []SensorTemperature
+	GPU            float64
 }
 
 func (s *HostState) PB() *pb.State {
@@ -60,6 +61,7 @@ func (s *HostState) PB() *pb.State {
 		UdpConnCount:   s.UdpConnCount,
 		ProcessCount:   s.ProcessCount,
 		Temperatures:   ts,
+		Gpu:            s.GPU,
 	}
 }
 
@@ -89,6 +91,7 @@ func PB2State(s *pb.State) HostState {
 		UdpConnCount:   s.GetUdpConnCount(),
 		ProcessCount:   s.GetProcessCount(),
 		Temperatures:   ts,
+		GPU:            s.GetGpu(),
 	}
 }
 
@@ -105,6 +108,7 @@ type Host struct {
 	IP              string `json:"-"`
 	CountryCode     string
 	Version         string
+	GPU             []string
 }
 
 func (h *Host) PB() *pb.Host {
@@ -121,6 +125,7 @@ func (h *Host) PB() *pb.Host {
 		Ip:              h.IP,
 		CountryCode:     h.CountryCode,
 		Version:         h.Version,
+		Gpu:             h.GPU,
 	}
 }
 
@@ -138,5 +143,6 @@ func PB2Host(h *pb.Host) Host {
 		IP:              h.GetIp(),
 		CountryCode:     h.GetCountryCode(),
 		Version:         h.GetVersion(),
+		GPU:             h.GetGpu(),
 	}
 }
