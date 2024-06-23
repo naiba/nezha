@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
@@ -223,31 +224,30 @@ func (cp *commonPage) network(c *gin.Context) {
 }
 
 func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
-	v, err, _ := cp.requestGroup.Do("serverStats", func() (any, error) {
+	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+	_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+	authorized := isMember || isViewPasswordVerfied
+	v, err, _ := cp.requestGroup.Do(fmt.Sprintf("serverStats::%t", authorized), func() (interface{}, error) {
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
 
-		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
-		_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
-
 		var servers []*model.Server
 
-		if isMember || isViewPasswordVerfied {
+		if authorized {
 			servers = singleton.SortedServerList
 		} else {
-			servers = singleton.SortedServerListForGuest
-		}
-
-		filteredServers := make([]*model.Server, len(servers))
-		for i, server := range servers {
-			filteredServer := *server
-			filteredServer.DDNSDomain = "redacted"
-			filteredServers[i] = &filteredServer
+			filteredServers := make([]*model.Server, len(singleton.SortedServerListForGuest))
+			for i, server := range singleton.SortedServerListForGuest {
+				filteredServer := *server
+				filteredServer.DDNSDomain = "redacted"
+				filteredServers[i] = &filteredServer
+			}
+			servers = filteredServers
 		}
 
 		return utils.Json.Marshal(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: filteredServers,
+			Servers: servers,
 		})
 	})
 	return v.([]byte), err

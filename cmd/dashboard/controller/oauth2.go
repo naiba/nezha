@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/naiba/nezha/pkg/oidc/cloudflare"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/naiba/nezha/pkg/oidc/cloudflare"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
@@ -192,15 +193,12 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 				client = GitHubAPI.NewClient(oc)
 			}
 			var gu *GitHubAPI.User
-			if err == nil {
-				gu, _, err = client.Users.Get(ctx, "")
-			}
+			gu, _, err = client.Users.Get(ctx, "")
 			if err == nil {
 				user = model.NewUserFromGitHub(gu)
 			}
 		}
 	}
-
 	if err == nil && user.Login == "" {
 		err = errors.New("获取用户信息失败")
 	}
