@@ -25,7 +25,7 @@ os_arch=""
 
 sudo() {
     EUID=$(id -ru)
-    if [ $EUID -ne 0 ]; then
+    if [ "$EUID" -ne 0 ]; then
         if command -v sudo > /dev/null 2>&1; then
             command sudo "$@"
         else
@@ -65,7 +65,7 @@ pre_check() {
     fi
 
     ## China_IP
-    if [ -z $CN ]; then
+    if [ -z "$CN" ]; then
         if curl -m 10 -s https://ipapi.co/json | grep -q 'China'; then
             echo "According to the information provided by ipapi.co, the current IP may be in China"
             printf "Will the installation be done with a Chinese Mirror? [Y/n] (Custom Mirror Input 3): "
@@ -152,14 +152,14 @@ installation_check() {
         fi
     fi
 
-    if [ -f $NZ_DASHBOARD_PATH/app ]; then
+    if [ -f "$NZ_DASHBOARD_PATH/app" ]; then
         IS_DOCKER_NEZHA=0
         FRESH_INSTALL=0
     fi
 }
 
 select_version() {
-    if [ -z $IS_DOCKER_NEZHA ]; then
+    if [ -z "$IS_DOCKER_NEZHA" ]; then
         printf "${yellow}Select your installation method(Input anything is ok if you are installing agent):\n1. Docker\n2. Standalone${plain}\n"
         while true; do
             printf "Please enter [1-2]: "
@@ -286,7 +286,7 @@ install_dashboard() {
 }
 
 install_dashboard_docker() {
-    if [ ! $FRESH_INSTALL = 0 ]; then
+    if [ ! "$FRESH_INSTALL" = 0 ]; then
         command -v docker >/dev/null 2>&1
         if [ $? != 0 ]; then
             echo "Installing Docker"

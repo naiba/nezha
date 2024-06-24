@@ -25,7 +25,7 @@ os_arch=""
 
 sudo() {
     EUID=$(id -ru)
-    if [ $EUID -ne 0 ]; then
+    if [ "$EUID" -ne 0 ]; then
         if command -v sudo > /dev/null 2>&1; then
             command sudo "$@"
         else
@@ -65,7 +65,7 @@ pre_check() {
     fi
 
     ## China_IP
-    if [ -z $CN ]; then
+    if [ -z "$CN" ]; then
         if curl -m 10 -s https://ipapi.co/json | grep -q 'China'; then
             echo "根据ipapi.co提供的信息，当前IP可能在中国"
             printf "是否选用中国镜像完成安装? [Y/n] (自定义镜像输入 3):"
@@ -153,14 +153,14 @@ installation_check() {
         fi
     fi
 
-    if [ -f $NZ_DASHBOARD_PATH/app ]; then
+    if [ -f "$NZ_DASHBOARD_PATH/app" ]; then
         IS_DOCKER_NEZHA=0
         FRESH_INSTALL=0
     fi
 }
 
 select_version() {
-    if [ -z $IS_DOCKER_NEZHA ]; then
+    if [ -z "$IS_DOCKER_NEZHA" ]; then
         printf "${yellow}请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）：\n1. Docker\n2. 独立安装${plain}\n"
         while true; do
             printf "请输入选择 [1-2]："
@@ -287,7 +287,7 @@ install_dashboard() {
 }
 
 install_dashboard_docker() {
-    if [ ! $FRESH_INSTALL = 0 ]; then
+    if [ ! "$FRESH_INSTALL" = 0 ]; then
         command -v docker >/dev/null 2>&1
         if [ $? != 0 ]; then
             echo "正在安装 Docker"
