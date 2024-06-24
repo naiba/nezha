@@ -184,7 +184,7 @@ select_version() {
 update_script() {
     echo "> Update Script"
 
-    curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
+    curl -sL https://${GITHUB_RAW_URL}/script/install_en.sh -o /tmp/nezha.sh
     new_version=$(grep "NZ_VERSION" /tmp/nezha.sh | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
     if [ ! -n "$new_version" ]; then
         echo "Script failed to get, please check if the network can link https://${GITHUB_RAW_URL}/script/install.sh"
