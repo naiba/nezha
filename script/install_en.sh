@@ -24,8 +24,8 @@ os_arch=""
 [ -e /etc/os-release ] && grep -i "PRETTY_NAME" /etc/os-release | grep -qi "alpine" && os_alpine='1'
 
 sudo() {
-    EUID=$(id -ru)
-    if [ "$EUID" -ne 0 ]; then
+    myEUID=$(id -ru)
+    if [ "$myEUID" -ne 0 ]; then
         if command -v sudo > /dev/null 2>&1; then
             command sudo "$@"
         else
