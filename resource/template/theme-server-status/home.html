@@ -533,6 +533,21 @@
                         connectNulls: true
                     };
                 });
+
+                const legendData = chartData.map(item => item.monitor_name);
+                const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 3;
+                const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
+                const autoIncrement = Math.floor((legendData.length - 1) / (isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (isMobile ? 20 : 28)
+                const height = 300 + autoIncrement;
+                const gridTop = 40 + autoIncrement;
+                const legendIcon = isMobile ? 'rect' : ""; 
+                const itemWidth = isMobile ? 10 : 25;
+                const itemHeight = isMobile ? 10 : 14;
+                chart.resize({
+                    width: 'auto',
+                    height: height
+                });
+
                 const option = {
                     backgroundColor: backgroundColor,
                     title: {
@@ -548,8 +563,9 @@
                         }
                     },
                     legend: {
-                        data: chartData.map(item => item.monitor_name),
+                        data: legendData,
                         show: true,
+                        icon: legendIcon,
                         textStyle: {
                             fontSize: fontSize,
                             color: fontColor
@@ -557,7 +573,9 @@
                         top: legendTop,
                         bottom: 0,
                         left: legendLeft,
-                        padding: legendPadding
+                        padding: legendPadding,
+                        itemWidth: itemWidth,
+                        itemHeight: itemHeight,
                     },
                     xAxis: {
                         type: 'time',
@@ -589,7 +607,7 @@
                         color: fontColor
                     },
                     grid: {
-                        top: '40',
+                        top: gridTop,
                         left: gridLeft,
                         right: gridRight
                     }
