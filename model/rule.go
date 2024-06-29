@@ -74,7 +74,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	case "cpu":
 		src = float64(server.State.CPU)
 	case "gpu":
-		if server.State.GPU != -1 && !server.LastActive.IsZero() {
+		if server.State.GPU != -1 && !server.LastActive.IsZero() && strings.Compare(server.Host.Version, "0.17.0") >= 0 {
 			src = float64(server.State.GPU)
 		} else {
 			return nil
