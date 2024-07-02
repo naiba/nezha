@@ -27,13 +27,16 @@ const mixinsVue = {
         toggleView() {
             this.showGroup = !this.showGroup;
             localStorage.setItem("showGroup", JSON.stringify(this.showGroup));
+            if(this.$root.page == 'service') {
+                this.$root.initTooltip();
+            }
             return this.showGroup;
         },
         storedShowGroup() {
             const storedShowGroup = localStorage.getItem("showGroup");
             if (storedShowGroup !== null) {
                 this.showGroup = JSON.parse(storedShowGroup);
-            }       
+            }   
         },
         toggleTemplate(template) {
             if( template != this.preferredTemplate){
