@@ -42,6 +42,19 @@ func percentage(used, total uint64) float64 {
 	return float64(used) * 100 / float64(total)
 }
 
+func maxSliceValue(slice []float64) float64 {
+	if len(slice) != 0 {
+		max := slice[0]
+		for _, val := range slice {
+			if max < val {
+				max = val
+			}
+		}
+		return max
+	}
+	return 0
+}
+
 // Snapshot 未通过规则返回 struct{}{}, 通过返回 nil
 func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, db *gorm.DB) interface{} {
 	// 监控全部但是排除了此服务器
@@ -63,6 +76,8 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	switch u.Type {
 	case "cpu":
 		src = float64(server.State.CPU)
+	case "gpu":
+		src = float64(server.State.GPU)
 	case "memory":
 		src = percentage(server.State.MemUsed, server.Host.MemTotal)
 	case "swap":
@@ -120,6 +135,16 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 		src = float64(server.State.UdpConnCount)
 	case "process_count":
 		src = float64(server.State.ProcessCount)
+	case "temperature_max":
+		var temp []float64
+		if server.State.Temperatures != nil {
+			for _, tempStat := range server.State.Temperatures {
+				if tempStat.Temperature != 0 {
+					temp = append(temp, tempStat.Temperature)
+				}
+			}
+			src = maxSliceValue(temp)
+		}
 	}
 
 	// 循环区间流量检测 · 更新下次需要检测时间
