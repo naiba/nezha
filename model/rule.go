@@ -43,13 +43,16 @@ func percentage(used, total uint64) float64 {
 }
 
 func maxSliceValue(slice []float64) float64 {
-	max := slice[0]
-	for _, val := range slice {
-		if max < val {
-			max = val
+	if len(slice) != 0 {
+		max := slice[0]
+		for _, val := range slice {
+			if max < val {
+				max = val
+			}
 		}
+		return max
 	}
-	return max
+	return 0
 }
 
 // Snapshot 未通过规则返回 struct{}{}, 通过返回 nil
@@ -74,7 +77,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	case "cpu":
 		src = float64(server.State.CPU)
 	case "gpu":
-		if server.State.GPU != -1 && !server.LastActive.IsZero() && strings.Compare(server.Host.Version, "0.17.0") >= 0 {
+		if server.State.GPU > 0 {
 			src = float64(server.State.GPU)
 		} else {
 			return nil
@@ -146,6 +149,9 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 			}
 			src = maxSliceValue(temp)
 		} else {
+			return nil
+		}
+		if src == 0 {
 			return nil
 		}
 	}
