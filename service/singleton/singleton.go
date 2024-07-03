@@ -93,7 +93,7 @@ func RecordTransferHourlyUsage() {
 	ServerLock.Lock()
 	defer ServerLock.Unlock()
 	now := time.Now()
-	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, Loc)
+	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
 	var txs []model.Transfer
 	for id, server := range ServerList {
 		tx := model.Transfer{
