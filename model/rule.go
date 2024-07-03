@@ -44,13 +44,13 @@ func percentage(used, total uint64) float64 {
 
 func maxSliceValue(slice []float64) float64 {
 	if len(slice) != 0 {
-		temperature_max := slice[0]
+		max := slice[0]
 		for _, val := range slice {
-			if temperature_max < val {
-				temperature_max = val
+			if max < val {
+				max = val
 			}
 		}
-		return temperature_max
+		return max
 	}
 	return 0
 }
@@ -135,7 +135,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 		src = float64(server.State.UdpConnCount)
 	case "process_count":
 		src = float64(server.State.ProcessCount)
-	case "temperature":
+	case "temperature_max":
 		var temp []float64
 		if server.State.Temperatures != nil {
 			for _, tempStat := range server.State.Temperatures {
