@@ -44,13 +44,13 @@ func percentage(used, total uint64) float64 {
 
 func maxSliceValue(slice []float64) float64 {
 	if len(slice) != 0 {
-		max := slice[0]
+		temperature_max := slice[0]
 		for _, val := range slice {
-			if max < val {
-				max = val
+			if temperature_max < val {
+				temperature_max = val
 			}
 		}
-		return max
+		return temperature_max
 	}
 	return 0
 }
