@@ -144,11 +144,6 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 				}
 			}
 			src = maxSliceValue(temp)
-		} else {
-			return nil
-		}
-		if src == 0 {
-			return nil
 		}
 	}
 
