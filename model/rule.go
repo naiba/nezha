@@ -77,11 +77,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	case "cpu":
 		src = float64(server.State.CPU)
 	case "gpu":
-		if server.State.GPU > 0 {
-			src = float64(server.State.GPU)
-		} else {
-			return nil
-		}
+		src = float64(server.State.GPU)
 	case "memory":
 		src = percentage(server.State.MemUsed, server.Host.MemTotal)
 	case "swap":
