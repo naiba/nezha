@@ -93,7 +93,7 @@ func RecordTransferHourlyUsage() {
 	ServerLock.Lock()
 	defer ServerLock.Unlock()
 	now := time.Now()
-	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, Loc)
+	nowTrimSeconds := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), 0, 0, 0, now.Location())
 	var txs []model.Transfer
 	for id, server := range ServerList {
 		tx := model.Transfer{
@@ -136,7 +136,7 @@ func CleanMonitorHistory() {
 			if !rule.IsTransferDurationRule() {
 				continue
 			}
-			dataCouldRemoveBefore := rule.GetTransferDurationStart()
+			dataCouldRemoveBefore := rule.GetTransferDurationStart().UTC()
 			// 判断规则影响的机器范围
 			if rule.Cover == model.RuleCoverAll {
 				// 更新全局可以清理的数据点
@@ -155,12 +155,12 @@ func CleanMonitorHistory() {
 		}
 	}
 	for id, couldRemove := range specialServerKeep {
-		DB.Unscoped().Delete(&model.Transfer{}, "server_id = ? AND created_at < ?", id, couldRemove)
+		DB.Unscoped().Delete(&model.Transfer{}, "server_id = ? AND datetime(`created_at`) < datetime(?)", id, couldRemove)
 	}
 	if allServerKeep.IsZero() {
 		DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?)", specialServerIDs)
 	} else {
-		DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?) AND created_at < ?", specialServerIDs, allServerKeep)
+		DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (?) AND datetime(`created_at`) < datetime(?)", specialServerIDs, allServerKeep)
 	}
 }
 
