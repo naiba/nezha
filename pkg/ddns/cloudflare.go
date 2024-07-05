@@ -13,7 +13,7 @@ type ProviderCloudflare struct {
 	Secret string
 }
 
-func (provider ProviderCloudflare) UpdateDomain(domainConfig *DomainConfig) bool {
+func (provider *ProviderCloudflare) UpdateDomain(domainConfig *DomainConfig) bool {
 	if domainConfig == nil {
 		return false
 	}
@@ -42,7 +42,7 @@ func (provider ProviderCloudflare) UpdateDomain(domainConfig *DomainConfig) bool
 	return resultV4 && resultV6
 }
 
-func (provider ProviderCloudflare) addDomainRecord(zoneID string, domainConfig *DomainConfig, isIpv4 bool) bool {
+func (provider *ProviderCloudflare) addDomainRecord(zoneID string, domainConfig *DomainConfig, isIpv4 bool) bool {
 	record, err := provider.findDNSRecord(zoneID, domainConfig.FullDomain, isIpv4)
 	if err != nil {
 		log.Printf("查找 DNS 记录时出错: %s\n", err)
@@ -58,7 +58,7 @@ func (provider ProviderCloudflare) addDomainRecord(zoneID string, domainConfig *
 	}
 }
 
-func (provider ProviderCloudflare) getZoneID(domain string) (string, error) {
+func (provider *ProviderCloudflare) getZoneID(domain string) (string, error) {
 	_, realDomain := SplitDomain(domain)
 	url := fmt.Sprintf("https://api.cloudflare.com/client/v4/zones?name=%s", realDomain)
 	body, err := provider.sendRequest("GET", url, nil)
@@ -81,7 +81,7 @@ func (provider ProviderCloudflare) getZoneID(domain string) (string, error) {
 	return "", fmt.Errorf("找不到 Zone ID")
 }
 
-func (provider ProviderCloudflare) findDNSRecord(zoneID string, domain string, isIPv4 bool) (map[string]interface{}, error) {
+func (provider *ProviderCloudflare) findDNSRecord(zoneID string, domain string, isIPv4 bool) (map[string]interface{}, error) {
 	var ipType = "A"
 	if !isIPv4 {
 		ipType = "AAAA"
@@ -106,7 +106,7 @@ func (provider ProviderCloudflare) findDNSRecord(zoneID string, domain string, i
 	return nil, nil // 没有找到 DNS 记录
 }
 
-func (provider ProviderCloudflare) createDNSRecord(zoneID string, domainConfig *DomainConfig, isIPv4 bool) bool {
+func (provider *ProviderCloudflare) createDNSRecord(zoneID string, domainConfig *DomainConfig, isIPv4 bool) bool {
 	var ipType = "A"
 	var ipAddr = domainConfig.Ipv4Addr
 	if !isIPv4 {
@@ -126,7 +126,7 @@ func (provider ProviderCloudflare) createDNSRecord(zoneID string, domainConfig *
 	return err == nil
 }
 
-func (provider ProviderCloudflare) updateDNSRecord(zoneID string, recordID string, domainConfig *DomainConfig, isIPv4 bool) bool {
+func (provider *ProviderCloudflare) updateDNSRecord(zoneID string, recordID string, domainConfig *DomainConfig, isIPv4 bool) bool {
 	var ipType = "A"
 	var ipAddr = domainConfig.Ipv4Addr
 	if !isIPv4 {
@@ -147,7 +147,7 @@ func (provider ProviderCloudflare) updateDNSRecord(zoneID string, recordID strin
 }
 
 // 以下为辅助方法，如发送 HTTP 请求等
-func (provider ProviderCloudflare) sendRequest(method string, url string, data []byte) ([]byte, error) {
+func (provider *ProviderCloudflare) sendRequest(method string, url string, data []byte) ([]byte, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, bytes.NewBuffer(data))
 	if err != nil {

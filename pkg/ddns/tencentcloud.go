@@ -23,7 +23,7 @@ type ProviderTencentCloud struct {
 	SecretKey string
 }
 
-func (provider ProviderTencentCloud) UpdateDomain(domainConfig *DomainConfig) bool {
+func (provider *ProviderTencentCloud) UpdateDomain(domainConfig *DomainConfig) bool {
 	if domainConfig == nil {
 		return false
 	}
@@ -46,7 +46,7 @@ func (provider ProviderTencentCloud) UpdateDomain(domainConfig *DomainConfig) bo
 	return resultV4 && resultV6
 }
 
-func (provider ProviderTencentCloud) addDomainRecord(domainConfig *DomainConfig, isIpv4 bool) bool {
+func (provider *ProviderTencentCloud) addDomainRecord(domainConfig *DomainConfig, isIpv4 bool) bool {
 	record, err := provider.findDNSRecord(domainConfig.FullDomain, isIpv4)
 	if err != nil {
 		log.Printf("查找 DNS 记录时出错: %s\n", err)
@@ -66,7 +66,7 @@ func (provider ProviderTencentCloud) addDomainRecord(domainConfig *DomainConfig,
 	return provider.updateDNSRecord(domainConfig.FullDomain, record["RecordList"].([]interface{})[0].(map[string]interface{})["RecordId"].(float64), domainConfig, isIpv4)
 }
 
-func (provider ProviderTencentCloud) findDNSRecord(domain string, isIPv4 bool) (map[string]interface{}, error) {
+func (provider *ProviderTencentCloud) findDNSRecord(domain string, isIPv4 bool) (map[string]interface{}, error) {
 	var ipType = "A"
 	if !isIPv4 {
 		ipType = "AAAA"
@@ -95,7 +95,7 @@ func (provider ProviderTencentCloud) findDNSRecord(domain string, isIPv4 bool) (
 	return result, nil
 }
 
-func (provider ProviderTencentCloud) createDNSRecord(domain string, domainConfig *DomainConfig, isIPv4 bool) bool {
+func (provider *ProviderTencentCloud) createDNSRecord(domain string, domainConfig *DomainConfig, isIPv4 bool) bool {
 	var ipType = "A"
 	var ipAddr = domainConfig.Ipv4Addr
 	if !isIPv4 {
@@ -117,7 +117,7 @@ func (provider ProviderTencentCloud) createDNSRecord(domain string, domainConfig
 	return err == nil
 }
 
-func (provider ProviderTencentCloud) updateDNSRecord(domain string, recordID float64, domainConfig *DomainConfig, isIPv4 bool) bool {
+func (provider *ProviderTencentCloud) updateDNSRecord(domain string, recordID float64, domainConfig *DomainConfig, isIPv4 bool) bool {
 	var ipType = "A"
 	var ipAddr = domainConfig.Ipv4Addr
 	if !isIPv4 {
@@ -141,7 +141,7 @@ func (provider ProviderTencentCloud) updateDNSRecord(domain string, recordID flo
 }
 
 // 以下为辅助方法，如发送 HTTP 请求等
-func (provider ProviderTencentCloud) sendRequest(action string, data []byte) ([]byte, error) {
+func (provider *ProviderTencentCloud) sendRequest(action string, data []byte) ([]byte, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(data))
 	if err != nil {
@@ -173,18 +173,18 @@ func (provider ProviderTencentCloud) sendRequest(action string, data []byte) ([]
 
 // https://github.com/jeessy2/ddns-go/blob/master/util/tencent_cloud_signer.go
 
-func (provider ProviderTencentCloud) sha256hex(s string) string {
+func (provider *ProviderTencentCloud) sha256hex(s string) string {
 	b := sha256.Sum256([]byte(s))
 	return hex.EncodeToString(b[:])
 }
 
-func (provider ProviderTencentCloud) hmacsha256(s, key string) string {
+func (provider *ProviderTencentCloud) hmacsha256(s, key string) string {
 	hashed := hmac.New(sha256.New, []byte(key))
 	hashed.Write([]byte(s))
 	return string(hashed.Sum(nil))
 }
 
-func (provider ProviderTencentCloud) WriteString(strs ...string) string {
+func (provider *ProviderTencentCloud) WriteString(strs ...string) string {
 	var b strings.Builder
 	for _, str := range strs {
 		b.WriteString(str)
@@ -193,7 +193,7 @@ func (provider ProviderTencentCloud) WriteString(strs ...string) string {
 	return b.String()
 }
 
-func (provider ProviderTencentCloud) signRequest(secretId string, secretKey string, r *http.Request, action string, payload string) {
+func (provider *ProviderTencentCloud) signRequest(secretId string, secretKey string, r *http.Request, action string, payload string) {
 	algorithm := "TC3-HMAC-SHA256"
 	service := "dnspod"
 	host := provider.WriteString(service, ".tencentcloudapi.com")

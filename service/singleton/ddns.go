@@ -1,10 +1,10 @@
 package singleton
 
 import (
-	"errors"
 	"fmt"
-	ddns2 "github.com/naiba/nezha/pkg/ddns"
 	"log"
+
+	ddns2 "github.com/naiba/nezha/pkg/ddns"
 )
 
 func RetryableUpdateDomain(provider ddns2.Provider, config *ddns2.DomainConfig, maxRetries int) bool {
@@ -25,54 +25,54 @@ func RetryableUpdateDomain(provider ddns2.Provider, config *ddns2.DomainConfig, 
 func GetDDNSProviderFromString(provider string) (ddns2.Provider, error) {
 	switch provider {
 	case "webhook":
-		return ddns2.ProviderWebHook{
+		return &ddns2.ProviderWebHook{
 			URL:           Conf.DDNS.WebhookURL,
 			RequestMethod: Conf.DDNS.WebhookMethod,
 			RequestBody:   Conf.DDNS.WebhookRequestBody,
 			RequestHeader: Conf.DDNS.WebhookHeaders,
 		}, nil
 	case "dummy":
-		return ddns2.ProviderDummy{}, nil
+		return &ddns2.ProviderDummy{}, nil
 	case "cloudflare":
-		return ddns2.ProviderCloudflare{
+		return &ddns2.ProviderCloudflare{
 			Secret: Conf.DDNS.AccessSecret,
 		}, nil
 	case "tencentcloud":
-		return ddns2.ProviderTencentCloud{
+		return &ddns2.ProviderTencentCloud{
 			SecretID:  Conf.DDNS.AccessID,
 			SecretKey: Conf.DDNS.AccessSecret,
 		}, nil
 	}
-	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider))
+	return &ddns2.ProviderDummy{}, fmt.Errorf("无法找到配置的DDNS提供者%s", Conf.DDNS.Provider)
 }
 
 func GetDDNSProviderFromProfile(profileName string) (ddns2.Provider, error) {
 	profile, ok := Conf.DDNS.Profiles[profileName]
 	if !ok {
-		return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("未找到配置项 %s", profileName))
+		return &ddns2.ProviderDummy{}, fmt.Errorf("未找到配置项 %s", profileName)
 	}
 
 	switch profile.Provider {
 	case "webhook":
-		return ddns2.ProviderWebHook{
+		return &ddns2.ProviderWebHook{
 			URL:           profile.WebhookURL,
 			RequestMethod: profile.WebhookMethod,
 			RequestBody:   profile.WebhookRequestBody,
 			RequestHeader: profile.WebhookHeaders,
 		}, nil
 	case "dummy":
-		return ddns2.ProviderDummy{}, nil
+		return &ddns2.ProviderDummy{}, nil
 	case "cloudflare":
-		return ddns2.ProviderCloudflare{
+		return &ddns2.ProviderCloudflare{
 			Secret: profile.AccessSecret,
 		}, nil
 	case "tencentcloud":
-		return ddns2.ProviderTencentCloud{
+		return &ddns2.ProviderTencentCloud{
 			SecretID:  profile.AccessID,
 			SecretKey: profile.AccessSecret,
 		}, nil
 	}
-	return ddns2.ProviderDummy{}, errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", profile.Provider))
+	return &ddns2.ProviderDummy{}, fmt.Errorf("无法找到配置的DDNS提供者%s", profile.Provider)
 }
 
 func ValidateDDNSProvidersFromProfiles() error {
@@ -80,7 +80,7 @@ func ValidateDDNSProvidersFromProfiles() error {
 	providers := make(map[string]string)
 	for profileName, profile := range Conf.DDNS.Profiles {
 		if _, ok := validProviders[profile.Provider]; !ok {
-			return errors.New(fmt.Sprintf("无法找到配置的DDNS提供者%s", profile.Provider))
+			return fmt.Errorf("无法找到配置的DDNS提供者%s", profile.Provider)
 		}
 		providers[profileName] = profile.Provider
 	}

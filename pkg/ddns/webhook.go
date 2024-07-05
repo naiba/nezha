@@ -14,7 +14,7 @@ type ProviderWebHook struct {
 	RequestHeader string
 }
 
-func (provider ProviderWebHook) UpdateDomain(domainConfig *DomainConfig) bool {
+func (provider *ProviderWebHook) UpdateDomain(domainConfig *DomainConfig) bool {
 	if domainConfig == nil {
 		return false
 	}
