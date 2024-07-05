@@ -71,6 +71,7 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/zhucaidan" title="zhucaidan"><img src="https://avatars.githubusercontent.com/u/47970938?v=4" width="50;" alt="zhucaidan"/></a>
 <a href="https://github.com/ysicing" title="缘生"><img src="https://avatars.githubusercontent.com/u/8605565?v=4" width="50;" alt="缘生"/></a>
 <a href="https://github.com/unclezs" title="unclezs"><img src="https://avatars.githubusercontent.com/u/42318775?v=4" width="50;" alt="unclezs"/></a>
+<a href="https://github.com/pesh178" title="pesh178"><img src="https://avatars.githubusercontent.com/u/35772816?v=4" width="50;" alt="pesh178"/></a>
 <a href="https://github.com/lvyaoting" title="lvyaoting"><img src="https://avatars.githubusercontent.com/u/166296299?v=4" width="50;" alt="lvyaoting"/></a>
 <a href="https://github.com/yuanweize" title="I"><img src="https://avatars.githubusercontent.com/u/30067203?v=4" width="50;" alt="I"/></a>
 <a href="https://github.com/guoyongchang" title="guoyongchang"><img src="https://avatars.githubusercontent.com/u/10484506?v=4" width="50;" alt="guoyongchang"/></a>
