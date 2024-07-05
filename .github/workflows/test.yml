@@ -45,7 +45,7 @@ jobs:
           buildmode: default
       - name: Upload Release
         # 打包上传生成的文件
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: my-build
-          path: ./**/*
+          path: /
