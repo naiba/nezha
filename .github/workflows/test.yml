@@ -48,4 +48,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: my-build
-          path: /home/runner/work/nezha/nezha
+          path: /home/runner/work/nezha/nezha/build
