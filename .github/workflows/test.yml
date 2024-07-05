@@ -43,3 +43,9 @@ jobs:
           tags: timetzdata
           ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=test
           buildmode: default
+      - name: Upload Release
+        # 打包上传生成的文件
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-build
+          path: ./**/*
