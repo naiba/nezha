@@ -58,9 +58,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/hhhkkk520" title="Kris"><img src="https://avatars.githubusercontent.com/u/52115472?v=4" width="50;" alt="Kris"/></a>
 <a href="https://github.com/1ridic" title="1ridic"><img src="https://avatars.githubusercontent.com/u/88495501?v=4" width="50;" alt="1ridic"/></a>
 <a href="https://github.com/Mmx233" title="Mmx"><img src="https://avatars.githubusercontent.com/u/36563672?v=4" width="50;" alt="Mmx"/></a>
-<a href="https://github.com/pesh178" title="pesh178"><img src="https://avatars.githubusercontent.com/u/35772816?v=4" width="50;" alt="pesh178"/></a>
 <a href="https://github.com/rootmelo92118" title="rootmelo92118"><img src="https://avatars.githubusercontent.com/u/32770959?v=4" width="50;" alt="rootmelo92118"/></a>
 <a href="https://github.com/iilemon" title="Sean"><img src="https://avatars.githubusercontent.com/u/33201711?v=4" width="50;" alt="Sean"/></a>
+<a href="https://github.com/pesh178" title="pesh178"><img src="https://avatars.githubusercontent.com/u/35772816?v=4" width="50;" alt="pesh178"/></a>
 <a href="https://github.com/fscarmen" title="fscarmen"><img src="https://avatars.githubusercontent.com/u/62703343?v=4" width="50;" alt="fscarmen"/></a>
 <a href="https://github.com/ch8o" title="no-name-now"><img src="https://avatars.githubusercontent.com/u/9103372?v=4" width="50;" alt="no-name-now"/></a>
 <a href="https://github.com/HsukqiLee" title="HsukqiLee"><img src="https://avatars.githubusercontent.com/u/79034142?v=4" width="50;" alt="HsukqiLee"/></a>
