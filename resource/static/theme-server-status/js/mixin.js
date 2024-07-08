@@ -7,6 +7,7 @@ const mixinsVue = {
         showGoTop: false,
         preferredTemplate: null,
         isMobile: false,
+        staticUrl: '/static-custom',
         adaptedTemplates: [
             { key: 'default', name: 'Default', icon: 'th large' },
             { key: 'angel-kanade', name: 'AngelKanade', icon: 'square' },
@@ -15,8 +16,8 @@ const mixinsVue = {
     },
     created() {
         this.isMobile = this.checkIsMobile();
-        this.initTheme();
-        this.storedShowGroup();
+        this.theme = this.initTheme();
+        this.showGroup = this.initShowGroup();
         this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : this.$root.defaultTemplate;
         window.addEventListener('scroll', this.handleScroll);
     },
@@ -24,25 +25,36 @@ const mixinsVue = {
         window.removeEventListener('scroll', this.handleScroll);
     },
     methods: {
-        toggleView() {
-            this.showGroup = !this.showGroup;
-            localStorage.setItem("showGroup", JSON.stringify(this.showGroup));
-            if(this.$root.page == 'service') {
-                this.$root.initTooltip();
+        initTheme() {
+            const storedTheme = localStorage.getItem("theme");
+            const theme = (storedTheme === 'dark' || storedTheme === 'light') ? storedTheme : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            this.setTheme(theme);
+            return theme;
+        },
+        setTheme(theme) {
+            document.body.setAttribute("theme", theme);
+            this.theme = theme;
+            localStorage.setItem("theme", theme);
+            // 重新赋值全局调色
+            this.colors = this.theme == "dark" ? this.colorsDark : this.colorsLight;
+            
+            if(this.$root.page == 'index') {
+                this.reloadCharts(); // 重新载入echarts图表
             }
-            return this.showGroup;
         },
-        storedShowGroup() {
+        initShowGroup() {
             const storedShowGroup = localStorage.getItem("showGroup");
-            if (storedShowGroup !== null) {
-                this.showGroup = JSON.parse(storedShowGroup);
-            }   
+            const showGroup = storedShowGroup !== null ? JSON.parse(storedShowGroup) : false;
+            if (storedShowGroup === null) {
+                localStorage.setItem("showGroup", showGroup);
+            }
+            return showGroup;
         },
-        toggleTemplate(template) {
-            if( template != this.preferredTemplate){
-                this.preferredTemplate = template;
-                this.updateCookie("preferred_theme", template);
-                window.location.reload();
+        toggleShowGroup() {
+            this.showGroup = !this.showGroup;
+            localStorage.setItem("showGroup", this.showGroup);
+            if (this.$root.page == 'service') {
+                this.$root.initTooltip();
             }
         },
         updateCookie(name, value) {
@@ -59,43 +71,6 @@ const mixinsVue = {
                 }
             }
             return cookieValue;
-        },
-        setTheme(title, store = false) {
-            this.theme = title;
-            document.body.setAttribute("theme", title);
-            if (store) {
-                localStorage.setItem("theme", title);
-                this.isSystemTheme = false;
-                if(this.$root.page == 'index') {
-                    this.$root.reloadCharts(); //重新载入echarts图表
-                }
-            }
-        },
-        setSystemTheme() {
-            localStorage.removeItem("theme");
-            this.initTheme();
-            this.isSystemTheme = true;
-        },
-        initTheme() {
-            const storeTheme = localStorage.getItem("theme");
-            if (storeTheme === 'dark' || storeTheme === 'light') {
-                this.setTheme(storeTheme, true);
-            } else {
-                this.isSystemTheme = true
-                const handleChange = (mediaQueryListEvent) => {
-                    if (localStorage.getItem("theme")) {
-                        return
-                    }
-                    if (mediaQueryListEvent.matches) {
-                        this.setTheme('dark');
-                    } else {
-                        this.setTheme('light');
-                    }
-                }
-                const mediaQueryListDark = window.matchMedia('(prefers-color-scheme: dark)');
-                this.setTheme(mediaQueryListDark.matches ? 'dark' : 'light');
-                mediaQueryListDark.addEventListener("change", handleChange);
-            }
         },
         toFixed2(f) {
             return f.toFixed(2)
