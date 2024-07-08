@@ -115,9 +115,10 @@
                 let result = [];
                 let exist = {};
                 this.servers.forEach(item => {
-                    //item.Host.CountryCode = 'cn';
                     if (item.Host.CountryCode) {
-                        //if(item.Host.CountryCode.toLowerCase() == 'tw' || item.Host.CountryCode.toLowerCase() == 'hk' || item.Host.CountryCode.toLowerCase() == 'mo') item.Host.CountryCode = 'cn';
+                        if(this.countryMapGeoFile == 'nezha.world.geo.json' || this.countryMapGeoFile == 'nezha.world.antarctica.geo.json') {
+                            if(item.Host.CountryCode.toLowerCase() == 'tw' || item.Host.CountryCode.toLowerCase() == 'hk' || item.Host.CountryCode.toLowerCase() == 'mo') item.Host.CountryCode = 'cn';
+                        }
                         if (!exist[item.Host.CountryCode]) {
                             exist[item.Host.CountryCode] = true;
                             count[item.Host.CountryCode] = 1;
