@@ -7,7 +7,7 @@ const mixinsVue = {
         showGoTop: false,
         preferredTemplate: null,
         isMobile: false,
-        staticUrl: '/static-custom',
+        staticUrl: '/static/theme-server-status',
         adaptedTemplates: [
             { key: 'default', name: 'Default', icon: 'th large' },
             { key: 'angel-kanade', name: 'AngelKanade', icon: 'square' },
