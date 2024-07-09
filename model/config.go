@@ -38,6 +38,7 @@ const (
 	ConfigTypeJihulab    = "jihulab"
 	ConfigTypeGitea      = "gitea"
 	ConfigTypeCloudflare = "cloudflare"
+	ConfigTypeOidc       = "oidc"
 )
 
 const (
@@ -87,11 +88,23 @@ type Config struct {
 		ViewPassword   string // 前台查看密码
 	}
 	Oauth2 struct {
-		Type         string
-		Admin        string // 管理员用户名列表
-		ClientID     string
-		ClientSecret string
-		Endpoint     string
+		Type            string
+		Admin           string // 管理员用户名列表
+		AdminGroups     string // 管理员用户组列表
+		ClientID        string
+		ClientSecret    string
+		Endpoint        string
+		OidcDisplayName string // for OIDC Display Name
+		OidcAuthURL     string // for OIDC Auth URL
+		OidcTokenURL    string // for OIDC Token URL
+		OidcUserInfoURL string // for OIDC UserInfo URL
+		OidcLogoutURL   string // for OIDC Logout URL
+		OidcRegisterURL string // for OIDC Register URL
+		OidcLoginClaim  string // for OIDC Claim
+		OidcGroupClaim  string // for OIDC Group Claim
+		OidcScopes      string // for OIDC Scopes
+		OidcAutoCreate  bool   // for OIDC Auto Create
+		OidcAutoLogin   bool   // for OIDC Auto Login
 	}
 	HTTPPort      uint
 	GRPCPort      uint
@@ -180,6 +193,18 @@ func (c *Config) Read(path string) error {
 	}
 	if c.DDNS.MaxRetries == 0 {
 		c.DDNS.MaxRetries = 3
+	}
+	if c.Oauth2.OidcScopes == "" {
+		c.Oauth2.OidcScopes = "openid,profile,email"
+	}
+	if c.Oauth2.OidcLoginClaim == "" {
+		c.Oauth2.OidcLoginClaim = "sub"
+	}
+	if c.Oauth2.OidcDisplayName == "" {
+		c.Oauth2.OidcDisplayName = "OIDC"
+	}
+	if c.Oauth2.OidcGroupClaim == "" {
+		c.Oauth2.OidcGroupClaim = "groups"
 	}
 
 	c.updateIgnoredIPNotificationID()

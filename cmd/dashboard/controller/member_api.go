@@ -847,6 +847,11 @@ func (ma *memberAPI) logout(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
+
+	if oidcLogoutUrl := singleton.Conf.Oauth2.OidcLogoutURL; oidcLogoutUrl != "" {
+		// 重定向到 OIDC 退出登录地址。不知道为什么，这里的重定向不生效
+		c.Redirect(http.StatusOK, oidcLogoutUrl)
+	}
 }
 
 type settingForm struct {

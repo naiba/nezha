@@ -11,20 +11,20 @@ import (
 	"time"
 
 	"github.com/naiba/nezha/pkg/oidc/cloudflare"
+	"github.com/naiba/nezha/pkg/oidc/general"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
 	GitHubAPI "github.com/google/go-github/v47/github"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/service/singleton"
 	"github.com/patrickmn/go-cache"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/oauth2"
 	GitHubOauth2 "golang.org/x/oauth2/github"
 	GitlabOauth2 "golang.org/x/oauth2/gitlab"
-
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/mygin"
-	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/service/singleton"
 )
 
 type oauth2controller struct {
@@ -85,6 +85,17 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			Endpoint: oauth2.Endpoint{
 				AuthURL:  fmt.Sprintf("%s/cdn-cgi/access/sso/oidc/%s/authorization", singleton.Conf.Oauth2.Endpoint, singleton.Conf.Oauth2.ClientID),
 				TokenURL: fmt.Sprintf("%s/cdn-cgi/access/sso/oidc/%s/token", singleton.Conf.Oauth2.Endpoint, singleton.Conf.Oauth2.ClientID),
+			},
+			RedirectURL: oa.getRedirectURL(c),
+		}
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
+		return &oauth2.Config{
+			ClientID:     singleton.Conf.Oauth2.ClientID,
+			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
+			Scopes:       strings.Split(singleton.Conf.Oauth2.OidcScopes, ","),
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  singleton.Conf.Oauth2.OidcAuthURL,
+				TokenURL: singleton.Conf.Oauth2.OidcTokenURL,
 			},
 			RedirectURL: oa.getRedirectURL(c),
 		}
@@ -179,7 +190,20 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 					user = cloudflareUserInfo.MapToNezhaUser()
 				}
 			}
-
+		} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
+			client := oauth2Config.Client(context.Background(), otk)
+			resp, err := client.Get(singleton.Conf.Oauth2.OidcUserInfoURL)
+			loginClaim := singleton.Conf.Oauth2.OidcLoginClaim
+			groupClain := singleton.Conf.Oauth2.OidcGroupClaim
+			adminGroups := strings.Split(singleton.Conf.Oauth2.AdminGroups, ",")
+			autoCreate := singleton.Conf.Oauth2.OidcAutoCreate
+			if err == nil {
+				defer resp.Body.Close()
+				var oidceUserInfo *general.UserInfo
+				if err := json.NewDecoder(resp.Body).Decode(&oidceUserInfo); err == nil {
+					user = oidceUserInfo.MapToNezhaUser(loginClaim, groupClain, adminGroups, autoCreate)
+				}
+			}
 		} else {
 			var client *GitHubAPI.Client
 			oc := oauth2Config.Client(ctx, otk)
@@ -212,10 +236,15 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 		return
 	}
 	var isAdmin bool
-	for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
-		if admin != "" && strings.EqualFold(user.Login, admin) {
-			isAdmin = true
-			break
+
+	if user.SuperAdmin {
+		isAdmin = true
+	} else {
+		for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
+			if admin != "" && strings.EqualFold(user.Login, admin) {
+				isAdmin = true
+				break
+			}
 		}
 	}
 	if !isAdmin {
