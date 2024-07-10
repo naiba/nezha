@@ -10,8 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/naiba/nezha/pkg/oidc/cloudflare"
-	"github.com/naiba/nezha/pkg/oidc/general"
+	myOidc "github.com/naiba/nezha/pkg/oidc/general"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
@@ -28,7 +29,8 @@ import (
 )
 
 type oauth2controller struct {
-	r gin.IRoutes
+	r            gin.IRoutes
+	oidcProvider *oidc.Provider
 }
 
 func (oa *oauth2controller) serve() {
@@ -89,15 +91,25 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			RedirectURL: oa.getRedirectURL(c),
 		}
 	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
+		var err error
+		oa.oidcProvider, err = oidc.NewProvider(c.Request.Context(), singleton.Conf.Oauth2.OidcIssuer)
+		if err != nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusBadRequest,
+				Title: fmt.Sprintf("Cannot get OIDC infomaion from issuer from %s", singleton.Conf.Oauth2.OidcIssuer),
+				Msg:   err.Error(),
+			}, true)
+			return nil
+		}
+		scopes := strings.Split(singleton.Conf.Oauth2.OidcScopes, ",")
+		scopes = append(scopes, oidc.ScopeOpenID)
+		uniqueScopes := removeDuplicates(scopes)
 		return &oauth2.Config{
 			ClientID:     singleton.Conf.Oauth2.ClientID,
 			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
-			Scopes:       strings.Split(singleton.Conf.Oauth2.OidcScopes, ","),
-			Endpoint: oauth2.Endpoint{
-				AuthURL:  singleton.Conf.Oauth2.OidcAuthURL,
-				TokenURL: singleton.Conf.Oauth2.OidcTokenURL,
-			},
-			RedirectURL: oa.getRedirectURL(c),
+			Scopes:       uniqueScopes,
+			Endpoint:     oa.oidcProvider.Endpoint(),
+			RedirectURL:  oa.getRedirectURL(c),
 		}
 	} else {
 		return &oauth2.Config{
@@ -191,16 +203,14 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 				}
 			}
 		} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
-			client := oauth2Config.Client(context.Background(), otk)
-			resp, err := client.Get(singleton.Conf.Oauth2.OidcUserInfoURL)
-			loginClaim := singleton.Conf.Oauth2.OidcLoginClaim
-			groupClain := singleton.Conf.Oauth2.OidcGroupClaim
-			adminGroups := strings.Split(singleton.Conf.Oauth2.AdminGroups, ",")
-			autoCreate := singleton.Conf.Oauth2.OidcAutoCreate
+			userInfo, err := oa.oidcProvider.UserInfo(c.Request.Context(), oauth2.StaticTokenSource(otk))
 			if err == nil {
-				defer resp.Body.Close()
-				var oidceUserInfo *general.UserInfo
-				if err := json.NewDecoder(resp.Body).Decode(&oidceUserInfo); err == nil {
+				loginClaim := singleton.Conf.Oauth2.OidcLoginClaim
+				groupClain := singleton.Conf.Oauth2.OidcGroupClaim
+				adminGroups := strings.Split(singleton.Conf.Oauth2.AdminGroups, ",")
+				autoCreate := singleton.Conf.Oauth2.OidcAutoCreate
+				var oidceUserInfo *myOidc.UserInfo
+				if err := userInfo.Claims(&oidceUserInfo); err == nil {
 					user = oidceUserInfo.MapToNezhaUser(loginClaim, groupClain, adminGroups, autoCreate)
 				}
 			}
@@ -270,4 +280,17 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/redirect", mygin.CommonEnvironment(c, gin.H{
 		"URL": "/",
 	}))
+}
+
+func removeDuplicates(elements []string) []string {
+	encountered := map[string]bool{}
+	result := []string{}
+
+	for _, v := range elements {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
 }

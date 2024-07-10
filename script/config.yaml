@@ -8,9 +8,7 @@ oauth2:
   adminGroups: admins,admins2 # 管理员组, 半角逗号分隔。 如果用户在这些组中，将被视为管理员
   clientid: 
   clientsecret: 
-  oidcAuthUrl: https://auth.example.com/realms/master/protocol/openid-connect/auth
-  oidcTokenUrl: https://auth.example.com/realms/master/protocol/openid-connect/token
-  oidcUserInfoUrl: https://auth.example.com/realms/master/protocol/openid-connect/userinfo
+  oidcIssuer: https://auth.example.com/realms/master # oidc认证服务器地址
   oidcLogoutUrl: https://auth.example.com/realms/master/protocol/openid-connect/logout
   # oidcRegisterUrl: 
   oidcScopes: openid,profile,email,groups # oidc请求的scope，半角逗号分隔
