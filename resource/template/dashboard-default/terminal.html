@@ -1,16 +1,14 @@
 {{define "dashboard-default/terminal"}}
 <!DOCTYPE html>
 <html lang="{{.Conf.Language}}">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tty@{{.ServerName}} - {{.Title}}</title>
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
-    <link href="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/xterm/4.11.0/xterm.css" type="text/css" rel="stylesheet"/>
+    <link type="text/css" rel="stylesheet" href="https://unpkg.com/xterm@5.3.0/css/xterm.css" />
 </head>
-
 <style>
     html,
     body,
@@ -92,6 +90,5 @@
         }
     </script>
 </body>
-
 </html>
 {{end}}
