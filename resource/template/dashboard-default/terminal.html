@@ -25,12 +25,11 @@
         background-color: black;
     }
 </style>
-
 <body onresize="onResize()">
     <div id="terminal-container"></div>
-    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/xterm/4.11.0/xterm.js" type="application/javascript"></script>
-    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/xterm/4.11.0/addons/attach/xterm-addon-attach.js"></script>
-    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-y/xterm/4.11.0/addons/fit/xterm-addon-fit.js"></script>
+    <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://unpkg.com/@xterm/addon-attach@0.11.0/lib/addon-attach.js"></script>
+    <script src="https://unpkg.com/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
     <script>
         let sendResizing = false;
 
