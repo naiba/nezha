@@ -123,7 +123,8 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 
 func (oa *oauth2controller) getRedirectURL(c *gin.Context) string {
 	scheme := "http://"
-	if strings.HasPrefix(c.Request.Referer(), "https://") {
+	referer := c.Request.Referer()
+	if forwardedProto := c.Request.Header.Get("X-Forwarded-Proto"); forwardedProto == "https" || strings.HasPrefix(referer, "https://") {
 		scheme = "https://"
 	}
 	return scheme + c.Request.Host + "/oauth2/callback"
