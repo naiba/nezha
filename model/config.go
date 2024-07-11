@@ -95,9 +95,7 @@ type Config struct {
 		ClientSecret    string
 		Endpoint        string
 		OidcDisplayName string // for OIDC Display Name
-		OidcAuthURL     string // for OIDC Auth URL
-		OidcTokenURL    string // for OIDC Token URL
-		OidcUserInfoURL string // for OIDC UserInfo URL
+		OidcIssuer      string // for OIDC Issuer
 		OidcLogoutURL   string // for OIDC Logout URL
 		OidcRegisterURL string // for OIDC Register URL
 		OidcLoginClaim  string // for OIDC Claim
