@@ -3,19 +3,11 @@ httpport: 80
 language: nz_language
 grpcport: nz_grpc_port
 oauth2:
-  type: oidc
-  admin: test,test2 # 管理员用户名，半角逗号分隔。 如果用户是这些用户之一，将被视为管理员
-  adminGroups: admins,admins2 # 管理员组, 半角逗号分隔。 如果用户在这些组中，将被视为管理员
-  clientid: 
-  clientsecret: 
-  oidcIssuer: https://auth.example.com/realms/master # oidc认证服务器地址
-  oidcLogoutUrl: https://auth.example.com/realms/master/protocol/openid-connect/logout
-  # oidcRegisterUrl: 
-  oidcScopes: openid,profile,email,groups # oidc请求的scope，半角逗号分隔
-  oidcLoginClaim: preferred_username # 从oidc返回的用户名字段，可以是preferred_username或者sub或者email
-  oidcGroupsClaim: groups # 从oidc返回的用户组信息字段，可以是groups或者roles
-  oidcAutoCreate: true # 如果用户不存在，是否自动创建
-  oidcAutoLogin: true # 当地址是/login时，自动跳转到oidc登录页面
+  type: "nz_oauth2_type" #Oauth2 登录接入类型，github/gitlab/jihulab/gitee/gitea
+  admin: "nz_admin_logins" #管理员列表，半角逗号隔开
+  clientid: "nz_github_oauth_client_id" # 在 https://github.com/settings/developers 创建，无需审核 Callback 填 http(s)://域名或IP/oauth2/callback
+  clientsecret: "nz_github_oauth_client_secret"
+  endpoint: "" # 如gitea自建需要设置
 site:
   brand: "nz_site_title"
   cookiename: "nezha-dashboard" #浏览器 Cookie 字段名，可不改
