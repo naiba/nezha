@@ -40,7 +40,7 @@ jobs:
           dest: build
           pkg: cmd/dashboard
           prefix: dashboard
-          targets: ${{ matrix.targets }}
+          targets: linux/amd64,linux/arm64,linux/arm-7,linux/s390x,linux/riscv64,windows/amd64,windows/386,windows/arm64 # linux/386,
           v: true
           x: false
           race: false
