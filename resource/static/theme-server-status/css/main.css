@@ -234,6 +234,19 @@ body {
     cursor: pointer;
 }
 
+/*加快Agent详情下拉展示速度*/
+.collapsing{
+    -webkit-transition-property:height,visibility;
+    -o-transition-property:height,visibility;
+    transition-property:height,visibility;
+    -webkit-transition-duration:.15s;
+    -o-transition-duration:.15s;
+    transition-duration:.15s;
+    -webkit-transition-timing-function: linear;
+    -o-transition-timing-function: linear;
+    transition-timing-function: linear
+}
+
 /*正文结束*/
 
 /* 服务页 正文*/
