@@ -16,6 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on
+    strategy:
+      matrix:
+        os: [linux-amd64, linux-arm64, linux-arm-7, linux-riscv64, linux-s390x, windows-386.exe, windows-amd64.exe]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v4
@@ -47,5 +50,6 @@ jobs:
         # 打包上传生成的文件
         uses: actions/upload-artifact@v4
         with:
-          name: my-build
-          path: /home/runner/work/nezha/nezha/build
+          name: dashboard-${{ matrix.os }}
+          path: /home/runner/work/nezha/nezha/build/dashboard-${{ matrix.os }}
+      
