@@ -25,6 +25,13 @@ const mixinsVue = {
         window.removeEventListener('scroll', this.handleScroll);
     },
     methods: {
+        toggleTemplate(template) {
+            if( template != this.preferredTemplate){
+                this.preferredTemplate = template;
+                this.updateCookie("preferred_theme", template);
+                window.location.reload();
+            }
+        },
         initTheme() {
             const storedTheme = localStorage.getItem("theme");
             const theme = (storedTheme === 'dark' || storedTheme === 'light') ? storedTheme : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
