@@ -65,15 +65,9 @@ pre_check() {
         if [[ -z "${CN}" ]]; then
             GITHUB_RAW_URL="raw.githubusercontent.com/naiba/nezha/master"
             GITHUB_URL="github.com"
-            Get_Docker_URL="get.docker.com"
-            Get_Docker_Argu=" "
-            Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
         else
             GITHUB_RAW_URL="gitee.com/naibahq/nezha/raw/master"
-            GITHUB_URL="github.com"
-            Get_Docker_URL="get.docker.com"
-            Get_Docker_Argu=" -s docker --mirror Aliyun"
-            Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
+            GITHUB_URL="gitee.com"
         fi
     fi
 }
@@ -89,6 +83,9 @@ install_agent() {
     echo -e "Obtaining Agent version"
 
     local version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/agent/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+    fi
     if [ ! -n "$version" ]; then
         version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
