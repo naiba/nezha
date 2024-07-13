@@ -43,3 +43,6 @@ jobs:
           tags: timetzdata
           ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=test
           buildmode: default
+      - name: fix dist
+        run: |
+          mv dist/dashboard-linux-arm-7 dist/dashboard-linux-arm

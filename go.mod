@@ -2,8 +2,6 @@ module github.com/naiba/nezha
 
 go 1.21
 
-toolchain go1.22.3
-
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20240425163905-bcdc1ad063ea
 	code.gitea.io/sdk/gitea v0.18.0
