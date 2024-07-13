@@ -35,6 +35,10 @@ func (gp *guestPage) serve() {
 }
 
 func (gp *guestPage) login(c *gin.Context) {
+	if singleton.Conf.Oauth2.OidcAutoLogin {
+		c.Redirect(http.StatusFound, "/oauth2/login")
+		return
+	}
 	LoginType := "GitHub"
 	RegistrationLink := "https://github.com/join"
 	if singleton.Conf.Oauth2.Type == model.ConfigTypeGitee {
@@ -52,6 +56,9 @@ func (gp *guestPage) login(c *gin.Context) {
 	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeCloudflare {
 		LoginType = "Cloudflare"
 		RegistrationLink = "https://dash.cloudflare.com/sign-up/teams"
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
+		LoginType = singleton.Conf.Oauth2.OidcDisplayName
+		RegistrationLink = singleton.Conf.Oauth2.OidcRegisterURL
 	}
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/login", mygin.CommonEnvironment(c, gin.H{
 		"Title":            singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),

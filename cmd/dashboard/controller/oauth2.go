@@ -10,25 +10,27 @@ import (
 	"strings"
 	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/naiba/nezha/pkg/oidc/cloudflare"
+	myOidc "github.com/naiba/nezha/pkg/oidc/general"
 
 	"code.gitea.io/sdk/gitea"
 	"github.com/gin-gonic/gin"
 	GitHubAPI "github.com/google/go-github/v47/github"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/service/singleton"
 	"github.com/patrickmn/go-cache"
 	"github.com/xanzy/go-gitlab"
 	"golang.org/x/oauth2"
 	GitHubOauth2 "golang.org/x/oauth2/github"
 	GitlabOauth2 "golang.org/x/oauth2/gitlab"
-
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/mygin"
-	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/service/singleton"
 )
 
 type oauth2controller struct {
-	r gin.IRoutes
+	r            gin.IRoutes
+	oidcProvider *oidc.Provider
 }
 
 func (oa *oauth2controller) serve() {
@@ -88,6 +90,27 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 			},
 			RedirectURL: oa.getRedirectURL(c),
 		}
+	} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
+		var err error
+		oa.oidcProvider, err = oidc.NewProvider(c.Request.Context(), singleton.Conf.Oauth2.OidcIssuer)
+		if err != nil {
+			mygin.ShowErrorPage(c, mygin.ErrInfo{
+				Code:  http.StatusBadRequest,
+				Title: fmt.Sprintf("Cannot get OIDC infomaion from issuer from %s", singleton.Conf.Oauth2.OidcIssuer),
+				Msg:   err.Error(),
+			}, true)
+			return nil
+		}
+		scopes := strings.Split(singleton.Conf.Oauth2.OidcScopes, ",")
+		scopes = append(scopes, oidc.ScopeOpenID)
+		uniqueScopes := removeDuplicates(scopes)
+		return &oauth2.Config{
+			ClientID:     singleton.Conf.Oauth2.ClientID,
+			ClientSecret: singleton.Conf.Oauth2.ClientSecret,
+			Scopes:       uniqueScopes,
+			Endpoint:     oa.oidcProvider.Endpoint(),
+			RedirectURL:  oa.getRedirectURL(c),
+		}
 	} else {
 		return &oauth2.Config{
 			ClientID:     singleton.Conf.Oauth2.ClientID,
@@ -100,7 +123,8 @@ func (oa *oauth2controller) getCommonOauth2Config(c *gin.Context) *oauth2.Config
 
 func (oa *oauth2controller) getRedirectURL(c *gin.Context) string {
 	scheme := "http://"
-	if strings.HasPrefix(c.Request.Referer(), "https://") {
+	referer := c.Request.Referer()
+	if forwardedProto := c.Request.Header.Get("X-Forwarded-Proto"); forwardedProto == "https" || strings.HasPrefix(referer, "https://") {
 		scheme = "https://"
 	}
 	return scheme + c.Request.Host + "/oauth2/callback"
@@ -179,7 +203,18 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 					user = cloudflareUserInfo.MapToNezhaUser()
 				}
 			}
-
+		} else if singleton.Conf.Oauth2.Type == model.ConfigTypeOidc {
+			userInfo, err := oa.oidcProvider.UserInfo(c.Request.Context(), oauth2.StaticTokenSource(otk))
+			if err == nil {
+				loginClaim := singleton.Conf.Oauth2.OidcLoginClaim
+				groupClain := singleton.Conf.Oauth2.OidcGroupClaim
+				adminGroups := strings.Split(singleton.Conf.Oauth2.AdminGroups, ",")
+				autoCreate := singleton.Conf.Oauth2.OidcAutoCreate
+				var oidceUserInfo *myOidc.UserInfo
+				if err := userInfo.Claims(&oidceUserInfo); err == nil {
+					user = oidceUserInfo.MapToNezhaUser(loginClaim, groupClain, adminGroups, autoCreate)
+				}
+			}
 		} else {
 			var client *GitHubAPI.Client
 			oc := oauth2Config.Client(ctx, otk)
@@ -212,10 +247,15 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 		return
 	}
 	var isAdmin bool
-	for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
-		if admin != "" && strings.EqualFold(user.Login, admin) {
-			isAdmin = true
-			break
+
+	if user.SuperAdmin {
+		isAdmin = true
+	} else {
+		for _, admin := range strings.Split(singleton.Conf.Oauth2.Admin, ",") {
+			if admin != "" && strings.EqualFold(user.Login, admin) {
+				isAdmin = true
+				break
+			}
 		}
 	}
 	if !isAdmin {
@@ -241,4 +281,17 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/redirect", mygin.CommonEnvironment(c, gin.H{
 		"URL": "/",
 	}))
+}
+
+func removeDuplicates(elements []string) []string {
+	encountered := map[string]bool{}
+	result := []string{}
+
+	for _, v := range elements {
+		if !encountered[v] {
+			encountered[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
 }
