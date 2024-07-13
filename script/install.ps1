@@ -56,7 +56,7 @@ if($region -ne "CN"){
 $download = "https://github.com/$agentrepo/releases/download/$agenttag/$file"
 Write-Host "Location:$region,connect directly!" -BackgroundColor DarkRed -ForegroundColor Green
 }else{
-$download = "https://github.com/$agentrepo/releases/download/$agenttag/$file"
+$download = "https://gitee.com/naibahq/agent/releases/download/$agenttag/$file"
 Write-Host "Location:CN,use mirror address" -BackgroundColor DarkRed -ForegroundColor Green
 }
 echo $download
