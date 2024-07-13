@@ -361,7 +361,12 @@ install_agent() {
     sudo chmod -R 700 $NZ_AGENT_PATH
 
     echo "正在下载监控端"
-    wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
+    if [ -z "$CN" ]; then
+        NZ_AGENT_URL="https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip"
+    else
+        NZ_AGENT_URL="https://${GITHUB_URL}/naibahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip"
+    fi
+    wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip $NZ_AGENT_URL >/dev/null 2>&1
     if [ $? != 0 ]; then
         err "Release 下载失败，请检查本机能否连接 ${GITHUB_URL}"
         return 1

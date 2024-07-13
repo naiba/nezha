@@ -105,7 +105,12 @@ install_agent() {
     chmod -R 777 $NZ_AGENT_PATH
 
     echo -e "Downloading Agent"
-    curl -o nezha-agent_darwin_${os_arch}.zip -L -f --retry 2 --retry-max-time 60 https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_darwin_${os_arch}.zip >/dev/null 2>&1
+    if [[ -z $CN ]]; then
+        NZ_AGENT_URL="https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_darwin_${os_arch}.zip"
+    else
+        NZ_AGENT_URL="https://${GITHUB_URL}/naibahq/agent/releases/download/${version}/nezha-agent_darwin_${os_arch}.zip"
+    fi
+    curl -o nezha-agent_darwin_${os_arch}.zip -L -f --retry 2 --retry-max-time 60 $NZ_AGENT_URL >/dev/null 2>&1
     if [[ $? != 0 ]]; then
         echo -e "${red}Fail to download agent, please check if the network can link ${GITHUB_URL}${plain}"
         return 0
