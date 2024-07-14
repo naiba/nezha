@@ -100,6 +100,7 @@ LOOP:
 		case <-time.After(timeout):
 			break LOOP
 		}
+		time.Sleep(time.Millisecond * 500)
 	}
 
 	if stream.userIo == nil && stream.agentIo == nil {
