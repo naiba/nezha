@@ -49,7 +49,7 @@ def sync_to_gitee(tag: str, body: str, files: slice):
         'name': tag,
         'body': body,
         'prerelease': False,
-        'target_commitish': 'main'
+        'target_commitish': 'master'
     }
     release_api_response = api_client.post(release_api_uri, json=release_data)
     if release_api_response.status_code == 201:
