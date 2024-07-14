@@ -91,6 +91,7 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name.endsWith("_id") ||
                 item.name === "id" ||
                 item.name === "ID" ||
+                item.name === "ServerID" ||
                 item.name === "RequestType" ||
                 item.name === "RequestMethod" ||
                 item.name === "TriggerMode" ||
@@ -252,6 +253,28 @@ function addOrEditNotification(notification) {
     ".notification.modal",
     "#notificationForm",
     "/api/notification"
+  );
+}
+
+function addOrEditNAT(nat) {
+  const modal = $(".nat.modal");
+  modal.children(".header").text((nat ? LANG.Edit : LANG.Add));
+  modal
+    .find(".nezha-primary-btn.button")
+    .html(
+      nat
+        ? LANG.Edit + '<i class="edit icon"></i>'
+        : LANG.Add + '<i class="add icon"></i>'
+    );
+  modal.find("input[name=ID]").val(nat ? nat.ID : null);
+  modal.find("input[name=ServerID]").val(nat ? nat.ServerID : null);
+  modal.find("input[name=Name]").val(nat ? nat.Name : null);
+  modal.find("input[name=Host]").val(nat ? nat.Host : null);
+  modal.find("input[name=Domain]").val(nat ? nat.Domain : null);
+  showFormModal(
+    ".nat.modal",
+    "#natForm",
+    "/api/nat"
   );
 }
 

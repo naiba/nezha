@@ -260,8 +260,8 @@ func (cp *commonPage) home(c *gin.Context) {
 }
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  10240,
+	WriteBufferSize: 10240,
 }
 
 type Data struct {
@@ -305,8 +305,8 @@ func (cp *commonPage) ws(c *gin.Context) {
 }
 
 func (cp *commonPage) terminal(c *gin.Context) {
-	terminalID := c.Param("id")
-	if _, err := rpc.NezhaHandlerSingleton.GetStream(terminalID); err != nil {
+	streamId := c.Param("id")
+	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code:  http.StatusForbidden,
 			Title: "无权访问",
@@ -316,7 +316,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}, true)
 		return
 	}
-	defer rpc.NezhaHandlerSingleton.CloseStream(terminalID)
+	defer rpc.NezhaHandlerSingleton.CloseStream(streamId)
 
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -344,11 +344,11 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}
 	}()
 
-	if err = rpc.NezhaHandlerSingleton.UserConnected(terminalID, conn); err != nil {
+	if err = rpc.NezhaHandlerSingleton.UserConnected(streamId, conn); err != nil {
 		return
 	}
 
-	rpc.NezhaHandlerSingleton.StartStream(terminalID, time.Second*10)
+	rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
 }
 
 type createTerminalRequest struct {
@@ -380,7 +380,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 		return
 	}
 
-	id, err := uuid.GenerateUUID()
+	streamId, err := uuid.GenerateUUID()
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
@@ -394,7 +394,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 		return
 	}
 
-	rpc.NezhaHandlerSingleton.CreateStream(id)
+	rpc.NezhaHandlerSingleton.CreateStream(streamId)
 
 	singleton.ServerLock.RLock()
 	server := singleton.ServerList[createTerminalReq.ID]
@@ -411,7 +411,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 	}
 
 	terminalData, _ := utils.Json.Marshal(&model.TerminalTask{
-		StreamID: id,
+		StreamID: streamId,
 	})
 	if err := server.TaskStream.Send(&proto.Task{
 		Type: model.TaskTypeTerminalGRPC,
@@ -428,7 +428,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 	}
 
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/terminal", mygin.CommonEnvironment(c, gin.H{
-		"SessionID":  id,
+		"SessionID":  streamId,
 		"ServerName": server.Name,
 	}))
 }

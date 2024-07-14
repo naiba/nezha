@@ -648,3 +648,6 @@ other = "Deshabilitar Cambio de Plantilla en Frontend"
 
 [ServersOnWorldMap]
 other = "Servidores en el mapa mundial"
+
+[NAT]
+other = "NAT"

@@ -24,8 +24,8 @@ func InitCronTask() {
 	Crons = make(map[uint64]*model.Cron)
 }
 
-// LoadCronTasks 加载计划任务
-func LoadCronTasks() {
+// loadCronTasks 加载计划任务
+func loadCronTasks() {
 	InitCronTask()
 	var crons []model.Cron
 	DB.Find(&crons)

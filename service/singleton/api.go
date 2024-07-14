@@ -15,8 +15,6 @@ var (
 
 	ServerAPI  = &ServerAPIService{}
 	MonitorAPI = &MonitorAPIService{}
-
-	once = &sync.Once{}
 )
 
 type ServerAPIService struct{}
@@ -78,7 +76,7 @@ func InitAPI() {
 	UserIDToApiTokenList = make(map[uint64][]string)
 }
 
-func LoadAPI() {
+func loadAPI() {
 	InitAPI()
 	var tokenList []*model.ApiToken
 	DB.Find(&tokenList)

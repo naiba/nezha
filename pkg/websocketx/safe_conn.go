@@ -1,10 +1,13 @@
 package websocketx
 
 import (
+	"io"
 	"sync"
 
 	"github.com/gorilla/websocket"
 )
+
+var _ io.ReadWriteCloser = &Conn{}
 
 type Conn struct {
 	*websocket.Conn

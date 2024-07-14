@@ -24,8 +24,8 @@ func InitNotification() {
 	NotificationIDToTag = make(map[uint64]string)
 }
 
-// LoadNotifications 从 DB 初始化通知方式相关参数
-func LoadNotifications() {
+// loadNotifications 从 DB 初始化通知方式相关参数
+func loadNotifications() {
 	InitNotification()
 	notificationsLock.Lock()
 	defer notificationsLock.Unlock()
