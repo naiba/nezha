@@ -119,5 +119,5 @@ jobs:
             owner: 'naiba',
             repo: 'nezha',
             workflow_id: 'sync-release.yml',
-            ref: 'main'
+            ref: 'master'
             })
