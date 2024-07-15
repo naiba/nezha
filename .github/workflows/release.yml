@@ -22,7 +22,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v2
         with:
           xgo_version: latest
-          go_version: 1.20.x
+          go_version: 1.21.x
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
@@ -36,6 +36,7 @@ jobs:
 
       - name: fix dist
         run: |
+          ls -al dist/
           mv dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
 
       - name: Log in to the GHCR
@@ -107,3 +108,16 @@ jobs:
           curl -s https://purge.jsdelivr.net/gh/$LOWER_USERNAME/nezha@master/script/nezha-agent.service
           curl -s https://purge.jsdelivr.net/gh/$LOWER_USERNAME/nezha@master/script/docker-compose.yaml
           curl -s https://purge.jsdelivr.net/gh/$LOWER_USERNAME/nezha@master/script/config.yaml
+
+      - name: Trigger sync
+        if: ${{ env.SYNCED == 0 }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+            owner: 'naiba',
+            repo: 'nezha',
+            workflow_id: 'sync-release.yml',
+            ref: 'master'
+            })

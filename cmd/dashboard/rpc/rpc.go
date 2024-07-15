@@ -14,9 +14,8 @@ import (
 
 func ServeRPC(port uint) {
 	server := grpc.NewServer()
-	pb.RegisterNezhaServiceServer(server, &rpcService.NezhaHandler{
-		Auth: &rpcService.AuthHandler{},
-	})
+	rpcService.NezhaHandlerSingleton = rpcService.NewNezhaHandler()
+	pb.RegisterNezhaServiceServer(server, rpcService.NezhaHandlerSingleton)
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		panic(err)

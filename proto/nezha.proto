@@ -8,6 +8,7 @@ service NezhaService {
     rpc ReportSystemInfo(Host)returns(Receipt){}
     rpc ReportTask(TaskResult)returns(Receipt){}
     rpc RequestTask(Host)returns(stream Task){}
+    rpc IOStream(stream IOStreamData)returns(stream IOStreamData){}
 }
 
 message Host {
@@ -67,4 +68,8 @@ message TaskResult {
 
 message Receipt{
     bool proced = 1;
+}
+
+message IOStreamData {
+    bytes data = 1;
 }

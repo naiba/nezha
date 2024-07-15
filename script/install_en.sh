@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.17.0"
+NZ_VERSION="v0.18.1"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -113,7 +113,7 @@ pre_check() {
             Docker_IMG="ghcr.io\/naiba\/nezha-dashboard"
         else
             GITHUB_RAW_URL="gitee.com/naibahq/nezha/raw/master"
-            GITHUB_URL="github.com"
+            GITHUB_URL="gitee.com"
             Get_Docker_URL="get.docker.com"
             Get_Docker_Argu=" -s docker --mirror Aliyun"
             Docker_IMG="registry.cn-shanghai.aliyuncs.com\/naibahq\/nezha-dashboard"
@@ -335,9 +335,12 @@ install_agent() {
 
     echo "> Install Agent"
 
-    echo "Obtaining Agent version"
+    echo "Obtaining Agent version number"
 
     local version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/agent/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+    fi
     if [ ! -n "$version" ]; then
         version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
@@ -547,6 +550,24 @@ restart_and_update_docker() {
 }
 
 restart_and_update_standalone() {
+    local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/nezha/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+    fi
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    fi
+    if [ ! -n "$version" ]; then
+        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    fi
+
+    if [ ! -n "$version" ]; then
+        err "Fail to obtaine agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
+        return 1
+    else
+        echo "The current latest version is: ${version}"
+    fi
+
     if [ "$os_alpine" != 1 ]; then
         sudo systemctl daemon-reload
         sudo systemctl stop nezha-dashboard
@@ -554,7 +575,13 @@ restart_and_update_standalone() {
         sudo rc-service nezha-dashboard stop
     fi
 
-    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip https://${GITHUB_URL}/naiba/nezha/releases/latest/download/dashboard-linux-$os_arch.zip >/dev/null 2>&1 && sudo unzip -qq $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dist/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm -r $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_PATH/dist
+    if [ -z "$CN" ]; then
+        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naiba/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
+    else
+        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naibahq/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
+    fi
+
+    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_URL >/dev/null 2>&1 && sudo unzip -qq $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dist/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm -r $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_PATH/dist
 
     if [ "$os_alpine" != 1 ]; then
         sudo systemctl enable nezha-dashboard

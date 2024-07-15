@@ -25,7 +25,7 @@ jobs:
         uses: crazy-max/ghaction-xgo@v2
         with:
           xgo_version: latest
-          go_version: 1.20.x
+          go_version: 1.21.x
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
@@ -36,4 +36,8 @@ jobs:
           tags: timetzdata
           ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=test
           buildmode: default
+      - name: fix dist
+        run: |
+          ls -al dist/
+          mv dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
 

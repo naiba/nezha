@@ -45,6 +45,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/batch-update-server-group", ma.batchUpdateServerGroup)
 	mr.POST("/batch-delete-server", ma.batchDeleteServer)
 	mr.POST("/notification", ma.addOrEditNotification)
+	mr.POST("/nat", ma.addOrEditNAT)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
 	mr.DELETE("/:model/:id", ma.delete)
@@ -208,6 +209,11 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		err = singleton.DB.Unscoped().Delete(&model.Notification{}, "id = ?", id).Error
 		if err == nil {
 			singleton.OnDeleteNotification(id)
+		}
+	case "nat":
+		err = singleton.DB.Unscoped().Delete(&model.NAT{}, "id = ?", id).Error
+		if err == nil {
+			singleton.OnNATUpdate()
 		}
 	case "monitor":
 		err = singleton.DB.Unscoped().Delete(&model.Monitor{}, "id = ?", id).Error
@@ -733,6 +739,45 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 	})
 }
 
+type natForm struct {
+	ID       uint64
+	Name     string
+	ServerID uint64
+	Host     string
+	Domain   string
+}
+
+func (ma *memberAPI) addOrEditNAT(c *gin.Context) {
+	var nf natForm
+	var n model.NAT
+	err := c.ShouldBindJSON(&nf)
+	if err == nil {
+		n.Name = nf.Name
+		n.ID = nf.ID
+		n.Domain = nf.Domain
+		n.Host = nf.Host
+		n.ServerID = nf.ServerID
+	}
+	if err == nil {
+		if n.ID == 0 {
+			err = singleton.DB.Create(&n).Error
+		} else {
+			err = singleton.DB.Save(&n).Error
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+	singleton.OnNATUpdate()
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
 type alertRuleForm struct {
 	ID                     uint64
 	Name                   string
@@ -847,6 +892,11 @@ func (ma *memberAPI) logout(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
+
+	if oidcLogoutUrl := singleton.Conf.Oauth2.OidcLogoutURL; oidcLogoutUrl != "" {
+		// 重定向到 OIDC 退出登录地址。不知道为什么，这里的重定向不生效
+		c.Redirect(http.StatusOK, oidcLogoutUrl)
+	}
 }
 
 type settingForm struct {

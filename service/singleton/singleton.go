@@ -34,10 +34,11 @@ func InitTimezoneAndCache() {
 
 // LoadSingleton 加载子服务并执行
 func LoadSingleton() {
-	LoadNotifications() // 加载通知服务
-	LoadServers()       // 加载服务器列表
-	LoadCronTasks()     // 加载定时任务
-	LoadAPI()
+	loadNotifications() // 加载通知服务
+	loadServers()       // 加载服务器列表
+	loadCronTasks()     // 加载定时任务
+	loadAPI()
+	initNAT()
 }
 
 // InitConfigFromPath 从给出的文件路径中加载配置
@@ -47,11 +48,11 @@ func InitConfigFromPath(path string) {
 	if err != nil {
 		panic(err)
 	}
-	ValidateConfig()
+	validateConfig()
 }
 
-// ValidateConfig 验证配置文件有效性
-func ValidateConfig() {
+// validateConfig 验证配置文件有效性
+func validateConfig() {
 	var err error
 	if Conf.DDNS.Provider == "" {
 		err = ValidateDDNSProvidersFromProfiles()
@@ -82,7 +83,8 @@ func InitDBFromPath(path string) {
 	}
 	err = DB.AutoMigrate(model.Server{}, model.User{},
 		model.Notification{}, model.AlertRule{}, model.Monitor{},
-		model.MonitorHistory{}, model.Cron{}, model.Transfer{}, model.ApiToken{})
+		model.MonitorHistory{}, model.Cron{}, model.Transfer{},
+		model.ApiToken{}, model.NAT{})
 	if err != nil {
 		panic(err)
 	}

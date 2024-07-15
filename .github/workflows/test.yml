@@ -52,8 +52,8 @@ jobs:
         uses: crazy-max/ghaction-xgo@v3
         with:
           xgo_version: latest
-          go_version: 1.20.x
-          dest: build
+          go_version: 1.21.x
+          dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
           targets: ${{ matrix.os }}
@@ -68,5 +68,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-${{ env.ARTIFACT_NAME }}
-          path: /home/runner/work/nezha/nezha/build
-      
+          path: /home/runner/work/nezha/nezha/dist

@@ -3,10 +3,13 @@ package rpc
 import (
 	"context"
 	"fmt"
-	"github.com/naiba/nezha/pkg/ddns"
-	"github.com/naiba/nezha/pkg/utils"
 	"log"
+	"sync"
 	"time"
+
+	"github.com/naiba/nezha/pkg/ddns"
+	"github.com/naiba/nezha/pkg/grpcx"
+	"github.com/naiba/nezha/pkg/utils"
 
 	"github.com/jinzhu/copier"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -16,8 +19,20 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
+var NezhaHandlerSingleton *NezhaHandler
+
 type NezhaHandler struct {
-	Auth *AuthHandler
+	Auth          *authHandler
+	ioStreams     map[string]*ioStreamContext
+	ioStreamMutex *sync.RWMutex
+}
+
+func NewNezhaHandler() *NezhaHandler {
+	return &NezhaHandler{
+		Auth:          &authHandler{},
+		ioStreamMutex: new(sync.RWMutex),
+		ioStreams:     make(map[string]*ioStreamContext),
+	}
 }
 
 func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Receipt, error) {
@@ -176,4 +191,29 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 
 	singleton.ServerList[clientID].Host = &host
 	return &pb.Receipt{Proced: true}, nil
+}
+
+func (s *NezhaHandler) IOStream(stream pb.NezhaService_IOStreamServer) error {
+	if _, err := s.Auth.Check(stream.Context()); err != nil {
+		return err
+	}
+	id, err := stream.Recv()
+	if err != nil {
+		return err
+	}
+	if id == nil || len(id.Data) < 4 || (id.Data[0] != 0xff && id.Data[1] != 0x05 && id.Data[2] != 0xff && id.Data[3] == 0x05) {
+		return fmt.Errorf("invalid stream id")
+	}
+
+	streamId := string(id.Data[4:])
+
+	if _, err := s.GetStream(streamId); err != nil {
+		return err
+	}
+	iw := grpcx.NewIOStreamWrapper(stream)
+	if err := s.AgentConnected(streamId, iw); err != nil {
+		return err
+	}
+	iw.Wait()
+	return nil
 }

@@ -59,6 +59,7 @@ func main() {
 		return
 	}
 
+	// TODO 使用 cmux 在同一端口服务 HTTP 和 gRPC
 	singleton.CleanMonitorHistory()
 	go rpc.ServeRPC(singleton.Conf.GRPCPort)
 	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
