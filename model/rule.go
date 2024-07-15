@@ -29,6 +29,7 @@ type Rule struct {
 	Duration      uint64          `json:"duration,omitempty"`       // 持续时间 (秒)
 	Cover         uint64          `json:"cover,omitempty"`          // 覆盖范围 RuleCoverAll/IgnoreAll
 	Ignore        map[uint64]bool `json:"ignore,omitempty"`         // 覆盖范围的排除
+	NextCheck   float64           `json:"nextcheck,omitempty"`    // 下一次检测间隔
 
 	// 只作为缓存使用，记录下次该检测的时间
 	NextTransferAt  map[uint64]time.Time   `json:"-"`
@@ -149,7 +150,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 
 	// 循环区间流量检测 · 更新下次需要检测时间
 	if u.IsTransferDurationRule() {
-		seconds := 1800 * ((u.Max - src) / u.Max)
+		seconds := u.NextCheck * ((u.Max - src) / u.Max)
 		if seconds < 180 {
 			seconds = 180
 		}
