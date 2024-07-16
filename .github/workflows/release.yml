@@ -55,7 +55,7 @@ jobs:
 
       - name: Set up image name
         run: |
-          GHRC_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
+          GHRC_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nz" | tr '[:upper:]' '[:lower:]')
           
           echo "::set-output name=GHRC_IMAGE_NAME::$GHRC_IMAGE_NAME"
           
