@@ -66,8 +66,8 @@ pre_check() {
 
     ## China_IP
     if [ -z "$CN" ]; then
-        if curl -m 10 -s https://ipapi.co/json | grep -q 'China'; then
-            echo "根据ipapi.co提供的信息，当前IP可能在中国"
+        if curl -m 10 -s http://ip-api.com/json |grep 'country' |grep -q 'China'; then
+            echo "根据ip-api.com提供的信息，当前IP可能在中国"
             printf "是否选用中国镜像完成安装? [Y/n] (自定义镜像输入 3):"
             read -r input
             case $input in
