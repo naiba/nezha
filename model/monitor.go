@@ -120,7 +120,7 @@ func (m *Monitor) AfterFind(tx *gorm.DB) error {
 
 // IsServiceSentinelNeeded 判断该任务类型是否需要进行服务监控 需要则返回true
 func IsServiceSentinelNeeded(t uint64) bool {
-	return t != TaskTypeCommand && t != TaskTypeTerminal && t != TaskTypeUpgrade
+	return t != TaskTypeCommand && t != TaskTypeTerminalGRPC && t != TaskTypeUpgrade
 }
 
 func (m *Monitor) InitSkipServers() error {
