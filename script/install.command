@@ -28,8 +28,8 @@ pre_check() {
 
     ## China_IP
     if [[ -z "${CN}" ]]; then
-        if [[ $(curl -m 10 -s https://ipapi.co/json | grep 'China') != "" ]]; then
-            echo "According to the information provided by ipapi.co, the current IP may be in China"
+        if [[ $(curl -m 10 -s http://ip-api.com/json |grep 'country' |grep -q 'China') != "" ]]; then
+            echo "According to the information provided by ip-api.com, the current IP may be in China"
             read -e -r -p "Is the installation done with a Chinese Mirror? [Y/n] (Custom Mirror Input 3):" input
             case $input in
             [yY][eE][sS] | [yY])
