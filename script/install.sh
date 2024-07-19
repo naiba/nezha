@@ -48,6 +48,19 @@ err() {
     printf "${red}$*${plain}\n" >&2
 }
 
+geo_check() {
+    api_list="http://api.myip.la/en?json https://api.ip.sb/geoip https://ipapi.co/json http://ip-api.com/json/"
+    ua="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
+    set -- $api_list
+    for url in $api_list; do
+        text="$(curl -A $ua -m 10 -s $url)"
+        if echo $text | grep -qw 'CN'; then
+            isCN=true
+            break
+        fi
+    done
+}
+
 pre_check() {
     ## os_arch
     if uname -m | grep -q 'x86_64'; then
@@ -66,8 +79,9 @@ pre_check() {
 
     ## China_IP
     if [ -z "$CN" ]; then
-        if curl -m 10 -s http://ip-api.com/json |grep 'country' |grep -q 'China'; then
-            echo "根据ip-api.com提供的信息，当前IP可能在中国"
+        geo_check
+        if [ ! -z "$isCN" ]; then
+            echo "根据geoip api提供的信息，当前IP可能在中国"
             printf "是否选用中国镜像完成安装? [Y/n] (自定义镜像输入 3):"
             read -r input
             case $input in
