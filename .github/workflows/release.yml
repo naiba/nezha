@@ -14,7 +14,7 @@ jobs:
 
       - name: Extract branch name
         run: |
-          export TAG_NAME=v0.18.0
+          export TAG_NAME=v0.18.1
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         id: extract_branch
 
