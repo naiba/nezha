@@ -28,6 +28,12 @@ func (conn *Conn) Write(data []byte) (int, error) {
 	return len(data), nil
 }
 
+func (conn *Conn) WriteMessage(messageType int, data []byte) error {
+	conn.writeLock.Lock()
+	defer conn.writeLock.Unlock()
+	return conn.Conn.WriteMessage(messageType, data)
+}
+
 func (conn *Conn) Read(data []byte) (int, error) {
 	if len(conn.dataBuf) > 0 {
 		n := copy(data, conn.dataBuf)
