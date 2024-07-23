@@ -49,8 +49,20 @@ if ([string]::IsNullOrWhiteSpace($agenttag)) {
     }
 }
 #Region判断
-$ipapi= Invoke-RestMethod  -Uri "https://api.myip.com/" -UserAgent "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.163 Safari/535.1"
-$region=$ipapi.cc
+$ipapi = ""
+$region = "Unknown"
+foreach ($url in ("https://dash.cloudflare.com/cdn-cgi/trace","https://cf-ns.com/cdn-cgi/trace","https://1.0.0.1/cdn-cgi/trace")) {
+    try {
+        $ipapi = Invoke-RestMethod -Uri $url -TimeoutSec 5 -UseBasicParsing
+        if ($ipapi -match "loc=(\w+)" ) {
+            $region = $Matches[1]
+            break
+        }
+    }
+    catch {
+        Write-Host "Error occurred while querying $url : $_"
+    }
+}
 echo $ipapi
 if($region -ne "CN"){
 $download = "https://github.com/$agentrepo/releases/download/$agenttag/$file"
