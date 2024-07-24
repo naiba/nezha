@@ -343,6 +343,15 @@ tr.accordion-toggle{
     right: 13px;
 }
 
+footer{
+    padding-bottom: 2rem;
+}
+
+footer p{
+    text-align: center;
+    font-size: 10px;
+}
+
 @media only screen and (max-width: 1200px) {
     .accordian-body{
         margin: 5px 0px 5px 10px;        
