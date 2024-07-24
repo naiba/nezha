@@ -50,6 +50,11 @@ body {
     /*margin-right: 5px;*/
 }
 
+.navbar .dropdown:hover,
+.navbar .dropdown a{
+    cursor: pointer;
+}
+
 .navbar .dropdown .dropdown-toggle {
     padding-bottom: 10px;
     padding-top: 10px;
@@ -59,7 +64,7 @@ body {
     margin:0px -15px;
 }
 
-.navbar .navbar-nav>li>a {
+.navbar .navbar-nav > li > a {
     color:#f1f1f1;
 }
 
@@ -135,6 +140,10 @@ body {
 
 .table th, .table td {
     text-align: left;
+}
+
+tr.accordion-toggle{
+    cursor:pointer;
 }
 
 .table > tbody > tr > td,
@@ -332,6 +341,15 @@ body {
     font-size: 2em;
     top: 13px;
     right: 13px;
+}
+
+footer{
+    padding-bottom: 2rem;
+}
+
+footer p{
+    text-align: center;
+    font-size: 10px;
 }
 
 @media only screen and (max-width: 1200px) {

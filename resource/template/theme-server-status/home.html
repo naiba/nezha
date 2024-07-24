@@ -157,7 +157,7 @@
                 const isMobile = this.checkIsMobile();
                 const width = isMobile ? 338 : 1102;
                 const height = isMobile ? 200 : 500;
-                const backgroundColor = this.theme == "dark" ? '#1C1D26' : '#ffffff';
+                const backgroundColor = this.theme == "dark" ? '' : '';
                 const inRangeColor = this.theme == "dark" ? '#D2B206' : '#FFDF32';
                 const tooltipBackgroundColor = this.theme == "dark" ? "#ffffff" : '#ffffff';
                 const tooltipBorderColor = this.theme == "dark" ? "#ffffff" : "#ffffff"; 
@@ -520,7 +520,7 @@
                 const theme = localStorage.getItem("theme") ? localStorage.getItem("theme") : systemDarkMode;
                 const chartTheme = theme == "dark" ? "dark" : "default";
                 const fontColor = theme == "dark" ? "#f1f1f1" : "#000000";
-                const backgroundColor = theme == "dark" ? "#1C1D26" : '';
+                const backgroundColor = theme == "dark" ? '' : '';
                 const tooltipBackgroundColor = theme == "dark" ? "#1C1D26" : '#ffffff';
                 const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
                 // 渲染图表
