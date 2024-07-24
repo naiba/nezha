@@ -16,9 +16,29 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on
+    strategy:
+      matrix:
+        os: [linux/amd64,linux/arm64,linux/arm-7,linux/s390x,linux/riscv64,windows/amd64,windows/386]
     steps:
+      - name: Prepare a unique name for Artifacts
+        id: prep_artifact_name
+        run: |
+          # Calculate a unique string which applies to the matrix entry
+          # that we can use to construct unique and valid artifact names.
+          # We achieve that by squashing runs of characters are invalid
+          # in artifact names, and also whitespace and dashes, into a
+          # single dash character.  The unique string will appear as
+          # the environment variable ARTIFACT_NAME in subsequent actions.
+          if [ "${{ matrix.container }}" != "" ] ; then
+              name="${{ matrix.container }}"
+          else
+              name="${{ matrix.os }}"
+          fi
+          # The option to enable + in sed regexps differs by OS so we avoid it
+          name=$(echo -n "$name" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
+          echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "^1.21.3"
       - name: Unit test
@@ -29,21 +49,23 @@ jobs:
         with:
           args: --exclude=G104,G402 ./...
       - name: xgo build
-        uses: crazy-max/ghaction-xgo@v2
+        uses: crazy-max/ghaction-xgo@v3
         with:
           xgo_version: latest
           go_version: 1.21.x
           dest: dist
           pkg: cmd/dashboard
           prefix: dashboard
-          targets: linux/amd64,linux/arm64,linux/arm-7,linux/s390x,linux/riscv64,windows/amd64,windows/386,windows/arm64 # linux/386,
+          targets: ${{ matrix.os }}
           v: true
           x: false
           race: false
           tags: timetzdata
           ldflags: -s -w --extldflags '-static -fpic' -X github.com/naiba/nezha/service/singleton.Version=test
           buildmode: default
-      - name: fix dist
-        run: |
-          ls -al dist/
-          mv dist/dashboard-linux-arm-7 dist/dashboard-linux-arm
+      - name: Upload Release
+        # 打包上传生成的文件
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-${{ env.ARTIFACT_NAME }}
+          path: /home/runner/work/nezha/nezha/dist
