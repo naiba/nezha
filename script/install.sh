@@ -49,7 +49,7 @@ err() {
 }
 
 geo_check() {
-    api_list="http://api.myip.la/en?json https://api.ip.sb/geoip https://ipapi.co/json http://ip-api.com/json/"
+    api_list="https://blog.cloudflare.com/cdn-cgi/trace https://dash.cloudflare.com/cdn-cgi/trace https://cf-ns.com/cdn-cgi/trace"
     ua="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
     set -- $api_list
     for url in $api_list; do

@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"sync"
 	"time"
 
 	"github.com/naiba/nezha/pkg/ddns"
+	"github.com/naiba/nezha/pkg/geoip"
 	"github.com/naiba/nezha/pkg/grpcx"
 	"github.com/naiba/nezha/pkg/utils"
 
@@ -216,4 +218,26 @@ func (s *NezhaHandler) IOStream(stream pb.NezhaService_IOStreamServer) error {
 	}
 	iw.Wait()
 	return nil
+}
+
+func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, error) {
+	var clientID uint64
+	var err error
+	if clientID, err = s.Auth.Check(c); err != nil {
+		return nil, err
+	}
+	singleton.ServerLock.RLock()
+	defer singleton.ServerLock.RUnlock()
+
+	record := &geoip.IPInfo{}
+	ip := r.GetIp()
+	netIP := net.ParseIP(ip)
+	location, err := geoip.Lookup(netIP, record)
+	if err != nil {
+		return nil, err
+	}
+
+	singleton.ServerList[clientID].Host.CountryCode = location
+
+	return &pb.GeoIP{Ip: ip, CountryCode: location}, nil
 }

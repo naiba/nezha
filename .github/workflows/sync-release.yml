@@ -13,4 +13,4 @@ jobs:
       - name: Sync to Gitee
         run: |
           pip3 install PyGitHub
-          python3 .github/workflows/sync.py
+          python3 .github/sync.py
