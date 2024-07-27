@@ -92,6 +92,9 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/wwng2333" title="Crazy"><img src="https://avatars.githubusercontent.com/u/17147265?v=4" width="50;" alt="Crazy"/></a>
 <a href="https://github.com/wellcoming" title="Coming"><img src="https://avatars.githubusercontent.com/u/74850890?v=4" width="50;" alt="Coming"/></a><!--GAMFC_DELIMITER_END-->
 
+## Special Thanks
+- [IPInfo](https://ipinfo.io/) for providing an accurate GeoIP Database.
+
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=naiba/nezha&type=Timeline)](https://star-history.com/#naiba/nezha&Timeline)
