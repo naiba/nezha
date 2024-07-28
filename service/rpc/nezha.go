@@ -243,9 +243,10 @@ func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, e
 	// 将地区码写入到 Host
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
-	if singleton.ServerList[clientID].Host != nil {
-		singleton.ServerList[clientID].Host.CountryCode = location
+	if singleton.ServerList[clientID].Host == nil {
+		return nil, fmt.Errorf("host not found")
 	}
+	singleton.ServerList[clientID].Host.CountryCode = location
 
 	return &pb.GeoIP{Ip: ip, CountryCode: location}, nil
 }
