@@ -55,7 +55,7 @@ def delete_gitee_releases(latest_id, client, uri, token):
     for id in release_ids:
         release_uri = f"{uri}/{id}"
         delete_data = {
-            'access_token': access_token
+            'access_token': token
         }
         delete_response = client.delete(release_uri, json=delete_data)
         if delete_response.status_code == 204:
