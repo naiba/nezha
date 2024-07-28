@@ -62,7 +62,7 @@ def delete_gitee_releases(latest_id, client, uri, token):
             print(f'Successfully deleted release #{id}.')
         else:
             raise ValueError(
-                f"Request failed with status code {release_api_response.status_code}")
+                f"Request failed with status code {delete_response.status_code}")
 
 
 def sync_to_gitee(tag: str, body: str, files: slice):
