@@ -26,13 +26,14 @@ type CommonResponse struct {
 }
 
 type CommonServerInfo struct {
-	ID         uint64 `json:"id"`
-	Name       string `json:"name"`
-	Tag        string `json:"tag"`
-	LastActive int64  `json:"last_active"`
-	IPV4       string `json:"ipv4"`
-	IPV6       string `json:"ipv6"`
-	ValidIP    string `json:"valid_ip"`
+	ID           uint64 `json:"id"`
+	Name         string `json:"name"`
+	Tag          string `json:"tag"`
+	LastActive   int64  `json:"last_active"`
+	IPV4         string `json:"ipv4"`
+	IPV6         string `json:"ipv6"`
+	ValidIP      string `json:"valid_ip"`
+	DisplayIndex int    `json:"display_index"`
 }
 
 // StatusResponse 服务器状态子结构 包含服务器信息与状态信息
@@ -141,13 +142,14 @@ func (s *ServerAPIService) GetAllStatus() *ServerStatusResponse {
 		}
 		ipv4, ipv6, validIP := utils.SplitIPAddr(host.IP)
 		info := CommonServerInfo{
-			ID:         v.ID,
-			Name:       v.Name,
-			Tag:        v.Tag,
-			LastActive: v.LastActive.Unix(),
-			IPV4:       ipv4,
-			IPV6:       ipv6,
-			ValidIP:    validIP,
+			ID:           v.ID,
+			Name:         v.Name,
+			Tag:          v.Tag,
+			LastActive:   v.LastActive.Unix(),
+			IPV4:         ipv4,
+			IPV6:         ipv6,
+			ValidIP:      validIP,
+			DisplayIndex: v.DisplayIndex,
 		}
 		res.Result = append(res.Result, &StatusResponse{
 			CommonServerInfo: info,
