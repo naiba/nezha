@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"sync"
 	"time"
 
 	"github.com/naiba/nezha/pkg/ddns"
+	"github.com/naiba/nezha/pkg/geoip"
 	"github.com/naiba/nezha/pkg/grpcx"
 	"github.com/naiba/nezha/pkg/utils"
 
@@ -216,4 +218,28 @@ func (s *NezhaHandler) IOStream(stream pb.NezhaService_IOStreamServer) error {
 	}
 	iw.Wait()
 	return nil
+}
+
+func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, error) {
+	var clientID uint64
+	var err error
+	if clientID, err = s.Auth.Check(c); err != nil {
+		return nil, err
+	}
+
+	// 根据内置数据库查询 IP 地理位置
+	record := &geoip.IPInfo{}
+	ip := r.GetIp()
+	netIP := net.ParseIP(ip)
+	location, err := geoip.Lookup(netIP, record)
+	if err != nil {
+		return nil, err
+	}
+
+	// 将地区码写入到 Host
+	singleton.ServerLock.RLock()
+	defer singleton.ServerLock.RUnlock()
+	singleton.ServerList[clientID].Host.CountryCode = location
+
+	return &pb.GeoIP{Ip: ip, CountryCode: location}, nil
 }

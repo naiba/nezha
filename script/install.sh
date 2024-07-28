@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.18.1"
+NZ_VERSION="v0.18.2"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -49,7 +49,7 @@ err() {
 }
 
 geo_check() {
-    api_list="http://api.myip.la/en?json https://api.ip.sb/geoip https://ipapi.co/json http://ip-api.com/json/"
+    api_list="https://blog.cloudflare.com/cdn-cgi/trace https://dash.cloudflare.com/cdn-cgi/trace https://cf-ns.com/cdn-cgi/trace"
     ua="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
     set -- $api_list
     for url in $api_list; do
