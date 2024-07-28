@@ -138,7 +138,6 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		singleton.ServerList[clientID].Host != nil &&
 		host.IP != "" &&
 		singleton.ServerList[clientID].Host.IP != host.IP {
-
 		serverDomain := singleton.ServerList[clientID].DDNSDomain
 		if singleton.Conf.DDNS.Provider == "" {
 			provider, err = singleton.GetDDNSProviderFromProfile(singleton.ServerList[clientID].DDNSProfile)
@@ -191,6 +190,11 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		singleton.ServerList[clientID].PrevHourlyTransferOut = singleton.ServerList[clientID].PrevHourlyTransferOut - int64(singleton.ServerList[clientID].State.NetOutTransfer)
 	}
 
+	// 不要冲掉国家码
+	if singleton.ServerList[clientID].Host != nil {
+		host.CountryCode = singleton.ServerList[clientID].Host.CountryCode
+	}
+
 	singleton.ServerList[clientID].Host = &host
 	return &pb.Receipt{Proced: true}, nil
 }
@@ -239,7 +243,9 @@ func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, e
 	// 将地区码写入到 Host
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
-	singleton.ServerList[clientID].Host.CountryCode = location
+	if singleton.ServerList[clientID].Host != nil {
+		singleton.ServerList[clientID].Host.CountryCode = location
+	}
 
 	return &pb.GeoIP{Ip: ip, CountryCode: location}, nil
 }
