@@ -238,8 +238,8 @@ func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, e
 
 	// 将地区码写入到 Host
 	singleton.ServerLock.RLock()
-	singleton.ServerList[clientID].Host.CountryCode = location
 	defer singleton.ServerLock.RUnlock()
+	singleton.ServerList[clientID].Host.CountryCode = location
 
 	return &pb.GeoIP{Ip: ip, CountryCode: location}, nil
 }
