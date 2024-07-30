@@ -1,8 +1,6 @@
 {{define "theme-server-status/content-footer"}}
-<footer class="container" style="padding-bottom: 2rem;">
-    <p style="text-align: center; font-size: 10px;">
-        {{ .Conf.Site.Brand }} | Theme ServerStatus | Powered by <a target="_blank" href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a> {{.Version}}
-    </p>
+<footer>
+    <p>{{ .Conf.Site.Brand }} | Theme ServerStatus | Powered by <a target="_blank" href="https://github.com/naiba/nezha">{{tr "NezhaMonitoring"}}</a> {{.Version}}</p>
 </footer>
 <aside class="toolbox">
     <span v-if="page=='index' && countryMapChartData.length!=0" class="showMapChart">

@@ -12,6 +12,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fetch IPInfo GeoIP Database
+        env: 
+          IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
+        run: |
+          rm pkg/geoip/geoip.db
+          wget -O pkg/geoip/geoip.db https://ipinfo.io/data/free/country.mmdb?token=${IPINFO_TOKEN}
+
       - name: Extract branch name
         run: |
           export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})

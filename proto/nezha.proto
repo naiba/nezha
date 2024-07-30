@@ -9,6 +9,7 @@ service NezhaService {
     rpc ReportTask(TaskResult)returns(Receipt){}
     rpc RequestTask(Host)returns(stream Task){}
     rpc IOStream(stream IOStreamData)returns(stream IOStreamData){}
+    rpc LookupGeoIP(GeoIP)returns(GeoIP){}
 }
 
 message Host {
@@ -22,7 +23,7 @@ message Host {
     string virtualization = 8;
     uint64 boot_time = 9;
     string ip = 10;
-    string country_code = 11;
+    string country_code = 11; // deprecated
     string version = 12;
     repeated string gpu = 13;
 }
@@ -72,4 +73,9 @@ message Receipt{
 
 message IOStreamData {
     bytes data = 1;
+}
+
+message GeoIP {
+    string ip = 1;
+    string country_code = 2;
 }

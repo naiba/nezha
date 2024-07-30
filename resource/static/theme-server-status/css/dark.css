@@ -1,10 +1,7 @@
 body[theme="dark"] {
-    background: #31363b;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    background: rgba(49, 54, 59, 1);
     color: #f1f1f1;
-}
-
-body[theme="dark"] .navbar .navbar-brand {
-    color: #ffffff;
 }
 
 body[theme="dark"] .navbar .navbar-brand {
@@ -13,8 +10,8 @@ body[theme="dark"] .navbar .navbar-brand {
 
 body[theme="dark"] .navbar .dropdown-menu {
     list-style-image: initial;
-    background-color: #171a1e;
-    border-color: #31363b;
+    background-color: rgba(23, 26, 30, 1);
+    border-color: rgba(49, 54, 59, 1);
     box-shadow: rgba(0, 0, 0, 0.18) 0px 6px 12px;
 }
 
@@ -24,8 +21,8 @@ body[theme="dark"] .navbar .dropdown-menu > li > a {
 
 body[theme="dark"] .navbar .dropdown-menu > li > a:focus,
 body[theme="dark"] .navbar .dropdown-menu > li > a:hover {
-    background-color: #25282a;
-    background-image: linear-gradient(#1c1d26 0, #1c1d26 100%);
+    background-color: rgba(37, 40, 42, 1);
+    background-image: linear-gradient(rgba(28, 29, 38, 1) 0, rgba(28, 29, 38, 1) 100%);
 }
 
 body[theme="dark"] .navbar .navbar-nav > .open > a:focus,
@@ -37,18 +34,13 @@ body[theme="dark"] .navbar .navbar-nav > .open > a{
     background-color: transparent !important;
 }
 
-body[theme="dark"] .navbar .navbar-nav .open .dropdown-menu>li>a {
+body[theme="dark"] .navbar .navbar-nav .open .dropdown-menu > li > a {
     color: #f1f1f1;
-}
-
-body[theme="dark"] .toolbox i{
-    color: rgba(241,241,241,1);
-    background-color: rgba(0,0,0,0.5);
 }
 
 body[theme="dark"] .content {
     background-image: initial;
-    background-color: #1c1d26;
+    background-color: rgba(28, 29, 38, 1);
     border: none;
     box-shadow: rgba(0, 0, 0, 0.5) 0 0.625em 2em;
     -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0 0.625em 2em;
@@ -57,55 +49,8 @@ body[theme="dark"] .content {
 
 body[theme="dark"] .table {
     background-image: initial;
-    background-color: #1c1d26;
+    background-color: rgba(28, 29, 38, 1);
     border-color: #545b5e;
-}
-
-body[theme="dark"] .table>thead>tr.node-group-tag>th {
-    background-color: #1c1d26;
-}
-
-body[theme="dark"] .table-striped tbody > tr.even > td,
-body[theme="dark"] .table-striped tbody > tr.even > th {
-    background-color: #1c1d26;
-}
-
-body[theme="dark"] .table-striped tbody > tr.odd > td,
-body[theme="dark"] .table-striped tbody > tr.odd > th {
-    background-color: #1c1d26;
-}
-
-body[theme="dark"] .progress {
-    background-image: linear-gradient(#2c2c2c 0,#1c1d26 100%);
-    background-color: #1c1d26;
-}
-
-body[theme="dark"] .progress-bar {
-    color: white;
-}
-
-body[theme="dark"] .progress-bar-success {
-    background-image: linear-gradient(#4d853a 0, #367e36 100%);
-}
-
-body[theme="dark"] .progress-offline .progress-bar-success {
-    background-image: linear-gradient(grey 0, grey 100%);
-}
-
-body[theme="dark"] .progress-bar-warning {
-    background-image: linear-gradient(#995f0d 0, #b5710f 100%);
-}
-
-body[theme="dark"] .progress-offline .progress-bar-warning {
-    background-image: linear-gradient(grey 0, grey 100%);
-}
-
-body[theme="dark"] .progress-bar-danger {
-    background-image: linear-gradient(#942320 0, #a12623 100%);
-}
-
-body[theme="dark"] .progress-offline .progress-bar-danger {
-    background-image: linear-gradient(grey 0, grey 100%);
 }
 
 body[theme="dark"] .table > tbody > tr > td:before,
@@ -115,17 +60,69 @@ body[theme="dark"] .table > thead > tr.node-group-cell > th:before{
     background-color: rgba(58, 62, 65, 1);
 }
 
-body[theme="dark"] .table > tbody > tr.expandRow > td:before,
-body[theme="dark"] .table > thead > tr.node-group-tag > th:before{
-    background-color: #1c1d26;
+body[theme="dark"] .table-striped tbody > tr,
+body[theme="dark"] .table-striped tbody > tr.even > td,
+body[theme="dark"] .table-striped tbody > tr.even > th {
+    background-color: rgba(28, 29, 38, 1);
+}
+
+body[theme="dark"] .table-striped tbody > tr,
+body[theme="dark"] .table-striped tbody > tr.odd > td,
+body[theme="dark"] .table-striped tbody > tr.odd > th {
+    /* background-color: rgba(28, 29, 38, 1); 282B2E*/
+    background-color: rgba(34, 35, 46, 1);
+}
+
+body[theme="dark"] .table-hover > tbody > tr:hover{
+    background-color: unset;
 }
 
 body[theme="dark"] .table-hover > tbody > tr:not(.expandRow):hover > td {
-    background-color: #171a1e;
+    background-color: rgba(48, 50, 65, 1);
 }
 
-body[theme="dark"] .table-striped > tbody > tr:nth-of-type(2n+1) {
-    background-color: #1c1d26;
+/* expandRow展开部分样式 */
+body[theme="dark"] .table > tbody > tr.expandRow.odd > td:before{
+    /* background-color: rgba(28, 29, 38, 1); 282B2E*/
+    background-color: rgba(34, 35, 46, 1);
+}
+
+body[theme="dark"] .table > tbody > tr.expandRow.even > td:before{
+    background-color: rgba(28, 29, 38, 1);
+}
+/* expandRow展开部分样式结束 */
+
+body[theme="dark"] .progress {
+    background-image: linear-gradient(#2c2c2c 0,rgba(28, 29, 38, 1) 100%);
+    background-color: rgba(28, 29, 38, 1);
+}
+
+body[theme="dark"] .progress-bar {
+    color: #ffffff;
+}
+
+body[theme="dark"] .progress-bar-success {
+    background-image: linear-gradient(#4d853a 0, #367e36 100%);
+}
+
+body[theme="dark"] .progress-offline .progress-bar-success {
+    background-image: linear-gradient(#808080 0, #808080 100%);
+}
+
+body[theme="dark"] .progress-bar-warning {
+    background-image: linear-gradient(#995f0d 0, #b5710f 100%);
+}
+
+body[theme="dark"] .progress-offline .progress-bar-warning {
+    background-image: linear-gradient(#808080 0, #808080 100%);
+}
+
+body[theme="dark"] .progress-bar-danger {
+    background-image: linear-gradient(#942320 0, #a12623 100%);
+}
+
+body[theme="dark"] .progress-offline .progress-bar-danger {
+    background-image: linear-gradient(#808080 0, #808080 100%);
 }
 
 body[theme="dark"] .node-cell.status .status-icon.online {
@@ -149,7 +146,7 @@ body[theme="dark"] .service-status .warning {
 }
 
 body[theme="dark"] .service-day-status-icon {
-    background-color: grey;
+    background-color: rgba(128, 128, 128, 1);
 }
 
 body[theme="dark"] footer p a, 
@@ -159,7 +156,7 @@ body[theme="dark"] footer p a:hover {
 }
 
 body[theme="dark"] .modal-content{
-    background-color: #1c1d26;
+    background-color: rgba(28, 29, 38, 1);
     color: #f1f1f1;
 }
 
@@ -169,4 +166,9 @@ body[theme="dark"] .modal-header{
 
 body[theme="dark"] .modal-header i{
     color: #f1f1f1;
+}
+
+body[theme="dark"] .toolbox i{
+    color: rgba(241, 241, 241, 1);
+    background-color: rgba(0, 0, 0, 0.5);
 }
