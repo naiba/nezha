@@ -135,6 +135,20 @@ LOOP:
 		}
 	}()
 
+	go keepAlive(stream)
+
 	<-endCh
 	return err
+}
+
+func keepAlive(stream *ioStreamContext) {
+        ticker := time.NewTicker(20 * time.Second)
+        defer ticker.Stop()
+
+        for range ticker.C {
+                _, err := stream.agentIo.Write([]byte("\n"))
+                if err != nil {
+                        return
+                }
+        }
 }
