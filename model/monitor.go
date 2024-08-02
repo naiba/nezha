@@ -13,7 +13,7 @@ import (
 
 const (
 	_ = iota
-	TaskTypeHTTPGET
+	TaskTypeHTTPGet
 	TaskTypeICMPPing
 	TaskTypeTCPPing
 	TaskTypeCommand
@@ -22,6 +22,7 @@ const (
 	TaskTypeKeepalive
 	TaskTypeTerminalGRPC
 	TaskTypeNAT
+	TaskTypeReportHostInfo
 )
 
 type TerminalTask struct {

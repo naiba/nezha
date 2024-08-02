@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
 	"github.com/ory/graceful"
 	flag "github.com/spf13/pflag"
@@ -68,6 +70,7 @@ func main() {
 	go singleton.AlertSentinelStart()
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
 	srv := controller.ServeWeb(singleton.Conf.HTTPPort)
+	go dispatchReportInfoTask()
 	if err := graceful.Graceful(func() error {
 		return srv.ListenAndServe()
 	}, func(c context.Context) error {
@@ -78,5 +81,20 @@ func main() {
 		return nil
 	}); err != nil {
 		log.Printf("NEZHA>> ERROR: %v", err)
+	}
+}
+
+func dispatchReportInfoTask() {
+	time.Sleep(time.Second * 15)
+	singleton.ServerLock.RLock()
+	defer singleton.ServerLock.RUnlock()
+	for _, server := range singleton.ServerList {
+		if server == nil || server.TaskStream == nil {
+			continue
+		}
+		server.TaskStream.Send(&proto.Task{
+			Type: model.TaskTypeReportHostInfo,
+			Data: "",
+		})
 	}
 }
