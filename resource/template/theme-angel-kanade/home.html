@@ -27,6 +27,7 @@
                   <template v-if="server.Host.GPU">
                       GPU: @#server.Host.GPU#@
                   </template>
+                  <br />
                   {{tr "DiskUsed"}}:
                   @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
                   {{tr "MemUsed"}}:
