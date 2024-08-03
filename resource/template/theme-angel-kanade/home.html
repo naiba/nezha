@@ -25,7 +25,7 @@
                     v-if="server.Host.Virtualization">@#server.Host.Virtualization#@:</span>@#server.Host.Arch#@]<br />
                   CPU: @#server.Host.CPU#@<br />
                   <template v-if="server.Host.GPU">
-                      GPU: @#server.Host.GPU#@
+                      GPU: @#server.Host.GPU#@<br />
                   </template>
                   {{tr "DiskUsed"}}:
                   @#formatByteSize(server.State.DiskUsed)#@/@#formatByteSize(server.Host.DiskTotal)#@<br />
