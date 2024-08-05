@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.18.2"
+NZ_VERSION="v0.18.3"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -53,9 +53,12 @@ geo_check() {
     ua="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
     set -- $api_list
     for url in $api_list; do
-        text="$(curl -A $ua -m 10 -s $url)"
+        text="$(curl -A "$ua" -m 10 -s $url)"
+        endpoint="$(echo $text | sed -n 's/.*h=\([^ ]*\).*/\1/p')"
         if echo $text | grep -qw 'CN'; then
             isCN=true
+            break
+        elif echo $url | grep -q $endpoint; then
             break
         fi
     done
