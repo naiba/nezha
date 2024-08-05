@@ -1,34 +1,35 @@
 {{define "theme-server-status/home"}}
 {{template "theme-server-status/header" .}}
-<div id="app">
-    {{template "theme-server-status/content-nav" .}}   
-    <!--  showGroup true -->
-    <template v-if="showGroup">
-        <section class="container table-responsive content" style="max-width: 95vw" v-for="group in nodesTag">
-            {{template "theme-server-status/home-group-true" .}} 
-        </section>
-    </template>
-    <!--  showGroup false -->
-    <template v-else>
-        <section class="container table-responsive content" style="max-width: 95vw">
-            {{template "theme-server-status/home-group-false" .}}
-        </section>
-    </template>
-    <div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="mapChartTitle">{{tr "ServersOnWorldMap"}}</h4>
-                    <i class="bi bi-x" data-dismiss="modal" aria-label="Close"></i>
-                </div>
-                <div class="modal-body">
-                    <div id="mapChart" style="width:100%;height:auto;"></div>
-                </div>
+{{template "theme-server-status/menu" .}}   
+<!--  showGroup true -->
+<template v-if="showGroup">
+    <section class="container-fluid table-responsive content" v-for="group in nodesTag">
+        {{template "theme-server-status/home-group-true" .}} 
+    </section>
+</template>
+<!--  showGroup false -->
+<template v-else>
+    <section class="container-fluid table-responsive content">
+        {{template "theme-server-status/home-group-false" .}}
+    </section>
+</template>
+<div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true" style="padding-left:0">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mapChartTitle">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>{{tr "ServersOnWorldMap"}}</span>
+                </h4>
+                <i class="bi bi-x xclose" data-dismiss="modal" aria-label="Close"></i>
+            </div>
+            <div class="modal-body">
+                <div id="mapChart"></div>
             </div>
         </div>
     </div>
-    {{template "theme-server-status/content-footer" .}}
 </div>
+{{template "theme-server-status/footer" .}}
 <script>
     new Vue({
         el: '#app',
@@ -155,8 +156,8 @@
                 }
                 const unit = this.language=='zh-CN' ? '台' : 'servers';
                 const isMobile = this.checkIsMobile();
-                const width = isMobile ? 338 : 1102;
-                const height = isMobile ? 200 : 500;
+                const width = window.innerWidth;
+                const height = 0.95 * window.innerHeight;
                 const backgroundColor = this.theme == "dark" ? '' : '';
                 const inRangeColor = this.theme == "dark" ? '#D2B206' : '#FFDF32';
                 const tooltipBackgroundColor = this.theme == "dark" ? "#ffffff" : '#ffffff';
@@ -645,5 +646,4 @@
         }
     })
 </script>
-{{template "theme-server-status/footer" .}}
 {{end}}

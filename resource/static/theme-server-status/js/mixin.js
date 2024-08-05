@@ -1,12 +1,14 @@
 const mixinsVue = {
     data: {
         cache: [],
+        isMobile: false,
         theme: "light",
         isSystemTheme: false,
         showGroup: false,
         showGoTop: false,
+        showTools: false,
         preferredTemplate: null,
-        isMobile: false,
+        semiTransparent: false,
         staticUrl: '/static/theme-server-status',
         adaptedTemplates: [
             { key: 'default', name: 'Default', icon: 'th large' },
@@ -18,6 +20,7 @@ const mixinsVue = {
         this.isMobile = this.checkIsMobile();
         this.theme = this.initTheme();
         this.showGroup = this.initShowGroup();
+        this.semiTransparent = this.initSemiTransparent();
         this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : this.$root.defaultTemplate;
         window.addEventListener('scroll', this.handleScroll);
     },
@@ -31,6 +34,9 @@ const mixinsVue = {
                 this.updateCookie("preferred_theme", template);
                 window.location.reload();
             }
+        },
+        toggleShowTools() {
+            this.showTools = !this.showTools;
         },
         initTheme() {
             const storedTheme = localStorage.getItem("theme");
@@ -63,6 +69,18 @@ const mixinsVue = {
             if (this.$root.page == 'service') {
                 this.$root.initTooltip();
             }
+        },
+        initSemiTransparent() {
+            const storedSemiTransparent = localStorage.getItem("semiTransparent");
+            const semiTransparent = storedSemiTransparent !== null ? JSON.parse(storedSemiTransparent) : false;
+            if (storedSemiTransparent === null) {
+                localStorage.setItem("semiTransparent", semiTransparent);
+            }
+            return semiTransparent;
+        },
+        toggleSemiTransparent(){
+            this.semiTransparent = !this.semiTransparent;
+            localStorage.setItem("semiTransparent", this.semiTransparent);
         },
         updateCookie(name, value) {
             document.cookie = name + "=" + value +"; path=/";
@@ -106,6 +124,7 @@ const mixinsVue = {
         },
         handleScroll() {
             this.showGoTop = window.scrollY >= 100;
+            if(this.showTools) this.showTools = false;
         },
         groupingData(data, field) {
             let map = new Map();
