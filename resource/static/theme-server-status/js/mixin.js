@@ -81,6 +81,9 @@ const mixinsVue = {
         toggleSemiTransparent(){
             this.semiTransparent = !this.semiTransparent;
             localStorage.setItem("semiTransparent", this.semiTransparent);
+            if(this.$root.page == 'index') {
+                this.reloadCharts(); // 重新载入echarts图表
+            }
         },
         updateCookie(name, value) {
             document.cookie = name + "=" + value +"; path=/";
