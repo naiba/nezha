@@ -525,6 +525,7 @@
                 const tooltipBackgroundColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.85)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,1)");
                 const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
                 const lineStyleWidth = isMobile ? 1 : 2;
+                const splitLineWidth = isMobile ? 0.5 : 1;
                 // 渲染图表
                 const chart = echarts.init(chartContainer, chartTheme, {
                     renderer: 'canvas',
@@ -615,6 +616,11 @@
                         axisLabel: {
                             textStyle: {
                                 fontSize: fontSize
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                width: splitLineWidth
                             }
                         }
                     },
