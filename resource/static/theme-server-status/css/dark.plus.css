@@ -5,7 +5,7 @@ body[theme="dark"]::before {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-image: url(https://github.com/user-attachments/assets/19b86598-5c88-475f-93ce-0d72efce21a4);
+    background-image: url(/static/theme-server-status/img/bg.jpg);
     background-repeat: no-repeat;
     background-position: 50% 50%;
     background-size: cover;
