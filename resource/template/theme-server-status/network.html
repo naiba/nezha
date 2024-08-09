@@ -12,7 +12,7 @@
     </table>
 </div>
 <div class="container-fluid table-responsive content">
-    <div ref="chartDom" style="border-radius: 28px; margin-top: 15px;height: 520px;max-width: 1400px;overflow: hidden"></div>
+    <div ref="chartDom" style="border-radius: 28px; margin-top: 15px;height: 520px;max-width: 95vw;overflow: hidden"></div>
 </div>
 {{template "theme-server-status/footer" .}}
 <script>
@@ -80,6 +80,10 @@
                     boundaryGap: false
                 },
                 series: [],
+                grid: {
+                    left: this.mobile ? 25 : 50,
+                    right: this.mobile ? 25 : 50
+                }
             },
             chartOnOff: true,
         },
