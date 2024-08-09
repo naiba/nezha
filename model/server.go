@@ -17,11 +17,11 @@ type Server struct {
 	Note         string `json:"-"` // 管理员可见备注
 	DisplayIndex int    // 展示排序，越大越靠前
 	HideForGuest bool   // 对游客隐藏
-	EnableDDNS   bool   // 是否启用DDNS 未在配置文件中启用DDNS 或 DDNS检查时间为0时此项无效
-	EnableIPv4   bool   // 是否启用DDNS IPv4
-	EnableIpv6   bool   // 是否启用DDNS IPv6
-	DDNSDomain   string // DDNS中的前缀 如基础域名为abc.oracle DDNSName为mjj 就会把mjj.abc.oracle解析服务器IP 为空则停用
-	DDNSProfile  string // DDNS配置
+	EnableDDNS   bool   `json:"-"` // 是否启用DDNS 未在配置文件中启用DDNS 或 DDNS检查时间为0时此项无效
+	EnableIPv4   bool   `json:"-"` // 是否启用DDNS IPv4
+	EnableIpv6   bool   `json:"-"` // 是否启用DDNS IPv6
+	DDNSDomain   string `json:"-"` // DDNS中的前缀 如基础域名为abc.oracle DDNSName为mjj 就会把mjj.abc.oracle解析服务器IP 为空则停用
+	DDNSProfile  string `json:"-"` // DDNS配置
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
