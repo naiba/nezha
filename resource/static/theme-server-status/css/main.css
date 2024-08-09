@@ -3,16 +3,22 @@ body {
     padding-bottom: 30px !important;
 }
 
+.container-fluid{
+    max-width: 1680px;
+    width: 95vw;
+    margin: 0 auto;
+}
+
+.nezha {
+    min-height: calc(100vh - 100px);
+}
+
 /* 导航部分 开始*/
 .navbar {
     min-height: 40px !important;
     margin:0 auto;
     font-size: 14px;
-}
-
-.navbar .container{
-    max-width: 95vw;
-    margin: 0 auto;
+    z-index:99999999;
 }
 
 .navbar-inverse{
@@ -46,11 +52,6 @@ body {
     word-break: break-all;
 }
 
-.navbar .node-cell-expand-label {
-    /*margin-right: 5px;*/
-}
-
-.navbar .dropdown:hover,
 .navbar .dropdown a{
     cursor: pointer;
 }
@@ -75,12 +76,10 @@ body {
 .navbar .navbar-collapse{
     max-height: 500px;
 }
-
 /* 导航部分 结束 */
 
 
 /* toolbox 开始 */
-
 .toolbox {
     position: fixed;
     bottom:20px;
@@ -121,7 +120,6 @@ body {
 .toolbox .showGoTop i.goTop {
     font-size: 1.55rem;
 }
-
 /* toolbox 结束 */
 
 
@@ -138,12 +136,12 @@ body {
     border-radius: 3px;
 }
 
-.table th, .table td {
-    text-align: left;
+.table-responsive{
+    border: none;
 }
 
-tr.accordion-toggle{
-    cursor:pointer;
+.table th, .table td {
+    text-align: left;
 }
 
 .table > tbody > tr > td,
@@ -171,6 +169,15 @@ tr.accordion-toggle{
     height: 0.7px;
 }
 
+table.monitor-detail{
+    margin:5px 0px 10px 0px;
+}
+
+tr.accordion-toggle{
+    cursor:pointer;
+}
+
+.table .network-thead-tr th,
 .table .node-group-tag th{
     font-size: 18px;
     padding-bottom:15px;
@@ -243,7 +250,7 @@ tr.accordion-toggle{
     cursor: pointer;
 }
 
-/*加快Agent详情下拉展示速度*/
+/*agent详情下拉速度*/
 .collapsing{
     -webkit-transition-property:height,visibility;
     -o-transition-property:height,visibility;
@@ -255,13 +262,10 @@ tr.accordion-toggle{
     -o-transition-timing-function: linear;
     transition-timing-function: linear
 }
-
 /*正文结束*/
 
 /* 服务页 正文*/
-.service-status {
-
-}
+.service-status {}
 
 .service-status .service-status-th{
     min-width:60px;
@@ -307,44 +311,67 @@ tr.accordion-toggle{
 .service-status .tooltip-inner {
     max-width: 500px;
 }
+
+td.ping-network-quality {
+    width: 600px;
+}
 /* 服务页 正文结束 */
 
-
-/* 服务器分布图 */
+/* 地图版服务器分布图 */
 #mapChartBox{
     z-index: 999999999;
+    padding-left: 0 !important;
 }
 
-.modal-content{
-    display: flex;
-    flex-direction: column;
-    pointer-events: auto;
+.modal-open .modal{
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .modal-dialog-centered{
     margin: 0 auto;
-    width: 1134px;
-    max-width: 1134px;
+    width: 100%;
+    max-width: 100%;
     display: flex;
     align-items: center; /* 垂直居中 */
     justify-content: center; /* 水平居中 */
     min-height: calc(100%) /* 确保模态框占据整个视口高度 */
 }
 
+.modal-content{
+    display: flex;
+    flex-direction: column;
+    pointer-events: auto;
+    border-radius: unset;
+    border: none;
+}
+
 .modal-header{
     position: relative;
 }
 
-.modal-header i{
+.modal-header h4{
+    cursor: pointer;
+}
+
+.modal-header i.xclose{
     cursor: pointer;
     position: absolute;
-    font-size: 2em;
-    top: 13px;
-    right: 13px;
+    font-size: 30px;
+    top: 12px;
+    right: 10px;
+}
+
+.modal-body{
+    padding: 0px;
+}
+
+a.template-item, a.cdn-item{
+    display: block;
 }
 
 footer{
-    padding-bottom: 2rem;
+    padding-bottom: 20px;
 }
 
 footer p{
@@ -356,6 +383,10 @@ footer p{
     .accordian-body{
         margin: 5px 0px 5px 10px;        
     }
+    table.monitor-detail{
+        margin:0px 0px 2px 0px;
+    }
+    .table .network-thead-tr th,
     .table .node-group-tag th{
         font-size:16px;
         padding-bottom:6px;
@@ -367,9 +398,18 @@ footer p{
         font-size: 10px !important;
         padding-top:60px !important;
     }
+    .nezha {
+        min-height: calc(100vh - 80px);
+    }
     .content {
         padding: 0;
         margin-bottom: 10px;
+    }
+    footer{
+        padding-bottom: 10px;
+    }
+    .cycle-transfer-stats .dataTables_wrapper{
+        margin-bottom: -10px;
     }
     .navbar .navbar-nav .open .dropdown-menu>li>a {
         color: #f1f1f1;
@@ -405,9 +445,16 @@ footer p{
     .accordian-body{
         margin: 5px 0px 5px 10px;        
     }
+    table.monitor-detail{
+        margin:0px 0px 2px 0px;
+    }
+    .table .network-thead-tr th,
     .table .node-group-tag th{
-        font-size:16px;
+        font-size:14px;
         padding-bottom:6px;
+    }
+    .table tr.network td{
+        font-size: 12px;
     }
     .service-status .service-status-th{
         min-width:30px;
@@ -432,15 +479,8 @@ footer p{
     .toolbox {
         right: 18px;
     }
-    .modal-dialog-centered{
-        width: 95%;
-    }
-    .modal-title{
-        line-height: 0.5;
-    }
-    .modal-header i{
-        top: 8px;
-        right: 8px;
+    td.ping-network-quality {
+        width: 110px;
     }
 }
 

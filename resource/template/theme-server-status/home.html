@@ -1,34 +1,35 @@
 {{define "theme-server-status/home"}}
 {{template "theme-server-status/header" .}}
-<div id="app">
-    {{template "theme-server-status/content-nav" .}}   
-    <!--  showGroup true -->
-    <template v-if="showGroup">
-        <section class="container table-responsive content" style="max-width: 95vw" v-for="group in nodesTag">
-            {{template "theme-server-status/home-group-true" .}} 
-        </section>
-    </template>
-    <!--  showGroup false -->
-    <template v-else>
-        <section class="container table-responsive content" style="max-width: 95vw">
-            {{template "theme-server-status/home-group-false" .}}
-        </section>
-    </template>
-    <div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="mapChartTitle">{{tr "ServersOnWorldMap"}}</h4>
-                    <i class="bi bi-x" data-dismiss="modal" aria-label="Close"></i>
-                </div>
-                <div class="modal-body">
-                    <div id="mapChart" style="width:100%;height:auto;"></div>
-                </div>
+{{template "theme-server-status/menu" .}}   
+<!--  showGroup true -->
+<template v-if="showGroup">
+    <section class="container-fluid table-responsive content" v-for="group in nodesTag">
+        {{template "theme-server-status/home-group-true" .}} 
+    </section>
+</template>
+<!--  showGroup false -->
+<template v-else>
+    <section class="container-fluid table-responsive content">
+        {{template "theme-server-status/home-group-false" .}}
+    </section>
+</template>
+<div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true" style="padding-left:0">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="mapChartTitle">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>{{tr "ServersOnWorldMap"}}</span>
+                </h4>
+                <i class="bi bi-x xclose" data-dismiss="modal" aria-label="Close"></i>
+            </div>
+            <div class="modal-body">
+                <div id="mapChart"></div>
             </div>
         </div>
     </div>
-    {{template "theme-server-status/content-footer" .}}
 </div>
+{{template "theme-server-status/footer" .}}
 <script>
     new Vue({
         el: '#app',
@@ -155,8 +156,8 @@
                 }
                 const unit = this.language=='zh-CN' ? '台' : 'servers';
                 const isMobile = this.checkIsMobile();
-                const width = isMobile ? 338 : 1102;
-                const height = isMobile ? 200 : 500;
+                const width = window.innerWidth;
+                const height = 0.95 * window.innerHeight;
                 const backgroundColor = this.theme == "dark" ? '' : '';
                 const inRangeColor = this.theme == "dark" ? '#D2B206' : '#FFDF32';
                 const tooltipBackgroundColor = this.theme == "dark" ? "#ffffff" : '#ffffff';
@@ -521,8 +522,10 @@
                 const chartTheme = theme == "dark" ? "dark" : "default";
                 const fontColor = theme == "dark" ? "#f1f1f1" : "#000000";
                 const backgroundColor = theme == "dark" ? '' : '';
-                const tooltipBackgroundColor = theme == "dark" ? "#1C1D26" : '#ffffff';
-                const tooltipBorderColor = theme == "dark" ? "#31363B" : "#ffffff";
+                const tooltipBackgroundColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.85)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,1)");
+                const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
+                const lineStyleWidth = isMobile ? 1 : 2;
+                const splitLineWidth = isMobile ? 0.5 : 1;
                 // 渲染图表
                 const chart = echarts.init(chartContainer, chartTheme, {
                     renderer: 'canvas',
@@ -549,7 +552,10 @@
                         smooth: true,
                         symbol: 'none',
                         data: data,
-                        connectNulls: true
+                        connectNulls: true,
+                        lineStyle: {
+                            width: lineStyleWidth
+                        }  
                     };
                 });
 
@@ -611,6 +617,11 @@
                             textStyle: {
                                 fontSize: fontSize
                             }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                width: splitLineWidth
+                            }
                         }
                     },
                     dataZoom: [
@@ -645,5 +656,4 @@
         }
     })
 </script>
-{{template "theme-server-status/footer" .}}
 {{end}}
