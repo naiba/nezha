@@ -197,6 +197,10 @@ body[theme="light"] .modal-header i.xclose{
     color: rgba(0, 0, 0, 0.87);
 }
 
+body[theme="light"] .network-box .network-box-header{
+    border-bottom: 1px solid rgba(224, 230, 241, 0.6);
+}
+
 @media only screen and (max-width: 767px) {
     body[theme="light"] .navbar .navbar-nav .open .dropdown-menu {
         background-color: rgba(249, 249, 249, 1);

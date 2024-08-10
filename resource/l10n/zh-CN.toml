@@ -651,3 +651,6 @@ other = "服务器世界分布图"
 
 [NAT]
 other = "内网穿透"
+
+[NetworkSpiterList]
+other = "网络监控"

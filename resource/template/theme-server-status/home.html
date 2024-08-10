@@ -155,14 +155,13 @@
                     return;
                 }
                 const unit = this.language=='zh-CN' ? '台' : 'servers';
-                const isMobile = this.checkIsMobile();
                 const width = window.innerWidth;
                 const height = 0.95 * window.innerHeight;
                 const backgroundColor = this.theme == "dark" ? '' : '';
                 const inRangeColor = this.theme == "dark" ? '#D2B206' : '#FFDF32';
                 const tooltipBackgroundColor = this.theme == "dark" ? "#ffffff" : '#ffffff';
                 const tooltipBorderColor = this.theme == "dark" ? "#ffffff" : "#ffffff"; 
-                const fontSize = isMobile ? 10 : 12;
+                const fontSize = this.isMobile ? 10 : 12;
                 const fontColor = this.theme == "dark" ? "#000000" : "#000000";     
                 const chartContainer = document.getElementById('mapChart');
                 const mapChart = echarts.init(chartContainer, '', { // init图表
@@ -510,13 +509,12 @@
                 }
                 // 定义图表参数值
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
-                const isMobile = this.checkIsMobile();
-                const fontSize = isMobile ? 10 : 14;
-                const gridLeft = isMobile ? 25 : 36;
-                const gridRight = isMobile ? 5 : 20;
-                const legendLeft = isMobile ? 'center' : 'center';
-                const legendTop = isMobile ? 5 : 5;
-                const legendPadding= isMobile ? [5,0,5,0] : [5,0,5,0];
+                const fontSize = this.isMobile ? 10 : 14;
+                const gridLeft = this.isMobile ? 25 : 36;
+                const gridRight = this.isMobile ? 5 : 20;
+                const legendLeft = this.isMobile ? 'center' : 'center';
+                const legendTop = this.isMobile ? 5 : 5;
+                const legendPadding= this.isMobile ? [5,0,5,0] : [5,0,5,0];
                 const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                 const theme = localStorage.getItem("theme") ? localStorage.getItem("theme") : systemDarkMode;
                 const chartTheme = theme == "dark" ? "dark" : "default";
@@ -524,8 +522,8 @@
                 const backgroundColor = theme == "dark" ? '' : '';
                 const tooltipBackgroundColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.85)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,1)");
                 const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
-                const lineStyleWidth = isMobile ? 1 : 2;
-                const splitLineWidth = isMobile ? 0.5 : 1;
+                const lineStyleWidth = this.isMobile ? 1 : 2;
+                const splitLineWidth = this.isMobile ? 0.5 : 1;
                 // 渲染图表
                 const chart = echarts.init(chartContainer, chartTheme, {
                     renderer: 'canvas',
@@ -562,12 +560,12 @@
                 const legendData = chartData.map(item => item.monitor_name);
                 const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 3;
                 const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
-                const autoIncrement = Math.floor((legendData.length - 1) / (isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (isMobile ? 20 : 28)
+                const autoIncrement = Math.floor((legendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 20 : 28)
                 const height = 300 + autoIncrement;
                 const gridTop = 40 + autoIncrement;
-                const legendIcon = isMobile ? 'rect' : ""; 
-                const itemWidth = isMobile ? 10 : 25;
-                const itemHeight = isMobile ? 10 : 14;
+                const legendIcon = this.isMobile ? 'rect' : ""; 
+                const itemWidth = this.isMobile ? 10 : 25;
+                const itemHeight = this.isMobile ? 10 : 14;
                 chart.resize({
                     width: 'auto',
                     height: height

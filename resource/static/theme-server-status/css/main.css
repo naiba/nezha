@@ -317,6 +317,72 @@ td.ping-network-quality {
 }
 /* 服务页 正文结束 */
 
+/* 网络页 正文*/
+.network-box .btn-group.open .dropdown-toggle{
+    box-shadow:unset;
+}
+
+.network-box .network-box-header{
+    font-size: 18px;
+    padding: 5px 0px 15px 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.network-box .network-box-header .dropdown-menu {
+    max-height: 22.5em;
+    overflow-y: auto;
+    z-index:99999998;
+    min-width: 200px;
+    padding: 0px;
+}
+
+.network-box .network-box-header .dropdown-menu::-webkit-scrollbar {
+    display: none;
+}
+
+.network-box .network-box-header .dropdown-menu li{
+    height: 2em;
+    cursor: pointer;
+}
+
+.network-box .network-box-header .dropdown-menu li.input-group{
+    margin: 0 auto;
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 99999997;
+}
+
+.network-box .network-box-header .dropdown-menu li.input-group input{
+    width: 100%;
+    height: 2em;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+}
+
+.network-box .network-box-header .dropdown-menu li a {
+    padding: 5px 0px 5px 15px;
+}
+
+.network-box .network-box-header .dropdown-menu li.hidden {
+    height: 0;
+    display: none;
+    visibility:hidden;
+}
+
+.network-box .network-box-header .dropdown-menu li.visible {
+    display: block;
+}
+
+.network-box .chartTitle {
+    text-align: center;
+    font-size: 18px;
+    margin: 18px 0px 15px 0px;
+}
+/* 网络页 正文结束 */
+
 /* 地图版服务器分布图 */
 #mapChartBox{
     z-index: 999999999;
@@ -392,6 +458,12 @@ footer p{
         padding-bottom:6px;
     }
 }
+
+/* 彩虹旗 */
+.fi-rb {
+    background-image: url(/static/theme-server-status/img/rb.png);
+}
+
 
 @media only screen and (max-width: 767px) {
     body {
@@ -481,6 +553,14 @@ footer p{
     }
     td.ping-network-quality {
         width: 110px;
+    }
+    .network-box .network-box-header {
+        margin: 8px 0px 0px 8px;
+        font-size: 16px;
+    }
+    .network-box .chartTitle {
+        font-size: 16px;
+        margin: 10px 0px 10px 0px;
     }
 }
 

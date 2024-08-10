@@ -14,7 +14,10 @@ const mixinsVue = {
             { key: 'default', name: 'Default', icon: 'th large' },
             { key: 'angel-kanade', name: 'AngelKanade', icon: 'square' },
             { key: 'server-status', name: 'ServerStatus', icon: 'list' }
-        ]
+        ],
+        colors: [],
+        colorsDark: ['#4992FF', '#08C091', '#FDDD5F', '#FF6E76', '#58D9F9', '#7CFFB2', '#FF8A44', '#8D48E3', '#DD79FF', '#5470C6', '#3BA272', '#FAC758', '#EE6666', '#72C0DE', '#91CC76', '#FB8352', '#9A60B4', '#EA7BCC'],
+        colorsLight: ['#5470C6', '#3BA272', '#FAC758', '#EE6666', '#72C0DE', '#91CC76', '#FB8352', '#9A60B4', '#EA7BCC', '#4992FF', '#08C091', '#FDDD5F', '#FF6E76', '#58D9F9', '#7CFFB2', '#FF8A44', '#8D48E3', '#DD79FF'],
     },
     created() {
         this.isMobile = this.checkIsMobile();
@@ -22,6 +25,7 @@ const mixinsVue = {
         this.showGroup = this.initShowGroup();
         this.semiTransparent = this.initSemiTransparent();
         this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : this.$root.defaultTemplate;
+        this.colors = this.theme == "dark" ? this.colorsDark : this.colorsLight;
         window.addEventListener('scroll', this.handleScroll);
     },
     destroyed() {
@@ -51,7 +55,7 @@ const mixinsVue = {
             // 重新赋值全局调色
             this.colors = this.theme == "dark" ? this.colorsDark : this.colorsLight;
             
-            if(this.$root.page == 'index') {
+            if(this.$root.page == 'index' || this.$root.page == 'network') {
                 this.reloadCharts(); // 重新载入echarts图表
             }
         },
@@ -81,7 +85,7 @@ const mixinsVue = {
         toggleSemiTransparent(){
             this.semiTransparent = !this.semiTransparent;
             localStorage.setItem("semiTransparent", this.semiTransparent);
-            if(this.$root.page == 'index') {
+            if(this.$root.page == 'index' || this.$root.page == 'network') {
                 this.reloadCharts(); // 重新载入echarts图表
             }
         },

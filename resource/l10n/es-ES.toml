@@ -651,3 +651,6 @@ other = "Servidores en el mapa mundial"
 
 [NAT]
 other = "NAT"
+
+[NetworkSpiterList]
+other = "Red Monitor"
