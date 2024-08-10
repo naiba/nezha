@@ -651,3 +651,6 @@ other = "伺服器世界分布圖"
 
 [NAT]
 other = "NAT"
+
+[NetworkSpiterList]
+other = "網絡監控"

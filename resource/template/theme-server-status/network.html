@@ -1,239 +1,362 @@
 {{define "theme-server-status/network"}}
 {{template "theme-server-status/header" .}}
 {{template "theme-server-status/menu" .}}
-<div class="container-fluid table-responsive content">
-    <table class="table table-striped table-condensed table-hover">
-        <button class="ui nezha-primary-btn button"
-                v-for="server in servers"
-                style="margin-top: 3px"
-                @click="redirectNetwork(server.ID)">
-            @#server.Name#@&nbsp;&nbsp;<i :class="'fi fi-' + server.Host.CountryCode"></i><span class="node-cell-location-text text-uppercase">&nbsp;&nbsp;@#server.Host.CountryCode#@</span>
-        </button>
-    </table>
-</div>
-<div class="container-fluid table-responsive content">
-    <div ref="chartDom" style="border-radius: 28px; margin-top: 15px;height: 520px;max-width: 1400px;overflow: hidden"></div>
+<div class="container-fluid content network-box">
+    <div class="network-box-header btn-group">
+        <div class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="bi bi-list-ul"></i> {{tr "NetworkSpiterList"}} <i class="bi bi-chevron-compact-down"></i>
+        </div>
+        <ul class="dropdown-menu">
+            <li class="input-group fixed-top">
+                <input type="text" id="dropdown-search" class="form-control" placeholder="Search...">
+            </li>
+            <li class="dropdown-item" v-for="server in servers" @click="showCharts(server.ID)">
+                <a><i :class="'fi fi-' + (server.Host.CountryCode || 'rb')"></i> @#server.Name#@ <i v-if="server.ID == currentServerId" class="check icon"></i></a>
+            </li>          
+        </ul>
+    </div>
+    <div class="chartTitle"><i class="chartCountryCode" :class="'fi fi-' + chartCountryCode"></i> @#chartTitle#@</div>
+    <div id="chartbox" style="width:100%;height:auto;"></div>
 </div>
 {{template "theme-server-status/footer" .}}
 <script>
-    const monitorInfo =  JSON.parse('{{.MonitorInfos}}');
-    const initData = JSON.parse('{{.Servers}}').servers;
-    let MaxTCPPingValue = {{.Conf.MaxTCPPingValue}};
     new Vue({
         el: '#app',
         delimiters: ['@#', '#@'],
         data: {
             page: 'network',
-            defaultTemplate: {{.Conf.Site.Theme}},
-            templates: {{.Themes}},
-            servers: initData,
-            option: {
-                tooltip: {
-                    trigger: 'axis',
-                    position: function (pt) {
-                        return [pt[0], '10%'];
-                    },
-                    formatter: function(params){
-                        let result = params[0].axisValueLabel + "<br />";
-                        params.forEach(function(item){
-                            result += item.marker + item.seriesName + ": " + item.value[1].toFixed(2) + " ms<br />";
-                         })
-                        return result;
-                    },
-                    confine: true,
-                    transitionDuration: 0
-                },
-                title: {
-                    left: 'center',
-                    text: "",
-                    textStyle: {}
-                },
-                legend: {
-                    top: '5%',
-                    data: [],
-                    textStyle: {
-                        fontSize: 14
-                    }
-                },
-                backgroundColor: 'rgba(255, 255, 255, 0.8)',
-                toolbox: {
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: 'none'
-                        },
-                        restore: {},
-                        saveAsImage: {}
-                    }
-                },
-                dataZoom: [
-                    {
-                        start: 0,
-                        end: 100
-                    }
-                ],
-                xAxis: {
-                    type: 'time',
-                    boundaryGap: false
-                },
-                yAxis: {
-                    type: 'value',
-                    boundaryGap: false
-                },
-                series: [],
-            },
-            chartOnOff: true,
+            defaultTemplate: "{{.Conf.Site.Theme}}",
+            templates: "{{.Themes }}",
+            servers: [],
+            chartDataList: [],
+            chartTitle: '',
+            chartCountryCode: '',
+            chart: null,
+            currentServerId: ''
         },
         mixins: [mixinsVue],
+        created() {
+            this.servers = JSON.parse('{{.Servers}}').servers;
+            this.showCharts(this.servers[0].ID);
+        },
         mounted() {
-            this.renderChart();
-            this.parseMonitorInfo(monitorInfo);
+            this.initSearch();            
         },
         methods: {
-            getFontLogoClass(str) {
-                if (["almalinux",
-                        "alpine",
-                        "aosc",
-                        "apple",
-                        "archlinux",
-                        "archlabs",
-                        "artix",
-                        "budgie",
-                        "centos",
-                        "coreos",
-                        "debian",
-                        "deepin",
-                        "devuan",
-                        "docker",
-                        "elementary",
-                        "fedora",
-                        "ferris",
-                        "flathub",
-                        "freebsd",
-                        "gentoo",
-                        "gnu-guix",
-                        "illumos",
-                        "kali-linux",
-                        "linuxmint",
-                        "mageia",
-                        "mandriva",
-                        "manjaro",
-                        "nixos",
-                        "openbsd",
-                        "opensuse",
-                        "pop-os",
-                        "raspberry-pi",
-                        "redhat",
-                        "rocky-linux",
-                        "sabayon",
-                        "slackware",
-                        "snappy",
-                        "solus",
-                        "tux",
-                        "ubuntu",
-                        "void",
-                        "zorin"].indexOf(str)
-                    > -1) {
-                    return str;
-                }
-                if (['openwrt', 'linux', "immortalwrt"].indexOf(str) > -1) {
-                    return 'tux';
-                }
-                if (str == 'amazon') {
-                    return 'redhat';
-                }
-                if (str == 'arch') {
-                    return 'archlinux';
-                }
-                return '';
-            },
-            redirectNetwork(id) {
-                this.getMonitorHistory(id)
-                .then(function(monitorInfo) {
-                      var vm = app.__vue__;
-                      vm.parseMonitorInfo(monitorInfo);
-                })
-                .catch(function(error){
-                    window.location.href = "/404";
-                })
-            },
-            getMonitorHistory(id) {
-                  return $.ajax({
-                    url: "/api/v1/monitor/"+id,
-                    method: "GET"
-                  });
-            },
-            parseMonitorInfo(monitorInfo) {
-                let tSeries = [];
-                let tLegendData = [];
-                var lcolors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc'];
-                for (let i = 0; i < monitorInfo.result.length; i++) {
-                    var lcolor = lcolors[i % lcolors.length];
-                    var rgbaColorMarker = 'rgba(' + parseInt(lcolor.slice(1, 3), 16) + ',' + parseInt(lcolor.slice(3, 5), 16) + ',' + parseInt(lcolor.slice(5, 7), 16) + ',0.5)';
-                    var rgbaColorBar = 'rgba(' + parseInt(lcolor.slice(1, 3), 16) + ',' + parseInt(lcolor.slice(3, 5), 16) + ',' + parseInt(lcolor.slice(5, 7), 16) + ',0.35)';
-                    let loss = 0;
-                    let data = [];
-                    let datal = [];
-                    for (let j = 0; j < monitorInfo.result[i].created_at.length; j++) {
-                        avgDelay = Math.round(monitorInfo.result[i].avg_delay[j]);
-                        if (avgDelay > 0 && avgDelay < MaxTCPPingValue) {
-                            data.push([monitorInfo.result[i].created_at[j], avgDelay]);
+            showCharts(id) {
+                const chartContainer = document.getElementById('chartbox');
+                // 发起数据请求
+                const url = `/api/v1/monitor/${id}`;
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.result) { // 数据请求成功，更新数据并渲染图表
+                            this.chartDataList[id] = data.result;
+                            this.$nextTick(() => {
+                                this.renderCharts(id);
+                            });
+                        } else {
+                            console.log('this server (id:'+ id + ') has no monitor.');
                         }
-                        else {
+                    })
+                    .catch(error => {
+                        console.error('Error fetching data:', error);
+                    });
+            },
+            renderCharts(id, reload = false) {
+                if (!this.chartDataList[id]) return;  
+                this.disposeCharts();
+                this.currentServerId = id;
+                this.chartCountryCode = this.getServerCountryCode(id);
+                const chartData = this.chartDataList[id];
+                const chartContainer = document.getElementById('chartbox');
+                this.chartTitle = chartData[0].server_name;
+                if (reload) {
+                    const existingChart = echarts.getInstanceByDom(chartContainer);
+                    if (existingChart) existingChart.dispose();
+                }
+                // 定义图表参数值
+                const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
+                const autoheight = this.isMobile ? (window.innerHeight - 200) : (window.innerHeight - 250);
+                const fontSize = this.isMobile ? 10 : 14;
+                const gridLeft = this.isMobile ? 30 : 36;
+                const gridRight = this.isMobile ? 12 : 20;
+                const legendLeft = this.isMobile ? 'center' : 'center';
+                const legendTop = this.isMobile ? 5 : 5;
+                const legendPadding= this.isMobile ? [5,0,5,0] : [5,0,5,0];
+                const fontColor = this.theme == "dark" ? "#f1f1f1" : "#000000";
+                const backgroundColor = this.theme == "dark" ? '' : '';
+                const tooltipBackgroundColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.85)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,1)");
+                const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
+                const lineStyleWidth = this.isMobile ? 1 : 2;
+                const splitLineWidth = this.isMobile ? 0.5 : 1;
+                const splitLineColor = this.theme == "dark" ? "rgba(110, 112, 121, 0.95)" : "rgba(224, 230, 241, 0.95)";
+                const markPointLabelColor = this.theme == "dark" ? "#111111" : "#000000";
+                const markPointItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
+                const markLineItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
+                const markLineLineStyleWidth = this.isMobile ? 0.15 : 0.3;
+                this.chart = echarts.init(chartContainer, '', { // init图表
+                    renderer: 'canvas',
+                    useDirtyRect: false,
+                    width: 'auto',
+                    height: autoheight,
+                });
+                // 获取图表数据
+                let legendData = [];
+                let seriesData = [];
+                chartData.forEach((item,key)=> {
+                    let loss = 0;
+                    let totalLossRate = 0;
+                    let legendName = '';
+                    let data = { main: [], markLine: []};
+                    item.avg_delay.forEach((avgDelay, index) => {
+                        const threshold = 0.9 * MaxTCPPingValue; // 定义阀值,用于判断是否丢包
+                        const filterAvgDelay = item.avg_delay.filter(value => value !== 0 && value !== MaxTCPPingValue);
+                        const max = Math.max(...filterAvgDelay).toFixed(1);
+                        const autoAvgDelay = 1.05 * max > 0.91 * MaxTCPPingValue ? 1.05 * max : 0.91 * MaxTCPPingValue;
+                        // 定义丢包 1. avgDelay==0  2. avgDelay>=MaxTCPPingValue 3. avgDelay>=threshold
+                        if(avgDelay == 0 || avgDelay >= MaxTCPPingValue){ //绝对丢包
                             loss += 1;
-                            datal.push({
-                                xAxis: monitorInfo.result[i].created_at[j],
+                            const lossrate = 100 * loss / (index + 1);
+                            data['main'].push(
+                                [item.created_at[index], autoAvgDelay, lossrate]
+                            );
+                            data['markLine'].push({
+                                xAxis: item.created_at[index],
                                 label: { show: false },
                                 emphasis: { disabled: true },
-                                lineStyle: {
-                                    type: "solid",
-                                    color: rgbaColorBar
-                                }
+                                lineStyle: { type: "solid" }
                             });
+                        } else if (avgDelay >= threshold && avgDelay < MaxTCPPingValue){ // 相对丢包
+                            loss += 1;
+                            const lossrate = 100 * loss / (index + 1);
+                            data['main'].push(
+                                [item.created_at[index], avgDelay, lossrate]
+                            );
+                            data['markLine'].push({
+                                xAxis: item.created_at[index],
+                                label: { show: false },
+                                emphasis: { disabled: true },
+                                lineStyle: { type: "solid" }
+                            });
+                        } else { // 未丢包
+                            const lossrate = 100 * loss / (index + 1);
+                            data['main'].push(
+                                [item.created_at[index], avgDelay, lossrate]
+                            );
                         }
-                    }
-                    lossRate = ((loss / monitorInfo.result[i].created_at.length) * 100).toFixed(1);
-                    if (lossRate > 99) {
-                        datal = [];
-                    }
-                    legendName = monitorInfo.result[i].monitor_name +" "+ lossRate + "%";
-                    tLegendData.push(legendName);
-                    tSeries.push({
+                    });
+                    // 处理legendData
+                    totalLossRate = ((loss / item.created_at.length) * 100).toFixed(1);
+                    legendName = `${item.monitor_name} ${totalLossRate}%`;
+                    legendData.push(legendName);
+                    // 处理seriesData
+                    seriesData.push(
+                        {
                             name: legendName,
                             type: 'line',
                             smooth: true,
                             symbol: 'none',
-                            data: data,
+                            connectNulls: true,
+                            lineStyle: {
+                                width: lineStyleWidth
+                            },  
+                            data: data['main'],
                             markLine: {
                                 symbol: "none",
                                 symbolSize :0,
-                                data: datal
+                                data: data['markLine'],
+                                itemStyle: { 
+                                    opacity: markLineItemStyleOpacity
+                                },
+                                lineStyle:{
+                                    width: markLineLineStyleWidth
+                                }
                             },
                             markPoint: {
                                 data: [
-                                    { type: 'max', symbol: 'pin', name: 'Max', itemStyle: { color: rgbaColorMarker }, symbolSize: 30, label: { fontSize: 8 } },
-                                    { type: 'min', symbol: 'pin', name: 'Min', itemStyle: { color: rgbaColorMarker }, symbolSize: 30, label: { fontSize: 8, offset: [0, 7.5] }, symbolRotate: 180 }
+                                    { 
+                                        name: 'Max',
+                                        type: 'max', 
+                                        symbol: 'pin', 
+                                        itemStyle: { 
+                                            opacity: markPointItemStyleOpacity
+                                        }, 
+                                        symbolSize: 30, 
+                                        label: { 
+                                            fontSize: 8,
+                                            color: markPointLabelColor,
+                                            formatter: function (params) {
+                                                return Math.round(params.value);
+                                            }
+                                        }
+                                    },
+                                    {
+                                        name: 'Min',
+                                        type: 'min', 
+                                        symbol: 'pin', 
+                                        itemStyle: { 
+                                            opacity: markPointItemStyleOpacity
+                                        }, 
+                                        symbolSize: 30, 
+                                        label: { 
+                                            fontSize: 8,
+                                            color: markPointLabelColor,
+                                            offset: [0, 8],
+                                            formatter: function (params) {
+                                                return Math.round(params.value);
+                                            }
+                                        }, 
+                                        symbolRotate: 180 
+                                    }
                                 ]
                             }
-                    });
+                        }
+                    );
+                });
+                const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 3;
+                const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
+                const autoIncrement = Math.floor((legendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 20 : 28)
+                const height = autoheight + autoIncrement;
+                const gridTop = 40 + autoIncrement;
+                const legendIcon = this.isMobile ? 'rect' : ""; 
+                const itemWidth = this.isMobile ? 10 : 25;
+                const itemHeight = this.isMobile ? 10 : 14;
+                this.chart.resize({
+                    width: 'auto',
+                    height: height
+                });
+                // 设置图表配置项
+                const option = {
+                    // 全局调色盘
+                    color: this.colors,
+                    // 背景颜色
+                    backgroundColor: backgroundColor,
+                    // 文字样式
+                    textStyle: {
+                        fontSize: fontSize,
+                        color: fontColor
+                    },
+                    // 图表网格设置
+                    grid: {
+                        top: gridTop,
+                        left: gridLeft,
+                        right: gridRight
+                    },
+                    // 图表标题设置
+                    title: {
+                        show: false,
+                    },
+                    // 图表系列数据设置
+                    series: seriesData.flat(),
+                    // X轴设置
+                    xAxis: {
+                        type: 'time',
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: fontSize
+                            }
+                        }
+                    },
+                    // Y轴设置
+                    yAxis: {
+                        type: 'value',
+                        axisLabel: {
+                            textStyle: {
+                                fontSize: fontSize
+                            }
+                        },
+                        splitLine: {
+                            lineStyle: {
+                                width: splitLineWidth,
+                                color: splitLineColor
+                            }
+                        }
+                    },
+                    // 图例设置
+                    legend: {
+                        data: legendData,
+                        show: true,
+                        icon: legendIcon,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        },
+                        top: legendTop,
+                        bottom: 0,
+                        left: legendLeft,
+                        padding: legendPadding,
+                        itemWidth: itemWidth,
+                        itemHeight: itemHeight,
+                    },
+                    // 提示框设置
+                    tooltip: {
+                        trigger: 'axis',
+                        backgroundColor: tooltipBackgroundColor,
+                        borderColor: tooltipBorderColor,
+                        textStyle: {
+                            fontSize: fontSize,
+                            color: fontColor
+                        },
+                        formatter: function (params) {
+                            let tooltipContent = '';
+                            const formattedTime = new Date(params[0].value[0]).toLocaleString(); 
+                            tooltipContent += `<span style="line-height:2em">${formattedTime}</span><br>`;
+                            params.forEach(param => {
+                                const formattedTime = new Date(param.value[0]).toLocaleString();
+                                if (!param.seriesName.includes('stack')) {
+                                    const name = param.seriesName.replace(/\s\d+(\.\d+)?%$/, '');
+                                    tooltipContent += `<span style="line-height:2em">${param.marker} ${name} ${param.value[2].toFixed(1)}% ${param.value[1].toFixed(2)}</span><br>`;
+                                }
+                            });
+                            return tooltipContent;
+                        }
+                    },
+                    // 数据缩放设置
+                    dataZoom: [
+                        {
+                            type: 'slider',
+                            start: 0,
+                            end: 100
+                        }
+                    ]
+                };
+                // 设置图表的配置选项
+                this.chart.setOption(option);
+            },
+            reloadCharts() { // 重新加载所有图表
+                this.servers.forEach(node => {
+                    const id = node.ID;
+                    const chartData = this.chartDataList[id];
+                    if (chartData) {
+                        this.renderCharts(id,true);
+                    }
+                });
+            },
+            disposeCharts(){
+                if(this.chart) {
+                    this.chart.dispose();
+                    this.chart = null;
                 }
-                this.option.title.text = monitorInfo.result[0].server_name;
-                this.option.series = tSeries;
-                this.option.legend.data = tLegendData;
-                this.myChart.clear();
-                this.myChart.setOption(this.option);
             },
-            isWindowsPlatform(str) {
-                return str.includes('Windows')
+            getServerCountryCode(id){
+                const result = this.servers.find(item => item.ID == id);
+                return result.Host.CountryCode ? result.Host.CountryCode : 'rb';
             },
-            renderChart() {
-              this.myChart = echarts.init(this.$refs.chartDom);
-              this.myChart.setOption(this.option);
-            },
-        },
-        beforeDestroy() {
-            this.myChart.dispose();
-            this.myChart = null;
-        },
+            initSearch() {
+                $('#dropdown-search').on('keyup', function() {
+                    var searchTerm = $(this).val().toLowerCase();
+                    $('.dropdown-menu .dropdown-item').each(function() {
+                        var text = $(this).text().toLowerCase();
+                        if (text.indexOf(searchTerm) > -1) {
+                            $(this).removeClass('hidden').addClass('visible'); // 显示元素
+                        } else {
+                            $(this).removeClass('visible').addClass('hidden'); // 隐藏元素
+                        }
+                    });
+                });
+            }
+        }
     });
 </script>
 {{end}}
