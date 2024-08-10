@@ -363,7 +363,7 @@ td.ping-network-quality {
 }
 
 .network-box .network-box-header .dropdown-menu li a {
-    padding: 5px 0px 5px 15px;
+    padding: 5px 5px 5px 15px;
 }
 
 .network-box .network-box-header .dropdown-menu li.hidden {

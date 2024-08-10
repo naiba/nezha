@@ -15,7 +15,7 @@
             </li>          
         </ul>
     </div>
-    <div class="chartTitle">@#chartTitle#@</div>
+    <div class="chartTitle"><i :class="'fi fi-' + (server.Host.CountryCode || 'rb')"></i> @#chartTitle#@</div>
     <div id="chartbox" style="width:100%;height:520px;"></div>
 </div>
 {{template "theme-server-status/footer" .}}
