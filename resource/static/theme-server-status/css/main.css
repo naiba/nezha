@@ -383,6 +383,7 @@ td.ping-network-quality {
 }
 
 .network-box .chartTitle i.chartCountryCode{
+    font-size: 16px;
     border-radius: 12.5%;
 }
 
@@ -566,6 +567,10 @@ footer p{
     .network-box .chartTitle {
         font-size: 16px;
         margin: 10px 0px 10px 0px;
+    }
+    .network-box .chartTitle i.chartCountryCode{
+        font-size: 15px;
+        border-radius: 12.5%;
     }
 }
 
