@@ -381,6 +381,11 @@ td.ping-network-quality {
     font-size: 18px;
     margin: 18px 0px 15px 0px;
 }
+
+.network-box .chartTitle i.chartCountryCode{
+    font-size: 14px;
+}
+
 /* 网络页 正文结束 */
 
 /* 地图版服务器分布图 */
@@ -561,6 +566,10 @@ footer p{
     .network-box .chartTitle {
         font-size: 16px;
         margin: 10px 0px 10px 0px;
+    }
+    .network-box .chartTitle i.chartCountryCode{
+        font-size: 14px;
+        border-radius: 12.5%;
     }
 }
 
