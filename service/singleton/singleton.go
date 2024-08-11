@@ -100,14 +100,14 @@ func RecordTransferHourlyUsage() {
 	for id, server := range ServerList {
 		tx := model.Transfer{
 			ServerID: id,
-			In:       server.State.NetInTransfer - uint64(server.PrevHourlyTransferIn),
-			Out:      server.State.NetOutTransfer - uint64(server.PrevHourlyTransferOut),
+			In:       utils.Uint64SubInt64(server.State.NetInTransfer, server.PrevTransferInSnapshot),
+			Out:      utils.Uint64SubInt64(server.State.NetOutTransfer, server.PrevTransferOutSnapshot),
 		}
 		if tx.In == 0 && tx.Out == 0 {
 			continue
 		}
-		server.PrevHourlyTransferIn = int64(server.State.NetInTransfer)
-		server.PrevHourlyTransferOut = int64(server.State.NetOutTransfer)
+		server.PrevTransferInSnapshot = int64(server.State.NetInTransfer)
+		server.PrevTransferOutSnapshot = int64(server.State.NetOutTransfer)
 		tx.CreatedAt = nowTrimSeconds
 		txs = append(txs, tx)
 	}

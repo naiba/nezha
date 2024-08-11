@@ -112,10 +112,10 @@ func (s *NezhaHandler) ReportSystemState(c context.Context, r *pb.State) (*pb.Re
 	singleton.ServerList[clientID].LastActive = time.Now()
 	singleton.ServerList[clientID].State = &state
 
-	// 如果从未记录过，先打点，等到小时时间点时入库
-	if singleton.ServerList[clientID].PrevHourlyTransferIn == 0 || singleton.ServerList[clientID].PrevHourlyTransferOut == 0 {
-		singleton.ServerList[clientID].PrevHourlyTransferIn = int64(state.NetInTransfer)
-		singleton.ServerList[clientID].PrevHourlyTransferOut = int64(state.NetOutTransfer)
+	// 应对 dashboard 重启的情况，如果从未记录过，先打点，等到小时时间点时入库
+	if singleton.ServerList[clientID].PrevTransferInSnapshot == 0 || singleton.ServerList[clientID].PrevTransferOutSnapshot == 0 {
+		singleton.ServerList[clientID].PrevTransferInSnapshot = int64(state.NetInTransfer)
+		singleton.ServerList[clientID].PrevTransferOutSnapshot = int64(state.NetOutTransfer)
 	}
 
 	return &pb.Receipt{Proced: true}, nil
@@ -135,9 +135,8 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	// 检查并更新DDNS
 	if singleton.Conf.DDNS.Enable &&
 		singleton.ServerList[clientID].EnableDDNS &&
-		singleton.ServerList[clientID].Host != nil &&
 		host.IP != "" &&
-		singleton.ServerList[clientID].Host.IP != host.IP {
+		(singleton.ServerList[clientID].Host == nil || singleton.ServerList[clientID].Host.IP != host.IP) {
 		serverDomain := singleton.ServerList[clientID].DDNSDomain
 		if singleton.Conf.DDNS.Provider == "" {
 			provider, err = singleton.GetDDNSProviderFromProfile(singleton.ServerList[clientID].DDNSProfile)
@@ -164,10 +163,9 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	}
 
 	// 发送IP变动通知
-	if singleton.Conf.EnableIPChangeNotification &&
+	if singleton.ServerList[clientID].Host != nil && singleton.Conf.EnableIPChangeNotification &&
 		((singleton.Conf.Cover == model.ConfigCoverAll && !singleton.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
 			(singleton.Conf.Cover == model.ConfigCoverIgnoreAll && singleton.Conf.IgnoredIPNotificationServerIDs[clientID])) &&
-		singleton.ServerList[clientID].Host != nil &&
 		singleton.ServerList[clientID].Host.IP != "" &&
 		host.IP != "" &&
 		singleton.ServerList[clientID].Host.IP != host.IP {
@@ -184,10 +182,14 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 			nil)
 	}
 
-	// 判断是否是机器重启，如果是机器重启要录入最后记录的流量里面
-	if singleton.ServerList[clientID].Host.BootTime < host.BootTime {
-		singleton.ServerList[clientID].PrevHourlyTransferIn = singleton.ServerList[clientID].PrevHourlyTransferIn - int64(singleton.ServerList[clientID].State.NetInTransfer)
-		singleton.ServerList[clientID].PrevHourlyTransferOut = singleton.ServerList[clientID].PrevHourlyTransferOut - int64(singleton.ServerList[clientID].State.NetOutTransfer)
+	/**
+	 * 这里的 singleton 中的数据都是关机前的旧数据
+	 * 当 agent 重启时，bootTime 变大，agent 端会先上报 host 信息，然后上报 state 信息
+	 * 这是可以借助上报顺序的空档，将停机前的流量统计数据标记下来，加到下一个小时的数据点上
+	 */
+	if singleton.ServerList[clientID].Host != nil && singleton.ServerList[clientID].Host.BootTime < host.BootTime {
+		singleton.ServerList[clientID].PrevTransferInSnapshot = singleton.ServerList[clientID].PrevTransferInSnapshot - int64(singleton.ServerList[clientID].State.NetInTransfer)
+		singleton.ServerList[clientID].PrevTransferOutSnapshot = singleton.ServerList[clientID].PrevTransferOutSnapshot - int64(singleton.ServerList[clientID].State.NetOutTransfer)
 	}
 
 	// 不要冲掉国家码

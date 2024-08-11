@@ -30,8 +30,8 @@ type Server struct {
 	TaskClose  chan error                        `gorm:"-" json:"-"`
 	TaskStream pb.NezhaService_RequestTaskServer `gorm:"-" json:"-"`
 
-	PrevHourlyTransferIn  int64 `gorm:"-" json:"-"` // 上次数据点时的入站使用量
-	PrevHourlyTransferOut int64 `gorm:"-" json:"-"` // 上次数据点时的出站使用量
+	PrevTransferInSnapshot  int64 `gorm:"-" json:"-"` // 上次数据点时的入站使用量
+	PrevTransferOutSnapshot int64 `gorm:"-" json:"-"` // 上次数据点时的出站使用量
 }
 
 func (s *Server) CopyFromRunningServer(old *Server) {
@@ -40,8 +40,8 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 	s.LastActive = old.LastActive
 	s.TaskClose = old.TaskClose
 	s.TaskStream = old.TaskStream
-	s.PrevHourlyTransferIn = old.PrevHourlyTransferIn
-	s.PrevHourlyTransferOut = old.PrevHourlyTransferOut
+	s.PrevTransferInSnapshot = old.PrevTransferInSnapshot
+	s.PrevTransferOutSnapshot = old.PrevTransferOutSnapshot
 }
 
 func boolToString(b bool) string {
