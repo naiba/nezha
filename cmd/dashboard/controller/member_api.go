@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -384,6 +385,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 	} else {
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}
+		s.TaskCloseLock = new(sync.Mutex)
 		singleton.ServerLock.Lock()
 		singleton.SecretToID[s.Secret] = s.ID
 		singleton.ServerList[s.ID] = &s

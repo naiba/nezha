@@ -90,12 +90,14 @@ func (s *NezhaHandler) RequestTask(h *pb.Host, stream pb.NezhaService_RequestTas
 	}
 	closeCh := make(chan error)
 	singleton.ServerLock.RLock()
+	singleton.ServerList[clientID].TaskCloseLock.Lock()
 	// 修复不断的请求 task 但是没有 return 导致内存泄漏
 	if singleton.ServerList[clientID].TaskClose != nil {
 		close(singleton.ServerList[clientID].TaskClose)
 	}
 	singleton.ServerList[clientID].TaskStream = stream
 	singleton.ServerList[clientID].TaskClose = closeCh
+	singleton.ServerList[clientID].TaskCloseLock.Unlock()
 	singleton.ServerLock.RUnlock()
 	return <-closeCh
 }

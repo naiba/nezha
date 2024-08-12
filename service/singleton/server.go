@@ -34,6 +34,7 @@ func loadServers() {
 		innerS := s
 		innerS.Host = &model.Host{}
 		innerS.State = &model.HostState{}
+		innerS.TaskCloseLock = new(sync.Mutex)
 		ServerList[innerS.ID] = &innerS
 		SecretToID[innerS.Secret] = innerS.ID
 		ServerTagToIDList[innerS.Tag] = append(ServerTagToIDList[innerS.Tag], innerS.ID)

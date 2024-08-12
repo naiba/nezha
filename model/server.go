@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"html/template"
+	"sync"
 	"time"
 
 	"github.com/naiba/nezha/pkg/utils"
@@ -27,8 +28,9 @@ type Server struct {
 	State      *HostState `gorm:"-"`
 	LastActive time.Time  `gorm:"-"`
 
-	TaskClose  chan error                        `gorm:"-" json:"-"`
-	TaskStream pb.NezhaService_RequestTaskServer `gorm:"-" json:"-"`
+	TaskClose     chan error                        `gorm:"-" json:"-"`
+	TaskCloseLock *sync.Mutex                       `gorm:"-" json:"-"`
+	TaskStream    pb.NezhaService_RequestTaskServer `gorm:"-" json:"-"`
 
 	PrevTransferInSnapshot  int64 `gorm:"-" json:"-"` // 上次数据点时的入站使用量
 	PrevTransferOutSnapshot int64 `gorm:"-" json:"-"` // 上次数据点时的出站使用量
@@ -39,6 +41,7 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 	s.State = old.State
 	s.LastActive = old.LastActive
 	s.TaskClose = old.TaskClose
+	s.TaskCloseLock = old.TaskCloseLock
 	s.TaskStream = old.TaskStream
 	s.PrevTransferInSnapshot = old.PrevTransferInSnapshot
 	s.PrevTransferOutSnapshot = old.PrevTransferOutSnapshot
