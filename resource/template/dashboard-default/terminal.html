@@ -1,6 +1,7 @@
 {{define "dashboard-default/terminal"}}
 <!DOCTYPE html>
 <html lang="{{.Conf.Language}}">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,16 +24,19 @@
         background-color: black;
     }
 </style>
+
 <body onresize="onResize()">
     <div id="terminal-container"></div>
     <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
-    <script src="https://unpkg.com/@xterm/addon-attach@0.11.0/lib/addon-attach.js"></script>
     <script src="https://unpkg.com/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
+    <script src="https://unpkg.com/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js"></script>
+    <script src="https://unpkg.com/trzsz@1.1.5/lib/trzsz.js"></script>
     <script>
         let sendResizing = false;
 
         function doResize() {
             fitAddon.fit()
+
             const w = fitAddon.proposeDimensions();
             const prefix = new Int8Array([1]);
             const resizeMessage = new TextEncoder().encode(JSON.stringify({
@@ -70,10 +74,11 @@
             cursorBlink: true,
         });
         const socket = new WebSocket((window.location.protocol == 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/terminal/' + '{{.SessionID}}');
-        const attachAddon = new AttachAddon.AttachAddon(socket);
+        const trzszAddon = new TrzszAddon(socket);
+        term.loadAddon(trzszAddon);
         const fitAddon = new FitAddon.FitAddon();
-        term.loadAddon(attachAddon);
         term.loadAddon(fitAddon);
+
         term.open(document.getElementById('terminal-container'));
 
         socket.onopen = () => {
@@ -90,5 +95,6 @@
         }
     </script>
 </body>
+
 </html>
 {{end}}
