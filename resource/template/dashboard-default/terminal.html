@@ -74,6 +74,8 @@
             cursorBlink: true,
         });
         const socket = new WebSocket((window.location.protocol == 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/terminal/' + '{{.SessionID}}');
+        socket.binaryType = 'arraybuffer';
+
         const trzszAddon = new TrzszAddon(socket);
         term.loadAddon(trzszAddon);
         const fitAddon = new FitAddon.FitAddon();
