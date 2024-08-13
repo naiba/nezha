@@ -14,8 +14,10 @@
 <script>
     (function () {
         updateLang({{.LANG }});
-    })();
+        document.documentElement.setAttribute('nz-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    }) ();
 </script>
 </body>
+
 </html>
 {{end}}

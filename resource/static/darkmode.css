@@ -1,0 +1,148 @@
+.ui.container {
+    width: 95vw !important;
+    max-width: 1680px !important;
+}
+
+html[nz-theme='dark'] {
+    body {
+        background-color: #121212 !important;
+        color: #fff !important;
+    }
+
+    .ui.menu {
+        background-color: #282828 !important;
+    }
+
+    .ui.menu * {
+        color: #fff !important;
+    }
+
+    .accordion {
+        background-color: #282828 !important;
+    }
+
+    .accordion .title {
+        color: #fff !important;
+    }
+
+    .ui.card {
+        background-color: #3f3f3f !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .header {
+        color: #fff !important;
+    }
+
+    .description {
+        color: #fff !important;
+    }
+
+    .icon {
+        color: #fff !important;
+    }
+
+    .ui.popup {
+        background-color: #575757 !important;
+        color: #fff !important;
+    }
+
+    .ui.table {
+        background-color: #282828 !important;
+        color: #fff !important;
+    }
+
+    .ui thead th {
+        background-color: #3f3f3f !important;
+        color: #fff !important;
+    }
+
+    .ui.buttons .button {
+        background-color: #3f3f3f !important;
+        color: #fff !important;
+    }
+
+    .ui.modal {
+        background-color: #282828 !important;
+    }
+
+    .ui.modal * {
+        color: #fff !important;
+    }
+
+    textarea,
+    input,
+    select,
+    .dropdown {
+        background-color: #3f3f3f !important;
+        color: #fff !important;
+    }
+
+    .ui.message {
+        background-color: unset !important;
+    }
+
+    .ui.dropdown .menu {
+        background-color: #575757 !important;
+        color: #fff !important;
+    }
+
+    .ui.modal>.header {
+        background-color: #3f3f3f !important;
+    }
+
+    .ui.modal>.content {
+        background-color: #282828 !important;
+    }
+
+    .ui.modal>.actions {
+        background-color: #3f3f3f !important;
+    }
+
+    #alert {
+        background-color: #3f3f3f !important;
+        color: #fff !important;
+    }
+
+    .ui.form .field>label {
+        color: unset !important;
+    }
+
+    .ui.segment {
+        background-color: #3f3f3f !important;
+    }
+
+    .ui.segment textarea,
+    input,
+    select,
+    .dropdown {
+        background-color: #575757 !important;
+        color: #fff !important;
+    }
+
+    form label {
+        color: #fff !important;
+    }
+
+    .ui.inverted.segment {
+        background-color: #121212 !important;
+    }
+
+    .ui.inverted.segment * {
+        color: #8b8b8b !important;
+    }
+
+    .menu .dropdown {
+        background-color: #282828 !important;
+        color: #fff !important;
+    }
+
+    .ui.menu .ui.dropdown .menu>.item {
+        color: #fff !important;
+    }
+
+    .login .ui.message{
+        color: #8b8b8b !important;
+    }
+}

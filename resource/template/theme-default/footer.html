@@ -10,10 +10,11 @@
 {{ if not .Conf.DisableSwitchTemplateInFrontend }}
 <script>
     function showSwitchTemplate(list, currentBackendTheme) {
-        console.log(list, currentBackendTheme);
-        console.log("currentBackendTheme:",currentBackendTheme);
+        // console.log(list, currentBackendTheme);
+        // console.log("currentBackendTheme:",currentBackendTheme);
     }
     showSwitchTemplate({{ .Themes }}, {{ .Conf.Site.Theme }})
+    document.documentElement.setAttribute('nz-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
 </script>
 {{ end }}
 <script>

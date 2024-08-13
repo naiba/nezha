@@ -35,20 +35,27 @@ func ServeWeb(port uint) *http.Server {
 		pprof.Register(r)
 	}
 	r.Use(natGateway)
-	tmpl := template.New("").Funcs(funcMap)
-	var err error
-	tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")
-	if err != nil {
-		panic(err)
+	if os.Getenv("NZ_LOCAL_TEMPLATE") == "true" {
+		r.SetFuncMap(funcMap)
+		r.Use(mygin.RecordPath)
+		r.Static("/static", "resource/static")
+		r.LoadHTMLGlob("resource/template/**/*.html")
+	} else {
+		tmpl := template.New("").Funcs(funcMap)
+		var err error
+		tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")
+		if err != nil {
+			panic(err)
+		}
+		tmpl = loadThirdPartyTemplates(tmpl)
+		r.SetHTMLTemplate(tmpl)
+		r.Use(mygin.RecordPath)
+		staticFs, err := fs.Sub(resource.StaticFS, "static")
+		if err != nil {
+			panic(err)
+		}
+		r.StaticFS("/static", http.FS(staticFs))
 	}
-	tmpl = loadThirdPartyTemplates(tmpl)
-	r.SetHTMLTemplate(tmpl)
-	r.Use(mygin.RecordPath)
-	staticFs, err := fs.Sub(resource.StaticFS, "static")
-	if err != nil {
-		panic(err)
-	}
-	r.StaticFS("/static", http.FS(staticFs))
 	r.Static("/static-custom", "resource/static/custom")
 	routers(r)
 	page404 := func(c *gin.Context) {

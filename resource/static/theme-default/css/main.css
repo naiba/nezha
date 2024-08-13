@@ -1,46 +1,54 @@
 /* 屏幕适配 */
 @media only screen and (min-width:1200px) {
   .ui.container {
-    width:95% !important;
+    width: 95% !important;
     font-size: 90% !important;
     max-width: 1300px !important;
   }
 }
+
 @media only screen and (max-width:767px) {
-  .ui.card>.content>.header:not(.ui),.ui.cards>.card>.content>.header:not(.ui) {
-    margin-top:0.4em !important;
+
+  .ui.card>.content>.header:not(.ui),
+  .ui.cards>.card>.content>.header:not(.ui) {
+    margin-top: 0.4em !important;
   }
-  .ui.menu .item>img:not(.ui){
+
+  .ui.menu .item>img:not(.ui) {
     width: 2.2rem;
   }
-  .ui.menu .item:before{
-    width:0.5px;
+
+  .ui.menu .item:before {
+    width: 0.5px;
   }
-  .ui.menu .item{
+
+  .ui.menu .item {
     padding: 0.9rem 0.55rem;
   }
-  .ui.large.menu{
+
+  .ui.large.menu {
     font-size: 1rem;
   }
 }
 
 i.icon {
-  color:#000;
-  width:1.2em !important;
+  color: #000;
+  width: 1.2em !important;
 }
+
 i.fi {
-    width:0.9em;
-    margin:0px 6px 0px 2px;
+  width: 0.9em;
+  margin: 0px 6px 0px 2px;
 }
 
 body {
-  content:" " !important;
-  background:fixed !important;
-  z-index:-1 !important;
-  top:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  left:0 !important;
+  content: " " !important;
+  background: fixed !important;
+  z-index: -1 !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
 }
 
 td {
@@ -65,79 +73,80 @@ td {
   padding-top: unset;
 }
 
-.login.nb-container > .grid {
+.login.nb-container>.grid {
   width: 100%;
   margin: 0 auto;
 }
 
-.login.nb-container > .grid .column {
+.login.nb-container>.grid .column {
   max-width: 450px;
 }
 
-.ui.menu .item-right:before{
-  width:0px;
+.ui.menu .item-right:before {
+  width: 0px;
 }
 
 .status.cards .flag {
   margin-right: 0 !important;
 }
 
-.status.cards .header > .info.icon {
+.status.cards .header>.info.icon {
   float: right;
   margin-right: 0;
 }
 
 .ui.grid {
-  margin-bottom:-0.5em
+  margin-bottom: -0.5em
 }
 
-.ui.card>.content>.header:not(.ui), .ui.cards>.card>.content>.header:not(.ui){
+.ui.card>.content>.header:not(.ui),
+.ui.cards>.card>.content>.header:not(.ui) {
   line-height: 1em;
 }
 
 .status.cards .wide.column {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
-  height:2.3rem !important;
+  height: 2.3rem !important;
 }
 
 .status.cards .wide.column:nth-child(1) {
-  margin-top:1.2rem !important;
+  margin-top: 1.2rem !important;
 }
 
 .status.cards .wide.column:nth-child(2) {
-  margin-top:1.2rem !important;
+  margin-top: 1.2rem !important;
 }
 
 .status.cards .three.wide.column {
   text-align: center;
-  width: 22%!important;
+  width: 22% !important;
 }
 
-.status.cards .thirteen.wide.column{
-  width: 78%!important;
-  padding-left:0;
+.status.cards .thirteen.wide.column {
+  width: 78% !important;
+  padding-left: 0;
 }
 
 .status.cards .description {
-  padding-bottom:0 !important;
+  padding-bottom: 0 !important;
 }
 
 .status.cards .flag {
-  margin-right:0.5rem !important;
+  margin-right: 0.5rem !important;
 }
 
-.status.cards .header > .info.icon {
+.status.cards .header>.info.icon {
   float: right;
-  margin-right:0 !important;
+  margin-right: 0 !important;
 }
 
 .ui.popup:before {
   display: none;
 }
 
-.closePopup{
-  color:rgb(10, 148, 242) !important;
+.closePopup {
+  color: rgb(10, 148, 242) !important;
   position: absolute;
   top: 7px;
   right: 10px;
@@ -150,26 +159,26 @@ td {
 }
 
 .ui.content {
-  margin:0 !important;
-  padding:1em !important;
+  margin: 0 !important;
+  padding: 1em !important;
 }
 
 .status.cards .ui.content.popup {
-  min-width:calc(100%)!important;
-  line-height:2rem !important;
-  border-radius:5px !important;
-  border:1px solid transparent !important;
-  font-family:Arial,Helvetica,sans-serif !important;
+  min-width: calc(100%) !important;
+  line-height: 2rem !important;
+  border-radius: 5px !important;
+  border: 1px solid transparent !important;
+  font-family: Arial, Helvetica, sans-serif !important;
 }
 
 .status.cards .outline.icon {
-  margin-right:1px !important;
+  margin-right: 1px !important;
 }
 
 .ui.progress .bar {
-  min-width:1.8em !important;
-  border-radius:5px !important;
-  line-height:1.65em !important;
+  min-width: 1.8em !important;
+  border-radius: 5px !important;
+  line-height: 1.65em !important;
   text-align: right;
   padding-right: 0.4em;
   color: rgba(255, 255, 255, 0.7);
@@ -182,7 +191,7 @@ td {
   align-items: center;
 }
 
-.service-status .delay-today > i {
+.service-status .delay-today>i {
   display: inline-block;
   width: 1.2em;
   height: 1.2em;
