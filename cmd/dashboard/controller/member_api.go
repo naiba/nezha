@@ -908,6 +908,7 @@ type settingForm struct {
 	Theme                   string
 	DashboardTheme          string
 	CustomCode              string
+	CustomCodeDashboard     string
 	ViewPassword            string
 	IgnoredIPNotification   string
 	IPChangeNotificationTag string // IP变更提醒的通知组
@@ -973,6 +974,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.Site.Theme = sf.Theme
 	singleton.Conf.Site.DashboardTheme = sf.DashboardTheme
 	singleton.Conf.Site.CustomCode = sf.CustomCode
+	singleton.Conf.Site.CustomCodeDashboard = sf.CustomCodeDashboard
 	singleton.Conf.Site.ViewPassword = sf.ViewPassword
 	singleton.Conf.Oauth2.Admin = sf.Admin
 	// 保证NotificationTag不为空

@@ -80,12 +80,13 @@ type Config struct {
 	Debug    bool   // debug模式开关
 	Language string // 系统语言，默认 zh-CN
 	Site     struct {
-		Brand          string // 站点名称
-		CookieName     string // 浏览器 Cookie 名称
-		Theme          string
-		DashboardTheme string
-		CustomCode     string
-		ViewPassword   string // 前台查看密码
+		Brand               string // 站点名称
+		CookieName          string // 浏览器 Cookie 名称
+		Theme               string
+		DashboardTheme      string
+		CustomCode          string
+		CustomCodeDashboard string
+		ViewPassword        string // 前台查看密码
 	}
 	Oauth2 struct {
 		Type            string

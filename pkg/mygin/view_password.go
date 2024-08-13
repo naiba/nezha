@@ -37,8 +37,7 @@ func ValidateViewPassword(opt ValidateViewPasswordOption) gin.HandlerFunc {
 		}
 		if opt.IsPage {
 			c.HTML(http.StatusOK, GetPreferredTheme(c, "/viewpassword"), CommonEnvironment(c, gin.H{
-				"Title":      singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "VerifyPassword"}),
-				"CustomCode": singleton.Conf.Site.CustomCode,
+				"Title": singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "VerifyPassword"}),
 			}))
 
 		} else {

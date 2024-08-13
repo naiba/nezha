@@ -1,6 +1,7 @@
 {{define "theme-default/header"}}
 <!DOCTYPE html>
 <html lang="{{.Conf.Language}}">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,7 +22,10 @@
     <script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
     <script src="/static/semantic-ui-alerts.min.js"></script>
     <script src="/static/theme-default/js/mixin.js?v20240302"></script>
+    <script>
+        document.documentElement.setAttribute('nz-theme', window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    </script>
 </head>
+
 <body>
-{{end}} 
-            
+    {{end}}

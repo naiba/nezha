@@ -99,7 +99,6 @@ func (p *commonPage) service(c *gin.Context) {
 		"Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
 		"Services":           res.([]interface{})[0],
 		"CycleTransferStats": res.([]interface{})[1],
-		"CustomCode":         singleton.Conf.Site.CustomCode,
 	}))
 }
 
@@ -204,7 +203,6 @@ func (cp *commonPage) network(c *gin.Context) {
 	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/network"), mygin.CommonEnvironment(c, gin.H{
 		"Servers":         string(serversBytes),
 		"MonitorInfos":    string(monitorInfos),
-		"CustomCode":      singleton.Conf.Site.CustomCode,
 		"MaxTCPPingValue": singleton.Conf.MaxTCPPingValue,
 	}))
 }
@@ -254,8 +252,7 @@ func (cp *commonPage) home(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/home"), mygin.CommonEnvironment(c, gin.H{
-		"Servers":    string(stat),
-		"CustomCode": singleton.Conf.Site.CustomCode,
+		"Servers": string(stat),
 	}))
 }
 

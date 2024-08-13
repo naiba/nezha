@@ -331,6 +331,9 @@ other = "前台界面主题"
 [CustomCodes]
 other = "自定义代码（包括 style 和 script）"
 
+[CustomCodesDashboard]
+other = "Custom Codes for Dashboard"
+
 [AccessPassword]
 other = "前台访问密码"
 

@@ -331,6 +331,9 @@ other = "Frontend Theme"
 [CustomCodes]
 other = "Custom Codes (Style and Script)"
 
+[CustomCodesDashboard]
+other = "Custom Codes for Dashboard"
+
 [AccessPassword]
 other = "Frontend Access Password"
 
