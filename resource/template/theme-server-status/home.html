@@ -551,6 +551,10 @@
                         symbol: 'none',
                         data: data,
                         connectNulls: true,
+                        legendHoverLink: false,
+                        emphasis: {
+                            disabled: true
+                        },
                         lineStyle: {
                             width: lineStyleWidth
                         }  
@@ -560,7 +564,7 @@
                 const legendData = chartData.map(item => item.monitor_name);
                 const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 3;
                 const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
-                const autoIncrement = Math.floor((legendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 20 : 28)
+                const autoIncrement = Math.floor((legendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 20 : 28);
                 const height = 300 + autoIncrement;
                 const gridTop = 40 + autoIncrement;
                 const legendIcon = this.isMobile ? 'rect' : ""; 

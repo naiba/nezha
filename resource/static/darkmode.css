@@ -1,8 +1,3 @@
-.ui.container {
-    width: 95vw !important;
-    max-width: 1680px !important;
-}
-
 html[nz-theme='dark'] {
     body {
         background-color: #121212 !important;

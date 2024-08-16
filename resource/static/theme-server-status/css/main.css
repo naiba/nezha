@@ -9,6 +9,10 @@ body {
     margin: 0 auto;
 }
 
+.container-fluid::-webkit-scrollbar {
+    display: none;
+}
+
 .nezha {
     min-height: calc(100vh - 100px);
 }
@@ -470,14 +474,13 @@ footer p{
     background-image: url(/static/theme-server-status/img/rb.png);
 }
 
-
 @media only screen and (max-width: 767px) {
     body {
         font-size: 10px !important;
         padding-top:60px !important;
     }
     .nezha {
-        min-height: calc(100vh - 80px);
+        min-height: calc(74.5vh);
     }
     .content {
         padding: 0;
