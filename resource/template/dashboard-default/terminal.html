@@ -23,10 +23,43 @@
     body {
         background-color: black;
     }
+
+    #file-list-iframe {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 30%;
+        height: 100%;
+        border: none;
+        background-color: white;
+        display: none;
+        z-index: 10;
+    }
+
+    #folder-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-size: 24px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 20;
+    }
 </style>
 
 <body onresize="onResize()">
     <div id="terminal-container"></div>
+    <iframe id="file-list-iframe" src=""></iframe>
+    <button id="folder-button">📁</button>
+
     <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://unpkg.com/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
     <script src="https://unpkg.com/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js"></script>
@@ -95,6 +128,27 @@
         socket.onerror = () => {
             alert('{{tr "TerminalConnectionFailed"}}')
         }
+
+        // 处理文件夹按钮点击事件
+        const folderButton = document.getElementById('folder-button');
+        const fileListIframe = document.getElementById('file-list-iframe');
+        let fileListVisible = false;
+
+        folderButton.addEventListener('click', () => {
+            if (!fileListVisible) {
+                // 显示文件列表
+                const params = new URLSearchParams({
+                    id: "{{.ServerID}}"
+                }).toString();
+                fileListIframe.src = `/file?${params}`;
+                fileListIframe.style.display = 'block';
+                fileListVisible = true;
+            } else {
+                // 隐藏文件列表
+                fileListIframe.style.display = 'none';
+                fileListVisible = false;
+            }
+        });
     </script>
 </body>
 
