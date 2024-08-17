@@ -9,6 +9,11 @@ td {
   word-break: break-all;
 }
 
+.ui.container{
+  width: 95vw !important;
+  max-width: 1680px !important;
+}
+
 .nb-container {
   padding-top: 75px;
   min-height: 100vh;
