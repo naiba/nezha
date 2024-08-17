@@ -240,12 +240,12 @@
                 const itemHeight = isMobile ? 10 : 10;
                 const gridLeft = 25;
                 const gridRight = 12;
-                const fontColor = "rgba(0, 0, 0, 0.68)";
                 const backgroundColor = '';
                 const borderColor = "#ffffff";
                 const chartData = this.chartDataList[id - 1];
                 const chartContainer = this.$refs[`chart${id}`][0];
-                const chart = echarts.init(chartContainer, null, {
+                const chartTheme = $('html').attr('nz-theme') == "dark" ? "dark" : "";
+                const chart = echarts.init(chartContainer, chartTheme, {
                     renderer: 'canvas',
                     useDirtyRect: false,
                     width: 'auto',
@@ -283,7 +283,6 @@
                         trigger: 'axis',
                         textStyle: {
                             fontSize: fontSize,
-                            color: fontColor
                         }
                     },
                     legend: {
@@ -292,7 +291,6 @@
                         show: true,
                         textStyle: {
                             fontSize: fontSize,
-                            color: fontColor
                         },
                         lineStyle: {
                             cap: 'butt'
@@ -332,7 +330,6 @@
                     series: seriesData,
                     textStyle: {
                         fontSize: fontSize,
-                        color: fontColor
                     },
                     grid: {
                         top: '30',

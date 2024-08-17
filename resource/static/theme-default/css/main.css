@@ -1,14 +1,5 @@
 /* 屏幕适配 */
-@media only screen and (min-width:1200px) {
-  .ui.container {
-    width: 95% !important;
-    font-size: 90% !important;
-    max-width: 1300px !important;
-  }
-}
-
 @media only screen and (max-width:767px) {
-
   .ui.card>.content>.header:not(.ui),
   .ui.cards>.card>.content>.header:not(.ui) {
     margin-top: 0.4em !important;
@@ -41,16 +32,6 @@ i.fi {
   margin: 0px 6px 0px 2px;
 }
 
-body {
-  content: " " !important;
-  background: fixed !important;
-  z-index: -1 !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-}
-
 td {
   word-wrap: break-word;
   word-break: break-all;
@@ -61,6 +42,11 @@ td {
   min-height: 100vh;
   padding-bottom: 65px;
   margin-bottom: -47px;
+}
+
+.ui.container {
+  width: 95% !important;
+  max-width: 1680px !important;
 }
 
 #app .ui.fluid.accordion {
