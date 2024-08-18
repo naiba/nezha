@@ -2,6 +2,7 @@ package api_v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 	"net/http"
 	"strconv"
@@ -63,7 +64,7 @@ func (v *ApiV1) getServerList(c *gin.Context) {
 // @tags server
 // @Accept json
 // @Param Authorization header string false "API Token"
-// @Param server body singleton.ServerConfigData true "服务器信息"
+// @Param Payload body singleton.ServerConfigData true "服务器信息"
 // @Produce json
 // @Success 200 {object} singleton.ServerConfigResponse
 // @Router /api/v1/server [post]
@@ -86,7 +87,7 @@ func (v *ApiV1) addServer(c *gin.Context) {
 // @tags server
 // @Accept json
 // @Param Authorization header string false "API Token"
-// @Param server body singleton.ServerConfigData true "服务器信息"
+// @Param Payload body singleton.ServerConfigData true "服务器信息"
 // @Produce json
 // @Success 200 {object} singleton.ServerConfigResponse
 // @Router /api/v1/server [put]
@@ -109,7 +110,7 @@ func (v *ApiV1) editServer(c *gin.Context) {
 // @tags server
 // @Accept json
 // @Param Authorization header string false "API Token"
-// @Param IDList body singleton.ServerDeleteRequest true "服务器ID列表"
+// @Param Payload body singleton.ServerDeleteRequest true "服务器ID列表"
 // @Produce json
 // @Success 200 {object} singleton.ServerDeleteResponse
 // @Router /api/v1/server [delete]
@@ -123,4 +124,27 @@ func (v *ApiV1) deleteServer(c *gin.Context) {
 	res := singleton.ServerAPI.DeleteServer(sf)
 	c.JSON(http.StatusOK, res)
 	return
+}
+
+// batchEditServerGroup
+// @Summary 批量更新服务器分组
+// @tags server
+// @Accept json
+// @Param Authorization header string false "API Token"
+// @Param Payload body singleton.BatchUpdateServerGroupRequest true "更新信息"
+// @Produce json
+// @Success 200 {object} singleton.BatchUpdateServerGroupResponse
+// @Router /api/v1/server/groups [put]
+func (v *ApiV1) batchEditServerGroup(c *gin.Context) {
+	var req singleton.BatchUpdateServerGroupRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+	service := singleton.ServerAPIService{}
+	res := service.BatchUpdateGroup(req)
+	c.JSON(http.StatusOK, res)
 }

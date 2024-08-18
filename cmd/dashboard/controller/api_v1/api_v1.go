@@ -28,6 +28,7 @@ func (v *ApiV1) Serve() {
 	r.GET("/server/details", v.getServerDetails)
 	r.POST("/server", v.addServer)
 	r.PUT("/server", v.editServer)
+	r.PUT("/server/groups", v.batchEditServerGroup)
 	r.DELETE("/server", v.deleteServer)
 
 	// 不强制认证的 API

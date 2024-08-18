@@ -36,7 +36,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "服务器信息",
-                        "name": "server",
+                        "name": "Payload",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -73,7 +73,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "服务器信息",
-                        "name": "server",
+                        "name": "Payload",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -110,7 +110,7 @@ const docTemplate = `{
                     },
                     {
                         "description": "服务器ID列表",
-                        "name": "IDList",
+                        "name": "Payload",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -165,6 +165,45 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/singleton.ServerStatusResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/server/groups": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "批量更新服务器分组",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "更新信息",
+                        "name": "Payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/singleton.BatchUpdateServerGroupRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/singleton.BatchUpdateServerGroupResponse"
                         }
                     }
                 }
@@ -325,11 +364,48 @@ const docTemplate = `{
                 }
             }
         },
+        "singleton.BatchUpdateServerGroupRequest": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "description": "新的分组",
+                    "type": "string",
+                    "example": "newGroup"
+                },
+                "servers": {
+                    "description": "需要更新的服务器ID",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        1,
+                        2
+                    ]
+                }
+            }
+        },
+        "singleton.BatchUpdateServerGroupResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        },
         "singleton.CommonServerInfo": {
             "type": "object",
             "properties": {
                 "agent_version": {
                     "type": "string"
+                },
+                "display_index": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -368,10 +444,6 @@ const docTemplate = `{
                     "type": "string",
                     "example": ""
                 },
-                "ID": {
-                    "type": "integer",
-                    "example": 0
-                },
                 "displayIndex": {
                     "description": "展示排序，越大越靠前",
                     "type": "integer",
@@ -393,6 +465,10 @@ const docTemplate = `{
                     "description": "对游客隐藏",
                     "type": "string",
                     "example": "off"
+                },
+                "id": {
+                    "type": "integer",
+                    "example": 0
                 },
                 "name": {
                     "description": "服务器名称",
@@ -420,10 +496,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "success"
                 },
                 "result": {
                     "$ref": "#/definitions/singleton.ServerConfigData"
@@ -450,10 +528,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "success"
                 }
             }
         },
@@ -461,10 +541,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "success"
                 },
                 "result": {
                     "type": "array",
@@ -478,10 +560,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 0
                 },
                 "message": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "success"
                 },
                 "result": {
                     "type": "array",
@@ -496,6 +580,9 @@ const docTemplate = `{
             "properties": {
                 "agent_version": {
                     "type": "string"
+                },
+                "display_index": {
+                    "type": "integer"
                 },
                 "host": {
                     "$ref": "#/definitions/model.Host"

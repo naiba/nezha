@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
@@ -530,13 +529,8 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 	})
 }
 
-type BatchUpdateServerGroupRequest struct {
-	Servers []uint64
-	Group   string
-}
-
 func (ma *memberAPI) batchUpdateServerGroup(c *gin.Context) {
-	var req BatchUpdateServerGroupRequest
+	var req singleton.BatchUpdateServerGroupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
@@ -544,50 +538,15 @@ func (ma *memberAPI) batchUpdateServerGroup(c *gin.Context) {
 		})
 		return
 	}
-
-	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", req.Servers).Update("tag", req.Group).Error; err != nil {
+	service := singleton.ServerAPIService{}
+	res := service.BatchUpdateGroup(req)
+	if res.Code != 0 {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
-			Message: err.Error(),
+			Message: res.Message,
 		})
 		return
 	}
-
-	singleton.ServerLock.Lock()
-
-	for i := 0; i < len(req.Servers); i++ {
-		serverId := req.Servers[i]
-		var s model.Server
-		copier.Copy(&s, singleton.ServerList[serverId])
-		s.Tag = req.Group
-		// 如果修改了Ta
-		oldTag := singleton.ServerList[serverId].Tag
-		newTag := s.Tag
-		if newTag != oldTag {
-			index := -1
-			for i := 0; i < len(singleton.ServerTagToIDList[oldTag]); i++ {
-				if singleton.ServerTagToIDList[oldTag][i] == s.ID {
-					index = i
-					break
-				}
-			}
-			if index > -1 {
-				// 删除旧 Tag-ID 绑定关系
-				singleton.ServerTagToIDList[oldTag] = append(singleton.ServerTagToIDList[oldTag][:index], singleton.ServerTagToIDList[oldTag][index+1:]...)
-				if len(singleton.ServerTagToIDList[oldTag]) == 0 {
-					delete(singleton.ServerTagToIDList, oldTag)
-				}
-			}
-			// 设置新的 Tag-ID 绑定关系
-			singleton.ServerTagToIDList[newTag] = append(singleton.ServerTagToIDList[newTag], s.ID)
-		}
-		singleton.ServerList[s.ID] = &s
-	}
-
-	singleton.ServerLock.Unlock()
-
-	singleton.ReSortServer()
-
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

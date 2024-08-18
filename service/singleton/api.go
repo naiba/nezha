@@ -3,6 +3,7 @@ package singleton
 import (
 	"errors"
 	"fmt"
+	"github.com/jinzhu/copier"
 	"sync"
 	"time"
 
@@ -304,6 +305,15 @@ type ServerDeleteResponse struct {
 	CommonResponse
 }
 
+type BatchUpdateServerGroupRequest struct {
+	Servers []uint64 `json:"servers" form:"servers" example:"1,2"`  // 需要更新的服务器ID
+	Group   string   `json:"group" form:"group" example:"newGroup"` // 新的分组
+}
+
+type BatchUpdateServerGroupResponse struct {
+	CommonResponse
+}
+
 func (sf *ServerConfigData) MapToServer() model.Server {
 	var server model.Server
 	server.ID = sf.ID
@@ -470,5 +480,72 @@ func (s *ServerAPIService) DeleteServer(sf ServerDeleteRequest) *ServerDeleteRes
 			Message: "success",
 		},
 	}
+}
 
+func (s *ServerAPIService) BatchUpdateGroup(req BatchUpdateServerGroupRequest) *BatchUpdateServerGroupResponse {
+	ServerLock.Lock()
+	// 先检查一遍确保所有server都存在
+	for _, id := range req.Servers {
+		if _, ok := ServerList[id]; !ok {
+			ServerLock.Unlock()
+			return &BatchUpdateServerGroupResponse{
+				CommonResponse: CommonResponse{
+					Code:    1002,
+					Message: fmt.Sprintf("Server %d not found", id),
+				},
+			}
+		}
+	}
+
+	// 移除数据库记录
+	if err := DB.Model(&model.Server{}).Where("id in (?)", req.Servers).Update("tag", req.Group).Error; err != nil {
+		ServerLock.Unlock()
+		return &BatchUpdateServerGroupResponse{
+			CommonResponse: CommonResponse{
+				Code:    1001,
+				Message: err.Error(),
+			},
+		}
+	}
+
+	for _, serverId := range req.Servers {
+		oldServer, ok := ServerList[serverId]
+		if !ok {
+			continue
+		}
+		var newServer model.Server
+		copier.Copy(&newServer, oldServer)
+		newServer.Tag = req.Group
+		// 如果修改了Ta
+		oldTag := oldServer.Tag
+		newTag := newServer.Tag
+		if newTag != oldTag {
+			index := -1
+			for i := 0; i < len(ServerTagToIDList[oldTag]); i++ {
+				if ServerTagToIDList[oldTag][i] == newServer.ID {
+					index = i
+					break
+				}
+			}
+			if index > -1 {
+				// 删除旧 Tag-ID 绑定关系
+				ServerTagToIDList[oldTag] = append(ServerTagToIDList[oldTag][:index], ServerTagToIDList[oldTag][index+1:]...)
+				if len(ServerTagToIDList[oldTag]) == 0 {
+					delete(ServerTagToIDList, oldTag)
+				}
+			}
+			// 设置新的 Tag-ID 绑定关系
+			ServerTagToIDList[newTag] = append(ServerTagToIDList[newTag], newServer.ID)
+		}
+		ServerList[newServer.ID] = &newServer
+	}
+
+	ServerLock.Unlock()
+	ReSortServer()
+	return &BatchUpdateServerGroupResponse{
+		CommonResponse{
+			Code:    0,
+			Message: "success",
+		},
+	}
 }

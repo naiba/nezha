@@ -76,10 +76,36 @@ definitions:
       temperature:
         type: number
     type: object
+  singleton.BatchUpdateServerGroupRequest:
+    properties:
+      group:
+        description: 新的分组
+        example: newGroup
+        type: string
+      servers:
+        description: 需要更新的服务器ID
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
+  singleton.BatchUpdateServerGroupResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      message:
+        example: success
+        type: string
+    type: object
   singleton.CommonServerInfo:
     properties:
       agent_version:
         type: string
+      display_index:
+        type: integer
       id:
         type: integer
       ipv4:
@@ -103,9 +129,6 @@ definitions:
       DDNSProfile:
         example: ""
         type: string
-      ID:
-        example: 0
-        type: integer
       displayIndex:
         description: 展示排序，越大越靠前
         example: 0
@@ -123,6 +146,9 @@ definitions:
         description: 对游客隐藏
         example: "off"
         type: string
+      id:
+        example: 0
+        type: integer
       name:
         description: 服务器名称
         example: 服务器名
@@ -145,8 +171,10 @@ definitions:
   singleton.ServerConfigResponse:
     properties:
       code:
+        example: 0
         type: integer
       message:
+        example: success
         type: string
       result:
         $ref: '#/definitions/singleton.ServerConfigData'
@@ -165,15 +193,19 @@ definitions:
   singleton.ServerDeleteResponse:
     properties:
       code:
+        example: 0
         type: integer
       message:
+        example: success
         type: string
     type: object
   singleton.ServerInfoResponse:
     properties:
       code:
+        example: 0
         type: integer
       message:
+        example: success
         type: string
       result:
         items:
@@ -183,8 +215,10 @@ definitions:
   singleton.ServerStatusResponse:
     properties:
       code:
+        example: 0
         type: integer
       message:
+        example: success
         type: string
       result:
         items:
@@ -195,6 +229,8 @@ definitions:
     properties:
       agent_version:
         type: string
+      display_index:
+        type: integer
       host:
         $ref: '#/definitions/model.Host'
       id:
@@ -228,7 +264,7 @@ paths:
         type: string
       - description: 服务器ID列表
         in: body
-        name: IDList
+        name: Payload
         required: true
         schema:
           $ref: '#/definitions/singleton.ServerDeleteRequest'
@@ -252,7 +288,7 @@ paths:
         type: string
       - description: 服务器信息
         in: body
-        name: server
+        name: Payload
         required: true
         schema:
           $ref: '#/definitions/singleton.ServerConfigData'
@@ -276,7 +312,7 @@ paths:
         type: string
       - description: 服务器信息
         in: body
-        name: server
+        name: Payload
         required: true
         schema:
           $ref: '#/definitions/singleton.ServerConfigData'
@@ -315,6 +351,31 @@ paths:
           schema:
             $ref: '#/definitions/singleton.ServerStatusResponse'
       summary: 获取服务器信息
+      tags:
+      - server
+  /api/v1/server/groups:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 更新信息
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.BatchUpdateServerGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.BatchUpdateServerGroupResponse'
+      summary: 批量更新服务器分组
       tags:
       - server
   /api/v1/server/list:
