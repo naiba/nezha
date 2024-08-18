@@ -97,20 +97,24 @@ def sync_to_gitee(tag: str, body: str, files: slice):
     asset_api_uri = f"{release_api_uri}/{release_id}/attach_files"
 
     for file_path in files:
-        files = {
-            'file': open(file_path, 'rb')
-        }
+        success = False
 
-        asset_api_response = requests.post(
-            asset_api_uri, params={'access_token': access_token}, files=files)
+        while not success:
+            files = {
+                'file': open(file_path, 'rb')
+            }
 
-        if asset_api_response.status_code == 201:
-            asset_info = asset_api_response.json()
-            asset_name = asset_info.get('name')
-            print(f"Successfully uploaded {asset_name}!")
-        else:
-            print(
-                f"Request failed with status code {asset_api_response.status_code}")
+            asset_api_response = requests.post(
+                asset_api_uri, params={'access_token': access_token}, files=files)
+
+            if asset_api_response.status_code == 201:
+                asset_info = asset_api_response.json()
+                asset_name = asset_info.get('name')
+                print(f"Successfully uploaded {asset_name}!")
+                success = True
+            else:
+                print(
+                    f"Request failed with status code {asset_api_response.status_code}")
 
     # 仅保留最新 Release 以防超出 Gitee 仓库配额
     try:
