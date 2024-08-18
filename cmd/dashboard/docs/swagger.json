@@ -233,6 +233,45 @@
                     }
                 }
             }
+        },
+        "/api/v1/server/upgrade": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "强制更新agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "API Token",
+                        "name": "Authorization",
+                        "in": "header"
+                    },
+                    {
+                        "description": "需要强制更新的服务器列表",
+                        "name": "Payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/singleton.ForceUpdateAgentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/singleton.ForceUpdateAgentResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -416,6 +455,53 @@
                 },
                 "valid_ip": {
                     "type": "string"
+                }
+            }
+        },
+        "singleton.ForceUpdateAgentRequest": {
+            "type": "object",
+            "properties": {
+                "server_id_list": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        1,
+                        2
+                    ]
+                }
+            }
+        },
+        "singleton.ForceUpdateAgentResponse": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "fail": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "example": {
+                        "3": "\"offline\""
+                    }
+                },
+                "message": {
+                    "type": "string",
+                    "example": "success"
+                },
+                "success": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "example": [
+                        1,
+                        2
+                    ]
                 }
             }
         },

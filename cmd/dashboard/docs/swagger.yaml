@@ -121,6 +121,38 @@ definitions:
       valid_ip:
         type: string
     type: object
+  singleton.ForceUpdateAgentRequest:
+    properties:
+      server_id_list:
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
+  singleton.ForceUpdateAgentResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      fail:
+        additionalProperties:
+          type: string
+        example:
+          "3": '"offline"'
+        type: object
+      message:
+        example: success
+        type: string
+      success:
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
   singleton.ServerConfigData:
     properties:
       DDNSDomain:
@@ -399,6 +431,31 @@ paths:
           schema:
             $ref: '#/definitions/singleton.ServerInfoResponse'
       summary: 获取服务器列表
+      tags:
+      - server
+  /api/v1/server/upgrade:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 需要强制更新的服务器列表
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.ForceUpdateAgentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ForceUpdateAgentResponse'
+      summary: 强制更新agent
       tags:
       - server
 swagger: "2.0"

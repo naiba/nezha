@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jinzhu/copier"
+	"github.com/naiba/nezha/proto"
 	"sync"
 	"time"
 
@@ -297,23 +298,6 @@ type ServerConfigResponse struct {
 	Result *ServerConfigData `json:"result"`
 }
 
-type ServerDeleteRequest struct {
-	IDList []uint64 `json:"id_list" form:"id_list" example:"1,2"` // 需要删除的服务器ID
-}
-
-type ServerDeleteResponse struct {
-	CommonResponse
-}
-
-type BatchUpdateServerGroupRequest struct {
-	Servers []uint64 `json:"servers" form:"servers" example:"1,2"`  // 需要更新的服务器ID
-	Group   string   `json:"group" form:"group" example:"newGroup"` // 新的分组
-}
-
-type BatchUpdateServerGroupResponse struct {
-	CommonResponse
-}
-
 func (sf *ServerConfigData) MapToServer() model.Server {
 	var server model.Server
 	server.ID = sf.ID
@@ -439,6 +423,14 @@ func (s *ServerAPIService) EditServer(sf ServerConfigData) (*ServerConfigRespons
 	return res, nil
 }
 
+type ServerDeleteRequest struct {
+	IDList []uint64 `json:"id_list" form:"id_list" example:"1,2"` // 需要删除的服务器ID
+}
+
+type ServerDeleteResponse struct {
+	CommonResponse
+}
+
 func (s *ServerAPIService) DeleteServer(sf ServerDeleteRequest) *ServerDeleteResponse {
 	// 先确定要删除的 Server 是否存在
 	ServerLock.RLock()
@@ -480,6 +472,15 @@ func (s *ServerAPIService) DeleteServer(sf ServerDeleteRequest) *ServerDeleteRes
 			Message: "success",
 		},
 	}
+}
+
+type BatchUpdateServerGroupRequest struct {
+	Servers []uint64 `json:"servers" form:"servers" example:"1,2"`  // 需要更新的服务器ID
+	Group   string   `json:"group" form:"group" example:"newGroup"` // 新的分组
+}
+
+type BatchUpdateServerGroupResponse struct {
+	CommonResponse
 }
 
 func (s *ServerAPIService) BatchUpdateGroup(req BatchUpdateServerGroupRequest) *BatchUpdateServerGroupResponse {
@@ -548,4 +549,54 @@ func (s *ServerAPIService) BatchUpdateGroup(req BatchUpdateServerGroupRequest) *
 			Message: "success",
 		},
 	}
+}
+
+type ForceUpdateAgentRequest struct {
+	ServerIDList []uint64 `json:"server_id_list" example:"1,2"`
+}
+type ForceUpdateAgentResponse struct {
+	CommonResponse
+	Success []uint64          `json:"success" example:"1,2"`
+	Fail    map[uint64]string `json:"fail" example:"3:\"offline\""`
+}
+
+func (s *ServerAPIService) ForceUpdateAgent(req ForceUpdateAgentRequest) *ForceUpdateAgentResponse {
+	res := &ForceUpdateAgentResponse{
+		CommonResponse: CommonResponse{
+			Code:    0,
+			Message: "success",
+		},
+		Success: make([]uint64, 0),
+		Fail:    map[uint64]string{},
+	}
+	successCount := 0
+	for _, serverId := range req.ServerIDList {
+		ServerLock.RLock()
+		server := ServerList[serverId]
+		ServerLock.RUnlock()
+		if server != nil && server.TaskStream != nil {
+			if err := server.TaskStream.Send(&proto.Task{
+				Type: model.TaskTypeUpgrade,
+			}); err != nil {
+				res.Fail[serverId] = err.Error()
+			} else {
+				res.Success = append(res.Success, serverId)
+				successCount += 1
+			}
+		} else {
+			res.Fail[serverId] = "offline"
+		}
+	}
+	if successCount == 0 {
+		res.CommonResponse = CommonResponse{
+			Code:    1001,
+			Message: "Fail",
+		}
+	} else if successCount != len(req.ServerIDList) {
+		res.CommonResponse = CommonResponse{
+			Code:    1002,
+			Message: "Partial Success",
+		}
+	}
+	return res
 }

@@ -27,6 +27,7 @@ func (v *ApiV1) Serve() {
 	r.GET("/server/list", v.getServerList)
 	r.GET("/server/details", v.getServerDetails)
 	r.POST("/server", v.addServer)
+	r.POST("/server/upgrade", v.batchUpgradeServerAgent)
 	r.PUT("/server", v.editServer)
 	r.PUT("/server/groups", v.batchEditServerGroup)
 	r.DELETE("/server", v.deleteServer)

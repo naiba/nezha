@@ -148,3 +148,26 @@ func (v *ApiV1) batchEditServerGroup(c *gin.Context) {
 	res := service.BatchUpdateGroup(req)
 	c.JSON(http.StatusOK, res)
 }
+
+// batchUpgradeServerAgent
+// @Summary 强制更新agent
+// @tags server
+// @Accept json
+// @Param Authorization header string false "API Token"
+// @Param Payload body singleton.ForceUpdateAgentRequest true "需要强制更新的服务器列表"
+// @Produce json
+// @Success 200 {object} singleton.ForceUpdateAgentResponse
+// @Router /api/v1/server/upgrade [post]
+func (v *ApiV1) batchUpgradeServerAgent(c *gin.Context) {
+	var req singleton.ForceUpdateAgentRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: err.Error(),
+		})
+		return
+	}
+	service := singleton.ServerAPIService{}
+	res := service.ForceUpdateAgent(req)
+	c.JSON(http.StatusOK, res)
+}

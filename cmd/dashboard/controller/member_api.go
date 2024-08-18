@@ -19,7 +19,6 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/resource"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -563,24 +562,19 @@ func (ma *memberAPI) forceUpdate(c *gin.Context) {
 	}
 
 	var executeResult bytes.Buffer
-
-	for i := 0; i < len(forceUpdateServers); i++ {
-		singleton.ServerLock.RLock()
-		server := singleton.ServerList[forceUpdateServers[i]]
-		singleton.ServerLock.RUnlock()
-		if server != nil && server.TaskStream != nil {
-			if err := server.TaskStream.Send(&proto.Task{
-				Type: model.TaskTypeUpgrade,
-			}); err != nil {
-				executeResult.WriteString(fmt.Sprintf("%d 下发指令失败 %+v<br/>", forceUpdateServers[i], err))
-			} else {
-				executeResult.WriteString(fmt.Sprintf("%d 下发指令成功<br/>", forceUpdateServers[i]))
-			}
+	service := singleton.ServerAPIService{}
+	req := singleton.ForceUpdateAgentRequest{ServerIDList: forceUpdateServers}
+	res := service.ForceUpdateAgent(req)
+	for _, serverId := range res.Success {
+		executeResult.WriteString(fmt.Sprintf("%d 下发指令成功<br/>", serverId))
+	}
+	for serverId, err := range res.Fail {
+		if err == "offline" {
+			executeResult.WriteString(fmt.Sprintf("%d 离线<br/>", serverId))
 		} else {
-			executeResult.WriteString(fmt.Sprintf("%d 离线<br/>", forceUpdateServers[i]))
+			executeResult.WriteString(fmt.Sprintf("%d 下发指令失败 %+v<br/>", serverId, err))
 		}
 	}
-
 	c.JSON(http.StatusOK, model.Response{
 		Code:    http.StatusOK,
 		Message: executeResult.String(),
