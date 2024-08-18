@@ -117,7 +117,7 @@ LOOP:
 	endCh := make(chan struct{})
 
 	go func() {
-		_, innerErr := io.Copy(stream.userIo, stream.agentIo)
+		_, innerErr := io.CopyBuffer(stream.userIo, stream.agentIo, make([]byte, 1048576))
 		if innerErr != nil {
 			err = innerErr
 		}
@@ -126,7 +126,7 @@ LOOP:
 		}
 	}()
 	go func() {
-		_, innerErr := io.Copy(stream.agentIo, stream.userIo)
+		_, innerErr := io.CopyBuffer(stream.agentIo, stream.userIo, make([]byte, 1048576))
 		if innerErr != nil {
 			err = innerErr
 		}

@@ -190,7 +190,7 @@
         async function uploadFile(file) {
             showUpdModal('u');
 
-            const chunkSize = 65536; // 64KB chunk
+            const chunkSize = 1048576; // 1MB chunk
             let offset = 0;
 
             const filePath = `${currentPath}${file.name}`;
