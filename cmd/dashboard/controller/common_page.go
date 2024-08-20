@@ -46,6 +46,8 @@ func (cp *commonPage) serve() {
 	cr.GET("/network", cp.network)
 	cr.GET("/ws", cp.ws)
 	cr.POST("/terminal", cp.createTerminal)
+	cr.GET("/file", cp.createFM)
+	cr.GET("/file/:id", cp.fm)
 }
 
 type viewPasswordForm struct {
@@ -257,8 +259,8 @@ func (cp *commonPage) home(c *gin.Context) {
 }
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  10240,
-	WriteBufferSize: 10240,
+	ReadBufferSize:  32768,
+	WriteBufferSize: 32768,
 }
 
 type Data struct {
@@ -427,5 +429,130 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/terminal", mygin.CommonEnvironment(c, gin.H{
 		"SessionID":  streamId,
 		"ServerName": server.Name,
+		"ServerID":   server.ID,
+	}))
+}
+
+func (cp *commonPage) fm(c *gin.Context) {
+	streamId := c.Param("id")
+	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "无权访问",
+			Msg:   "FM会话不存在",
+			Link:  "/",
+			Btn:   "返回首页",
+		}, true)
+		return
+	}
+	defer rpc.NezhaHandlerSingleton.CloseStream(streamId)
+
+	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code: http.StatusInternalServerError,
+			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+				MessageID: "NetworkError",
+			}),
+			Msg:  "Websocket协议切换失败",
+			Link: "/",
+			Btn:  "返回首页",
+		}, true)
+		return
+	}
+	defer wsConn.Close()
+	conn := websocketx.NewConn(wsConn)
+
+	go func() {
+		// PING 保活
+		for {
+			if err = conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				return
+			}
+			time.Sleep(time.Second * 10)
+		}
+	}()
+
+	if err = rpc.NezhaHandlerSingleton.UserConnected(streamId, conn); err != nil {
+		return
+	}
+
+	rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+}
+
+func (cp *commonPage) createFM(c *gin.Context) {
+	IdString := c.Query("id")
+	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "无权访问",
+			Msg:   "用户未登录",
+			Link:  "/login",
+			Btn:   "去登录",
+		}, true)
+		return
+	}
+
+	streamId, err := uuid.GenerateUUID()
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code: http.StatusInternalServerError,
+			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+				MessageID: "SystemError",
+			}),
+			Msg:  "生成会话ID失败",
+			Link: "/server",
+			Btn:  "返回重试",
+		}, true)
+		return
+	}
+
+	rpc.NezhaHandlerSingleton.CreateStream(streamId)
+
+	serverId, err := strconv.Atoi(IdString)
+	if err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "请求参数有误：" + err.Error(),
+			Link:  "/server",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+
+	singleton.ServerLock.RLock()
+	server := singleton.ServerList[uint64(serverId)]
+	singleton.ServerLock.RUnlock()
+	if server == nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "服务器不存在或处于离线状态",
+			Link:  "/server",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+
+	fmData, _ := utils.Json.Marshal(&model.TaskFM{
+		StreamID: streamId,
+	})
+	if err := server.TaskStream.Send(&proto.Task{
+		Type: model.TaskTypeFM,
+		Data: string(fmData),
+	}); err != nil {
+		mygin.ShowErrorPage(c, mygin.ErrInfo{
+			Code:  http.StatusForbidden,
+			Title: "请求失败",
+			Msg:   "Agent信令下发失败",
+			Link:  "/server",
+			Btn:   "返回重试",
+		}, true)
+		return
+	}
+
+	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/file", mygin.CommonEnvironment(c, gin.H{
+		"SessionID": streamId,
 	}))
 }
