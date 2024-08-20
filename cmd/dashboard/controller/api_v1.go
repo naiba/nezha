@@ -5,9 +5,13 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hashicorp/go-uuid"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
+	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/proto"
+	"github.com/naiba/nezha/service/rpc"
 	"github.com/naiba/nezha/service/singleton"
 )
 
@@ -28,6 +32,7 @@ func (v *apiV1) serve() {
 	}))
 	r.GET("/server/list", v.serverList)
 	r.GET("/server/details", v.serverDetails)
+	r.GET("/server/terminal", v.createTerminal)
 	// 不强制认证的 API
 	mr := v.r.Group("monitor")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
@@ -109,4 +114,42 @@ func (v *apiV1) monitorHistoriesById(c *gin.Context) {
 	}
 
 	c.JSON(200, singleton.MonitorAPI.GetMonitorHistories(map[string]any{"server_id": server.ID}))
+}
+
+func (v *apiV1) createTerminal(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		c.AbortWithStatusJSON(400, gin.H{"code": 400, "message": "id参数错误"})
+		return
+	}
+
+	streamId, err := uuid.GenerateUUID()
+	if err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"code": 500, "message": "生成会话ID失败"})
+		return
+	}
+
+	rpc.NezhaHandlerSingleton.CreateStream(streamId)
+
+	singleton.ServerLock.RLock()
+	server := singleton.ServerList[id]
+	singleton.ServerLock.RUnlock()
+	if server == nil || server.TaskStream == nil {
+		c.AbortWithStatusJSON(500, gin.H{"code": 500, "message": "服务器不存在或处于离线状态"})
+		return
+	}
+
+	terminalData, _ := utils.Json.Marshal(&model.TerminalTask{
+		StreamID: streamId,
+	})
+	if err := server.TaskStream.Send(&proto.Task{
+		Type: model.TaskTypeTerminalGRPC,
+		Data: string(terminalData),
+	}); err != nil {
+		c.AbortWithStatusJSON(500, gin.H{"code": 500, "message": "Agent信令下发失败"})
+		return
+	}
+	
+	c.JSON(200, gin.H{"code": 0, "message": "success", "streamId": streamId, "serverName": server.Name})
 }
