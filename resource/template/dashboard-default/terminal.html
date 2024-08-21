@@ -63,7 +63,6 @@
     <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://unpkg.com/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
     <script src="https://unpkg.com/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js"></script>
-    <script src="https://unpkg.com/trzsz@1.1.5/lib/trzsz.js"></script>
     <script>
         let sendResizing = false;
 
@@ -109,8 +108,6 @@
         const socket = new WebSocket((window.location.protocol == 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/terminal/' + '{{.SessionID}}');
         socket.binaryType = 'arraybuffer';
 
-        const trzszAddon = new TrzszAddon(socket);
-        term.loadAddon(trzszAddon);
         const fitAddon = new FitAddon.FitAddon();
         term.loadAddon(fitAddon);
 
