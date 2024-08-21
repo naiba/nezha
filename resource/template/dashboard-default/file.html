@@ -90,6 +90,8 @@
         let receivedLength = 0;
         let isFirstChunk = true;
         let isUpCompleted = false;
+        let handleReady = false;
+        let worker;
 
         function updateDirectoryTitle() {
             const directoryTitle = document.getElementById('current-directory');
@@ -160,7 +162,6 @@
             expectedLength = 0;
             receivedLength = 0;
             isFirstChunk = true;
-            updateProgress(0);
         }
 
         function downloadFile(filePath) {
@@ -265,20 +266,6 @@
             return { items };
         }
 
-        async function handleDownloadFile(blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            hideUpdModal();
-            resetUpdState();
-        }
-
         function readFileAsArrayBuffer(blob) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -337,8 +324,6 @@
             modal.open = true;
             if (operation === 'd') {
                 modal.setAttribute('headline', 'Downloading...');
-                modal.setAttribute('value', '0');
-                modal.setAttribute('max', '100');
             } else if (operation === 'u') {
                 modal.setAttribute('headline', 'Uploading...');
             }
@@ -349,9 +334,17 @@
             modal.open = false;
         }
 
-        function updateProgress(percentage) {
-            const progressBar = document.getElementById('upd-progress');
-            progressBar.value = percentage;
+        function waitForHandleReady() {
+            return new Promise(resolve => {
+                const checkReady = () => {
+                    if (handleReady) {
+                        resolve();
+                    } else {
+                        setTimeout(checkReady, 10);
+                    }
+                };
+                checkReady();
+            });
         }
 
         const socket = new WebSocket((window.location.protocol === 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/file/' + '{{.SessionID}}');
@@ -369,31 +362,36 @@
                     const completeIdentifier = new Uint8Array([0x4E, 0x5A, 0x55, 0x50]); // NZUP
 
                     if (arraysEqual(identifier, fileIdentifier)) {
-                        // Download
-                        const dataView = new DataView(arrayBuffer);
-                        expectedLength = Number(dataView.getBigUint64(4, false));
+                        worker = new Worker('/static/file.js');
+                        worker.onmessage = async function (event) {
+                            switch (event.data.type) {
+                                case 'error':
+                                    console.error('Error from worker:', event.data.error);
+                                    break;
+                                case 'progress':
+                                    handleReady = true;
+                                    break;
+                                case 'result':
+                                    handleReady = false;
+                                    const url = URL.createObjectURL(event.data.blob);
+                                    const anchor = document.createElement('a');
+                                    anchor.href = url;
+                                    anchor.download = event.data.fileName;
+                                    anchor.click();
+                                    URL.revokeObjectURL(url);
 
-                        isFirstChunk = false;
-                        receivedLength = 0;
+                                    // Delete the file in OPFS
+                                    window.addEventListener('beforeunload', async () => {
+                                        await worker.postMessage({ operation: 3, arrayBuffer: null, fileName: event.data.fileName });
+                                    });
 
-                        // Initialize writer
-                        const stream = new WritableStream({
-                            write(chunk) {
-                                receivedBuffer.push(chunk);
-                            },
-                            close() {
-                                // Save to blob
-                                const completeBlob = new Blob(receivedBuffer);
-                                handleDownloadFile(completeBlob);
+                                    hideUpdModal();
+                                    resetUpdState();
+                                    break;
                             }
-                        });
-
-                        writer = stream.getWriter();
-
-                        // Read data after 12 bytes (if any)
-                        const dataChunk = arrayBuffer.slice(12);
-                        writer.write(dataChunk);
-                        receivedLength += dataChunk.byteLength;
+                        };
+                        await worker.postMessage({ operation: 1, arrayBuffer: arrayBuffer, fileName: fileName });
+                        isFirstChunk = false;
                     } else if (arraysEqual(identifier, fileNameIdentifier)) {
                         // List files
                         const { items } = await parseFileList(arrayBuffer);
@@ -414,23 +412,11 @@
                         return;
                     }
                 } else {
-                    // Handle data chunks
-                    receivedLength += arrayBuffer.byteLength;
-                    writer.write(arrayBuffer);
-
-                    // Update progress bar
-                    const percentage = Math.min((receivedLength / expectedLength) * 100, 100);
-                    updateProgress(percentage);
-
-                    if (receivedLength === expectedLength) {
-                        writer.close(); // Close the writer
-                    }
+                    await waitForHandleReady();
+                    await worker.postMessage({ operation: 2, arrayBuffer: arrayBuffer, fileName: fileName });
                 }
             } catch (error) {
                 console.error('Error processing received data:', error);
-                if (writer) {
-                    writer.abort();
-                }
             }
         };
 
