@@ -63,6 +63,7 @@
     <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
     <script src="https://unpkg.com/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
     <script src="https://unpkg.com/@xterm/addon-web-links@0.11.0/lib/addon-web-links.js"></script>
+    <script src="https://unpkg.com/@xterm/addon-attach@0.11.0/lib/addon-attach.js"></script>
     <script>
         let sendResizing = false;
 
@@ -106,7 +107,9 @@
             cursorBlink: true,
         });
         const socket = new WebSocket((window.location.protocol == 'https:' ? 'wss' : 'ws') + '://' + window.location.host + '/terminal/' + '{{.SessionID}}');
-        socket.binaryType = 'arraybuffer';
+
+        const attachAddon = new AttachAddon.AttachAddon(socket);
+        term.loadAddon(attachAddon);
 
         const fitAddon = new FitAddon.FitAddon();
         term.loadAddon(fitAddon);
