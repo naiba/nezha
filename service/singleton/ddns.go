@@ -41,14 +41,14 @@ func GetDDNSProviderFromString(provider string) (ddns2.Provider, error) {
 	case ProviderTencentCloud:
 		return ddns2.NewProviderTencentCloud(Conf.DDNS.AccessID, Conf.DDNS.AccessSecret), nil
 	default:
-		return &ddns2.ProviderDummy{}, fmt.Errorf("无法找到配置的DDNS提供者 %s", provider)
+		return new(ddns2.ProviderDummy), fmt.Errorf("无法找到配置的DDNS提供者 %s", provider)
 	}
 }
 
 func GetDDNSProviderFromProfile(profileName string) (ddns2.Provider, error) {
 	profile, ok := Conf.DDNS.Profiles[profileName]
 	if !ok {
-		return &ddns2.ProviderDummy{}, fmt.Errorf("未找到配置项 %s", profileName)
+		return new(ddns2.ProviderDummy), fmt.Errorf("未找到配置项 %s", profileName)
 	}
 
 	switch profile.Provider {
@@ -59,7 +59,7 @@ func GetDDNSProviderFromProfile(profileName string) (ddns2.Provider, error) {
 	case ProviderTencentCloud:
 		return ddns2.NewProviderTencentCloud(profile.AccessID, profile.AccessSecret), nil
 	default:
-		return &ddns2.ProviderDummy{}, fmt.Errorf("无法找到配置的DDNS提供者 %s", profile.Provider)
+		return new(ddns2.ProviderDummy), fmt.Errorf("无法找到配置的DDNS提供者 %s", profile.Provider)
 	}
 }
 
