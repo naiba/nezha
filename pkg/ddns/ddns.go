@@ -1,5 +1,7 @@
 package ddns
 
+import "golang.org/x/net/publicsuffix"
+
 type DomainConfig struct {
 	EnableIPv4 bool
 	EnableIpv6 bool
@@ -10,5 +12,11 @@ type DomainConfig struct {
 
 type Provider interface {
 	// UpdateDomain Return is updated
-	UpdateDomain(domainConfig *DomainConfig) bool
+	UpdateDomain(*DomainConfig) error
+}
+
+func splitDomain(domain string) (prefix string, realDomain string) {
+	realDomain, _ = publicsuffix.EffectiveTLDPlusOne(domain)
+	prefix = domain[:len(domain)-len(realDomain)-1]
+	return prefix, realDomain
 }

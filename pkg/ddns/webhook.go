@@ -2,58 +2,79 @@ package ddns
 
 import (
 	"bytes"
-	"log"
+	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 type ProviderWebHook struct {
-	URL           string
-	RequestMethod string
-	RequestBody   string
-	RequestHeader string
+	url           string
+	requestMethod string
+	requestBody   string
+	requestHeader string
+	domainConfig  *DomainConfig
 }
 
-func (provider *ProviderWebHook) UpdateDomain(domainConfig *DomainConfig) bool {
+func NewProviderWebHook(s, rm, rb, rh string) *ProviderWebHook {
+	return &ProviderWebHook{
+		url:           s,
+		requestMethod: rm,
+		requestBody:   rb,
+		requestHeader: rh,
+	}
+}
+
+func (provider *ProviderWebHook) UpdateDomain(domainConfig *DomainConfig) error {
 	if domainConfig == nil {
-		return false
+		return fmt.Errorf("获取 DDNS 配置失败")
+	}
+	provider.domainConfig = domainConfig
+
+	if provider.domainConfig.FullDomain == "" {
+		return fmt.Errorf("failed to update an empty domain")
 	}
 
-	if domainConfig.FullDomain == "" {
-		log.Println("NEZHA>> Failed to update an empty domain")
-		return false
-	}
-	updated := false
-	client := &http.Client{}
-	if domainConfig.EnableIPv4 && domainConfig.Ipv4Addr != "" {
-		url := provider.FormatWebhookString(provider.URL, domainConfig, "ipv4")
-		body := provider.FormatWebhookString(provider.RequestBody, domainConfig, "ipv4")
-		header := provider.FormatWebhookString(provider.RequestHeader, domainConfig, "ipv4")
+	if provider.domainConfig.EnableIPv4 && provider.domainConfig.Ipv4Addr != "" {
+		url := provider.formatWebhookString(provider.url, "ipv4")
+		body := provider.formatWebhookString(provider.requestBody, "ipv4")
+		header := provider.formatWebhookString(provider.requestHeader, "ipv4")
 		headers := strings.Split(header, "\n")
-		req, err := http.NewRequest(provider.RequestMethod, url, bytes.NewBufferString(body))
+		req, err := http.NewRequest(provider.requestMethod, url, bytes.NewBufferString(body))
 		if err == nil && req != nil {
-			SetStringHeadersToRequest(req, headers)
-			if _, err := client.Do(req); err != nil {
-				log.Printf("NEZHA>> Failed to update a domain: %s. Cause by: %s\n", domainConfig.FullDomain, err.Error())
-			} else {
-				updated = true
+			utils.SetStringHeadersToRequest(req, headers)
+			if _, err := utils.HttpClient.Do(req); err != nil {
+				return fmt.Errorf("failed to update a domain: %s. Cause by: %v", provider.domainConfig.FullDomain, err)
 			}
 		}
 	}
-	if domainConfig.EnableIpv6 && domainConfig.Ipv6Addr != "" {
-		url := provider.FormatWebhookString(provider.URL, domainConfig, "ipv6")
-		body := provider.FormatWebhookString(provider.RequestBody, domainConfig, "ipv6")
-		header := provider.FormatWebhookString(provider.RequestHeader, domainConfig, "ipv6")
+	if provider.domainConfig.EnableIpv6 && provider.domainConfig.Ipv6Addr != "" {
+		url := provider.formatWebhookString(provider.url, "ipv6")
+		body := provider.formatWebhookString(provider.requestBody, "ipv6")
+		header := provider.formatWebhookString(provider.requestHeader, "ipv6")
 		headers := strings.Split(header, "\n")
-		req, err := http.NewRequest(provider.RequestMethod, url, bytes.NewBufferString(body))
+		req, err := http.NewRequest(provider.requestMethod, url, bytes.NewBufferString(body))
 		if err == nil && req != nil {
-			SetStringHeadersToRequest(req, headers)
-			if _, err := client.Do(req); err != nil {
-				log.Printf("NEZHA>> Failed to update a domain: %s. Cause by: %s\n", domainConfig.FullDomain, err.Error())
-			} else {
-				updated = true
+			utils.SetStringHeadersToRequest(req, headers)
+			if _, err := utils.HttpClient.Do(req); err != nil {
+				return fmt.Errorf("failed to update a domain: %s. Cause by: %v", provider.domainConfig.FullDomain, err)
 			}
 		}
 	}
-	return updated
+	return nil
+}
+
+func (provider *ProviderWebHook) formatWebhookString(s string, ipType string) string {
+	if provider.domainConfig == nil {
+		return s
+	}
+
+	result := strings.TrimSpace(s)
+	result = strings.Replace(result, "{ip}", provider.domainConfig.Ipv4Addr, -1)
+	result = strings.Replace(result, "{domain}", provider.domainConfig.FullDomain, -1)
+	result = strings.Replace(result, "{type}", ipType, -1)
+	// remove \r
+	result = strings.Replace(result, "\r", "", -1)
+	return result
 }

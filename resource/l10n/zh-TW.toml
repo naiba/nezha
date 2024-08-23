@@ -50,7 +50,7 @@ other = "新增計劃任務"
 other = "名稱"
 
 [Scheduler]
-other = "計劃"
+other = "排程"
 
 [BackUp]
 other = "備份"
@@ -80,37 +80,37 @@ other = "特定伺服器"
 other = "輸入ID/名稱以搜尋"
 
 [NotificationMethodGroup]
-other = "通知方式組"
+other = "通知群組"
 
 [PushSuccessMessages]
-other = "推送成功的消息"
+other = "推送成功的訊息"
 
 [TaskType]
 other = "任務類型"
 
 [CronTask]
-other = "計劃任務"
+other = "排程任務"
 
 [TriggerTask]
 other = "觸發任務"
 
 [TheFormaOfTheScheduleIs]
-other = "計劃的格式為："
+other = "排程的格式為："
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
 other = "秒 分 時 天 月 星期，詳情見"
 
 [ScheduleExpressionFormat]
-other = "計劃表達式格式"
+other = "排程表達式格式"
 
 [IntroductionOfCommands]
-other = "命令說明：編寫命令時類似於 shell/bat 腳本。建議不要換行，多個命令可用 <code>&&</code> 或 <code>&</code> 連接，若出現命令無法找到的情況，可能是由於 <code>PATH</code> 環境變量配置問題。在 <code>Linux</code> 伺服器上，可在命令開頭加入 <code>source ~/.bashrc</code>，或使用命令的絕對路徑執行。"
+other = "命令說明：編寫命令時類似於 shell/bat 腳本。建議不要換行，多個命令可用 <code>&&</code> 或 <code>&</code> 連接，若出現命令無法找到的情況，可能是由於 <code>PATH</code> 環境變數配置問題。在 <code>Linux</code> 伺服器上，可在命令開頭加入 <code>source ~/.bashrc</code>，或使用命令的絕對路徑執行。"
 
 [AddMonitor]
 other = "新增監控"
 
 [Blog]
-other = "博客"
+other = "部落格"
 
 [Target]
 other = "目標"
@@ -158,7 +158,7 @@ other = "新增通知方式"
 other = "分組"
 
 [DoNotSendTestMessages]
-other = "不發送測試信息"
+other = "不發送測試訊息"
 
 [RequestMethod]
 other = "請求方式"
@@ -221,7 +221,7 @@ other = "排序"
 other = "越大越靠前"
 
 [Secret]
-other = "密鑰"
+other = "金鑰"
 
 [Note]
 other = "備註"
@@ -254,10 +254,10 @@ other = "忽略所有"
 other = "觸發執行"
 
 [DeleteScheduledTask]
-other = "刪除計劃任務"
+other = "刪除排程任務"
 
 [ConfirmToDeleteThisScheduledTask]
-other = "確認刪除此計劃任務？"
+other = "確認刪除此排程任務？"
 
 [AccessDenied]
 other = "訪問被拒絕"
@@ -407,7 +407,7 @@ other = "流量"
 other = "負載"
 
 [ProcessCount]
-other = "進程數"
+other = "行程數"
 
 [ConnCount]
 other = "連接數"
@@ -422,7 +422,7 @@ other = "活動"
 other = "版本"
 
 [NetSpeed]
-other = "網絡"
+other = "網路"
 
 [Uptime]
 other = "在線"
@@ -458,7 +458,7 @@ other = "狀態"
 other = "可用性"
 
 [AverageLatency]
-other = "平均響應時間"
+other = "平均回應時間"
 
 [CycleTransferStats]
 other = "周期性流量統計"
@@ -524,7 +524,7 @@ other = "發生錯誤"
 other = "系統錯誤"
 
 [NetworkError]
-other = "網絡錯誤"
+other = "網路錯誤"
 
 [ServicesStatus]
 other = "服務狀態"
@@ -536,7 +536,7 @@ other = "伺服器管理"
 other = "服務監控"
 
 [ScheduledTasks]
-other = "計劃任務"
+other = "排程任務"
 
 [ApiManagement]
 other = "API 管理"
@@ -614,7 +614,7 @@ other = "對遊客隱藏"
 other = "菜單"
 
 [NetworkSpiter]
-other = "網絡"
+other = "網路"
 
 [EnableShowInService]
 other = "在服務中顯示"
@@ -656,4 +656,25 @@ other = "伺服器世界分布圖"
 other = "NAT"
 
 [NetworkSpiterList]
-other = "網絡監控"
+other = "網路監控"
+
+[Refresh]
+other = "重新整理"
+
+[CopyPath]
+other = "複製路徑"
+
+[Goto]
+other = "跳至"
+
+[GotoHeadline]
+other = "跳至資料夾"
+
+[GotoGo]
+other = "確定"
+
+[GotoClose]
+other = "取消"
+
+[FMError]
+other = "Agent 回傳了錯誤，請查看主控台獲取詳細資訊。要建立新連線，請重新開啟 FM。"

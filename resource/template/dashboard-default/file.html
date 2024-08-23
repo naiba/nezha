@@ -58,9 +58,9 @@
         <mdui-dropdown>
             <mdui-button-icon slot="trigger" icon="menu"></mdui-button-icon>
             <mdui-menu>
-                <mdui-menu-item id="refresh">Refresh</mdui-menu-item>
-                <mdui-menu-item id="copy">Copy path</mdui-menu-item>
-                <mdui-menu-item id="goto">Go to</mdui-menu-item>
+                <mdui-menu-item id="refresh">{{tr "Refresh"}}</mdui-menu-item>
+                <mdui-menu-item id="copy">{{tr "CopyPath"}}</mdui-menu-item>
+                <mdui-menu-item id="goto">{{tr "Goto"}}</mdui-menu-item>
             </mdui-menu>
         </mdui-dropdown>
         <span id="current-directory"></span>
@@ -70,16 +70,16 @@
     <mdui-list id="file-list" class="file-list"></mdui-list>
 
     <mdui-dialog id="error-dialog" headline="Error"
-        description="Agent returned an error, please view the console for details. To open a new connection, reopen the FM again."></mdui-dialog>
+        description="{{tr "FMError"}}"></mdui-dialog>
 
     <mdui-dialog id="upd-modal" class="modal">
         <mdui-linear-progress id="upd-progress"></mdui-linear-progress>
     </mdui-dialog>
 
-    <mdui-dialog id="goto-dialog" headline="Go to a folder" close-on-overlay-click>
+    <mdui-dialog id="goto-dialog" headline="{{tr "GotoHeadline"}}" close-on-overlay-click>
         <mdui-text-field id="goto-text" variant="outlined" value=""></mdui-text-field>
-        <mdui-button id="goto-go" slot="action" variant="text">Go</mdui-button>
-        <mdui-button id="goto-close" slot="action" variant="tonal">Close</mdui-button>
+        <mdui-button id="goto-go" slot="action" variant="text">{{tr "GotoGo"}}</mdui-button>
+        <mdui-button id="goto-close" slot="action" variant="tonal">{{tr "GotoClose"}}</mdui-button>
     </mdui-dialog>
 
     <script>

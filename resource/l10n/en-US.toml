@@ -653,7 +653,28 @@ other = "Disable Switch Template in Frontend"
 other = "Servers On World Map"
 
 [NAT]
-other = "NAT"
+other = "NAT Traversal"
 
 [NetworkSpiterList]
 other = "Network Monitor"
+
+[Refresh]
+other = "Refresh"
+
+[CopyPath]
+other = "Copy Path"
+
+[Goto]
+other = "Go to"
+
+[GotoHeadline]
+other = "Go to a Folder"
+
+[GotoGo]
+other = "Go"
+
+[GotoClose]
+other = "Cancel"
+
+[FMError]
+other = "Agent returned an error, please view the console for details. To open a new connection, reopen the FM again."
