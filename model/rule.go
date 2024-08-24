@@ -1,6 +1,7 @@
 package model
 
 import (
+	"slices"
 	"strings"
 	"time"
 
@@ -42,19 +43,6 @@ func percentage(used, total uint64) float64 {
 		return 0
 	}
 	return float64(used) * 100 / float64(total)
-}
-
-func maxSliceValue(slice []float64) float64 {
-	if len(slice) != 0 {
-		max := slice[0]
-		for _, val := range slice {
-			if max < val {
-				max = val
-			}
-		}
-		return max
-	}
-	return 0
 }
 
 // Snapshot 未通过规则返回 struct{}{}, 通过返回 nil
@@ -145,7 +133,7 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 					temp = append(temp, tempStat.Temperature)
 				}
 			}
-			src = maxSliceValue(temp)
+			src = slices.Max(temp)
 		}
 	}
 

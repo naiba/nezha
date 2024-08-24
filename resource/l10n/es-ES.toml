@@ -653,7 +653,28 @@ other = "Deshabilitar Cambio de Plantilla en Frontend"
 other = "Servidores en el mapa mundial"
 
 [NAT]
-other = "NAT"
+other = "NAT traversal"
 
 [NetworkSpiterList]
-other = "Red Monitor"
+other = "Monitor de red"
+
+[Refresh]
+other = "Actualizar"
+
+[CopyPath]
+other = "Copiar ruta"
+
+[Goto]
+other = "Ir a"
+
+[GotoHeadline]
+other = "Ir a una carpeta"
+
+[GotoGo]
+other = "Ir"
+
+[GotoClose]
+other = "Cancelar"
+
+[FMError]
+other = "Agent devolvió un error, consulte la consola para obtener más detalles. Para abrir una nueva conexión, vuelva a abrir el FM."

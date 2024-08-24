@@ -657,3 +657,24 @@ other = "内网穿透"
 
 [NetworkSpiterList]
 other = "网络监控"
+
+[Refresh]
+other = "刷新"
+
+[CopyPath]
+other = "复制路径"
+
+[Goto]
+other = "跳往"
+
+[GotoHeadline]
+other = "跳往文件夹"
+
+[GotoGo]
+other = "确认"
+
+[GotoClose]
+other = "取消"
+
+[FMError]
+other = "Agent 返回了错误，请查看控制台获取详细信息。要建立新连接，请重新打开 FM。"

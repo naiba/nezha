@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -199,7 +198,7 @@ func (oa *oauth2controller) callback(c *gin.Context) {
 			if err == nil {
 				defer resp.Body.Close()
 				var cloudflareUserInfo *cloudflare.UserInfo
-				if err := json.NewDecoder(resp.Body).Decode(&cloudflareUserInfo); err == nil {
+				if err := utils.Json.NewDecoder(resp.Body).Decode(&cloudflareUserInfo); err == nil {
 					user = cloudflareUserInfo.MapToNezhaUser()
 				}
 			}

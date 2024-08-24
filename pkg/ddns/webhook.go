@@ -2,58 +2,109 @@ package ddns
 
 import (
 	"bytes"
-	"log"
+	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
+
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 type ProviderWebHook struct {
-	URL           string
-	RequestMethod string
-	RequestBody   string
-	RequestHeader string
+	url           string
+	requestMethod string
+	requestBody   string
+	requestHeader string
+	domainConfig  *DomainConfig
 }
 
-func (provider *ProviderWebHook) UpdateDomain(domainConfig *DomainConfig) bool {
+func NewProviderWebHook(s, rm, rb, rh string) *ProviderWebHook {
+	return &ProviderWebHook{
+		url:           s,
+		requestMethod: rm,
+		requestBody:   rb,
+		requestHeader: rh,
+	}
+}
+
+func (provider *ProviderWebHook) UpdateDomain(domainConfig *DomainConfig) error {
 	if domainConfig == nil {
-		return false
+		return fmt.Errorf("获取 DDNS 配置失败")
+	}
+	provider.domainConfig = domainConfig
+
+	if provider.domainConfig.FullDomain == "" {
+		return fmt.Errorf("failed to update an empty domain")
 	}
 
-	if domainConfig.FullDomain == "" {
-		log.Println("NEZHA>> Failed to update an empty domain")
-		return false
-	}
-	updated := false
-	client := &http.Client{}
-	if domainConfig.EnableIPv4 && domainConfig.Ipv4Addr != "" {
-		url := provider.FormatWebhookString(provider.URL, domainConfig, "ipv4")
-		body := provider.FormatWebhookString(provider.RequestBody, domainConfig, "ipv4")
-		header := provider.FormatWebhookString(provider.RequestHeader, domainConfig, "ipv4")
-		headers := strings.Split(header, "\n")
-		req, err := http.NewRequest(provider.RequestMethod, url, bytes.NewBufferString(body))
-		if err == nil && req != nil {
-			SetStringHeadersToRequest(req, headers)
-			if _, err := client.Do(req); err != nil {
-				log.Printf("NEZHA>> Failed to update a domain: %s. Cause by: %s\n", domainConfig.FullDomain, err.Error())
-			} else {
-				updated = true
-			}
+	if provider.domainConfig.EnableIPv4 && provider.domainConfig.Ipv4Addr != "" {
+		req, err := provider.prepareRequest(true)
+		if err != nil {
+			return fmt.Errorf("failed to update a domain: %s. Cause by: %v", provider.domainConfig.FullDomain, err)
+		}
+		if _, err := utils.HttpClient.Do(req); err != nil {
+			return fmt.Errorf("failed to update a domain: %s. Cause by: %v", provider.domainConfig.FullDomain, err)
 		}
 	}
-	if domainConfig.EnableIpv6 && domainConfig.Ipv6Addr != "" {
-		url := provider.FormatWebhookString(provider.URL, domainConfig, "ipv6")
-		body := provider.FormatWebhookString(provider.RequestBody, domainConfig, "ipv6")
-		header := provider.FormatWebhookString(provider.RequestHeader, domainConfig, "ipv6")
-		headers := strings.Split(header, "\n")
-		req, err := http.NewRequest(provider.RequestMethod, url, bytes.NewBufferString(body))
-		if err == nil && req != nil {
-			SetStringHeadersToRequest(req, headers)
-			if _, err := client.Do(req); err != nil {
-				log.Printf("NEZHA>> Failed to update a domain: %s. Cause by: %s\n", domainConfig.FullDomain, err.Error())
-			} else {
-				updated = true
-			}
+
+	if provider.domainConfig.EnableIpv6 && provider.domainConfig.Ipv6Addr != "" {
+		req, err := provider.prepareRequest(false)
+		if err != nil {
+			return fmt.Errorf("failed to update a domain: %s. Cause by: %v", provider.domainConfig.FullDomain, err)
+		}
+		if _, err := utils.HttpClient.Do(req); err != nil {
+			return fmt.Errorf("failed to update a domain: %s. Cause by: %v", provider.domainConfig.FullDomain, err)
 		}
 	}
-	return updated
+	return nil
+}
+
+func (provider *ProviderWebHook) prepareRequest(isIPv4 bool) (*http.Request, error) {
+	u, err := url.Parse(provider.url)
+	if err != nil {
+		return nil, fmt.Errorf("failed parsing url: %v", err)
+	}
+
+	// Only handle queries here
+	q := u.Query()
+	for p, vals := range q {
+		for n, v := range vals {
+			vals[n] = provider.formatWebhookString(v, isIPv4)
+		}
+		q[p] = vals
+	}
+
+	u.RawQuery = q.Encode()
+	body := provider.formatWebhookString(provider.requestBody, isIPv4)
+	header := provider.formatWebhookString(provider.requestHeader, isIPv4)
+	headers := strings.Split(header, "\n")
+
+	req, err := http.NewRequest(provider.requestMethod, u.String(), bytes.NewBufferString(body))
+	if err != nil {
+		return nil, fmt.Errorf("failed creating new request: %v", err)
+	}
+
+	utils.SetStringHeadersToRequest(req, headers)
+	return req, nil
+}
+
+func (provider *ProviderWebHook) formatWebhookString(s string, isIPv4 bool) string {
+	var ipAddr, ipType string
+	if isIPv4 {
+		ipAddr = provider.domainConfig.Ipv4Addr
+		ipType = "ipv4"
+	} else {
+		ipAddr = provider.domainConfig.Ipv6Addr
+		ipType = "ipv6"
+	}
+
+	r := strings.NewReplacer(
+		"{ip}", ipAddr,
+		"{domain}", provider.domainConfig.FullDomain,
+		"{type}", ipType,
+		"\r", "",
+	)
+
+	result := r.Replace(strings.TrimSpace(s))
+	return result
 }

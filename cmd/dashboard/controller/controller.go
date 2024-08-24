@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -277,7 +276,7 @@ func natGateway(c *gin.Context) {
 	rpc.NezhaHandlerSingleton.CreateStream(streamId)
 	defer rpc.NezhaHandlerSingleton.CloseStream(streamId)
 
-	taskData, err := json.Marshal(model.TaskNAT{
+	taskData, err := utils.Json.Marshal(model.TaskNAT{
 		StreamID: streamId,
 		Host:     natConfig.Host,
 	})

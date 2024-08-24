@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/rand"
 	"math/big"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -85,4 +86,16 @@ func Uint64SubInt64(a uint64, b int64) uint64 {
 		return 0
 	}
 	return a - uint64(b)
+}
+
+func SetStringHeadersToRequest(req *http.Request, headers []string) {
+	if req == nil {
+		return
+	}
+	for _, element := range headers {
+		kv := strings.SplitN(element, ":", 2)
+		if len(kv) == 2 {
+			req.Header.Add(kv[0], kv[1])
+		}
+	}
 }
