@@ -655,6 +655,15 @@ other = "Servidores en el mapa mundial"
 [NAT]
 other = "NAT traversal"
 
+[LocalService]
+other = "Servicio de red local"
+
+[LocalServicePlaceholder]
+other = "192.168.1.1:80 (con puerto)"
+
+[BindHostname]
+other = "Vincular nombre de host"
+
 [NetworkSpiterList]
 other = "Monitor de red"
 
