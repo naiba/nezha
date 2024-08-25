@@ -655,6 +655,15 @@ other = "Servers On World Map"
 [NAT]
 other = "NAT Traversal"
 
+[LocalService]
+other = "Local service"
+
+[LocalServicePlaceholder]
+other = "192.168.1.1:80 (with port)"
+
+[BindHostname]
+other = "Bind hostname"
+
 [NetworkSpiterList]
 other = "Network Monitor"
 

@@ -653,7 +653,16 @@ other = "禁止前台切換主題"
 other = "伺服器世界分布圖"
 
 [NAT]
-other = "NAT"
+other = "NAT穿透"
+
+[LocalService]
+other = "內網服務"
+
+[LocalServicePlaceholder]
+other = "192.168.1.1:80(帶埠號)"
+
+[BindHostname]
+other = "綁定網域"
 
 [NetworkSpiterList]
 other = "網路監控"

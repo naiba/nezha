@@ -655,6 +655,15 @@ other = "服务器世界分布图"
 [NAT]
 other = "内网穿透"
 
+[LocalService]
+other = "内网服务"
+
+[LocalServicePlaceholder]
+other = "192.168.1.1:80(带端口)"
+
+[BindHostname]
+other = "绑定域名"
+
 [NetworkSpiterList]
 other = "网络监控"
 

@@ -261,22 +261,23 @@
         const x = readableBytes(bs)
         return x != "NaN undefined" ? x : '0B'
       },
-      getCoreAndGHz(str){
-        if((str || []).hasOwnProperty(0) === false){
-            return '';
+      getCoreAndGHz(arr) {
+        if ((arr || []).length === 0) {
+          return '';
         }
-        str = str[0];
-	    let GHz = str.match(/(\d|\.)+GHz/g);
-	    let Core = str.match(/(\d|\.)+ Physical/g);
-	    GHz = GHz!==null?GHz.hasOwnProperty(0)===false?'':GHz[0]:''
-	    Core = Core!==null?Core.hasOwnProperty(0)===false?'?':Core[0]:'?'
-	    if(Core === '?'){
-	        let Core = str.match(/(\d|\.)+ Virtual/g);
-	        Core = Core!==null?Core.hasOwnProperty(0)===false?'?':Core[0]:'?'
-	        return Core.replace('Virtual','Core')
-	    }
-	    return Core.replace('Physical','Core');
-	   
+        let totalCores = 0;
+        arr.forEach(str => {
+          let coreMatch = str.match(/(\d+(\.\d+)?) Physical/g);
+          let coreCount = 0;
+          if (coreMatch) {
+            coreCount = parseFloat(coreMatch[0]);
+            } else {
+            let coreMatch = str.match(/(\d+(\.\d+)?) Virtual/g);
+            coreCount = coreMatch ? parseFloat(coreMatch[0]) : 0;
+          }
+            totalCores += coreCount;
+        });
+        return `${totalCores} Cores`;
       },
       getByteToGB(bs){
         return (bs/1024/1024/1024).toFixed(2) + 'GB'
