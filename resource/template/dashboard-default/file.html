@@ -221,7 +221,7 @@
 
             const checkCompletion = setInterval(() => {
                 if (isUpCompleted) {
-                    clearInterval(checkCompletion); // 任务完成后停止检查
+                    clearInterval(checkCompletion);
                     hideUpdModal();
                     resetUpdState();
                     listFile();
@@ -480,6 +480,7 @@
                 const file = event.target.files[0];
                 if (file) {
                     await uploadFile(file);
+                    isUpCompleted = false;
                 }
             });
 
