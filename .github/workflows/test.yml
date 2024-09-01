@@ -16,18 +16,30 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu, windows, macos]
+        
+    runs-on: ${{ matrix.os }}-latest
     env:
       GO111MODULE: on
     steps:
       - uses: actions/checkout@v4
+        
       - uses: actions/setup-go@v5
         with:
           go-version: "1.21.x"
+          
       - name: Unit test
         run: |
           go test -v ./...
+          
+      - name: Build test
+        run: go build -v ./cmd/dashboard
+          
       - name: Run Gosec Security Scanner
+        if: runner.os == 'Linux'
         uses: securego/gosec@master
         with:
           args: --exclude=G104,G402 ./...

@@ -4,18 +4,6 @@ on:
   push:
     tags:
       - "v*"
-    branches:
-      - master
-    paths:
-      - "**.go"
-      - "go.mod"
-      - "go.sum"
-      - "resource/**"
-      - ".github/workflows/test.yml"
-  pull_request:
-    branches:
-      - master
-  workflow_dispatch:
 
 jobs:
   build:
@@ -24,22 +12,16 @@ jobs:
       matrix:
         goos: [linux, windows]
         goarch: [amd64]
-
         include:
           - goos: linux
             goarch: s390x
           - goos: linux
-            goarch: riscv64
-          - goos: linux
             goarch: arm64
-          - goos: linux
-            goarch: arm
-            goarm: 7
-          - goos: windows
-            goarch: 386
-
+            
     name: Build artifacts
     runs-on: ubuntu-latest
+    container:
+      image: goreleaser/goreleaser-cross:v1.21
     env:
       GOOS: ${{ matrix.goos }}
       GOARCH: ${{ matrix.goarch }}
@@ -47,6 +29,7 @@ jobs:
     outputs:
       tag_name: ${{ steps.extract_branch.outputs.tag }}
     steps:
+      - run: git config --global --add safe.directory /__w/nezha/nezha
       - uses: actions/checkout@v4
 
       - name: Fetch IPInfo GeoIP Database
@@ -55,35 +38,26 @@ jobs:
           IPINFO_TOKEN: ${{ secrets.IPINFO_TOKEN }}
         run: |
           rm pkg/geoip/geoip.db
-          wget -O pkg/geoip/geoip.db https://ipinfo.io/data/free/country.mmdb?token=${IPINFO_TOKEN}
-
-      - name: Prepare toolchains
-        run: bash ./.github/toolchains.sh
-
-      - name: Extract branch name
-        run: |
-          export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
-          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
-        id: extract_branch
+          wget -qO pkg/geoip/geoip.db https://ipinfo.io/data/free/country.mmdb?token=${IPINFO_TOKEN}
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: "1.21.x"
-
+     
       - name: Build
-        env:
-          VERSION: ${{ steps.extract_branch.outputs.tag }}
-          CGO_ENABLED: 1
-        run: |
-          bash ./.github/build.sh
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: build --single-target --clean --skip=validate
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-${{ env.GOOS }}-${{ env.GOARCH }}
           path: |
-            ./${{ env.BUILDDIR }}/*
+            ./dist/*/*
 
   release:
     runs-on: ubuntu-latest
@@ -98,7 +72,7 @@ jobs:
 
       - name: Archive and compress binaries
         run: |
-          for file in assets/*/*; do
+          for file in assets/*/*/*; do
             if [ -f "$file" ]; then
               chmod +x "$file"
               zip -jr "$file.zip" "$file"
@@ -108,7 +82,7 @@ jobs:
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "assets/*/*.zip"
+          artifacts: "assets/*/*/*.zip"
           generateReleaseNotes: true
 
       - name: Purge jsdelivr cache
@@ -148,7 +122,13 @@ jobs:
         run: |
           chmod -R +x ./assets/*
           mkdir dist
-          mv ./assets/*/* ./dist
+          mv ./assets/*/*/* ./dist
+
+      - name: Extract branch name
+        run: |
+          export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
+          echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
+        id: extract_branch
          
       - name: Log into GHCR
         uses: docker/login-action@master
@@ -186,10 +166,10 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm,linux/s390x,linux/riscv64
+          platforms: linux/amd64,linux/arm64,linux/s390x
           push: true
           tags: |
             ${{ steps.image-name.outputs.GHCR_IMAGE_NAME }}:latest
-            ${{ steps.image-name.outputs.GHCR_IMAGE_NAME }}:${{ needs.build.outputs.tag_name }}
+            ${{ steps.image-name.outputs.GHCR_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
             ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:latest
-            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:${{ needs.build.outputs.tag_name }}
+            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
