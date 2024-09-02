@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"time"
+	_ "time/tzdata"
 
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
