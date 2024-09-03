@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.18.3"
+NZ_VERSION="v0.19.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -598,7 +598,7 @@ restart_and_update_standalone() {
         NZ_DASHBOARD_URL="https://${GITHUB_URL}/naibahq/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
     fi
 
-    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_URL >/dev/null 2>&1 && sudo unzip -qq $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dist/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm -r $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_PATH/dist
+    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_URL >/dev/null 2>&1 && sudo unzip -qq -o $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm $NZ_DASHBOARD_PATH/app.zip
 
     if [ "$os_alpine" != 1 ]; then
         sudo systemctl enable nezha-dashboard
