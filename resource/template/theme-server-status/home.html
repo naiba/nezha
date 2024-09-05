@@ -73,8 +73,10 @@
             this.servers = JSON.parse('{{.Servers}}').servers;
             if(this.showGroup) {
                 this.nodesTag = this.groupingData(this.handleNodes(this.servers),"Tag");
+                console.log(this.nodesTag);
             } else {
                 this.nodesNoTag = this.handleNodes(this.servers);
+                console.log(this.nodesNoTag);
             }
             this.initCountryMap().then(countryMap => {
                 this.countryMap = countryMap;
@@ -162,13 +164,23 @@
                 const tooltipBackgroundColor = this.theme == "dark" ? "#ffffff" : '#ffffff';
                 const tooltipBorderColor = this.theme == "dark" ? "#ffffff" : "#ffffff"; 
                 const fontSize = this.isMobile ? 10 : 12;
-                const fontColor = this.theme == "dark" ? "#000000" : "#000000";     
+                const fontColor = this.theme == "dark" ? "#000000" : "#000000"; 
+                const showLoadingMaskColor = this.theme == "dark" ? 'rgba(28, 29, 38, 1)' : 'rgba(249, 249, 249, 1)';
+                const showLoadingTextColor = this.theme == "dark" ? 'rgba(241, 241, 241, 1)' : 'rgba(0, 0, 0, 1)';
+                const showLoadingColor = inRangeColor;    
                 const chartContainer = document.getElementById('mapChart');
                 const mapChart = echarts.init(chartContainer, '', { // init图表
                     renderer: 'canvas',
                     useDirtyRect: false,
                     width: width,
                     height: height,
+                });
+                mapChart.showLoading({
+                    text: 'loading',
+                    textColor: showLoadingTextColor,
+                    color: showLoadingColor,
+                    maskColor: showLoadingMaskColor,
+                    zlevel: 2
                 });
                 fetch(this.staticUrl + '/maps/' + this.countryMapGeoFile)
                     .then(response => response.json())
@@ -224,7 +236,10 @@
                                 }
                             ]
                         };
-                        mapChart.setOption(option);
+                        setTimeout(() => {
+                            mapChart.hideLoading();
+                            mapChart.setOption(option);
+                        }, 1000);
                     });
             },
             isWindowsPlatform(str) {
@@ -510,7 +525,7 @@
                 // 定义图表参数值
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const fontSize = this.isMobile ? 10 : 14;
-                const gridLeft = this.isMobile ? 25 : 36;
+                const gridLeft = (MaxTCPPingValue > 500) ? (this.isMobile ? 30 : 40) : (this.isMobile ? 25 : 36);
                 const gridRight = this.isMobile ? 5 : 20;
                 const legendLeft = this.isMobile ? 'center' : 'center';
                 const legendTop = this.isMobile ? 5 : 5;

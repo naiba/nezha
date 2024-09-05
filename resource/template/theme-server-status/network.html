@@ -74,7 +74,7 @@
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const autoheight = this.isMobile ? (window.innerHeight - 200) : (window.innerHeight - 250);
                 const fontSize = this.isMobile ? 10 : 14;
-                const gridLeft = this.isMobile ? 30 : 36;
+                const gridLeft = (MaxTCPPingValue > 500) ? (this.isMobile ? 36 : 42) : (this.isMobile ? 30 : 36);
                 const gridRight = this.isMobile ? 12 : 20;
                 const legendLeft = this.isMobile ? 'center' : 'center';
                 const legendTop = this.isMobile ? 5 : 5;
