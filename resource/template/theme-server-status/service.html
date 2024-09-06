@@ -3,24 +3,24 @@
 {{template "theme-server-status/menu" .}}
 <!--  showGroup true -->
 <template v-if="showGroup">
-    <section v-if="servicesTag.length === 0" class="container-fluid content" style="min-height: .01%;overflow-x: auto;">
+    <div v-if="servicesTag.length === 0" class="container-fluid content" style="min-height: .01%;overflow-x: auto;">
         <p>No Valid Service Monitor Configuration Entries Found. Please Verify in the <a href="/monitor">Admin Panel</a>.</p>
-    </section>
-    <section v-else class="container-fluid content" style="min-height: .01%;overflow-x: auto;" v-for="group in servicesTag">
+    </div>
+    <div v-else class="container-fluid content" style="min-height: .01%;overflow-x: auto;" v-for="group in servicesTag">
         {{template "theme-server-status/service-group-true" .}} 
-    </section>
+    </div>
 </template>
 <!--  showGroup false -->
 <template v-else>
-    <section v-if="servicesNoTag.length === 0" class="container-fluid content" style="min-height: .01%;overflow-x: auto;">
+    <div v-if="servicesNoTag.length === 0" class="container-fluid content" style="min-height: .01%;overflow-x: auto;">
         <p>No Valid Service Monitor Configuration Entries Found. Please Verify in the <a href="/monitor">Admin Panel</a>.</p>
-    </section>
-    <section v-else class="container-fluid content" style="min-height: .01%;overflow-x: auto;">
+    </div>
+    <div v-else class="container-fluid content" style="min-height: .01%;overflow-x: auto;">
         {{template "theme-server-status/service-group-false" .}}
-    </section>
+    </div>
 </template>
 {{if .CycleTransferStats}}
-    <section class="container-fluid content table-responsive">
+    <div class="container-fluid content table-responsive">
         <table class="table table-striped table-condensed table-hover">
             <thead>
                 <tr class="node-group-tag">
@@ -67,7 +67,7 @@
                 {{end}}
             </tbody>
         </table>
-    </section>
+    </div>
 {{end}}
 {{template "theme-server-status/footer" .}}
 <script>

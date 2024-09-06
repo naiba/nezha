@@ -74,23 +74,24 @@
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const autoheight = this.isMobile ? (window.innerHeight - 200) : (window.innerHeight - 250);
                 const fontSize = this.isMobile ? 10 : 14;
-                const gridLeft = this.isMobile ? 30 : 36;
+                const gridLeft = (MaxTCPPingValue > 500) ? (this.isMobile ? 36 : 42) : (this.isMobile ? 30 : 36);
                 const gridRight = this.isMobile ? 12 : 20;
                 const legendLeft = this.isMobile ? 'center' : 'center';
                 const legendTop = this.isMobile ? 5 : 5;
                 const legendPadding= this.isMobile ? [5,0,5,0] : [5,0,5,0];
                 const fontColor = this.theme == "dark" ? "#f1f1f1" : "#000000";
+                const chartTheme = this.theme == "dark" ? "dark" : "default";
                 const backgroundColor = this.theme == "dark" ? '' : '';
                 const tooltipBackgroundColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.85)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,1)");
                 const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
                 const lineStyleWidth = this.isMobile ? 1 : 2;
                 const splitLineWidth = this.isMobile ? 0.5 : 1;
-                const splitLineColor = this.theme == "dark" ? "rgba(110, 112, 121, 0.95)" : "rgba(224, 230, 241, 0.95)";
-                const markPointLabelColor = this.theme == "dark" ? "#111111" : "#000000";
-                const markPointItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
+                const markPointSymbolSize = this.isMobile ? 30 : 42;
+                const markPointItemStyleOpacity = this.semiTransparent ? 1 : 0.9;
+                const markPointFontSize = this.isMobile ? 8 : 10;
                 const markLineItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
                 const markLineLineStyleWidth = this.isMobile ? 0.15 : 0.3;
-                this.chart = echarts.init(chartContainer, '', { // init图表
+                this.chart = echarts.init(chartContainer, chartTheme, { // init图表
                     renderer: 'canvas',
                     useDirtyRect: false,
                     width: 'auto',
@@ -182,10 +183,9 @@
                                         itemStyle: { 
                                             opacity: markPointItemStyleOpacity
                                         }, 
-                                        symbolSize: 30, 
+                                        symbolSize: markPointSymbolSize, 
                                         label: { 
-                                            fontSize: 8,
-                                            color: markPointLabelColor,
+                                            fontSize: markPointFontSize,
                                             formatter: function (params) {
                                                 return Math.round(params.value);
                                             }
@@ -198,10 +198,9 @@
                                         itemStyle: { 
                                             opacity: markPointItemStyleOpacity
                                         }, 
-                                        symbolSize: 30, 
+                                        symbolSize: markPointSymbolSize, 
                                         label: { 
-                                            fontSize: 8,
-                                            color: markPointLabelColor,
+                                            fontSize: markPointFontSize,
                                             offset: [0, 8],
                                             formatter: function (params) {
                                                 return Math.round(params.value);
@@ -218,7 +217,8 @@
                 const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
                 const autoIncrement = Math.floor((legendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 20 : 28);
                 const height = autoheight + autoIncrement;
-                const gridTop = 40 + autoIncrement;
+                const gridTop = this.isMobile ? ( 60 + autoIncrement) : (80 + autoIncrement);
+                const gridBottom = this.isMobile ? 70 : 90;
                 const legendIcon = this.isMobile ? 'rect' : ""; 
                 const itemWidth = this.isMobile ? 10 : 25;
                 const itemHeight = this.isMobile ? 10 : 14;
@@ -241,7 +241,8 @@
                     grid: {
                         top: gridTop,
                         left: gridLeft,
-                        right: gridRight
+                        right: gridRight,
+                        bottom: gridBottom
                     },
                     // 图表标题设置
                     title: {
@@ -268,8 +269,7 @@
                         },
                         splitLine: {
                             lineStyle: {
-                                width: splitLineWidth,
-                                color: splitLineColor
+                                width: splitLineWidth
                             }
                         }
                     },

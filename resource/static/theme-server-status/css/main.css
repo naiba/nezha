@@ -480,7 +480,8 @@ footer p{
         padding-top:60px !important;
     }
     .nezha {
-        min-height: calc(74.5vh);
+        min-height: calc(100vh - 90px);
+        min-height: calc(var(--vh, 1vh) * 100 - 90px);
     }
     .content {
         padding: 0;

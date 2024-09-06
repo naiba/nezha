@@ -26,7 +26,9 @@ const mixinsVue = {
         this.semiTransparent = this.initSemiTransparent();
         this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : this.$root.defaultTemplate;
         this.colors = this.theme == "dark" ? this.colorsDark : this.colorsLight;
+        this.setBenchmarkHeight();
         window.addEventListener('scroll', this.handleScroll);
+        window.addEventListener('resize', this.setBenchmarkHeight());
     },
     destroyed() {
         window.removeEventListener('scroll', this.handleScroll);
@@ -152,6 +154,10 @@ const mixinsVue = {
         },
         checkIsMobile() { // 检测设备类型,页面宽度小于768px认为是移动设备
             return window.innerWidth <= 768;
+        },
+        setBenchmarkHeight() {
+            let vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
         }
     }
 }
