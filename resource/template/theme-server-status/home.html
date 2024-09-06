@@ -3,15 +3,15 @@
 {{template "theme-server-status/menu" .}}   
 <!--  showGroup true -->
 <template v-if="showGroup">
-    <section class="container-fluid table-responsive content" v-for="group in nodesTag">
+    <div class="container-fluid table-responsive content" v-for="group in nodesTag">
         {{template "theme-server-status/home-group-true" .}} 
-    </section>
+    </div>
 </template>
 <!--  showGroup false -->
 <template v-else>
-    <section class="container-fluid table-responsive content">
+    <div class="container-fluid table-responsive content">
         {{template "theme-server-status/home-group-false" .}}
-    </section>
+    </div>
 </template>
 <div class="modal fade" id="mapChartBox" tabindex="-1" role="dialog" aria-labelledby="mapChartTitle" aria-hidden="true" style="padding-left:0">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -73,10 +73,8 @@
             this.servers = JSON.parse('{{.Servers}}').servers;
             if(this.showGroup) {
                 this.nodesTag = this.groupingData(this.handleNodes(this.servers),"Tag");
-                console.log(this.nodesTag);
             } else {
                 this.nodesNoTag = this.handleNodes(this.servers);
-                console.log(this.nodesNoTag);
             }
             this.initCountryMap().then(countryMap => {
                 this.countryMap = countryMap;
@@ -532,8 +530,8 @@
                 const legendPadding= this.isMobile ? [5,0,5,0] : [5,0,5,0];
                 const systemDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                 const theme = localStorage.getItem("theme") ? localStorage.getItem("theme") : systemDarkMode;
-                const chartTheme = theme == "dark" ? "dark" : "default";
-                const fontColor = theme == "dark" ? "#f1f1f1" : "#000000";
+                const chartTheme = this.theme == "dark" ? "dark" : "default";
+                const fontColor = this.theme == "dark" ? "#f1f1f1" : "#000000";
                 const backgroundColor = theme == "dark" ? '' : '';
                 const tooltipBackgroundColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.85)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,1)");
                 const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");

@@ -2,18 +2,18 @@
 <!DOCTYPE html>
 <html lang="{{.Conf.Language}}">
 <head>
-    <title>{{ .Title }}</title>
+    <title>{{.Title}}</title>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta content="telephone=no" name="format-detection">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="theme-color" content="#000000" />
-    {{ if eq .Conf.Language "zh-CN" }}
+    {{if eq .Conf.Language "zh-CN"}}
         <link rel="manifest" href="/static/manifest-zh-CN.json?v20240905" />
-    {{ else }}
+    {{else}}
         <link rel="manifest" href="/static/manifest-en-US.json?v20240905" />
-    {{ end }}
+    {{end}}
     <link rel="apple-touch-startup-image" href="/static/logo.svg" />
     <link rel="shortcut icon" type="image/png" href="/static/logo.svg">
     <link rel="stylesheet" href="https://unpkg.com/bootstrap@3.4.1/dist/css/bootstrap.min.css">
@@ -25,10 +25,10 @@
     <script src="https://unpkg.com/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
     <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script>
     <script src="https://unpkg.com/echarts@5.5.0/dist/echarts.min.js"></script>
-    <link rel="stylesheet" href="/static/theme-server-status/css/main.css?v20240906">
+    <link rel="stylesheet" href="/static/theme-server-status/css/main.css?v20240907">
     <link rel="stylesheet" href="/static/theme-server-status/css/dark.css?v202408011">
     <link rel="stylesheet" href="/static/theme-server-status/css/light.css?v20240811">
-    <script src="/static/theme-server-status/js/mixin.js?v20240811"></script>
+    <script src="/static/theme-server-status/js/mixin.js?v20240907"></script>
 </head>
 <body>
 <div id="app">
