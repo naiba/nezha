@@ -234,7 +234,7 @@
                 const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 5;
                 const autoIncrement = Math.floor((tLegendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 40 : 60);
                 const height = 520 + autoIncrement;
-                const gridTop = 40 + autoIncrement;
+                const gridTop = 60 + autoIncrement;
                 this.option.grid = {
                     left: this.isMobile ? '8%' : '3.8%',
                     right: this.isMobile ? '8%' : '3.8%',
