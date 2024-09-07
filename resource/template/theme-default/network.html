@@ -231,8 +231,8 @@
                 this.option.series = tSeries;
                 this.option.legend.data = tLegendData;
                 const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 2;
-                const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 3;
-                const autoIncrement = Math.floor((tLegendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 40 : 40);
+                const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 5;
+                const autoIncrement = Math.floor((tLegendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 40 : 60);
                 const height = 520 + autoIncrement;
                 const gridTop = 40 + autoIncrement;
                 this.option.grid = {
