@@ -36,7 +36,11 @@
             defaultTemplate: {{.Conf.Site.Theme}},
             templates: {{.Themes}},
             servers: initData,
-            option: {
+            option: {}
+        },
+        mixins: [mixinsVue],
+        created() {
+            this.option = {
                 tooltip: {
                     trigger: 'axis',
                     position: function (pt) {
@@ -69,15 +73,6 @@
                     right: this.isMobile ? '8%' : '3.8%',
                 },
                 backgroundColor: '',
-                toolbox: {
-                    feature: {
-                        dataZoom: {
-                            yAxisIndex: 'none'
-                        },
-                        restore: {},
-                        saveAsImage: {}
-                    }
-                },
                 dataZoom: [
                     {
                         type: 'slider',
@@ -94,10 +89,8 @@
                     boundaryGap: false
                 },
                 series: [],
-            },
-            chartOnOff: true,
+            }
         },
-        mixins: [mixinsVue],
         mounted() {
             this.renderChart();
             this.parseMonitorInfo(monitorInfo);
@@ -237,6 +230,20 @@
                 this.option.title.text = monitorInfo.result[0].server_name;
                 this.option.series = tSeries;
                 this.option.legend.data = tLegendData;
+                const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 2;
+                const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
+                const autoIncrement = Math.floor((tLegendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 28 : 34);
+                const height = 520 + autoIncrement;
+                const gridTop = 60 + autoIncrement;
+                this.option.grid = {
+                    left: this.isMobile ? '8%' : '3.8%',
+                    right: this.isMobile ? '8%' : '3.8%',
+                    top: gridTop
+                };
+                this.myChart.resize({
+                    width: 'auto',
+                    height: height
+                });
                 this.myChart.clear();
                 this.myChart.setOption(this.option);
             },

@@ -15,13 +15,13 @@
             "purpose": "maskable"
         },
         {
-            "src": "//static/manifest-512x512.png",
+            "src": "/static/manifest-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "//static/manifest-512x512.png",
+            "src": "/static/manifest-512x512.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
