@@ -194,7 +194,7 @@
             ]
         },
         mixins: [mixinsVue],
-            created() {
+        created() {
             this.servers = JSON.parse('{{.Servers}}').servers;
             this.group()
         },
