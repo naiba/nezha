@@ -88,7 +88,7 @@
                 const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
                 const lineStyleWidth = this.isMobile ? 1 : 2;
                 const splitLineWidth = this.isMobile ? 0.5 : 1;
-                const markPointSymbolSize = this.isMobile ? 30 : 42;
+                const markPointSymbolSize = this.isMobile ? 36 : 42;
                 const markPointItemStyleOpacity = this.semiTransparent ? 1 : 1;
                 const markPointFontSize = this.isMobile ? 8 : 10;
                 const markLineItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
@@ -124,9 +124,6 @@
                             loss += 1;
                             const lossrate = 100 * loss / (index + 1);
                             if(lossrate != 100) {
-                                data['main'].push(
-                                    [item.created_at[index], MaxTCPPingValue, lossrate]
-                                );
                                 data['markLine'].push({
                                     xAxis: item.created_at[index],
                                     label: { show: false },
