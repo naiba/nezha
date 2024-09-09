@@ -381,6 +381,7 @@ td.ping-network-quality {
 }
 
 .network-box .chartTitle {
+    cursor: pointer;
     text-align: center;
     font-size: 18px;
     margin: 18px 0px 15px 0px;
@@ -482,6 +483,10 @@ footer p{
     .nezha {
         min-height: calc(100vh - 90px);
         min-height: calc(var(--vh, 1vh) * 100 - 90px);
+    }
+    #chartbox {
+        min-height: calc(100vh - 170px);
+        min-height: calc(var(--vh, 1vh) * 100 - 170px);    
     }
     .content {
         padding: 0;

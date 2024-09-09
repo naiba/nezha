@@ -15,7 +15,7 @@
             </li>
         </ul>
     </div>
-    <div class="chartTitle"><i class="chartCountryCode" :class="'fi fi-' + chartCountryCode"></i> @#chartTitle#@</div>
+    <div class="chartTitle" @click="showCharts(nextServerId)"><i class="chartCountryCode" :class="'fi fi-' + chartCountryCode"></i> @#chartTitle#@</div>
     <div id="chartbox" style="width:100%;height:auto;"></div>
 </div>
 {{template "theme-server-status/footer" .}}
@@ -32,7 +32,8 @@
             chartTitle: '',
             chartCountryCode: '',
             chart: null,
-            currentServerId: ''
+            currentServerId: '',
+            nextServerId: '',
         },
         mixins: [mixinsVue],
         created() {
@@ -66,13 +67,14 @@
                 if(!this.chartDataList[id]) return;
                 if(this.chart) this.disposeCharts(this.chart);
                 this.currentServerId = id;
+                this.nextServerId = this.getNextServerId(id);
                 this.chartCountryCode = this.getServerCountryCode(id);
                 this.chartTitle = this.chartDataList[id][0].server_name;
                 const chartData = this.chartDataList[id];
                 const chartContainer = document.getElementById('chartbox');
                 // 定义图表参数值
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
-                const autoheight = this.isMobile ? (window.innerHeight - 200) : (window.innerHeight - 250);
+                const autoheight = this.isMobile ? (window.innerHeight - 180) : (window.innerHeight - 250);
                 const fontSize = this.isMobile ? 10 : 14;
                 const gridLeft = (MaxTCPPingValue > 500) ? (this.isMobile ? 36 : 42) : (this.isMobile ? 30 : 36);
                 const gridRight = this.isMobile ? 12 : 20;
@@ -87,15 +89,25 @@
                 const lineStyleWidth = this.isMobile ? 1 : 2;
                 const splitLineWidth = this.isMobile ? 0.5 : 1;
                 const markPointSymbolSize = this.isMobile ? 30 : 42;
-                const markPointItemStyleOpacity = this.semiTransparent ? 1 : 0.9;
+                const markPointItemStyleOpacity = this.semiTransparent ? 1 : 1;
                 const markPointFontSize = this.isMobile ? 8 : 10;
                 const markLineItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
                 const markLineLineStyleWidth = this.isMobile ? 0.15 : 0.3;
+                const showLoadingMaskColor = this.theme == "dark" ? 'rgba(0, 0, 0, 0)' : 'rgba(255, 255, 255, 0)';
+                const showLoadingTextColor = this.theme == "dark" ? 'rgba(241, 241, 241, 1)' : 'rgba(0, 0, 0, 1)';
+                const showLoadingColor = this.theme == "dark" ? '#D2B206' : '#FFDF32';
                 this.chart = echarts.init(chartContainer, chartTheme, { // init图表
                     renderer: 'canvas',
                     useDirtyRect: false,
                     width: 'auto',
                     height: autoheight,
+                });
+                this.chart.showLoading({
+                    text: 'loading',
+                    textColor: showLoadingTextColor,
+                    color: showLoadingColor,
+                    maskColor: showLoadingMaskColor,
+                    zlevel: 2
                 });
                 // 获取图表数据
                 let legendData = [];
@@ -322,16 +334,16 @@
                     ]
                 };
                 // 设置图表的配置选项
-                this.chart.setOption(option);
+                setTimeout(() => {
+                    this.chart.hideLoading();
+                    this.chart.setOption(option);
+                }, 1000);
             },
-            reloadCharts() { // 重新加载所有图表
-                this.servers.forEach(node => {
-                    const id = node.ID;
-                    const chartData = this.chartDataList[id];
-                    if (chartData) {
-                        this.renderCharts(id,true);
-                    }
-                });
+            reloadCharts() { // 重新加载图表
+                const chartData = this.chartDataList[this.currentServerId];
+                if (chartData) {
+                    this.renderCharts(this.currentServerId,true);
+                }
             },
             disposeCharts(chart){
                 chart.dispose();
@@ -340,6 +352,16 @@
             getServerCountryCode(id){
                 const result = this.servers.find(item => item.ID == id);
                 return result.Host.CountryCode ? result.Host.CountryCode : 'rb';
+            },
+            getNextServerId(id) {
+                const currentIndex = this.servers.findIndex(item => item.ID === id);
+                if (currentIndex === -1) {
+                    return this.servers[0].ID;
+                }
+                // 判断是否有下一个元素
+                const nextIndex = currentIndex + 1;
+                // 如果有下一个元素，返回下一个元素的 ID；否则返回第一个元素的 ID
+                return nextIndex < this.servers.length ? this.servers[nextIndex].ID : this.servers[0].ID;
             },
             initSearch() {
                 $('#dropdown-search').on('keyup', function() {
