@@ -520,7 +520,6 @@
                     const chartboxShow = chartContainer.getAttribute('chartbox-show');
                     if ( chartboxShow === '0' ) return; 
                 }
-                // 定义图表参数值
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const fontSize = this.isMobile ? 10 : 14;
                 const gridLeft = (MaxTCPPingValue > 500) ? (this.isMobile ? 36 : 42) : (this.isMobile ? 25 : 36);
@@ -537,7 +536,6 @@
                 const tooltipBorderColor = this.theme == "dark" ? (this.semiTransparent ? "rgba(28,29,38,0.9)" : "rgba(28,29,38,1)") : (this.semiTransparent ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,1)");
                 const lineStyleWidth = this.isMobile ? 1 : 2;
                 const splitLineWidth = this.isMobile ? 0.5 : 1;
-                const markPointFontSize = this.isMobile ? 8 : 10;
                 const markLineItemStyleOpacity = this.semiTransparent ? 1 : 0.75;
                 const markLineLineStyleWidth = this.isMobile ? 0.15 : 0.3;
                 const chart = echarts.init(chartContainer, chartTheme, { // init图表
@@ -546,7 +544,6 @@
                     width: 'auto',
                     height: 300
                 });
-                // 获取图表数据
                 let legendData = [];
                 let seriesData = [];
                 chartData.forEach((item,key)=> {
@@ -589,11 +586,9 @@
                             );
                         }
                     });
-                    // 处理legendData
                     totalLossRate = ((loss / item.created_at.length) * 100).toFixed(1);
                     legendName = `${item.monitor_name} ${totalLossRate}%`;
                     legendData.push(legendName);
-                    // 处理seriesData
                     seriesData.push(
                         {
                             name: legendName,
@@ -623,7 +618,6 @@
                         }
                     );
                 });
-
                 const maxLegendsPerRowMobile = localStorage.getItem("maxLegendsPerRowMobile") ? localStorage.getItem("maxLegendsPerRowMobile") : 3;
                 const maxLegendsPerRowPc = localStorage.getItem("maxLegendsPerRowPc") ? localStorage.getItem("maxLegendsPerRowPc") : 6;
                 const autoIncrement = Math.floor((legendData.length - 1) / (this.isMobile ? maxLegendsPerRowMobile : maxLegendsPerRowPc)) * (this.isMobile ? 20 : 28);            
@@ -720,7 +714,7 @@
                 };
                 chart.setOption(option);
             },
-            reloadCharts() { // 重新加载所有图表
+            reloadCharts() {
                 this.servers.forEach(node => {
                     const id = node.ID;
                     const chartData = this.chartDataList[id];

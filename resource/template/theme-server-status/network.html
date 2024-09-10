@@ -72,7 +72,6 @@
                 this.chartTitle = this.chartDataList[id][0].server_name;
                 const chartData = this.chartDataList[id];
                 const chartContainer = document.getElementById('chartbox');
-                // 定义图表参数值
                 const MaxTCPPingValue = {{.Conf.MaxTCPPingValue}} ? {{.Conf.MaxTCPPingValue}} : 300;
                 const autoheight = this.isMobile ? (window.innerHeight - 180) : (window.innerHeight - 250);
                 const fontSize = this.isMobile ? 10 : 14;
@@ -109,7 +108,6 @@
                     maskColor: showLoadingMaskColor,
                     zlevel: 2
                 });
-                // 获取图表数据
                 let legendData = [];
                 let seriesData = [];
                 chartData.forEach((item,key)=> {
@@ -152,11 +150,9 @@
                             );
                         }
                     });
-                    // 处理legendData
                     totalLossRate = ((loss / item.created_at.length) * 100).toFixed(1);
                     legendName = `${item.monitor_name} ${totalLossRate}%`;
                     legendData.push(legendName);
-                    // 处理seriesData
                     seriesData.push(
                         {
                             name: legendName,
@@ -324,7 +320,7 @@
                     this.chart.setOption(option);
                 }, 1000);
             },
-            reloadCharts() { // 重新加载图表
+            reloadCharts() {
                 const chartData = this.chartDataList[this.currentServerId];
                 if (chartData) {
                     this.renderCharts(this.currentServerId,true);
