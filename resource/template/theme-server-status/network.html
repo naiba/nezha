@@ -237,29 +237,22 @@
                 });
                 // 设置图表配置项
                 const option = {
-                    // 全局调色盘
                     color: this.colors,
-                    // 背景颜色
                     backgroundColor: backgroundColor,
-                    // 文字样式
                     textStyle: {
                         fontSize: fontSize,
                         color: fontColor
                     },
-                    // 图表网格设置
                     grid: {
                         top: gridTop,
                         left: gridLeft,
                         right: gridRight,
                         bottom: gridBottom
                     },
-                    // 图表标题设置
                     title: {
                         show: false,
                     },
-                    // 图表系列数据设置
                     series: seriesData.flat(),
-                    // X轴设置
                     xAxis: {
                         type: 'time',
                         axisLabel: {
@@ -268,7 +261,6 @@
                             }
                         }
                     },
-                    // Y轴设置
                     yAxis: {
                         type: 'value',
                         axisLabel: {
@@ -282,7 +274,6 @@
                             }
                         }
                     },
-                    // 图例设置
                     legend: {
                         data: legendData,
                         show: true,
@@ -298,7 +289,6 @@
                         itemWidth: itemWidth,
                         itemHeight: itemHeight,
                     },
-                    // 提示框设置
                     tooltip: {
                         trigger: 'axis',
                         backgroundColor: tooltipBackgroundColor,
@@ -321,7 +311,6 @@
                             return tooltipContent;
                         }
                     },
-                    // 数据缩放设置
                     dataZoom: [
                         {
                             type: 'slider',
@@ -330,7 +319,6 @@
                         }
                     ]
                 };
-                // 设置图表的配置选项
                 setTimeout(() => {
                     this.chart.hideLoading();
                     this.chart.setOption(option);

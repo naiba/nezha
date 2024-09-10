@@ -18,7 +18,7 @@
     <tbody id="servers">
     <template v-for="(node,index) in nodesNoTag">
         <tr :id="'r'+node.ID" data-toggle="collapse" :data-target="'#rt'+node.ID" class="accordion-toggle" :class="index % 2 === 0 ? 'odd': 'even'" 
-        aria-expanded="false" @click="showCharts($event, node.ID)">
+        aria-expanded="false" @click="showCharts(node.ID)">
             <td class="node-cell status center">
                 <div class="status-container">
                     <div v-if="node.online" class="status-icon online"></div>
@@ -143,7 +143,7 @@
                             @#node.host.Version#@
                         </span>
                         <span class="node-echarts-expand">
-                            <div class="chartbox" chartbox-show="0" :key="node.ID" :ref="`chart${node.ID}`" style="width: 100%; height: auto;"></div>
+                            <div class="chartbox" :id="`chart-${node.ID}`" chartbox-show="0" :key="node.ID" style="width: 100%; height: auto;"></div>
                         </span>
                     </div>
                 </div>
