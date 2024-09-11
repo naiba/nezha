@@ -13,7 +13,18 @@ const mixinsVue = {
         this.isMobile = this.checkIsMobile();
         this.preferredTemplate = this.getCookie('preferred_theme') ? this.getCookie('preferred_theme') : this.$root.defaultTemplate;
     },
+    mounted() {
+        this.initDropdown();
+    },
     methods: {
+        initDropdown() {
+            if(this.isMobile) $('.ui.dropdown').dropdown({
+                action: 'hide',
+                on: 'click',
+                duration: 100,
+                direction: 'direction'
+            });
+        },
         toggleTemplate(template) {
             if( template != this.preferredTemplate){
                 this.preferredTemplate = template;

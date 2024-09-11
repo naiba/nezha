@@ -7,7 +7,7 @@
         </a>
         <a class='item' href="/"><i class="home icon"></i>{{tr "Home"}}</a>
         <template v-if="isMobile"> 
-            <div class="item ui simple dropdown">
+            <div class="item ui dropdown" :class="{ simple: !isMobile }">
                 <div class="text"><i class="bi bi-gear-wide-connected icon" style="margin-right:3px;"></i>{{tr "Feature" }}<i class="dropdown icon" style="margin-right:0px;"></i></div>
                 <div class="menu">
                     <a href="/service" class="item"><i class="rss icon"></i>{{tr "Services" }}</a>
@@ -20,7 +20,7 @@
             <a href="/network" class="item"><i class="bi bi-hdd-network icon"></i>{{tr "NetworkSpiter"}}</a>
         </template>
         {{ if not .Conf.DisableSwitchTemplateInFrontend }}        
-            <div class="item ui simple dropdown">
+            <div class="item ui dropdown" :class="{ simple: !isMobile }">
                 <div class="text"><i class="bi bi-incognito icon" style="margin-right:3px;"></i>{{tr "Template" }}<i class="dropdown icon" style="margin-right:0px;"></i></div>
                 <div class="menu"> 
                     <a v-for="(item, index) in adaptedTemplates" :key="index" @click="toggleTemplate(item.key)" class="item">
