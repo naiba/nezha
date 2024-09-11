@@ -1,22 +1,20 @@
-package controller
+package api_v1
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/gin-gonic/gin"
-
+	_ "github.com/naiba/nezha/cmd/dashboard/docs"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/service/singleton"
+	"strconv"
 )
 
-type apiV1 struct {
-	r gin.IRouter
+type ApiV1 struct {
+	R gin.IRouter
 }
 
-func (v *apiV1) serve() {
-	r := v.r.Group("")
+func (v *ApiV1) Serve() {
+	r := v.R.Group("")
 	// 强制认证的 API
 	r.Use(mygin.Authorize(mygin.AuthorizeOption{
 		MemberOnly: true,
@@ -26,10 +24,16 @@ func (v *apiV1) serve() {
 		Btn:        "点此登录",
 		Redirect:   "/login",
 	}))
-	r.GET("/server/list", v.serverList)
-	r.GET("/server/details", v.serverDetails)
+	r.GET("/server/list", v.getServerList)
+	r.GET("/server/details", v.getServerDetails)
+	r.POST("/server", v.addServer)
+	r.POST("/server/upgrade", v.batchUpgradeServerAgent)
+	r.PUT("/server", v.editServer)
+	r.PUT("/server/groups", v.batchEditServerGroup)
+	r.DELETE("/server", v.deleteServer)
+
 	// 不强制认证的 API
-	mr := v.r.Group("monitor")
+	mr := v.R.Group("monitor")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
 		MemberOnly: false,
 		IsPage:     false,
@@ -43,47 +47,10 @@ func (v *apiV1) serve() {
 		AbortWhenFail: true,
 	}))
 	mr.GET("/:id", v.monitorHistoriesById)
+
 }
 
-// serverList 获取服务器列表 不传入Query参数则获取全部
-// header: Authorization: Token
-// query: tag (服务器分组)
-func (v *apiV1) serverList(c *gin.Context) {
-	tag := c.Query("tag")
-	if tag != "" {
-		c.JSON(200, singleton.ServerAPI.GetListByTag(tag))
-		return
-	}
-	c.JSON(200, singleton.ServerAPI.GetAllList())
-}
-
-// serverDetails 获取服务器信息 不传入Query参数则获取全部
-// header: Authorization: Token
-// query: id (服务器ID，逗号分隔，优先级高于tag查询)
-// query: tag (服务器分组)
-func (v *apiV1) serverDetails(c *gin.Context) {
-	var idList []uint64
-	idListStr := strings.Split(c.Query("id"), ",")
-	if c.Query("id") != "" {
-		idList = make([]uint64, len(idListStr))
-		for i, v := range idListStr {
-			id, _ := strconv.ParseUint(v, 10, 64)
-			idList[i] = id
-		}
-	}
-	tag := c.Query("tag")
-	if tag != "" {
-		c.JSON(200, singleton.ServerAPI.GetStatusByTag(tag))
-		return
-	}
-	if len(idList) != 0 {
-		c.JSON(200, singleton.ServerAPI.GetStatusByIDList(idList))
-		return
-	}
-	c.JSON(200, singleton.ServerAPI.GetAllStatus())
-}
-
-func (v *apiV1) monitorHistoriesById(c *gin.Context) {
+func (v *ApiV1) monitorHistoriesById(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {

@@ -1,0 +1,461 @@
+definitions:
+  model.Host:
+    properties:
+      arch:
+        type: string
+      bootTime:
+        type: integer
+      countryCode:
+        type: string
+      cpu:
+        items:
+          type: string
+        type: array
+      diskTotal:
+        type: integer
+      gpu:
+        items:
+          type: string
+        type: array
+      memTotal:
+        type: integer
+      platform:
+        type: string
+      platformVersion:
+        type: string
+      swapTotal:
+        type: integer
+      version:
+        type: string
+      virtualization:
+        type: string
+    type: object
+  model.HostState:
+    properties:
+      cpu:
+        type: number
+      diskUsed:
+        type: integer
+      gpu:
+        type: number
+      load1:
+        type: number
+      load5:
+        type: number
+      load15:
+        type: number
+      memUsed:
+        type: integer
+      netInSpeed:
+        type: integer
+      netInTransfer:
+        type: integer
+      netOutSpeed:
+        type: integer
+      netOutTransfer:
+        type: integer
+      processCount:
+        type: integer
+      swapUsed:
+        type: integer
+      tcpConnCount:
+        type: integer
+      temperatures:
+        items:
+          $ref: '#/definitions/model.SensorTemperature'
+        type: array
+      udpConnCount:
+        type: integer
+      uptime:
+        type: integer
+    type: object
+  model.SensorTemperature:
+    properties:
+      name:
+        type: string
+      temperature:
+        type: number
+    type: object
+  singleton.BatchUpdateServerGroupRequest:
+    properties:
+      group:
+        description: 新的分组
+        example: newGroup
+        type: string
+      servers:
+        description: 需要更新的服务器ID
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
+  singleton.BatchUpdateServerGroupResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      message:
+        example: success
+        type: string
+    type: object
+  singleton.CommonServerInfo:
+    properties:
+      agent_version:
+        type: string
+      display_index:
+        type: integer
+      id:
+        type: integer
+      ipv4:
+        type: string
+      ipv6:
+        type: string
+      last_active:
+        type: integer
+      name:
+        type: string
+      tag:
+        type: string
+      valid_ip:
+        type: string
+    type: object
+  singleton.ForceUpdateAgentRequest:
+    properties:
+      server_id_list:
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
+  singleton.ForceUpdateAgentResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      fail:
+        additionalProperties:
+          type: string
+        example:
+          "3": '"offline"'
+        type: object
+      message:
+        example: success
+        type: string
+      success:
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
+  singleton.ServerConfigData:
+    properties:
+      DDNSDomain:
+        example: ""
+        type: string
+      DDNSProfile:
+        example: ""
+        type: string
+      displayIndex:
+        description: 展示排序，越大越靠前
+        example: 0
+        type: integer
+      enableDDNS:
+        example: "off"
+        type: string
+      enableIPv4:
+        example: "off"
+        type: string
+      enableIpv6:
+        example: "off"
+        type: string
+      hideForGuest:
+        description: 对游客隐藏
+        example: "off"
+        type: string
+      id:
+        example: 0
+        type: integer
+      name:
+        description: 服务器名称
+        example: 服务器名
+        type: string
+      note:
+        description: 管理员可见备注
+        example: 备注
+        type: string
+      secret:
+        description: 服务器密钥, 默认18位随机字符串
+        example: ""
+        type: string
+      tag:
+        description: 服务器分组
+        example: 服务器组
+        type: string
+    required:
+    - name
+    type: object
+  singleton.ServerConfigResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      message:
+        example: success
+        type: string
+      result:
+        $ref: '#/definitions/singleton.ServerConfigData'
+    type: object
+  singleton.ServerDeleteRequest:
+    properties:
+      id_list:
+        description: 需要删除的服务器ID
+        example:
+        - 1
+        - 2
+        items:
+          type: integer
+        type: array
+    type: object
+  singleton.ServerDeleteResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      message:
+        example: success
+        type: string
+    type: object
+  singleton.ServerInfoResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      message:
+        example: success
+        type: string
+      result:
+        items:
+          $ref: '#/definitions/singleton.CommonServerInfo'
+        type: array
+    type: object
+  singleton.ServerStatusResponse:
+    properties:
+      code:
+        example: 0
+        type: integer
+      message:
+        example: success
+        type: string
+      result:
+        items:
+          $ref: '#/definitions/singleton.StatusResponse'
+        type: array
+    type: object
+  singleton.StatusResponse:
+    properties:
+      agent_version:
+        type: string
+      display_index:
+        type: integer
+      host:
+        $ref: '#/definitions/model.Host'
+      id:
+        type: integer
+      ipv4:
+        type: string
+      ipv6:
+        type: string
+      last_active:
+        type: integer
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/model.HostState'
+      tag:
+        type: string
+      valid_ip:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/server:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 服务器ID列表
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.ServerDeleteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ServerDeleteResponse'
+      summary: 删除服务器
+      tags:
+      - server
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 服务器信息
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.ServerConfigData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ServerConfigResponse'
+      summary: 添加新服务器
+      tags:
+      - server
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 服务器信息
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.ServerConfigData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ServerConfigResponse'
+      summary: 编辑服务器
+      tags:
+      - server
+  /api/v1/server/details:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 服务器ID，逗号分隔，优先级高于tag查询
+        in: query
+        name: id
+        type: string
+      - description: 服务器分组
+        in: query
+        name: tag
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ServerStatusResponse'
+      summary: 获取服务器信息
+      tags:
+      - server
+  /api/v1/server/groups:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 更新信息
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.BatchUpdateServerGroupRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.BatchUpdateServerGroupResponse'
+      summary: 批量更新服务器分组
+      tags:
+      - server
+  /api/v1/server/list:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 服务器分组
+        in: query
+        name: tag
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ServerInfoResponse'
+      summary: 获取服务器列表
+      tags:
+      - server
+  /api/v1/server/upgrade:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: API Token
+        in: header
+        name: Authorization
+        type: string
+      - description: 需要强制更新的服务器列表
+        in: body
+        name: Payload
+        required: true
+        schema:
+          $ref: '#/definitions/singleton.ForceUpdateAgentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/singleton.ForceUpdateAgentResponse'
+      summary: 强制更新agent
+      tags:
+      - server
+swagger: "2.0"

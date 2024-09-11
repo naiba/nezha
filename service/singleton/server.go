@@ -73,3 +73,35 @@ func ReSortServer() {
 		return SortedServerListForGuest[i].DisplayIndex > SortedServerListForGuest[j].DisplayIndex
 	})
 }
+
+func OnServerDelete(id uint64) {
+	tag := ServerList[id].Tag
+	delete(SecretToID, ServerList[id].Secret)
+	delete(ServerList, id)
+	index := -1
+	for i := 0; i < len(ServerTagToIDList[tag]); i++ {
+		if ServerTagToIDList[tag][i] == id {
+			index = i
+			break
+		}
+	}
+	if index > -1 {
+
+		ServerTagToIDList[tag] = append(ServerTagToIDList[tag][:index], ServerTagToIDList[tag][index+1:]...)
+		if len(ServerTagToIDList[tag]) == 0 {
+			delete(ServerTagToIDList, tag)
+		}
+	}
+
+	AlertsLock.Lock()
+	for i := 0; i < len(Alerts); i++ {
+		if AlertsCycleTransferStatsStore[Alerts[i].ID] != nil {
+			delete(AlertsCycleTransferStatsStore[Alerts[i].ID].ServerName, id)
+			delete(AlertsCycleTransferStatsStore[Alerts[i].ID].Transfer, id)
+			delete(AlertsCycleTransferStatsStore[Alerts[i].ID].NextUpdate, id)
+		}
+	}
+	AlertsLock.Unlock()
+
+	DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", id)
+}
