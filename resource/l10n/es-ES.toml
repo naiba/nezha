@@ -226,6 +226,9 @@ other = "Secreto"
 [Note]
 other = "Nota"
 
+[PublicNote]
+other = "Nota Pública"
+
 [LinuxOneKeyInstall]
 other = "Instalación Linux con Un Solo Clic"
 

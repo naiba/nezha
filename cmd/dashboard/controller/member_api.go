@@ -306,6 +306,7 @@ type serverForm struct {
 	Secret       string
 	Tag          string
 	Note         string
+	PublicNote   string
 	HideForGuest string
 	EnableDDNS   string
 	EnableIPv4   string
@@ -326,6 +327,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.ID = sf.ID
 		s.Tag = sf.Tag
 		s.Note = sf.Note
+		s.PublicNote = sf.PublicNote
 		s.HideForGuest = sf.HideForGuest == "on"
 		s.EnableDDNS = sf.EnableDDNS == "on"
 		s.EnableIPv4 = sf.EnableIPv4 == "on"

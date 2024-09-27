@@ -226,6 +226,9 @@ other = "金鑰"
 [Note]
 other = "備註"
 
+[PublicNote]
+other = "公開備註"
+
 [LinuxOneKeyInstall]
 other = "Linux 一鍵安裝"
 

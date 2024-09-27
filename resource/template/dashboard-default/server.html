@@ -36,6 +36,7 @@
                     <th>{{tr "Secret"}}</th>
                     <th>{{tr "OneKeyInstall"}}</th>
                     <th>{{tr "Note"}}</th>
+                    <th>{{tr "PublicNote"}}</th>
                     <th>{{tr "Administration"}}</th>
                 </tr>
             </thead>
@@ -76,12 +77,13 @@
                         </button>
                     </td>
                     <td style="word-break: break-word;white-space: pre-wrap;">{{$server.Note}}</td>
+                    <td style="word-break: break-word;white-space: pre-wrap;">{{$server.PublicNote}}</td>
                     <td>
                         <div class="ui mini icon buttons">
                             <button class="ui button" onclick="connectToServer({{$server.ID}})">
                                 <i class="terminal icon"></i>
                             </button>
-                            <button class="ui button" onclick="addOrEditServer({{$server.Marshal}})">
+                            <button class="ui button" onclick="addOrEditServer({{$server.MarshalForDashboard}})">
                                 <i class="edit icon"></i>
                             </button>
                             <button class="ui button"

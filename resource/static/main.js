@@ -331,6 +331,7 @@ function addOrEditServer(server, conf) {
     .find("input[name=DisplayIndex]")
     .val(server ? server.DisplayIndex : null);
   modal.find("textarea[name=Note]").val(server ? server.Note : null);
+  modal.find("textarea[name=PublicNote]").val(server ? server.PublicNote : null);
   if (server) {
     modal.find(".secret.field").attr("style", "");
     modal.find(".command.field").attr("style", "");

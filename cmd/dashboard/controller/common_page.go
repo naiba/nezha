@@ -209,7 +209,7 @@ func (cp *commonPage) network(c *gin.Context) {
 	}))
 }
 
-func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
+func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 	_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
 	authorized := isMember || isViewPasswordVerfied
@@ -219,16 +219,15 @@ func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
 
 		var servers []*model.Server
 
-		if authorized {
-			servers = singleton.SortedServerList
-		} else {
-			filteredServers := make([]*model.Server, len(singleton.SortedServerListForGuest))
-			for i, server := range singleton.SortedServerListForGuest {
-				filteredServer := *server
-				filteredServer.DDNSDomain = "redacted"
-				filteredServers[i] = &filteredServer
+		for _, server := range singleton.SortedServerListForGuest {
+			item := *server
+			if item.HideForGuest && !authorized {
+				continue
 			}
-			servers = filteredServers
+			if !withPublicNote {
+				item.PublicNote = ""
+			}
+			servers = append(servers, &item)
 		}
 
 		return utils.Json.Marshal(Data{
@@ -240,7 +239,7 @@ func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
 }
 
 func (cp *commonPage) home(c *gin.Context) {
-	stat, err := cp.getServerStat(c)
+	stat, err := cp.getServerStat(c, true)
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
@@ -285,7 +284,7 @@ func (cp *commonPage) ws(c *gin.Context) {
 	defer conn.Close()
 	count := 0
 	for {
-		stat, err := cp.getServerStat(c)
+		stat, err := cp.getServerStat(c, false)
 		if err != nil {
 			continue
 		}

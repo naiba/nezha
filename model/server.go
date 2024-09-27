@@ -15,7 +15,8 @@ type Server struct {
 	Name         string
 	Tag          string // 分组名
 	Secret       string `gorm:"uniqueIndex" json:"-"`
-	Note         string `json:"-"` // 管理员可见备注
+	Note         string `json:"-"`                    // 管理员可见备注
+	PublicNote   string `json:"PublicNote,omitempty"` // 公开备注
 	DisplayIndex int    // 展示排序，越大越靠前
 	HideForGuest bool   // 对游客隐藏
 	EnableDDNS   bool   `json:"-"` // 是否启用DDNS 未在配置文件中启用DDNS 或 DDNS检查时间为0时此项无效
@@ -54,12 +55,13 @@ func boolToString(b bool) string {
 	return "false"
 }
 
-func (s Server) Marshal() template.JS {
+func (s Server) MarshalForDashboard() template.JS {
 	name, _ := utils.Json.Marshal(s.Name)
 	tag, _ := utils.Json.Marshal(s.Tag)
 	note, _ := utils.Json.Marshal(s.Note)
 	secret, _ := utils.Json.Marshal(s.Secret)
 	ddnsDomain, _ := utils.Json.Marshal(s.DDNSDomain)
 	ddnsProfile, _ := utils.Json.Marshal(s.DDNSProfile)
-	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"EnableIPv4": %s,"EnableIpv6": %s,"DDNSDomain": %s,"DDNSProfile": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), boolToString(s.EnableIPv4), boolToString(s.EnableIpv6), ddnsDomain, ddnsProfile)) // #nosec
+	publicNote, _ := utils.Json.Marshal(s.PublicNote)
+	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"EnableIPv4": %s,"EnableIpv6": %s,"DDNSDomain": %s,"DDNSProfile": %s,"PublicNote": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), boolToString(s.EnableIPv4), boolToString(s.EnableIpv6), ddnsDomain, ddnsProfile, publicNote))
 }
