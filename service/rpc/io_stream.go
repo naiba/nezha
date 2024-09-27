@@ -3,6 +3,7 @@ package rpc
 import (
 	"errors"
 	"io"
+	"sync"
 	"sync/atomic"
 	"time"
 )
@@ -12,6 +13,18 @@ type ioStreamContext struct {
 	agentIo          io.ReadWriteCloser
 	userIoConnectCh  chan struct{}
 	agentIoConnectCh chan struct{}
+}
+
+type bp struct {
+	buf []byte
+}
+
+var bufPool = sync.Pool{
+	New: func() any {
+		return &bp{
+			buf: make([]byte, 1024*1024),
+		}
+	},
 }
 
 func (s *NezhaHandler) CreateStream(streamId string) {
@@ -117,7 +130,9 @@ LOOP:
 	endCh := make(chan struct{})
 
 	go func() {
-		_, innerErr := io.CopyBuffer(stream.userIo, stream.agentIo, make([]byte, 1048576))
+		bp := bufPool.Get().(*bp)
+		defer bufPool.Put(bp)
+		_, innerErr := io.CopyBuffer(stream.userIo, stream.agentIo, bp.buf)
 		if innerErr != nil {
 			err = innerErr
 		}
@@ -126,7 +141,9 @@ LOOP:
 		}
 	}()
 	go func() {
-		_, innerErr := io.CopyBuffer(stream.agentIo, stream.userIo, make([]byte, 1048576))
+		bp := bufPool.Get().(*bp)
+		defer bufPool.Put(bp)
+		_, innerErr := io.CopyBuffer(stream.agentIo, stream.userIo, bp.buf)
 		if innerErr != nil {
 			err = innerErr
 		}
