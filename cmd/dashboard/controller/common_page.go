@@ -217,13 +217,16 @@ func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
 
-		var servers []*model.Server
+		var serverList []*model.Server
+		if authorized {
+			serverList = singleton.SortedServerList
+		} else {
+			serverList = singleton.SortedServerListForGuest
+		}
 
-		for _, server := range singleton.SortedServerListForGuest {
+		var servers []*model.Server
+		for _, server := range serverList {
 			item := *server
-			if item.HideForGuest && !authorized {
-				continue
-			}
 			if !withPublicNote {
 				item.PublicNote = ""
 			}
