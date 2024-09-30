@@ -75,7 +75,8 @@ jobs:
           for file in assets/*/*/*; do
             if [ -f "$file" ]; then
               chmod +x "$file"
-              zip -jr "$file.zip" "$file"
+              export fileWithoutExt=${file%.*}
+              zip -jr "$fileWithoutExt.zip" "$file"
             fi
           done
 
