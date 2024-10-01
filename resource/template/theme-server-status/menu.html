@@ -15,20 +15,9 @@
         </div>
         <nav id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/"><i class="home icon"></i>{{tr "Home" }}</a></li>
-                <template v-if="isMobile"> 
-                    <li class="dropdown">
-                        <a data-toggle="dropdown"><i class="bi bi-gear-wide-connected" style="position:relative;top:1px;margin-right:3px;font-size:1.1rem;"></i>{{tr "Feature" }}<b class="caret"></b></a>
-                        <ul class="dropdown-menu" style="min-width:100px;">
-                            <li><a href="/service"><i class="rss icon"></i>{{tr "Services" }}</a></li>
-                            <li><a href="/network"><i class="bi bi-hdd-network icon"></i>{{tr "NetworkSpiter"}}</a></li>                   
-                        </ul>
-                    </li>
-                </template>
-                <template v-else>
-                    <li><a href="/service"><i class="rss icon"></i>{{tr "Services" }}</a></li>
-                    <li><a href="/network"><i class="bi bi-hdd-network icon"></i>{{tr "NetworkSpiter"}}</a></li>
-                </template>
+                <li :class="isMenuActive('index')"><a href="/"><i class="home icon"></i>{{tr "Home" }}</a></li>
+                <li :class="isMenuActive('service')"><a href="/service"><i class="rss icon"></i>{{tr "Services" }}</a></li>
+                <li :class="isMenuActive('network')"><a href="/network"><i class="bi bi-hdd-network icon"></i>{{tr "NetworkSpiter"}}</a></li>
                 {{ if not .Conf.DisableSwitchTemplateInFrontend }}
                     <li class="dropdown">
                         <a data-toggle="dropdown"><i class="bi bi-incognito" style="position:relative;top:1px;margin-right:3px;font-size:1.2rem;vertical-align:top;"></i>{{tr "Template" }}<b class="caret"></b></a>

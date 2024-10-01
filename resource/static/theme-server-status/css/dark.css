@@ -8,6 +8,11 @@ body[theme="dark"] .navbar .navbar-brand {
     color: #ffffff;
 }
 
+body[theme="dark"] .navbar .navbar-nav li.pc-active a,
+body[theme="dark"] .navbar .navbar-nav li.m-active a{
+    color: rgba(73, 146, 255, 1);
+}
+
 body[theme="dark"] .navbar .dropdown-menu {
     background-color: rgba(23, 26, 30, 1);
     border-color: rgba(49, 54, 59, 1);
@@ -88,8 +93,8 @@ body[theme="dark"] .table > tbody > tr.expandRow.even > td:before{
 /* expandRow展开部分样式结束 */
 
 body[theme="dark"] .progress {
-    background-image: linear-gradient(#2c2c2c 0,rgba(28, 29, 38, 1) 100%);
-    background-color: rgba(28, 29, 38, 1);
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.075); 
 }
 
 body[theme="dark"] .progress-bar {
@@ -174,5 +179,5 @@ body[theme="dark"] .toolbox i{
 }
 
 body[theme="dark"] .network-box .network-box-header{
-    border-bottom: 1px solid rgba(110, 112, 121, 0.25);
+    border-bottom-color: rgba(110, 112, 121, 0.25);
 }

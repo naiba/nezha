@@ -16,8 +16,13 @@ body[theme="light"] .navbar .navbar-brand {
     color: rgba(0, 0, 0, 0.87);
 }
 
-body[theme="light"] .navbar .navbar-nav > li > a{
+body[theme="light"] .navbar .navbar-nav > li > a {
     color: rgba(0, 0, 0, 0.87);
+}
+
+body[theme="light"] .navbar .navbar-nav li.pc-active a,
+body[theme="light"] .navbar .navbar-nav li.m-active a {
+    color: rgba(73, 146, 255, 1);
 }
 
 body[theme="light"] .navbar .navbar-nav > .open > a:focus,
@@ -198,7 +203,7 @@ body[theme="light"] .modal-header i.xclose{
 }
 
 body[theme="light"] .network-box .network-box-header{
-    border-bottom: 1px solid rgba(224, 230, 241, 0.6);
+    border-bottom-color: rgba(224, 230, 241, 0.6);
 }
 
 @media only screen and (max-width: 767px) {

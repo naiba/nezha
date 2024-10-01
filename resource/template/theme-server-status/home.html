@@ -42,6 +42,7 @@
             servers: [],
             nodesTag: [],
             nodesNoTag: [],
+            additional: {},
             chartDataList: [],
             ws: null,
             language: {{.Conf.Language}},
@@ -81,7 +82,8 @@
                 this.countryNameMap = this.initCountryNameMap();
                 this.countryServer = this.initCountryServer();
                 this.countryMapChartData = this.initCountryMapChartData();
-            })
+            });
+            this.additional = this.initAdditional(this.servers);
         },
         mounted() {
             // 初始化时建立WebSocket连接
@@ -98,6 +100,25 @@
             });
         },
         methods: {
+            initAdditional(servers) {
+                let nodes = {};
+                servers?.forEach(server => {
+                    if(server.PublicNote) {
+                        nodes[server.ID] = {
+                            "remaining": {
+                                format: this.getRemainingFormat(server.live, server.PublicNote),
+                                days: this.getRemainingDays(this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"),server.PublicNote),
+                                percent: this.toFixed2(100 - this.getRemainingPercent(this.getNoteElementValue(server.PublicNote, "billingDataMod", "startDate"), this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"), server.PublicNote))
+                            },
+                            "price": {
+                                amount: this.getNoteElementValue(server.PublicNote, "billingDataMod", "amount"),
+                                cycle: this.getNoteElementValue(server.PublicNote, "billingDataMod", "cycle")
+                            }
+                        };
+                    }
+                });
+                return nodes;
+            },
             initCountryMap() {
                 return fetch(this.staticUrl + '/maps/nezha.countrymap.json')
                     .then(response => response.json())
@@ -722,6 +743,331 @@
                         this.renderCharts(id,true);
                     }
                 });
+            },
+            getNoteElementValue(string, elementName, childElementName) {
+                let obj;
+
+                try {
+                    obj = JSON.parse(string);
+                } catch (e) {
+                    return null; 
+                }
+
+                if (!elementName) return null;
+
+                if (childElementName) {
+                    return obj[elementName] && childElementName in obj[elementName] ? obj[elementName][childElementName] : null;
+                } else {
+                    return elementName in obj ? obj[elementName] : null;
+                }
+            },
+            getBillingCycle(billingCycle) { 
+                // 统一转换为小写进行比较
+                const cycle = billingCycle.toLowerCase();
+
+                switch (cycle) {
+                    case '月':
+                    case 'month':
+                    case 'monthly':
+                    case 'm':
+                        return "M";
+                    case '季':
+                    case 'quarterly':
+                    case 'q':
+                        return "Q";                        
+                    case '半':
+                    case '半年':
+                    case 'half':
+                    case 'semi-annually':
+                    case 'h':
+                        return "H";                        
+                    case '年':
+                    case 'year':
+                    case 'annually':
+                    case 'y':
+                        return "Y";
+                    default:
+                        return null;
+                }                
+            },
+            getAdjustTimezone(reference, target) {
+                // 获取时区
+                const referenceTimezoneOffset = reference.getTimezoneOffset(); 
+                const targetTimezoneOffset = target.getTimezoneOffset();
+
+                // 计算时区差异
+                const timezoneDifference = (referenceTimezoneOffset - targetTimezoneOffset) * 60 * 1000;
+
+                // 将 target 日期调整到 reference 时区
+                return new Date(target.getTime() + timezoneDifference);
+            },
+            getAutoRenewalEndDate(endDate, billingCycle) {
+                const expiration = new Date(endDate);
+                const current = this.getAdjustTimezone(new Date(endDate), new Date());
+
+                // 如果 expiration 无效，返回 null 并记录日志
+                if (isNaN(expiration.getTime())) {
+                    console.error("getAutoRenewalEndDate: Invalid expiration format");
+                }
+
+                const result = {
+                    flag: 1,  // 1表示需要更新
+                    check: 0, // 判断逻辑标记
+                    count: 0  // 周期累计计数
+                };
+
+                // 如果当前时间还没到到期时间，直接返回到期时间
+                if (current < expiration) {
+                    result.flag = 0;
+                    result.date = expiration;
+                    return result;
+                }
+
+                let nextExpiration = new Date(expiration); // 初始化为原到期时间
+                let newExpirationMonth = expiration.getMonth(); // 获取expiration初始月份
+
+                switch (billingCycle.toUpperCase()) {
+                    case 'M': // 月度
+                        nextExpiration.setFullYear(current.getFullYear());
+
+                        const monthCheck = current < new Date(current.getFullYear(), current.getMonth(), expiration.getDate());
+
+                        // 检查当前月是否在有效期内
+                        if (monthCheck) {
+                            nextExpiration.setMonth(current.getMonth());
+                            result.check = 1;
+                        } else {
+                            nextExpiration.setMonth(current.getMonth() + 1);
+                            result.check = 2;
+                        }
+                        break;
+
+                    case 'Q': // 季度
+                        nextExpiration.setFullYear(current.getFullYear());
+
+                        // 每次增加 3 个月，直到新的月份大于当前月份
+                        while (newExpirationMonth < current.getMonth()) {
+                            newExpirationMonth += 3;
+                            result.count += 1;
+                        }
+
+                        // nextExpiration设置获取到的新月份
+                        nextExpiration.setMonth(newExpirationMonth);
+
+                        const quarterlyCheck = current < nextExpiration;
+
+                        // 检查新月份是否在有效期内
+                        if (quarterlyCheck) {
+                            result.check = 3;
+                        } else {
+                            nextExpiration.setMonth(current.getMonth() + 3);
+                            result.check = 4;
+                            result.count += 1;
+                        }
+                        break;
+
+                    case 'H': // 半年
+                        nextExpiration.setFullYear(current.getFullYear());
+                
+                        // 每次增加 6 个月，直到新的月份大于当前月份
+                        while (newExpirationMonth < current.getMonth()) {
+                            newExpirationMonth += 6;
+                            result.count += 1;
+                        }
+
+                        // nextExpiration设置获取到的新月份
+                        nextExpiration.setMonth(newExpirationMonth);
+
+                        const halfCheck = current < nextExpiration;
+
+                        // 检查新月份是否在有效期内
+                        if (halfCheck) {
+                            result.check = 5;
+                        } else {
+                            nextExpiration.setMonth(current.getMonth() + 6);
+                            result.check = 6;
+                            result.count += 1;
+                        }    
+                        break;
+
+                    case 'Y': // 年度
+                        const yearCheck = current < new Date(current.getFullYear(), expiration.getMonth(), expiration.getDate());
+
+                        // 如果当前时间比这一年有效期早，则到期为本年
+                        if (yearCheck) {
+                            nextExpiration.setFullYear(current.getFullYear());
+                            result.check = 7;
+                        } else {
+                            // 否则推到下一年
+                            nextExpiration.setFullYear(current.getFullYear() + 1);
+                            result.check = 8;
+                        }
+                        break;
+
+                    default:
+                        throw new Error("Invalid billing cycle");
+                }
+
+                // 保持原到期时间的时分秒
+                nextExpiration.setHours(expiration.getHours());
+                nextExpiration.setMinutes(expiration.getMinutes());
+                nextExpiration.setSeconds(expiration.getSeconds());
+
+                result.date = nextExpiration;
+
+                return result;
+            },
+            getAutoRenewalStartDate(flag, startDate, check, count) {
+                //1.判断什么时候改变 2.如何改变
+                const start = new Date(startDate);
+                const current = this.getAdjustTimezone(start, new Date());
+
+                // 检查 startDate 格式是否有效，若无效返回 null
+                if (isNaN(start.getTime())) {
+                    console.error("getAutoRenewalStartDate: Invalid startDate format");
+                }
+
+                // 如果 flag 为 0，直接返回开始日期
+                if (flag === 0) {
+                    return start;
+                } 
+
+                // 初始化新的开始日期
+                const newStart = new Date(start);
+
+                switch (check) {
+                    case 1: // 处理月份：设置为上个月
+                        newStart.setFullYear(current.getFullYear());
+                        newStart.setMonth(current.getMonth() - 1);
+                        break;
+
+                    case 2: // 处理月份：设置为当前月
+                        newStart.setFullYear(current.getFullYear());
+                        newStart.setMonth(current.getMonth());
+                        break;
+
+                    case 3:
+                    case 4: // 处理季度
+                        newStart.setFullYear(current.getFullYear());
+                        newStart.setMonth(start.getMonth() + 3 * count);
+                        break;
+
+                    case 5:
+                    case 6: // 处理半年
+                        newStart.setFullYear(current.getFullYear());
+                        newStart.setMonth(start.getMonth() + 6 * count);
+                        break;
+
+                    case 7: // 处理年份：设置为上一年
+                        newStart.setFullYear(current.getFullYear() - 1);
+                        break;
+
+                    case 8: // 处理年份：保持当前年份
+                        newStart.setFullYear(current.getFullYear());
+                        break;
+
+                    default: // 默认处理：直接返回
+                        return;
+                }
+
+                return newStart;
+            },
+            getRemainingFormat(online, note) {
+                if (!note) return null;
+                const startDate = this.getNoteElementValue(note, "billingDataMod", "startDate");
+                const endDate = this.getNoteElementValue(note, "billingDataMod", "endDate");
+                
+                // 检查 startDate 和 endDate 是否有效
+                if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
+                    console.error("getRemainingFormat: Invalid startDate or endDate in note");
+                    return null; // 如果无效，返回 null 或其他错误处理逻辑
+                }
+
+                //处理特殊时间格式
+                if (startDate.includes('0000-00-00') || endDate.includes("0000-00-00")) {
+                    return this.formatPercents(online, this.toFixed2(100));
+                } else {
+                    const percent = this.getRemainingPercent(startDate, endDate, note);
+                    return this.formatPercents(online, this.toFixed2(percent));                    
+                }
+            },
+            getRemainingDays(endDate, note) {
+                // 检查 endDate 是否有效
+                if (!endDate || typeof endDate !== 'string') {
+                    console.error("getRemainingDays: Invalid endDate format");
+                    return null;
+                }
+
+                // 处理特殊时间格式
+                if (endDate.includes("0000-00-00")) return "lifetime";
+
+                // 获取当前时间，并调整时区
+                const currentTime = this.getAdjustTimezone(new Date(endDate), new Date());
+
+                // 获取计费周期和自动续订日期
+                const billingCycle = this.getNoteElementValue(note, "billingDataMod", "cycle") || "月";
+                const autoEndDate = this.getAutoRenewalEndDate(
+                    this.getNoteElementValue(note, "billingDataMod", "endDate"),
+                    this.getBillingCycle(billingCycle)
+                );
+
+                // 检查 autoRenewal 状态
+                const autoRenewal = this.getNoteElementValue(note, "billingDataMod", "autoRenewal") == 1;
+
+                // 确定到期时间
+                const end = autoRenewal ? autoEndDate.date : new Date(endDate);
+
+                // 计算剩余天数
+                const timeDiff = end - currentTime;
+                const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+                return daysDiff;
+            },
+            getRemainingPercent(startDate, endDate, note) {
+                // 检查 startDate 和 endDate 是否为有效字符串并处理特殊格式
+                if (typeof startDate !== 'string' || typeof endDate !== 'string') {
+                    console.error("getRemainingPercent: Invalid startDate or endDate format");
+                    return null;
+                }
+                
+                if (startDate.includes("0000-00-00") || endDate.includes("0000-00-00")) return 100;
+
+                // 获取当前时间并调整时区
+                const now = this.getAdjustTimezone(new Date(endDate), new Date());
+
+                // 获取计费周期
+                const billingCycle = this.getNoteElementValue(note, "billingDataMod", "cycle") || "月";
+
+                // 自动获取结束日期
+                const autoEndDate = this.getAutoRenewalEndDate(
+                    this.getNoteElementValue(note, "billingDataMod", "endDate"),
+                    this.getBillingCycle(billingCycle)
+                );
+
+                // 自动获取开始日期
+                const autoStartDate = autoEndDate.flag == 1
+                    ? this.getAutoRenewalStartDate(autoEndDate.flag, this.getNoteElementValue(note, "billingDataMod", "startDate"), autoEndDate.check, autoEndDate.count)
+                    : new Date(startDate);
+                
+                // 计算开始和结束时间
+                const autoRenewal = this.getNoteElementValue(note, "billingDataMod", "autoRenewal") == 1;
+                const start = autoRenewal ? autoStartDate : new Date(startDate);
+                const end = autoRenewal ? autoEndDate.date : new Date(endDate);
+
+                // 计算剩余百分比
+                if (now < start) {
+                    return 0;
+                }
+                if (now >= end) {
+                    return 100;
+                }
+
+                const totalDuration = end - start;
+                const elapsedDuration = now - start;
+                const percent = (elapsedDuration / totalDuration) * 100;
+
+                // 确保百分比在 0-100 之间
+                return Math.min(Math.max(percent, 0), 100);
             }
         }
     })

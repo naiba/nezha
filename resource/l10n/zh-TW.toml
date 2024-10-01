@@ -690,3 +690,18 @@ other = "取消"
 
 [FMError]
 other = "Agent 回傳了錯誤，請查看主控台獲取詳細資訊。要建立新連線，請重新開啟 FM。"
+
+[Remaining]
+other = "剩餘"
+
+[Lifetime]
+other = "永續"
+
+[Price]
+other = "價格"
+
+[Expired]
+other = "已到期"
+
+[Days]
+other = "天"
