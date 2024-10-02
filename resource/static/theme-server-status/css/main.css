@@ -237,8 +237,8 @@ tr.accordion-toggle{
 }
 
 .node-cell.network {
-    min-width: 100px;
-    max-width: 100px;
+    min-width: 110px;
+    max-width: 110px;
 }
 
 .node-cell.traffic {
@@ -248,6 +248,24 @@ tr.accordion-toggle{
 .node-cell.cpu, .node-cell.ram, .node-cell.hdd, .node-cell.memory {
     min-width: 50px;
     max-width: 50px;
+}
+
+.node-cell.remaining {
+    min-width: 65px;
+    max-width: 65px;    
+}
+
+.node-cell.remaining .additional {
+    position: absolute;
+    left: 0; 
+    font-size: 12px;
+    text-align: center;
+    width: 100%;
+}
+
+.node-cell.remaining .additional small{
+    white-space: nowrap;
+    font-size: 80%;
 }
 
 .temp-detail {
@@ -331,6 +349,8 @@ td.ping-network-quality {
     padding: 5px 0px 15px 5px;
     cursor: pointer;
     width: 100%;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
 }
 
 .network-box .network-box-header .dropdown-menu {
@@ -529,6 +549,10 @@ footer p{
         display: none;
         visibility: hidden;
     }
+    .node-cell.remaining {
+        min-width: 75px;
+        max-width: 75px;    
+    }
     .accordian-body{
         margin: 5px 0px 5px 10px;        
     }
@@ -572,6 +596,7 @@ footer p{
     .network-box .network-box-header {
         margin: 8px 0px 0px 8px;
         font-size: 16px;
+        border-bottom: none;
     }
     .network-box .chartTitle {
         font-size: 16px;

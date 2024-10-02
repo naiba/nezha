@@ -690,3 +690,18 @@ other = "Cancel"
 
 [FMError]
 other = "Agent returned an error, please view the console for details. To open a new connection, reopen the FM again."
+
+[Remaining]
+other = "Remaining"
+
+[Lifetime]
+other = "Lifetime"
+
+[Price]
+other = "Price"
+
+[Expired]
+other = "Expired"
+
+[Days]
+other = "d"

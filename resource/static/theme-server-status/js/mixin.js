@@ -155,6 +155,11 @@ const mixinsVue = {
         checkIsMobile() { // 检测设备类型,页面宽度小于768px认为是移动设备
             return window.innerWidth <= 768;
         },
+        isMenuActive(page){
+            if(page == this.$root.page) {
+                return this.isMobile ? 'm-active' : 'pc-active'; 
+            }
+        },
         setBenchmarkHeight() {
             let vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${vh}px`);
