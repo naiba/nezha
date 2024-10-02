@@ -9,7 +9,7 @@
         <th class="node-cell name center">{{tr "Name"}}</th>
         <th class="node-cell os center">{{tr "Platform"}}</th>
         <th class="node-cell location center">{{tr "Location"}}</th>
-        <th v-if="additional && Object.values(additional).filter(item => item.price).length > 0" class="node-cell price center">{{tr "Price"}}</th>
+        <th v-if="group.data.some(item => item.additional && item.additional.price && Object.keys(item.additional.price).length > 0)" class="node-cell price center">{{tr "Price"}}</th>
         <th class="node-cell uptime center">{{tr "Uptime"}}</th>
         <th class="node-cell load center">{{tr "Load"}}</th>
         <th class="node-cell network center">{{tr "NetSpeed"}}↓|↑</th>
@@ -17,7 +17,7 @@
         <th class="node-cell cpu center">{{tr "CpuUsed"}}</th>
         <th class="node-cell memory center">{{tr "MemUsed"}}</th>
         <th class="node-cell hdd center">{{tr "DiskUsed"}}</th>
-        <th v-if="additional && Object.values(additional).filter(item => item.remaining).length > 0" class="node-cell remaining center">{{tr "Remaining"}}</th>
+        <th v-if="group.data.some(item => item.additional && item.additional.remaining && Object.keys(item.additional.remaining).length > 0)" class="node-cell remaining center">{{tr "Remaining"}}</th>
     </tr>
     </thead>
     <tbody id="servers">
@@ -41,10 +41,10 @@
                 <i :class="'fi fi-' + node.location"></i>
                 <span class="node-cell-location-text text-uppercase">&nbsp;@#node.location#@</span>
             </td>
-            <td v-if="additional && Object.values(additional).filter(item => item.price).length > 0" class="node-cell price center">
-                <template v-if="additional[node.ID] && additional[node.ID].price">
-                    <span v-if="additional[node.ID].price.amount == 0" class="node-cell-price-text">Free</span>
-                    <span v-else class="node-cell-price-text">@#additional[node.ID].price.amount#@@#(additional[node.ID].price.cycle ? '/' + additional[node.ID].price.cycle : '')#@</span>
+            <td v-if="group.data.some(item => item.additional && item.additional.price && Object.keys(item.additional.price).length > 0)" class="node-cell price center">
+                <template v-if="node.additional && node.additional.price">
+                    <span v-if="node.additional.price.amount == 0" class="node-cell-price-text">Free</span>
+                    <span v-else class="node-cell-price-text">@#node.additional.price.amount#@@#(node.additional.price.cycle ? '/' + node.additional.price.cycle : '')#@</span>
                 </template>
             </td>
             <td style="text-align: center;" class="node-cell uptime">@#node.uptime#@</td>
@@ -70,16 +70,16 @@
                     </div>
                 </div>
             </td>
-            <td v-if="additional && Object.values(additional).filter(item => item.remaining).length > 0" class="node-cell remaining">
+            <td v-if="group.data.some(item => item.additional && item.additional.remaining && Object.keys(item.additional.remaining).length > 0)" class="node-cell remaining">
                 <div :class="['progress', node.online ? 'progress-online' : 'progress-offline']">
-                    <template v-if="additional[node.ID] && additional[node.ID].remaining.format">
-                        <div :style="additional[node.ID].remaining.format.style" :class="additional[node.ID].remaining.days == 'lifetime' ? '' : additional[node.ID].remaining.format.class"></div>
+                    <template v-if="node.additional && node.additional.remaining.format">
+                        <div :style="node.additional.remaining.format.style" :class="node.additional.remaining.days == 'lifetime' ? '' : node.additional.remaining.format.class"></div>
                         <div class="additional">
-                            <small v-if="additional[node.ID].remaining.days == 'lifetime'">{{tr "Lifetime"}}</small>
-                            <small v-else-if="additional[node.ID].remaining.days < 0">{{tr "Expired"}}</small>
+                            <small v-if="node.additional.remaining.days == 'lifetime'">{{tr "Lifetime"}}</small>
+                            <small v-else-if="node.additional.remaining.days < 0">{{tr "Expired"}}</small>
                             <small v-else>
-                                <span class="node-cell-remaining-days">@#additional[node.ID].remaining.days#@{{tr "Days"}}</span>
-                                <span class="node-cell-remaining-percent">@#additional[node.ID].remaining.percent#@%</span>
+                                <span class="node-cell-remaining-days">@#node.additional.remaining.days#@{{tr "Days"}}</span>
+                                <span class="node-cell-remaining-percent">@#node.additional.remaining.percent#@%</span>
                             </small>
                         </div>
                     </template>
