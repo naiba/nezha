@@ -72,10 +72,25 @@
         mixins: [mixinsVue],
         created() {
             this.servers = JSON.parse('{{.Servers}}').servers;
+            this.additional = this.initAdditional(this.servers);
             if(this.showGroup) {
                 this.nodesTag = this.groupingData(this.handleNodes(this.servers),"Tag");
+                this.nodesTag.forEach(group => {
+                    group.data.forEach(item => {
+                        const additionalData = this.additional[item.ID];
+                        if (additionalData) {
+                            item.additional = additionalData; // 添加 additional 属性
+                        }
+                    });
+                });
             } else {
                 this.nodesNoTag = this.handleNodes(this.servers);
+                this.nodesNoTag.forEach(item => {
+                    const additionalData = this.additional[item.ID];
+                    if (additionalData) {
+                        item.additional = additionalData; // 添加 additional 属性
+                    }
+                });
             }
             this.initCountryMap().then(countryMap => {
                 this.countryMap = countryMap;
@@ -83,7 +98,6 @@
                 this.countryServer = this.initCountryServer();
                 this.countryMapChartData = this.initCountryMapChartData();
             });
-            this.additional = this.initAdditional(this.servers);
         },
         mounted() {
             // 初始化时建立WebSocket连接
@@ -103,18 +117,42 @@
             initAdditional(servers) {
                 let nodes = {};
                 servers?.forEach(server => {
-                    if(server.PublicNote) {
+                    if (server.PublicNote) {
+                        const remainingFormat = this.getRemainingFormat(server.live, server.PublicNote);
+                        const remainingDays = this.getRemainingDays(this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"), server.PublicNote);
+                        const remainingPercent = this.getRemainingPercent(
+                            this.getNoteElementValue(server.PublicNote, "billingDataMod", "startDate"),
+                            this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"),
+                            server.PublicNote
+                        );
+                        const priceAmount = this.getNoteElementValue(server.PublicNote, "billingDataMod", "amount");
+                        const priceCycle = this.getNoteElementValue(server.PublicNote, "billingDataMod", "cycle");
+
+                        // 初始化节点
                         nodes[server.ID] = {
-                            "remaining": {
-                                format: this.getRemainingFormat(server.live, server.PublicNote),
-                                days: this.getRemainingDays(this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"),server.PublicNote),
-                                percent: this.toFixed2(100 - this.getRemainingPercent(this.getNoteElementValue(server.PublicNote, "billingDataMod", "startDate"), this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"), server.PublicNote))
-                            },
-                            "price": {
-                                amount: this.getNoteElementValue(server.PublicNote, "billingDataMod", "amount"),
-                                cycle: this.getNoteElementValue(server.PublicNote, "billingDataMod", "cycle")
-                            }
+                            "remaining": {},
+                            "price": {}
                         };
+
+                        if (remainingFormat) {
+                            nodes[server.ID].remaining.format = remainingFormat;
+                        }
+
+                        if (remainingDays) {
+                            nodes[server.ID].remaining.days = remainingDays;
+                        }
+
+                        if (remainingPercent) {
+                            nodes[server.ID].remaining.percent = this.toFixed2(100 - remainingPercent);
+                        }
+
+                        if (priceAmount) {
+                            nodes[server.ID].price.amount = priceAmount;
+                        }
+
+                        if (priceCycle && priceAmount) {
+                            nodes[server.ID].price.cycle = priceCycle;
+                        }
                     }
                 });
                 return nodes;
@@ -416,8 +454,22 @@
                     }
                     if(this.showGroup) {
                         this.nodesTag = this.groupingData(this.handleNodes(data.servers),"Tag");
+                        this.nodesTag.forEach(group => {
+                            group.data.forEach(item => {
+                                const additionalData = this.additional[item.ID];
+                                if (additionalData) {
+                                    item.additional = additionalData; // 添加 additional 属性
+                                }
+                            });
+                        });
                     } else {
                         this.nodesNoTag = this.handleNodes(data.servers);
+                        this.nodesNoTag.forEach(item => {
+                            const additionalData = this.additional[item.ID];
+                            if (additionalData) {
+                                item.additional = additionalData; // 添加 additional 属性
+                            }
+                        });
                     }
                 }
                 this.ws.onclose = () => {
@@ -528,7 +580,7 @@
                         }
                     })
                     .catch(error => {
-                        console.error('Error fetching data:', error);
+                        console.log('Error fetching data:', error);
                     });
             },
             renderCharts(id, reload = false) {
@@ -807,7 +859,7 @@
 
                 // 如果 expiration 无效，返回 null 并记录日志
                 if (isNaN(expiration.getTime())) {
-                    console.error("getAutoRenewalEndDate: Invalid expiration format");
+                    console.log("getAutoRenewalEndDate: Invalid expiration format");
                 }
 
                 const result = {
@@ -924,7 +976,7 @@
 
                 // 检查 startDate 格式是否有效，若无效返回 null
                 if (isNaN(start.getTime())) {
-                    console.error("getAutoRenewalStartDate: Invalid startDate format");
+                    console.log("getAutoRenewalStartDate: Invalid startDate format");
                 }
 
                 // 如果 flag 为 0，直接返回开始日期
@@ -976,31 +1028,47 @@
                 if (!note) return null;
                 const startDate = this.getNoteElementValue(note, "billingDataMod", "startDate");
                 const endDate = this.getNoteElementValue(note, "billingDataMod", "endDate");
-                
+
                 // 检查 startDate 和 endDate 是否有效
                 if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
-                    console.error("getRemainingFormat: Invalid startDate or endDate in note");
                     return null; // 如果无效，返回 null 或其他错误处理逻辑
                 }
 
-                //处理特殊时间格式
+                // 处理特殊时间格式
                 if (startDate.includes('0000-00-00') || endDate.includes("0000-00-00")) {
                     return this.formatPercents(online, this.toFixed2(100));
-                } else {
-                    const percent = this.getRemainingPercent(startDate, endDate, note);
-                    return this.formatPercents(online, this.toFixed2(percent));                    
                 }
+
+                // 检查 startDate 和 endDate 是否为合法的Date
+                if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
+                    return {
+                        "class": "",
+                        "style": "width: 0%",
+                        "percent": "0"
+                    }
+                }
+
+                //处理特殊时间格式
+                const percent = this.getRemainingPercent(startDate, endDate, note);
+                return this.formatPercents(online, this.toFixed2(percent));                    
+                
             },
             getRemainingDays(endDate, note) {
                 // 检查 endDate 是否有效
                 if (!endDate || typeof endDate !== 'string') {
-                    console.error("getRemainingDays: Invalid endDate format");
                     return null;
                 }
 
                 // 处理特殊时间格式
-                if (endDate.includes("0000-00-00")) return "lifetime";
+                if (endDate.includes("0000-00-00")) {
+                    return "lifetime";
+                }
 
+                // 检查 startDate 和 endDate 是否为合法的Date
+                if (isNaN(new Date(endDate).getTime())) {
+                    return "NaN";
+                }
+                
                 // 获取当前时间，并调整时区
                 const currentTime = this.getAdjustTimezone(new Date(endDate), new Date());
 
@@ -1025,13 +1093,20 @@
             },
             getRemainingPercent(startDate, endDate, note) {
                 // 检查 startDate 和 endDate 是否为有效字符串并处理特殊格式
-                if (typeof startDate !== 'string' || typeof endDate !== 'string') {
-                    console.error("getRemainingPercent: Invalid startDate or endDate format");
+                if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
                     return null;
                 }
-                
-                if (startDate.includes("0000-00-00") || endDate.includes("0000-00-00")) return 100;
 
+                // 处理特殊时间格式
+                if (startDate.includes("0000-00-00") || endDate.includes("0000-00-00")) {
+                    return 100;
+                }
+
+                // 检查 startDate 和 endDate 是否为合法的Date
+                if (isNaN(new Date(startDate).getTime()) || isNaN(new Date(endDate).getTime())) {
+                    return "NaN";
+                }
+                
                 // 获取当前时间并调整时区
                 const now = this.getAdjustTimezone(new Date(endDate), new Date());
 
@@ -1056,7 +1131,7 @@
 
                 // 计算剩余百分比
                 if (now < start) {
-                    return 0;
+                    return 0.01; //避免当条件判断!percent被过滤
                 }
                 if (now >= end) {
                     return 100;
