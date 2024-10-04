@@ -159,8 +159,8 @@
     }
     function batchEditServerGroup() {
         let groupName = prompt('{{tr "InputServerGroupName"}}')
-        if (!groupName) {
-            return;
+        if (groupName === null) {
+            return
         }
         const servers = []
         checkBoxList.forEach(cb => {
