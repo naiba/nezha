@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.19.1"
+NZ_VERSION="v0.19.2"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -169,9 +169,6 @@ installation_check() {
                 echo "No Docker images with the nezha-dashboard repository were found."
             fi
         fi
-    else
-        err "Please install docker-compose manually. https://docs.docker.com/compose/install/linux/"
-        exit 1
     fi
 
     if [ -f "$NZ_DASHBOARD_PATH/app" ]; then
@@ -450,11 +447,16 @@ modify_dashboard_config() {
     echo "> Modify Dashboard Configuration"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        echo "Download Docker Script"
-        wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
-        if [ $? != 0 ]; then
-            err "Script failed to get, please check if the network can link ${GITHUB_RAW_URL}"
-            return 0
+        if [ ! -z "$DOCKER_COMPOSE_COMMAND" ]; then
+            echo "Download Docker Script"
+            wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
+            if [ $? != 0 ]; then
+                err "Script failed to get, please check if the network can link ${GITHUB_RAW_URL}"
+                return 0
+            fi
+        else
+            err "请手动安装 docker-compose。https://docs.docker.com/compose/install/linux/"
+            before_show_menu
         fi
     fi
 
