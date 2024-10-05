@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.19.0"
+NZ_VERSION="v0.19.1"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -65,6 +65,8 @@ geo_check() {
 }
 
 pre_check() {
+    umask 077
+
     ## os_arch
     if uname -m | grep -q 'x86_64'; then
         os_arch="amd64"
@@ -168,6 +170,9 @@ installation_check() {
                 echo "未找到带有 nezha-dashboard 仓库的 Docker 镜像。"
             fi
         fi
+    else
+        err "请手动安装 docker-compose。https://docs.docker.com/compose/install/linux/"
+        exit 1
     fi
 
     if [ -f "$NZ_DASHBOARD_PATH/app" ]; then
@@ -288,8 +293,6 @@ install_dashboard() {
         esac
     fi
 
-    sudo chmod -R 700 $NZ_DASHBOARD_PATH
-
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
         install_dashboard_docker
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
@@ -375,7 +378,6 @@ install_agent() {
 
     # 哪吒监控文件夹
     sudo mkdir -p $NZ_AGENT_PATH
-    sudo chmod -R 700 $NZ_AGENT_PATH
 
     echo "正在下载监控端"
     if [ -z "$CN" ]; then
