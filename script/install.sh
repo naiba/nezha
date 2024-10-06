@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.19.1"
+NZ_VERSION="v0.19.2"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -170,9 +170,6 @@ installation_check() {
                 echo "未找到带有 nezha-dashboard 仓库的 Docker 镜像。"
             fi
         fi
-    else
-        err "请手动安装 docker-compose。https://docs.docker.com/compose/install/linux/"
-        exit 1
     fi
 
     if [ -f "$NZ_DASHBOARD_PATH/app" ]; then
@@ -456,11 +453,16 @@ modify_dashboard_config() {
     echo "> 修改面板配置"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        echo "正在下载 Docker 脚本"
-        wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
-        if [ $? != 0 ]; then
-            err "下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}"
-            return 0
+        if [ ! -z "$DOCKER_COMPOSE_COMMAND" ]; then
+            echo "正在下载 Docker 脚本"
+            wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
+            if [ $? != 0 ]; then
+                err "下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}"
+                return 0
+            fi
+        else
+            err "请手动安装 docker-compose。https://docs.docker.com/compose/install/linux/"
+            before_show_menu
         fi
     fi
 
