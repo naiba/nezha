@@ -71,7 +71,7 @@ other = "忽略所有，僅通過特定伺服器執行"
 other = "覆蓋所有，僅特定伺服器不執行"
 
 [ExecuteByTriggerServer]
-other = "由觸發的伺服器執行"
+other = "由觸發告警的伺服器執行"
 
 [SpecificServers]
 other = "特定伺服器"
@@ -104,7 +104,7 @@ other = "秒 分 時 天 月 星期，詳情見"
 other = "排程表達式格式"
 
 [IntroductionOfCommands]
-other = "命令說明：編寫命令時類似於 shell/bat 腳本。建議不要換行，多個命令可用 <code>&&</code> 或 <code>&</code> 連接，若出現命令無法找到的情況，可能是由於 <code>PATH</code> 環境變數配置問題。在 <code>Linux</code> 伺服器上，可在命令開頭加入 <code>source ~/.bashrc</code>，或使用命令的絕對路徑執行。"
+other = "命令說明：編寫命令時類似於 shell/bat 腳本。建議不要換行，多個命令可用 <code>&&</code> 或 <code>;</code> 連接，若出現命令無法找到的情況，可能是由於 <code>PATH</code> 環境變數配置問題。在 <code>Linux</code> 伺服器上，可在命令開頭加入 <code>source ~/.bashrc</code>，或使用命令的絕對路徑執行。"
 
 [AddMonitor]
 other = "新增監控"
@@ -254,7 +254,7 @@ other = "覆蓋所有"
 other = "忽略所有"
 
 [ByTrigger]
-other = "觸發執行"
+other = "觸發告警的伺服器"
 
 [DeleteScheduledTask]
 other = "刪除排程任務"
@@ -281,7 +281,7 @@ other = "沒有帳號？"
 other = "HTTP(S)/SSL證書"
 
 [TCPPort]
-other = "TCP 端口"
+other = "TCPing"
 
 [DeleteService]
 other = "移除服務"

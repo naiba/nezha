@@ -71,7 +71,7 @@ other = "忽略所有，仅通过特定服务器执行"
 other = "覆盖所有，仅特定服务器不执行"
 
 [ExecuteByTriggerServer]
-other = "由触发的服务器执行"
+other = "由触发告警的服务器执行"
 
 [SpecificServers]
 other = "特定服务器"
@@ -104,7 +104,7 @@ other = "秒 分 时 天 月 星期，详情见"
 other = "计划表达式格式"
 
 [IntroductionOfCommands]
-other = "命令说明：编写命令时类似于 shell/bat 脚本。建议不要换行，多个命令可用 <code>&&</code> 或 <code>&</code> 连接，若出现命令无法找到的情况，可能是由于 <code>PATH</code> 环境变量配置问题。在 <code>Linux</code> 服务器上，可在命令开头加入 <code>source ~/.bashrc</code>，或使用命令的绝对路径执行。"
+other = "命令说明：编写命令时类似于 shell/bat 脚本。建议不要换行，多个命令可用 <code>&&</code> 或 <code>;</code> 连接，若出现命令无法找到的情况，可能是由于 <code>PATH</code> 环境变量配置问题。在 <code>Linux</code> 服务器上，可在命令开头加入 <code>source ~/.bashrc</code>，或使用命令的绝对路径执行。"
 
 [AddMonitor]
 other = "新增监控"
@@ -254,7 +254,7 @@ other = "覆盖所有"
 other = "忽略所有"
 
 [ByTrigger]
-other = "触发执行"
+other = "触发告警的服务器"
 
 [DeleteScheduledTask]
 other = "删除计划任务"
@@ -281,7 +281,7 @@ other = "没有账号？"
 other = "HTTP(S)/SSL证书"
 
 [TCPPort]
-other = "TCP 端口"
+other = "TCPing"
 
 [DeleteService]
 other = "移除服务"
