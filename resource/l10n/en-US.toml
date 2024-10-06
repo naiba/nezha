@@ -23,19 +23,19 @@ other = "Home"
 other = "Back to Homepage"
 
 [AdminPanel]
-other = "Admin Panel"
+other = "Dashboard"
 
 [Logout]
-other = "Logout"
+other = "Log out"
 
 [Login]
-other = "Login"
+other = "Log in"
 
 [ConfirmLogout]
-other = "Do you want to Logout?"
+other = "Confirm Logging Out?"
 
 [AfterLoggingOutYouHaveToLoginAgain]
-other = "You need to Login again to continue"
+other = "You will need to log in again to continue"
 
 [Cancel]
 other = "Cancel"
@@ -56,7 +56,7 @@ other = "Cron Expression"
 other = "Backup"
 
 [3amDaily]
-other = "(Daily at 3 AM)"
+other = "(At 3 AM)"
 
 [Command]
 other = "Command"
@@ -71,7 +71,7 @@ other = "Ignore All, Execute Only on Specific Servers"
 other = "Cover All, Except Specific Servers"
 
 [ExecuteByTriggerServer]
-other = "Execute on Trigger Server"
+other = "Execute on Alarmed Servers"
 
 [SpecificServers]
 other = "Specific Servers"
@@ -104,7 +104,7 @@ other = "Sec Min Hour Day Month Week, see details in "
 other = "CRON Expression Format"
 
 [IntroductionOfCommands]
-other = "Introduction of Commands: Writing commands is similar to shell/bat scripts. It's advised not to break lines, and multiple commands can be connected with <code>&&</code> or <code>&</code>. If a command cannot be found, it might be due to <code>PATH</code> environment variable configuration issues. On <code>Linux</code> servers, you can add <code>source ~/.bashrc</code> at the beginning of the command, or use the command's absolute path."
+other = "Note on writing commands: It is similar to shell/bat scripts. but it's advised not to start a newline, and connect multiple commands with <code>&&</code> or <code>;</code>. If a command cannot be found, it is possibly due to <code>PATH</code> environment variable issues. On <code>Linux</code> servers, you can add <code>source ~/.bashrc</code> at the beginning of the command, or just use the absolute path."
 
 [AddMonitor]
 other = "Add Service Monitor"
@@ -119,7 +119,7 @@ other = "Target"
 other = "Type"
 
 [SslExpirationOrChange]
-other = "(SSL Expiration or Change)"
+other = "(Certificate Expiration and Changes)"
 
 [Duration]
 other = "Interval"
@@ -134,10 +134,10 @@ other = "Enable Failure Notification"
 other = "Failure Notification"
 
 [MaxLatency]
-other = "Max Latency (ms)"
+other = "Maximum Latency (ms)"
 
 [MinLatency]
-other = "Min Latency (ms)"
+other = "Minimum Latency (ms)"
 
 [EnableLatencyNotification]
 other = "Enable Latency Notification"
@@ -147,7 +147,7 @@ other = "Latency Notification"
 
 [IntroductionOfMonitor]
 other = """
-For type <b>HTTP-GET</b>, enter URL (with http/https, HTTPS protocol will also monitor SSL certificate);<br>
+For type <b>HTTP-GET</b>, enter URL (with http/https scheme, HTTPS protocol will also monitor SSL certificate);<br>
 For type <b>ICMP-Ping</b>, enter domain/IP without port: example.com;<br>
 For type <b>TCP-Ping</b>, enter domain/IP + port number: example.com:22"""
 
@@ -182,16 +182,16 @@ other = "Notification Trigger Mode"
 other = "Always Trigger"
 
 [ModeOnetimeTrigger]
-other = "Single Trigger"
+other = "Trigger Once"
 
 [EnableTriggerTask]
 other = "Enable Trigger Task"
 
 [FailTriggerTasks]
-other = "Tasks triggered during an alarm"
+other = "Tasks to trigger on an alarm"
 
 [RecoverTriggerTasks]
-other = "Tasks triggered during recovery"
+other = "Tasks to trigger after recovery"
 
 [Enable]
 other = "Enable"
@@ -218,7 +218,7 @@ other = "Einstein Lightspeed 1"
 other = "Display Index"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "Higher Number, Higher Priority"
+other = "Greater Number, Higher Priority"
 
 [Secret]
 other = "Secret"
@@ -230,10 +230,10 @@ other = "Note"
 other = "Public Note"
 
 [LinuxOneKeyInstall]
-other = "Linux One-Command Install"
+other = "Linux Installation Command"
 
 [NoDomainAlert]
-other = "Set CDN bypassed Domain/IP in setting before using this function"
+other = "Please set the IP (or a domain pointed to it) of the original server in settings"
 
 [PushSuccessfully]
 other = "Send Success Notification"
@@ -254,13 +254,13 @@ other = "Cover All"
 other = "Ignore All"
 
 [ByTrigger]
-other = "Execute by Trigger"
+other = "Alarmed Servers"
 
 [DeleteScheduledTask]
 other = "Delete Scheduled Task"
 
 [ConfirmToDeleteThisScheduledTask]
-other = "Are you sure you want to Delete?"
+other = "Confirm deletion?"
 
 [AccessDenied]
 other = "Access Denied"
@@ -281,22 +281,22 @@ other = "Don't Have an Account?"
 other = "HTTP(S)/SSL Certificate"
 
 [TCPPort]
-other = "TCP Port"
+other = "TCPing"
 
 [DeleteService]
 other = "Remove Service Monitor"
 
 [ConfirmToDeleteThisService]
-other = "Confirm to Delete This Service?"
+other = "Confirm Deleting This Service?"
 
 [DeleteNotificationMethod]
 other = "Delete Notification Method"
 
 [ConfirmToDeleteThisNotificationMethod]
-other = "Confirm to Delete This Notification Method?"
+other = "Confirm Deleting This Notification Method?"
 
 [ForceUpdate]
-other = "Force Update Agent"
+other = "Trigger Agent Update"
 
 [SelectAll]
 other = "Select All"
@@ -305,7 +305,7 @@ other = "Select All"
 other = "Version"
 
 [OneKeyInstall]
-other = "One-Command Install"
+other = "Installation commands"
 
 [ClickToCopy]
 other = "Click To Copy"
@@ -314,7 +314,7 @@ other = "Click To Copy"
 other = "Delete Server"
 
 [ConfirmToDeleteServer]
-other = "Confirm to Delete Server?"
+other = "Confirm Deleting This Server?"
 
 [NoServerSelected]
 other = "No Server Selected"
@@ -545,7 +545,7 @@ other = "Scheduled Tasks"
 other = "API Management"
 
 [IssueNewApiToken]
-other = "Issue New API Token"
+other = "Generate New API Token"
 
 [Token]
 other = "Token"
@@ -554,10 +554,10 @@ other = "Token"
 other = "Delete Token"
 
 [ConfirmToDeleteThisToken]
-other = "Confirm to Delete This Token?"
+other = "Confirm Deleting This Token?"
 
 [YouAreNotAuthorized]
-other = "Not Authorized for This Page"
+other = "This Page needs Authorization"
 
 [WrongAccessPassword]
 other = "Wrong Access Password"
@@ -605,7 +605,7 @@ other = "IP Changed"
 other = "Remaining Data"
 
 [DashboardTheme]
-other = "Admin Panel Theme"
+other = "Dashboard Theme"
 
 [Info]
 other = "Info"
