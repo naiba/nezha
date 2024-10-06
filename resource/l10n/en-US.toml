@@ -95,7 +95,7 @@ other = "Cron Task"
 other = "Trigger Task"
 
 [TheFormaOfTheScheduleIs]
-other = "The Cron Expression is like:"
+other = "The Cron Expression format is:"
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
 other = "Sec Min Hour Day Month Week, see details in "
@@ -182,7 +182,7 @@ other = "Notification Trigger Mode"
 other = "Always Trigger"
 
 [ModeOnetimeTrigger]
-other = "Always Trigger"
+other = "Single Trigger"
 
 [EnableTriggerTask]
 other = "Enable Trigger Task"
@@ -296,7 +296,7 @@ other = "Delete Notification Method"
 other = "Confirm to Delete This Notification Method?"
 
 [ForceUpdate]
-other = "Force to Update"
+other = "Force Update Agent"
 
 [SelectAll]
 other = "Select All"
@@ -611,7 +611,7 @@ other = "Admin Panel Theme"
 other = "Info"
 
 [HideForGuest]
-other = "Hide for Guest"
+other = "Hide from Guest"
 
 [Menu]
 other = "Menu"
