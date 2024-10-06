@@ -23,7 +23,7 @@ other = "Home"
 other = "Back to Homepage"
 
 [AdminPanel]
-other = "Admin Dashboard"
+other = "Dashboard"
 
 [Logout]
 other = "Log out"
@@ -605,7 +605,7 @@ other = "IP Changed"
 other = "Remaining Data"
 
 [DashboardTheme]
-other = "Admin Panel Theme"
+other = "Dashboard Theme"
 
 [Info]
 other = "Info"
