@@ -36,16 +36,16 @@ body[theme="light"] .navbar .dropdown-menu {
 
 
 body[theme="light"] .navbar .dropdown-menu > li > a:focus,
-body[theme="light"] .navbar .dropdown-menu > li > a:hover{
+body[theme="light"] .navbar .dropdown-menu > li > a:hover {
     /** 二级导航鼠标悬停选中背景 **/
     background-color: rgba(0, 0, 0, .05);
 }
 
-body[theme="light"] .navbar .navbar-collapse{
+body[theme="light"] .navbar .navbar-collapse {
     border-color:rgba(0, 0, 0, 0.085);
 }
 
-body[theme="light"]  .navbar .navbar-toggle .icon-bar{
+body[theme="light"]  .navbar .navbar-toggle .icon-bar {
     background-color: rgba(0, 0, 0, 0.9);
 }
 
@@ -87,7 +87,7 @@ body[theme="light"] .table > thead > tr.node-group-tag > th:before {
 body[theme="light"] .table > tbody > tr > td:before,
 body[theme="light"] .table > tfoot > tr > td:before,
 body[theme="light"] .table > thead > tr > td:before,
-body[theme="light"] .table > thead > tr.node-group-cell > th:before{
+body[theme="light"] .table > thead > tr.node-group-cell > th:before {
      /** border-bottom 颜色 **/
     background-color: rgba(0, 0, 0, 0.075); 
 }
@@ -97,11 +97,11 @@ body[theme="light"] .table-hover > tbody > tr:not(.expandRow):hover > td {
 }
 
 /* expandRow展开部分样式 */
-body[theme="light"] .table > tbody > tr.expandRow.odd > td:before{
+body[theme="light"] .table > tbody > tr.expandRow.odd > td:before {
     background-color: unset;
 }
 
-body[theme="light"] .table > tbody > tr.expandRow.even > td:before{
+body[theme="light"] .table > tbody > tr.expandRow.even > td:before {
     background-color: unset;
 }
 /* expandRow展开部分样式结束 */
@@ -123,7 +123,7 @@ body[theme="light"] .progress-bar-danger {
     background-image: linear-gradient(to right, rgba(255, 70, 0, 0.6) 0, rgba(201, 48, 44,0.6) 100%);   
 }
 
-body[theme="light"] .toolbox i{
+body[theme="light"] .toolbox i {
     background-color: rgba(255, 255, 255, .55);
 }
 
