@@ -9,7 +9,7 @@ body[theme="dark"] .navbar .navbar-brand {
 }
 
 body[theme="dark"] .navbar .navbar-nav li.pc-active a,
-body[theme="dark"] .navbar .navbar-nav li.m-active a{
+body[theme="dark"] .navbar .navbar-nav li.m-active a {
     color: rgba(73, 146, 255, 1);
 }
 
@@ -32,7 +32,7 @@ body[theme="dark"] .navbar .dropdown-menu > li > a:hover {
 body[theme="dark"] .navbar .navbar-nav > .open > a:focus,
 body[theme="dark"] .navbar .navbar-nav > .open > a:hover,
 body[theme="dark"] .navbar .navbar-nav > .active > a,
-body[theme="dark"] .navbar .navbar-nav > .open > a{
+body[theme="dark"] .navbar .navbar-nav > .open > a {
     background-image: none;
     box-shadow: none;
     background-color: transparent;
@@ -58,7 +58,7 @@ body[theme="dark"] .table {
 body[theme="dark"] .table > tbody > tr > td:before,
 body[theme="dark"] .table > tfoot > tr > td:before,
 body[theme="dark"] .table > thead > tr > td:before,
-body[theme="dark"] .table > thead > tr.node-group-cell > th:before{
+body[theme="dark"] .table > thead > tr.node-group-cell > th:before {
     background-color: rgba(58, 62, 65, 1);
 }
 
@@ -74,7 +74,7 @@ body[theme="dark"] .table-striped tbody > tr.odd > th {
     background-color: rgba(34, 35, 46, 1);
 }
 
-body[theme="dark"] .table-hover > tbody > tr:hover{
+body[theme="dark"] .table-hover > tbody > tr:hover {
     background-color: unset;
 }
 
@@ -83,11 +83,11 @@ body[theme="dark"] .table-hover > tbody > tr:not(.expandRow):hover > td {
 }
 
 /* expandRow展开部分样式 */
-body[theme="dark"] .table > tbody > tr.expandRow.odd > td:before{
+body[theme="dark"] .table > tbody > tr.expandRow.odd > td:before {
     background-color: rgba(34, 35, 46, 1);
 }
 
-body[theme="dark"] .table > tbody > tr.expandRow.even > td:before{
+body[theme="dark"] .table > tbody > tr.expandRow.even > td:before {
     background-color: rgba(28, 29, 38, 1);
 }
 /* expandRow展开部分样式结束 */
@@ -155,29 +155,29 @@ body[theme="dark"] footer p a:hover {
     text-decoration: none;
 }
 
-body[theme="dark"] .modal-content{
+body[theme="dark"] .modal-content {
     background-color: rgba(28, 29, 38, 1);
     color: #f1f1f1;
 }
 
-body[theme="dark"] #earthChartBox .modal-content{
+body[theme="dark"] #earthChartBox .modal-content {
     background-color: rgba(0, 0, 0, 1);
     color: #f1f1f1;
 }
 
-body[theme="dark"] .modal-header{
+body[theme="dark"] .modal-header {
     border-bottom-color:#080808;
 }
 
-body[theme="dark"] .modal-header i.xclose{
+body[theme="dark"] .modal-header i.xclose {
     color: #f1f1f1;
 }
 
-body[theme="dark"] .toolbox i{
+body[theme="dark"] .toolbox i {
     color: rgba(241, 241, 241, 1);
     background-color: rgba(0, 0, 0, 0.5);
 }
 
-body[theme="dark"] .network-box .network-box-header{
+body[theme="dark"] .network-box .network-box-header {
     border-bottom-color: rgba(110, 112, 121, 0.25);
 }

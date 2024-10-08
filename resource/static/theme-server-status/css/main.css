@@ -237,8 +237,8 @@ tr.accordion-toggle{
 }
 
 .node-cell.network {
-    min-width: 110px;
-    max-width: 110px;
+    min-width: 100px;
+    max-width: 100px;
 }
 
 .node-cell.traffic {
@@ -340,11 +340,11 @@ td.ping-network-quality {
 /* 服务页 正文结束 */
 
 /* 网络页 正文*/
-.network-box .btn-group.open .dropdown-toggle{
+.network-box .btn-group.open .dropdown-toggle {
     box-shadow:unset;
 }
 
-.network-box .network-box-header{
+.network-box .network-box-header {
     font-size: 18px;
     padding: 5px 0px 15px 5px;
     cursor: pointer;
@@ -365,12 +365,12 @@ td.ping-network-quality {
     display: none;
 }
 
-.network-box .network-box-header .dropdown-menu li{
+.network-box .network-box-header .dropdown-menu li {
     height: 2em;
     cursor: pointer;
 }
 
-.network-box .network-box-header .dropdown-menu li.input-group{
+.network-box .network-box-header .dropdown-menu li.input-group {
     margin: 0 auto;
     display: flex;
     position: sticky;
@@ -378,7 +378,7 @@ td.ping-network-quality {
     z-index: 99999997;
 }
 
-.network-box .network-box-header .dropdown-menu li.input-group input{
+.network-box .network-box-header .dropdown-menu li.input-group input {
     width: 100%;
     height: 2em;
     border-top: none;
@@ -407,7 +407,7 @@ td.ping-network-quality {
     margin: 18px 0px 15px 0px;
 }
 
-.network-box .chartTitle i.chartCountryCode{
+.network-box .chartTitle i.chartCountryCode {
     font-size: 16px;
     border-radius: 12.5%;
 }
@@ -415,17 +415,17 @@ td.ping-network-quality {
 /* 网络页 正文结束 */
 
 /* 地图版服务器分布图 */
-#mapChartBox{
+#mapChartBox {
     z-index: 999999999;
     padding-left: 0 !important;
 }
 
-.modal-open .modal{
+.modal-open .modal {
     overflow-x: hidden;
     overflow-y: hidden;
 }
 
-.modal-dialog-centered{
+.modal-dialog-centered {
     margin: 0 auto;
     width: 100%;
     max-width: 100%;
@@ -435,7 +435,7 @@ td.ping-network-quality {
     min-height: calc(100%) /* 确保模态框占据整个视口高度 */
 }
 
-.modal-content{
+.modal-content {
     display: flex;
     flex-direction: column;
     pointer-events: auto;
@@ -443,15 +443,15 @@ td.ping-network-quality {
     border: none;
 }
 
-.modal-header{
+.modal-header {
     position: relative;
 }
 
-.modal-header h4{
+.modal-header h4 {
     cursor: pointer;
 }
 
-.modal-header i.xclose{
+.modal-header i.xclose {
     cursor: pointer;
     position: absolute;
     font-size: 30px;
@@ -459,32 +459,32 @@ td.ping-network-quality {
     right: 10px;
 }
 
-.modal-body{
+.modal-body {
     padding: 0px;
 }
 
-a.template-item, a.cdn-item{
+a.template-item, a.cdn-item {
     display: block;
 }
 
-footer{
+footer {
     padding-bottom: 20px;
 }
 
-footer p{
+footer p {
     text-align: center;
     font-size: 10px;
 }
 
 @media only screen and (max-width: 1200px) {
-    .accordian-body{
+    .accordian-body {
         margin: 5px 0px 5px 10px;        
     }
-    table.monitor-detail{
+    table.monitor-detail {
         margin:0px 0px 2px 0px;
     }
     .table .network-thead-tr th,
-    .table .node-group-tag th{
+    .table .node-group-tag th {
         font-size:16px;
         padding-bottom:6px;
     }
@@ -512,10 +512,10 @@ footer p{
         padding: 0;
         margin-bottom: 10px;
     }
-    footer{
+    footer {
         padding-bottom: 10px;
     }
-    .cycle-transfer-stats .dataTables_wrapper{
+    .cycle-transfer-stats .dataTables_wrapper {
         margin-bottom: -10px;
     }
     .navbar .navbar-nav .open .dropdown-menu>li>a {
@@ -537,54 +537,58 @@ footer p{
     }
     .node-cell.os,
     .node-cell.uptime,
-    .node-cell.traffic{
+    .node-cell.traffic {
         display: none;
         visibility: hidden;
     }
-    .node-cell.location{
+    .node-cell.location {
         display: table-cell;
         visibility: visible;
     }
-    .node-cell-os-text,.node-cell-location-text{
+    .node-cell-os-text,.node-cell-location-text {
         display: none;
         visibility: hidden;
+    }
+    .node-cell.network {
+        min-width: 95px;
+        max-width: 95px;
     }
     .node-cell.remaining {
         min-width: 75px;
         max-width: 75px;    
     }
-    .accordian-body{
+    .accordian-body {
         margin: 5px 0px 5px 10px;        
     }
-    table.monitor-detail{
+    table.monitor-detail {
         margin:0px 0px 2px 0px;
     }
     .table .network-thead-tr th,
-    .table .node-group-tag th{
+    .table .node-group-tag th {
         font-size:14px;
         padding-bottom:6px;
     }
-    .table tr.network td{
+    .table tr.network td {
         font-size: 12px;
     }
-    .service-status .service-status-th{
+    .service-status .service-status-th {
         min-width:30px;
     }
-    .service-status .delay-today{
+    .service-status .delay-today {
         margin-top:4px;
         justify-content: center;
     }
-    .service-status .delay-today i{
+    .service-status .delay-today i {
         margin-right:0px;
     }
-    .service-status .delay-today-text{
+    .service-status .delay-today-text {
         display: none;
         visibility: hidden;
     }
-    .service-status .service-averagelatency-th{
+    .service-status .service-averagelatency-th {
         min-width:70px;
     }
-    .service-status .service-30daysonline-th{
+    .service-status .service-30daysonline-th {
         min-width:75px;
     }
     .toolbox {
@@ -602,7 +606,7 @@ footer p{
         font-size: 16px;
         margin: 10px 0px 10px 0px;
     }
-    .network-box .chartTitle i.chartCountryCode{
+    .network-box .chartTitle i.chartCountryCode {
         font-size: 15px;
         border-radius: 12.5%;
     }

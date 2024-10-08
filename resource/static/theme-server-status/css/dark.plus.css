@@ -86,7 +86,7 @@ body[theme="dark"] .table > thead > tr.node-group-tag > th:before {
 body[theme="dark"] .table > tbody > tr > td:before,
 body[theme="dark"] .table > tfoot > tr > td:before,
 body[theme="dark"] .table > thead > tr > td:before,
-body[theme="dark"] .table > thead > tr.node-group-cell > th:before{
+body[theme="dark"] .table > thead > tr.node-group-cell > th:before {
      /** border-bottom 颜色 **/
     background-color: rgba(155, 155, 155, 0.1); 
 }
@@ -96,11 +96,11 @@ body[theme="dark"] .table-hover > tbody > tr:not(.expandRow):hover > td {
 }
 
 /* expandRow展开部分样式 */
-body[theme="dark"] .table > tbody > tr.expandRow.odd > td:before{
+body[theme="dark"] .table > tbody > tr.expandRow.odd > td:before {
     background-color: unset;
 }
 
-body[theme="dark"] .table > tbody > tr.expandRow.even > td:before{
+body[theme="dark"] .table > tbody > tr.expandRow.even > td:before {
     background-color: unset;
 }
 /* expandRow展开部分样式结束 */

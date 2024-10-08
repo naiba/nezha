@@ -47,16 +47,16 @@ body[theme="light"] .navbar .navbar-nav .open .dropdown-menu > li > a {
     color: rgba(0, 0, 0, 0.87);
 }
 
-body[theme="light"] .navbar .navbar-toggle{
+body[theme="light"] .navbar .navbar-toggle {
     border:none;
     padding:9px 12px;
 }
 
-body[theme="light"] .navbar .navbar-collapse{
+body[theme="light"] .navbar .navbar-collapse {
     border-color:rgba(0, 0, 0, 0.085);
 }
 
-body[theme="light"]  .navbar .navbar-toggle .icon-bar{
+body[theme="light"]  .navbar .navbar-toggle .icon-bar {
     background-color: rgba(0, 0, 0, 0.87);
 }
 
@@ -95,12 +95,12 @@ body[theme="light"] .table-striped tbody > tr.odd > th {
 body[theme="light"] .table > tbody > tr > td:before,
 body[theme="light"] .table > tfoot > tr > td:before,
 body[theme="light"] .table > thead > tr > td:before,
-body[theme="light"] .table > thead > tr.node-group-cell > th:before{
+body[theme="light"] .table > thead > tr.node-group-cell > th:before {
     background-color: rgba(221, 221, 221, 1);
 }
 
 body[theme="light"] .table > tbody > tr.expandRow > td:before,
-body[theme="light"] .table > thead > tr.node-group-tag > th:before{
+body[theme="light"] .table > thead > tr.node-group-tag > th:before {
     background-color: rgba(255, 255, 255, 1);
 }
 
@@ -174,35 +174,35 @@ body[theme="light"] footer p a:hover {
     text-decoration: none;
 }
 
-body[theme="light"] .toolbox i{
+body[theme="light"] .toolbox i {
     color: rgba(94, 114, 228, .9);
     background-color: rgba(255, 255, 255, .5);
     box-shadow:0 .125rem .25rem rgba(0, 0, 0, .15) !important;
 }
 
-body[theme="light"] .toolbox .mytoggle .tooltip-inner{
+body[theme="light"] .toolbox .mytoggle .tooltip-inner {
     background: #ffffff;
     box-shadow: 0 .125rem .25rem rgba(0, 0, 0, .15) !important;
 }
 
-body[theme="light"] .toolbox .mytoggle li:hover{
+body[theme="light"] .toolbox .mytoggle li:hover {
     background-color:#e6e6e6;
 }
 
-body[theme="light"] .modal-content{
+body[theme="light"] .modal-content {
     background-color: rgba(249, 249, 249, 1);
     color: rgba(0, 0, 0, 0.87);
 }
 
-body[theme="light"] .modal-header{
+body[theme="light"] .modal-header {
     border-bottom-color:#f1f1f1;
 }
 
-body[theme="light"] .modal-header i.xclose{
+body[theme="light"] .modal-header i.xclose {
     color: rgba(0, 0, 0, 0.87);
 }
 
-body[theme="light"] .network-box .network-box-header{
+body[theme="light"] .network-box .network-box-header {
     border-bottom-color: rgba(224, 230, 241, 0.6);
 }
 

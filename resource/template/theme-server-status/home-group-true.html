@@ -35,15 +35,16 @@
                 <i v-if='isWindowsPlatform(node.host.Platform)' class="windows icon"></i>
                 <i v-else-if='getFontLogoClass(node.host.Platform) == "" && node.stateuptime > 0' class="fl-tux"></i>
                 <i v-else :class="'fl-' + getFontLogoClass(node.host.Platform)"></i>
-                <span class="node-cell-os-text">@#getPlatformName(node.os)#@</span>
+                <span class="node-cell-os-text">@#getPlatformName(node.os) === '' && node.stateuptime > 0 ? 'linux' : getPlatformName(node.os)#@</span>
             </td>
-            <td style="text-align: center;" class="node-cell location">
-                <i :class="'fi fi-' + node.location"></i>
-                <span class="node-cell-location-text text-uppercase">&nbsp;@#node.location#@</span>
+            <td class="node-cell location center">
+                <i :class="'fi fi-' + (node.stateuptime > 0 ? (node.location || 'rb') : '')"></i>
+                <span class="node-cell-location-text text-uppercase">@#node.stateuptime > 0 ? (node.location || 'RB') : ''#@</span>
             </td>
             <td v-if="group.data.some(item => item.additional && item.additional.price && Object.keys(item.additional.price).length > 0)" class="node-cell price center">
                 <template v-if="node.additional && node.additional.price">
-                    <span v-if="node.additional.price.amount == 0" class="node-cell-price-text">Free</span>
+                    <span v-if="node.additional.price.amount == 0" class="node-cell-price-text">FREE</span>
+                    <span v-else-if="node.additional.price.amount == -1" class="node-cell-price-text">PAYG</span>
                     <span v-else class="node-cell-price-text">@#node.additional.price.amount#@@#(node.additional.price.cycle ? '/' + node.additional.price.cycle : '')#@</span>
                 </template>
             </td>
@@ -92,8 +93,8 @@
                     <div style="display: flex;left-items: center;justify-content: center;flex-direction: column; max-width: 89vw">
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "Platform"}}:</span>
-                            @#node.host.Platform#@-@#node.host.PlatformVersion#@
-                            [<span v-if="node.host.Virtualization">@#node.host.Virtualization#@:</span>@#node.host.Arch#@]
+                            <span v-if="node.host.Platform">@#node.host.Platform#@@#node.host.PlatformVersion ? '-' + node.host.PlatformVersion : ''#@</span>
+                            <span v-if="node.host.Arch">[@#node.host.Virtualization ? node.host.Virtualization + ':' : ''#@@#node.host.Arch#@]</span>
                         </span>
                         <span class="node-cell-expand" v-if="node.host.CPU">
                             <span class="node-cell-expand-label">CPU:</span>
