@@ -71,8 +71,8 @@ func (ns *NotificationServerBundle) reqBody(message string) (string, error) {
 			return string(msgBytes)[1 : len(msgBytes)-1]
 		}), nil
 	case NotificationRequestTypeForm:
-		var data map[string]string
-		if err := utils.Json.Unmarshal([]byte(n.RequestBody), &data); err != nil {
+		data, err := utils.GjsonParseStringMap(n.RequestBody)
+		if err != nil {
 			return "", err
 		}
 		params := url.Values{}
@@ -99,8 +99,8 @@ func (n *Notification) setRequestHeader(req *http.Request) error {
 	if n.RequestHeader == "" {
 		return nil
 	}
-	var m map[string]string
-	if err := utils.Json.Unmarshal([]byte(n.RequestHeader), &m); err != nil {
+	m, err := utils.GjsonParseStringMap(n.RequestHeader)
+	if err != nil {
 		return err
 	}
 	for k, v := range m {

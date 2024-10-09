@@ -20,3 +20,10 @@ func splitDomain(domain string) (prefix string, realDomain string) {
 	prefix = domain[:len(domain)-len(realDomain)-1]
 	return prefix, realDomain
 }
+
+func getRecordString(isIpv4 bool) string {
+	if isIpv4 {
+		return "A"
+	}
+	return "AAAA"
+}

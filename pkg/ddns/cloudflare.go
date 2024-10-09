@@ -2,6 +2,7 @@ package ddns
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -14,10 +15,13 @@ import (
 const baseEndpoint = "https://api.cloudflare.com/client/v4/zones"
 
 type ProviderCloudflare struct {
+	isIpv4       bool
+	domainConfig *DomainConfig
 	secret       string
 	zoneId       string
+	ipAddr       string
 	recordId     string
-	domainConfig *DomainConfig
+	recordType   string
 }
 
 type cfReq struct {
@@ -26,13 +30,6 @@ type cfReq struct {
 	Content string `json:"content"`
 	TTL     uint32 `json:"ttl"`
 	Proxied bool   `json:"proxied"`
-}
-
-type cfResp struct {
-	Result []struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	} `json:"result"`
 }
 
 func NewProviderCloudflare(s string) *ProviderCloudflare {
@@ -54,13 +51,19 @@ func (provider *ProviderCloudflare) UpdateDomain(domainConfig *DomainConfig) err
 
 	// 当IPv4和IPv6同时成功才算作成功
 	if provider.domainConfig.EnableIPv4 {
-		if err = provider.addDomainRecord(true); err != nil {
+		provider.isIpv4 = true
+		provider.recordType = getRecordString(provider.isIpv4)
+		provider.ipAddr = provider.domainConfig.Ipv4Addr
+		if err = provider.addDomainRecord(); err != nil {
 			return err
 		}
 	}
 
 	if provider.domainConfig.EnableIpv6 {
-		if err = provider.addDomainRecord(false); err != nil {
+		provider.isIpv4 = false
+		provider.recordType = getRecordString(provider.isIpv4)
+		provider.ipAddr = provider.domainConfig.Ipv6Addr
+		if err = provider.addDomainRecord(); err != nil {
 			return err
 		}
 	}
@@ -68,19 +71,18 @@ func (provider *ProviderCloudflare) UpdateDomain(domainConfig *DomainConfig) err
 	return nil
 }
 
-func (provider *ProviderCloudflare) addDomainRecord(isIpv4 bool) error {
-	err := provider.findDNSRecord(isIpv4)
+func (provider *ProviderCloudflare) addDomainRecord() error {
+	err := provider.findDNSRecord()
 	if err != nil {
+		if errors.Is(err, utils.ErrGjsonNotFound) {
+			// 添加 DNS 记录
+			return provider.createDNSRecord()
+		}
 		return fmt.Errorf("查找 DNS 记录时出错: %s", err)
 	}
 
-	if provider.recordId == "" {
-		// 添加 DNS 记录
-		return provider.createDNSRecord(isIpv4)
-	} else {
-		// 更新 DNS 记录
-		return provider.updateDNSRecord(isIpv4)
-	}
+	// 更新 DNS 记录
+	return provider.updateDNSRecord()
 }
 
 func (provider *ProviderCloudflare) getZoneID() error {
@@ -96,35 +98,22 @@ func (provider *ProviderCloudflare) getZoneID() error {
 		return err
 	}
 
-	res := &cfResp{}
-	err = utils.Json.Unmarshal(body, res)
+	result, err := utils.GjsonGet(body, "result.0.id")
 	if err != nil {
 		return err
 	}
 
-	result := res.Result
-	if len(result) > 0 {
-		provider.zoneId = result[0].ID
-		return nil
-	}
-
-	return fmt.Errorf("找不到 Zone ID")
+	provider.zoneId = result.String()
+	return nil
 }
 
-func (provider *ProviderCloudflare) findDNSRecord(isIPv4 bool) error {
-	var ipType string
-	if isIPv4 {
-		ipType = "A"
-	} else {
-		ipType = "AAAA"
-	}
-
+func (provider *ProviderCloudflare) findDNSRecord() error {
 	de, _ := url.JoinPath(baseEndpoint, provider.zoneId, "dns_records")
 	du, _ := url.Parse(de)
 
 	q := du.Query()
 	q.Set("name", provider.domainConfig.FullDomain)
-	q.Set("type", ipType)
+	q.Set("type", provider.recordType)
 	du.RawQuery = q.Encode()
 
 	body, err := provider.sendRequest("GET", du.String(), nil)
@@ -132,36 +121,21 @@ func (provider *ProviderCloudflare) findDNSRecord(isIPv4 bool) error {
 		return err
 	}
 
-	res := &cfResp{}
-	err = utils.Json.Unmarshal(body, res)
+	result, err := utils.GjsonGet(body, "result.0.id")
 	if err != nil {
 		return err
 	}
 
-	result := res.Result
-	if len(result) > 0 {
-		provider.recordId = result[0].ID
-		return nil
-	}
-
+	provider.recordId = result.String()
 	return nil
 }
 
-func (provider *ProviderCloudflare) createDNSRecord(isIPv4 bool) error {
-	var ipType, ipAddr string
-	if isIPv4 {
-		ipType = "A"
-		ipAddr = provider.domainConfig.Ipv4Addr
-	} else {
-		ipType = "AAAA"
-		ipAddr = provider.domainConfig.Ipv6Addr
-	}
-
+func (provider *ProviderCloudflare) createDNSRecord() error {
 	de, _ := url.JoinPath(baseEndpoint, provider.zoneId, "dns_records")
 	data := &cfReq{
 		Name:    provider.domainConfig.FullDomain,
-		Type:    ipType,
-		Content: ipAddr,
+		Type:    provider.recordType,
+		Content: provider.ipAddr,
 		TTL:     60,
 		Proxied: false,
 	}
@@ -171,21 +145,12 @@ func (provider *ProviderCloudflare) createDNSRecord(isIPv4 bool) error {
 	return err
 }
 
-func (provider *ProviderCloudflare) updateDNSRecord(isIPv4 bool) error {
-	var ipType, ipAddr string
-	if isIPv4 {
-		ipType = "A"
-		ipAddr = provider.domainConfig.Ipv4Addr
-	} else {
-		ipType = "AAAA"
-		ipAddr = provider.domainConfig.Ipv6Addr
-	}
-
+func (provider *ProviderCloudflare) updateDNSRecord() error {
 	de, _ := url.JoinPath(baseEndpoint, provider.zoneId, "dns_records", provider.recordId)
 	data := &cfReq{
 		Name:    provider.domainConfig.FullDomain,
-		Type:    ipType,
-		Content: ipAddr,
+		Type:    provider.recordType,
+		Content: provider.ipAddr,
 		TTL:     60,
 		Proxied: false,
 	}

@@ -155,8 +155,8 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 				Ipv4Addr:   ipv4,
 				Ipv6Addr:   ipv6,
 			}
-			go singleton.RetryableUpdateDomain(provider, config, maxRetries)
 
+			go singleton.RetryableUpdateDomain(provider, config, maxRetries)
 		} else {
 			// 虽然会在启动时panic, 可以断言不会走这个分支, 但是考虑到动态加载配置或者其它情况, 这里输出一下方便检查奇奇怪怪的BUG
 			log.Printf("NEZHA>> 未找到对应的DDNS配置(%s), 或者是provider填写不正确, 请前往config.yml检查你的设置", singleton.ServerList[clientID].DDNSProfile)
