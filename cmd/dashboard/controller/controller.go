@@ -95,10 +95,16 @@ func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
 			continue
 		}
 
-		descPath := filepath.Join("resource", "template", theme.Name(), "theme.json")
-		desc, err := os.ReadFile(descPath)
+		themeDir := theme.Name()
+		if !strings.HasPrefix(themeDir, "theme-") {
+			log.Printf("NEZHA>> Invalid theme name: %s", themeDir)
+			continue
+		}
+
+		descPath := filepath.Join("resource", "template", themeDir, "theme.json")
+		desc, err := os.ReadFile(filepath.Clean(descPath))
 		if err != nil {
-			log.Printf("NEZHA>> Error opening %s config: %v", theme.Name(), err)
+			log.Printf("NEZHA>> Error opening %s config: %v", themeDir, err)
 			continue
 		}
 
@@ -109,14 +115,14 @@ func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
 		}
 
 		// load templates
-		templatePath := filepath.Join("resource", "template", theme.Name(), "*.html")
+		templatePath := filepath.Join("resource", "template", themeDir, "*.html")
 		t, err := ret.ParseGlob(templatePath)
 		if err != nil {
-			log.Printf("NEZHA>> Error parsing templates %s: %v", theme.Name(), err)
+			log.Printf("NEZHA>> Error parsing templates %s: %v", themeDir, err)
 			continue
 		}
 
-		themeKey := strings.TrimPrefix(theme.Name(), "theme-")
+		themeKey := strings.TrimPrefix(themeDir, "theme-")
 		model.Themes[themeKey] = themeName.String()
 
 		ret = t
