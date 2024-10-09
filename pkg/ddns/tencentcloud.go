@@ -41,20 +41,6 @@ type tcReq struct {
 	RecordId   uint64 `json:"RecordId,omitempty"`
 }
 
-/*
-type tcResp struct {
-	Response struct {
-		RecordList []struct {
-			RecordId uint64
-			Value    string
-		}
-		Error struct {
-			Code string
-		}
-	}
-}
-*/
-
 func NewProviderTencentCloud(id, key string) *ProviderTencentCloud {
 	return &ProviderTencentCloud{
 		secretID:  id,

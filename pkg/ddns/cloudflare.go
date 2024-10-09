@@ -32,15 +32,6 @@ type cfReq struct {
 	Proxied bool   `json:"proxied"`
 }
 
-/*
-type cfResp struct {
-	Result []struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	} `json:"result"`
-}
-*/
-
 func NewProviderCloudflare(s string) *ProviderCloudflare {
 	return &ProviderCloudflare{
 		secret: s,
