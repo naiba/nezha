@@ -3,10 +3,10 @@ package controller
 import (
 	"fmt"
 	"html/template"
-	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -34,28 +34,16 @@ func ServeWeb(port uint) *http.Server {
 		pprof.Register(r)
 	}
 	r.Use(natGateway)
-	if os.Getenv("NZ_LOCAL_TEMPLATE") == "true" {
-		r.SetFuncMap(funcMap)
-		r.Use(mygin.RecordPath)
-		r.Static("/static", "resource/static")
-		r.LoadHTMLGlob("resource/template/**/*.html")
-	} else {
-		tmpl := template.New("").Funcs(funcMap)
-		var err error
-		tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")
-		if err != nil {
-			panic(err)
-		}
-		tmpl = loadThirdPartyTemplates(tmpl)
-		r.SetHTMLTemplate(tmpl)
-		r.Use(mygin.RecordPath)
-		staticFs, err := fs.Sub(resource.StaticFS, "static")
-		if err != nil {
-			panic(err)
-		}
-		r.StaticFS("/static", http.FS(staticFs))
+	tmpl := template.New("").Funcs(funcMap)
+	var err error
+	tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")
+	if err != nil {
+		panic(err)
 	}
-	r.Static("/static-custom", "resource/static/custom")
+	tmpl = loadThirdPartyTemplates(tmpl)
+	r.SetHTMLTemplate(tmpl)
+	r.Use(mygin.RecordPath)
+	r.StaticFS("/static", http.FS(resource.StaticFS))
 	routers(r)
 	page404 := func(c *gin.Context) {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
@@ -106,14 +94,34 @@ func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
 		if !theme.IsDir() {
 			continue
 		}
-		// load templates
-		t, err := ret.ParseGlob(fmt.Sprintf("resource/template/%s/*.html", theme.Name()))
+
+		descPath := filepath.Join("resource", "template", theme.Name(), "theme.json")
+		desc, err := os.ReadFile(descPath)
 		if err != nil {
-			log.Printf("NEZHA>> Error parsing templates %s error: %v", theme.Name(), err)
+			log.Printf("NEZHA>> Error opening %s config: %v", theme.Name(), err)
 			continue
 		}
+
+		themeName, err := utils.GjsonGet(desc, "name")
+		if err != nil {
+			log.Printf("NEZHA>> Error opening %s config: not a valid description file", theme.Name())
+			continue
+		}
+
+		// load templates
+		templatePath := filepath.Join("resource", "template", theme.Name(), "*.html")
+		t, err := ret.ParseGlob(templatePath)
+		if err != nil {
+			log.Printf("NEZHA>> Error parsing templates %s: %v", theme.Name(), err)
+			continue
+		}
+
+		themeKey := strings.TrimPrefix(theme.Name(), "theme-")
+		model.Themes[themeKey] = themeName.String()
+
 		ret = t
 	}
+
 	return ret
 }
 
