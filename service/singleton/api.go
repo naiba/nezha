@@ -34,6 +34,7 @@ type CommonServerInfo struct {
 	IPV6         string `json:"ipv6"`
 	ValidIP      string `json:"valid_ip"`
 	DisplayIndex int    `json:"display_index"`
+	HideForGuest bool   `json:"hide_for_guest"`
 }
 
 // StatusResponse 服务器状态子结构 包含服务器信息与状态信息
@@ -150,6 +151,7 @@ func (s *ServerAPIService) GetAllStatus() *ServerStatusResponse {
 			IPV6:         ipv6,
 			ValidIP:      validIP,
 			DisplayIndex: v.DisplayIndex,
+			HideForGuest: v.HideForGuest,
 		}
 		res.Result = append(res.Result, &StatusResponse{
 			CommonServerInfo: info,
