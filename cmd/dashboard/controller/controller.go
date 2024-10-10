@@ -84,7 +84,7 @@ func routers(r *gin.Engine) {
 }
 
 func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
-	var ret = tmpl
+	ret := tmpl
 	themes, err := os.ReadDir("resource/template")
 	if err != nil {
 		log.Printf("NEZHA>> Error reading themes folder: %v", err)
@@ -96,6 +96,12 @@ func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
 		}
 
 		themeDir := theme.Name()
+		if strings.HasPrefix(themeDir, "dashboard-") {
+			// load dashboard templates, ignore desc file
+			ret = loadTemplates(ret, themeDir)
+			continue
+		}
+
 		if !strings.HasPrefix(themeDir, "theme-") {
 			log.Printf("NEZHA>> Invalid theme name: %s", themeDir)
 			continue
@@ -115,20 +121,25 @@ func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
 		}
 
 		// load templates
-		templatePath := filepath.Join("resource", "template", themeDir, "*.html")
-		t, err := ret.ParseGlob(templatePath)
-		if err != nil {
-			log.Printf("NEZHA>> Error parsing templates %s: %v", themeDir, err)
-			continue
-		}
+		ret = loadTemplates(ret, themeDir)
 
 		themeKey := strings.TrimPrefix(themeDir, "theme-")
 		model.Themes[themeKey] = themeName.String()
-
-		ret = t
 	}
 
 	return ret
+}
+
+func loadTemplates(tmpl *template.Template, themeDir string) *template.Template {
+	// load templates
+	templatePath := filepath.Join("resource", "template", themeDir, "*.html")
+	t, err := tmpl.ParseGlob(templatePath)
+	if err != nil {
+		log.Printf("NEZHA>> Error parsing templates %s: %v", themeDir, err)
+		return tmpl
+	}
+
+	return t
 }
 
 var funcMap = template.FuncMap{
