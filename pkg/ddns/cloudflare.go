@@ -9,19 +9,16 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 )
 
 const baseEndpoint = "https://api.cloudflare.com/client/v4/zones"
 
 type ProviderCloudflare struct {
-	isIpv4       bool
-	domainConfig *DomainConfig
-	secret       string
-	zoneId       string
-	ipAddr       string
-	recordId     string
-	recordType   string
+	provider
+	zoneId   string
+	recordId string
 }
 
 type cfReq struct {
@@ -32,37 +29,47 @@ type cfReq struct {
 	Proxied bool   `json:"proxied"`
 }
 
-func NewProviderCloudflare(s string) *ProviderCloudflare {
+func NewProviderCloudflare(profile *model.DDNSProfile, ip *IP) *ProviderCloudflare {
 	return &ProviderCloudflare{
-		secret: s,
+		provider: provider{DDNSProfile: profile, IPAddrs: ip},
 	}
 }
 
-func (provider *ProviderCloudflare) UpdateDomain(domainConfig *DomainConfig) error {
-	if domainConfig == nil {
-		return fmt.Errorf("获取 DDNS 配置失败")
+func (provider *ProviderCloudflare) UpdateDomain() {
+	for _, domain := range provider.DDNSProfile.Domains {
+		for retries := 0; retries < int(provider.DDNSProfile.MaxRetries); retries++ {
+			provider.Domain = domain
+			log.Printf("NEZHA>> 正在尝试更新域名(%s)DDNS(%d/%d)", provider.Domain, retries+1, provider.DDNSProfile.MaxRetries)
+			if err := provider.updateDomain(); err != nil {
+				log.Printf("NEZHA>> 尝试更新域名(%s)DDNS失败: %v", provider.Domain, err)
+			} else {
+				log.Printf("NEZHA>> 尝试更新域名(%s)DDNS成功", provider.Domain)
+				break
+			}
+		}
 	}
-	provider.domainConfig = domainConfig
+}
 
+func (provider *ProviderCloudflare) updateDomain() error {
 	err := provider.getZoneID()
 	if err != nil {
 		return fmt.Errorf("无法获取 zone ID: %s", err)
 	}
 
 	// 当IPv4和IPv6同时成功才算作成功
-	if provider.domainConfig.EnableIPv4 {
-		provider.isIpv4 = true
-		provider.recordType = getRecordString(provider.isIpv4)
-		provider.ipAddr = provider.domainConfig.Ipv4Addr
+	if *provider.DDNSProfile.EnableIPv4 {
+		provider.IsIpv4 = true
+		provider.RecordType = getRecordString(provider.IsIpv4)
+		provider.IPAddr = provider.IPAddrs.Ipv4Addr
 		if err = provider.addDomainRecord(); err != nil {
 			return err
 		}
 	}
 
-	if provider.domainConfig.EnableIpv6 {
-		provider.isIpv4 = false
-		provider.recordType = getRecordString(provider.isIpv4)
-		provider.ipAddr = provider.domainConfig.Ipv6Addr
+	if *provider.DDNSProfile.EnableIPv6 {
+		provider.IsIpv4 = false
+		provider.RecordType = getRecordString(provider.IsIpv4)
+		provider.IPAddr = provider.IPAddrs.Ipv6Addr
 		if err = provider.addDomainRecord(); err != nil {
 			return err
 		}
@@ -86,7 +93,7 @@ func (provider *ProviderCloudflare) addDomainRecord() error {
 }
 
 func (provider *ProviderCloudflare) getZoneID() error {
-	_, realDomain := splitDomain(provider.domainConfig.FullDomain)
+	_, realDomain := splitDomain(provider.Domain)
 	zu, _ := url.Parse(baseEndpoint)
 
 	q := zu.Query()
@@ -112,8 +119,8 @@ func (provider *ProviderCloudflare) findDNSRecord() error {
 	du, _ := url.Parse(de)
 
 	q := du.Query()
-	q.Set("name", provider.domainConfig.FullDomain)
-	q.Set("type", provider.recordType)
+	q.Set("name", provider.Domain)
+	q.Set("type", provider.RecordType)
 	du.RawQuery = q.Encode()
 
 	body, err := provider.sendRequest("GET", du.String(), nil)
@@ -133,9 +140,9 @@ func (provider *ProviderCloudflare) findDNSRecord() error {
 func (provider *ProviderCloudflare) createDNSRecord() error {
 	de, _ := url.JoinPath(baseEndpoint, provider.zoneId, "dns_records")
 	data := &cfReq{
-		Name:    provider.domainConfig.FullDomain,
-		Type:    provider.recordType,
-		Content: provider.ipAddr,
+		Name:    provider.Domain,
+		Type:    provider.RecordType,
+		Content: provider.IPAddr,
 		TTL:     60,
 		Proxied: false,
 	}
@@ -148,9 +155,9 @@ func (provider *ProviderCloudflare) createDNSRecord() error {
 func (provider *ProviderCloudflare) updateDNSRecord() error {
 	de, _ := url.JoinPath(baseEndpoint, provider.zoneId, "dns_records", provider.recordId)
 	data := &cfReq{
-		Name:    provider.domainConfig.FullDomain,
-		Type:    provider.recordType,
-		Content: provider.ipAddr,
+		Name:    provider.Domain,
+		Type:    provider.RecordType,
+		Content: provider.IPAddr,
 		TTL:     60,
 		Proxied: false,
 	}
@@ -167,7 +174,7 @@ func (provider *ProviderCloudflare) sendRequest(method string, url string, data 
 		return nil, err
 	}
 
-	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", provider.secret))
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", provider.DDNSProfile.AccessSecret))
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := utils.HttpClient.Do(req)

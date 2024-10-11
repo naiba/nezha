@@ -21,36 +21,25 @@
                 <input type="text" name="secret">
             </div>
             <div class="field">
-                <div class="ui hideforguest checkbox">
-                    <input name="HideForGuest" type="checkbox" tabindex="0" class="hidden" />
-                    <label>{{tr "HideForGuest"}}</label>
+                <label>{{tr "DDNSProfiles"}}</label>
+                <div class="ui fluid multiple ddns search selection dropdown">
+                    <input type="hidden" name="DDNSProfilesRaw">
+                    <i class="dropdown icon ddnsProfiles"></i>
+                    <div class="default text">{{tr "EnterIdAndNameToSearch"}}</div>
+                    <div class="menu"></div>
                 </div>
             </div>
             <div class="field">
                 <div class="ui enableddns checkbox">
-                    <input name="EnableDDNS" type="checkbox" tabindex="0" />
+                    <input name="EnableDDNS" type="checkbox" tabindex="0" class="hidden" />
                     <label>{{tr "EnableDDNS"}}</label>
                 </div>
             </div>
             <div class="field">
-                <div class="ui enableipv4 checkbox">
-                    <input name="EnableIPv4" type="checkbox" tabindex="0" />
-                    <label>{{tr "EnableIPv4"}}</label>
+                <div class="ui hideforguest checkbox">
+                    <input name="HideForGuest" type="checkbox" tabindex="0" class="hidden" />
+                    <label>{{tr "HideForGuest"}}</label>
                 </div>
-            </div>
-            <div class="field">
-                <div class="ui enableipv6 checkbox">
-                    <input name="EnableIpv6" type="checkbox" tabindex="0" />
-                    <label>{{tr "EnableIpv6"}}</label>
-                </div>
-            </div>
-            <div class="field">
-                <label>{{tr "DDNSDomain"}}</label>
-                <input type="text" name="DDNSDomain" placeholder="{{tr "DDNSDomain"}}">
-            </div>
-            <div class="field">
-                <label>{{tr "DDNSProfile"}}</label>
-                <input type="text" name="DDNSProfile" placeholder="{{tr "DDNSProfile"}}">
             </div>
             <div class="field">
                 <label>{{tr "Note"}}</label>

@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"golang.org/x/net/idna"
 	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
@@ -38,6 +39,7 @@ func (ma *memberAPI) serve() {
 
 	mr.GET("/search-server", ma.searchServer)
 	mr.GET("/search-tasks", ma.searchTask)
+	mr.GET("/search-ddns", ma.searchDDNS)
 	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
@@ -46,6 +48,7 @@ func (ma *memberAPI) serve() {
 	mr.POST("/batch-update-server-group", ma.batchUpdateServerGroup)
 	mr.POST("/batch-delete-server", ma.batchDeleteServer)
 	mr.POST("/notification", ma.addOrEditNotification)
+	mr.POST("/ddns", ma.addOrEditDDNS)
 	mr.POST("/nat", ma.addOrEditNAT)
 	mr.POST("/alert-rule", ma.addOrEditAlertRule)
 	mr.POST("/setting", ma.updateSetting)
@@ -211,6 +214,11 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		if err == nil {
 			singleton.OnDeleteNotification(id)
 		}
+	case "ddns":
+		err = singleton.DB.Unscoped().Delete(&model.DDNSProfile{}, "id = ?", id).Error
+		if err == nil {
+			singleton.OnDDNSUpdate()
+		}
 	case "nat":
 		err = singleton.DB.Unscoped().Delete(&model.NAT{}, "id = ?", id).Error
 		if err == nil {
@@ -299,20 +307,38 @@ func (ma *memberAPI) searchTask(c *gin.Context) {
 	})
 }
 
+func (ma *memberAPI) searchDDNS(c *gin.Context) {
+	var ddns []model.DDNSProfile
+	likeWord := "%" + c.Query("word") + "%"
+	singleton.DB.Select("id,name").Where("id = ? OR name LIKE ?",
+		c.Query("word"), likeWord).Find(&ddns)
+
+	var resp []searchResult
+	for i := 0; i < len(ddns); i++ {
+		resp = append(resp, searchResult{
+			Value: ddns[i].ID,
+			Name:  ddns[i].Name,
+			Text:  ddns[i].Name,
+		})
+	}
+
+	c.JSON(http.StatusOK, map[string]interface{}{
+		"success": true,
+		"results": resp,
+	})
+}
+
 type serverForm struct {
-	ID           uint64
-	Name         string `binding:"required"`
-	DisplayIndex int
-	Secret       string
-	Tag          string
-	Note         string
-	PublicNote   string
-	HideForGuest string
-	EnableDDNS   string
-	EnableIPv4   string
-	EnableIpv6   string
-	DDNSDomain   string
-	DDNSProfile  string
+	ID              uint64
+	Name            string `binding:"required"`
+	DisplayIndex    int
+	Secret          string
+	Tag             string
+	Note            string
+	PublicNote      string
+	HideForGuest    string
+	EnableDDNS      string
+	DDNSProfilesRaw string
 }
 
 func (ma *memberAPI) addOrEditServer(c *gin.Context) {
@@ -330,18 +356,18 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.PublicNote = sf.PublicNote
 		s.HideForGuest = sf.HideForGuest == "on"
 		s.EnableDDNS = sf.EnableDDNS == "on"
-		s.EnableIPv4 = sf.EnableIPv4 == "on"
-		s.EnableIpv6 = sf.EnableIpv6 == "on"
-		s.DDNSDomain = sf.DDNSDomain
-		s.DDNSProfile = sf.DDNSProfile
-		if s.ID == 0 {
-			s.Secret, err = utils.GenerateRandomString(18)
-			if err == nil {
-				err = singleton.DB.Create(&s).Error
+		s.DDNSProfilesRaw = sf.DDNSProfilesRaw
+		err = utils.Json.Unmarshal([]byte(sf.DDNSProfilesRaw), &s.DDNSProfiles)
+		if err == nil {
+			if s.ID == 0 {
+				s.Secret, err = utils.GenerateRandomString(18)
+				if err == nil {
+					err = singleton.DB.Create(&s).Error
+				}
+			} else {
+				isEdit = true
+				err = singleton.DB.Save(&s).Error
 			}
-		} else {
-			isEdit = true
-			err = singleton.DB.Save(&s).Error
 		}
 	}
 	if err != nil {
@@ -738,6 +764,83 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		return
 	}
 	singleton.OnRefreshOrAddNotification(&n)
+	c.JSON(http.StatusOK, model.Response{
+		Code: http.StatusOK,
+	})
+}
+
+type ddnsForm struct {
+	ID                 uint64
+	MaxRetries         uint64
+	EnableIPv4         string
+	EnableIPv6         string
+	Name               string
+	Provider           uint8
+	DomainsRaw         string
+	AccessID           string
+	AccessSecret       string
+	WebhookURL         string
+	WebhookMethod      uint8
+	WebhookRequestBody string
+	WebhookHeaders     string
+}
+
+func (ma *memberAPI) addOrEditDDNS(c *gin.Context) {
+	var df ddnsForm
+	var p model.DDNSProfile
+	err := c.ShouldBindJSON(&df)
+	if err == nil {
+		if df.Provider == 0 {
+			err = errors.New("provider 不能为空")
+		}
+		if df.MaxRetries < 1 || df.MaxRetries > 10 {
+			err = errors.New("重试次数必须为大于 1 且不超过 10 的整数")
+		}
+	}
+	if err == nil {
+		p.Name = df.Name
+		p.ID = df.ID
+		enableIPv4 := df.EnableIPv4 == "on"
+		enableIPv6 := df.EnableIPv6 == "on"
+		p.EnableIPv4 = &enableIPv4
+		p.EnableIPv6 = &enableIPv6
+		p.MaxRetries = df.MaxRetries
+		p.Provider = df.Provider
+		p.DomainsRaw = df.DomainsRaw
+		p.Domains = strings.Split(p.DomainsRaw, ",")
+		p.AccessID = df.AccessID
+		p.AccessSecret = df.AccessSecret
+		p.WebhookURL = df.WebhookURL
+		p.WebhookMethod = df.WebhookMethod
+		p.WebhookRequestBody = df.WebhookRequestBody
+		p.WebhookHeaders = df.WebhookHeaders
+	}
+	if err == nil {
+		for n, domain := range p.Domains {
+			// IDN to ASCII
+			domainValid, domainErr := idna.Lookup.ToASCII(domain)
+			if domainErr != nil {
+				err = fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
+				break
+			}
+			p.Domains[n] = domainValid
+		}
+	}
+	if err == nil {
+		if p.ID == 0 {
+			err = singleton.DB.Create(&p).Error
+		} else {
+			err = singleton.DB.Save(&p).Error
+		}
+	}
+	if err != nil {
+		c.JSON(http.StatusOK, model.Response{
+			Code:    http.StatusBadRequest,
+			Message: fmt.Sprintf("请求错误：%s", err),
+		})
+		return
+	}
+	singleton.OnDDNSUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

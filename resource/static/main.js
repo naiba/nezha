@@ -99,7 +99,10 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "DisplayIndex" ||
                 item.name === "Type" ||
                 item.name === "Cover" ||
-                item.name === "Duration"
+                item.name === "Duration" ||
+                item.name === "MaxRetries" ||
+                item.name === "Provider" ||
+                item.name === "WebhookMethod"
               ) {
                 obj[item.name] = parseInt(item.value);
               } else if (item.name.endsWith("Latency")) {
@@ -119,6 +122,16 @@ function showFormModal(modelSelector, formID, URL, getData) {
               }
 
               if (item.name.endsWith("TasksRaw")) {
+                if (item.value.length > 2) {
+                  obj[item.name] = JSON.stringify(
+                    [...item.value.matchAll(/\d+/gm)].map((k) =>
+                      parseInt(k[0])
+                    )
+                  );
+                }
+              }
+
+              if (item.name.endsWith("DDNSProfilesRaw")) {
                 if (item.value.length > 2) {
                   obj[item.name] = JSON.stringify(
                     [...item.value.matchAll(/\d+/gm)].map((k) =>
@@ -207,6 +220,7 @@ function addOrEditAlertRule(rule) {
       );
     }
   }
+  // 需要在 showFormModal 进一步拼接数组
   modal
     .find("input[name=FailTriggerTasksRaw]")
     .val(rule ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
@@ -253,6 +267,52 @@ function addOrEditNotification(notification) {
     ".notification.modal",
     "#notificationForm",
     "/api/notification"
+  );
+}
+
+function addOrEditDDNS(ddns) {
+  const modal = $(".ddns.modal");
+  modal.children(".header").text((ddns ? LANG.Edit : LANG.Add));
+  modal
+    .find(".nezha-primary-btn.button")
+    .html(
+      ddns
+        ? LANG.Edit + '<i class="edit icon"></i>'
+        : LANG.Add + '<i class="add icon"></i>'
+    );
+  modal.find("input[name=ID]").val(ddns ? ddns.ID : null);
+  modal.find("input[name=Name]").val(ddns ? ddns.Name : null);
+  modal.find("input[name=DomainsRaw]").val(ddns ? ddns.DomainsRaw : null);
+  modal.find("input[name=AccessID]").val(ddns ? ddns.AccessID : null);
+  modal.find("input[name=AccessSecret]").val(ddns ? ddns.AccessSecret : null);
+  modal.find("input[name=MaxRetries]").val(ddns ? ddns.MaxRetries : 3);
+  modal.find("input[name=WebhookURL]").val(ddns ? ddns.WebhookURL : null);
+  modal
+    .find("textarea[name=WebhookHeaders]")
+    .val(ddns ? ddns.WebhookHeaders : null);
+  modal
+    .find("textarea[name=WebhookRequestBody]")
+    .val(ddns ? ddns.WebhookRequestBody : null);
+  modal
+    .find("select[name=Provider]")
+    .val(ddns ? ddns.Provider : 0);
+  modal
+    .find("select[name=WebhookMethod]")
+    .val(ddns ? ddns.WebhookMethod : 1);
+  if (ddns && ddns.EnableIPv4) {
+    modal.find(".ui.enableipv4.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.enableipv4.checkbox").checkbox("set unchecked");
+  }
+  if (ddns && ddns.EnableIPv6) {
+    modal.find(".ui.enableipv6.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.enableipv6.checkbox").checkbox("set unchecked");
+  }
+  showFormModal(
+    ".ddns.modal",
+    "#ddnsForm",
+    "/api/ddns"
   );
 }
 
@@ -325,8 +385,28 @@ function addOrEditServer(server, conf) {
   modal.find("input[name=id]").val(server ? server.ID : null);
   modal.find("input[name=name]").val(server ? server.Name : null);
   modal.find("input[name=Tag]").val(server ? server.Tag : null);
-  modal.find("input[name=DDNSDomain]").val(server ? server.DDNSDomain : null);
-  modal.find("input[name=DDNSProfile]").val(server ? server.DDNSProfile : null);
+  modal.find("a.ui.label.visible").each((i, el) => {
+    el.remove();
+  });
+  var ddns;
+  if (server) {
+    ddns = server.DDNSProfilesRaw;
+    const serverList = JSON.parse(ddns || "[]");
+    const node = modal.find("i.dropdown.icon.ddnsProfiles");
+    for (let i = 0; i < serverList.length; i++) {
+      node.after(
+        '<a class="ui label transition visible" data-value="' +
+        serverList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        serverList[i] +
+        '<i class="delete icon"></i></a>'
+      );
+    }
+  }
+  // 需要在 showFormModal 进一步拼接数组
+  modal
+    .find("input[name=DDNSProfilesRaw]")
+    .val(server ? "[]," + ddns.substr(1, ddns.length - 2) : "[]");
   modal
     .find("input[name=DisplayIndex]")
     .val(server ? server.DisplayIndex : null);
@@ -342,26 +422,17 @@ function addOrEditServer(server, conf) {
     modal.find(".command.field").attr("style", "display:none");
     modal.find("input[name=secret]").val("");
   }
-  if (server && server.HideForGuest) {
-    modal.find(".ui.hideforguest.checkbox").checkbox("set checked");
-  } else {
-    modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
-  }
   if (server && server.EnableDDNS) {
     modal.find(".ui.enableddns.checkbox").checkbox("set checked");
   } else {
     modal.find(".ui.enableddns.checkbox").checkbox("set unchecked");
   }
-  if (server && server.EnableIPv4) {
-    modal.find(".ui.enableipv4.checkbox").checkbox("set checked");
+  if (server && server.HideForGuest) {
+    modal.find(".ui.hideforguest.checkbox").checkbox("set checked");
   } else {
-    modal.find(".ui.enableipv4.checkbox").checkbox("set unchecked");
+    modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
   }
-  if (server && server.EnableIpv6) {
-    modal.find(".ui.enableipv6.checkbox").checkbox("set checked");
-  } else {
-    modal.find(".ui.enableipv6.checkbox").checkbox("set unchecked");
-  }
+
   showFormModal(".server.modal", "#serverForm", "/api/server");
 }
 
@@ -447,6 +518,7 @@ function addOrEditMonitor(monitor) {
       );
     }
   }
+  // 需要在 showFormModal 进一步拼接数组
   modal
     .find("input[name=FailTriggerTasksRaw]")
     .val(monitor ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
@@ -492,6 +564,7 @@ function addOrEditCron(cron) {
       );
     }
   }
+  // 需要在 showFormModal 进一步拼接数组
   modal
     .find("input[name=ServersRaw]")
     .val(cron ? "[]," + servers.substr(1, servers.length - 2) : "[]");
@@ -616,6 +689,18 @@ $(document).ready(() => {
       clearable: true,
       apiSettings: {
         url: "/api/search-tasks?word={query}",
+        cache: false,
+      },
+    });
+  } catch (error) { }
+});
+
+$(document).ready(() => {
+  try {
+    $(".ui.ddns.search.dropdown").dropdown({
+      clearable: true,
+      apiSettings: {
+        url: "/api/search-ddns?word={query}",
         cache: false,
       },
     });

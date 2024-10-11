@@ -12,22 +12,3 @@ site:
   brand: "nz_site_title"
   cookiename: "nezha-dashboard" #浏览器 Cookie 字段名，可不改
   theme: "default"
-ddns:
-  enable: false
-  provider: "webhook" # 如需使用多配置功能，请把此项留空
-  accessid: ""
-  accesssecret: ""
-  webhookmethod: ""
-  webhookurl: ""
-  webhookrequestbody: ""
-  webhookheaders: ""
-  maxretries: 3
-  profiles:
-    example:
-      provider: ""
-      accessid: ""
-      accesssecret: ""
-      webhookmethod: ""
-      webhookurl: ""
-      webhookrequestbody: ""
-      webhookheaders: ""    

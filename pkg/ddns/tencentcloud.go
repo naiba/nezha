@@ -14,20 +14,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 )
 
 const te = "https://dnspod.tencentcloudapi.com"
 
 type ProviderTencentCloud struct {
-	isIpv4       bool
-	domainConfig *DomainConfig
-	recordID     uint64
-	recordType   string
-	secretID     string
-	secretKey    string
-	errCode      string
-	ipAddr       string
+	provider
+	recordID uint64
+	errCode  string
 }
 
 type tcReq struct {
@@ -41,34 +37,43 @@ type tcReq struct {
 	RecordId   uint64 `json:"RecordId,omitempty"`
 }
 
-func NewProviderTencentCloud(id, key string) *ProviderTencentCloud {
+func NewProviderTencentCloud(profile *model.DDNSProfile, ip *IP) *ProviderTencentCloud {
 	return &ProviderTencentCloud{
-		secretID:  id,
-		secretKey: key,
+		provider: provider{DDNSProfile: profile, IPAddrs: ip},
 	}
 }
 
-func (provider *ProviderTencentCloud) UpdateDomain(domainConfig *DomainConfig) error {
-	if domainConfig == nil {
-		return fmt.Errorf("获取 DDNS 配置失败")
+func (provider *ProviderTencentCloud) UpdateDomain() {
+	for _, domain := range provider.DDNSProfile.Domains {
+		for retries := 0; retries < int(provider.DDNSProfile.MaxRetries); retries++ {
+			provider.Domain = domain
+			log.Printf("NEZHA>> 正在尝试更新域名(%s)DDNS(%d/%d)", provider.Domain, retries+1, provider.DDNSProfile.MaxRetries)
+			if err := provider.updateDomain(); err != nil {
+				log.Printf("NEZHA>> 尝试更新域名(%s)DDNS失败: %v", provider.Domain, err)
+			} else {
+				log.Printf("NEZHA>> 尝试更新域名(%s)DDNS成功", provider.Domain)
+				break
+			}
+		}
 	}
-	provider.domainConfig = domainConfig
+}
 
+func (provider *ProviderTencentCloud) updateDomain() error {
 	// 当IPv4和IPv6同时成功才算作成功
 	var err error
-	if provider.domainConfig.EnableIPv4 {
-		provider.isIpv4 = true
-		provider.recordType = getRecordString(provider.isIpv4)
-		provider.ipAddr = provider.domainConfig.Ipv4Addr
+	if *provider.DDNSProfile.EnableIPv4 {
+		provider.IsIpv4 = true
+		provider.RecordType = getRecordString(provider.IsIpv4)
+		provider.IPAddr = provider.IPAddrs.Ipv4Addr
 		if err = provider.addDomainRecord(); err != nil {
 			return err
 		}
 	}
 
-	if provider.domainConfig.EnableIpv6 {
-		provider.isIpv4 = false
-		provider.recordType = getRecordString(provider.isIpv4)
-		provider.ipAddr = provider.domainConfig.Ipv6Addr
+	if *provider.DDNSProfile.EnableIPv6 {
+		provider.IsIpv4 = false
+		provider.RecordType = getRecordString(provider.IsIpv4)
+		provider.IPAddr = provider.IPAddrs.Ipv6Addr
 		if err = provider.addDomainRecord(); err != nil {
 			return err
 		}
@@ -94,9 +99,9 @@ func (provider *ProviderTencentCloud) addDomainRecord() error {
 }
 
 func (provider *ProviderTencentCloud) findDNSRecord() error {
-	prefix, realDomain := splitDomain(provider.domainConfig.FullDomain)
+	prefix, realDomain := splitDomain(provider.Domain)
 	data := &tcReq{
-		RecordType: provider.recordType,
+		RecordType: provider.RecordType,
 		Domain:     realDomain,
 		RecordLine: "默认",
 		Subdomain:  prefix,
@@ -124,13 +129,13 @@ func (provider *ProviderTencentCloud) findDNSRecord() error {
 }
 
 func (provider *ProviderTencentCloud) createDNSRecord() error {
-	prefix, realDomain := splitDomain(provider.domainConfig.FullDomain)
+	prefix, realDomain := splitDomain(provider.Domain)
 	data := &tcReq{
-		RecordType: provider.recordType,
+		RecordType: provider.RecordType,
 		RecordLine: "默认",
 		Domain:     realDomain,
 		SubDomain:  prefix,
-		Value:      provider.ipAddr,
+		Value:      provider.IPAddr,
 		TTL:        600,
 	}
 
@@ -140,13 +145,13 @@ func (provider *ProviderTencentCloud) createDNSRecord() error {
 }
 
 func (provider *ProviderTencentCloud) updateDNSRecord() error {
-	prefix, realDomain := splitDomain(provider.domainConfig.FullDomain)
+	prefix, realDomain := splitDomain(provider.Domain)
 	data := &tcReq{
-		RecordType: provider.recordType,
+		RecordType: provider.RecordType,
 		RecordLine: "默认",
 		Domain:     realDomain,
 		SubDomain:  prefix,
-		Value:      provider.ipAddr,
+		Value:      provider.IPAddr,
 		TTL:        600,
 		RecordId:   provider.recordID,
 	}
@@ -166,7 +171,7 @@ func (provider *ProviderTencentCloud) sendRequest(action string, data []byte) ([
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-TC-Version", "2021-03-23")
 
-	provider.signRequest(provider.secretID, provider.secretKey, req, action, string(data))
+	provider.signRequest(provider.DDNSProfile.AccessID, provider.DDNSProfile.AccessSecret, req, action, string(data))
 	resp, err := utils.HttpClient.Do(req)
 	if err != nil {
 		return nil, err

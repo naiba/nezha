@@ -27,6 +27,7 @@ func (mp *memberPage) serve() {
 	mr.GET("/monitor", mp.monitor)
 	mr.GET("/cron", mp.cron)
 	mr.GET("/notification", mp.notification)
+	mr.GET("/ddns", mp.ddns)
 	mr.GET("/nat", mp.nat)
 	mr.GET("/setting", mp.setting)
 	mr.GET("/api", mp.api)
@@ -75,6 +76,17 @@ func (mp *memberPage) notification(c *gin.Context) {
 		"Title":         singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Notification"}),
 		"Notifications": nf,
 		"AlertRules":    ar,
+	}))
+}
+
+func (mp *memberPage) ddns(c *gin.Context) {
+	var data []model.DDNSProfile
+	singleton.DB.Find(&data)
+	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/ddns", mygin.CommonEnvironment(c, gin.H{
+		"Title":        singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "DDNS"}),
+		"DDNS":         data,
+		"ProviderMap":  model.ProviderMap,
+		"ProviderList": model.ProviderList,
 	}))
 }
 

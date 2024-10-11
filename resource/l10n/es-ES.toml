@@ -622,20 +622,59 @@ other = "Red"
 [EnableShowInService]
 other = "Mostrar en servicio"
 
+[DDNS]
+other = "DNS Dinámico"
+
+[DDNSProfiles]
+other = "Perfiles DDNS"
+
+[AddDDNSProfile]
+other = "Nuevo Perfil"
+
 [EnableDDNS]
 other = "Habilitar DDNS"
 
 [EnableIPv4]
-other = "Habilitar DDNS IPv4"
+other = "IPv4 Activado"
 
-[EnableIpv6]
-other = "Habilitar DDNS IPv6"
+[EnableIPv6]
+other = "IPv6 Activado"
 
 [DDNSDomain]
-other = "Dominio DDNS"
+other = "Dominios"
 
-[DDNSProfile]
-other = "Nombre del perfil de DDNS"
+[DDNSDomains]
+other = "Dominios (separados por comas)"
+
+[DDNSProvider]
+other = "Proveedor DDNS"
+
+[MaxRetries]
+other = "Número máximo de intentos de reintento"
+
+[DDNSAccessID]
+other = "Credencial 1"
+
+[DDNSAccessSecret]
+other = "Credencial 2"
+
+[DDNSTokenID]
+other = "ID del Token"
+
+[DDNSTokenSecret]
+other = "Secreto del Token"
+
+[WebhookURL]
+other = "URL del Webhook"
+
+[WebhookMethod]
+other = "Método de Solicitud del Webhook"
+
+[WebhookHeaders]
+other = "Encabezados de Solicitud del Webhook"
+
+[WebhookRequestBody]
+other = "Cuerpo de Solicitud del Webhook"
 
 [Feature]
 other = "Característica"

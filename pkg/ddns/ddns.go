@@ -1,24 +1,32 @@
 package ddns
 
-import "golang.org/x/net/publicsuffix"
+import (
+	"github.com/naiba/nezha/model"
+	"golang.org/x/net/publicsuffix"
+)
 
-type DomainConfig struct {
-	EnableIPv4 bool
-	EnableIpv6 bool
-	FullDomain string
-	Ipv4Addr   string
-	Ipv6Addr   string
+type IP struct {
+	Ipv4Addr string
+	Ipv6Addr string
 }
 
 type Provider interface {
-	// UpdateDomain Return is updated
-	UpdateDomain(*DomainConfig) error
+	UpdateDomain()
 }
 
-func splitDomain(domain string) (prefix string, realDomain string) {
-	realDomain, _ = publicsuffix.EffectiveTLDPlusOne(domain)
-	prefix = domain[:len(domain)-len(realDomain)-1]
-	return prefix, realDomain
+type provider struct {
+	IsIpv4      bool
+	DDNSProfile *model.DDNSProfile
+	IPAddrs     *IP
+	IPAddr      string
+	RecordType  string
+	Domain      string
+}
+
+func splitDomain(domain string) (prefix string, tld string) {
+	tld, _ = publicsuffix.EffectiveTLDPlusOne(domain)
+	prefix = domain[:len(domain)-len(tld)-1]
+	return
 }
 
 func getRecordString(isIpv4 bool) string {

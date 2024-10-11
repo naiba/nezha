@@ -622,20 +622,59 @@ other = "网络"
 [EnableShowInService]
 other = "在服务中显示"
 
+[DDNS]
+other = "动态 DNS"
+
+[DDNSProfiles]
+other = "DDNS配置"
+
+[AddDDNSProfile]
+other = "新配置"
+
 [EnableDDNS]
 other = "启用DDNS"
 
 [EnableIPv4]
 other = "启用DDNS IPv4"
 
-[EnableIpv6]
+[EnableIPv6]
 other = "启用DDNS IPv6"
 
 [DDNSDomain]
 other = "DDNS域名"
 
-[DDNSProfile]
-other = "DDNS配置名"
+[DDNSDomains]
+other = "域名（逗号分隔）"
+
+[DDNSProvider]
+other = "DDNS供应商"
+
+[MaxRetries]
+other = "最大重试次数"
+
+[DDNSAccessID]
+other = "DDNS 凭据 1"
+
+[DDNSAccessSecret]
+other = "DDNS 凭据 2"
+
+[DDNSTokenID]
+other = "令牌 ID"
+
+[DDNSTokenSecret]
+other = "令牌 Secret"
+
+[WebhookURL]
+other = "Webhook 地址"
+
+[WebhookMethod]
+other = "Webhook 请求方式"
+
+[WebhookHeaders]
+other = "Webhook 请求头"
+
+[WebhookRequestBody]
+other = "Webhook 请求体"
 
 [Feature]
 other = "功能"

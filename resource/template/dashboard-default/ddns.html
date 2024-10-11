@@ -1,0 +1,58 @@
+{{define "dashboard-default/ddns"}}
+{{template "common/header" .}}
+{{template "common/menu" .}}
+<div class="nb-container">
+    <div class="ui container">
+        <div class="ui grid">
+            <div class="right floated right aligned twelve wide column">
+                <button class="ui right labeled nezha-primary-btn icon button" onclick="addOrEditDDNS()"><i
+                        class="add icon"></i> {{tr "AddDDNSProfile"}}
+                </button>
+            </div>
+        </div>
+        <table class="ui basic table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>{{tr "Name"}}</th>
+                    <th>{{tr "EnableIPv4"}}</th>
+                    <th>{{tr "EnableIPv6"}}</th>
+                    <th>{{tr "DDNSProvider"}}</th>
+                    <th>{{tr "DDNSDomain"}}</th>
+                    <th>{{tr "MaxRetries"}}</th>
+                    <th>{{tr "Administration"}}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range $item := .DDNS}}
+                <tr>
+                    <td>{{$item.ID}}</td>
+                    <td>{{$item.Name}}</td>
+                    <td>{{$item.EnableIPv4}}</td>
+                    <td>{{$item.EnableIPv6}}</td>
+                    <td>{{index $.ProviderMap $item.Provider}}</td>
+                    <td>{{$item.DomainsRaw}}</td>
+                    <td>{{$item.MaxRetries}}</td>
+                    <td>
+                        <div class="ui mini icon buttons">
+                            <button class="ui button" onclick="addOrEditDDNS({{$item}})">
+                                <i class="edit icon"></i>
+                            </button>
+                            <button class="ui button"
+                                onclick="showConfirm('确定删除DDNS配置？','确认删除',deleteRequest,'/api/ddns/'+{{$item.ID}})">
+                                <i class="trash alternate outline icon"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{template "component/ddns" .}}
+{{template "common/footer" .}}
+<script>
+    $('.checkbox').checkbox()
+</script>
+{{end}}

@@ -622,20 +622,59 @@ other = "Network"
 [EnableShowInService]
 other = "Enable Show in Service"
 
+[DDNS]
+other = "Dynamic DNS"
+
+[DDNSProfiles]
+other = "DDNS Profiles"
+
+[AddDDNSProfile]
+other = "New Profile"
+
 [EnableDDNS]
 other = "Enable DDNS"
 
 [EnableIPv4]
-other = "Enable DDNS IPv4"
+other = "IPv4 Enabled"
 
-[EnableIpv6]
-other = "Enable DDNS IPv6"
+[EnableIPv6]
+other = "IPv6 Enabled"
 
 [DDNSDomain]
-other = "DDNS Domain"
+other = "Domains"
 
-[DDNSProfile]
-other = "DDNS Profile Name"
+[DDNSDomains]
+other = "Domains (separate with comma)"
+
+[DDNSProvider]
+other = "DDNS Provider"
+
+[MaxRetries]
+other = "Maximum retry attempts"
+
+[DDNSAccessID]
+other = "Credential 1"
+
+[DDNSAccessSecret]
+other = "Credential 2"
+
+[DDNSTokenID]
+other = "Token ID"
+
+[DDNSTokenSecret]
+other = "Token Secret"
+
+[WebhookURL]
+other = "Webhook URL"
+
+[WebhookMethod]
+other = "Webhook Request Method"
+
+[WebhookHeaders]
+other = "Webhook Request Headers"
+
+[WebhookRequestBody]
+other = "Webhook Request Body"
 
 [Feature]
 other = "Feature"
