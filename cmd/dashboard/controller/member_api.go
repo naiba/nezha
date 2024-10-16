@@ -790,9 +790,6 @@ func (ma *memberAPI) addOrEditDDNS(c *gin.Context) {
 	var p model.DDNSProfile
 	err := c.ShouldBindJSON(&df)
 	if err == nil {
-		if df.Provider == 0 {
-			err = errors.New("provider 不能为空")
-		}
 		if df.MaxRetries < 1 || df.MaxRetries > 10 {
 			err = errors.New("重试次数必须为大于 1 且不超过 10 的整数")
 		}
@@ -814,8 +811,7 @@ func (ma *memberAPI) addOrEditDDNS(c *gin.Context) {
 		p.WebhookMethod = df.WebhookMethod
 		p.WebhookRequestBody = df.WebhookRequestBody
 		p.WebhookHeaders = df.WebhookHeaders
-	}
-	if err == nil {
+
 		for n, domain := range p.Domains {
 			// IDN to ASCII
 			domainValid, domainErr := idna.Lookup.ToASCII(domain)

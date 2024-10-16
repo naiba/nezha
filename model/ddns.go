@@ -79,11 +79,6 @@ func (d DDNSProfile) TableName() string {
 	return "ddns"
 }
 
-func (d *DDNSProfile) BeforeSave(tx *gorm.DB) error {
-	d.DomainsRaw = strings.Join(d.Domains, ",")
-	return nil
-}
-
 func (d *DDNSProfile) AfterFind(tx *gorm.DB) error {
 	if d.DomainsRaw != "" {
 		d.Domains = strings.Split(d.DomainsRaw, ",")

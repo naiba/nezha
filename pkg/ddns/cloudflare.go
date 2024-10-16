@@ -93,7 +93,11 @@ func (provider *ProviderCloudflare) addDomainRecord() error {
 }
 
 func (provider *ProviderCloudflare) getZoneID() error {
-	_, realDomain := splitDomain(provider.Domain)
+	_, realDomain, err := splitDomainSOA(provider.Domain)
+	if err != nil {
+		return err
+	}
+
 	zu, _ := url.Parse(baseEndpoint)
 
 	q := zu.Query()

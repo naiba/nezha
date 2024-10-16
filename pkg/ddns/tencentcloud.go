@@ -24,6 +24,8 @@ type ProviderTencentCloud struct {
 	provider
 	recordID uint64
 	errCode  string
+	prefix   string
+	zone     string
 }
 
 type tcReq struct {
@@ -59,8 +61,13 @@ func (provider *ProviderTencentCloud) UpdateDomain() {
 }
 
 func (provider *ProviderTencentCloud) updateDomain() error {
-	// 当IPv4和IPv6同时成功才算作成功
+	prefix, zone := splitDomain(provider.Domain)
+
+	provider.prefix = prefix
+	provider.zone = zone
+
 	var err error
+	// 当IPv4和IPv6同时成功才算作成功
 	if *provider.DDNSProfile.EnableIPv4 {
 		provider.IsIpv4 = true
 		provider.RecordType = getRecordString(provider.IsIpv4)
@@ -99,12 +106,11 @@ func (provider *ProviderTencentCloud) addDomainRecord() error {
 }
 
 func (provider *ProviderTencentCloud) findDNSRecord() error {
-	prefix, realDomain := splitDomain(provider.Domain)
 	data := &tcReq{
 		RecordType: provider.RecordType,
-		Domain:     realDomain,
+		Domain:     provider.zone,
 		RecordLine: "默认",
-		Subdomain:  prefix,
+		Subdomain:  provider.prefix,
 	}
 
 	jsonData, _ := utils.Json.Marshal(data)
@@ -129,12 +135,11 @@ func (provider *ProviderTencentCloud) findDNSRecord() error {
 }
 
 func (provider *ProviderTencentCloud) createDNSRecord() error {
-	prefix, realDomain := splitDomain(provider.Domain)
 	data := &tcReq{
 		RecordType: provider.RecordType,
 		RecordLine: "默认",
-		Domain:     realDomain,
-		SubDomain:  prefix,
+		Domain:     provider.zone,
+		SubDomain:  provider.prefix,
 		Value:      provider.IPAddr,
 		TTL:        600,
 	}
@@ -145,12 +150,11 @@ func (provider *ProviderTencentCloud) createDNSRecord() error {
 }
 
 func (provider *ProviderTencentCloud) updateDNSRecord() error {
-	prefix, realDomain := splitDomain(provider.Domain)
 	data := &tcReq{
 		RecordType: provider.RecordType,
 		RecordLine: "默认",
-		Domain:     realDomain,
-		SubDomain:  prefix,
+		Domain:     provider.zone,
+		SubDomain:  provider.prefix,
 		Value:      provider.IPAddr,
 		TTL:        600,
 		RecordId:   provider.recordID,
