@@ -1,6 +1,7 @@
-package ddns
+package webhook
 
 import (
+	"context"
 	"testing"
 
 	"github.com/naiba/nezha/model"
@@ -20,15 +21,11 @@ type testSt struct {
 }
 
 func execCase(t *testing.T, item testSt) {
-	ip := IP{
-		Ipv4Addr: "1.1.1.1",
-	}
-
-	pw := NewProviderWebHook(&item.profile, &ip)
-	pw.IPAddr = ip.Ipv4Addr
-	pw.Domain = item.profile.Domains[0]
+	pw := Provider{DDNSProfile: &item.profile}
+	pw.ipAddr = "1.1.1.1"
+	pw.domain = item.profile.Domains[0]
 	pw.ipType = "ipv4"
-	pw.RecordType = "A"
+	pw.recordType = "A"
 	pw.DDNSProfile = &item.profile
 
 	reqUrl, err := pw.reqUrl()
@@ -47,7 +44,7 @@ func execCase(t *testing.T, item testSt) {
 		t.Fatalf("Expected %s, but got %s", item.expectBody, reqBody)
 	}
 
-	req, err := pw.prepareRequest()
+	req, err := pw.prepareRequest(context.Background())
 	if err != nil {
 		t.Fatalf("Error: %s", err)
 	}

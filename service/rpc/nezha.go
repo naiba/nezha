@@ -140,7 +140,9 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		providers, err := singleton.GetDDNSProvidersFromProfiles(singleton.ServerList[clientID].DDNSProfiles, &ddns.IP{Ipv4Addr: ipv4, Ipv6Addr: ipv6})
 		if err == nil {
 			for _, provider := range providers {
-				go provider.UpdateDomain()
+				go func(provider *ddns.Provider) {
+					provider.UpdateDomain(context.Background())
+				}(provider)
 			}
 		} else {
 			log.Printf("NEZHA>> 获取DDNS配置时发生错误: %v", err)

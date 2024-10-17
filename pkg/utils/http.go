@@ -22,6 +22,8 @@ func init() {
 			SkipVerifySSL: false,
 		}),
 	})
+
+	http.DefaultClient.Timeout = time.Minute * 10
 }
 
 type _httpTransport struct {

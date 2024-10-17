@@ -4,8 +4,13 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/libdns/cloudflare"
+	"github.com/libdns/tencentcloud"
+
 	"github.com/naiba/nezha/model"
 	ddns2 "github.com/naiba/nezha/pkg/ddns"
+	"github.com/naiba/nezha/pkg/ddns/dummy"
+	"github.com/naiba/nezha/pkg/ddns/webhook"
 )
 
 var (
@@ -28,7 +33,7 @@ func OnDDNSUpdate() {
 	}
 }
 
-func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]ddns2.Provider, error) {
+func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]*ddns2.Provider, error) {
 	profiles := make([]*model.DDNSProfile, 0, len(profileId))
 	ddnsCacheLock.RLock()
 	for _, id := range profileId {
@@ -40,20 +45,21 @@ func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]ddns2.Pro
 	}
 	ddnsCacheLock.RUnlock()
 
-	providers := make([]ddns2.Provider, 0, len(profiles))
+	providers := make([]*ddns2.Provider, 0, len(profiles))
 	for _, profile := range profiles {
+		provider := &ddns2.Provider{DDNSProfile: profile, IPAddrs: ip}
 		switch profile.Provider {
 		case model.ProviderDummy:
-			provider := ddns2.NewProviderDummy(profile)
+			provider.Setter = &dummy.Provider{}
 			providers = append(providers, provider)
 		case model.ProviderWebHook:
-			provider := ddns2.NewProviderWebHook(profile, ip)
+			provider.Setter = &webhook.Provider{DDNSProfile: profile}
 			providers = append(providers, provider)
 		case model.ProviderCloudflare:
-			provider := ddns2.NewProviderCloudflare(profile, ip)
+			provider.Setter = &cloudflare.Provider{APIToken: profile.AccessSecret}
 			providers = append(providers, provider)
 		case model.ProviderTencentCloud:
-			provider := ddns2.NewProviderTencentCloud(profile, ip)
+			provider.Setter = &tencentcloud.Provider{SecretId: profile.AccessID, SecretKey: profile.AccessSecret}
 			providers = append(providers, provider)
 		default:
 			return nil, fmt.Errorf("无法找到配置的DDNS提供者ID %d", profile.Provider)
