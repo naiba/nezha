@@ -51,6 +51,7 @@ var ProviderList = []DDNSProvider{
 		AccessSecret:       true,
 		WebhookURL:         true,
 		WebhookMethod:      true,
+		WebhookRequestType: true,
 		WebhookRequestBody: true,
 		WebhookHeaders:     true,
 	},
@@ -93,6 +94,7 @@ type DDNSProvider struct {
 	AccessSecret       bool
 	WebhookURL         bool
 	WebhookMethod      bool
+	WebhookRequestType bool
 	WebhookRequestBody bool
 	WebhookHeaders     bool
 }

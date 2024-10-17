@@ -632,22 +632,22 @@ other = "DDNS配置"
 other = "新配置"
 
 [EnableDDNS]
-other = "启用DDNS"
+other = "启用 DDNS"
 
 [EnableIPv4]
-other = "启用DDNS IPv4"
+other = "启用 DDNS IPv4"
 
 [EnableIPv6]
-other = "启用DDNS IPv6"
+other = "启用 DDNS IPv6"
 
 [DDNSDomain]
-other = "DDNS域名"
+other = "DDNS 域名"
 
 [DDNSDomains]
 other = "域名（逗号分隔）"
 
 [DDNSProvider]
-other = "DDNS供应商"
+other = "DDNS 供应商"
 
 [MaxRetries]
 other = "最大重试次数"
@@ -669,6 +669,9 @@ other = "Webhook 地址"
 
 [WebhookMethod]
 other = "Webhook 请求方式"
+
+[WebhookRequestType]
+other = "Webhook 请求类型"
 
 [WebhookHeaders]
 other = "Webhook 请求头"
