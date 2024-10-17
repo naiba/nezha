@@ -3,6 +3,7 @@ package model
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"sync"
 	"time"
 
@@ -51,7 +52,8 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 func (s *Server) AfterFind(tx *gorm.DB) error {
 	if s.DDNSProfilesRaw != "" {
 		if err := utils.Json.Unmarshal([]byte(s.DDNSProfilesRaw), &s.DDNSProfiles); err != nil {
-			return err
+			log.Println("NEZHA>> Server.AfterFind:", err)
+			return nil
 		}
 	}
 	return nil
