@@ -3,7 +3,6 @@ package utils
 import (
 	"crypto/rand"
 	"math/big"
-	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -11,7 +10,11 @@ import (
 	jsoniter "github.com/json-iterator/go"
 )
 
-var Json = jsoniter.ConfigCompatibleWithStandardLibrary
+var (
+	Json = jsoniter.ConfigCompatibleWithStandardLibrary
+
+	DNSServers = []string{"1.1.1.1:53", "223.5.5.5:53", "[2606:4700:4700::1111]:53", "[2400:3200::1]:53"}
+)
 
 func IsWindows() bool {
 	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
@@ -86,16 +89,4 @@ func Uint64SubInt64(a uint64, b int64) uint64 {
 		return 0
 	}
 	return a - uint64(b)
-}
-
-func SetStringHeadersToRequest(req *http.Request, headers []string) {
-	if req == nil {
-		return
-	}
-	for _, element := range headers {
-		kv := strings.SplitN(element, ":", 2)
-		if len(kv) == 2 {
-			req.Header.Add(kv[0], kv[1])
-		}
-	}
 }

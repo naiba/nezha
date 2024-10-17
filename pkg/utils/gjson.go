@@ -21,6 +21,10 @@ func GjsonGet(json []byte, path string) (gjson.Result, error) {
 }
 
 func GjsonParseStringMap(jsonObject string) (map[string]string, error) {
+	if jsonObject == "" {
+		return nil, nil
+	}
+
 	result := gjson.Parse(jsonObject)
 	if !result.IsObject() {
 		return nil, ErrGjsonWrongType

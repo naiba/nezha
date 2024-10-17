@@ -3,27 +3,28 @@ package model
 import (
 	"fmt"
 	"html/template"
+	"log"
 	"sync"
 	"time"
 
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
+	"gorm.io/gorm"
 )
 
 type Server struct {
 	Common
 	Name         string
-	Tag          string // 分组名
-	Secret       string `gorm:"uniqueIndex" json:"-"`
-	Note         string `json:"-"`                    // 管理员可见备注
-	PublicNote   string `json:"PublicNote,omitempty"` // 公开备注
-	DisplayIndex int    // 展示排序，越大越靠前
-	HideForGuest bool   // 对游客隐藏
-	EnableDDNS   bool   `json:"-"` // 是否启用DDNS 未在配置文件中启用DDNS 或 DDNS检查时间为0时此项无效
-	EnableIPv4   bool   `json:"-"` // 是否启用DDNS IPv4
-	EnableIpv6   bool   `json:"-"` // 是否启用DDNS IPv6
-	DDNSDomain   string `json:"-"` // DDNS中的前缀 如基础域名为abc.oracle DDNSName为mjj 就会把mjj.abc.oracle解析服务器IP 为空则停用
-	DDNSProfile  string `json:"-"` // DDNS配置
+	Tag          string   // 分组名
+	Secret       string   `gorm:"uniqueIndex" json:"-"`
+	Note         string   `json:"-"`                    // 管理员可见备注
+	PublicNote   string   `json:"PublicNote,omitempty"` // 公开备注
+	DisplayIndex int      // 展示排序，越大越靠前
+	HideForGuest bool     // 对游客隐藏
+	EnableDDNS   bool     // 启用DDNS
+	DDNSProfiles []uint64 `gorm:"-" json:"-"` // DDNS配置
+
+	DDNSProfilesRaw string `gorm:"default:'[]';column:ddns_profiles_raw" json:"-"`
 
 	Host       *Host      `gorm:"-"`
 	State      *HostState `gorm:"-"`
@@ -48,6 +49,16 @@ func (s *Server) CopyFromRunningServer(old *Server) {
 	s.PrevTransferOutSnapshot = old.PrevTransferOutSnapshot
 }
 
+func (s *Server) AfterFind(tx *gorm.DB) error {
+	if s.DDNSProfilesRaw != "" {
+		if err := utils.Json.Unmarshal([]byte(s.DDNSProfilesRaw), &s.DDNSProfiles); err != nil {
+			log.Println("NEZHA>> Server.AfterFind:", err)
+			return nil
+		}
+	}
+	return nil
+}
+
 func boolToString(b bool) string {
 	if b {
 		return "true"
@@ -60,8 +71,7 @@ func (s Server) MarshalForDashboard() template.JS {
 	tag, _ := utils.Json.Marshal(s.Tag)
 	note, _ := utils.Json.Marshal(s.Note)
 	secret, _ := utils.Json.Marshal(s.Secret)
-	ddnsDomain, _ := utils.Json.Marshal(s.DDNSDomain)
-	ddnsProfile, _ := utils.Json.Marshal(s.DDNSProfile)
+	ddnsProfilesRaw, _ := utils.Json.Marshal(s.DDNSProfilesRaw)
 	publicNote, _ := utils.Json.Marshal(s.PublicNote)
-	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"EnableIPv4": %s,"EnableIpv6": %s,"DDNSDomain": %s,"DDNSProfile": %s,"PublicNote": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), boolToString(s.EnableIPv4), boolToString(s.EnableIpv6), ddnsDomain, ddnsProfile, publicNote))
+	return template.JS(fmt.Sprintf(`{"ID":%d,"Name":%s,"Secret":%s,"DisplayIndex":%d,"Tag":%s,"Note":%s,"HideForGuest": %s,"EnableDDNS": %s,"DDNSProfilesRaw": %s,"PublicNote": %s}`, s.ID, name, secret, s.DisplayIndex, tag, note, boolToString(s.HideForGuest), boolToString(s.EnableDDNS), ddnsProfilesRaw, publicNote))
 }

@@ -1,7 +1,6 @@
 package singleton
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -39,6 +38,7 @@ func LoadSingleton() {
 	loadCronTasks()     // 加载定时任务
 	loadAPI()
 	initNAT()
+	initDDNS()
 }
 
 // InitConfigFromPath 从给出的文件路径中加载配置
@@ -47,25 +47,6 @@ func InitConfigFromPath(path string) {
 	err := Conf.Read(path)
 	if err != nil {
 		panic(err)
-	}
-	validateConfig()
-}
-
-// validateConfig 验证配置文件有效性
-func validateConfig() {
-	var err error
-	if Conf.DDNS.Provider == "" {
-		err = ValidateDDNSProvidersFromProfiles()
-	} else {
-		_, err = GetDDNSProviderFromString(Conf.DDNS.Provider)
-	}
-	if err != nil {
-		panic(err)
-	}
-	if Conf.DDNS.Enable {
-		if Conf.DDNS.MaxRetries < 1 || Conf.DDNS.MaxRetries > 10 {
-			panic(fmt.Errorf("DDNS.MaxRetries值域为[1, 10]的整数, 当前为 %d", Conf.DDNS.MaxRetries))
-		}
 	}
 }
 
@@ -84,7 +65,7 @@ func InitDBFromPath(path string) {
 	err = DB.AutoMigrate(model.Server{}, model.User{},
 		model.Notification{}, model.AlertRule{}, model.Monitor{},
 		model.MonitorHistory{}, model.Cron{}, model.Transfer{},
-		model.ApiToken{}, model.NAT{})
+		model.ApiToken{}, model.NAT{}, model.DDNSProfile{})
 	if err != nil {
 		panic(err)
 	}
