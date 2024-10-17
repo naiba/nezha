@@ -49,6 +49,13 @@
                 </select>
             </div>
             <div class="field">
+                <label>{{tr "WebhookRequestType"}}</label>
+                <select name="WebhookRequestType" class="ui fluid dropdown">
+                    <option value="1">JSON</option>
+                    <option value="2">Form</option>
+                </select>
+            </div>
+            <div class="field">
                 <label>{{tr "WebhookHeaders"}}</label>
                 <textarea name="WebhookHeaders" placeholder='{"User-Agent":"Nezha-Agent"}'></textarea>
             </div>

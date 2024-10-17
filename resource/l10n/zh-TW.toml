@@ -632,49 +632,52 @@ other = "DDNS配置"
 other = "新增配置"
 
 [EnableDDNS]
-other = "啟用DDNS"
+other = "啟用 DDNS"
 
 [EnableIPv4]
-other = "啟用DDNS IPv4"
+other = "啟用 DDNS IPv4"
 
 [EnableIPv6]
-other = "啟用DDNS IPv6"
+other = "啟用 DDNS IPv6"
 
 [DDNSDomain]
-other = "DDNS域名"
+other = "DDNS 域名"
 
 [DDNSDomains]
 other = "域名（逗號分隔）"
 
 [DDNSProvider]
-other = "DDNS供應商"
+other = "DDN S供應商"
 
 [MaxRetries]
 other = "最大重試次數"
 
 [DDNSAccessID]
-other = "DDNS憑據1"
+other = "DDNS 憑據 1"
 
 [DDNSAccessSecret]
-other = "DDNS憑據2"
+other = "DDNS 憑據 2"
 
 [DDNSTokenID]
-other = "令牌ID"
+other = "令牌 ID"
 
 [DDNSTokenSecret]
-other = "令牌Secret"
+other = "令牌 Secret"
 
 [WebhookURL]
-other = "Webhook地址"
+other = "Webhook 地址"
 
 [WebhookMethod]
-other = "Webhook請求方式"
+other = "Webhook 請求方式"
+
+[WebhookRequestType]
+other = "Webhook 請求類型"
 
 [WebhookHeaders]
-other = "Webhook請求頭"
+other = "Webhook 請求頭"
 
 [WebhookRequestBody]
-other = "Webhook請求體"
+other = "Webhook 請求體"
 
 [Feature]
 other = "功能"

@@ -159,6 +159,8 @@ func (provider *Provider) formatWebhookString(s string) string {
 		"#domain#", provider.domain,
 		"#type#", provider.ipType,
 		"#record#", provider.recordType,
+		"#access_id#", provider.DDNSProfile.AccessID,
+		"#access_secret#", provider.DDNSProfile.AccessSecret,
 		"\r", "",
 	)
 

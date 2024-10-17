@@ -670,6 +670,9 @@ other = "URL del Webhook"
 [WebhookMethod]
 other = "Método de Solicitud del Webhook"
 
+[WebhookRequestType]
+other = "Tipo de solicitud del Webhook"
+
 [WebhookHeaders]
 other = "Encabezados de Solicitud del Webhook"
 

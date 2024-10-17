@@ -102,7 +102,8 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "Duration" ||
                 item.name === "MaxRetries" ||
                 item.name === "Provider" ||
-                item.name === "WebhookMethod"
+                item.name === "WebhookMethod" ||
+                item.name === "WebhookRequestType"
               ) {
                 obj[item.name] = parseInt(item.value);
               } else if (item.name.endsWith("Latency")) {
@@ -299,6 +300,9 @@ function addOrEditDDNS(ddns) {
   modal
     .find("select[name=WebhookMethod]")
     .val(ddns ? ddns.WebhookMethod : 1);
+  modal
+    .find("select[name=WebhookRequestType]")
+    .val(ddns ? ddns.WebhookRequestType : 1);
   if (ddns && ddns.EnableIPv4) {
     modal.find(".ui.enableipv4.checkbox").checkbox("set checked");
   } else {

@@ -781,6 +781,7 @@ type ddnsForm struct {
 	AccessSecret       string
 	WebhookURL         string
 	WebhookMethod      uint8
+	WebhookRequestType uint8
 	WebhookRequestBody string
 	WebhookHeaders     string
 }
@@ -809,6 +810,7 @@ func (ma *memberAPI) addOrEditDDNS(c *gin.Context) {
 		p.AccessSecret = df.AccessSecret
 		p.WebhookURL = df.WebhookURL
 		p.WebhookMethod = df.WebhookMethod
+		p.WebhookRequestType = df.WebhookRequestType
 		p.WebhookRequestBody = df.WebhookRequestBody
 		p.WebhookHeaders = df.WebhookHeaders
 
