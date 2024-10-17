@@ -391,7 +391,12 @@ function addOrEditServer(server, conf) {
   var ddns;
   if (server) {
     ddns = server.DDNSProfilesRaw;
-    const serverList = JSON.parse(ddns || "[]");
+    let serverList;
+    try {
+      serverList = JSON.parse(ddns);
+    } catch (error) {
+      serverList = "[]";
+    }
     const node = modal.find("i.dropdown.icon.ddnsProfiles");
     for (let i = 0; i < serverList.length; i++) {
       node.after(
