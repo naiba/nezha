@@ -747,3 +747,6 @@ other = "Expired"
 
 [Days]
 other = "d"
+
+[CustomNameservers]
+other = "Custom Public DNS Nameservers for DDNS (separate with comma)"

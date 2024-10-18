@@ -747,3 +747,6 @@ other = "已到期"
 
 [Days]
 other = "天"
+
+[CustomNameservers]
+other = "自訂DDNS使用的公共DNS伺服器（逗號分隔）"

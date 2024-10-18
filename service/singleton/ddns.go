@@ -20,6 +20,7 @@ var (
 
 func initDDNS() {
 	OnDDNSUpdate()
+	OnNameserverUpdate()
 }
 
 func OnDDNSUpdate() {
@@ -31,6 +32,10 @@ func OnDDNSUpdate() {
 	for i := 0; i < len(ddns); i++ {
 		ddnsCache[ddns[i].ID] = ddns[i]
 	}
+}
+
+func OnNameserverUpdate() {
+	ddns2.InitDNSServers(Conf.DNSServers)
 }
 
 func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]*ddns2.Provider, error) {
