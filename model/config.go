@@ -23,6 +23,7 @@ var Themes = map[string]string{
 	"hotaru":        "Hotaru",
 	"angel-kanade":  "AngelKanade",
 	"server-status": "ServerStatus",
+	"custom":        "Custom(local)",
 }
 
 var DashboardThemes = map[string]string{
