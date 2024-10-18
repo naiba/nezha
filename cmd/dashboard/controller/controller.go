@@ -96,6 +96,13 @@ func loadThirdPartyTemplates(tmpl *template.Template) *template.Template {
 		}
 
 		themeDir := theme.Name()
+		if themeDir == "theme-custom" {
+			// for backward compatibility
+			// note: will remove this in future versions
+			ret = loadTemplates(ret, themeDir)
+			continue
+		}
+
 		if strings.HasPrefix(themeDir, "dashboard-") {
 			// load dashboard templates, ignore desc file
 			ret = loadTemplates(ret, themeDir)
