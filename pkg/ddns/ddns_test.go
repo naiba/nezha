@@ -27,6 +27,11 @@ func TestSplitDomainSOA(t *testing.T) {
 			zone:   "example.com.",
 			prefix: "abc",
 		},
+		{
+			domain: "example.com",
+			zone:   "example.com.",
+			prefix: "",
+		},
 	}
 
 	for _, c := range cases {

@@ -108,7 +108,7 @@ func splitDomainSOA(domain string) (prefix string, zone string, err error) {
 			if len(r.Answer) > 0 {
 				if soa, ok := r.Answer[0].(*dns.SOA); ok {
 					zone = soa.Hdr.Name
-					prefix = domain[:len(domain)-len(zone)-1]
+					prefix = libdns.RelativeName(domain, zone)
 					return
 				}
 			}
