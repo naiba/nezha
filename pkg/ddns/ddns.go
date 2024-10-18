@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/libdns/libdns"
@@ -13,7 +14,10 @@ import (
 	"github.com/naiba/nezha/pkg/utils"
 )
 
-var dnsTimeOut = 10 * time.Second
+var (
+	dnsTimeOut       = 10 * time.Second
+	customDNSServers []string
+)
 
 type IP struct {
 	Ipv4Addr string
@@ -31,6 +35,12 @@ type Provider struct {
 	DDNSProfile *model.DDNSProfile
 	IPAddrs     *IP
 	Setter      libdns.RecordSetter
+}
+
+func InitDNSServers(s string) {
+	if s != "" {
+		customDNSServers = strings.Split(s, ",")
+	}
 }
 
 func (provider *Provider) UpdateDomain(ctx context.Context) {
@@ -95,12 +105,17 @@ func splitDomainSOA(domain string) (prefix string, zone string, err error) {
 	domain += "."
 	indexes := dns.Split(domain)
 
+	servers := utils.DNSServers
+	if len(customDNSServers) > 0 {
+		servers = customDNSServers
+	}
+
 	var r *dns.Msg
 	for _, idx := range indexes {
 		m := new(dns.Msg)
 		m.SetQuestion(domain[idx:], dns.TypeSOA)
 
-		for _, server := range utils.DNSServers {
+		for _, server := range servers {
 			r, _, err = c.Exchange(m, server)
 			if err != nil {
 				return

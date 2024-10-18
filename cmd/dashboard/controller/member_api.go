@@ -1012,6 +1012,7 @@ type settingForm struct {
 	DashboardTheme          string
 	CustomCode              string
 	CustomCodeDashboard     string
+	CustomNameservers       string
 	ViewPassword            string
 	IgnoredIPNotification   string
 	IPChangeNotificationTag string // IP变更提醒的通知组
@@ -1078,6 +1079,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.Site.DashboardTheme = sf.DashboardTheme
 	singleton.Conf.Site.CustomCode = sf.CustomCode
 	singleton.Conf.Site.CustomCodeDashboard = sf.CustomCodeDashboard
+	singleton.Conf.DNSServers = sf.CustomNameservers
 	singleton.Conf.Site.ViewPassword = sf.ViewPassword
 	singleton.Conf.Oauth2.Admin = sf.Admin
 	// 保证NotificationTag不为空
@@ -1093,6 +1095,8 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	}
 	// 更新系统语言
 	singleton.InitLocalizer()
+	// 更新DNS服务器
+	singleton.OnNameserverUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
