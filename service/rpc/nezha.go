@@ -14,7 +14,6 @@ import (
 	"github.com/naiba/nezha/pkg/utils"
 
 	"github.com/jinzhu/copier"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
@@ -55,18 +54,18 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			curServer := model.Server{}
 			copier.Copy(&curServer, singleton.ServerList[clientID])
 			if cr.PushSuccessful && r.GetSuccessful() {
-				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
-					&i18n.LocalizeConfig{
-						MessageID: "ScheduledTaskExecutedSuccessfully",
-					},
-				), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
+				// singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
+				// 	&i18n.LocalizeConfig{
+				// 		MessageID: "ScheduledTaskExecutedSuccessfully",
+				// 	},
+				// ), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			if !r.GetSuccessful() {
-				singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
-					&i18n.LocalizeConfig{
-						MessageID: "ScheduledTaskExecutedFailed",
-					},
-				), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
+				// singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
+				// 	&i18n.LocalizeConfig{
+				// 		MessageID: "ScheduledTaskExecutedFailed",
+				// 	},
+				// ), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			singleton.DB.Model(cr).Updates(model.Cron{
 				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
@@ -160,9 +159,9 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		singleton.SendNotification(singleton.Conf.IPChangeNotificationTag,
 			fmt.Sprintf(
 				"[%s] %s, %s => %s",
-				singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-					MessageID: "IPChanged",
-				}),
+				// singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+				// 	MessageID: "IPChanged",
+				// }),
 				singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP),
 				singleton.IPDesensitize(host.IP),
 			),

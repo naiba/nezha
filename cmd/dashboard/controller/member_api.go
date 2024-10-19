@@ -19,7 +19,6 @@ import (
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/resource"
 	"github.com/naiba/nezha/service/singleton"
 )
 
@@ -1050,22 +1049,6 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 
-	if !utils.IsFileExists("resource/template/theme-"+sf.Theme+"/home.html") && !resource.IsTemplateFileExist("template/theme-"+sf.Theme+"/home.html") {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("前台主题文件异常：%s", sf.Theme),
-		})
-		return
-	}
-
-	if !utils.IsFileExists("resource/template/dashboard-"+sf.DashboardTheme+"/setting.html") && !resource.IsTemplateFileExist("template/dashboard-"+sf.DashboardTheme+"/setting.html") {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("后台主题文件异常：%s", sf.DashboardTheme),
-		})
-		return
-	}
-
 	singleton.Conf.Language = sf.Language
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
@@ -1093,8 +1076,6 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		})
 		return
 	}
-	// 更新系统语言
-	singleton.InitLocalizer()
 	// 更新DNS服务器
 	singleton.OnNameserverUpdate()
 	c.JSON(http.StatusOK, model.Response{

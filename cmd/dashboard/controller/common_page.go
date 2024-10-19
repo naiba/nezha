@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -11,7 +10,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
 	"github.com/jinzhu/copier"
-	"github.com/nicksnyder/go-i18n/v2/i18n"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/sync/singleflight"
 
@@ -68,7 +66,7 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 	err := c.ShouldBind(&vpf)
 	var hash []byte
 	if err == nil && vpf.Password != singleton.Conf.Site.ViewPassword {
-		err = errors.New(singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "WrongAccessPassword"}))
+		// err = errors.New(singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "WrongAccessPassword"}))
 	}
 	if err == nil {
 		hash, err = bcrypt.GenerateFromPassword([]byte(vpf.Password), bcrypt.DefaultCost)
@@ -76,9 +74,9 @@ func (p *commonPage) issueViewPassword(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusOK,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "AnErrorEccurred",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "AnErrorEccurred",
+			// }),
 			Msg: err.Error(),
 		}, true)
 		c.Abort()
@@ -107,7 +105,7 @@ func (p *commonPage) service(c *gin.Context) {
 		}, nil
 	})
 	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/service"), mygin.CommonEnvironment(c, gin.H{
-		"Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
+		// "Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
 		"Services":           res.([]interface{})[0],
 		"CycleTransferStats": res.([]interface{})[1],
 	}))
@@ -255,9 +253,9 @@ func (cp *commonPage) home(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "SystemError",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "SystemError",
+			// }),
 			Msg:  "服务器状态获取失败",
 			Link: "/",
 			Btn:  "返回首页",
@@ -284,9 +282,9 @@ func (cp *commonPage) ws(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "NetworkError",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "NetworkError",
+			// }),
 			Msg:  "Websocket协议切换失败",
 			Link: "/",
 			Btn:  "返回首页",
@@ -332,9 +330,9 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "NetworkError",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "NetworkError",
+			// }),
 			Msg:  "Websocket协议切换失败",
 			Link: "/",
 			Btn:  "返回首页",
@@ -394,9 +392,9 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "SystemError",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "SystemError",
+			// }),
 			Msg:  "生成会话ID失败",
 			Link: "/server",
 			Btn:  "返回重试",
@@ -462,9 +460,9 @@ func (cp *commonPage) fm(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "NetworkError",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "NetworkError",
+			// }),
 			Msg:  "Websocket协议切换失败",
 			Link: "/",
 			Btn:  "返回首页",
@@ -508,9 +506,9 @@ func (cp *commonPage) createFM(c *gin.Context) {
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
-			Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-				MessageID: "SystemError",
-			}),
+			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+			// 	MessageID: "SystemError",
+			// }),
 			Msg:  "生成会话ID失败",
 			Link: "/server",
 			Btn:  "返回重试",

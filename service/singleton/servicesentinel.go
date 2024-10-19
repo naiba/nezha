@@ -8,8 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/nicksnyder/go-i18n/v2/i18n"
-
 	"github.com/naiba/nezha/model"
 	pb "github.com/naiba/nezha/proto"
 )
@@ -609,14 +607,15 @@ func GetStatusCode[T float32 | uint64](percent T) int {
 func StatusCodeToString(statusCode int) string {
 	switch statusCode {
 	case StatusNoData:
-		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusNoData"})
+		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusNoData"})
 	case StatusGood:
-		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusGood"})
+		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusGood"})
 	case StatusLowAvailability:
-		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusLowAvailability"})
+		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusLowAvailability"})
 	case StatusDown:
-		return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusDown"})
+		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusDown"})
 	default:
 		return ""
 	}
+	return ""
 }

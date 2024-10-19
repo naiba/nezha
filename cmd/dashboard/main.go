@@ -39,7 +39,6 @@ func init() {
 	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
 	singleton.InitTimezoneAndCache()
 	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
-	singleton.InitLocalizer()
 	initSystem()
 }
 
