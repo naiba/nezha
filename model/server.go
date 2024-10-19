@@ -7,9 +7,10 @@ import (
 	"sync"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
-	"gorm.io/gorm"
 )
 
 type Server struct {
