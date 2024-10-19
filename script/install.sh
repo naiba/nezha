@@ -29,7 +29,7 @@ sudo() {
         if command -v sudo > /dev/null 2>&1; then
             command sudo "$@"
         else
-            err "ERROR: sudo is not installed on the system, the action cannot be proceeded."
+            err "错误: 您的系统未安装 sudo，因此无法进行该项操作。"
             exit 1
         fi
     else
