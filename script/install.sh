@@ -12,13 +12,13 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.19.2"
+NZ_VERSION="v0.20.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
-export PATH=$PATH:/usr/local/bin
+export PATH="$PATH:/usr/local/bin"
 
 os_arch=""
 [ -e /etc/os-release ] && grep -i "PRETTY_NAME" /etc/os-release | grep -qi "alpine" && os_alpine='1'
@@ -29,7 +29,7 @@ sudo() {
         if command -v sudo > /dev/null 2>&1; then
             command sudo "$@"
         else
-            err "错误: 您的系统未安装 sudo，因此无法进行该项操作。"
+            err "ERROR: sudo is not installed on the system, the action cannot be proceeded."
             exit 1
         fi
     else
@@ -45,20 +45,28 @@ check_systemd() {
 }
 
 err() {
-    printf "${red}$*${plain}\n" >&2
+    printf "${red}%s${plain}\n" "$*" >&2
+}
+
+success() {
+    printf "${green}%s${plain}\n" "$*"
+}
+
+info() {
+    printf "${yellow}%s${plain}\n" "$*"
 }
 
 geo_check() {
     api_list="https://blog.cloudflare.com/cdn-cgi/trace https://dash.cloudflare.com/cdn-cgi/trace https://cf-ns.com/cdn-cgi/trace"
     ua="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
-    set -- $api_list
+    set -- "$api_list"
     for url in $api_list; do
-        text="$(curl -A "$ua" -m 10 -s $url)"
-        endpoint="$(echo $text | sed -n 's/.*h=\([^ ]*\).*/\1/p')"
-        if echo $text | grep -qw 'CN'; then
+        text="$(curl -A "$ua" -m 10 -s "$url")"
+        endpoint="$(echo "$text" | sed -n 's/.*h=\([^ ]*\).*/\1/p')"
+        if echo "$text" | grep -qw 'CN'; then
             isCN=true
             break
-        elif echo $url | grep -q $endpoint; then
+        elif echo "$url" | grep -q "$endpoint"; then
             break
         fi
     done
@@ -85,9 +93,9 @@ pre_check() {
     ## China_IP
     if [ -z "$CN" ]; then
         geo_check
-        if [ ! -z "$isCN" ]; then
+        if [ -n "$isCN" ]; then
             echo "根据geoip api提供的信息，当前IP可能在中国"
-            printf "是否选用中国镜像完成安装? [Y/n] (自定义镜像输入 3):"
+            printf "是否选用中国镜像完成安装? [Y/n] (自定义镜像输入 3)："
             read -r input
             case $input in
             [yY][eE][sS] | [yY])
@@ -180,7 +188,9 @@ installation_check() {
 
 select_version() {
     if [ -z "$IS_DOCKER_NEZHA" ]; then
-        printf "${yellow}请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）：\n1. Docker\n2. 独立安装${plain}\n"
+        info "请自行选择您的安装方式（如果你是安装Agent，输入哪个都是一样的）："
+        info "1. Docker"
+        info "2. 独立安装"
         while true; do
             printf "请输入选择 [1-2]："
             read -r option
@@ -206,7 +216,7 @@ update_script() {
 
     curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
     new_version=$(grep "NZ_VERSION" /tmp/nezha.sh | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$new_version" ]; then
+    if [ -z "$new_version" ]; then
         echo "脚本获取失败，请检查本机能否链接 https://${GITHUB_RAW_URL}/script/install.sh"
         return 1
     fi
@@ -221,7 +231,7 @@ update_script() {
 }
 
 before_show_menu() {
-    echo && printf "${yellow}* 按回车返回主菜单 *${plain}" && read temp
+    echo && info "* 按回车返回主菜单 *" && read temp
     show_menu
 }
 
@@ -231,7 +241,7 @@ install_base() {
 }
 
 install_arch() {
-    printf "${green}提示: ${plain} Arch安装libselinux需添加nezha-agent用户，安装完会自动删除，建议手动检查一次\n"
+    info "提示：Arch安装libselinux需添加nezha-agent用户，安装完会自动删除，建议手动检查一次"
     read -r -p "是否安装libselinux? [Y/n] " input
     case $input in
     [yY][eE][sS] | [yY])
@@ -255,11 +265,11 @@ install_arch() {
 }
 
 install_soft() {
-    (command -v yum >/dev/null 2>&1 && sudo yum makecache && sudo yum install $* selinux-policy -y) ||
-        (command -v apt >/dev/null 2>&1 && sudo apt update && sudo apt install $* selinux-utils -y) ||
-        (command -v pacman >/dev/null 2>&1 && sudo pacman -Syu $* base-devel --noconfirm && install_arch) ||
-        (command -v apt-get >/dev/null 2>&1 && sudo apt-get update && sudo apt-get install $* selinux-utils -y) ||
-        (command -v apk >/dev/null 2>&1 && sudo apk update && sudo apk add $* -f)
+    (command -v yum >/dev/null 2>&1 && sudo yum makecache && sudo yum install "$@" selinux-policy -y) ||
+        (command -v apt >/dev/null 2>&1 && sudo apt update && sudo apt install "$@" selinux-utils -y) ||
+        (command -v pacman >/dev/null 2>&1 && sudo pacman -Syu "$@" base-devel --noconfirm && install_arch) ||
+        (command -v apt-get >/dev/null 2>&1 && sudo apt-get update && sudo apt-get install "$@" selinux-utils -y) ||
+        (command -v apk >/dev/null 2>&1 && sudo apk update && sudo apk add "$@" -f)
 }
 
 install_dashboard() {
@@ -305,12 +315,10 @@ install_dashboard() {
 
 install_dashboard_docker() {
     if [ ! "$FRESH_INSTALL" = 0 ]; then
-        command -v docker >/dev/null 2>&1
-        if [ $? != 0 ]; then
+        if ! command -v docker >/dev/null 2>&1; then
             echo "正在安装 Docker"
             if [ "$os_alpine" != 1 ]; then
-                curl -sL https://${Get_Docker_URL} | sudo bash -s ${Get_Docker_Argu}
-                if [ $? != 0 ]; then
+                if ! curl -sL https://${Get_Docker_URL} | sudo bash -s "${Get_Docker_Argu}"; then
                     err "下载脚本失败，请检查本机能否连接 ${Get_Docker_URL}"
                     return 0
                 fi
@@ -321,7 +329,7 @@ install_dashboard_docker() {
                 sudo rc-update add docker
                 sudo rc-service docker start
             fi
-            printf "${green}Docker${plain} 安装成功\n"
+            success "Docker installed successfully"
             installation_check
         fi
     fi
@@ -334,13 +342,11 @@ install_dashboard_standalone() {
 }
 
 selinux() {
-    #判断当前的状态
-    command -v getenforce >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        getenforce | grep '[Ee]nfor'
-        if [ $? -eq 0 ]; then
+    #Check SELinux
+    if command -v getenforce >/dev/null 2>&1; then
+        if getenforce | grep '[Ee]nfor'; then
             echo "SELinux是开启状态，正在关闭！"
-            sudo setenforce 0 &>/dev/null
+            sudo setenforce 0 >/dev/null 2>&1
             find_key="SELINUX="
             sudo sed -ri "/^$find_key/c${find_key}disabled" /etc/selinux/config
         fi
@@ -355,22 +361,23 @@ install_agent() {
 
     echo "正在获取监控Agent版本号"
 
-    local version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/agent/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+
+    _version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/agent/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
 
-    if [ ! -n "$version" ]; then
+    if [ -z "$_version" ]; then
         err "获取版本号失败，请检查本机能否链接 https://api.github.com/repos/nezhahq/agent/releases/latest"
         return 1
     else
-        echo "当前最新版本为: ${version}"
+        echo "当前最新版本为: ${_version}"
     fi
 
     # 哪吒监控文件夹
@@ -378,12 +385,13 @@ install_agent() {
 
     echo "正在下载监控端"
     if [ -z "$CN" ]; then
-        NZ_AGENT_URL="https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip"
+        NZ_AGENT_URL="https://${GITHUB_URL}/nezhahq/agent/releases/download/${_version}/nezha-agent_linux_${os_arch}.zip"
     else
-        NZ_AGENT_URL="https://${GITHUB_URL}/naibahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip"
+        NZ_AGENT_URL="https://${GITHUB_URL}/naibahq/agent/releases/download/${_version}/nezha-agent_linux_${os_arch}.zip"
     fi
-    wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip $NZ_AGENT_URL >/dev/null 2>&1
-    if [ $? != 0 ]; then
+
+    _cmd="wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip $NZ_AGENT_URL >/dev/null 2>&1"
+    if ! eval "$_cmd"; then
         err "Release 下载失败，请检查本机能否连接 ${GITHUB_URL}"
         return 1
     fi
@@ -435,14 +443,14 @@ modify_agent_config() {
         fi
     fi
 
-    sudo ${NZ_AGENT_PATH}/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p $nz_client_secret $args >/dev/null 2>&1
+    _cmd="sudo ${NZ_AGENT_PATH}/nezha-agent service install -s $nz_grpc_host:$nz_grpc_port -p $nz_client_secret $args >/dev/null 2>&1"
 
-    if [ $? -ne 0 ]; then
-        sudo ${NZ_AGENT_PATH}/nezha-agent service uninstall >/dev/null 2>&1
-        sudo ${NZ_AGENT_PATH}/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p $nz_client_secret $args >/dev/null 2>&1
+    if ! eval "$_cmd"; then
+        sudo "${NZ_AGENT_PATH}"/nezha-agent service uninstall >/dev/null 2>&1
+        sudo "${NZ_AGENT_PATH}"/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p "$nz_client_secret" "$args" >/dev/null 2>&1
     fi
     
-    printf "Agent配置 ${green}修改成功，请稍等重启生效${plain}\n"
+    success "Agent配置 修改成功，请稍等重启生效"
 
     #if [[ $# == 0 ]]; then
     #    before_show_menu
@@ -453,10 +461,10 @@ modify_dashboard_config() {
     echo "> 修改面板配置"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        if [ ! -z "$DOCKER_COMPOSE_COMMAND" ]; then
+        if [ -n "$DOCKER_COMPOSE_COMMAND" ]; then
             echo "正在下载 Docker 脚本"
-            wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
-            if [ $? != 0 ]; then
+            _cmd="wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1"
+            if ! eval "$_cmd"; then
                 err "下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}"
                 return 0
             fi
@@ -466,8 +474,8 @@ modify_dashboard_config() {
         fi
     fi
 
-    wget -t 2 -T 60 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
-    if [ $? != 0 ]; then
+    _cmd="wget -t 2 -T 60 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1"
+    if ! eval "$_cmd"; then
         err "下载脚本失败，请检查本机能否连接 ${GITHUB_RAW_URL}"
         return 0
     fi
@@ -529,18 +537,18 @@ modify_dashboard_config() {
     if [ "$IS_DOCKER_NEZHA" = 0 ]; then
         echo "正在下载服务文件"
         if [ "$os_alpine" != 1 ]; then
-            sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
+            _download="sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1"
         else
-            sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
-            sudo chmod +x $NZ_DASHBOARD_SERVICERC
-            if [ $? != 0 ]; then
+            _download="sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1"
+            if ! eval "$_download"; then
                 err "文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}"
                 return 0
             fi
+            sudo chmod +x $NZ_DASHBOARD_SERVICERC
         fi
     fi
 
-    printf "面板配置 ${green}修改成功，请稍等重启生效${plain}\n"
+    success "面板配置 修改成功，请稍等重启生效"
 
     restart_and_update
 
@@ -553,14 +561,14 @@ restart_and_update() {
     echo "> 重启并更新面板"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        restart_and_update_docker
+        _cmd="restart_and_update_docker"
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
-        restart_and_update_standalone
+        _cmd="restart_and_update_standalone"
     fi
 
-    if [ $? = 0 ]; then
-        printf "${green}哪吒监控 重启成功${plain}\n"
-        printf "默认管理面板地址：${yellow}域名:站点访问端口${plain}\n"
+    if eval "$_cmd"; then
+        success "哪吒监控 重启成功"
+        info "默认管理面板地址：域名:站点访问端口"
     else
         err "重启失败，可能是因为启动时间超过了两秒，请稍后查看日志信息"
     fi
@@ -571,21 +579,28 @@ restart_and_update() {
 }
 
 restart_and_update_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml pull
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml pull
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
 }
 
 restart_and_update_standalone() {
-    local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/nezha/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+    _version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/nezha/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    fi
+
+    if [ -z "$_version" ]; then
+        err "获取版本号失败，请检查本机能否链接 https://api.github.com/repos/naiba/nezha/releases/latest"
+        return 1
+    else
+        echo "当前最新版本为: ${_version}"
     fi
 
     if [ "$os_alpine" != 1 ]; then
@@ -595,20 +610,13 @@ restart_and_update_standalone() {
         sudo rc-service nezha-dashboard stop
     fi
 
-    if [ ! -n "$version" ]; then
-        err "获取版本号失败，请检查本机能否链接 https://api.github.com/repos/naiba/nezha/releases/latest"
-        return 1
-    else
-        echo "当前最新版本为: ${version}"
-    fi
-
     if [ -z "$CN" ]; then
-        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naiba/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
+        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naiba/nezha/releases/download/${_version}/dashboard-linux-${os_arch}.zip"
     else
-        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naibahq/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
+        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naibahq/nezha/releases/download/${_version}/dashboard-linux-${os_arch}.zip"
     fi
 
-    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_URL >/dev/null 2>&1 && sudo unzip -qq -o $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm $NZ_DASHBOARD_PATH/app.zip
+    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip "$NZ_DASHBOARD_URL" >/dev/null 2>&1 && sudo unzip -qq -o $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm $NZ_DASHBOARD_PATH/app.zip
 
     if [ "$os_alpine" != 1 ]; then
         sudo systemctl enable nezha-dashboard
@@ -623,13 +631,13 @@ start_dashboard() {
     echo "> 启动面板"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        start_dashboard_docker
+        _cmd="start_dashboard_docker"
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
-        start_dashboard_standalone
+        _cmd="start_dashboard_standalone"
     fi
 
-    if [ $? = 0 ]; then
-        printf "${green}哪吒监控 启动成功${plain}\n"
+    if eval "$_cmd"; then
+        success "哪吒监控 启动成功"
     else
         err "启动失败，请稍后查看日志信息"
     fi
@@ -640,7 +648,7 @@ start_dashboard() {
 }
 
 start_dashboard_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
 }
 
 start_dashboard_standalone() {
@@ -655,13 +663,13 @@ stop_dashboard() {
     echo "> 停止面板"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        stop_dashboard_docker
+        _cmd="stop_dashboard_docker"
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
-        stop_dashboard_standalone
+        _cmd="stop_dashboard_standalone"
     fi
 
-    if [ $? = 0 ]; then
-        printf "${green}哪吒监控 停止成功${plain}\n"
+    if eval "$_cmd"; then
+        success "哪吒监控 停止成功"
     else
         err "停止失败，请稍后查看日志信息"
     fi
@@ -672,7 +680,7 @@ stop_dashboard() {
 }
 
 stop_dashboard_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
 }
 
 stop_dashboard_standalone() {
@@ -698,7 +706,7 @@ show_dashboard_log() {
 }
 
 show_dashboard_log_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml logs -f
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml logs -f
 }
 
 show_dashboard_log_standalone() {
@@ -726,7 +734,7 @@ uninstall_dashboard() {
 }
 
 uninstall_dashboard_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
     sudo rm -rf $NZ_DASHBOARD_PATH
     sudo docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
     sudo docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
@@ -815,7 +823,7 @@ show_usage() {
 }
 
 show_menu() {
-    printf "
+    echo "
     ${green}哪吒监控管理脚本${plain} ${red}${NZ_VERSION}${plain}
     --- https://github.com/naiba/nezha ---
     ${green}1.${plain}  安装面板端
@@ -836,7 +844,7 @@ show_menu() {
     ————————————————-
     ${green}0.${plain}  退出脚本
     "
-    echo && printf "请输入选择 [0-13]: " && read -r num
+    printf "请输入选择 [0-13]: " && read -r num
     case "${num}" in
         0)
             exit 0
