@@ -579,9 +579,9 @@ restart_and_update() {
 }
 
 restart_and_update_docker() {
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml pull
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml pull
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
 }
 
 restart_and_update_standalone() {
@@ -648,7 +648,7 @@ start_dashboard() {
 }
 
 start_dashboard_docker() {
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
 }
 
 start_dashboard_standalone() {
@@ -680,7 +680,7 @@ stop_dashboard() {
 }
 
 stop_dashboard_docker() {
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
 }
 
 stop_dashboard_standalone() {
@@ -706,7 +706,7 @@ show_dashboard_log() {
 }
 
 show_dashboard_log_docker() {
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml logs -f
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml logs -f
 }
 
 show_dashboard_log_standalone() {
@@ -734,7 +734,7 @@ uninstall_dashboard() {
 }
 
 uninstall_dashboard_docker() {
-    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
     sudo rm -rf $NZ_DASHBOARD_PATH
     sudo docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
     sudo docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
