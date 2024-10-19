@@ -329,7 +329,7 @@ install_dashboard_docker() {
                 sudo rc-update add docker
                 sudo rc-service docker start
             fi
-            success "Docker installed successfully"
+            success "Docker 安装成功"
             installation_check
         fi
     fi

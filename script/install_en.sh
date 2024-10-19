@@ -596,7 +596,7 @@ restart_and_update_standalone() {
     fi
 
     if [ -z "$_version" ]; then
-        err "Fail to obtaine agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
+        err "Fail to obtain agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
         return 1
     else
         echo "The current latest version is: ${_version}"
