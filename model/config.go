@@ -105,11 +105,9 @@ type Config struct {
 		OidcAutoCreate  bool   // for OIDC Auto Create
 		OidcAutoLogin   bool   // for OIDC Auto Login
 	}
-	HTTPPort      uint
-	GRPCPort      uint
-	GRPCHost      string
-	ProxyGRPCPort uint
-	TLS           bool
+	ListenPort  uint
+	InstallHost string
+	TLS         bool
 
 	EnablePlainIPInNotification     bool // 通知信息IP不打码
 	DisableSwitchTemplateInFrontend bool // 前台禁用切换模板功能
@@ -152,9 +150,6 @@ func (c *Config) Read(path string) error {
 	}
 	if c.Language == "" {
 		c.Language = "zh-CN"
-	}
-	if c.GRPCPort == 0 {
-		c.GRPCPort = 5555
 	}
 	if c.EnableIPChangeNotification && c.IPChangeNotificationTag == "" {
 		c.IPChangeNotificationTag = "default"

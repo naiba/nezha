@@ -14,6 +14,8 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 	"github.com/ory/graceful"
 	flag "github.com/spf13/pflag"
+	// gin-swagger middleware
+	// swagger embed files
 )
 
 type DashboardCliParam struct {
@@ -64,13 +66,14 @@ func main() {
 
 	// TODO 使用 cmux 在同一端口服务 HTTP 和 gRPC
 	singleton.CleanMonitorHistory()
-	go rpc.ServeRPC(singleton.Conf.GRPCPort)
+	go rpc.ServeRPC(singleton.Conf.ListenPort)
 	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go rpc.DispatchKeepalive()
 	go singleton.AlertSentinelStart()
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
-	srv := controller.ServeWeb(singleton.Conf.HTTPPort)
+	srv := controller.ServeWeb(singleton.Conf.ListenPort)
+
 	go dispatchReportInfoTask()
 	if err := graceful.Graceful(func() error {
 		return srv.ListenAndServe()

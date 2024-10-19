@@ -991,8 +991,8 @@ func (ma *memberAPI) logout(c *gin.Context) {
 		return
 	}
 	singleton.DB.Model(admin).UpdateColumns(model.User{
-		Token:        "",
-		TokenExpired: time.Now(),
+		// Token:        "",
+		// TokenExpired: time.Now(),
 	})
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
@@ -1071,7 +1071,7 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
 	singleton.Conf.DisableSwitchTemplateInFrontend = sf.DisableSwitchTemplateInFrontend == "on"
 	singleton.Conf.Cover = sf.Cover
-	singleton.Conf.GRPCHost = sf.GRPCHost
+	// singleton.Conf.GRPCHost = sf.GRPCHost
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
 	singleton.Conf.IPChangeNotificationTag = sf.IPChangeNotificationTag
 	singleton.Conf.Site.Brand = sf.Title

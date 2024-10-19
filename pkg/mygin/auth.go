@@ -3,7 +3,6 @@ package mygin
 import (
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 
@@ -43,7 +42,7 @@ func Authorize(opt AuthorizeOption) func(*gin.Context) {
 		if token != "" {
 			var u model.User
 			if err := singleton.DB.Where("token = ?", token).First(&u).Error; err == nil {
-				isLogin = u.TokenExpired.After(time.Now())
+				isLogin = true // u.TokenExpired.After(time.Now())
 			}
 			if isLogin {
 				c.Set(model.CtxKeyAuthorizedUser, &u)

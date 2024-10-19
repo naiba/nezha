@@ -27,11 +27,6 @@ func (gp *guestPage) serve() {
 	}))
 
 	gr.GET("/login", gp.login)
-
-	oauth := &oauth2controller{
-		r: gr,
-	}
-	oauth.serve()
 }
 
 func (gp *guestPage) login(c *gin.Context) {

@@ -54,6 +54,15 @@ type viewPasswordForm struct {
 	Password string
 }
 
+// PingExample godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /example/helloworld [get]
 func (p *commonPage) issueViewPassword(c *gin.Context) {
 	var vpf viewPasswordForm
 	err := c.ShouldBind(&vpf)

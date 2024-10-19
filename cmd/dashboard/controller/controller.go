@@ -16,7 +16,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-uuid"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
+	docs "github.com/naiba/nezha/cmd/dashboard/docs"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
@@ -29,11 +32,13 @@ import (
 func ServeWeb(port uint) *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	if singleton.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
 		pprof.Register(r)
 	}
 	r.Use(natGateway)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	tmpl := template.New("").Funcs(funcMap)
 	var err error
 	tmpl, err = tmpl.ParseFS(resource.TemplateFS, "template/**/*.html")

@@ -2,17 +2,12 @@ name: Run Tests
 
 on:
   push:
-    branches:
-      - master
     paths:
       - "**.go"
       - "go.mod"
       - "go.sum"
       - "resource/**"
       - ".github/workflows/test.yml"
-  pull_request:
-    branches:
-      - master
 
 jobs:
   tests:
