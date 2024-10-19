@@ -51,7 +51,7 @@ if ([string]::IsNullOrWhiteSpace($agenttag)) {
 #Region判断
 $ipapi = ""
 $region = "Unknown"
-foreach ($url in ("https://dash.cloudflare.com/cdn-cgi/trace","https://cf-ns.com/cdn-cgi/trace","https://1.0.0.1/cdn-cgi/trace")) {
+foreach ($url in ("https://dash.cloudflare.com/cdn-cgi/trace","https://developers.cloudflare.com/cdn-cgi/trace","https://1.0.0.1/cdn-cgi/trace")) {
     try {
         $ipapi = Invoke-RestMethod -Uri $url -TimeoutSec 5 -UseBasicParsing
         if ($ipapi -match "loc=(\w+)" ) {

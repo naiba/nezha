@@ -12,13 +12,13 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.19.2"
+NZ_VERSION="v0.20.0"
 
 red='\033[0;31m'
 green='\033[0;32m'
 yellow='\033[0;33m'
 plain='\033[0m'
-export PATH=$PATH:/usr/local/bin
+export PATH="$PATH:/usr/local/bin"
 
 os_arch=""
 [ -e /etc/os-release ] && grep -i "PRETTY_NAME" /etc/os-release | grep -qi "alpine" && os_alpine='1'
@@ -45,20 +45,28 @@ check_systemd() {
 }
 
 err() {
-    printf "${red}$*${plain}\n" >&2
+    printf "${red}%s${plain}\n" "$*" >&2
+}
+
+success() {
+    printf "${green}%s${plain}\n" "$*"
+}
+
+info() {
+    printf "${yellow}%s${plain}\n" "$*"
 }
 
 geo_check() {
-    api_list="https://blog.cloudflare.com/cdn-cgi/trace https://dash.cloudflare.com/cdn-cgi/trace https://cf-ns.com/cdn-cgi/trace"
+    api_list="https://blog.cloudflare.com/cdn-cgi/trace https://dash.cloudflare.com/cdn-cgi/trace https://developers.cloudflare.com/cdn-cgi/trace"
     ua="Mozilla/5.0 (X11; Linux x86_64; rv:60.0) Gecko/20100101 Firefox/81.0"
-    set -- $api_list
+    set -- "$api_list"
     for url in $api_list; do
-        text="$(curl -A "$ua" -m 10 -s $url)"
-        endpoint="$(echo $text | sed -n 's/.*h=\([^ ]*\).*/\1/p')"
-        if echo $text | grep -qw 'CN'; then
+        text="$(curl -A "$ua" -m 10 -s "$url")"
+        endpoint="$(echo "$text" | sed -n 's/.*h=\([^ ]*\).*/\1/p')"
+        if echo "$text" | grep -qw 'CN'; then
             isCN=true
             break
-        elif echo $url | grep -q $endpoint; then
+        elif echo "$url" | grep -q "$endpoint"; then
             break
         fi
     done
@@ -85,7 +93,7 @@ pre_check() {
     ## China_IP
     if [ -z "$CN" ]; then
         geo_check
-        if [ ! -z "$isCN" ]; then
+        if [ -n "$isCN" ]; then
             echo "According to the information provided by various geoip api, the current IP may be in China"
             printf "Will the installation be done with a Chinese Mirror? [Y/n] (Custom Mirror Input 3): "
             read -r input
@@ -179,7 +187,9 @@ installation_check() {
 
 select_version() {
     if [ -z "$IS_DOCKER_NEZHA" ]; then
-        printf "${yellow}Select your installation method(Input anything is ok if you are installing agent):\n1. Docker\n2. Standalone${plain}\n"
+        info "Select your installation method(Input anything is ok if you are installing agent):"
+        info "1. Docker"
+        info "2. Standalone"
         while true; do
             printf "Please enter [1-2]: "
             read -r option
@@ -205,7 +215,7 @@ update_script() {
 
     curl -sL https://${GITHUB_RAW_URL}/script/install_en.sh -o /tmp/nezha.sh
     new_version=$(grep "NZ_VERSION" /tmp/nezha.sh | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$new_version" ]; then
+    if [ -z "$new_version" ]; then
         echo "Script failed to get, please check if the network can link https://${GITHUB_RAW_URL}/script/install.sh"
         return 1
     fi
@@ -220,7 +230,7 @@ update_script() {
 }
 
 before_show_menu() {
-    echo && printf "${yellow}* Press Enter to return to the main menu *${plain}" && read temp
+    echo && info "* Press Enter to return to the main menu *" && read temp
     show_menu
 }
 
@@ -230,7 +240,7 @@ install_base() {
 }
 
 install_arch() {
-    printf "${green}Info: ${plain} Archlinux needs to add nezha-agent user to install libselinux. It will be deleted automatically after installation. It is recommended to check manually\n"
+    info "Archlinux needs to add nezha-agent user to install libselinux. It will be deleted automatically after installation. It is recommended to check manually"
     read -r -p "Do you need to install libselinux? [Y/n] " input
     case $input in
     [yY][eE][sS] | [yY])
@@ -254,11 +264,11 @@ install_arch() {
 }
 
 install_soft() {
-    (command -v yum >/dev/null 2>&1 && sudo yum makecache && sudo yum install $* selinux-policy -y) ||
-        (command -v apt >/dev/null 2>&1 && sudo apt update && sudo apt install $* selinux-utils -y) ||
-        (command -v pacman >/dev/null 2>&1 && sudo pacman -Syu $* base-devel --noconfirm && install_arch) ||
-        (command -v apt-get >/dev/null 2>&1 && sudo apt-get update && sudo apt-get install $* selinux-utils -y) ||
-        (command -v apk >/dev/null 2>&1 && sudo apk update && sudo apk add $* -f)
+    (command -v yum >/dev/null 2>&1 && sudo yum makecache && sudo yum install "$@" selinux-policy -y) ||
+        (command -v apt >/dev/null 2>&1 && sudo apt update && sudo apt install "$@" selinux-utils -y) ||
+        (command -v pacman >/dev/null 2>&1 && sudo pacman -Syu "$@" base-devel --noconfirm && install_arch) ||
+        (command -v apt-get >/dev/null 2>&1 && sudo apt-get update && sudo apt-get install "$@" selinux-utils -y) ||
+        (command -v apk >/dev/null 2>&1 && sudo apk update && sudo apk add "$@" -f)
 }
 
 install_dashboard() {
@@ -304,12 +314,10 @@ install_dashboard() {
 
 install_dashboard_docker() {
     if [ ! "$FRESH_INSTALL" = 0 ]; then
-        command -v docker >/dev/null 2>&1
-        if [ $? != 0 ]; then
+        if ! command -v docker >/dev/null 2>&1; then
             echo "Installing Docker"
             if [ "$os_alpine" != 1 ]; then
-                curl -sL https://${Get_Docker_URL} | sudo bash -s ${Get_Docker_Argu}
-                if [ $? != 0 ]; then
+                if ! curl -sL https://${Get_Docker_URL} | sudo bash -s "${Get_Docker_Argu}"; then
                     err "Script failed to get, please check if the network can link ${Get_Docker_URL}"
                     return 0
                 fi
@@ -320,7 +328,7 @@ install_dashboard_docker() {
                 sudo rc-update add docker
                 sudo rc-service docker start
             fi
-            printf "${green}Docker${plain} installed successfully\n"
+            success "Docker installed successfully"
             installation_check
         fi
     fi
@@ -334,12 +342,10 @@ install_dashboard_standalone() {
 
 selinux() {
     #Check SELinux
-    command -v getenforce >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        getenforce | grep '[Ee]nfor'
-        if [ $? -eq 0 ]; then
+    if command -v getenforce >/dev/null 2>&1; then
+        if getenforce | grep '[Ee]nfor'; then
             echo "SELinux running, closing now!"
-            sudo setenforce 0 &>/dev/null
+            sudo setenforce 0 >/dev/null 2>&1
             find_key="SELINUX="
             sudo sed -ri "/^$find_key/c${find_key}disabled" /etc/selinux/config
         fi
@@ -354,30 +360,37 @@ install_agent() {
 
     echo "Obtaining Agent version number"
 
-    local version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/agent/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+
+    _version=$(curl -m 10 -sL "https://api.github.com/repos/nezhahq/agent/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/agent/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/nezhahq/agent/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/nezhahq\/agent@/v/g')
     fi
 
-    if [ ! -n "$version" ]; then
-        err "Fail to obtaine agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
+    if [ -z "$_version" ]; then
+        err "Fail to obtain agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
         return 1
     else
-        echo "The current latest version is: ${version}"
+        echo "The current latest version is: ${_version}"
     fi
 
     # Nezha Monitoring Folder
     sudo mkdir -p $NZ_AGENT_PATH
 
     echo "Downloading Agent"
-    wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip https://${GITHUB_URL}/nezhahq/agent/releases/download/${version}/nezha-agent_linux_${os_arch}.zip >/dev/null 2>&1
-    if [ $? != 0 ]; then
+    if [ -z "$CN" ]; then
+        NZ_AGENT_URL="https://${GITHUB_URL}/nezhahq/agent/releases/download/${_version}/nezha-agent_linux_${os_arch}.zip"
+    else
+        NZ_AGENT_URL="https://${GITHUB_URL}/naibahq/agent/releases/download/${_version}/nezha-agent_linux_${os_arch}.zip"
+    fi
+
+    _cmd="wget -t 2 -T 60 -O nezha-agent_linux_${os_arch}.zip $NZ_AGENT_URL >/dev/null 2>&1"
+    if ! eval "$_cmd"; then
         err "Fail to download agent, please check if the network can link ${GITHUB_URL}"
         return 1
     fi
@@ -401,10 +414,10 @@ modify_agent_config() {
     echo "> Modify Agent Configuration"
 
     if [ $# -lt 3 ]; then
-        echo "Please add Agent in the admin panel first, record the secret"
-            printf "Please enter a domain that resolves to the IP where the panel is located (no CDN): "
+        echo "Please add Agent in the Dashboard first, record the secret"
+            printf "Please enter a domain that resolves to the IP where Dashboard is located (no CDN): "
             read -r nz_grpc_host
-            printf "Please enter the panel RPC port (default 5555): "
+            printf "Please enter Dashboard RPC port (default 5555): "
             read -r nz_grpc_port
             printf "Please enter the Agent secret: "
             read -r nz_client_secret
@@ -429,14 +442,14 @@ modify_agent_config() {
         fi
     fi
 
-    sudo ${NZ_AGENT_PATH}/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p $nz_client_secret $args >/dev/null 2>&1
+    _cmd="sudo ${NZ_AGENT_PATH}/nezha-agent service install -s $nz_grpc_host:$nz_grpc_port -p $nz_client_secret $args >/dev/null 2>&1"
 
-    if [ $? -ne 0 ]; then
-        sudo ${NZ_AGENT_PATH}/nezha-agent service uninstall >/dev/null 2>&1
-        sudo ${NZ_AGENT_PATH}/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p $nz_client_secret $args >/dev/null 2>&1
+    if ! eval "$_cmd"; then
+        sudo "${NZ_AGENT_PATH}"/nezha-agent service uninstall >/dev/null 2>&1
+        sudo "${NZ_AGENT_PATH}"/nezha-agent service install -s "$nz_grpc_host:$nz_grpc_port" -p "$nz_client_secret" "$args" >/dev/null 2>&1
     fi
     
-    printf "Agent configuration ${green} modified successfully, please wait for agent self-restart to take effect${plain}\n"
+    success "Agent configuration modified successfully, please wait for agent self-restart to take effect"
 
     #if [[ $# == 0 ]]; then
     #    before_show_menu
@@ -447,21 +460,21 @@ modify_dashboard_config() {
     echo "> Modify Dashboard Configuration"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        if [ ! -z "$DOCKER_COMPOSE_COMMAND" ]; then
+        if [ -n "$DOCKER_COMPOSE_COMMAND" ]; then
             echo "Download Docker Script"
-            wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1
-            if [ $? != 0 ]; then
+            _cmd="wget -t 2 -T 60 -O /tmp/nezha-docker-compose.yaml https://${GITHUB_RAW_URL}/script/docker-compose.yaml >/dev/null 2>&1"
+            if ! eval "$_cmd"; then
                 err "Script failed to get, please check if the network can link ${GITHUB_RAW_URL}"
                 return 0
             fi
         else
-            err "请手动安装 docker-compose。https://docs.docker.com/compose/install/linux/"
+            err "Please install docker-compose manually. https://docs.docker.com/compose/install/linux/"
             before_show_menu
         fi
     fi
 
-    wget -t 2 -T 60 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1
-    if [ $? != 0 ]; then
+    _cmd="wget -t 2 -T 60 -O /tmp/nezha-config.yaml https://${GITHUB_RAW_URL}/script/config.yaml >/dev/null 2>&1"
+    if ! eval "$_cmd"; then
         err "Script failed to get, please check if the network can link ${GITHUB_RAW_URL}"
         return 0
     fi
@@ -523,18 +536,18 @@ modify_dashboard_config() {
     if [ "$IS_DOCKER_NEZHA" = 0 ]; then
         echo "Downloading service file"
         if [ "$os_alpine" != 1 ]; then
-            sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1
+            _download="sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1"
         else
-            sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1
-            sudo chmod +x $NZ_DASHBOARD_SERVICERC
-            if [ $? != 0 ]; then
+            _download="sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1"
+            if ! eval "$_download"; then
                 err "File failed to get, please check if the network can link ${GITHUB_RAW_URL}"
                 return 0
             fi
+            sudo chmod +x $NZ_DASHBOARD_SERVICERC
         fi
     fi
 
-    printf "Dashboard configuration ${green} modified successfully, please wait for Dashboard self-restart to take effect${plain}\n"
+    success "Dashboard configuration modified successfully, please wait for Dashboard self-restart to take effect"
 
     restart_and_update
 
@@ -544,17 +557,17 @@ modify_dashboard_config() {
 }
 
 restart_and_update() {
-    echo "> Restart and Update the Panel"
+    echo "> Restart and Update Dashboard"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        restart_and_update_docker
+        _cmd="restart_and_update_docker"
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
-        restart_and_update_standalone
+        _cmd="restart_and_update_standalone"
     fi
 
-    if [ $? = 0 ]; then
-        printf "${green}Nezha Monitoring Restart Successful${plain}\n"
-        printf "Default panel address: ${yellow}domain:Site_access_port${plain}\n"
+    if eval "$_cmd"; then
+        success "Nezha Monitoring Restart Successful"
+        info "Default Dashboard address: domain:site_access_port"
     else
         err "The restart failed, probably because the boot time exceeded two seconds, please check the log information later"
     fi
@@ -565,28 +578,28 @@ restart_and_update() {
 }
 
 restart_and_update_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml pull
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml pull
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
 }
 
 restart_and_update_standalone() {
-    local version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/nezha/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
+    _version=$(curl -m 10 -sL "https://api.github.com/repos/naiba/nezha/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gitee.com/api/v5/repos/naibahq/nezha/releases/latest" | awk -F '"' '{for(i=1;i<=NF;i++){if($i=="tag_name"){print $(i+2)}}}')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://fastly.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
     fi
-    if [ ! -n "$version" ]; then
-        version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
+    if [ -z "$_version" ]; then
+        _version=$(curl -m 10 -sL "https://gcore.jsdelivr.net/gh/naiba/nezha/" | grep "option\.value" | awk -F "'" '{print $2}' | sed 's/naiba\/nezha@/v/g')
     fi
 
-    if [ ! -n "$version" ]; then
-        err "Fail to obtaine agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
+    if [ -z "$_version" ]; then
+        err "Fail to obtain agent version, please check if the network can link https://api.github.com/repos/nezhahq/agent/releases/latest"
         return 1
     else
-        echo "The current latest version is: ${version}"
+        echo "The current latest version is: ${_version}"
     fi
 
     if [ "$os_alpine" != 1 ]; then
@@ -597,12 +610,12 @@ restart_and_update_standalone() {
     fi
 
     if [ -z "$CN" ]; then
-        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naiba/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
+        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naiba/nezha/releases/download/${_version}/dashboard-linux-${os_arch}.zip"
     else
-        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naibahq/nezha/releases/download/$version/dashboard-linux-$os_arch.zip"
+        NZ_DASHBOARD_URL="https://${GITHUB_URL}/naibahq/nezha/releases/download/${_version}/dashboard-linux-${os_arch}.zip"
     fi
 
-    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip $NZ_DASHBOARD_URL >/dev/null 2>&1 && sudo unzip -qq -o $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm $NZ_DASHBOARD_PATH/app.zip
+    sudo wget -qO $NZ_DASHBOARD_PATH/app.zip "$NZ_DASHBOARD_URL" >/dev/null 2>&1 && sudo unzip -qq -o $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm $NZ_DASHBOARD_PATH/app.zip
 
     if [ "$os_alpine" != 1 ]; then
         sudo systemctl enable nezha-dashboard
@@ -614,16 +627,16 @@ restart_and_update_standalone() {
 }
 
 start_dashboard() {
-    echo "> Start Panel"
+    echo "> Start Dashboard"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        start_dashboard_docker
+        _cmd="start_dashboard_docker"
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
-        start_dashboard_standalone
+        _cmd="start_dashboard_standalone"
     fi
 
-    if [ $? = 0 ]; then
-        printf "${green}Nezha Monitoring Start Successful${plain}\n"
+    if eval "$_cmd"; then
+        success "Nezha Monitoring Start Successful"
     else
         err "Failed to start, please check the log message later"
     fi
@@ -634,7 +647,7 @@ start_dashboard() {
 }
 
 start_dashboard_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml up -d
 }
 
 start_dashboard_standalone() {
@@ -646,16 +659,16 @@ start_dashboard_standalone() {
 }
 
 stop_dashboard() {
-    echo "> Stop Panel"
+    echo "> Stop Dashboard"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
-        stop_dashboard_docker
+        _cmd="stop_dashboard_docker"
     elif [ "$IS_DOCKER_NEZHA" = 0 ]; then
-        stop_dashboard_standalone
+        _cmd="stop_dashboard_standalone"
     fi
 
-    if [ $? = 0 ]; then
-        printf "${green}Nezha Monitoring Stop Successful${plain}\n"
+    if eval "$_cmd"; then
+        success "Nezha Monitoring Stop Successful"
     else
         err "Failed to stop, please check the log message later"
     fi
@@ -666,7 +679,7 @@ stop_dashboard() {
 }
 
 stop_dashboard_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
 }
 
 stop_dashboard_standalone() {
@@ -678,7 +691,7 @@ stop_dashboard_standalone() {
 }
 
 show_dashboard_log() {
-    echo "> View Panel Log"
+    echo "> View Dashboard Log"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
         show_dashboard_log_docker
@@ -692,7 +705,7 @@ show_dashboard_log() {
 }
 
 show_dashboard_log_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml logs -f
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml logs -f
 }
 
 show_dashboard_log_standalone() {
@@ -704,7 +717,7 @@ show_dashboard_log_standalone() {
 }
 
 uninstall_dashboard() {
-    echo "> Uninstall Panel"
+    echo "> Uninstall Dashboard"
 
     if [ "$IS_DOCKER_NEZHA" = 1 ]; then
         uninstall_dashboard_docker
@@ -720,7 +733,7 @@ uninstall_dashboard() {
 }
 
 uninstall_dashboard_docker() {
-    sudo $DOCKER_COMPOSE_COMMAND -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
+    sudo "$DOCKER_COMPOSE_COMMAND" -f ${NZ_DASHBOARD_PATH}/docker-compose.yaml down
     sudo rm -rf $NZ_DASHBOARD_PATH
     sudo docker rmi -f ghcr.io/naiba/nezha-dashboard >/dev/null 2>&1
     sudo docker rmi -f registry.cn-shanghai.aliyuncs.com/naibahq/nezha-dashboard >/dev/null 2>&1
@@ -791,13 +804,13 @@ show_usage() {
     echo "Nezha Monitor Management Script Usage: "
     echo "--------------------------------------------------------"
     echo "./nezha.sh                            - Show Menu"
-    echo "./nezha.sh install_dashboard          - Install Panel"
-    echo "./nezha.sh modify_dashboard_config    - Modify Panel Configuration"
-    echo "./nezha.sh start_dashboard            - Start Panel"
-    echo "./nezha.sh stop_dashboard             - Stop Panel"
-    echo "./nezha.sh restart_and_update         - Restart and Update the Panel"
-    echo "./nezha.sh show_dashboard_log         - View Panel Log"
-    echo "./nezha.sh uninstall_dashboard        - Uninstall Panel"
+    echo "./nezha.sh install_dashboard          - Install Dashboard"
+    echo "./nezha.sh modify_dashboard_config    - Modify Dashboard Configuration"
+    echo "./nezha.sh start_dashboard            - Start Dashboard"
+    echo "./nezha.sh stop_dashboard             - Stop Dashboard"
+    echo "./nezha.sh restart_and_update         - Restart and Update the Dashboard"
+    echo "./nezha.sh show_dashboard_log         - View Dashboard Log"
+    echo "./nezha.sh uninstall_dashboard        - Uninstall Dashboard"
     echo "--------------------------------------------------------"
     echo "./nezha.sh install_agent              - Install Agent"
     echo "./nezha.sh modify_agent_config        - Modify Agent Configuration"
@@ -812,13 +825,13 @@ show_menu() {
     printf "
     ${green}Nezha Monitor Management Script${plain} ${red}${NZ_VERSION}${plain}
     --- https://github.com/naiba/nezha ---
-    ${green}1.${plain}  Install Panel
-    ${green}2.${plain}  Modify Panel Configuration
-    ${green}3.${plain}  Start Panel
-    ${green}4.${plain}  Stop Panel
-    ${green}5.${plain}  Restart and Update the Panel
-    ${green}6.${plain}  View Panel Log
-    ${green}7.${plain}  Uninstall Panel
+    ${green}1.${plain}  Install Dashboard
+    ${green}2.${plain}  Modify Dashbaord Configuration
+    ${green}3.${plain}  Start Dashboard
+    ${green}4.${plain}  Stop Dashboard
+    ${green}5.${plain}  Restart and Update Dashboard
+    ${green}6.${plain}  View Dashboard Log
+    ${green}7.${plain}  Uninstall Dashboard
     ————————————————-
     ${green}8.${plain}  Install Agent
     ${green}9.${plain}  Modify Agent Configuration
