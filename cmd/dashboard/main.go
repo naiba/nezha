@@ -4,18 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"time"
 	_ "time/tzdata"
+
+	"github.com/ory/graceful"
+	"github.com/soheilhy/cmux"
+	flag "github.com/spf13/pflag"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
-	"github.com/ory/graceful"
-	flag "github.com/spf13/pflag"
-	// gin-swagger middleware
-	// swagger embed files
 )
 
 type DashboardCliParam struct {
@@ -43,6 +45,25 @@ func init() {
 }
 
 func initSystem() {
+	// 初始化管理员账户
+	var usersCount int64
+	if err := singleton.DB.Model(&model.User{}).Count(&usersCount).Error; err != nil {
+		panic(err)
+	}
+	if usersCount == 0 {
+		hash, err := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
+		if err != nil {
+			panic(err)
+		}
+		admin := model.User{
+			Username: "admin",
+			Password: string(hash),
+		}
+		if err := singleton.DB.Create(&admin).Error; err != nil {
+			panic(err)
+		}
+	}
+
 	// 启动 singleton 包下的所有服务
 	singleton.LoadSingleton()
 
@@ -63,19 +84,28 @@ func main() {
 		return
 	}
 
+	l, err := net.Listen("tcp", fmt.Sprintf(":%d", singleton.Conf.ListenPort))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	m := cmux.New(l)
+	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
+	httpL := m.Match(cmux.HTTP1Fast())
+
 	// TODO 使用 cmux 在同一端口服务 HTTP 和 gRPC
 	singleton.CleanMonitorHistory()
-	go rpc.ServeRPC(singleton.Conf.ListenPort)
+	go rpc.ServeRPC(grpcL)
 	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go rpc.DispatchKeepalive()
 	go singleton.AlertSentinelStart()
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
-	srv := controller.ServeWeb(singleton.Conf.ListenPort)
+	srv := controller.ServeWeb()
 
 	go dispatchReportInfoTask()
 	if err := graceful.Graceful(func() error {
-		return srv.ListenAndServe()
+		return srv.Serve(httpL)
 	}, func(c context.Context) error {
 		log.Println("NEZHA>> Graceful::START")
 		singleton.RecordTransferHourlyUsage()

@@ -10,11 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
 	"github.com/jinzhu/copier"
-	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/sync/singleflight"
 
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/pkg/websocketx"
 	"github.com/naiba/nezha/proto"
@@ -29,14 +27,11 @@ type commonPage struct {
 
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
-	cr.Use(mygin.Authorize(mygin.AuthorizeOption{}))
-	cr.Use(mygin.PreferredTheme)
-	cr.POST("/view-password", cp.issueViewPassword)
 	cr.GET("/terminal/:id", cp.terminal)
-	cr.Use(mygin.ValidateViewPassword(mygin.ValidateViewPasswordOption{
-		IsPage:        true,
-		AbortWhenFail: true,
-	}))
+	// cr.Use(mygin.ValidateViewPassword(mygin.ValidateViewPasswordOption{
+	// 	IsPage:        true,
+	// 	AbortWhenFail: true,
+	// }))
 	cr.GET("/", cp.home)
 	cr.GET("/service", cp.service)
 	// TODO: 界面直接跳转使用该接口
@@ -46,44 +41,6 @@ func (cp *commonPage) serve() {
 	cr.POST("/terminal", cp.createTerminal)
 	cr.GET("/file", cp.createFM)
 	cr.GET("/file/:id", cp.fm)
-}
-
-type viewPasswordForm struct {
-	Password string
-}
-
-// PingExample godoc
-// @Summary ping example
-// @Schemes
-// @Description do ping
-// @Tags example
-// @Accept json
-// @Produce json
-// @Success 200 {string} Helloworld
-// @Router /example/helloworld [get]
-func (p *commonPage) issueViewPassword(c *gin.Context) {
-	var vpf viewPasswordForm
-	err := c.ShouldBind(&vpf)
-	var hash []byte
-	if err == nil && vpf.Password != singleton.Conf.Site.ViewPassword {
-		// err = errors.New(singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "WrongAccessPassword"}))
-	}
-	if err == nil {
-		hash, err = bcrypt.GenerateFromPassword([]byte(vpf.Password), bcrypt.DefaultCost)
-	}
-	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusOK,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "AnErrorEccurred",
-			// }),
-			Msg: err.Error(),
-		}, true)
-		c.Abort()
-		return
-	}
-	c.SetCookie(singleton.Conf.Site.CookieName+"-vp", string(hash), 60*60*24, "", "", false, false)
-	c.Redirect(http.StatusFound, c.Request.Referer())
 }
 
 func (p *commonPage) service(c *gin.Context) {
@@ -104,11 +61,11 @@ func (p *commonPage) service(c *gin.Context) {
 			stats, statsStore,
 		}, nil
 	})
-	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/service"), mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "", gin.H{
 		// "Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
 		"Services":           res.([]interface{})[0],
 		"CycleTransferStats": res.([]interface{})[1],
-	}))
+	})
 }
 
 func (cp *commonPage) network(c *gin.Context) {
@@ -124,13 +81,13 @@ func (cp *commonPage) network(c *gin.Context) {
 	}
 	if err := singleton.DB.Model(&model.MonitorHistory{}).Select("monitor_id, server_id").
 		Where("monitor_id != 0 and server_id != 0").Limit(1).First(&monitorHistory).Error; err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "请求参数有误：" + "server monitor history not found",
-			Link:  "/",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "请求参数有误：" + "server monitor history not found",
+		// 	Link:  "/",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	} else {
 		if monitorHistory == nil || monitorHistory.ServerID == 0 {
@@ -147,24 +104,24 @@ func (cp *commonPage) network(c *gin.Context) {
 		var err error
 		id, err = strconv.ParseUint(idStr, 10, 64)
 		if err != nil {
-			mygin.ShowErrorPage(c, mygin.ErrInfo{
-				Code:  http.StatusForbidden,
-				Title: "请求失败",
-				Msg:   "请求参数有误：" + err.Error(),
-				Link:  "/",
-				Btn:   "返回重试",
-			}, true)
+			// mygin.ShowErrorPage(c, mygin.ErrInfo{
+			// 	Code:  http.StatusForbidden,
+			// 	Title: "请求失败",
+			// 	Msg:   "请求参数有误：" + err.Error(),
+			// 	Link:  "/",
+			// 	Btn:   "返回重试",
+			// }, true)
 			return
 		}
 		_, ok := singleton.ServerList[id]
 		if !ok {
-			mygin.ShowErrorPage(c, mygin.ErrInfo{
-				Code:  http.StatusForbidden,
-				Title: "请求失败",
-				Msg:   "请求参数有误：" + "server id not found",
-				Link:  "/",
-				Btn:   "返回重试",
-			}, true)
+			// mygin.ShowErrorPage(c, mygin.ErrInfo{
+			// 	Code:  http.StatusForbidden,
+			// 	Title: "请求失败",
+			// 	Msg:   "请求参数有误：" + "server id not found",
+			// 	Link:  "/",
+			// 	Btn:   "返回重试",
+			// }, true)
 			return
 		}
 	}
@@ -178,13 +135,13 @@ func (cp *commonPage) network(c *gin.Context) {
 		Where("server_id != 0").
 		Find(&serverIdsWithMonitor).
 		Error; err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "请求参数有误：" + "no server with monitor histories",
-			Link:  "/",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "请求参数有误：" + "no server with monitor histories",
+		// 	Link:  "/",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 	if isMember || isViewPasswordVerfied {
@@ -209,11 +166,10 @@ func (cp *commonPage) network(c *gin.Context) {
 		Servers: servers,
 	})
 
-	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/network"), mygin.CommonEnvironment(c, gin.H{
-		"Servers":         string(serversBytes),
-		"MonitorInfos":    string(monitorInfos),
-		"MaxTCPPingValue": singleton.Conf.MaxTCPPingValue,
-	}))
+	c.HTML(http.StatusOK, "", gin.H{
+		"Servers":      string(serversBytes),
+		"MonitorInfos": string(monitorInfos),
+	})
 }
 
 func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
@@ -251,20 +207,20 @@ func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte
 func (cp *commonPage) home(c *gin.Context) {
 	stat, err := cp.getServerStat(c, true)
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusInternalServerError,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "SystemError",
-			// }),
-			Msg:  "服务器状态获取失败",
-			Link: "/",
-			Btn:  "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code: http.StatusInternalServerError,
+		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+		// 	// 	MessageID: "SystemError",
+		// 	// }),
+		// 	Msg:  "服务器状态获取失败",
+		// 	Link: "/",
+		// 	Btn:  "返回首页",
+		// }, true)
 		return
 	}
-	c.HTML(http.StatusOK, mygin.GetPreferredTheme(c, "/home"), mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "", gin.H{
 		"Servers": string(stat),
-	}))
+	})
 }
 
 var upgrader = websocket.Upgrader{
@@ -280,15 +236,15 @@ type Data struct {
 func (cp *commonPage) ws(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusInternalServerError,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "NetworkError",
-			// }),
-			Msg:  "Websocket协议切换失败",
-			Link: "/",
-			Btn:  "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code: http.StatusInternalServerError,
+		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+		// 	// 	MessageID: "NetworkError",
+		// 	// }),
+		// 	Msg:  "Websocket协议切换失败",
+		// 	Link: "/",
+		// 	Btn:  "返回首页",
+		// }, true)
 		return
 	}
 	defer conn.Close()
@@ -315,28 +271,28 @@ func (cp *commonPage) ws(c *gin.Context) {
 func (cp *commonPage) terminal(c *gin.Context) {
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "无权访问",
-			Msg:   "终端会话不存在",
-			Link:  "/",
-			Btn:   "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "无权访问",
+		// 	Msg:   "终端会话不存在",
+		// 	Link:  "/",
+		// 	Btn:   "返回首页",
+		// }, true)
 		return
 	}
 	defer rpc.NezhaHandlerSingleton.CloseStream(streamId)
 
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusInternalServerError,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "NetworkError",
-			// }),
-			Msg:  "Websocket协议切换失败",
-			Link: "/",
-			Btn:  "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code: http.StatusInternalServerError,
+		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+		// 	// 	MessageID: "NetworkError",
+		// 	// }),
+		// 	Msg:  "Websocket协议切换失败",
+		// 	Link: "/",
+		// 	Btn:  "返回首页",
+		// }, true)
 		return
 	}
 	defer wsConn.Close()
@@ -367,38 +323,38 @@ type createTerminalRequest struct {
 
 func (cp *commonPage) createTerminal(c *gin.Context) {
 	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "无权访问",
-			Msg:   "用户未登录",
-			Link:  "/login",
-			Btn:   "去登录",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "无权访问",
+		// 	Msg:   "用户未登录",
+		// 	Link:  "/login",
+		// 	Btn:   "去登录",
+		// }, true)
 		return
 	}
 	var createTerminalReq createTerminalRequest
 	if err := c.ShouldBind(&createTerminalReq); err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "请求参数有误：" + err.Error(),
-			Link:  "/server",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "请求参数有误：" + err.Error(),
+		// 	Link:  "/server",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 
 	streamId, err := uuid.GenerateUUID()
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusInternalServerError,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "SystemError",
-			// }),
-			Msg:  "生成会话ID失败",
-			Link: "/server",
-			Btn:  "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code: http.StatusInternalServerError,
+		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+		// 	// 	MessageID: "SystemError",
+		// 	// }),
+		// 	Msg:  "生成会话ID失败",
+		// 	Link: "/server",
+		// 	Btn:  "返回重试",
+		// }, true)
 		return
 	}
 
@@ -408,13 +364,13 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 	server := singleton.ServerList[createTerminalReq.ID]
 	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "服务器不存在或处于离线状态",
-			Link:  "/server",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "服务器不存在或处于离线状态",
+		// 	Link:  "/server",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 
@@ -425,48 +381,48 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 		Type: model.TaskTypeTerminalGRPC,
 		Data: string(terminalData),
 	}); err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "Agent信令下发失败",
-			Link:  "/server",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "Agent信令下发失败",
+		// 	Link:  "/server",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 
-	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/terminal", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "", gin.H{
 		"SessionID":  streamId,
 		"ServerName": server.Name,
 		"ServerID":   server.ID,
-	}))
+	})
 }
 
 func (cp *commonPage) fm(c *gin.Context) {
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "无权访问",
-			Msg:   "FM会话不存在",
-			Link:  "/",
-			Btn:   "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "无权访问",
+		// 	Msg:   "FM会话不存在",
+		// 	Link:  "/",
+		// 	Btn:   "返回首页",
+		// }, true)
 		return
 	}
 	defer rpc.NezhaHandlerSingleton.CloseStream(streamId)
 
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusInternalServerError,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "NetworkError",
-			// }),
-			Msg:  "Websocket协议切换失败",
-			Link: "/",
-			Btn:  "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code: http.StatusInternalServerError,
+		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+		// 	// 	MessageID: "NetworkError",
+		// 	// }),
+		// 	Msg:  "Websocket协议切换失败",
+		// 	Link: "/",
+		// 	Btn:  "返回首页",
+		// }, true)
 		return
 	}
 	defer wsConn.Close()
@@ -492,27 +448,27 @@ func (cp *commonPage) fm(c *gin.Context) {
 func (cp *commonPage) createFM(c *gin.Context) {
 	IdString := c.Query("id")
 	if _, authorized := c.Get(model.CtxKeyAuthorizedUser); !authorized {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "无权访问",
-			Msg:   "用户未登录",
-			Link:  "/login",
-			Btn:   "去登录",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "无权访问",
+		// 	Msg:   "用户未登录",
+		// 	Link:  "/login",
+		// 	Btn:   "去登录",
+		// }, true)
 		return
 	}
 
 	streamId, err := uuid.GenerateUUID()
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code: http.StatusInternalServerError,
-			// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-			// 	MessageID: "SystemError",
-			// }),
-			Msg:  "生成会话ID失败",
-			Link: "/server",
-			Btn:  "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code: http.StatusInternalServerError,
+		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
+		// 	// 	MessageID: "SystemError",
+		// 	// }),
+		// 	Msg:  "生成会话ID失败",
+		// 	Link: "/server",
+		// 	Btn:  "返回重试",
+		// }, true)
 		return
 	}
 
@@ -520,13 +476,13 @@ func (cp *commonPage) createFM(c *gin.Context) {
 
 	serverId, err := strconv.Atoi(IdString)
 	if err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "请求参数有误：" + err.Error(),
-			Link:  "/server",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "请求参数有误：" + err.Error(),
+		// 	Link:  "/server",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 
@@ -534,13 +490,13 @@ func (cp *commonPage) createFM(c *gin.Context) {
 	server := singleton.ServerList[uint64(serverId)]
 	singleton.ServerLock.RUnlock()
 	if server == nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "服务器不存在或处于离线状态",
-			Link:  "/server",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "服务器不存在或处于离线状态",
+		// 	Link:  "/server",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 
@@ -551,17 +507,17 @@ func (cp *commonPage) createFM(c *gin.Context) {
 		Type: model.TaskTypeFM,
 		Data: string(fmData),
 	}); err != nil {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusForbidden,
-			Title: "请求失败",
-			Msg:   "Agent信令下发失败",
-			Link:  "/server",
-			Btn:   "返回重试",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusForbidden,
+		// 	Title: "请求失败",
+		// 	Msg:   "Agent信令下发失败",
+		// 	Link:  "/server",
+		// 	Btn:   "返回重试",
+		// }, true)
 		return
 	}
 
-	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/file", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "dashboard-", gin.H{
 		"SessionID": streamId,
-	}))
+	})
 }

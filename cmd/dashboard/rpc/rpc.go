@@ -1,7 +1,6 @@
 package rpc
 
 import (
-	"fmt"
 	"net"
 
 	"google.golang.org/grpc"
@@ -12,15 +11,11 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
-func ServeRPC(port uint) {
+func ServeRPC(l net.Listener) {
 	server := grpc.NewServer()
 	rpcService.NezhaHandlerSingleton = rpcService.NewNezhaHandler()
 	pb.RegisterNezhaServiceServer(server, rpcService.NezhaHandlerSingleton)
-	listen, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		panic(err)
-	}
-	server.Serve(listen)
+	server.Serve(l)
 }
 
 func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {

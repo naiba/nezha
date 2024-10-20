@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -15,7 +16,6 @@ import (
 
 	docs "github.com/naiba/nezha/cmd/dashboard/docs"
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/rpc"
@@ -41,7 +41,7 @@ import (
 
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
-func ServeWeb(port uint) *http.Server {
+func ServeWeb() *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
@@ -50,23 +50,24 @@ func ServeWeb(port uint) *http.Server {
 		pprof.Register(r)
 	}
 	r.Use(natGateway)
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-	r.Use(mygin.RecordPath)
+	if singleton.Conf.Debug {
+		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	}
+	r.Use(recordPath)
 	routers(r)
 	page404 := func(c *gin.Context) {
-		mygin.ShowErrorPage(c, mygin.ErrInfo{
-			Code:  http.StatusNotFound,
-			Title: "该页面不存在",
-			Msg:   "该页面内容可能已着陆火星",
-			Link:  "/",
-			Btn:   "返回首页",
-		}, true)
+		// mygin.ShowErrorPage(c, mygin.ErrInfo{
+		// 	Code:  http.StatusNotFound,
+		// 	Title: "该页面不存在",
+		// 	Msg:   "该页面内容可能已着陆火星",
+		// 	Link:  "/",
+		// 	Btn:   "返回首页",
+		// }, true)
 	}
 	r.NoRoute(page404)
 	r.NoMethod(page404)
 
 	srv := &http.Server{
-		Addr:              fmt.Sprintf(":%d", port),
 		ReadHeaderTimeout: time.Second * 5,
 		Handler:           r,
 	}
@@ -90,9 +91,6 @@ func routers(r *gin.Engine) {
 	// 通用页面
 	cp := commonPage{r: r}
 	cp.serve()
-	// 游客页面
-	gp := guestPage{r}
-	gp.serve()
 	// 会员页面
 	mp := &memberPage{r}
 	mp.serve()
@@ -163,4 +161,12 @@ func natGateway(c *gin.Context) {
 
 	rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
 	c.Abort()
+}
+
+func recordPath(c *gin.Context) {
+	url := c.Request.URL.String()
+	for _, p := range c.Params {
+		url = strings.Replace(url, p.Value, ":"+p.Key, 1)
+	}
+	c.Set("MatchedPath", url)
 }

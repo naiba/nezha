@@ -350,9 +350,6 @@ func (ss *ServiceSentinel) worker() {
 			ts.count++
 			ts.ping = (ts.ping*float32(ts.count-1) + mh.Delay) / float32(ts.count)
 			if ts.count == Conf.AvgPingCount {
-				if ts.ping > float32(Conf.MaxTCPPingValue) {
-					ts.ping = float32(Conf.MaxTCPPingValue)
-				}
 				ts.count = 0
 				if err := DB.Create(&model.MonitorHistory{
 					MonitorID: mh.GetId(),

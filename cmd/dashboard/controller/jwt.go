@@ -7,12 +7,14 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/service/singleton"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func initParams() *jwt.GinJWTMiddleware {
 	return &jwt.GinJWTMiddleware{
-		Realm:       "test zone",
-		Key:         []byte("secret key"),
+		Realm:       singleton.Conf.SiteName,
+		Key:         []byte(singleton.Conf.SecretKey),
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: model.CtxKeyAuthorizedUser,
@@ -41,7 +43,7 @@ func payloadFunc() func(data interface{}) jwt.MapClaims {
 	return func(data interface{}) jwt.MapClaims {
 		if v, ok := data.(*model.User); ok {
 			return jwt.MapClaims{
-				model.CtxKeyAuthorizedUser: v.Username,
+				model.CtxKeyAuthorizedUser: v.ID,
 			}
 		}
 		return jwt.MapClaims{}
@@ -51,36 +53,48 @@ func payloadFunc() func(data interface{}) jwt.MapClaims {
 func identityHandler() func(c *gin.Context) interface{} {
 	return func(c *gin.Context) interface{} {
 		claims := jwt.ExtractClaims(c)
-		return &model.User{
-			Username: claims[model.CtxKeyAuthorizedUser].(string),
+		userId := claims[model.CtxKeyAuthorizedUser].(uint64)
+		var user model.User
+		if err := singleton.DB.First(&user, userId).Error; err != nil {
+			return nil
 		}
+		return &user
 	}
 }
 
+// login test godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags example
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /example/login [get]
 func authenticator() func(c *gin.Context) (interface{}, error) {
 	return func(c *gin.Context) (interface{}, error) {
 		var loginVals model.LoginRequest
 		if err := c.ShouldBind(&loginVals); err != nil {
 			return "", jwt.ErrMissingLoginValues
 		}
-		userID := loginVals.Username
-		password := loginVals.Password
 
-		if (userID == "admin" && password == "admin") || (userID == "test" && password == "test") {
-			return &model.User{
-				Username: userID,
-			}, nil
+		var user model.User
+		if err := singleton.DB.Select("id").Where("username = ?", loginVals.Username).First(&user).Error; err != nil {
+			return nil, jwt.ErrFailedAuthentication
 		}
-		return nil, jwt.ErrFailedAuthentication
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginVals.Password)); err != nil {
+			return nil, jwt.ErrFailedAuthentication
+		}
+
+		return &user, nil
 	}
 }
 
 func authorizator() func(data interface{}, c *gin.Context) bool {
 	return func(data interface{}, c *gin.Context) bool {
-		if v, ok := data.(*model.User); ok && v.Username == "admin" {
-			return true
-		}
-		return false
+		_, ok := data.(*model.User)
+		return ok
 	}
 }
 

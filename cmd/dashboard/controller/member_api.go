@@ -16,7 +16,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
@@ -28,13 +27,13 @@ type memberAPI struct {
 
 func (ma *memberAPI) serve() {
 	mr := ma.r.Group("")
-	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
-		MemberOnly: true,
-		IsPage:     false,
-		Msg:        "访问此接口需要登录",
-		Btn:        "点此登录",
-		Redirect:   "/login",
-	}))
+	// mr.Use(mygin.Authorize(mygin.AuthorizeOption{
+	// 	MemberOnly: true,
+	// 	IsPage:     false,
+	// 	Msg:        "访问此接口需要登录",
+	// 	Btn:        "点此登录",
+	// 	Redirect:   "/login",
+	// }))
 
 	mr.GET("/search-server", ma.searchServer)
 	mr.GET("/search-tasks", ma.searchTask)
@@ -997,30 +996,23 @@ func (ma *memberAPI) logout(c *gin.Context) {
 		Code: http.StatusOK,
 	})
 
-	if oidcLogoutUrl := singleton.Conf.Oauth2.OidcLogoutURL; oidcLogoutUrl != "" {
-		// 重定向到 OIDC 退出登录地址。不知道为什么，这里的重定向不生效
-		c.Redirect(http.StatusOK, oidcLogoutUrl)
-	}
+	// if oidcLogoutUrl := singleton.Conf.Oauth2.OidcLogoutURL; oidcLogoutUrl != "" {
+	// 	// 重定向到 OIDC 退出登录地址。不知道为什么，这里的重定向不生效
+	// 	c.Redirect(http.StatusOK, oidcLogoutUrl)
+	// }
 }
 
 type settingForm struct {
-	Title                   string
-	Admin                   string
+	SiteName                string
 	Language                string
-	Theme                   string
-	DashboardTheme          string
-	CustomCode              string
-	CustomCodeDashboard     string
 	CustomNameservers       string
-	ViewPassword            string
 	IgnoredIPNotification   string
 	IPChangeNotificationTag string // IP变更提醒的通知组
-	GRPCHost                string
+	InstallHost             string
 	Cover                   uint8
 
-	EnableIPChangeNotification      string
-	EnablePlainIPInNotification     string
-	DisableSwitchTemplateInFrontend string
+	EnableIPChangeNotification  string
+	EnablePlainIPInNotification string
 }
 
 func (ma *memberAPI) updateSetting(c *gin.Context) {
@@ -1033,38 +1025,31 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 		return
 	}
 
-	if _, yes := model.Themes[sf.Theme]; !yes {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("前台主题不存在：%s", sf.Theme),
-		})
-		return
-	}
+	// if _, yes := model.Themes[sf.Theme]; !yes {
+	// 	c.JSON(http.StatusOK, model.Response{
+	// 		Code:    http.StatusBadRequest,
+	// 		Message: fmt.Sprintf("前台主题不存在：%s", sf.Theme),
+	// 	})
+	// 	return
+	// }
 
-	if _, yes := model.DashboardThemes[sf.DashboardTheme]; !yes {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("后台主题不存在：%s", sf.DashboardTheme),
-		})
-		return
-	}
+	// if _, yes := model.DashboardThemes[sf.DashboardTheme]; !yes {
+	// 	c.JSON(http.StatusOK, model.Response{
+	// 		Code:    http.StatusBadRequest,
+	// 		Message: fmt.Sprintf("后台主题不存在：%s", sf.DashboardTheme),
+	// 	})
+	// 	return
+	// }
 
 	singleton.Conf.Language = sf.Language
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
-	singleton.Conf.DisableSwitchTemplateInFrontend = sf.DisableSwitchTemplateInFrontend == "on"
 	singleton.Conf.Cover = sf.Cover
-	// singleton.Conf.GRPCHost = sf.GRPCHost
+	singleton.Conf.InstallHost = sf.InstallHost
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
 	singleton.Conf.IPChangeNotificationTag = sf.IPChangeNotificationTag
-	singleton.Conf.Site.Brand = sf.Title
-	singleton.Conf.Site.Theme = sf.Theme
-	singleton.Conf.Site.DashboardTheme = sf.DashboardTheme
-	singleton.Conf.Site.CustomCode = sf.CustomCode
-	singleton.Conf.Site.CustomCodeDashboard = sf.CustomCodeDashboard
+	singleton.Conf.SiteName = sf.SiteName
 	singleton.Conf.DNSServers = sf.CustomNameservers
-	singleton.Conf.Site.ViewPassword = sf.ViewPassword
-	singleton.Conf.Oauth2.Admin = sf.Admin
 	// 保证NotificationTag不为空
 	if singleton.Conf.IPChangeNotificationTag == "" {
 		singleton.Conf.IPChangeNotificationTag = "default"
