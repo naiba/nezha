@@ -23,17 +23,17 @@ func (r ServiceItemResponse) TotalUptime() float32 {
 }
 
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
-type CommonError struct {
-	Code int               `json:"code"`
-	Args map[string]string `json:"args"`
+type CommonResponse[T any] struct {
+	Success bool   `json:"success,omitempty"`
+	Data    T      `json:"data,omitempty"`
+	Error   string `json:"error,omitempty"`
 }
 
-type CommonResponse struct {
-	Success bool        `json:"success"`
-	Data    interface{} `json:"data"`
-	Error   CommonError `json:"error"`
+type LoginResponse struct {
+	Token  string `json:"token,omitempty"`
+	Expire string `json:"expire,omitempty"`
 }

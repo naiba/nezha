@@ -78,6 +78,27 @@ func initSystem() {
 	}
 }
 
+// @title           Nezha Monitoring API
+// @version         1.0
+// @description     Nezha Monitoring API
+// @termsOfService  http://nezhahq.github.io
+
+// @contact.name   API Support
+// @contact.url    http://nezhahq.github.io
+// @contact.email  hi@nai.ba
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8008
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey  BearerAuth
+// @in header
+// @name Authorization
+
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
 	if dashboardCliParam.Version {
 		fmt.Println(singleton.Version)
@@ -103,17 +124,23 @@ func main() {
 	srv := controller.ServeWeb()
 
 	go dispatchReportInfoTask()
-	if err := graceful.Graceful(func() error {
-		return srv.Serve(httpL)
-	}, func(c context.Context) error {
-		log.Println("NEZHA>> Graceful::START")
-		singleton.RecordTransferHourlyUsage()
-		log.Println("NEZHA>> Graceful::END")
-		m.Close()
-		return nil
-	}); err != nil {
-		log.Printf("NEZHA>> ERROR: %v", err)
-	}
+
+	go func() {
+		if err := graceful.Graceful(func() error {
+			log.Println("NEZHA>> Dashboard::START", singleton.Conf.ListenPort)
+			return srv.Serve(httpL)
+		}, func(c context.Context) error {
+			log.Println("NEZHA>> Graceful::START")
+			singleton.RecordTransferHourlyUsage()
+			log.Println("NEZHA>> Graceful::END")
+			m.Close()
+			return nil
+		}); err != nil {
+			log.Printf("NEZHA>> ERROR: %v", err)
+		}
+	}()
+
+	m.Serve()
 }
 
 func dispatchReportInfoTask() {

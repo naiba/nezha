@@ -22,25 +22,6 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
-// @title           Swagger Example API
-// @version         1.0
-// @description     This is a sample server celler server.
-// @termsOfService  http://swagger.io/terms/
-
-// @contact.name   API Support
-// @contact.url    http://www.swagger.io/support
-// @contact.email  support@swagger.io
-
-// @license.name  Apache 2.0
-// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
-
-// @host      localhost:8080
-// @BasePath  /api/v1
-
-// @securityDefinitions.basic  BasicAuth
-
-// @externalDocs.description  OpenAPI
-// @externalDocs.url          https://swagger.io/resources/open-api/
 func ServeWeb() *http.Server {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
@@ -53,25 +34,14 @@ func ServeWeb() *http.Server {
 	if singleton.Conf.Debug {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
+
 	r.Use(recordPath)
 	routers(r)
-	page404 := func(c *gin.Context) {
-		// mygin.ShowErrorPage(c, mygin.ErrInfo{
-		// 	Code:  http.StatusNotFound,
-		// 	Title: "该页面不存在",
-		// 	Msg:   "该页面内容可能已着陆火星",
-		// 	Link:  "/",
-		// 	Btn:   "返回首页",
-		// }, true)
-	}
-	r.NoRoute(page404)
-	r.NoMethod(page404)
 
-	srv := &http.Server{
+	return &http.Server{
 		ReadHeaderTimeout: time.Second * 5,
 		Handler:           r,
 	}
-	return srv
 }
 
 func routers(r *gin.Engine) {
@@ -79,27 +49,26 @@ func routers(r *gin.Engine) {
 	if err != nil {
 		log.Fatal("JWT Error:" + err.Error())
 	}
+	api := r.Group("api/v1")
+	api.Use(handlerMiddleWare(authMiddleware))
 
-	// register middleware
-	r.Use(handlerMiddleWare(authMiddleware))
+	api.POST("/login", authMiddleware.LoginHandler)
 
-	r.POST("/login", authMiddleware.LoginHandler)
-
-	auth := r.Group("/auth", authMiddleware.MiddlewareFunc())
+	auth := api.Group("", authMiddleware.MiddlewareFunc())
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 
 	// 通用页面
-	cp := commonPage{r: r}
-	cp.serve()
-	// 会员页面
-	mp := &memberPage{r}
-	mp.serve()
-	// API
-	api := r.Group("api")
-	{
-		ma := &memberAPI{api}
-		ma.serve()
-	}
+	// cp := commonPage{r: r}
+	// cp.serve()
+	// // 会员页面
+	// mp := &memberPage{r}
+	// mp.serve()
+	// // API
+	// external := api.Group("api")
+	// {
+	// 	ma := &memberAPI{external}
+	// 	ma.serve()
+	// }
 }
 
 func natGateway(c *gin.Context) {

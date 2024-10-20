@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -15,6 +17,7 @@ func initParams() *jwt.GinJWTMiddleware {
 	return &jwt.GinJWTMiddleware{
 		Realm:       singleton.Conf.SiteName,
 		Key:         []byte(singleton.Conf.SecretKey),
+		CookieName:  "nz-jwt",
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: model.CtxKeyAuthorizedUser,
@@ -24,9 +27,20 @@ func initParams() *jwt.GinJWTMiddleware {
 		Authenticator:   authenticator(),
 		Authorizator:    authorizator(),
 		Unauthorized:    unauthorized(),
-		TokenLookup:     "header: Authorization, query: token, cookie: jwt",
+		TokenLookup:     "header: Authorization, query: token, cookie: nz-jwt",
 		TokenHeadName:   "Bearer",
 		TimeFunc:        time.Now,
+
+		LoginResponse: func(c *gin.Context, code int, token string, expire time.Time) {
+			c.JSON(http.StatusOK, model.CommonResponse[model.LoginResponse]{
+				Success: true,
+				Data: model.LoginResponse{
+					Token:  token,
+					Expire: expire.Format(time.RFC3339),
+				},
+			})
+		},
+		RefreshResponse: refreshResponse,
 	}
 }
 
@@ -41,9 +55,9 @@ func handlerMiddleWare(authMiddleware *jwt.GinJWTMiddleware) gin.HandlerFunc {
 
 func payloadFunc() func(data interface{}) jwt.MapClaims {
 	return func(data interface{}) jwt.MapClaims {
-		if v, ok := data.(*model.User); ok {
+		if v, ok := data.(string); ok {
 			return jwt.MapClaims{
-				model.CtxKeyAuthorizedUser: v.ID,
+				model.CtxKeyAuthorizedUser: v,
 			}
 		}
 		return jwt.MapClaims{}
@@ -53,7 +67,7 @@ func payloadFunc() func(data interface{}) jwt.MapClaims {
 func identityHandler() func(c *gin.Context) interface{} {
 	return func(c *gin.Context) interface{} {
 		claims := jwt.ExtractClaims(c)
-		userId := claims[model.CtxKeyAuthorizedUser].(uint64)
+		userId := claims[model.CtxKeyAuthorizedUser].(string)
 		var user model.User
 		if err := singleton.DB.First(&user, userId).Error; err != nil {
 			return nil
@@ -62,15 +76,15 @@ func identityHandler() func(c *gin.Context) interface{} {
 	}
 }
 
-// login test godoc
-// @Summary ping example
+// User Login
+// @Summary user login
 // @Schemes
-// @Description do ping
-// @Tags example
+// @Description user login
 // @Accept json
+// @param request body model.LoginRequest true "Login Request"
 // @Produce json
-// @Success 200 {string} Helloworld
-// @Router /example/login [get]
+// @Success 200 {object} model.CommonResponse[model.LoginResponse]
+// @Router /login [post]
 func authenticator() func(c *gin.Context) (interface{}, error) {
 	return func(c *gin.Context) (interface{}, error) {
 		var loginVals model.LoginRequest
@@ -79,7 +93,7 @@ func authenticator() func(c *gin.Context) (interface{}, error) {
 		}
 
 		var user model.User
-		if err := singleton.DB.Select("id").Where("username = ?", loginVals.Username).First(&user).Error; err != nil {
+		if err := singleton.DB.Select("id", "password").Where("username = ?", loginVals.Username).First(&user).Error; err != nil {
 			return nil, jwt.ErrFailedAuthentication
 		}
 
@@ -87,7 +101,11 @@ func authenticator() func(c *gin.Context) (interface{}, error) {
 			return nil, jwt.ErrFailedAuthentication
 		}
 
-		return &user, nil
+		if err := singleton.DB.Model(&user).Update("login_expire", time.Now().Add(time.Hour)).Error; err != nil {
+			return nil, jwt.ErrFailedAuthentication
+		}
+
+		return fmt.Sprintf("%d", user.ID), nil
 	}
 }
 
@@ -100,11 +118,37 @@ func authorizator() func(data interface{}, c *gin.Context) bool {
 
 func unauthorized() func(c *gin.Context, code int, message string) {
 	return func(c *gin.Context, code int, message string) {
-		c.JSON(code, model.CommonResponse{
+		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
 			Success: false,
-			Error: model.CommonError{
-				Code: model.ApiErrorUnauthorized,
-			},
+			Error:   "ApiErrorUnauthorized",
 		})
 	}
+}
+
+// Refresh token
+// @Summary Refresh token
+// @Security BearerAuth
+// @Schemes
+// @Description Refresh token
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[model.LoginResponse]
+// @Router /refresh_token [get]
+func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
+	claims := jwt.ExtractClaims(c)
+	userId := claims[model.CtxKeyAuthorizedUser].(string)
+	if err := singleton.DB.Model(&model.User{}).Where("id = ?", userId).Update("login_expire", expire).Error; err != nil {
+		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
+			Success: false,
+			Error:   "ApiErrorUnauthorized",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, model.CommonResponse[model.LoginResponse]{
+		Success: true,
+		Data: model.LoginResponse{
+			Token:  token,
+			Expire: expire.Format(time.RFC3339),
+		},
+	})
 }

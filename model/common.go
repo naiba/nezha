@@ -7,15 +7,12 @@ import (
 )
 
 const CtxKeyAuthorizedUser = "ckau"
-const CtxKeyViewPasswordVerified = "ckvpv"
-const CtxKeyPreferredTheme = "ckpt"
-const CacheKeyOauth2State = "p:a:state"
 
 type Common struct {
-	ID        uint64         `gorm:"primaryKey"`
-	CreatedAt time.Time      `gorm:"index;<-:create"`
-	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	ID        uint64         `gorm:"primaryKey" json:"id,omitempty"`
+	CreatedAt time.Time      `gorm:"index;<-:create" json:"created_at,omitempty"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updated_at,omitempty"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 }
 
 type Response struct {

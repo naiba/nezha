@@ -128,7 +128,7 @@ func (cp *commonPage) network(c *gin.Context) {
 	monitorHistories := singleton.MonitorAPI.GetMonitorHistories(map[string]any{"server_id": id})
 	monitorInfos, _ = utils.Json.Marshal(monitorHistories)
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
-	_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+	var isViewPasswordVerfied bool
 
 	if err := singleton.DB.Model(&model.MonitorHistory{}).
 		Select("distinct(server_id)").
@@ -174,7 +174,7 @@ func (cp *commonPage) network(c *gin.Context) {
 
 func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
-	_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+	var isViewPasswordVerfied bool
 	authorized := isMember || isViewPasswordVerfied
 	v, err, _ := cp.requestGroup.Do(fmt.Sprintf("serverStats::%t", authorized), func() (interface{}, error) {
 		singleton.SortedServerLock.RLock()

@@ -117,6 +117,9 @@ func (c *Config) Read(path string) error {
 		return err
 	}
 
+	if c.ListenPort == 0 {
+		c.ListenPort = 8008
+	}
 	if c.Language == "" {
 		c.Language = "zh-CN"
 	}

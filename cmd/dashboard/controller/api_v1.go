@@ -99,7 +99,7 @@ func (v *apiV1) monitorHistoriesById(c *gin.Context) {
 	}
 
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
-	_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+	var isViewPasswordVerfied bool
 	authorized := isMember || isViewPasswordVerfied
 
 	if server.HideForGuest && !authorized {
