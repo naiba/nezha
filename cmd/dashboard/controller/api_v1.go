@@ -72,7 +72,7 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 	}
 	tag := c.Query("tag")
 	if tag != "" {
-		c.JSON(200, singleton.ServerAPI.GetStatusByTag(tag))
+		// c.JSON(200, singleton.ServerAPI.GetStatusByTag(tag))
 		return
 	}
 	if len(idList) != 0 {

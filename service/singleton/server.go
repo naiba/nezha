@@ -8,21 +8,18 @@ import (
 )
 
 var (
-	ServerList        map[uint64]*model.Server // [ServerID] -> model.Server
-	SecretToID        map[string]uint64        // [ServerSecret] -> ServerID
-	ServerTagToIDList map[string][]uint64      // [ServerTag] -> ServerID
-	ServerLock        sync.RWMutex
+	ServerList     map[uint64]*model.Server // [ServerID] -> model.Server
+	ServerUUIDToID map[string]uint64        // [ServerUUID] -> ServerID
+	ServerLock     sync.RWMutex
 
 	SortedServerList         []*model.Server // 用于存储服务器列表的 slice，按照服务器 ID 排序
 	SortedServerListForGuest []*model.Server
 	SortedServerLock         sync.RWMutex
 )
 
-// InitServer 初始化 ServerID <-> Secret 的映射
 func InitServer() {
 	ServerList = make(map[uint64]*model.Server)
-	SecretToID = make(map[string]uint64)
-	ServerTagToIDList = make(map[string][]uint64)
+	ServerUUIDToID = make(map[string]uint64)
 }
 
 // loadServers 加载服务器列表并根据ID排序
@@ -36,8 +33,7 @@ func loadServers() {
 		innerS.State = &model.HostState{}
 		innerS.TaskCloseLock = new(sync.Mutex)
 		ServerList[innerS.ID] = &innerS
-		SecretToID[innerS.Secret] = innerS.ID
-		ServerTagToIDList[innerS.Tag] = append(ServerTagToIDList[innerS.Tag], innerS.ID)
+		ServerUUIDToID[innerS.UUID] = innerS.ID
 	}
 	ReSortServer()
 }

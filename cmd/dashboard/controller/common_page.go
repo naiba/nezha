@@ -10,7 +10,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
 	"github.com/jinzhu/copier"
-	"golang.org/x/sync/singleflight"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
@@ -21,8 +20,7 @@ import (
 )
 
 type commonPage struct {
-	r            *gin.Engine
-	requestGroup singleflight.Group
+	r *gin.Engine
 }
 
 func (cp *commonPage) serve() {
@@ -37,14 +35,13 @@ func (cp *commonPage) serve() {
 	// TODO: 界面直接跳转使用该接口
 	cr.GET("/network/:id", cp.network)
 	cr.GET("/network", cp.network)
-	cr.GET("/ws", cp.ws)
 	cr.POST("/terminal", cp.createTerminal)
 	cr.GET("/file", cp.createFM)
 	cr.GET("/file/:id", cp.fm)
 }
 
 func (p *commonPage) service(c *gin.Context) {
-	res, _, _ := p.requestGroup.Do("servicePage", func() (interface{}, error) {
+	res, _, _ := requestGroup.Do("servicePage", func() (interface{}, error) {
 		singleton.AlertsLock.RLock()
 		defer singleton.AlertsLock.RUnlock()
 		var stats map[uint64]model.ServiceItemResponse
@@ -71,7 +68,7 @@ func (p *commonPage) service(c *gin.Context) {
 func (cp *commonPage) network(c *gin.Context) {
 	var (
 		monitorHistory       *model.MonitorHistory
-		servers              []*model.Server
+		servers              []model.Server
 		serverIdsWithMonitor []uint64
 		monitorInfos         = []byte("{}")
 		id                   uint64
@@ -148,7 +145,7 @@ func (cp *commonPage) network(c *gin.Context) {
 		for _, server := range singleton.SortedServerList {
 			for _, id := range serverIdsWithMonitor {
 				if server.ID == id {
-					servers = append(servers, server)
+					servers = append(servers, *server)
 				}
 			}
 		}
@@ -156,14 +153,14 @@ func (cp *commonPage) network(c *gin.Context) {
 		for _, server := range singleton.SortedServerListForGuest {
 			for _, id := range serverIdsWithMonitor {
 				if server.ID == id {
-					servers = append(servers, server)
+					servers = append(servers, *server)
 				}
 			}
 		}
 	}
-	serversBytes, _ := utils.Json.Marshal(Data{
-		Now:     time.Now().Unix() * 1000,
-		Servers: servers,
+	serversBytes, _ := utils.Json.Marshal(model.StreamServerData{
+		Now: time.Now().Unix() * 1000,
+		// Servers: servers,
 	})
 
 	c.HTML(http.StatusOK, "", gin.H{
@@ -176,7 +173,7 @@ func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 	var isViewPasswordVerfied bool
 	authorized := isMember || isViewPasswordVerfied
-	v, err, _ := cp.requestGroup.Do(fmt.Sprintf("serverStats::%t", authorized), func() (interface{}, error) {
+	v, err, _ := requestGroup.Do(fmt.Sprintf("serverStats::%t", authorized), func() (interface{}, error) {
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
 
@@ -187,18 +184,18 @@ func (cp *commonPage) getServerStat(c *gin.Context, withPublicNote bool) ([]byte
 			serverList = singleton.SortedServerListForGuest
 		}
 
-		var servers []*model.Server
+		var servers []model.Server
 		for _, server := range serverList {
 			item := *server
 			if !withPublicNote {
 				item.PublicNote = ""
 			}
-			servers = append(servers, &item)
+			servers = append(servers, item)
 		}
 
-		return utils.Json.Marshal(Data{
-			Now:     time.Now().Unix() * 1000,
-			Servers: servers,
+		return utils.Json.Marshal(model.StreamServerData{
+			Now: time.Now().Unix() * 1000,
+			// Servers: servers,
 		})
 	})
 	return v.([]byte), err
@@ -221,51 +218,6 @@ func (cp *commonPage) home(c *gin.Context) {
 	c.HTML(http.StatusOK, "", gin.H{
 		"Servers": string(stat),
 	})
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  32768,
-	WriteBufferSize: 32768,
-}
-
-type Data struct {
-	Now     int64           `json:"now,omitempty"`
-	Servers []*model.Server `json:"servers,omitempty"`
-}
-
-func (cp *commonPage) ws(c *gin.Context) {
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
-	if err != nil {
-		// mygin.ShowErrorPage(c, mygin.ErrInfo{
-		// 	Code: http.StatusInternalServerError,
-		// 	// Title: singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-		// 	// 	MessageID: "NetworkError",
-		// 	// }),
-		// 	Msg:  "Websocket协议切换失败",
-		// 	Link: "/",
-		// 	Btn:  "返回首页",
-		// }, true)
-		return
-	}
-	defer conn.Close()
-	count := 0
-	for {
-		stat, err := cp.getServerStat(c, false)
-		if err != nil {
-			continue
-		}
-		if err := conn.WriteMessage(websocket.TextMessage, stat); err != nil {
-			break
-		}
-		count += 1
-		if count%4 == 0 {
-			err = conn.WriteMessage(websocket.PingMessage, []byte{})
-			if err != nil {
-				break
-			}
-		}
-		time.Sleep(time.Second * 2)
-	}
 }
 
 func (cp *commonPage) terminal(c *gin.Context) {

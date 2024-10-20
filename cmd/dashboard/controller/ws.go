@@ -1,0 +1,96 @@
+package controller
+
+import (
+	"fmt"
+	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/service/singleton"
+	"golang.org/x/sync/singleflight"
+)
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  32768,
+	WriteBufferSize: 32768,
+}
+
+// Websocket server stream
+// @Summary Websocket server stream
+// @tags common
+// @Schemes
+// @Description Websocket server stream
+// @security BearerAuth
+// @Produce json
+// @Success 200 {object} model.StreamServerData
+// @Router /ws/server [get]
+func serverStream(c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
+			Success: false,
+			Error:   err.Error(),
+		})
+		return
+	}
+	defer conn.Close()
+	count := 0
+	for {
+		stat, err := getServerStat(c, count == 0)
+		if err != nil {
+			continue
+		}
+		if err := conn.WriteMessage(websocket.TextMessage, stat); err != nil {
+			break
+		}
+		count += 1
+		if count%4 == 0 {
+			err = conn.WriteMessage(websocket.PingMessage, []byte{})
+			if err != nil {
+				break
+			}
+		}
+		time.Sleep(time.Second * 2)
+	}
+}
+
+var requestGroup singleflight.Group
+
+func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
+	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+	authorized := isMember // TODO || isViewPasswordVerfied
+	v, err, _ := requestGroup.Do(fmt.Sprintf("serverStats::%t", authorized), func() (interface{}, error) {
+		singleton.SortedServerLock.RLock()
+		defer singleton.SortedServerLock.RUnlock()
+
+		var serverList []*model.Server
+		if authorized {
+			serverList = singleton.SortedServerList
+		} else {
+			serverList = singleton.SortedServerListForGuest
+		}
+
+		var servers []model.StreamServer
+		for i := 0; i < len(serverList); i++ {
+			server := serverList[i]
+			servers = append(servers, model.StreamServer{
+				ID:           server.ID,
+				Name:         server.Name,
+				PublicNote:   utils.IfOr(withPublicNote, server.PublicNote, ""),
+				DisplayIndex: server.DisplayIndex,
+				Host:         server.Host,
+				State:        server.State,
+				LastActive:   server.LastActive,
+			})
+		}
+
+		return utils.Json.Marshal(model.StreamServerData{
+			Now:     time.Now().Unix() * 1000,
+			Servers: servers,
+		})
+	})
+	return v.([]byte), err
+}

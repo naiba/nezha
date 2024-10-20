@@ -37,8 +37,6 @@ func execCase(t *testing.T, item testSt) {
 	server := Server{
 		Common:       Common{},
 		Name:         "ServerName",
-		Tag:          "",
-		Secret:       "",
 		Note:         "",
 		DisplayIndex: 0,
 		Host: &Host{

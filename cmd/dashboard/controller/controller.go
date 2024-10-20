@@ -49,13 +49,21 @@ func routers(r *gin.Engine) {
 	if err != nil {
 		log.Fatal("JWT Error:" + err.Error())
 	}
+	if err := authMiddleware.MiddlewareInit(); err != nil {
+		log.Fatal("authMiddleware.MiddlewareInit Error:" + err.Error())
+	}
 	api := r.Group("api/v1")
-	api.Use(handlerMiddleWare(authMiddleware))
-
 	api.POST("/login", authMiddleware.LoginHandler)
+
+	unrequiredAuth := api.Group("", unrquiredAuthMiddleware(authMiddleware))
+	unrequiredAuth.GET("/ws/server", serverStream)
+	unrequiredAuth.GET("/server-group", listServerGroup)
 
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+	auth.PATCH("/server/:id", editServer)
+
+	api.DELETE("/batch-delete/server", batchDeleteServer)
 
 	// 通用页面
 	// cp := commonPage{r: r}

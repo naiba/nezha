@@ -80,13 +80,14 @@ func (c *AgentConfig) Save() error {
 type Config struct {
 	Debug bool // debug模式开关
 
-	Language    string // 系统语言，默认 zh-CN
-	SiteName    string
-	SecretKey   string
-	ListenPort  uint
-	InstallHost string
-	TLS         bool
-	Location    string // 时区，默认为 Asia/Shanghai
+	Language       string // 系统语言，默认 zh-CN
+	SiteName       string
+	JWTSecretKey   string
+	AgentSecretKey string
+	ListenPort     uint
+	InstallHost    string
+	TLS            bool
+	Location       string // 时区，默认为 Asia/Shanghai
 
 	EnablePlainIPInNotification bool // 通知信息IP不打码
 
@@ -132,8 +133,18 @@ func (c *Config) Read(path string) error {
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2
 	}
-	if c.SecretKey == "" {
-		c.SecretKey, err = utils.GenerateRandomString(1024)
+	if c.JWTSecretKey == "" {
+		c.JWTSecretKey, err = utils.GenerateRandomString(1024)
+		if err != nil {
+			return err
+		}
+		if err = c.Save(); err != nil {
+			return err
+		}
+	}
+
+	if c.AgentSecretKey == "" {
+		c.AgentSecretKey, err = utils.GenerateRandomString(32)
 		if err != nil {
 			return err
 		}

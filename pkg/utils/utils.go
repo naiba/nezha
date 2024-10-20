@@ -90,3 +90,17 @@ func Uint64SubInt64(a uint64, b int64) uint64 {
 	}
 	return a - uint64(b)
 }
+
+func IfOr[T any](a bool, x, y T) T {
+	if a {
+		return x
+	}
+	return y
+}
+
+func IfOrFn[T any](a bool, x, y func() T) T {
+	if a {
+		return x()
+	}
+	return y()
+}

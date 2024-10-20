@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -16,7 +16,7 @@ import (
 func initParams() *jwt.GinJWTMiddleware {
 	return &jwt.GinJWTMiddleware{
 		Realm:       singleton.Conf.SiteName,
-		Key:         []byte(singleton.Conf.SecretKey),
+		Key:         []byte(singleton.Conf.JWTSecretKey),
 		CookieName:  "nz-jwt",
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
@@ -41,15 +41,6 @@ func initParams() *jwt.GinJWTMiddleware {
 			})
 		},
 		RefreshResponse: refreshResponse,
-	}
-}
-
-func handlerMiddleWare(authMiddleware *jwt.GinJWTMiddleware) gin.HandlerFunc {
-	return func(context *gin.Context) {
-		errInit := authMiddleware.MiddlewareInit()
-		if errInit != nil {
-			log.Fatal("authMiddleware.MiddlewareInit() Error:" + errInit.Error())
-		}
 	}
 }
 
@@ -81,7 +72,7 @@ func identityHandler() func(c *gin.Context) interface{} {
 // @Schemes
 // @Description user login
 // @Accept json
-// @param request body model.LoginRequest true "Login Request"
+// @param loginRequest body model.LoginRequest true "Login Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[model.LoginResponse]
 // @Router /login [post]
@@ -151,4 +142,41 @@ func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
 			Expire: expire.Format(time.RFC3339),
 		},
 	})
+}
+
+func unrquiredAuthMiddleware(mw *jwt.GinJWTMiddleware) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		claims, err := mw.GetClaimsFromJWT(c)
+		if err != nil {
+			return
+		}
+
+		switch v := claims["exp"].(type) {
+		case nil:
+			return
+		case float64:
+			if int64(v) < mw.TimeFunc().Unix() {
+				return
+			}
+		case json.Number:
+			n, err := v.Int64()
+			if err != nil {
+				return
+			}
+			if n < mw.TimeFunc().Unix() {
+				return
+			}
+		default:
+			return
+		}
+
+		c.Set("JWT_PAYLOAD", claims)
+		identity := mw.IdentityHandler(c)
+
+		if identity != nil {
+			c.Set(mw.IdentityKey, identity)
+		}
+
+		c.Next()
+	}
 }

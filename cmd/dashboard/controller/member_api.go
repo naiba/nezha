@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	"golang.org/x/net/idna"
-	"gorm.io/gorm"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
@@ -44,7 +43,6 @@ func (ma *memberAPI) serve() {
 	mr.GET("/cron/:id/manual", ma.manualTrigger)
 	mr.POST("/force-update", ma.forceUpdate)
 	mr.POST("/batch-update-server-group", ma.batchUpdateServerGroup)
-	mr.POST("/batch-delete-server", ma.batchDeleteServer)
 	mr.POST("/notification", ma.addOrEditNotification)
 	mr.POST("/ddns", ma.addOrEditDDNS)
 	mr.POST("/nat", ma.addOrEditNAT)
@@ -188,25 +186,6 @@ func (ma *memberAPI) delete(c *gin.Context) {
 
 	var err error
 	switch c.Param("model") {
-	case "server":
-		err := singleton.DB.Transaction(func(tx *gorm.DB) error {
-			err = singleton.DB.Unscoped().Delete(&model.Server{}, "id = ?", id).Error
-			if err != nil {
-				return err
-			}
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "server_id = ?", id).Error
-			if err != nil {
-				return err
-			}
-			return nil
-		})
-		if err == nil {
-			// 删除服务器
-			singleton.ServerLock.Lock()
-			onServerDelete(id)
-			singleton.ServerLock.Unlock()
-			singleton.ReSortServer()
-		}
 	case "notification":
 		err = singleton.DB.Unscoped().Delete(&model.Notification{}, "id = ?", id).Error
 		if err == nil {
@@ -346,10 +325,8 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 	err := c.ShouldBindJSON(&sf)
 	if err == nil {
 		s.Name = sf.Name
-		s.Secret = sf.Secret
 		s.DisplayIndex = sf.DisplayIndex
 		s.ID = sf.ID
-		s.Tag = sf.Tag
 		s.Note = sf.Note
 		s.PublicNote = sf.PublicNote
 		s.HideForGuest = sf.HideForGuest == "on"
@@ -358,7 +335,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		err = utils.Json.Unmarshal([]byte(sf.DDNSProfilesRaw), &s.DDNSProfiles)
 		if err == nil {
 			if s.ID == 0 {
-				s.Secret, err = utils.GenerateRandomString(18)
+				_, err = utils.GenerateRandomString(18)
 				if err == nil {
 					err = singleton.DB.Create(&s).Error
 				}
@@ -378,34 +355,6 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 	if isEdit {
 		singleton.ServerLock.Lock()
 		s.CopyFromRunningServer(singleton.ServerList[s.ID])
-		// 如果修改了 Secret
-		if s.Secret != singleton.ServerList[s.ID].Secret {
-			// 删除旧 Secret-ID 绑定关系
-			singleton.SecretToID[s.Secret] = s.ID
-			// 设置新的 Secret-ID 绑定关系
-			delete(singleton.SecretToID, singleton.ServerList[s.ID].Secret)
-		}
-		// 如果修改了Tag
-		oldTag := singleton.ServerList[s.ID].Tag
-		newTag := s.Tag
-		if newTag != oldTag {
-			index := -1
-			for i := 0; i < len(singleton.ServerTagToIDList[oldTag]); i++ {
-				if singleton.ServerTagToIDList[oldTag][i] == s.ID {
-					index = i
-					break
-				}
-			}
-			if index > -1 {
-				// 删除旧 Tag-ID 绑定关系
-				singleton.ServerTagToIDList[oldTag] = append(singleton.ServerTagToIDList[oldTag][:index], singleton.ServerTagToIDList[oldTag][index+1:]...)
-				if len(singleton.ServerTagToIDList[oldTag]) == 0 {
-					delete(singleton.ServerTagToIDList, oldTag)
-				}
-			}
-			// 设置新的 Tag-ID 绑定关系
-			singleton.ServerTagToIDList[newTag] = append(singleton.ServerTagToIDList[newTag], s.ID)
-		}
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerLock.Unlock()
 	} else {
@@ -413,9 +362,7 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 		s.State = &model.HostState{}
 		s.TaskCloseLock = new(sync.Mutex)
 		singleton.ServerLock.Lock()
-		singleton.SecretToID[s.Secret] = s.ID
 		singleton.ServerList[s.ID] = &s
-		singleton.ServerTagToIDList[s.Tag] = append(singleton.ServerTagToIDList[s.Tag], s.ID)
 		singleton.ServerLock.Unlock()
 	}
 	singleton.ReSortServer()
@@ -636,28 +583,28 @@ func (ma *memberAPI) batchUpdateServerGroup(c *gin.Context) {
 		serverId := req.Servers[i]
 		var s model.Server
 		copier.Copy(&s, singleton.ServerList[serverId])
-		s.Tag = req.Group
-		// 如果修改了Ta
-		oldTag := singleton.ServerList[serverId].Tag
-		newTag := s.Tag
-		if newTag != oldTag {
-			index := -1
-			for i := 0; i < len(singleton.ServerTagToIDList[oldTag]); i++ {
-				if singleton.ServerTagToIDList[oldTag][i] == s.ID {
-					index = i
-					break
-				}
-			}
-			if index > -1 {
-				// 删除旧 Tag-ID 绑定关系
-				singleton.ServerTagToIDList[oldTag] = append(singleton.ServerTagToIDList[oldTag][:index], singleton.ServerTagToIDList[oldTag][index+1:]...)
-				if len(singleton.ServerTagToIDList[oldTag]) == 0 {
-					delete(singleton.ServerTagToIDList, oldTag)
-				}
-			}
-			// 设置新的 Tag-ID 绑定关系
-			singleton.ServerTagToIDList[newTag] = append(singleton.ServerTagToIDList[newTag], s.ID)
-		}
+		// s.Tag = req.Group
+		// // 如果修改了Ta
+		// oldTag := singleton.ServerList[serverId].Tag
+		// newTag := s.Tag
+		// if newTag != oldTag {
+		// 	index := -1
+		// 	for i := 0; i < len(singleton.ServerTagToIDList[oldTag]); i++ {
+		// 		if singleton.ServerTagToIDList[oldTag][i] == s.ID {
+		// 			index = i
+		// 			break
+		// 		}
+		// 	}
+		// 	if index > -1 {
+		// 		// 删除旧 Tag-ID 绑定关系
+		// 		singleton.ServerTagToIDList[oldTag] = append(singleton.ServerTagToIDList[oldTag][:index], singleton.ServerTagToIDList[oldTag][index+1:]...)
+		// 		if len(singleton.ServerTagToIDList[oldTag]) == 0 {
+		// 			delete(singleton.ServerTagToIDList, oldTag)
+		// 		}
+		// 	}
+		// 	// 设置新的 Tag-ID 绑定关系
+		// 	singleton.ServerTagToIDList[newTag] = append(singleton.ServerTagToIDList[newTag], s.ID)
+		// }
 		singleton.ServerList[s.ID] = &s
 	}
 
@@ -1066,64 +1013,4 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
-}
-
-func (ma *memberAPI) batchDeleteServer(c *gin.Context) {
-	var servers []uint64
-	if err := c.ShouldBindJSON(&servers); err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
-		return
-	}
-	if err := singleton.DB.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: err.Error(),
-		})
-		return
-	}
-	singleton.ServerLock.Lock()
-	for i := 0; i < len(servers); i++ {
-		id := servers[i]
-		onServerDelete(id)
-	}
-	singleton.ServerLock.Unlock()
-	singleton.ReSortServer()
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-}
-
-func onServerDelete(id uint64) {
-	tag := singleton.ServerList[id].Tag
-	delete(singleton.SecretToID, singleton.ServerList[id].Secret)
-	delete(singleton.ServerList, id)
-	index := -1
-	for i := 0; i < len(singleton.ServerTagToIDList[tag]); i++ {
-		if singleton.ServerTagToIDList[tag][i] == id {
-			index = i
-			break
-		}
-	}
-	if index > -1 {
-
-		singleton.ServerTagToIDList[tag] = append(singleton.ServerTagToIDList[tag][:index], singleton.ServerTagToIDList[tag][index+1:]...)
-		if len(singleton.ServerTagToIDList[tag]) == 0 {
-			delete(singleton.ServerTagToIDList, tag)
-		}
-	}
-
-	singleton.AlertsLock.Lock()
-	for i := 0; i < len(singleton.Alerts); i++ {
-		if singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID] != nil {
-			delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].ServerName, id)
-			delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].Transfer, id)
-			delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].NextUpdate, id)
-		}
-	}
-	singleton.AlertsLock.Unlock()
-
-	singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", id)
 }

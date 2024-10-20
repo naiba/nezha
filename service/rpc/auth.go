@@ -2,20 +2,23 @@ package rpc
 
 import (
 	"context"
+	"sync"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 )
 
 type authHandler struct {
 	ClientSecret string
+	ClientUUID   string
 }
 
 func (a *authHandler) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{"client_secret": a.ClientSecret}, nil
+	return map[string]string{"client_secret": a.ClientSecret, "client_uuid": a.ClientUUID}, nil
 }
 
 func (a *authHandler) RequireTransportSecurity() bool {
@@ -33,15 +36,29 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 		clientSecret = value[0]
 	}
 
+	if clientSecret != singleton.Conf.AgentSecretKey {
+		return 0, status.Errorf(codes.Unauthenticated, "客户端认证失败")
+	}
+
+	var clientUUID string
+	if value, ok := md["client_uuid"]; ok {
+		clientUUID = value[0]
+	}
+
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
-	clientID, hasID := singleton.SecretToID[clientSecret]
+	clientID, hasID := singleton.ServerUUIDToID[clientUUID]
 	if !hasID {
-		return 0, status.Errorf(codes.Unauthenticated, "客户端认证失败")
+		s := model.Server{UUID: clientUUID}
+		if err := singleton.DB.Create(&s).Error; err != nil {
+			return 0, status.Errorf(codes.Unauthenticated, err.Error())
+		}
+		s.Host = &model.Host{}
+		s.State = &model.HostState{}
+		s.TaskCloseLock = new(sync.Mutex)
+		singleton.ServerList[s.ID] = &s
+		singleton.ServerUUIDToID[clientUUID] = s.ID
 	}
-	_, hasServer := singleton.ServerList[clientID]
-	if !hasServer {
-		return 0, status.Errorf(codes.Unauthenticated, "客户端认证失败")
-	}
+
 	return clientID, nil
 }
