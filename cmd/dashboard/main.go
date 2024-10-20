@@ -93,7 +93,6 @@ func main() {
 	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
 	httpL := m.Match(cmux.HTTP1Fast())
 
-	// TODO 使用 cmux 在同一端口服务 HTTP 和 gRPC
 	singleton.CleanMonitorHistory()
 	go rpc.ServeRPC(grpcL)
 	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
@@ -110,7 +109,7 @@ func main() {
 		log.Println("NEZHA>> Graceful::START")
 		singleton.RecordTransferHourlyUsage()
 		log.Println("NEZHA>> Graceful::END")
-		srv.Shutdown(c)
+		m.Close()
 		return nil
 	}); err != nil {
 		log.Printf("NEZHA>> ERROR: %v", err)
