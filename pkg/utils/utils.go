@@ -5,7 +5,10 @@ import (
 	"math/big"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
+
+	"golang.org/x/exp/constraints"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -103,4 +106,15 @@ func IfOrFn[T any](a bool, x, y func() T) T {
 		return x()
 	}
 	return y()
+}
+
+func Itoa[T constraints.Integer](i T) string {
+	switch any(i).(type) {
+	case int, int8, int16, int32, int64:
+		return strconv.FormatInt(int64(i), 10)
+	case uint, uint8, uint16, uint32, uint64:
+		return strconv.FormatUint(uint64(i), 10)
+	default:
+		return ""
+	}
 }
