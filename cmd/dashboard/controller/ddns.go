@@ -13,11 +13,11 @@ import (
 	"golang.org/x/net/idna"
 )
 
-// Add DDNS configuration
-// @Summary Add DDNS configuration
+// Add DDNS profile
+// @Summary Add DDNS profile
 // @Security BearerAuth
 // @Schemes
-// @Description Add DDNS configuration
+// @Description Add DDNS profile
 // @Tags auth required
 // @Accept json
 // @param request body model.DDNSForm true "DDNS Request"
@@ -67,17 +67,17 @@ func newDDNS(c *gin.Context) error {
 	}
 
 	singleton.OnDDNSUpdate()
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
+	c.JSON(http.StatusOK, model.CommonResponse[any]{
+		Success: true,
 	})
 	return nil
 }
 
-// Edit DDNS configuration
-// @Summary Edit DDNS configuration
+// Edit DDNS profile
+// @Summary Edit DDNS profile
 // @Security BearerAuth
 // @Schemes
-// @Description Edit DDNS configuration
+// @Description Edit DDNS profile
 // @Tags auth required
 // @Accept json
 // @param request body model.DDNSForm true "DDNS Request"
@@ -134,8 +134,8 @@ func editDDNS(c *gin.Context) error {
 	}
 
 	singleton.OnDDNSUpdate()
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
+	c.JSON(http.StatusOK, model.CommonResponse[any]{
+		Success: true,
 	})
 	return nil
 }
@@ -163,11 +163,59 @@ func batchDeleteDDNS(c *gin.Context) error {
 	}
 
 	singleton.OnDDNSUpdate()
-	c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
+	c.JSON(http.StatusOK, model.CommonResponse[any]{
 		Success: true,
 	})
 	return nil
 }
 
-// TODO
-func listDDNS(c *gin.Context) {}
+// List DDNS Profiles
+// @Summary List DDNS profiles
+// @Schemes
+// @Description List DDNS profiles
+// @Security BearerAuth
+// @Tags common
+// @param id query string false "Profile ID"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[[]model.DDNSProfile]
+// @Router /ddns [get]
+func listDDNS(c *gin.Context) error {
+	var idList []uint64
+	idQuery := c.Query("id")
+
+	if idQuery != "" {
+		idListStr := strings.Split(idQuery, ",")
+		idList = make([]uint64, 0, len(idListStr))
+		for _, v := range idListStr {
+			id, err := strconv.ParseUint(v, 10, 64)
+			if err != nil {
+				return err
+			}
+			idList = append(idList, id)
+		}
+	}
+
+	var ddnsProfiles []model.DDNSProfile
+
+	singleton.DDNSCacheLock.RLock()
+	if len(idList) > 0 {
+		for _, id := range idList {
+			if profile, ok := singleton.DDNSCache[id]; ok {
+				ddnsProfiles = append(ddnsProfiles, *profile)
+			} else {
+				return fmt.Errorf("profile id %d not found", id)
+			}
+		}
+	} else {
+		for _, profile := range singleton.DDNSCache {
+			ddnsProfiles = append(ddnsProfiles, *profile)
+		}
+	}
+
+	singleton.DDNSCacheLock.RUnlock()
+	c.JSON(http.StatusOK, model.CommonResponse[[]model.DDNSProfile]{
+		Success: true,
+		Data:    ddnsProfiles,
+	})
+	return nil
+}
