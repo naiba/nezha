@@ -199,6 +199,7 @@ func listDDNS(c *gin.Context) error {
 
 	singleton.DDNSCacheLock.RLock()
 	if len(idList) > 0 {
+		ddnsProfiles = make([]model.DDNSProfile, 0, len(idList))
 		for _, id := range idList {
 			if profile, ok := singleton.DDNSCache[id]; ok {
 				ddnsProfiles = append(ddnsProfiles, *profile)
@@ -207,6 +208,7 @@ func listDDNS(c *gin.Context) error {
 			}
 		}
 	} else {
+		ddnsProfiles = make([]model.DDNSProfile, 0, len(singleton.DDNSCache))
 		for _, profile := range singleton.DDNSCache {
 			ddnsProfiles = append(ddnsProfiles, *profile)
 		}
