@@ -59,12 +59,12 @@ func routers(r *gin.Engine) {
 	optionalAuth := api.Group("", optionalAuthMiddleware(authMiddleware))
 	optionalAuth.GET("/ws/server", commonHandler[any](serverStream))
 	optionalAuth.GET("/server-group", commonHandler[[]model.ServerGroup](listServerGroup))
-	optionalAuth.GET("/ddns", listDDNS) // TODO
 
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 	auth.PATCH("/server/:id", commonHandler[any](editServer))
 
+	auth.GET("/ddns", commonHandler[[]model.DDNSProfile](listDDNS))
 	auth.POST("/ddns", commonHandler[any](newDDNS))
 	auth.PATCH("/ddns/:id", commonHandler[any](editDDNS))
 

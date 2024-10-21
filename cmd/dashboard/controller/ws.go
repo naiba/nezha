@@ -6,10 +6,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"golang.org/x/sync/singleflight"
+
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/service/singleton"
-	"golang.org/x/sync/singleflight"
 )
 
 var upgrader = websocket.Upgrader{

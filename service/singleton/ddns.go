@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	ddnsCache     map[uint64]*model.DDNSProfile
-	ddnsCacheLock sync.RWMutex
+	DDNSCache     map[uint64]*model.DDNSProfile
+	DDNSCacheLock sync.RWMutex
 )
 
 func initDDNS() {
@@ -26,11 +26,11 @@ func initDDNS() {
 func OnDDNSUpdate() {
 	var ddns []*model.DDNSProfile
 	DB.Find(&ddns)
-	ddnsCacheLock.Lock()
-	defer ddnsCacheLock.Unlock()
-	ddnsCache = make(map[uint64]*model.DDNSProfile)
+	DDNSCacheLock.Lock()
+	defer DDNSCacheLock.Unlock()
+	DDNSCache = make(map[uint64]*model.DDNSProfile)
 	for i := 0; i < len(ddns); i++ {
-		ddnsCache[ddns[i].ID] = ddns[i]
+		DDNSCache[ddns[i].ID] = ddns[i]
 	}
 }
 
@@ -40,15 +40,15 @@ func OnNameserverUpdate() {
 
 func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]*ddns2.Provider, error) {
 	profiles := make([]*model.DDNSProfile, 0, len(profileId))
-	ddnsCacheLock.RLock()
+	DDNSCacheLock.RLock()
 	for _, id := range profileId {
-		if profile, ok := ddnsCache[id]; ok {
+		if profile, ok := DDNSCache[id]; ok {
 			profiles = append(profiles, profile)
 		} else {
 			return nil, fmt.Errorf("无法找到DDNS配置 ID %d", id)
 		}
 	}
-	ddnsCacheLock.RUnlock()
+	DDNSCacheLock.RUnlock()
 
 	providers := make([]*ddns2.Provider, 0, len(profiles))
 	for _, profile := range profiles {
