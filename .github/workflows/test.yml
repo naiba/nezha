@@ -31,7 +31,6 @@ jobs:
 
       - name: bootstrap
         run: |
-          go mod tidy -v
           go install github.com/swaggo/swag/cmd/swag@latest
           swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs
           
