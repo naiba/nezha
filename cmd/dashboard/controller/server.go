@@ -19,24 +19,16 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server/{id} [patch]
-func editServer(c *gin.Context) {
+func editServer(c *gin.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return err
 	}
 	var sf model.EditServer
 	var s model.Server
 	if err := c.ShouldBindJSON(&sf); err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return err
 	}
 	s.Name = sf.Name
 	s.DisplayIndex = sf.DisplayIndex
@@ -48,20 +40,12 @@ func editServer(c *gin.Context) {
 	s.DDNSProfiles = sf.DDNSProfiles
 	ddnsProfilesRaw, err := utils.Json.Marshal(s.DDNSProfiles)
 	if err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return err
 	}
 	s.DDNSProfilesRaw = string(ddnsProfilesRaw)
 
 	if err := singleton.DB.Save(&s).Error; err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return newGormError("%v", err)
 	}
 
 	singleton.ServerLock.Lock()
@@ -72,6 +56,7 @@ func editServer(c *gin.Context) {
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
+	return nil
 }
 
 // Batch delete server
@@ -85,22 +70,14 @@ func editServer(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/server [post]
-func batchDeleteServer(c *gin.Context) {
+func batchDeleteServer(c *gin.Context) error {
 	var servers []uint64
 	if err := c.ShouldBindJSON(&servers); err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return err
 	}
 
 	if err := singleton.DB.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return newGormError("%v", err)
 	}
 
 	singleton.ServerLock.Lock()
@@ -127,4 +104,5 @@ func batchDeleteServer(c *gin.Context) {
 	c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
 		Success: true,
 	})
+	return nil
 }

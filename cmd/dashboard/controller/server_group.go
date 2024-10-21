@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/service/singleton"
 )
 
@@ -19,18 +18,17 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.ServerGroup]
 // @Router /server-group [get]
-func listServerGroup(c *gin.Context) {
+func listServerGroup(c *gin.Context) error {
 	authorizedUser, has := c.Get(model.CtxKeyAuthorizedUser)
 	log.Println("bingo test", authorizedUser, has)
 	var sg []model.ServerGroup
-	err := singleton.DB.Find(&sg).Error
+	if err := singleton.DB.Find(&sg).Error; err != nil {
+		return err
+	}
+
 	c.JSON(http.StatusOK, model.CommonResponse[[]model.ServerGroup]{
-		Success: err == nil,
+		Success: true,
 		Data:    sg,
-		Error: utils.IfOrFn[string](err == nil, func() string {
-			return err.Error()
-		}, func() string {
-			return ""
-		}),
 	})
+	return nil
 }

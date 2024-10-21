@@ -24,24 +24,16 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /ddns [post]
-func newDDNS(c *gin.Context) {
+func newDDNS(c *gin.Context) error {
 	var df model.DDNSForm
 	var p model.DDNSProfile
-	var err error
 
-	defer func() {
-		if err != nil {
-			c.JSON(http.StatusOK, genericErrorMsg(err))
-		}
-	}()
-
-	if err = c.ShouldBindJSON(&df); err != nil {
-		return
+	if err := c.ShouldBindJSON(&df); err != nil {
+		return err
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
-		err = errors.New("重试次数必须为大于 1 且不超过 10 的整数")
-		return
+		return errors.New("重试次数必须为大于 1 且不超过 10 的整数")
 	}
 
 	p.Name = df.Name
@@ -65,20 +57,20 @@ func newDDNS(c *gin.Context) {
 		// IDN to ASCII
 		domainValid, domainErr := idna.Lookup.ToASCII(domain)
 		if domainErr != nil {
-			err = fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
-			return
+			return fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
 		}
 		p.Domains[n] = domainValid
 	}
 
-	if err = singleton.DB.Create(&p).Error; err != nil {
-		return
+	if err := singleton.DB.Create(&p).Error; err != nil {
+		return newGormError("%v", err)
 	}
 
 	singleton.OnDDNSUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
+	return nil
 }
 
 // Edit DDNS configuration
@@ -92,30 +84,22 @@ func newDDNS(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /ddns/{id} [patch]
-func editDDNS(c *gin.Context) {
+func editDDNS(c *gin.Context) error {
 	var df model.DDNSForm
 	var p model.DDNSProfile
-	var err error
-
-	defer func() {
-		if err != nil {
-			c.JSON(http.StatusOK, genericErrorMsg(err))
-		}
-	}()
 
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return
+		return err
 	}
 
-	if err = c.ShouldBindJSON(&df); err != nil {
-		return
+	if err := c.ShouldBindJSON(&df); err != nil {
+		return err
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
-		err = errors.New("重试次数必须为大于 1 且不超过 10 的整数")
-		return
+		return errors.New("重试次数必须为大于 1 且不超过 10 的整数")
 	}
 
 	p.Name = df.Name
@@ -140,20 +124,20 @@ func editDDNS(c *gin.Context) {
 		// IDN to ASCII
 		domainValid, domainErr := idna.Lookup.ToASCII(domain)
 		if domainErr != nil {
-			err = fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
-			return
+			return fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
 		}
 		p.Domains[n] = domainValid
 	}
 
 	if err = singleton.DB.Save(&p).Error; err != nil {
-		return
+		return newGormError("%v", err)
 	}
 
 	singleton.OnDDNSUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
+	return nil
 }
 
 // Batch delete DDNS configurations
@@ -167,30 +151,22 @@ func editDDNS(c *gin.Context) {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/ddns [post]
-func batchDeleteDDNS(c *gin.Context) {
+func batchDeleteDDNS(c *gin.Context) error {
 	var ddnsConfigs []uint64
-	var err error
 
-	defer func() {
-		if err != nil {
-			c.JSON(http.StatusOK, genericErrorMsg(err))
-		}
-	}()
-
-	err = c.ShouldBindJSON(&ddnsConfigs)
-	if err != nil {
-		return
+	if err := c.ShouldBindJSON(&ddnsConfigs); err != nil {
+		return err
 	}
 
-	err = singleton.DB.Unscoped().Delete(&model.DDNSProfile{}, "id in (?)", ddnsConfigs).Error
-	if err != nil {
-		return
+	if err := singleton.DB.Unscoped().Delete(&model.DDNSProfile{}, "id in (?)", ddnsConfigs).Error; err != nil {
+		return newGormError("%v", err)
 	}
 
 	singleton.OnDDNSUpdate()
 	c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
 		Success: true,
 	})
+	return nil
 }
 
 // TODO
