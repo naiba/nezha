@@ -71,6 +71,7 @@ func routers(r *gin.Engine) {
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 
 	auth.GET("/ddns", commonHandler(listDDNS))
+	auth.GET("/ddns/providers", commonHandler(listProviders))
 	auth.POST("/ddns", commonHandler(newDDNS))
 	auth.PATCH("/ddns/:id", commonHandler(editDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))

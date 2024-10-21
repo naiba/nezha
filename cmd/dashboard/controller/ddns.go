@@ -227,3 +227,20 @@ func listDDNS(c *gin.Context) error {
 	})
 	return nil
 }
+
+// List DDNS Providers
+// @Summary List DDNS providers
+// @Schemes
+// @Description List DDNS providers
+// @Security BearerAuth
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[[]string]
+// @Router /ddns/providers [get]
+func listProviders(c *gin.Context) error {
+	c.JSON(http.StatusOK, model.CommonResponse[[]string]{
+		Success: true,
+		Data:    model.ProviderList,
+	})
+	return nil
+}

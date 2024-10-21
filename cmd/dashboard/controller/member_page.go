@@ -82,9 +82,9 @@ func (mp *memberPage) ddns(c *gin.Context) {
 	singleton.DB.Find(&data)
 	c.HTML(http.StatusOK, "dashboard-", gin.H{
 		// "Title":        singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "DDNS"}),
-		"DDNS":         data,
-		"ProviderMap":  model.ProviderMap,
-		"ProviderList": model.ProviderList,
+		"DDNS": data,
+		//"ProviderMap": model.ProviderMap,
+		//"ProviderList": model.ProviderList,
 	})
 }
 

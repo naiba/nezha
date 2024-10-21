@@ -7,73 +7,32 @@ import (
 )
 
 const (
-	ProviderDummy = iota
-	ProviderWebHook
-	ProviderCloudflare
-	ProviderTencentCloud
+	ProviderDummy        = "dummy"
+	ProviderWebHook      = "webhook"
+	ProviderCloudflare   = "cloudflare"
+	ProviderTencentCloud = "tencentcloud"
 )
 
-const (
-	_Dummy        = "dummy"
-	_WebHook      = "webhook"
-	_Cloudflare   = "cloudflare"
-	_TencentCloud = "tencentcloud"
-)
-
-var ProviderMap = map[uint8]string{
-	ProviderDummy:        _Dummy,
-	ProviderWebHook:      _WebHook,
-	ProviderCloudflare:   _Cloudflare,
-	ProviderTencentCloud: _TencentCloud,
-}
-
-var ProviderList = []DDNSProvider{
-	{
-		Name: _Dummy,
-		ID:   ProviderDummy,
-	},
-	{
-		Name:         _Cloudflare,
-		ID:           ProviderCloudflare,
-		AccessSecret: true,
-	},
-	{
-		Name:         _TencentCloud,
-		ID:           ProviderTencentCloud,
-		AccessID:     true,
-		AccessSecret: true,
-	},
-	// Least frequently used, always place this at the end
-	{
-		Name:               _WebHook,
-		ID:                 ProviderWebHook,
-		AccessID:           true,
-		AccessSecret:       true,
-		WebhookURL:         true,
-		WebhookMethod:      true,
-		WebhookRequestType: true,
-		WebhookRequestBody: true,
-		WebhookHeaders:     true,
-	},
+var ProviderList = []string{
+	ProviderDummy, ProviderWebHook, ProviderCloudflare, ProviderTencentCloud,
 }
 
 type DDNSProfile struct {
 	Common
-	EnableIPv4         *bool
-	EnableIPv6         *bool
-	MaxRetries         uint64
-	Name               string
-	Provider           uint8
-	AccessID           string
-	AccessSecret       string
-	WebhookURL         string
-	WebhookMethod      uint8
-	WebhookRequestType uint8
-	WebhookRequestBody string
-	WebhookHeaders     string
-
-	Domains    []string `gorm:"-"`
-	DomainsRaw string
+	EnableIPv4         *bool    `json:"enable_ipv4,omitempty"`
+	EnableIPv6         *bool    `json:"enable_ipv6,omitempty"`
+	MaxRetries         uint64   `json:"max_retries,omitempty"`
+	Name               string   `json:"name,omitempty"`
+	Provider           string   `json:"provider,omitempty"`
+	AccessID           string   `json:"access_id,omitempty"`
+	AccessSecret       string   `json:"access_secret,omitempty"`
+	WebhookURL         string   `json:"webhook_url,omitempty"`
+	WebhookMethod      uint8    `json:"webhook_method,omitempty"`
+	WebhookRequestType uint8    `json:"webhook_request_type,omitempty"`
+	WebhookRequestBody string   `json:"webhook_request_body,omitempty"`
+	WebhookHeaders     string   `json:"webhook_headers,omitempty"`
+	Domains            []string `json:"domains,omitempty" gorm:"-"`
+	DomainsRaw         string   `json:"domains_raw,omitempty"`
 }
 
 func (d DDNSProfile) TableName() string {
@@ -87,31 +46,19 @@ func (d *DDNSProfile) AfterFind(tx *gorm.DB) error {
 	return nil
 }
 
-type DDNSProvider struct {
-	Name               string
-	ID                 uint8
-	AccessID           bool
-	AccessSecret       bool
-	WebhookURL         bool
-	WebhookMethod      bool
-	WebhookRequestType bool
-	WebhookRequestBody bool
-	WebhookHeaders     bool
-}
-
 type DDNSForm struct {
-	ID                 uint64
-	MaxRetries         uint64
-	EnableIPv4         string
-	EnableIPv6         string
-	Name               string
-	Provider           uint8
-	DomainsRaw         string
-	AccessID           string
-	AccessSecret       string
-	WebhookURL         string
-	WebhookMethod      uint8
-	WebhookRequestType uint8
-	WebhookRequestBody string
-	WebhookHeaders     string
+	ID                 uint64 `json:"id,omitempty"`
+	MaxRetries         uint64 `json:"max_retries,omitempty"`
+	EnableIPv4         string `json:"enable_ipv4,omitempty"`
+	EnableIPv6         string `json:"enable_ipv6,omitempty"`
+	Name               string `json:"name,omitempty"`
+	Provider           string `json:"provider,omitempty"`
+	DomainsRaw         string `json:"domains_raw,omitempty"`
+	AccessID           string `json:"access_id,omitempty"`
+	AccessSecret       string `json:"access_secret,omitempty"`
+	WebhookURL         string `json:"webhook_url,omitempty"`
+	WebhookMethod      uint8  `json:"webhook_method,omitempty"`
+	WebhookRequestType uint8  `json:"webhook_request_type,omitempty"`
+	WebhookRequestBody string `json:"webhook_request_body,omitempty"`
+	WebhookHeaders     string `json:"webhook_headers,omitempty"`
 }
