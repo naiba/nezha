@@ -175,7 +175,7 @@ func batchDeleteDDNS(c *gin.Context) error {
 // @Schemes
 // @Description List DDNS profiles
 // @Security BearerAuth
-// @Tags common
+// @Tags auth required
 // @param id query string false "Profile ID"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.DDNSProfile]
