@@ -8,9 +8,10 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/idna"
+
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
-	"golang.org/x/net/idna"
 )
 
 // Add DDNS profile
