@@ -57,19 +57,19 @@ func routers(r *gin.Engine) {
 	api.POST("/login", authMiddleware.LoginHandler)
 
 	optionalAuth := api.Group("", optionalAuthMiddleware(authMiddleware))
-	optionalAuth.GET("/ws/server", commonHandler(serverStream))
-	optionalAuth.GET("/server-group", commonHandlerWithType[[]model.ServerGroup](listServerGroup))
+	optionalAuth.GET("/ws/server", commonHandler[any](serverStream))
+	optionalAuth.GET("/server-group", commonHandler[[]model.ServerGroup](listServerGroup))
 	optionalAuth.GET("/ddns", listDDNS) // TODO
 
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
-	auth.PATCH("/server/:id", commonHandler(editServer))
+	auth.PATCH("/server/:id", commonHandler[any](editServer))
 
-	auth.POST("/ddns", commonHandler(newDDNS))
-	auth.PATCH("/ddns/:id", commonHandler(editDDNS))
+	auth.POST("/ddns", commonHandler[any](newDDNS))
+	auth.PATCH("/ddns/:id", commonHandler[any](editDDNS))
 
-	api.POST("/batch-delete/server", commonHandler(batchDeleteServer))
-	api.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
+	api.POST("/batch-delete/server", commonHandler[any](batchDeleteServer))
+	api.POST("/batch-delete/ddns", commonHandler[any](batchDeleteDDNS))
 
 	// 通用页面
 	// cp := commonPage{r: r}
@@ -154,14 +154,7 @@ func recordPath(c *gin.Context) {
 	c.Set("MatchedPath", url)
 }
 
-func newErrorResponse(err error) model.CommonResponse[any] {
-	return model.CommonResponse[any]{
-		Success: false,
-		Error:   err.Error(),
-	}
-}
-
-func newErrorResponseWithType[T any](err error) model.CommonResponse[T] {
+func newErrorResponse[T any](err error) model.CommonResponse[T] {
 	return model.CommonResponse[T]{
 		Success: false,
 		Error:   err.Error(),
@@ -188,30 +181,15 @@ func (ge *gormError) Error() string {
 	return fmt.Sprintf(ge.msg, ge.a...)
 }
 
-func commonHandler(handler handlerFunc) func(*gin.Context) {
+func commonHandler[T any](handler handlerFunc) func(*gin.Context) {
 	return func(c *gin.Context) {
 		if err := handler(c); err != nil {
 			if _, ok := err.(*gormError); ok {
 				log.Printf("NEZHA>> gorm error: %v", err)
-				c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
+				c.JSON(http.StatusOK, newErrorResponse[T](errors.New("database error")))
 				return
 			} else {
-				c.JSON(http.StatusOK, newErrorResponse(err))
-				return
-			}
-		}
-	}
-}
-
-func commonHandlerWithType[T any](handler handlerFunc) func(*gin.Context) {
-	return func(c *gin.Context) {
-		if err := handler(c); err != nil {
-			if _, ok := err.(*gormError); ok {
-				log.Printf("NEZHA>> gorm error: %v", err)
-				c.JSON(http.StatusOK, newErrorResponseWithType[T](errors.New("database error")))
-				return
-			} else {
-				c.JSON(http.StatusOK, newErrorResponseWithType[T](err))
+				c.JSON(http.StatusOK, newErrorResponse[T](err))
 				return
 			}
 		}
