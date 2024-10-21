@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -27,14 +26,10 @@ var upgrader = websocket.Upgrader{
 // @Produce json
 // @Success 200 {object} model.StreamServerData
 // @Router /ws/server [get]
-func serverStream(c *gin.Context) {
+func serverStream(c *gin.Context) error {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
-			Success: false,
-			Error:   err.Error(),
-		})
-		return
+		return err
 	}
 	defer conn.Close()
 	count := 0
@@ -55,6 +50,7 @@ func serverStream(c *gin.Context) {
 		}
 		time.Sleep(time.Second * 2)
 	}
+	return nil
 }
 
 var requestGroup singleflight.Group

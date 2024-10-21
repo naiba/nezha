@@ -98,3 +98,20 @@ type DDNSProvider struct {
 	WebhookRequestBody bool
 	WebhookHeaders     bool
 }
+
+type DDNSForm struct {
+	ID                 uint64
+	MaxRetries         uint64
+	EnableIPv4         string
+	EnableIPv6         string
+	Name               string
+	Provider           uint8
+	DomainsRaw         string
+	AccessID           string
+	AccessSecret       string
+	WebhookURL         string
+	WebhookMethod      uint8
+	WebhookRequestType uint8
+	WebhookRequestBody string
+	WebhookHeaders     string
+}
