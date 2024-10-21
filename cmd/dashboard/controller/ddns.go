@@ -235,7 +235,7 @@ func listDDNS(c *gin.Context) error {
 // @Security BearerAuth
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[[]string]]
+// @Success 200 {object} model.CommonResponse[[]string]
 // @Router /ddns/providers [get]
 func listProviders(c *gin.Context) error {
 	c.JSON(http.StatusOK, model.CommonResponse[[]string]{
