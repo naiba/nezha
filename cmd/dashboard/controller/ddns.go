@@ -81,26 +81,31 @@ func newDDNS(c *gin.Context) error {
 // @Description Edit DDNS profile
 // @Tags auth required
 // @Accept json
+// @param id path string true "Profile ID"
 // @param request body model.DDNSForm true "DDNS Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /ddns/{id} [patch]
 func editDDNS(c *gin.Context) error {
-	var df model.DDNSForm
-	var p model.DDNSProfile
-
 	idStr := c.Param("id")
+
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		return err
 	}
 
+	var df model.DDNSForm
 	if err := c.ShouldBindJSON(&df); err != nil {
 		return err
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
 		return errors.New("重试次数必须为大于 1 且不超过 10 的整数")
+	}
+
+	var p model.DDNSProfile
+	if err = singleton.DB.First(&p, id).Error; err != nil {
+		return newGormError("%v", err)
 	}
 
 	p.Name = df.Name

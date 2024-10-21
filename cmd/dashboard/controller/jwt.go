@@ -110,7 +110,7 @@ func authorizator() func(data interface{}, c *gin.Context) bool {
 
 func unauthorized() func(c *gin.Context, code int, message string) {
 	return func(c *gin.Context, code int, message string) {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
+		c.JSON(http.StatusOK, model.CommonResponse[any]{
 			Success: false,
 			Error:   "ApiErrorUnauthorized",
 		})
@@ -130,7 +130,7 @@ func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
 	claims := jwt.ExtractClaims(c)
 	userId := claims[model.CtxKeyAuthorizedUser].(string)
 	if err := singleton.DB.Model(&model.User{}).Where("id = ?", userId).Update("login_expire", expire).Error; err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
+		c.JSON(http.StatusOK, model.CommonResponse[any]{
 			Success: false,
 			Error:   "ApiErrorUnauthorized",
 		})

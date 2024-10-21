@@ -18,7 +18,7 @@ type StreamServerData struct {
 	Servers []StreamServer `json:"servers,omitempty"`
 }
 
-type EditServer struct {
+type ServerForm struct {
 	Name         string   `json:"name,omitempty"`
 	Note         string   `json:"note,omitempty"`                   // 管理员可见备注
 	PublicNote   string   `json:"public_note,omitempty"`            // 公开备注

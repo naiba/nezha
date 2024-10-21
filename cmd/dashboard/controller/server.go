@@ -17,6 +17,9 @@ import (
 // @Schemes
 // @Description Edit server
 // @Tags auth required
+// @Accept json
+// @Param id path uint true "Server ID"
+// @Param body body model.ServerForm true "ServerForm"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server/{id} [patch]
@@ -26,11 +29,16 @@ func editServer(c *gin.Context) error {
 	if err != nil {
 		return err
 	}
-	var sf model.EditServer
-	var s model.Server
+	var sf model.ServerForm
 	if err := c.ShouldBindJSON(&sf); err != nil {
 		return err
 	}
+
+	var s model.Server
+	if err := singleton.DB.First(&s, id).Error; err != nil {
+		return newGormError("%v", err)
+	}
+
 	s.Name = sf.Name
 	s.DisplayIndex = sf.DisplayIndex
 	s.ID = id
@@ -102,7 +110,7 @@ func batchDeleteServer(c *gin.Context) error {
 
 	singleton.ReSortServer()
 
-	c.JSON(http.StatusOK, model.CommonResponse[interface{}]{
+	c.JSON(http.StatusOK, model.CommonResponse[any]{
 		Success: true,
 	})
 	return nil
