@@ -720,7 +720,7 @@ type ddnsForm struct {
 	EnableIPv4         string
 	EnableIPv6         string
 	Name               string
-	Provider           uint8
+	Provider           string
 	DomainsRaw         string
 	AccessID           string
 	AccessSecret       string

@@ -67,7 +67,7 @@ func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]*ddns2.Pr
 			provider.Setter = &tencentcloud.Provider{SecretId: profile.AccessID, SecretKey: profile.AccessSecret}
 			providers = append(providers, provider)
 		default:
-			return nil, fmt.Errorf("无法找到配置的DDNS提供者ID %d", profile.Provider)
+			return nil, fmt.Errorf("无法找到配置的DDNS提供者 %s", profile.Provider)
 		}
 	}
 	return providers, nil
