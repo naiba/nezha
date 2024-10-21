@@ -105,7 +105,7 @@ func editDDNS(c *gin.Context) error {
 
 	var p model.DDNSProfile
 	if err = singleton.DB.First(&p, id).Error; err != nil {
-		return newGormError("%v", err)
+		return fmt.Errorf("profile id %d does not exist", id)
 	}
 
 	p.Name = df.Name
