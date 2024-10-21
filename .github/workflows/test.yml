@@ -32,7 +32,7 @@ jobs:
       - name: bootstrap
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
-          swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs
+          swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
           
       - name: Unit test
         run: |
