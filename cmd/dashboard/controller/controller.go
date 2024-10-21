@@ -58,12 +58,17 @@ func routers(r *gin.Engine) {
 	unrequiredAuth := api.Group("", unrquiredAuthMiddleware(authMiddleware))
 	unrequiredAuth.GET("/ws/server", serverStream)
 	unrequiredAuth.GET("/server-group", listServerGroup)
+	unrequiredAuth.GET("/ddns", listDDNS) // TODO
 
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 	auth.PATCH("/server/:id", editServer)
 
-	api.DELETE("/batch-delete/server", batchDeleteServer)
+	auth.POST("/ddns", newDDNS)
+	auth.PATCH("/ddns/:id", editDDNS)
+
+	api.POST("/batch-delete/server", batchDeleteServer)
+	api.POST("/batch-delete/ddns", batchDeleteDDNS)
 
 	// 通用页面
 	// cp := commonPage{r: r}
@@ -146,4 +151,11 @@ func recordPath(c *gin.Context) {
 		url = strings.Replace(url, p.Value, ":"+p.Key, 1)
 	}
 	c.Set("MatchedPath", url)
+}
+
+func genericErrorMsg(err error) model.CommonResponse[any] {
+	return model.CommonResponse[any]{
+		Success: false,
+		Error:   err.Error(),
+	}
 }
