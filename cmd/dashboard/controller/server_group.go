@@ -27,7 +27,7 @@ func listServerGroup(c *gin.Context) {
 	c.JSON(http.StatusOK, model.CommonResponse[[]model.ServerGroup]{
 		Success: err == nil,
 		Data:    sg,
-		Error: utils.IfOrFn[string](err == nil, func() string {
+		Error: utils.IfOrFn(err == nil, func() string {
 			return err.Error()
 		}, func() string {
 			return ""

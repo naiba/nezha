@@ -2,15 +2,16 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/service/singleton"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/service/singleton"
 )
 
 func initParams() *jwt.GinJWTMiddleware {
@@ -96,7 +97,7 @@ func authenticator() func(c *gin.Context) (interface{}, error) {
 			return nil, jwt.ErrFailedAuthentication
 		}
 
-		return fmt.Sprintf("%d", user.ID), nil
+		return utils.Itoa(user.ID), nil
 	}
 }
 
