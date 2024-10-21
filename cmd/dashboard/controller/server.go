@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -36,7 +37,7 @@ func editServer(c *gin.Context) error {
 
 	var s model.Server
 	if err := singleton.DB.First(&s, id).Error; err != nil {
-		return newGormError("%v", err)
+		return fmt.Errorf("server id %d does not exist", id)
 	}
 
 	s.Name = sf.Name
