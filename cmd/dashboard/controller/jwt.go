@@ -93,10 +93,6 @@ func authenticator() func(c *gin.Context) (interface{}, error) {
 			return nil, jwt.ErrFailedAuthentication
 		}
 
-		if err := singleton.DB.Model(&user).Update("login_expire", time.Now().Add(time.Hour)).Error; err != nil {
-			return nil, jwt.ErrFailedAuthentication
-		}
-
 		return utils.Itoa(user.ID), nil
 	}
 }
@@ -127,15 +123,6 @@ func unauthorized() func(c *gin.Context, code int, message string) {
 // @Success 200 {object} model.CommonResponse[model.LoginResponse]
 // @Router /refresh_token [get]
 func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
-	claims := jwt.ExtractClaims(c)
-	userId := claims[model.CtxKeyAuthorizedUser].(string)
-	if err := singleton.DB.Model(&model.User{}).Where("id = ?", userId).Update("login_expire", expire).Error; err != nil {
-		c.JSON(http.StatusOK, model.CommonResponse[any]{
-			Success: false,
-			Error:   "ApiErrorUnauthorized",
-		})
-		return
-	}
 	c.JSON(http.StatusOK, model.CommonResponse[model.LoginResponse]{
 		Success: true,
 		Data: model.LoginResponse{
