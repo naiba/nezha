@@ -113,7 +113,7 @@ func newServerGroup(c *gin.Context) error {
 // @Param body body model.ServerGroupForm true "ServerGroupForm"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
-// @Router /server-group/{id} [put]
+// @Router /server-group/{id} [patch]
 func editServerGroup(c *gin.Context) error {
 	id := c.Param("id")
 	var sg model.ServerGroupForm
@@ -122,7 +122,7 @@ func editServerGroup(c *gin.Context) error {
 	}
 	var sgDB model.ServerGroup
 	if err := singleton.DB.First(&sgDB, id).Error; err != nil {
-		return newGormError("%v", err)
+		return fmt.Errorf("group id %s does not exist", id)
 	}
 	sgDB.Name = sg.Name
 
