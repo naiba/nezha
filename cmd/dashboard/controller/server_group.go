@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -69,12 +70,13 @@ func newServerGroup(c *gin.Context) error {
 	if err := c.ShouldBindJSON(&sgf); err != nil {
 		return err
 	}
+	sgf.Servers = slices.Compact(sgf.Servers)
 
 	var sg model.ServerGroup
 	sg.Name = sgf.Name
 
 	var count int64
-	if err := singleton.DB.Model(&model.Server{}).Where("id = ?", sgf.Servers).Count(&count).Error; err != nil {
+	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sgf.Servers).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != int64(len(sgf.Servers)) {
@@ -120,6 +122,8 @@ func editServerGroup(c *gin.Context) error {
 	if err := c.ShouldBindJSON(&sg); err != nil {
 		return err
 	}
+	sg.Servers = slices.Compact(sg.Servers)
+
 	var sgDB model.ServerGroup
 	if err := singleton.DB.First(&sgDB, id).Error; err != nil {
 		return fmt.Errorf("group id %s does not exist", id)
@@ -127,7 +131,7 @@ func editServerGroup(c *gin.Context) error {
 	sgDB.Name = sg.Name
 
 	var count int64
-	if err := singleton.DB.Model(&model.Server{}).Where("id = ?", sg.Servers).Count(&count).Error; err != nil {
+	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sg.Servers).Count(&count).Error; err != nil {
 		return err
 	}
 	if count != int64(len(sg.Servers)) {

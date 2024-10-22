@@ -187,10 +187,10 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 
 	for i := 0; i < len(monitors); i++ {
 		// 旧版本可能不存在通知组 为其设置默认组
-		if monitors[i].NotificationTag == "" {
-			monitors[i].NotificationTag = "default"
-			DB.Save(monitors[i])
-		}
+		//if monitors[i].NotificationTag == "" {
+		//	monitors[i].NotificationTag = "default"
+		//	DB.Save(monitors[i])
+		//}
 		task := *monitors[i]
 		// 通过cron定时将服务监控任务传递给任务调度管道
 		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {
@@ -432,7 +432,7 @@ func (ss *ServiceSentinel) worker() {
 		if mh.Delay > 0 {
 			ss.monitorsLock.RLock()
 			if ss.monitors[mh.GetId()].LatencyNotify {
-				notificationTag := ss.monitors[mh.GetId()].NotificationTag
+				notificationGroupID := ss.monitors[mh.GetId()].NotificationGroupID
 				minMuteLabel := NotificationMuteLabel.ServiceLatencyMin(mh.GetId())
 				maxMuteLabel := NotificationMuteLabel.ServiceLatencyMax(mh.GetId())
 				if mh.Delay > ss.monitors[mh.GetId()].MaxLatency {
@@ -440,19 +440,19 @@ func (ss *ServiceSentinel) worker() {
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
 					msg := fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MaxLatency, reporterServer.Name)
-					go SendNotification(notificationTag, msg, minMuteLabel)
+					go SendNotification(notificationGroupID, msg, minMuteLabel)
 					ServerLock.RUnlock()
 				} else if mh.Delay < ss.monitors[mh.GetId()].MinLatency {
 					// 延迟低于最小值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
 					msg := fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.monitors[mh.GetId()].Name, mh.Delay, ss.monitors[mh.GetId()].MinLatency, reporterServer.Name)
-					go SendNotification(notificationTag, msg, maxMuteLabel)
+					go SendNotification(notificationGroupID, msg, maxMuteLabel)
 					ServerLock.RUnlock()
 				} else {
 					// 正常延迟， 清除静音缓存
-					UnMuteNotification(notificationTag, minMuteLabel)
-					UnMuteNotification(notificationTag, maxMuteLabel)
+					UnMuteNotification(notificationGroupID, minMuteLabel)
+					UnMuteNotification(notificationGroupID, maxMuteLabel)
 				}
 			}
 			ss.monitorsLock.RUnlock()
@@ -471,16 +471,16 @@ func (ss *ServiceSentinel) worker() {
 				ServerLock.RLock()
 
 				reporterServer := ServerList[r.Reporter]
-				notificationTag := ss.monitors[mh.GetId()].NotificationTag
+				notificationGroupID := ss.monitors[mh.GetId()].NotificationGroupID
 				notificationMsg := fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.monitors[mh.GetId()].Name, reporterServer.Name, mh.Data)
 				muteLabel := NotificationMuteLabel.ServiceStateChanged(mh.GetId())
 
 				// 状态变更时，清除静音缓存
 				if stateCode != lastStatus {
-					UnMuteNotification(notificationTag, muteLabel)
+					UnMuteNotification(notificationGroupID, muteLabel)
 				}
 
-				go SendNotification(notificationTag, notificationMsg, muteLabel)
+				go SendNotification(notificationGroupID, notificationMsg, muteLabel)
 				ServerLock.RUnlock()
 			}
 
@@ -515,14 +515,14 @@ func (ss *ServiceSentinel) worker() {
 				ss.monitorsLock.RLock()
 				if ss.monitors[mh.GetId()].Notify {
 					muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), "network")
-					go SendNotification(ss.monitors[mh.GetId()].NotificationTag, fmt.Sprintf("[SSL] Fetch cert info failed, %s %s", ss.monitors[mh.GetId()].Name, errMsg), muteLabel)
+					go SendNotification(ss.monitors[mh.GetId()].NotificationGroupID, fmt.Sprintf("[SSL] Fetch cert info failed, %s %s", ss.monitors[mh.GetId()].Name, errMsg), muteLabel)
 				}
 				ss.monitorsLock.RUnlock()
 
 			}
 		} else {
 			// 清除网络错误静音缓存
-			UnMuteNotification(ss.monitors[mh.GetId()].NotificationTag, NotificationMuteLabel.ServiceSSL(mh.GetId(), "network"))
+			UnMuteNotification(ss.monitors[mh.GetId()].NotificationGroupID, NotificationMuteLabel.ServiceSSL(mh.GetId(), "network"))
 
 			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
@@ -545,7 +545,7 @@ func (ss *ServiceSentinel) worker() {
 					ss.sslCertCache[mh.GetId()] = mh.Data
 				}
 
-				notificationTag := ss.monitors[mh.GetId()].NotificationTag
+				notificationGroupID := ss.monitors[mh.GetId()].NotificationGroupID
 				serviceName := ss.monitors[mh.GetId()].Name
 				ss.monitorsLock.Unlock()
 
@@ -562,7 +562,7 @@ func (ss *ServiceSentinel) worker() {
 						// 静音规则： 服务id+证书过期时间
 						// 用于避免多个监测点对相同证书同时报警
 						muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), fmt.Sprintf("expire_%s", expiresTimeStr))
-						go SendNotification(notificationTag, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), muteLabel)
+						go SendNotification(notificationGroupID, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), muteLabel)
 					}
 
 					// 证书变更提醒
@@ -572,7 +572,7 @@ func (ss *ServiceSentinel) worker() {
 							oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
 
 						// 证书变更后会自动更新缓存，所以不需要静音
-						go SendNotification(notificationTag, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), nil)
+						go SendNotification(notificationGroupID, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), nil)
 					}
 				}
 			}

@@ -32,14 +32,25 @@ type NotificationServerBundle struct {
 
 type Notification struct {
 	Common
-	Name          string
-	Tag           string // 分组名
-	URL           string
-	RequestMethod int
-	RequestType   int
-	RequestHeader string `gorm:"type:longtext" `
-	RequestBody   string `gorm:"type:longtext" `
-	VerifySSL     *bool
+	Name          string `json:"name,omitempty"`
+	URL           string `json:"url,omitempty"`
+	RequestMethod int    `json:"request_method,omitempty"`
+	RequestType   int    `json:"request_type,omitempty"`
+	RequestHeader string `json:"request_header,omitempty" gorm:"type:longtext"`
+	RequestBody   string `json:"request_body,omitempty" gorm:"type:longtext"`
+	VerifySSL     *bool  `json:"verify_ssl,omitempty"`
+}
+
+type NotificationForm struct {
+	ID            uint64 `json:"id,omitempty"`
+	Name          string `json:"name,omitempty"`
+	URL           string `json:"url,omitempty"`
+	RequestMethod int    `json:"request_method,omitempty"`
+	RequestType   int    `json:"request_type,omitempty"`
+	RequestHeader string `json:"request_header,omitempty"`
+	RequestBody   string `json:"request_body,omitempty"`
+	VerifySSL     string `json:"verify_ssl,omitempty"`
+	SkipCheck     string `json:"skip_check,omitempty"`
 }
 
 func (ns *NotificationServerBundle) reqURL(message string) string {

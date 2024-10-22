@@ -46,14 +46,14 @@ const (
 
 type Monitor struct {
 	Common
-	Name            string
-	Type            uint8
-	Target          string
-	SkipServersRaw  string
-	Duration        uint64
-	Notify          bool
-	NotificationTag string // 当前服务监控所属的通知组
-	Cover           uint8
+	Name                string
+	Type                uint8
+	Target              string
+	SkipServersRaw      string
+	Duration            uint64
+	Notify              bool
+	NotificationGroupID uint64 // 当前服务监控所属的通知组 ID
+	Cover               uint8
 
 	EnableTriggerTask      bool     `gorm:"default: false"`
 	EnableShowInService    bool     `gorm:"default: false"`

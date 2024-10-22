@@ -9,19 +9,30 @@ import (
 	"github.com/naiba/nezha/model"
 )
 
-const firstNotificationDelay = time.Minute * 15
+const (
+	firstNotificationDelay = time.Minute * 15
+	defaultGroupID         = 0
+)
 
 // 通知方式
 var (
-	NotificationList    map[string]map[uint64]*model.Notification // [NotificationMethodTag][NotificationID] -> model.Notification
-	NotificationIDToTag map[uint64]string                         // [NotificationID] -> NotificationTag
-	notificationsLock   sync.RWMutex
+	NotificationList      map[uint64]map[uint64]*model.Notification // [NotificationGroupID][NotificationID] -> model.Notification
+	NotificationIDToGroup map[uint64]uint64                         // [NotificationID] -> NotificationGroupID
+
+	NotificationMap   map[uint64]*model.Notification
+	NotificationGroup map[uint64]string // [NotificationGroupID] -> [NotificationGroupName]
+
+	notificationsLock     sync.RWMutex
+	notificationGroupLock sync.RWMutex
 )
 
-// InitNotification 初始化 Tag <-> ID <-> Notification 的映射
+// InitNotification 初始化 GroupID <-> ID <-> Notification 的映射
 func InitNotification() {
-	NotificationList = make(map[string]map[uint64]*model.Notification)
-	NotificationIDToTag = make(map[uint64]string)
+	NotificationList = make(map[uint64]map[uint64]*model.Notification)
+	NotificationIDToGroup = make(map[uint64]uint64)
+	// 默认分组
+	NotificationList[defaultGroupID] = make(map[uint64]*model.Notification)
+	NotificationGroup[defaultGroupID] = "default"
 }
 
 // loadNotifications 从 DB 初始化通知方式相关参数
@@ -30,24 +41,121 @@ func loadNotifications() {
 	notificationsLock.Lock()
 	defer notificationsLock.Unlock()
 
+	groupNotifications := make(map[uint64][]uint64)
+	var ngn []model.NotificationGroupNotification
+	if err := DB.Find(&ngn).Error; err != nil {
+		panic(err)
+	}
+
+	for _, n := range ngn {
+		groupNotifications[n.NotificationGroupID] = append(groupNotifications[n.NotificationGroupID], n.NotificationID)
+	}
+
 	var notifications []model.Notification
 	if err := DB.Find(&notifications).Error; err != nil {
 		panic(err)
 	}
-	for i := 0; i < len(notifications); i++ {
-		// 旧版本的Tag可能不存在 自动设置为默认值
-		if notifications[i].Tag == "" {
-			SetDefaultNotificationTagInDB(&notifications[i])
+
+	NotificationMap = make(map[uint64]*model.Notification, len(notifications))
+	for i := range notifications {
+		NotificationMap[notifications[i].ID] = &notifications[i]
+	}
+
+	for gid, nids := range groupNotifications {
+		NotificationList[gid] = make(map[uint64]*model.Notification)
+		for _, nid := range nids {
+			if n, ok := NotificationMap[nid]; ok {
+				NotificationList[gid][n.ID] = n
+				NotificationIDToGroup[n.ID] = gid
+			}
 		}
-		AddNotificationToList(&notifications[i])
+	}
+
+	for _, n := range notifications {
+		if _, ok := NotificationIDToGroup[n.ID]; !ok {
+			ncopy := n
+			NotificationList[defaultGroupID][n.ID] = &ncopy
+			NotificationIDToGroup[n.ID] = defaultGroupID
+		}
 	}
 }
 
-// SetDefaultNotificationTagInDB 设置默认通知方式的 Tag
-func SetDefaultNotificationTagInDB(n *model.Notification) {
-	n.Tag = "default"
-	if err := DB.Save(n).Error; err != nil {
-		log.Println("NEZHA>> SetDefaultNotificationTagInDB 错误: ", err)
+// OnRefreshOrAddNotificationGroup 刷新通知方式组相关参数
+func OnRefreshOrAddNotificationGroup(ng *model.NotificationGroup, ngn []uint64) {
+	notificationsLock.Lock()
+	defer notificationsLock.Unlock()
+
+	notificationGroupLock.Lock()
+	defer notificationGroupLock.Unlock()
+	var isEdit bool
+	if _, ok := NotificationGroup[ng.ID]; ok {
+		isEdit = true
+	}
+
+	if !isEdit {
+		AddNotificationGroupToList(ng, ngn)
+	} else {
+		UpdateNotificationGroupInList(ng, ngn)
+	}
+}
+
+// AddNotificationGroupToList 添加通知方式组到map中
+func AddNotificationGroupToList(ng *model.NotificationGroup, ngn []uint64) {
+	NotificationGroup[ng.ID] = ng.Name
+
+	NotificationList[ng.ID] = make(map[uint64]*model.Notification, len(ngn))
+
+	for _, n := range ngn {
+		// 确认新的绑定关系，从默认分组中移出
+		if _, ok := NotificationList[defaultGroupID][n]; ok {
+			delete(NotificationList[defaultGroupID], n)
+		}
+
+		NotificationIDToGroup[n] = ng.ID
+		NotificationList[ng.ID][n] = NotificationMap[n]
+	}
+}
+
+// UpdateNotificationGroupInList 在 map 中更新通知方式组
+func UpdateNotificationGroupInList(ng *model.NotificationGroup, ngn []uint64) {
+	NotificationGroup[ng.ID] = ng.Name
+
+	oldList := make(map[uint64]struct{})
+	for nid := range NotificationList[ng.ID] {
+		oldList[nid] = struct{}{}
+	}
+
+	NotificationList[ng.ID] = make(map[uint64]*model.Notification)
+	for _, nid := range ngn {
+		NotificationList[ng.ID][nid] = NotificationMap[nid]
+		NotificationIDToGroup[nid] = ng.ID
+	}
+
+	for oldID := range oldList {
+		if _, exists := NotificationList[ng.ID][oldID]; !exists {
+			delete(NotificationIDToGroup, oldID)
+			// 删除的 ID 回落到默认分组
+			NotificationIDToGroup[oldID] = defaultGroupID
+			NotificationList[defaultGroupID][oldID] = NotificationMap[oldID]
+		}
+	}
+}
+
+// UpdateNotificationGroupInList 删除通知方式组
+func OnDeleteNotificationGroup(gids []uint64) {
+	notificationsLock.Lock()
+	defer notificationsLock.Unlock()
+
+	for _, gid := range gids {
+		delete(NotificationGroup, gid)
+
+		// 删除的通知组下所有通知转移到默认分组
+		for nid, notification := range NotificationList[gid] {
+			NotificationList[defaultGroupID][nid] = notification
+			NotificationIDToGroup[nid] = defaultGroupID
+		}
+
+		delete(NotificationList, gid)
 	}
 }
 
@@ -57,59 +165,60 @@ func OnRefreshOrAddNotification(n *model.Notification) {
 	defer notificationsLock.Unlock()
 
 	var isEdit bool
-	if _, ok := NotificationIDToTag[n.ID]; ok {
+	gid, ok := NotificationIDToGroup[n.ID]
+	if ok {
 		isEdit = true
 	}
 	if !isEdit {
 		AddNotificationToList(n)
 	} else {
-		UpdateNotificationInList(n)
+		UpdateNotificationInList(n, gid)
 	}
 }
 
 // AddNotificationToList 添加通知方式到map中
 func AddNotificationToList(n *model.Notification) {
 	// 当前 Tag 不存在，创建对应该 Tag 的 子 map 后再添加
-	if _, ok := NotificationList[n.Tag]; !ok {
-		NotificationList[n.Tag] = make(map[uint64]*model.Notification)
-	}
-	NotificationList[n.Tag][n.ID] = n
-	NotificationIDToTag[n.ID] = n.Tag
+	//if _, ok := NotificationList[n.Tag]; !ok {
+	//	NotificationList[n.Tag] = make(map[uint64]*model.Notification)
+	//}
+
+	// 新创建的通知方式添加到默认分组
+	NotificationList[defaultGroupID][n.ID] = n
+	NotificationIDToGroup[n.ID] = defaultGroupID
 }
 
 // UpdateNotificationInList 在 map 中更新通知方式
-func UpdateNotificationInList(n *model.Notification) {
-	if n.Tag != NotificationIDToTag[n.ID] {
-		// 如果 Tag 不一致，则需要先移除原有的映射关系
-		delete(NotificationList[NotificationIDToTag[n.ID]], n.ID)
-		delete(NotificationIDToTag, n.ID)
-		// 将新的 Tag 中的通知方式添加到 map 中
-		AddNotificationToList(n)
-	} else {
-		// 如果 Tag 一致，则直接更新
-		NotificationList[n.Tag][n.ID] = n
-	}
+func UpdateNotificationInList(n *model.Notification, gid uint64) {
+	NotificationList[gid][n.ID] = n
 }
 
-// OnDeleteNotification 在map中删除通知方式
-func OnDeleteNotification(id uint64) {
+// OnDeleteNotification 在map和表中删除通知方式
+func OnDeleteNotification(id []uint64) {
 	notificationsLock.Lock()
 	defer notificationsLock.Unlock()
 
-	delete(NotificationList[NotificationIDToTag[id]], id)
-	delete(NotificationIDToTag, id)
+	for _, i := range id {
+		gid := NotificationIDToGroup[i]
+		delete(NotificationList[gid], i)
+		delete(NotificationIDToGroup, i)
+	}
+
+	if err := DB.Delete(&model.NotificationGroupNotification{}, "notification_id in (?)", id).Error; err != nil {
+		log.Println(err)
+	}
 }
 
-func UnMuteNotification(notificationTag string, muteLabel *string) {
-	fullMuteLabel := *NotificationMuteLabel.AppendNotificationTag(muteLabel, notificationTag)
+func UnMuteNotification(notificationGroupID uint64, muteLabel *string) {
+	fullMuteLabel := *NotificationMuteLabel.AppendNotificationGroupName(muteLabel, notificationGroupID)
 	Cache.Delete(fullMuteLabel)
 }
 
 // SendNotification 向指定的通知方式组的所有通知方式发送通知
-func SendNotification(notificationTag string, desc string, muteLabel *string, ext ...*model.Server) {
+func SendNotification(notificationGroupID uint64, desc string, muteLabel *string, ext ...*model.Server) {
 	if muteLabel != nil {
 		// 将通知方式组名称加入静音标志
-		muteLabel := *NotificationMuteLabel.AppendNotificationTag(muteLabel, notificationTag)
+		muteLabel := *NotificationMuteLabel.AppendNotificationGroupName(muteLabel, notificationGroupID)
 		// 通知防骚扰策略
 		var flag bool
 		if cacheN, has := Cache.Get(muteLabel); has {
@@ -144,10 +253,10 @@ func SendNotification(notificationTag string, desc string, muteLabel *string, ex
 	// 向该通知方式组的所有通知方式发出通知
 	notificationsLock.RLock()
 	defer notificationsLock.RUnlock()
-	for _, n := range NotificationList[notificationTag] {
+	for _, n := range NotificationList[notificationGroupID] {
 		log.Println("NEZHA>> 尝试通知", n.Name)
 	}
-	for _, n := range NotificationList[notificationTag] {
+	for _, n := range NotificationList[notificationGroupID] {
 		ns := model.NotificationServerBundle{
 			Notification: n,
 			Server:       nil,
@@ -183,8 +292,10 @@ func (_NotificationMuteLabel) ServerIncidentResolved(alertId uint64, serverId ui
 	return &label
 }
 
-func (_NotificationMuteLabel) AppendNotificationTag(label *string, notificationTag string) *string {
-	newLabel := fmt.Sprintf("%s:%s", *label, notificationTag)
+func (_NotificationMuteLabel) AppendNotificationGroupName(label *string, notificationGroupID uint64) *string {
+	notificationGroupLock.RLock()
+	defer notificationGroupLock.RUnlock()
+	newLabel := fmt.Sprintf("%s:%s", *label, NotificationGroup[notificationGroupID])
 	return &newLabel
 }
 

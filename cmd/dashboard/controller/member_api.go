@@ -186,16 +186,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 
 	var err error
 	switch c.Param("model") {
-	case "notification":
-		err = singleton.DB.Unscoped().Delete(&model.Notification{}, "id = ?", id).Error
-		if err == nil {
-			singleton.OnDeleteNotification(id)
-		}
-	case "ddns":
-		err = singleton.DB.Unscoped().Delete(&model.DDNSProfile{}, "id = ?", id).Error
-		if err == nil {
-			singleton.OnDDNSUpdate()
-		}
+
 	case "nat":
 		err = singleton.DB.Unscoped().Delete(&model.NAT{}, "id = ?", id).Error
 		if err == nil {
@@ -372,13 +363,13 @@ func (ma *memberAPI) addOrEditServer(c *gin.Context) {
 }
 
 type monitorForm struct {
-	ID                     uint64
-	Name                   string
-	Target                 string
-	Type                   uint8
-	Cover                  uint8
-	Notify                 string
-	NotificationTag        string
+	ID     uint64
+	Name   string
+	Target string
+	Type   uint8
+	Cover  uint8
+	Notify string
+	//NotificationTag        string
 	SkipServersRaw         string
 	Duration               uint64
 	MinLatency             float32
@@ -402,7 +393,7 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 		m.SkipServersRaw = mf.SkipServersRaw
 		m.Cover = mf.Cover
 		m.Notify = mf.Notify == "on"
-		m.NotificationTag = mf.NotificationTag
+		//m.NotificationTag = mf.NotificationTag
 		m.Duration = mf.Duration
 		m.LatencyNotify = mf.LatencyNotify == "on"
 		m.MinLatency = mf.MinLatency
@@ -415,9 +406,9 @@ func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
 	}
 	if err == nil {
 		// 保证NotificationTag不为空
-		if m.NotificationTag == "" {
-			m.NotificationTag = "default"
-		}
+		//if m.NotificationTag == "" {
+		//	m.NotificationTag = "default"
+		//}
 		err = utils.Json.Unmarshal([]byte(mf.FailTriggerTasksRaw), &m.FailTriggerTasks)
 	}
 	if err == nil {
@@ -475,7 +466,7 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		cr.Command = cf.Command
 		cr.ServersRaw = cf.ServersRaw
 		cr.PushSuccessful = cf.PushSuccessful == "on"
-		cr.NotificationTag = cf.NotificationTag
+		//cr.NotificationTag = cf.NotificationTag
 		cr.ID = cf.ID
 		cr.Cover = cf.Cover
 		err = utils.Json.Unmarshal([]byte(cf.ServersRaw), &cr.Servers)
@@ -494,9 +485,9 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 	tx := singleton.DB.Begin()
 	if err == nil {
 		// 保证NotificationTag不为空
-		if cr.NotificationTag == "" {
-			cr.NotificationTag = "default"
-		}
+		//if cr.NotificationTag == "" {
+		//	cr.NotificationTag = "default"
+		//}
 		if cf.ID == 0 {
 			err = tx.Create(&cr).Error
 		} else {
@@ -655,7 +646,6 @@ func (ma *memberAPI) forceUpdate(c *gin.Context) {
 type notificationForm struct {
 	ID            uint64
 	Name          string
-	Tag           string // 分组名
 	URL           string
 	RequestMethod int
 	RequestType   int
@@ -671,7 +661,6 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 	err := c.ShouldBindJSON(&nf)
 	if err == nil {
 		n.Name = nf.Name
-		n.Tag = nf.Tag
 		n.RequestMethod = nf.RequestMethod
 		n.RequestType = nf.RequestType
 		n.RequestHeader = nf.RequestHeader
@@ -691,10 +680,6 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		}
 	}
 	if err == nil {
-		// 保证Tag不为空
-		if n.Tag == "" {
-			n.Tag = "default"
-		}
 		if n.ID == 0 {
 			err = singleton.DB.Create(&n).Error
 		} else {
@@ -878,7 +863,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		r.RulesRaw = arf.RulesRaw
 		r.FailTriggerTasksRaw = arf.FailTriggerTasksRaw
 		r.RecoverTriggerTasksRaw = arf.RecoverTriggerTasksRaw
-		r.NotificationTag = arf.NotificationTag
+		//r.NotificationTag = arf.NotificationTag
 		enable := arf.Enable == "on"
 		r.TriggerMode = arf.TriggerMode
 		r.Enable = &enable
@@ -892,9 +877,9 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 	}
 	//保证NotificationTag不为空
 	if err == nil {
-		if r.NotificationTag == "" {
-			r.NotificationTag = "default"
-		}
+		//if r.NotificationTag == "" {
+		//	r.NotificationTag = "default"
+		//}
 		if r.ID == 0 {
 			err = singleton.DB.Create(&r).Error
 		} else {

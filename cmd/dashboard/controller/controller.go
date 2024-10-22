@@ -67,8 +67,18 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/server-group/:id", commonHandler(editServerGroup))
 	auth.POST("/batch-delete/server-group", commonHandler(batchDeleteServerGroup))
 
+	auth.GET("/notification-group", commonHandler(listNotificationGroup))
+	auth.POST("/notification-group", commonHandler(newNotificationGroup))
+	auth.PATCH("/notification-group/:id", commonHandler(editNotificationGroup))
+	auth.POST("/batch-delete/notification-group", commonHandler(batchDeleteNotificationGroup))
+
 	auth.PATCH("/server/:id", commonHandler(editServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
+
+	auth.POST("/notification", commonHandler(newNotification))
+	auth.PATCH("/notification/:id", commonHandler(editNotification))
+	auth.POST("/batch-delete/notification", commonHandler(batchDeleteNotification))
+	// 待添加list，
 
 	auth.GET("/ddns", commonHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))
