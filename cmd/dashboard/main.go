@@ -29,6 +29,8 @@ type DashboardCliParam struct {
 	DatebaseLocation string // Sqlite3 数据库文件路径
 }
 
+const NezhaServicePath = "/proto.NezhaService/"
+
 var (
 	dashboardCliParam DashboardCliParam
 )
@@ -123,20 +125,20 @@ func main() {
 	grpcHandler := rpc.ServeRPC()
 	httpHandler := controller.ServeWeb()
 
-	mixedHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
+	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
 	http2Server := &http2.Server{}
-	http1Server := &http.Server{Handler: h2c.NewHandler(mixedHandler, http2Server), ReadHeaderTimeout: time.Second * 5}
+	muxServer := &http.Server{Handler: h2c.NewHandler(muxHandler, http2Server), ReadHeaderTimeout: time.Second * 5}
 
 	go dispatchReportInfoTask()
 
 	if err := graceful.Graceful(func() error {
 		log.Println("NEZHA>> Dashboard::START", singleton.Conf.ListenPort)
-		return http1Server.Serve(l)
+		return muxServer.Serve(l)
 	}, func(c context.Context) error {
 		log.Println("NEZHA>> Graceful::START")
 		singleton.RecordTransferHourlyUsage()
 		log.Println("NEZHA>> Graceful::END")
-		return l.Close()
+		return muxServer.Shutdown(c)
 	}); err != nil {
 		log.Printf("NEZHA>> ERROR: %v", err)
 	}
@@ -159,7 +161,8 @@ func dispatchReportInfoTask() {
 
 func newHTTPandGRPCMux(httpHandler http.Handler, grpcHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.ProtoMajor == 2 && strings.HasPrefix(r.Header.Get("content-type"), "application/grpc") {
+		if r.Header.Get("Content-Type") == "application/grpc" &&
+			strings.HasPrefix(r.URL.Path, NezhaServicePath) {
 			grpcHandler.ServeHTTP(w, r)
 			return
 		}
