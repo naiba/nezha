@@ -64,7 +64,7 @@ func listServerGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server-group [post]
-func newServerGroup(c *gin.Context) error {
+func createServerGroup(c *gin.Context) error {
 	var sgf model.ServerGroupForm
 	if err := c.ShouldBindJSON(&sgf); err != nil {
 		return err
@@ -114,7 +114,7 @@ func newServerGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server-group/{id} [patch]
-func editServerGroup(c *gin.Context) error {
+func updateServerGroup(c *gin.Context) error {
 	id := c.Param("id")
 	var sg model.ServerGroupForm
 	if err := c.ShouldBindJSON(&sg); err != nil {

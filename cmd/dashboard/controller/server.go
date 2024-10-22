@@ -24,7 +24,7 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server/{id} [patch]
-func editServer(c *gin.Context) error {
+func updateServer(c *gin.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {

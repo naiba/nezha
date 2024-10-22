@@ -63,17 +63,21 @@ func routers(r *gin.Engine) {
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
 
-	auth.POST("/server-group", commonHandler(newServerGroup))
-	auth.PATCH("/server-group/:id", commonHandler(editServerGroup))
+	auth.GET("/user", commonHandler(listUser))
+	auth.POST("/user", commonHandler(createUser))
+	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
+
+	auth.POST("/server-group", commonHandler(createServerGroup))
+	auth.PATCH("/server-group/:id", commonHandler(updateServerGroup))
 	auth.POST("/batch-delete/server-group", commonHandler(batchDeleteServerGroup))
 
-	auth.PATCH("/server/:id", commonHandler(editServer))
+	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 
 	auth.GET("/ddns", commonHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))
-	auth.POST("/ddns", commonHandler(newDDNS))
-	auth.PATCH("/ddns/:id", commonHandler(editDDNS))
+	auth.POST("/ddns", commonHandler(createDDNS))
+	auth.PATCH("/ddns/:id", commonHandler(updateDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
 }
 
