@@ -61,7 +61,11 @@ func routers(r *gin.Engine) {
 	optionalAuth.GET("/server-group", commonHandler(listServerGroup))
 
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
+
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+
+	auth.POST("/terminal", commonHandler(createTerminal))
+	auth.GET("/ws/terminal/:id", commonHandler(terminalStream))
 
 	auth.GET("/user", commonHandler(listUser))
 	auth.POST("/user", commonHandler(createUser))
