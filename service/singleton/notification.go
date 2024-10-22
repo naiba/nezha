@@ -107,9 +107,7 @@ func AddNotificationGroupToList(ng *model.NotificationGroup, ngn []uint64) {
 
 	for _, n := range ngn {
 		// 确认新的绑定关系，从默认分组中移出
-		if _, ok := NotificationList[defaultGroupID][n]; ok {
-			delete(NotificationList[defaultGroupID], n)
-		}
+		delete(NotificationList[defaultGroupID], n)
 
 		NotificationIDToGroup[n] = ng.ID
 		NotificationList[ng.ID][n] = NotificationMap[n]
@@ -184,12 +182,14 @@ func AddNotificationToList(n *model.Notification) {
 	//}
 
 	// 新创建的通知方式添加到默认分组
+	NotificationMap[n.ID] = n
 	NotificationList[defaultGroupID][n.ID] = n
 	NotificationIDToGroup[n.ID] = defaultGroupID
 }
 
 // UpdateNotificationInList 在 map 中更新通知方式
 func UpdateNotificationInList(n *model.Notification, gid uint64) {
+	NotificationMap[n.ID] = n
 	NotificationList[gid][n.ID] = n
 }
 
