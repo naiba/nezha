@@ -25,7 +25,7 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /ddns [post]
-func newDDNS(c *gin.Context) error {
+func createDDNS(c *gin.Context) error {
 	var df model.DDNSForm
 	var p model.DDNSProfile
 
@@ -86,7 +86,7 @@ func newDDNS(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /ddns/{id} [patch]
-func editDDNS(c *gin.Context) error {
+func updateDDNS(c *gin.Context) error {
 	idStr := c.Param("id")
 
 	id, err := strconv.ParseUint(idStr, 10, 64)

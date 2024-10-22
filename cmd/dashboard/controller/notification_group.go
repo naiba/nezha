@@ -67,7 +67,7 @@ func listNotificationGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification-group [post]
-func newNotificationGroup(c *gin.Context) error {
+func createNotificationGroup(c *gin.Context) error {
 	var ngf model.NotificationGroupForm
 	if err := c.ShouldBindJSON(&ngf); err != nil {
 		return err
@@ -120,7 +120,7 @@ func newNotificationGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification-group/{id} [patch]
-func editNotificationGroup(c *gin.Context) error {
+func updateNotificationGroup(c *gin.Context) error {
 	idStr := c.Param("id")
 
 	id, err := strconv.ParseUint(idStr, 10, 64)

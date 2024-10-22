@@ -21,7 +21,7 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification [post]
-func newNotification(c *gin.Context) error {
+func createNotification(c *gin.Context) error {
 	var nf model.NotificationForm
 	if err := c.ShouldBindJSON(&nf); err != nil {
 		return err
@@ -72,7 +72,7 @@ func newNotification(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification/{id} [patch]
-func editNotification(c *gin.Context) error {
+func updateNotification(c *gin.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
