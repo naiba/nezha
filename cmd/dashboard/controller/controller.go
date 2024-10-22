@@ -23,7 +23,7 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
-func ServeWeb() *http.Server {
+func ServeWeb() http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
@@ -39,10 +39,7 @@ func ServeWeb() *http.Server {
 	r.Use(recordPath)
 	routers(r)
 
-	return &http.Server{
-		ReadHeaderTimeout: time.Second * 5,
-		Handler:           r,
-	}
+	return r
 }
 
 func routers(r *gin.Engine) {
