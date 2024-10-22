@@ -125,7 +125,7 @@ func main() {
 
 	mixedHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
 	http2Server := &http2.Server{}
-	http1Server := &http.Server{Handler: h2c.NewHandler(mixedHandler, http2Server)}
+	http1Server := &http.Server{Handler: h2c.NewHandler(mixedHandler, http2Server), ReadHeaderTimeout: time.Second * 5}
 
 	go dispatchReportInfoTask()
 
