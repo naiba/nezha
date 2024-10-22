@@ -823,7 +823,7 @@ show_usage() {
 }
 
 show_menu() {
-    echo "
+    printf "
     ${green}哪吒监控管理脚本${plain} ${red}${NZ_VERSION}${plain}
     --- https://github.com/naiba/nezha ---
     ${green}1.${plain}  安装面板端
@@ -844,7 +844,7 @@ show_menu() {
     ————————————————-
     ${green}0.${plain}  退出脚本
     "
-    printf "请输入选择 [0-13]: " && read -r num
+    echo && printf "请输入选择 [0-13]: " && read -r num
     case "${num}" in
         0)
             exit 0
