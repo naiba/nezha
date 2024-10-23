@@ -1,8 +1,6 @@
 package rpc
 
 import (
-	"net/http"
-
 	"google.golang.org/grpc"
 
 	"github.com/naiba/nezha/model"
@@ -11,7 +9,7 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
-func ServeRPC() http.Handler {
+func ServeRPC() *grpc.Server {
 	server := grpc.NewServer()
 	rpcService.NezhaHandlerSingleton = rpcService.NewNezhaHandler()
 	pb.RegisterNezhaServiceServer(server, rpcService.NezhaHandlerSingleton)
