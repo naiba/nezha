@@ -2,11 +2,10 @@ package utils
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"net"
 	"net/http"
-
-	"github.com/gin-gonic/gin"
 )
 
 var _ io.ReadWriteCloser = &RequestWrapper{}
@@ -17,8 +16,12 @@ type RequestWrapper struct {
 	writer net.Conn
 }
 
-func NewRequestWrapper(req *http.Request, writer gin.ResponseWriter) (*RequestWrapper, error) {
-	conn, _, err := writer.Hijack()
+func NewRequestWrapper(req *http.Request, writer http.ResponseWriter) (*RequestWrapper, error) {
+	hj, ok := writer.(http.Hijacker)
+	if !ok {
+		return nil, errors.New("http server does not support hijacking")
+	}
+	conn, _, err := hj.Hijack()
 	if err != nil {
 		return nil, err
 	}
