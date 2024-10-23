@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,15 +20,12 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server [get]
-func listServer(c *gin.Context) error {
+func listServer(c *gin.Context) ([]model.Server, error) {
 	var servers []model.Server
 	if err := singleton.DB.Find(&servers).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Data: servers,
-	})
-	return nil
+	return servers, nil
 }
 
 // Edit server
@@ -44,20 +40,20 @@ func listServer(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server/{id} [patch]
-func updateServer(c *gin.Context) error {
+func updateServer(c *gin.Context) (any, error) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var sf model.ServerForm
 	if err := c.ShouldBindJSON(&sf); err != nil {
-		return err
+		return nil, err
 	}
 
 	var s model.Server
 	if err := singleton.DB.First(&s, id).Error; err != nil {
-		return fmt.Errorf("server id %d does not exist", id)
+		return nil, fmt.Errorf("server id %d does not exist", id)
 	}
 
 	s.Name = sf.Name
@@ -70,12 +66,12 @@ func updateServer(c *gin.Context) error {
 	s.DDNSProfiles = sf.DDNSProfiles
 	ddnsProfilesRaw, err := utils.Json.Marshal(s.DDNSProfiles)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	s.DDNSProfilesRaw = string(ddnsProfilesRaw)
 
 	if err := singleton.DB.Save(&s).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.ServerLock.Lock()
@@ -83,10 +79,8 @@ func updateServer(c *gin.Context) error {
 	singleton.ServerList[s.ID] = &s
 	singleton.ServerLock.Unlock()
 	singleton.ReSortServer()
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-	return nil
+
+	return nil, nil
 }
 
 // Batch delete server
@@ -100,14 +94,14 @@ func updateServer(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/server [post]
-func batchDeleteServer(c *gin.Context) error {
+func batchDeleteServer(c *gin.Context) (any, error) {
 	var servers []uint64
 	if err := c.ShouldBindJSON(&servers); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := singleton.DB.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.ServerLock.Lock()
@@ -131,8 +125,5 @@ func batchDeleteServer(c *gin.Context) error {
 
 	singleton.ReSortServer()
 
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return nil, nil
 }

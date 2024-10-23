@@ -159,7 +159,7 @@ func newErrorResponse(err error) model.CommonResponse[any] {
 	}
 }
 
-type handlerFunc func(c *gin.Context) error
+type handlerFunc[T any] func(c *gin.Context) (T, error)
 
 // There are many error types in gorm, so create a custom type to represent all
 // gorm errors here instead
@@ -179,17 +179,20 @@ func (ge *gormError) Error() string {
 	return fmt.Sprintf(ge.msg, ge.a...)
 }
 
-func commonHandler(handler handlerFunc) func(*gin.Context) {
+func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	return func(c *gin.Context) {
-		if err := handler(c); err != nil {
-			if _, ok := err.(*gormError); ok {
-				log.Printf("NEZHA>> gorm error: %v", err)
-				c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
-				return
-			} else {
-				c.JSON(http.StatusOK, newErrorResponse(err))
-				return
-			}
+		data, err := handler(c)
+		if err == nil {
+			c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
+			return
+		}
+		if _, ok := err.(*gormError); ok {
+			log.Printf("NEZHA>> gorm error: %v", err)
+			c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
+			return
+		} else {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
 		}
 	}
 }

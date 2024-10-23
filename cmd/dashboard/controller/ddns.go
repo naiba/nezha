@@ -3,7 +3,6 @@ package controller
 import (
 	"errors"
 	"fmt"
-	"net/http"
 	"strconv"
 	"strings"
 
@@ -23,18 +22,18 @@ import (
 // @Accept json
 // @param request body model.DDNSForm true "DDNS Request"
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[uint64]
 // @Router /ddns [post]
-func createDDNS(c *gin.Context) error {
+func createDDNS(c *gin.Context) (uint64, error) {
 	var df model.DDNSForm
 	var p model.DDNSProfile
 
 	if err := c.ShouldBindJSON(&df); err != nil {
-		return err
+		return 0, err
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
-		return errors.New("重试次数必须为大于 1 且不超过 10 的整数")
+		return 0, errors.New("重试次数必须为大于 1 且不超过 10 的整数")
 	}
 
 	p.Name = df.Name
@@ -58,20 +57,18 @@ func createDDNS(c *gin.Context) error {
 		// IDN to ASCII
 		domainValid, domainErr := idna.Lookup.ToASCII(domain)
 		if domainErr != nil {
-			return fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
+			return 0, fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
 		}
 		p.Domains[n] = domainValid
 	}
 
 	if err := singleton.DB.Create(&p).Error; err != nil {
-		return newGormError("%v", err)
+		return 0, newGormError("%v", err)
 	}
 
 	singleton.OnDDNSUpdate()
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+
+	return p.ID, nil
 }
 
 // Edit DDNS profile
@@ -86,26 +83,26 @@ func createDDNS(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /ddns/{id} [patch]
-func updateDDNS(c *gin.Context) error {
+func updateDDNS(c *gin.Context) (any, error) {
 	idStr := c.Param("id")
 
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var df model.DDNSForm
 	if err := c.ShouldBindJSON(&df); err != nil {
-		return err
+		return nil, err
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
-		return errors.New("重试次数必须为大于 1 且不超过 10 的整数")
+		return nil, errors.New("重试次数必须为大于 1 且不超过 10 的整数")
 	}
 
 	var p model.DDNSProfile
 	if err = singleton.DB.First(&p, id).Error; err != nil {
-		return fmt.Errorf("profile id %d does not exist", id)
+		return nil, fmt.Errorf("profile id %d does not exist", id)
 	}
 
 	p.Name = df.Name
@@ -130,20 +127,18 @@ func updateDDNS(c *gin.Context) error {
 		// IDN to ASCII
 		domainValid, domainErr := idna.Lookup.ToASCII(domain)
 		if domainErr != nil {
-			return fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
+			return nil, fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
 		}
 		p.Domains[n] = domainValid
 	}
 
 	if err = singleton.DB.Save(&p).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnDDNSUpdate()
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+
+	return nil, nil
 }
 
 // Batch delete DDNS configurations
@@ -157,22 +152,20 @@ func updateDDNS(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/ddns [post]
-func batchDeleteDDNS(c *gin.Context) error {
+func batchDeleteDDNS(c *gin.Context) (any, error) {
 	var ddnsConfigs []uint64
 
 	if err := c.ShouldBindJSON(&ddnsConfigs); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := singleton.DB.Unscoped().Delete(&model.DDNSProfile{}, "id in (?)", ddnsConfigs).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnDDNSUpdate()
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+
+	return nil, nil
 }
 
 // List DDNS Profiles
@@ -185,7 +178,7 @@ func batchDeleteDDNS(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.DDNSProfile]
 // @Router /ddns [get]
-func listDDNS(c *gin.Context) error {
+func listDDNS(c *gin.Context) ([]model.DDNSProfile, error) {
 	var idList []uint64
 	idQuery := c.Query("id")
 
@@ -195,7 +188,7 @@ func listDDNS(c *gin.Context) error {
 		for _, v := range idListStr {
 			id, err := strconv.ParseUint(v, 10, 64)
 			if err != nil {
-				return err
+				return nil, err
 			}
 			idList = append(idList, id)
 		}
@@ -210,7 +203,7 @@ func listDDNS(c *gin.Context) error {
 			if profile, ok := singleton.DDNSCache[id]; ok {
 				ddnsProfiles = append(ddnsProfiles, *profile)
 			} else {
-				return fmt.Errorf("profile id %d not found", id)
+				return nil, fmt.Errorf("profile id %d not found", id)
 			}
 		}
 	} else {
@@ -221,11 +214,7 @@ func listDDNS(c *gin.Context) error {
 	}
 
 	singleton.DDNSCacheLock.RUnlock()
-	c.JSON(http.StatusOK, model.CommonResponse[[]model.DDNSProfile]{
-		Success: true,
-		Data:    ddnsProfiles,
-	})
-	return nil
+	return ddnsProfiles, nil
 }
 
 // List DDNS Providers
@@ -237,10 +226,6 @@ func listDDNS(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]string]
 // @Router /ddns/providers [get]
-func listProviders(c *gin.Context) error {
-	c.JSON(http.StatusOK, model.CommonResponse[[]string]{
-		Success: true,
-		Data:    model.ProviderList,
-	})
-	return nil
+func listProviders(c *gin.Context) ([]string, error) {
+	return model.ProviderList, nil
 }

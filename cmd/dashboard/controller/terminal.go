@@ -2,7 +2,6 @@ package controller
 
 import (
 	"errors"
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -25,15 +24,15 @@ import (
 // @Produce json
 // @Success 200 {object} model.CreateTerminalResponse
 // @Router /terminal [post]
-func createTerminal(c *gin.Context) error {
+func createTerminal(c *gin.Context) (*model.CreateTerminalResponse, error) {
 	var createTerminalReq model.TerminalForm
 	if err := c.ShouldBind(&createTerminalReq); err != nil {
-		return err
+		return nil, err
 	}
 
 	streamId, err := uuid.GenerateUUID()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	rpc.NezhaHandlerSingleton.CreateStream(streamId)
@@ -42,7 +41,7 @@ func createTerminal(c *gin.Context) error {
 	server := singleton.ServerList[createTerminalReq.ServerID]
 	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
-		return errors.New("server not found or not connected")
+		return nil, errors.New("server not found or not connected")
 	}
 
 	terminalData, _ := utils.Json.Marshal(&model.TerminalTask{
@@ -52,19 +51,14 @@ func createTerminal(c *gin.Context) error {
 		Type: model.TaskTypeTerminalGRPC,
 		Data: string(terminalData),
 	}); err != nil {
-		return err
+		return nil, err
 	}
 
-	c.JSON(http.StatusOK, model.CommonResponse[model.CreateTerminalResponse]{
-		Success: true,
-		Data: model.CreateTerminalResponse{
-			SessionID:  streamId,
-			ServerID:   server.ID,
-			ServerName: server.Name,
-		},
-	})
-
-	return nil
+	return &model.CreateTerminalResponse{
+		SessionID:  streamId,
+		ServerID:   server.ID,
+		ServerName: server.Name,
+	}, nil
 }
 
 // TerminalStream web ssh terminal stream
@@ -73,16 +67,16 @@ func createTerminal(c *gin.Context) error {
 // @Tags auth required
 // @Param id path string true "Stream ID"
 // @Router /terminal/{id} [get]
-func terminalStream(c *gin.Context) error {
+func terminalStream(c *gin.Context) (any, error) {
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
-		return err
+		return nil, err
 	}
 	defer rpc.NezhaHandlerSingleton.CloseStream(streamId)
 
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer wsConn.Close()
 	conn := websocketx.NewConn(wsConn)
@@ -98,8 +92,8 @@ func terminalStream(c *gin.Context) error {
 	}()
 
 	if err = rpc.NezhaHandlerSingleton.UserConnected(streamId, conn); err != nil {
-		return err
+		return nil, err
 	}
 
-	return rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	return nil, rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
 }
