@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"slices"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -71,7 +72,7 @@ func createServerGroup(c *gin.Context) (uint64, error) {
 	sg.Name = sgf.Name
 
 	var count int64
-	if err := singleton.DB.Model(&model.Server{}).Where("id = ?", sgf.Servers).Count(&count).Error; err != nil {
+	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sgf.Servers).Count(&count).Error; err != nil {
 		return 0, newGormError("%v", err)
 	}
 	if count != int64(len(sgf.Servers)) {
@@ -112,7 +113,13 @@ func createServerGroup(c *gin.Context) (uint64, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server-group/{id} [patch]
 func updateServerGroup(c *gin.Context) (any, error) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
 	var sg model.ServerGroupForm
 	if err := c.ShouldBindJSON(&sg); err != nil {
 		return nil, err
@@ -121,19 +128,19 @@ func updateServerGroup(c *gin.Context) (any, error) {
 
 	var sgDB model.ServerGroup
 	if err := singleton.DB.First(&sgDB, id).Error; err != nil {
-		return nil, fmt.Errorf("group id %s does not exist", id)
+		return nil, fmt.Errorf("group id %d does not exist", id)
 	}
 	sgDB.Name = sg.Name
 
 	var count int64
-	if err := singleton.DB.Model(&model.Server{}).Where("id = ?", sg.Servers).Count(&count).Error; err != nil {
+	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sg.Servers).Count(&count).Error; err != nil {
 		return nil, err
 	}
 	if count != int64(len(sg.Servers)) {
 		return nil, fmt.Errorf("have invalid server id")
 	}
 
-	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
+	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&sgDB).Error; err != nil {
 			return err
 		}
