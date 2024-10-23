@@ -166,10 +166,6 @@ func OnRefreshOrAddNotification(n *model.Notification) {
 
 // AddNotificationToList 添加通知方式到map中
 func AddNotificationToList(n *model.Notification) {
-	// 当前 Tag 不存在，创建对应该 Tag 的 子 map 后再添加
-	//if _, ok := NotificationList[n.Tag]; !ok {
-	//	NotificationList[n.Tag] = make(map[uint64]*model.Notification)
-	//}
 	NotificationMap[n.ID] = n
 }
 

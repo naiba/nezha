@@ -38,11 +38,6 @@ func loadCronTasks() {
 			Crons[crons[i].ID] = &crons[i]
 			continue
 		}
-		// 旧版本计划任务可能不存在通知组 为其添加默认通知组
-		//if crons[i].NotificationTag == "" {
-		//	crons[i].NotificationTag = "default"
-		//	DB.Save(crons[i])
-		//}
 		// 注册计划任务
 		crons[i].CronJobID, err = Cron.AddFunc(crons[i].Scheduler, CronTrigger(crons[i]))
 		if err == nil {

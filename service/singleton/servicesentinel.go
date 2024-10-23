@@ -186,11 +186,6 @@ func (ss *ServiceSentinel) loadMonitorHistory() {
 	defer ss.monitorsLock.Unlock()
 
 	for i := 0; i < len(monitors); i++ {
-		// 旧版本可能不存在通知组 为其设置默认组
-		//if monitors[i].NotificationTag == "" {
-		//	monitors[i].NotificationTag = "default"
-		//	DB.Save(monitors[i])
-		//}
 		task := *monitors[i]
 		// 通过cron定时将服务监控任务传递给任务调度管道
 		monitors[i].CronJobID, err = Cron.AddFunc(task.CronSpec(), func() {

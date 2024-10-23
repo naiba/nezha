@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
+	"gorm.io/gorm"
 )
 
 // List notification
@@ -150,11 +151,17 @@ func batchDeleteNotification(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
-	if err := singleton.DB.Unscoped().Delete(&model.Notification{}, "id in (?)", n).Error; err != nil {
-		return nil, newGormError("%v", err)
-	}
+	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Unscoped().Delete(&model.Notification{}, "id in (?)", n).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Delete(&model.NotificationGroupNotification{}, "notification_id in (?)", n).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 
-	if err := singleton.DB.Delete(&model.NotificationGroupNotification{}, "notification_id in (?)", n).Error; err != nil {
+	if err != nil {
 		return nil, newGormError("%v", err)
 	}
 

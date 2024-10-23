@@ -67,11 +67,6 @@ func AlertSentinelStart() {
 		panic(err)
 	}
 	for _, alert := range Alerts {
-		// 旧版本可能不存在通知组 为其添加默认值
-		//if alert.NotificationTag == "" {
-		//	alert.NotificationTag = "default"
-		//	DB.Save(alert)
-		//}
 		alertsStore[alert.ID] = make(map[uint64][][]interface{})
 		alertsPrevState[alert.ID] = make(map[uint64]uint)
 		addCycleTransferStatsInfo(alert)
