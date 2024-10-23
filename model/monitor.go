@@ -46,27 +46,28 @@ const (
 
 type Monitor struct {
 	Common
-	Name                string
-	Type                uint8
-	Target              string
-	SkipServersRaw      string
-	Duration            uint64
-	Notify              bool
-	NotificationGroupID uint64 // 当前服务监控所属的通知组 ID
-	Cover               uint8
+	Name                string `json:"name,omitempty"`
+	Type                uint8  `json:"type,omitempty"`
+	Target              string `json:"target,omitempty"`
+	SkipServersRaw      string `json:"-"`
+	Duration            uint64 `json:"duration,omitempty"`
+	Notify              bool   `json:"notify,omitempty"`
+	NotificationGroupID uint64 `json:"notification_group_id,omitempty"` // 当前服务监控所属的通知组 ID
+	Cover               uint8  `json:"cover,omitempty"`
 
-	EnableTriggerTask      bool     `gorm:"default: false"`
-	EnableShowInService    bool     `gorm:"default: false"`
-	FailTriggerTasksRaw    string   `gorm:"default:'[]'"`
-	RecoverTriggerTasksRaw string   `gorm:"default:'[]'"`
-	FailTriggerTasks       []uint64 `gorm:"-" json:"-"` // 失败时执行的触发任务id
-	RecoverTriggerTasks    []uint64 `gorm:"-" json:"-"` // 恢复时执行的触发任务id
+	EnableTriggerTask      bool   `gorm:"default: false" json:"enable_trigger_task,omitempty"`
+	EnableShowInService    bool   `gorm:"default: false" json:"enable_show_in_service,omitempty"`
+	FailTriggerTasksRaw    string `gorm:"default:'[]'" json:"-"`
+	RecoverTriggerTasksRaw string `gorm:"default:'[]'" json:"-"`
 
-	MinLatency    float32
-	MaxLatency    float32
-	LatencyNotify bool
+	FailTriggerTasks    []uint64 `gorm:"-" json:"fail_trigger_tasks"`    // 失败时执行的触发任务id
+	RecoverTriggerTasks []uint64 `gorm:"-" json:"recover_trigger_tasks"` // 恢复时执行的触发任务id
 
-	SkipServers map[uint64]bool `gorm:"-" json:"-"`
+	MinLatency    float32 `json:"min_latency,omitempty"`
+	MaxLatency    float32 `json:"max_latency,omitempty"`
+	LatencyNotify bool    `json:"latency_notify,omitempty"`
+
+	SkipServers map[uint64]bool `gorm:"-" json:"skip_servers"`
 	CronJobID   cron.EntryID    `gorm:"-" json:"-"`
 }
 
@@ -88,7 +89,11 @@ func (m *Monitor) CronSpec() string {
 }
 
 func (m *Monitor) BeforeSave(tx *gorm.DB) error {
-
+	if data, err := utils.Json.Marshal(m.SkipServers); err != nil {
+		return err
+	} else {
+		m.SkipServersRaw = string(data)
+	}
 	if data, err := utils.Json.Marshal(m.FailTriggerTasks); err != nil {
 		return err
 	} else {
@@ -104,13 +109,9 @@ func (m *Monitor) BeforeSave(tx *gorm.DB) error {
 
 func (m *Monitor) AfterFind(tx *gorm.DB) error {
 	m.SkipServers = make(map[uint64]bool)
-	var skipServers []uint64
-	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
+	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &m.SkipServers); err != nil {
 		log.Println("NEZHA>> Monitor.AfterFind:", err)
 		return nil
-	}
-	for i := 0; i < len(skipServers); i++ {
-		m.SkipServers[skipServers[i]] = true
 	}
 
 	// 加载触发任务列表
@@ -127,16 +128,4 @@ func (m *Monitor) AfterFind(tx *gorm.DB) error {
 // IsServiceSentinelNeeded 判断该任务类型是否需要进行服务监控 需要则返回true
 func IsServiceSentinelNeeded(t uint64) bool {
 	return t != TaskTypeCommand && t != TaskTypeTerminalGRPC && t != TaskTypeUpgrade
-}
-
-func (m *Monitor) InitSkipServers() error {
-	var skipServers []uint64
-	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &skipServers); err != nil {
-		return err
-	}
-	m.SkipServers = make(map[uint64]bool)
-	for i := 0; i < len(skipServers); i++ {
-		m.SkipServers[skipServers[i]] = true
-	}
-	return nil
 }

@@ -264,7 +264,7 @@ func (ss *ServiceSentinel) OnMonitorUpdate(m model.Monitor) error {
 	return nil
 }
 
-func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
+func (ss *ServiceSentinel) OnMonitorDelete(ids []uint64) {
 	ss.serviceResponseDataStoreLock.Lock()
 	defer ss.serviceResponseDataStoreLock.Unlock()
 	ss.monthlyStatusLock.Lock()
@@ -272,20 +272,22 @@ func (ss *ServiceSentinel) OnMonitorDelete(id uint64) {
 	ss.monitorsLock.Lock()
 	defer ss.monitorsLock.Unlock()
 
-	delete(ss.serviceCurrentStatusIndex, id)
-	delete(ss.serviceCurrentStatusData, id)
-	delete(ss.lastStatus, id)
-	delete(ss.serviceResponseDataStoreCurrentUp, id)
-	delete(ss.serviceResponseDataStoreCurrentDown, id)
-	delete(ss.serviceResponseDataStoreCurrentAvgDelay, id)
-	delete(ss.sslCertCache, id)
-	delete(ss.serviceStatusToday, id)
+	for _, id := range ids {
+		delete(ss.serviceCurrentStatusIndex, id)
+		delete(ss.serviceCurrentStatusData, id)
+		delete(ss.lastStatus, id)
+		delete(ss.serviceResponseDataStoreCurrentUp, id)
+		delete(ss.serviceResponseDataStoreCurrentDown, id)
+		delete(ss.serviceResponseDataStoreCurrentAvgDelay, id)
+		delete(ss.sslCertCache, id)
+		delete(ss.serviceStatusToday, id)
 
-	// 停掉定时任务
-	Cron.Remove(ss.monitors[id].CronJobID)
-	delete(ss.monitors, id)
+		// 停掉定时任务
+		Cron.Remove(ss.monitors[id].CronJobID)
+		delete(ss.monitors, id)
 
-	delete(ss.monthlyStatus, id)
+		delete(ss.monthlyStatus, id)
+	}
 }
 
 func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceItemResponse {

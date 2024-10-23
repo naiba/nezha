@@ -20,12 +20,10 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server [get]
-func listServer(c *gin.Context) ([]model.Server, error) {
-	var servers []model.Server
-	if err := singleton.DB.Find(&servers).Error; err != nil {
-		return nil, newGormError("%v", err)
-	}
-	return servers, nil
+func listServer(c *gin.Context) ([]*model.Server, error) {
+	singleton.SortedServerLock.RLock()
+	defer singleton.SortedServerLock.RUnlock()
+	return singleton.SortedServerList, nil
 }
 
 // Edit server

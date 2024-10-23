@@ -21,8 +21,6 @@ func (mp *memberPage) serve() {
 	// 	// Btn:        singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Login"}),
 	// 	Redirect: "/login",
 	// }))
-	mr.GET("/server", mp.server)
-	mr.GET("/monitor", mp.monitor)
 	mr.GET("/cron", mp.cron)
 	mr.GET("/notification", mp.notification)
 	mr.GET("/ddns", mp.ddns)
@@ -37,22 +35,6 @@ func (mp *memberPage) api(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard-", gin.H{
 		// "title":  singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ApiManagement"}),
 		"Tokens": singleton.ApiTokenList,
-	})
-}
-
-func (mp *memberPage) server(c *gin.Context) {
-	singleton.SortedServerLock.RLock()
-	defer singleton.SortedServerLock.RUnlock()
-	c.HTML(http.StatusOK, "dashboard-", gin.H{
-		// "Title":   singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServersManagement"}),
-		"Servers": singleton.SortedServerList,
-	})
-}
-
-func (mp *memberPage) monitor(c *gin.Context) {
-	c.HTML(http.StatusOK, "dashboard-", gin.H{
-		// "Title":    singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesManagement"}),
-		"Monitors": singleton.ServiceSentinelShared.Monitors(),
 	})
 }
 

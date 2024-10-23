@@ -32,7 +32,6 @@ func (ma *memberAPI) serve() {
 	// 	Btn:        "点此登录",
 	// 	Redirect:   "/login",
 	// }))
-	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
 	mr.GET("/cron/:id/manual", ma.manualTrigger)
 	mr.POST("/force-update", ma.forceUpdate)
@@ -179,12 +178,7 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		if err == nil {
 			singleton.OnNATUpdate()
 		}
-	case "monitor":
-		err = singleton.DB.Unscoped().Delete(&model.Monitor{}, "id = ?", id).Error
-		if err == nil {
-			singleton.ServiceSentinelShared.OnMonitorDelete(id)
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ?", id).Error
-		}
+
 	case "cron":
 		err = singleton.DB.Unscoped().Delete(&model.Cron{}, "id = ?", id).Error
 		if err == nil {
@@ -206,87 +200,6 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		c.JSON(http.StatusOK, model.Response{
 			Code:    http.StatusBadRequest,
 			Message: fmt.Sprintf("数据库错误：%s", err),
-		})
-		return
-	}
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-}
-
-type monitorForm struct {
-	ID     uint64
-	Name   string
-	Target string
-	Type   uint8
-	Cover  uint8
-	Notify string
-	//NotificationTag        string
-	SkipServersRaw         string
-	Duration               uint64
-	MinLatency             float32
-	MaxLatency             float32
-	LatencyNotify          string
-	EnableTriggerTask      string
-	EnableShowInService    string
-	FailTriggerTasksRaw    string
-	RecoverTriggerTasksRaw string
-}
-
-func (ma *memberAPI) addOrEditMonitor(c *gin.Context) {
-	var mf monitorForm
-	var m model.Monitor
-	err := c.ShouldBindJSON(&mf)
-	if err == nil {
-		m.Name = mf.Name
-		m.Target = strings.TrimSpace(mf.Target)
-		m.Type = mf.Type
-		m.ID = mf.ID
-		m.SkipServersRaw = mf.SkipServersRaw
-		m.Cover = mf.Cover
-		m.Notify = mf.Notify == "on"
-		//m.NotificationTag = mf.NotificationTag
-		m.Duration = mf.Duration
-		m.LatencyNotify = mf.LatencyNotify == "on"
-		m.MinLatency = mf.MinLatency
-		m.MaxLatency = mf.MaxLatency
-		m.EnableShowInService = mf.EnableShowInService == "on"
-		m.EnableTriggerTask = mf.EnableTriggerTask == "on"
-		m.RecoverTriggerTasksRaw = mf.RecoverTriggerTasksRaw
-		m.FailTriggerTasksRaw = mf.FailTriggerTasksRaw
-		err = m.InitSkipServers()
-	}
-	if err == nil {
-		// 保证NotificationTag不为空
-		//if m.NotificationTag == "" {
-		//	m.NotificationTag = "default"
-		//}
-		err = utils.Json.Unmarshal([]byte(mf.FailTriggerTasksRaw), &m.FailTriggerTasks)
-	}
-	if err == nil {
-		err = utils.Json.Unmarshal([]byte(mf.RecoverTriggerTasksRaw), &m.RecoverTriggerTasks)
-	}
-	if err == nil {
-		if m.ID == 0 {
-			err = singleton.DB.Create(&m).Error
-		} else {
-			err = singleton.DB.Save(&m).Error
-		}
-	}
-	if err == nil {
-		if m.Cover == 0 {
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
-		} else {
-			err = singleton.DB.Unscoped().Delete(&model.MonitorHistory{}, "monitor_id = ? and server_id not in (?)", m.ID, strings.Split(m.SkipServersRaw[1:len(m.SkipServersRaw)-1], ",")).Error
-		}
-	}
-	if err == nil {
-		err = singleton.ServiceSentinelShared.OnMonitorUpdate(m)
-	}
-	if err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("请求错误：%s", err),
 		})
 		return
 	}
