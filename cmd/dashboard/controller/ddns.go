@@ -37,8 +37,8 @@ func createDDNS(c *gin.Context) (uint64, error) {
 	}
 
 	p.Name = df.Name
-	enableIPv4 := df.EnableIPv4 == "on"
-	enableIPv6 := df.EnableIPv6 == "on"
+	enableIPv4 := df.EnableIPv4
+	enableIPv6 := df.EnableIPv6
 	p.EnableIPv4 = &enableIPv4
 	p.EnableIPv6 = &enableIPv6
 	p.MaxRetries = df.MaxRetries
@@ -107,8 +107,8 @@ func updateDDNS(c *gin.Context) (any, error) {
 
 	p.Name = df.Name
 	p.ID = id
-	enableIPv4 := df.EnableIPv4 == "on"
-	enableIPv6 := df.EnableIPv6 == "on"
+	enableIPv4 := df.EnableIPv4
+	enableIPv6 := df.EnableIPv6
 	p.EnableIPv4 = &enableIPv4
 	p.EnableIPv6 = &enableIPv6
 	p.MaxRetries = df.MaxRetries

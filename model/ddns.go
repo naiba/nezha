@@ -49,8 +49,8 @@ func (d *DDNSProfile) AfterFind(tx *gorm.DB) error {
 type DDNSForm struct {
 	ID                 uint64 `json:"id,omitempty"`
 	MaxRetries         uint64 `json:"max_retries,omitempty"`
-	EnableIPv4         string `json:"enable_ipv4,omitempty"`
-	EnableIPv6         string `json:"enable_ipv6,omitempty"`
+	EnableIPv4         bool   `json:"enable_ipv4,omitempty"`
+	EnableIPv6         bool   `json:"enable_ipv6,omitempty"`
 	Name               string `json:"name,omitempty"`
 	Provider           string `json:"provider,omitempty"`
 	DomainsRaw         string `json:"domains_raw,omitempty"`
