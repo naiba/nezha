@@ -72,6 +72,7 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/server-group/:id", commonHandler(updateServerGroup))
 	auth.POST("/batch-delete/server-group", commonHandler(batchDeleteServerGroup))
 
+	auth.GET("/server", commonHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 

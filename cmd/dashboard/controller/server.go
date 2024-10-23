@@ -12,6 +12,26 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
+// List server
+// @Summary List server
+// @Security BearerAuth
+// @Schemes
+// @Description List server
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[any]
+// @Router /server [get]
+func listServer(c *gin.Context) error {
+	var servers []model.Server
+	if err := singleton.DB.Find(&servers).Error; err != nil {
+		return newGormError("%v", err)
+	}
+	c.JSON(http.StatusOK, model.CommonResponse[any]{
+		Data: servers,
+	})
+	return nil
+}
+
 // Edit server
 // @Summary Edit server
 // @Security BearerAuth
