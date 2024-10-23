@@ -17,14 +17,12 @@ import (
 // @Description List notification
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[[]model.Notification]
 // @Router /notification [get]
 func listNotification(c *gin.Context) ([]model.Notification, error) {
-	singleton.NotificationsLock.RLock()
-	defer singleton.NotificationsLock.RUnlock()
-	notifications := make([]model.Notification, 0, len(singleton.NotificationMap))
-	for _, n := range singleton.NotificationMap {
-		notifications = append(notifications, *n)
+	var notifications []model.Notification
+	if err := singleton.DB.Find(&notifications).Error; err != nil {
+		return nil, newGormError("%v", err)
 	}
 	return notifications, nil
 }

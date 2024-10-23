@@ -18,7 +18,7 @@ import (
 // @Description List server
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[[]model.Server]
 // @Router /server [get]
 func listServer(c *gin.Context) ([]model.Server, error) {
 	var servers []model.Server
