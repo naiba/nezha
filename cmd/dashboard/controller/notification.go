@@ -154,6 +154,10 @@ func batchDeleteNotification(c *gin.Context) (any, error) {
 		return nil, newGormError("%v", err)
 	}
 
+	if err := singleton.DB.Delete(&model.NotificationGroupNotification{}, "notification_id in (?)", n).Error; err != nil {
+		return nil, newGormError("%v", err)
+	}
+
 	singleton.OnDeleteNotification(n)
 	return nil, nil
 }

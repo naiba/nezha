@@ -11,13 +11,12 @@ import (
 
 const (
 	firstNotificationDelay = time.Minute * 15
-	defaultGroupID         = 0
 )
 
 // 通知方式
 var (
-	NotificationList      map[uint64]map[uint64]*model.Notification // [NotificationGroupID][NotificationID] -> model.Notification
-	NotificationIDToGroup map[uint64]uint64                         // [NotificationID] -> NotificationGroupID
+	NotificationList       map[uint64]map[uint64]*model.Notification // [NotificationGroupID][NotificationID] -> model.Notification
+	NotificationIDToGroups map[uint64]map[uint64]struct{}            // [NotificationID] -> NotificationGroupID
 
 	NotificationMap   map[uint64]*model.Notification
 	NotificationGroup map[uint64]string // [NotificationGroupID] -> [NotificationGroupName]
@@ -29,11 +28,8 @@ var (
 // InitNotification 初始化 GroupID <-> ID <-> Notification 的映射
 func InitNotification() {
 	NotificationList = make(map[uint64]map[uint64]*model.Notification)
-	NotificationIDToGroup = make(map[uint64]uint64)
+	NotificationIDToGroups = make(map[uint64]map[uint64]struct{})
 	NotificationGroup = make(map[uint64]string)
-	// 默认分组
-	NotificationList[defaultGroupID] = make(map[uint64]*model.Notification)
-	NotificationGroup[defaultGroupID] = "default"
 }
 
 // loadNotifications 从 DB 初始化通知方式相关参数
@@ -67,16 +63,13 @@ func loadNotifications() {
 		for _, nid := range nids {
 			if n, ok := NotificationMap[nid]; ok {
 				NotificationList[gid][n.ID] = n
-				NotificationIDToGroup[n.ID] = gid
-			}
-		}
-	}
 
-	for _, n := range notifications {
-		if _, ok := NotificationIDToGroup[n.ID]; !ok {
-			ncopy := n
-			NotificationList[defaultGroupID][n.ID] = &ncopy
-			NotificationIDToGroup[n.ID] = defaultGroupID
+				if NotificationIDToGroups[n.ID] == nil {
+					NotificationIDToGroups[n.ID] = make(map[uint64]struct{})
+				}
+
+				NotificationIDToGroups[n.ID][gid] = struct{}{}
+			}
 		}
 	}
 }
@@ -107,10 +100,10 @@ func AddNotificationGroupToList(ng *model.NotificationGroup, ngn []uint64) {
 	NotificationList[ng.ID] = make(map[uint64]*model.Notification, len(ngn))
 
 	for _, n := range ngn {
-		// 确认新的绑定关系，从默认分组中移出
-		delete(NotificationList[defaultGroupID], n)
-
-		NotificationIDToGroup[n] = ng.ID
+		if NotificationIDToGroups[n] == nil {
+			NotificationIDToGroups[n] = make(map[uint64]struct{})
+		}
+		NotificationIDToGroups[n][ng.ID] = struct{}{}
 		NotificationList[ng.ID][n] = NotificationMap[n]
 	}
 }
@@ -127,15 +120,18 @@ func UpdateNotificationGroupInList(ng *model.NotificationGroup, ngn []uint64) {
 	NotificationList[ng.ID] = make(map[uint64]*model.Notification)
 	for _, nid := range ngn {
 		NotificationList[ng.ID][nid] = NotificationMap[nid]
-		NotificationIDToGroup[nid] = ng.ID
+		if NotificationIDToGroups[nid] == nil {
+			NotificationIDToGroups[nid] = make(map[uint64]struct{})
+		}
+		NotificationIDToGroups[nid][ng.ID] = struct{}{}
 	}
 
 	for oldID := range oldList {
-		if _, exists := NotificationList[ng.ID][oldID]; !exists {
-			delete(NotificationIDToGroup, oldID)
-			// 删除的 ID 回落到默认分组
-			NotificationIDToGroup[oldID] = defaultGroupID
-			NotificationList[defaultGroupID][oldID] = NotificationMap[oldID]
+		if _, ok := NotificationList[ng.ID][oldID]; !ok {
+			delete(NotificationIDToGroups[oldID], ng.ID)
+			if len(NotificationIDToGroups[oldID]) == 0 {
+				delete(NotificationIDToGroups, oldID)
+			}
 		}
 	}
 }
@@ -147,13 +143,6 @@ func OnDeleteNotificationGroup(gids []uint64) {
 
 	for _, gid := range gids {
 		delete(NotificationGroup, gid)
-
-		// 删除的通知组下所有通知转移到默认分组
-		for nid, notification := range NotificationList[gid] {
-			NotificationList[defaultGroupID][nid] = notification
-			NotificationIDToGroup[nid] = defaultGroupID
-		}
-
 		delete(NotificationList, gid)
 	}
 }
@@ -164,14 +153,14 @@ func OnRefreshOrAddNotification(n *model.Notification) {
 	defer NotificationsLock.Unlock()
 
 	var isEdit bool
-	gid, ok := NotificationIDToGroup[n.ID]
+	_, ok := NotificationMap[n.ID]
 	if ok {
 		isEdit = true
 	}
 	if !isEdit {
 		AddNotificationToList(n)
 	} else {
-		UpdateNotificationInList(n, gid)
+		UpdateNotificationInList(n)
 	}
 }
 
@@ -181,17 +170,18 @@ func AddNotificationToList(n *model.Notification) {
 	//if _, ok := NotificationList[n.Tag]; !ok {
 	//	NotificationList[n.Tag] = make(map[uint64]*model.Notification)
 	//}
-
-	// 新创建的通知方式添加到默认分组
 	NotificationMap[n.ID] = n
-	NotificationList[defaultGroupID][n.ID] = n
-	NotificationIDToGroup[n.ID] = defaultGroupID
 }
 
 // UpdateNotificationInList 在 map 中更新通知方式
-func UpdateNotificationInList(n *model.Notification, gid uint64) {
+func UpdateNotificationInList(n *model.Notification) {
 	NotificationMap[n.ID] = n
-	NotificationList[gid][n.ID] = n
+	// 如果已经与通知组有绑定关系，更新
+	if gids, ok := NotificationIDToGroups[n.ID]; ok {
+		for gid := range gids {
+			NotificationList[gid][n.ID] = n
+		}
+	}
 }
 
 // OnDeleteNotification 在map和表中删除通知方式
@@ -200,13 +190,14 @@ func OnDeleteNotification(id []uint64) {
 	defer NotificationsLock.Unlock()
 
 	for _, i := range id {
-		gid := NotificationIDToGroup[i]
-		delete(NotificationList[gid], i)
-		delete(NotificationIDToGroup, i)
-	}
-
-	if err := DB.Delete(&model.NotificationGroupNotification{}, "notification_id in (?)", id).Error; err != nil {
-		log.Println(err)
+		delete(NotificationMap, i)
+		// 如果绑定了通知组才删除
+		if gids, ok := NotificationIDToGroups[i]; ok {
+			for gid := range gids {
+				delete(NotificationList[gid], i)
+				delete(NotificationIDToGroups, i)
+			}
+		}
 	}
 }
 
