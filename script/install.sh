@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.20.1"
+NZ_VERSION="v0.20.2"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -538,6 +538,10 @@ modify_dashboard_config() {
         echo "正在下载服务文件"
         if [ "$os_alpine" != 1 ]; then
             _download="sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICE https://${GITHUB_RAW_URL}/script/nezha-dashboard.service >/dev/null 2>&1"
+            if ! eval "$_download"; then
+                err "文件下载失败，请检查本机能否连接 ${GITHUB_RAW_URL}"
+                return 0
+            fi
         else
             _download="sudo wget -t 2 -T 60 -O $NZ_DASHBOARD_SERVICERC https://${GITHUB_RAW_URL}/script/nezha-dashboard >/dev/null 2>&1"
             if ! eval "$_download"; then
@@ -823,7 +827,7 @@ show_usage() {
 }
 
 show_menu() {
-    echo "
+    printf "
     ${green}哪吒监控管理脚本${plain} ${red}${NZ_VERSION}${plain}
     --- https://github.com/naiba/nezha ---
     ${green}1.${plain}  安装面板端
@@ -844,7 +848,7 @@ show_menu() {
     ————————————————-
     ${green}0.${plain}  退出脚本
     "
-    printf "请输入选择 [0-13]: " && read -r num
+    echo && printf "请输入选择 [0-13]: " && read -r num
     case "${num}" in
         0)
             exit 0
