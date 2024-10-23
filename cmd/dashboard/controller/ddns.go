@@ -7,11 +7,34 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"golang.org/x/net/idna"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 )
+
+// List DDNS Profiles
+// @Summary List DDNS profiles
+// @Schemes
+// @Description List DDNS profiles
+// @Security BearerAuth
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[[]*model.DDNSProfile]
+// @Router /ddns [get]
+func listDDNS(c *gin.Context) ([]*model.DDNSProfile, error) {
+	var ddnsProfiles []*model.DDNSProfile
+
+	singleton.DDNSCacheLock.RLock()
+	defer singleton.DDNSCacheLock.RUnlock()
+
+	if err := copier.Copy(&ddnsProfiles, &singleton.DDNSList); err != nil {
+		return nil, err
+	}
+
+	return ddnsProfiles, nil
+}
 
 // Add DDNS profile
 // @Summary Add DDNS profile
@@ -66,7 +89,8 @@ func createDDNS(c *gin.Context) (uint64, error) {
 		return 0, newGormError("%v", err)
 	}
 
-	singleton.OnDDNSUpdate()
+	singleton.OnDDNSUpdate(&p)
+	singleton.UpdateDDNSList()
 
 	return p.ID, nil
 }
@@ -136,7 +160,8 @@ func updateDDNS(c *gin.Context) (any, error) {
 		return nil, newGormError("%v", err)
 	}
 
-	singleton.OnDDNSUpdate()
+	singleton.OnDDNSUpdate(&p)
+	singleton.UpdateDDNSList()
 
 	return nil, nil
 }
@@ -163,58 +188,10 @@ func batchDeleteDDNS(c *gin.Context) (any, error) {
 		return nil, newGormError("%v", err)
 	}
 
-	singleton.OnDDNSUpdate()
+	singleton.OnDDNSDelete(ddnsConfigs)
+	singleton.UpdateDDNSList()
 
 	return nil, nil
-}
-
-// List DDNS Profiles
-// @Summary List DDNS profiles
-// @Schemes
-// @Description List DDNS profiles
-// @Security BearerAuth
-// @Tags auth required
-// @param id query string false "Profile ID"
-// @Produce json
-// @Success 200 {object} model.CommonResponse[[]model.DDNSProfile]
-// @Router /ddns [get]
-func listDDNS(c *gin.Context) ([]model.DDNSProfile, error) {
-	var idList []uint64
-	idQuery := c.Query("id")
-
-	if idQuery != "" {
-		idListStr := strings.Split(idQuery, ",")
-		idList = make([]uint64, 0, len(idListStr))
-		for _, v := range idListStr {
-			id, err := strconv.ParseUint(v, 10, 64)
-			if err != nil {
-				return nil, err
-			}
-			idList = append(idList, id)
-		}
-	}
-
-	var ddnsProfiles []model.DDNSProfile
-
-	singleton.DDNSCacheLock.RLock()
-	if len(idList) > 0 {
-		ddnsProfiles = make([]model.DDNSProfile, 0, len(idList))
-		for _, id := range idList {
-			if profile, ok := singleton.DDNSCache[id]; ok {
-				ddnsProfiles = append(ddnsProfiles, *profile)
-			} else {
-				return nil, fmt.Errorf("profile id %d not found", id)
-			}
-		}
-	} else {
-		ddnsProfiles = make([]model.DDNSProfile, 0, len(singleton.DDNSCache))
-		for _, profile := range singleton.DDNSCache {
-			ddnsProfiles = append(ddnsProfiles, *profile)
-		}
-	}
-
-	singleton.DDNSCacheLock.RUnlock()
-	return ddnsProfiles, nil
 }
 
 // List DDNS Providers
