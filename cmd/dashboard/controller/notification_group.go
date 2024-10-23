@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"slices"
 	"strconv"
 
@@ -22,15 +21,15 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.NotificationGroupResponseItem]
 // @Router /notification-group [get]
-func listNotificationGroup(c *gin.Context) error {
+func listNotificationGroup(c *gin.Context) ([]model.NotificationGroupResponseItem, error) {
 	var ng []model.NotificationGroup
 	if err := singleton.DB.Find(&ng).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	var ngn []model.NotificationGroupNotification
 	if err := singleton.DB.Find(&ngn).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	groupNotifications := make(map[uint64][]uint64, len(ng))
@@ -49,11 +48,7 @@ func listNotificationGroup(c *gin.Context) error {
 		})
 	}
 
-	c.JSON(http.StatusOK, model.CommonResponse[[]model.NotificationGroupResponseItem]{
-		Success: true,
-		Data:    ngRes,
-	})
-	return nil
+	return ngRes, nil
 }
 
 // New notification group
@@ -67,10 +62,10 @@ func listNotificationGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification-group [post]
-func createNotificationGroup(c *gin.Context) error {
+func createNotificationGroup(c *gin.Context) (uint64, error) {
 	var ngf model.NotificationGroupForm
 	if err := c.ShouldBindJSON(&ngf); err != nil {
-		return err
+		return 0, err
 	}
 	ngf.Notifications = slices.Compact(ngf.Notifications)
 
@@ -79,14 +74,14 @@ func createNotificationGroup(c *gin.Context) error {
 
 	var count int64
 	if err := singleton.DB.Model(&model.Notification{}).Where("id in (?)", ngf.Notifications).Count(&count).Error; err != nil {
-		return err
+		return 0, newGormError("%v", err)
 	}
 
 	if count != int64(len(ngf.Notifications)) {
-		return fmt.Errorf("have invalid notification id")
+		return 0, fmt.Errorf("have invalid notification id")
 	}
 
-	singleton.DB.Transaction(func(tx *gorm.DB) error {
+	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&ng).Error; err != nil {
 			return err
 		}
@@ -100,12 +95,12 @@ func createNotificationGroup(c *gin.Context) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return 0, newGormError("%v", err)
+	}
 
 	singleton.OnRefreshOrAddNotificationGroup(&ng, ngf.Notifications)
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return ng.ID, nil
 }
 
 // Edit notification group
@@ -120,21 +115,21 @@ func createNotificationGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification-group/{id} [patch]
-func updateNotificationGroup(c *gin.Context) error {
+func updateNotificationGroup(c *gin.Context) (any, error) {
 	idStr := c.Param("id")
 
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var ngf model.NotificationGroupForm
 	if err := c.ShouldBindJSON(&ngf); err != nil {
-		return err
+		return nil, err
 	}
 	var ngDB model.NotificationGroup
 	if err := singleton.DB.First(&ngDB, id).Error; err != nil {
-		return fmt.Errorf("group id %d does not exist", id)
+		return nil, fmt.Errorf("group id %d does not exist", id)
 	}
 
 	ngDB.Name = ngf.Name
@@ -142,10 +137,10 @@ func updateNotificationGroup(c *gin.Context) error {
 
 	var count int64
 	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", ngf.Notifications).Count(&count).Error; err != nil {
-		return err
+		return nil, newGormError("%v", err)
 	}
 	if count != int64(len(ngf.Notifications)) {
-		return fmt.Errorf("have invalid notification id")
+		return nil, fmt.Errorf("have invalid notification id")
 	}
 
 	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
@@ -167,14 +162,11 @@ func updateNotificationGroup(c *gin.Context) error {
 		return nil
 	})
 	if err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnRefreshOrAddNotificationGroup(&ngDB, ngf.Notifications)
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return nil, nil
 }
 
 // Batch delete notification group
@@ -188,10 +180,10 @@ func updateNotificationGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/notification-group [post]
-func batchDeleteNotificationGroup(c *gin.Context) error {
+func batchDeleteNotificationGroup(c *gin.Context) (any, error) {
 	var ngn []uint64
 	if err := c.ShouldBindJSON(&ngn); err != nil {
-		return err
+		return nil, err
 	}
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
@@ -205,12 +197,9 @@ func batchDeleteNotificationGroup(c *gin.Context) error {
 	})
 
 	if err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnDeleteNotificationGroup(ngn)
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return nil, nil
 }

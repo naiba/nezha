@@ -49,8 +49,8 @@ type NotificationForm struct {
 	RequestType   int    `json:"request_type,omitempty"`
 	RequestHeader string `json:"request_header,omitempty"`
 	RequestBody   string `json:"request_body,omitempty"`
-	VerifySSL     string `json:"verify_ssl,omitempty"`
-	SkipCheck     string `json:"skip_check,omitempty"`
+	VerifySSL     bool   `json:"verify_ssl,omitempty"`
+	SkipCheck     bool   `json:"skip_check,omitempty"`
 }
 
 func (ns *NotificationServerBundle) reqURL(message string) string {

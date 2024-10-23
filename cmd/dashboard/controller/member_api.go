@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,11 +32,6 @@ func (ma *memberAPI) serve() {
 	// 	Btn:        "点此登录",
 	// 	Redirect:   "/login",
 	// }))
-
-	mr.GET("/search-server", ma.searchServer)
-	mr.GET("/search-tasks", ma.searchTask)
-	mr.GET("/search-ddns", ma.searchDDNS)
-	mr.POST("/server", ma.addOrEditServer)
 	mr.POST("/monitor", ma.addOrEditMonitor)
 	mr.POST("/cron", ma.addOrEditCron)
 	mr.GET("/cron/:id/manual", ma.manualTrigger)
@@ -53,13 +47,6 @@ func (ma *memberAPI) serve() {
 	mr.GET("/token", ma.getToken)
 	mr.POST("/token", ma.issueNewToken)
 	mr.DELETE("/token/:token", ma.deleteToken)
-
-	// API
-	v1 := ma.r.Group("v1")
-	{
-		apiv1 := &apiV1{v1}
-		apiv1.serve()
-	}
 }
 
 type apiResult struct {
@@ -222,141 +209,6 @@ func (ma *memberAPI) delete(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-}
-
-type searchResult struct {
-	Name  string `json:"name,omitempty"`
-	Value uint64 `json:"value,omitempty"`
-	Text  string `json:"text,omitempty"`
-}
-
-func (ma *memberAPI) searchServer(c *gin.Context) {
-	var servers []model.Server
-	likeWord := "%" + c.Query("word") + "%"
-	singleton.DB.Select("id,name").Where("id = ? OR name LIKE ? OR tag LIKE ? OR note LIKE ?",
-		c.Query("word"), likeWord, likeWord, likeWord).Find(&servers)
-
-	var resp []searchResult
-	for i := 0; i < len(servers); i++ {
-		resp = append(resp, searchResult{
-			Value: servers[i].ID,
-			Name:  servers[i].Name,
-			Text:  servers[i].Name,
-		})
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"results": resp,
-	})
-}
-
-func (ma *memberAPI) searchTask(c *gin.Context) {
-	var tasks []model.Cron
-	likeWord := "%" + c.Query("word") + "%"
-	singleton.DB.Select("id,name").Where("id = ? OR name LIKE ?",
-		c.Query("word"), likeWord).Find(&tasks)
-
-	var resp []searchResult
-	for i := 0; i < len(tasks); i++ {
-		resp = append(resp, searchResult{
-			Value: tasks[i].ID,
-			Name:  tasks[i].Name,
-			Text:  tasks[i].Name,
-		})
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"results": resp,
-	})
-}
-
-func (ma *memberAPI) searchDDNS(c *gin.Context) {
-	var ddns []model.DDNSProfile
-	likeWord := "%" + c.Query("word") + "%"
-	singleton.DB.Select("id,name").Where("id = ? OR name LIKE ?",
-		c.Query("word"), likeWord).Find(&ddns)
-
-	var resp []searchResult
-	for i := 0; i < len(ddns); i++ {
-		resp = append(resp, searchResult{
-			Value: ddns[i].ID,
-			Name:  ddns[i].Name,
-			Text:  ddns[i].Name,
-		})
-	}
-
-	c.JSON(http.StatusOK, map[string]interface{}{
-		"success": true,
-		"results": resp,
-	})
-}
-
-type serverForm struct {
-	ID              uint64
-	Name            string `binding:"required"`
-	DisplayIndex    int
-	Secret          string
-	Tag             string
-	Note            string
-	PublicNote      string
-	HideForGuest    string
-	EnableDDNS      string
-	DDNSProfilesRaw string
-}
-
-func (ma *memberAPI) addOrEditServer(c *gin.Context) {
-	var sf serverForm
-	var s model.Server
-	var isEdit bool
-	err := c.ShouldBindJSON(&sf)
-	if err == nil {
-		s.Name = sf.Name
-		s.DisplayIndex = sf.DisplayIndex
-		s.ID = sf.ID
-		s.Note = sf.Note
-		s.PublicNote = sf.PublicNote
-		s.HideForGuest = sf.HideForGuest == "on"
-		s.EnableDDNS = sf.EnableDDNS == "on"
-		s.DDNSProfilesRaw = sf.DDNSProfilesRaw
-		err = utils.Json.Unmarshal([]byte(sf.DDNSProfilesRaw), &s.DDNSProfiles)
-		if err == nil {
-			if s.ID == 0 {
-				_, err = utils.GenerateRandomString(18)
-				if err == nil {
-					err = singleton.DB.Create(&s).Error
-				}
-			} else {
-				isEdit = true
-				err = singleton.DB.Save(&s).Error
-			}
-		}
-	}
-	if err != nil {
-		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("请求错误：%s", err),
-		})
-		return
-	}
-	if isEdit {
-		singleton.ServerLock.Lock()
-		s.CopyFromRunningServer(singleton.ServerList[s.ID])
-		singleton.ServerList[s.ID] = &s
-		singleton.ServerLock.Unlock()
-	} else {
-		s.Host = &model.Host{}
-		s.State = &model.HostState{}
-		s.TaskCloseLock = new(sync.Mutex)
-		singleton.ServerLock.Lock()
-		singleton.ServerList[s.ID] = &s
-		singleton.ServerLock.Unlock()
-	}
-	singleton.ReSortServer()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

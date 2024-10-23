@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,10 +20,10 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification [post]
-func createNotification(c *gin.Context) error {
+func createNotification(c *gin.Context) (uint64, error) {
 	var nf model.NotificationForm
 	if err := c.ShouldBindJSON(&nf); err != nil {
-		return err
+		return 0, err
 	}
 
 	var n model.Notification
@@ -34,7 +33,7 @@ func createNotification(c *gin.Context) error {
 	n.RequestHeader = nf.RequestHeader
 	n.RequestBody = nf.RequestBody
 	n.URL = nf.URL
-	verifySSL := nf.VerifySSL == "on"
+	verifySSL := nf.VerifySSL
 	n.VerifySSL = &verifySSL
 	n.ID = nf.ID
 	ns := model.NotificationServerBundle{
@@ -43,21 +42,18 @@ func createNotification(c *gin.Context) error {
 		Loc:          singleton.Loc,
 	}
 	// 未勾选跳过检查
-	if nf.SkipCheck != "on" {
+	if !nf.SkipCheck {
 		if err := ns.Send("这是测试消息"); err != nil {
-			return err
+			return 0, err
 		}
 	}
 
 	if err := singleton.DB.Create(&n).Error; err != nil {
-		return newGormError("%v", err)
+		return 0, newGormError("%v", err)
 	}
 
 	singleton.OnRefreshOrAddNotification(&n)
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-	return nil
+	return n.ID, nil
 }
 
 // Edit notification
@@ -72,20 +68,20 @@ func createNotification(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification/{id} [patch]
-func updateNotification(c *gin.Context) error {
+func updateNotification(c *gin.Context) (any, error) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	var nf model.NotificationForm
 	if err := c.ShouldBindJSON(&nf); err != nil {
-		return err
+		return nil, err
 	}
 
 	var n model.Notification
 	if err := singleton.DB.First(&n, id).Error; err != nil {
-		return fmt.Errorf("notification id %d does not exist", id)
+		return nil, fmt.Errorf("notification id %d does not exist", id)
 	}
 
 	n.Name = nf.Name
@@ -94,7 +90,7 @@ func updateNotification(c *gin.Context) error {
 	n.RequestHeader = nf.RequestHeader
 	n.RequestBody = nf.RequestBody
 	n.URL = nf.URL
-	verifySSL := nf.VerifySSL == "on"
+	verifySSL := nf.VerifySSL
 	n.VerifySSL = &verifySSL
 	n.ID = nf.ID
 	ns := model.NotificationServerBundle{
@@ -103,21 +99,18 @@ func updateNotification(c *gin.Context) error {
 		Loc:          singleton.Loc,
 	}
 	// 未勾选跳过检查
-	if nf.SkipCheck != "on" {
+	if !nf.SkipCheck {
 		if err := ns.Send("这是测试消息"); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
 	if err := singleton.DB.Save(&n).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnRefreshOrAddNotification(&n)
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
-	return nil
+	return nil, nil
 }
 
 // Batch delete notifications
@@ -131,20 +124,17 @@ func updateNotification(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/notification [post]
-func batchDeleteNotification(c *gin.Context) error {
+func batchDeleteNotification(c *gin.Context) (any, error) {
 	var n []uint64
 
 	if err := c.ShouldBindJSON(&n); err != nil {
-		return err
+		return nil, err
 	}
 
 	if err := singleton.DB.Unscoped().Delete(&model.Notification{}, "id in (?)", n).Error; err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnDeleteNotification(n)
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return nil, nil
 }

@@ -27,10 +27,10 @@ var upgrader = websocket.Upgrader{
 // @Produce json
 // @Success 200 {object} model.StreamServerData
 // @Router /ws/server [get]
-func serverStream(c *gin.Context) error {
+func serverStream(c *gin.Context) (any, error) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer conn.Close()
 	count := 0
@@ -51,7 +51,7 @@ func serverStream(c *gin.Context) error {
 		}
 		time.Sleep(time.Second * 2)
 	}
-	return nil
+	return nil, nil
 }
 
 var requestGroup singleflight.Group

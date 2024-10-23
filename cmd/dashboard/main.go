@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/http"
+	"strings"
 	"time"
 	_ "time/tzdata"
 
 	"github.com/ory/graceful"
-	"github.com/soheilhy/cmux"
 	flag "github.com/spf13/pflag"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 
 	"github.com/naiba/nezha/cmd/dashboard/controller"
 	"github.com/naiba/nezha/cmd/dashboard/rpc"
@@ -110,37 +113,33 @@ func main() {
 		log.Fatal(err)
 	}
 
-	m := cmux.New(l)
-	grpcL := m.Match(cmux.HTTP2HeaderField("content-type", "application/grpc"))
-	httpL := m.Match(cmux.HTTP1Fast())
-
 	singleton.CleanMonitorHistory()
-	go rpc.ServeRPC(grpcL)
 	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go rpc.DispatchKeepalive()
 	go singleton.AlertSentinelStart()
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
-	srv := controller.ServeWeb()
+
+	grpcHandler := rpc.ServeRPC()
+	httpHandler := controller.ServeWeb()
+
+	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
+	http2Server := &http2.Server{}
+	muxServer := &http.Server{Handler: h2c.NewHandler(muxHandler, http2Server), ReadHeaderTimeout: time.Second * 5}
 
 	go dispatchReportInfoTask()
 
-	go func() {
-		if err := graceful.Graceful(func() error {
-			log.Println("NEZHA>> Dashboard::START", singleton.Conf.ListenPort)
-			return srv.Serve(httpL)
-		}, func(c context.Context) error {
-			log.Println("NEZHA>> Graceful::START")
-			singleton.RecordTransferHourlyUsage()
-			log.Println("NEZHA>> Graceful::END")
-			m.Close()
-			return nil
-		}); err != nil {
-			log.Printf("NEZHA>> ERROR: %v", err)
-		}
-	}()
-
-	m.Serve()
+	if err := graceful.Graceful(func() error {
+		log.Println("NEZHA>> Dashboard::START", singleton.Conf.ListenPort)
+		return muxServer.Serve(l)
+	}, func(c context.Context) error {
+		log.Println("NEZHA>> Graceful::START")
+		singleton.RecordTransferHourlyUsage()
+		log.Println("NEZHA>> Graceful::END")
+		return muxServer.Shutdown(c)
+	}); err != nil {
+		log.Printf("NEZHA>> ERROR: %v", err)
+	}
 }
 
 func dispatchReportInfoTask() {
@@ -156,4 +155,15 @@ func dispatchReportInfoTask() {
 			Data: "",
 		})
 	}
+}
+
+func newHTTPandGRPCMux(httpHandler http.Handler, grpcHandler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.ProtoMajor == 2 && r.Header.Get("Content-Type") == "application/grpc" &&
+			strings.HasPrefix(r.URL.Path, "/"+proto.NezhaService_ServiceDesc.ServiceName) {
+			grpcHandler.ServeHTTP(w, r)
+			return
+		}
+		httpHandler.ServeHTTP(w, r)
+	})
 }

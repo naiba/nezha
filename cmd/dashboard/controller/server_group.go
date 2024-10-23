@@ -2,7 +2,6 @@ package controller
 
 import (
 	"fmt"
-	"net/http"
 	"slices"
 
 	"github.com/gin-gonic/gin"
@@ -21,16 +20,16 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.ServerGroupResponseItem]
 // @Router /server-group [get]
-func listServerGroup(c *gin.Context) error {
+func listServerGroup(c *gin.Context) ([]model.ServerGroupResponseItem, error) {
 	var sg []model.ServerGroup
 	if err := singleton.DB.Find(&sg).Error; err != nil {
-		return err
+		return nil, err
 	}
 
 	groupServers := make(map[uint64][]uint64, 0)
 	var sgs []model.ServerGroupServer
 	if err := singleton.DB.Find(&sgs).Error; err != nil {
-		return err
+		return nil, err
 	}
 	for _, s := range sgs {
 		if _, ok := groupServers[s.ServerGroupId]; !ok {
@@ -47,11 +46,7 @@ func listServerGroup(c *gin.Context) error {
 		})
 	}
 
-	c.JSON(http.StatusOK, model.CommonResponse[[]model.ServerGroupResponseItem]{
-		Success: true,
-		Data:    sgRes,
-	})
-	return nil
+	return sgRes, nil
 }
 
 // New server group
@@ -63,12 +58,12 @@ func listServerGroup(c *gin.Context) error {
 // @Accept json
 // @Param body body model.ServerGroupForm true "ServerGroupForm"
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[uint64]
 // @Router /server-group [post]
-func createServerGroup(c *gin.Context) error {
+func createServerGroup(c *gin.Context) (uint64, error) {
 	var sgf model.ServerGroupForm
 	if err := c.ShouldBindJSON(&sgf); err != nil {
-		return err
+		return 0, err
 	}
 	sgf.Servers = slices.Compact(sgf.Servers)
 
@@ -76,14 +71,14 @@ func createServerGroup(c *gin.Context) error {
 	sg.Name = sgf.Name
 
 	var count int64
-	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sgf.Servers).Count(&count).Error; err != nil {
-		return err
+	if err := singleton.DB.Model(&model.Server{}).Where("id = ?", sgf.Servers).Count(&count).Error; err != nil {
+		return 0, newGormError("%v", err)
 	}
 	if count != int64(len(sgf.Servers)) {
-		return fmt.Errorf("have invalid server id")
+		return 0, fmt.Errorf("have invalid server id")
 	}
 
-	singleton.DB.Transaction(func(tx *gorm.DB) error {
+	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&sg).Error; err != nil {
 			return err
 		}
@@ -97,11 +92,11 @@ func createServerGroup(c *gin.Context) error {
 		}
 		return nil
 	})
+	if err != nil {
+		return 0, newGormError("%v", err)
+	}
 
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return sg.ID, nil
 }
 
 // Edit server group
@@ -116,26 +111,26 @@ func createServerGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /server-group/{id} [patch]
-func updateServerGroup(c *gin.Context) error {
+func updateServerGroup(c *gin.Context) (any, error) {
 	id := c.Param("id")
 	var sg model.ServerGroupForm
 	if err := c.ShouldBindJSON(&sg); err != nil {
-		return err
+		return nil, err
 	}
 	sg.Servers = slices.Compact(sg.Servers)
 
 	var sgDB model.ServerGroup
 	if err := singleton.DB.First(&sgDB, id).Error; err != nil {
-		return fmt.Errorf("group id %s does not exist", id)
+		return nil, fmt.Errorf("group id %s does not exist", id)
 	}
 	sgDB.Name = sg.Name
 
 	var count int64
-	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sg.Servers).Count(&count).Error; err != nil {
-		return err
+	if err := singleton.DB.Model(&model.Server{}).Where("id = ?", sg.Servers).Count(&count).Error; err != nil {
+		return nil, err
 	}
 	if count != int64(len(sg.Servers)) {
-		return fmt.Errorf("have invalid server id")
+		return nil, fmt.Errorf("have invalid server id")
 	}
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
@@ -157,13 +152,10 @@ func updateServerGroup(c *gin.Context) error {
 		return nil
 	})
 	if err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return nil, nil
 }
 
 // Batch delete server group
@@ -177,10 +169,10 @@ func updateServerGroup(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/server-group [post]
-func batchDeleteServerGroup(c *gin.Context) error {
+func batchDeleteServerGroup(c *gin.Context) (any, error) {
 	var sgs []uint64
 	if err := c.ShouldBindJSON(&sgs); err != nil {
-		return err
+		return nil, err
 	}
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
@@ -194,11 +186,8 @@ func batchDeleteServerGroup(c *gin.Context) error {
 	})
 
 	if err != nil {
-		return newGormError("%v", err)
+		return nil, newGormError("%v", err)
 	}
 
-	c.JSON(http.StatusOK, model.CommonResponse[any]{
-		Success: true,
-	})
-	return nil
+	return nil, nil
 }

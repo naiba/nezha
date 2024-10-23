@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -15,14 +16,6 @@ import (
 type authHandler struct {
 	ClientSecret string
 	ClientUUID   string
-}
-
-func (a *authHandler) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
-	return map[string]string{"client_secret": a.ClientSecret, "client_uuid": a.ClientUUID}, nil
-}
-
-func (a *authHandler) RequireTransportSecurity() bool {
-	return false
 }
 
 func (a *authHandler) Check(ctx context.Context) (uint64, error) {
@@ -45,6 +38,10 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 		clientUUID = value[0]
 	}
 
+	if _, err := uuid.ParseUUID(clientUUID); err != nil {
+		return 0, status.Errorf(codes.Unauthenticated, "客户端 UUID 不合法")
+	}
+
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
 	clientID, hasID := singleton.ServerUUIDToID[clientUUID]
@@ -58,6 +55,7 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 		s.TaskCloseLock = new(sync.Mutex)
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerUUIDToID[clientUUID] = s.ID
+		clientID = s.ID
 	}
 
 	return clientID, nil

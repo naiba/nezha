@@ -18,16 +18,12 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.User]
 // @Router /user [get]
-func listUser(c *gin.Context) error {
+func listUser(c *gin.Context) ([]model.User, error) {
 	var users []model.User
 	if err := singleton.DB.Find(&users).Error; err != nil {
-		return err
+		return nil, err
 	}
-	c.JSON(200, model.CommonResponse[[]model.User]{
-		Success: true,
-		Data:    users,
-	})
-	return nil
+	return users, nil
 }
 
 // Create user
@@ -39,19 +35,19 @@ func listUser(c *gin.Context) error {
 // @Accept json
 // @param request body model.UserForm true "User Request"
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[uint64]
 // @Router /user [post]
-func createUser(c *gin.Context) error {
+func createUser(c *gin.Context) (uint64, error) {
 	var uf model.UserForm
 	if err := c.ShouldBindJSON(&uf); err != nil {
-		return err
+		return 0, err
 	}
 
 	if len(uf.Password) < 6 {
-		return errors.New("password length must be greater than 6")
+		return 0, errors.New("password length must be greater than 6")
 	}
 	if uf.Username == "" {
-		return errors.New("username can't be empty")
+		return 0, errors.New("username can't be empty")
 	}
 
 	var u model.User
@@ -59,11 +55,15 @@ func createUser(c *gin.Context) error {
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(uf.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	u.Password = string(hash)
 
-	return singleton.DB.Create(&u).Error
+	if err := singleton.DB.Create(&u).Error; err != nil {
+		return 0, err
+	}
+
+	return u.ID, nil
 }
 
 // Batch delete users
@@ -77,10 +77,10 @@ func createUser(c *gin.Context) error {
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/user [post]
-func batchDeleteUser(c *gin.Context) error {
+func batchDeleteUser(c *gin.Context) (any, error) {
 	var ids []uint
 	if err := c.ShouldBindJSON(&ids); err != nil {
-		return err
+		return nil, err
 	}
-	return singleton.DB.Where("id IN (?)", ids).Delete(&model.User{}).Error
+	return nil, singleton.DB.Where("id IN (?)", ids).Delete(&model.User{}).Error
 }

@@ -23,7 +23,7 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
-func ServeWeb() *http.Server {
+func ServeWeb() http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	docs.SwaggerInfo.BasePath = "/api/v1"
@@ -39,10 +39,7 @@ func ServeWeb() *http.Server {
 	r.Use(recordPath)
 	routers(r)
 
-	return &http.Server{
-		ReadHeaderTimeout: time.Second * 5,
-		Handler:           r,
-	}
+	return r
 }
 
 func routers(r *gin.Engine) {
@@ -61,7 +58,11 @@ func routers(r *gin.Engine) {
 	optionalAuth.GET("/server-group", commonHandler(listServerGroup))
 
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
+
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
+
+	auth.POST("/terminal", commonHandler(createTerminal))
+	auth.GET("/ws/terminal/:id", commonHandler(terminalStream))
 
 	auth.GET("/user", commonHandler(listUser))
 	auth.POST("/user", commonHandler(createUser))
@@ -76,6 +77,7 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/notification-group/:id", commonHandler(updateNotificationGroup))
 	auth.POST("/batch-delete/notification-group", commonHandler(batchDeleteNotificationGroup))
 
+	auth.GET("/server", commonHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 
@@ -167,7 +169,7 @@ func newErrorResponse(err error) model.CommonResponse[any] {
 	}
 }
 
-type handlerFunc func(c *gin.Context) error
+type handlerFunc[T any] func(c *gin.Context) (T, error)
 
 // There are many error types in gorm, so create a custom type to represent all
 // gorm errors here instead
@@ -187,17 +189,20 @@ func (ge *gormError) Error() string {
 	return fmt.Sprintf(ge.msg, ge.a...)
 }
 
-func commonHandler(handler handlerFunc) func(*gin.Context) {
+func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	return func(c *gin.Context) {
-		if err := handler(c); err != nil {
-			if _, ok := err.(*gormError); ok {
-				log.Printf("NEZHA>> gorm error: %v", err)
-				c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
-				return
-			} else {
-				c.JSON(http.StatusOK, newErrorResponse(err))
-				return
-			}
+		data, err := handler(c)
+		if err == nil {
+			c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
+			return
+		}
+		if _, ok := err.(*gormError); ok {
+			log.Printf("NEZHA>> gorm error: %v", err)
+			c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
+			return
+		} else {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
 		}
 	}
 }

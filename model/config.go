@@ -47,59 +47,29 @@ const (
 	ConfigCoverIgnoreAll
 )
 
-type AgentConfig struct {
-	HardDrivePartitionAllowlist []string
-	NICAllowlist                map[string]bool
-	v                           *viper.Viper
-}
-
-// Read 从给定的文件目录加载配置文件
-func (c *AgentConfig) Read(path string) error {
-	c.v = viper.New()
-	c.v.SetConfigFile(path)
-	err := c.v.ReadInConfig()
-	if err != nil {
-		return err
-	}
-	err = c.v.Unmarshal(c)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *AgentConfig) Save() error {
-	data, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(c.v.ConfigFileUsed(), data, 0600)
-}
-
-// Config 站点配置
 type Config struct {
-	Debug bool // debug模式开关
+	Debug bool `mapstructure:"debug" json:"debug,omitempty"` // debug模式开关
 
-	Language       string // 系统语言，默认 zh-CN
-	SiteName       string
-	JWTSecretKey   string
-	AgentSecretKey string
-	ListenPort     uint
-	InstallHost    string
-	TLS            bool
-	Location       string // 时区，默认为 Asia/Shanghai
+	Language       string `mapstructure:"language" json:"language,omitempty"` // 系统语言，默认 zh-CN
+	SiteName       string `mapstructure:"site_name" json:"site_name,omitempty"`
+	JWTSecretKey   string `mapstructure:"jwt_secret_key" json:"jwt_secret_key,omitempty"`
+	AgentSecretKey string `mapstructure:"agent_secret_key" json:"agent_secret_key,omitempty"`
+	ListenPort     uint   `mapstructure:"listen_port" json:"listen_port,omitempty"`
+	InstallHost    string `mapstructure:"install_host" json:"install_host,omitempty"`
+	TLS            bool   `mapstructure:"tls" json:"tls,omitempty"`
+	Location       string `mapstructure:"location" json:"location,omitempty"` // 时区，默认为 Asia/Shanghai
 
-	EnablePlainIPInNotification bool // 通知信息IP不打码
+	EnablePlainIPInNotification bool `mapstructure:"enable_plain_ip_in_notification" json:"enable_plain_ip_in_notification,omitempty"` // 通知信息IP不打码
 
 	// IP变更提醒
-	EnableIPChangeNotification bool
-	IPChangeNotificationTag    string
-	Cover                      uint8  // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
-	IgnoredIPNotification      string // 特定服务器IP（多个服务器用逗号分隔）
+	EnableIPChangeNotification bool   `mapstructure:"enable_ip_change_notification" json:"enable_ip_change_notification,omitempty"`
+	IPChangeNotificationTag    string `mapstructure:"ip_change_notification_tag" json:"ip_change_notification_tag,omitempty"`
+	Cover                      uint8  `mapstructure:"cover" json:"cover,omitempty"`                                     // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
+	IgnoredIPNotification      string `mapstructure:"ignored_ip_notification" json:"ignored_ip_notification,omitempty"` // 特定服务器IP（多个服务器用逗号分隔）
 
-	IgnoredIPNotificationServerIDs map[uint64]bool // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
-	AvgPingCount                   int
-	DNSServers                     string
+	IgnoredIPNotificationServerIDs map[uint64]bool `mapstructure:"ignored_ip_notification_server_i_ds" json:"ignored_ip_notification_server_i_ds,omitempty"` // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
+	AvgPingCount                   int             `mapstructure:"avg_ping_count" json:"avg_ping_count,omitempty"`
+	DNSServers                     string          `mapstructure:"dns_servers" json:"dns_servers,omitempty"`
 
 	v *viper.Viper
 }
