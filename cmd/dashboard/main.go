@@ -159,7 +159,7 @@ func dispatchReportInfoTask() {
 
 func newHTTPandGRPCMux(httpHandler http.Handler, grpcHandler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Header.Get("Content-Type") == "application/grpc" &&
+		if r.ProtoMajor == 2 && r.Header.Get("Content-Type") == "application/grpc" &&
 			strings.HasPrefix(r.URL.Path, "/"+proto.NezhaService_ServiceDesc.ServiceName) {
 			grpcHandler.ServeHTTP(w, r)
 			return
