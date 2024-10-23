@@ -30,6 +30,7 @@ var (
 func InitNotification() {
 	NotificationList = make(map[uint64]map[uint64]*model.Notification)
 	NotificationIDToGroup = make(map[uint64]uint64)
+	NotificationGroup = make(map[uint64]string)
 	// 默认分组
 	NotificationList[defaultGroupID] = make(map[uint64]*model.Notification)
 	NotificationGroup[defaultGroupID] = "default"
