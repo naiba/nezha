@@ -81,10 +81,10 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 
+	auth.GET("/notification", commonHandler(listNotification))
 	auth.POST("/notification", commonHandler(createNotification))
 	auth.PATCH("/notification/:id", commonHandler(updateNotification))
 	auth.POST("/batch-delete/notification", commonHandler(batchDeleteNotification))
-	// 待添加list，
 
 	auth.GET("/ddns", commonHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))

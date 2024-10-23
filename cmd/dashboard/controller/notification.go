@@ -9,6 +9,23 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
+// List notification
+// @Summary List notification
+// @Security BearerAuth
+// @Schemes
+// @Description List notification
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[any]
+// @Router /notification [get]
+func listNotification(c *gin.Context) ([]model.Notification, error) {
+	var notifications []model.Notification
+	if err := singleton.DB.Find(&notifications).Error; err != nil {
+		return nil, newGormError("%v", err)
+	}
+	return notifications, nil
+}
+
 // Add notification
 // @Summary Add notification
 // @Security BearerAuth
