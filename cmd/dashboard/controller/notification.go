@@ -19,9 +19,11 @@ import (
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /notification [get]
 func listNotification(c *gin.Context) ([]model.Notification, error) {
-	var notifications []model.Notification
-	if err := singleton.DB.Find(&notifications).Error; err != nil {
-		return nil, newGormError("%v", err)
+	singleton.NotificationsLock.RLock()
+	defer singleton.NotificationsLock.RUnlock()
+	notifications := make([]model.Notification, 0, len(singleton.NotificationMap))
+	for _, n := range singleton.NotificationMap {
+		notifications = append(notifications, *n)
 	}
 	return notifications, nil
 }

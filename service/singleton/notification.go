@@ -22,8 +22,8 @@ var (
 	NotificationMap   map[uint64]*model.Notification
 	NotificationGroup map[uint64]string // [NotificationGroupID] -> [NotificationGroupName]
 
-	notificationsLock     sync.RWMutex
-	notificationGroupLock sync.RWMutex
+	NotificationsLock     sync.RWMutex
+	NotificationGroupLock sync.RWMutex
 )
 
 // InitNotification 初始化 GroupID <-> ID <-> Notification 的映射
@@ -38,8 +38,8 @@ func InitNotification() {
 // loadNotifications 从 DB 初始化通知方式相关参数
 func loadNotifications() {
 	InitNotification()
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
+	NotificationsLock.Lock()
+	defer NotificationsLock.Unlock()
 
 	groupNotifications := make(map[uint64][]uint64)
 	var ngn []model.NotificationGroupNotification
@@ -82,11 +82,11 @@ func loadNotifications() {
 
 // OnRefreshOrAddNotificationGroup 刷新通知方式组相关参数
 func OnRefreshOrAddNotificationGroup(ng *model.NotificationGroup, ngn []uint64) {
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
+	NotificationsLock.Lock()
+	defer NotificationsLock.Unlock()
 
-	notificationGroupLock.Lock()
-	defer notificationGroupLock.Unlock()
+	NotificationGroupLock.Lock()
+	defer NotificationGroupLock.Unlock()
 	var isEdit bool
 	if _, ok := NotificationGroup[ng.ID]; ok {
 		isEdit = true
@@ -141,8 +141,8 @@ func UpdateNotificationGroupInList(ng *model.NotificationGroup, ngn []uint64) {
 
 // UpdateNotificationGroupInList 删除通知方式组
 func OnDeleteNotificationGroup(gids []uint64) {
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
+	NotificationsLock.Lock()
+	defer NotificationsLock.Unlock()
 
 	for _, gid := range gids {
 		delete(NotificationGroup, gid)
@@ -159,8 +159,8 @@ func OnDeleteNotificationGroup(gids []uint64) {
 
 // OnRefreshOrAddNotification 刷新通知方式相关参数
 func OnRefreshOrAddNotification(n *model.Notification) {
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
+	NotificationsLock.Lock()
+	defer NotificationsLock.Unlock()
 
 	var isEdit bool
 	gid, ok := NotificationIDToGroup[n.ID]
@@ -195,8 +195,8 @@ func UpdateNotificationInList(n *model.Notification, gid uint64) {
 
 // OnDeleteNotification 在map和表中删除通知方式
 func OnDeleteNotification(id []uint64) {
-	notificationsLock.Lock()
-	defer notificationsLock.Unlock()
+	NotificationsLock.Lock()
+	defer NotificationsLock.Unlock()
 
 	for _, i := range id {
 		gid := NotificationIDToGroup[i]
@@ -251,8 +251,8 @@ func SendNotification(notificationGroupID uint64, desc string, muteLabel *string
 		}
 	}
 	// 向该通知方式组的所有通知方式发出通知
-	notificationsLock.RLock()
-	defer notificationsLock.RUnlock()
+	NotificationsLock.RLock()
+	defer NotificationsLock.RUnlock()
 	for _, n := range NotificationList[notificationGroupID] {
 		log.Println("NEZHA>> 尝试通知", n.Name)
 	}
@@ -293,8 +293,8 @@ func (_NotificationMuteLabel) ServerIncidentResolved(alertId uint64, serverId ui
 }
 
 func (_NotificationMuteLabel) AppendNotificationGroupName(label *string, notificationGroupID uint64) *string {
-	notificationGroupLock.RLock()
-	defer notificationGroupLock.RUnlock()
+	NotificationGroupLock.RLock()
+	defer NotificationGroupLock.RUnlock()
 	newLabel := fmt.Sprintf("%s:%s", *label, NotificationGroup[notificationGroupID])
 	return &newLabel
 }
