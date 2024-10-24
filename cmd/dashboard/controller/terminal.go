@@ -66,7 +66,7 @@ func createTerminal(c *gin.Context) (*model.CreateTerminalResponse, error) {
 // @Description Terminal stream
 // @Tags auth required
 // @Param id path string true "Stream UUID"
-// @Router /terminal/{id} [get]
+// @Router /ws/terminal/{id} [get]
 func terminalStream(c *gin.Context) (any, error) {
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {

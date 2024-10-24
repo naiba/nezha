@@ -66,7 +66,7 @@ func createFM(c *gin.Context) (*model.CreateFMResponse, error) {
 // @Description Start FM stream
 // @Tags auth required
 // @Param id path string true "Stream UUID"
-// @Router /file/{id} [get]
+// @Router /ws/file/{id} [get]
 func fmStream(c *gin.Context) (any, error) {
 	streamId := c.Param("id")
 	if _, err := rpc.NezhaHandlerSingleton.GetStream(streamId); err != nil {
