@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
@@ -18,12 +19,17 @@ import (
 // @Description List server
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[[]*model.Server]
 // @Router /server [get]
 func listServer(c *gin.Context) ([]*model.Server, error) {
 	singleton.SortedServerLock.RLock()
 	defer singleton.SortedServerLock.RUnlock()
-	return singleton.SortedServerList, nil
+
+	var ssl []*model.Server
+	if err := copier.Copy(&ssl, &singleton.SortedServerList); err != nil {
+		return nil, err
+	}
+	return ssl, nil
 }
 
 // Edit server

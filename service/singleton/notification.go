@@ -3,6 +3,7 @@ package singleton
 import (
 	"fmt"
 	"log"
+	"slices"
 	"sync"
 	"time"
 
@@ -18,8 +19,9 @@ var (
 	NotificationList       map[uint64]map[uint64]*model.Notification // [NotificationGroupID][NotificationID] -> model.Notification
 	NotificationIDToGroups map[uint64]map[uint64]struct{}            // [NotificationID] -> NotificationGroupID
 
-	NotificationMap   map[uint64]*model.Notification
-	NotificationGroup map[uint64]string // [NotificationGroupID] -> [NotificationGroupName]
+	NotificationMap        map[uint64]*model.Notification
+	NotificationListSorted []*model.Notification
+	NotificationGroup      map[uint64]string // [NotificationGroupID] -> [NotificationGroupName]
 
 	NotificationsLock     sync.RWMutex
 	NotificationGroupLock sync.RWMutex
@@ -36,7 +38,6 @@ func InitNotification() {
 func loadNotifications() {
 	InitNotification()
 	NotificationsLock.Lock()
-	defer NotificationsLock.Unlock()
 
 	groupNotifications := make(map[uint64][]uint64)
 	var ngn []model.NotificationGroupNotification
@@ -72,6 +73,27 @@ func loadNotifications() {
 			}
 		}
 	}
+
+	NotificationsLock.Unlock()
+	UpdateNotificationList()
+}
+
+func UpdateNotificationList() {
+	NotificationsLock.RLock()
+	defer NotificationsLock.RUnlock()
+
+	NotificationListSorted = make([]*model.Notification, 0, len(NotificationMap))
+	for _, n := range NotificationMap {
+		NotificationListSorted = append(NotificationListSorted, n)
+	}
+	slices.SortFunc(NotificationListSorted, func(a, b *model.Notification) int {
+		if a.ID < b.ID {
+			return -1
+		} else if a.ID == b.ID {
+			return 0
+		}
+		return 1
+	})
 }
 
 // OnRefreshOrAddNotificationGroup 刷新通知方式组相关参数

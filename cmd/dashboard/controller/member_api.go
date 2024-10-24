@@ -533,7 +533,7 @@ func (ma *memberAPI) addOrEditDDNS(c *gin.Context) {
 		})
 		return
 	}
-	singleton.OnDDNSUpdate()
+	//singleton.OnDDNSUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 	"gorm.io/gorm"
@@ -17,14 +18,15 @@ import (
 // @Description List notification
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[any]
+// @Success 200 {object} model.CommonResponse[[]*model.Notification]
 // @Router /notification [get]
-func listNotification(c *gin.Context) ([]model.Notification, error) {
+func listNotification(c *gin.Context) ([]*model.Notification, error) {
 	singleton.NotificationsLock.RLock()
 	defer singleton.NotificationsLock.RUnlock()
-	notifications := make([]model.Notification, 0, len(singleton.NotificationMap))
-	for _, n := range singleton.NotificationMap {
-		notifications = append(notifications, *n)
+
+	var notifications []*model.Notification
+	if err := copier.Copy(&notifications, &singleton.NotificationListSorted); err != nil {
+		return nil, err
 	}
 	return notifications, nil
 }
@@ -73,6 +75,7 @@ func createNotification(c *gin.Context) (uint64, error) {
 	}
 
 	singleton.OnRefreshOrAddNotification(&n)
+	singleton.UpdateNotificationList()
 	return n.ID, nil
 }
 
@@ -130,6 +133,7 @@ func updateNotification(c *gin.Context) (any, error) {
 	}
 
 	singleton.OnRefreshOrAddNotification(&n)
+	singleton.UpdateNotificationList()
 	return nil, nil
 }
 
@@ -166,5 +170,6 @@ func batchDeleteNotification(c *gin.Context) (any, error) {
 	}
 
 	singleton.OnDeleteNotification(n)
+	singleton.UpdateNotificationList()
 	return nil, nil
 }

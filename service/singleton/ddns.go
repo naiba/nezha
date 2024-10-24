@@ -2,6 +2,7 @@ package singleton
 
 import (
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/libdns/cloudflare"
@@ -16,22 +17,54 @@ import (
 var (
 	DDNSCache     map[uint64]*model.DDNSProfile
 	DDNSCacheLock sync.RWMutex
+	DDNSList      []*model.DDNSProfile
 )
 
 func initDDNS() {
-	OnDDNSUpdate()
-	OnNameserverUpdate()
-}
-
-func OnDDNSUpdate() {
 	var ddns []*model.DDNSProfile
 	DB.Find(&ddns)
 	DDNSCacheLock.Lock()
-	defer DDNSCacheLock.Unlock()
 	DDNSCache = make(map[uint64]*model.DDNSProfile)
 	for i := 0; i < len(ddns); i++ {
 		DDNSCache[ddns[i].ID] = ddns[i]
 	}
+	DDNSCacheLock.Unlock()
+
+	UpdateDDNSList()
+	OnNameserverUpdate()
+}
+
+func OnDDNSUpdate(p *model.DDNSProfile) {
+	DDNSCacheLock.Lock()
+	defer DDNSCacheLock.Unlock()
+	DDNSCache[p.ID] = p
+}
+
+func OnDDNSDelete(id []uint64) {
+	DDNSCacheLock.Lock()
+	defer DDNSCacheLock.Unlock()
+
+	for _, i := range id {
+		delete(DDNSCache, i)
+	}
+}
+
+func UpdateDDNSList() {
+	DDNSCacheLock.RLock()
+	defer DDNSCacheLock.RUnlock()
+
+	DDNSList = make([]*model.DDNSProfile, 0, len(DDNSCache))
+	for _, p := range DDNSCache {
+		DDNSList = append(DDNSList, p)
+	}
+	slices.SortFunc(DDNSList, func(a, b *model.DDNSProfile) int {
+		if a.ID < b.ID {
+			return -1
+		} else if a.ID == b.ID {
+			return 0
+		}
+		return 1
+	})
 }
 
 func OnNameserverUpdate() {
