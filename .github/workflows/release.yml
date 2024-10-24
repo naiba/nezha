@@ -150,9 +150,10 @@ jobs:
 
       - name: Extract branch name in tag
         run: |
-          export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
-          if [ -z "$TAG_NAME" ]; then
-            export TAG_NAME=$(echo ${GITHUB_HEAD_REF})
+          if [[ $GITHUB_REF == refs/heads/* ]]; then
+            export TAG_NAME=$(echo ${GITHUB_REF#refs/heads/})
+          else
+            export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
           fi
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         id: extract_branch
