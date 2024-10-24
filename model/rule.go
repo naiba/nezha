@@ -66,8 +66,8 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	switch u.Type {
 	case "cpu":
 		src = float64(server.State.CPU)
-	case "gpu":
-		src = float64(server.State.GPU)
+	case "gpu_max":
+		src = slices.Max(server.State.GPU)
 	case "memory":
 		src = percentage(server.State.MemUsed, server.Host.MemTotal)
 	case "swap":
