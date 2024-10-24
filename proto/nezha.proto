@@ -45,7 +45,7 @@ message State {
     uint64 udp_conn_count = 15;
     uint64 process_count = 16;
     repeated State_SensorTemperature temperatures = 17;
-    double gpu = 18;
+    repeated double gpu = 18;
 }
 
 message State_SensorTemperature {

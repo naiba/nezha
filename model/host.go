@@ -32,7 +32,7 @@ type HostState struct {
 	UdpConnCount   uint64
 	ProcessCount   uint64
 	Temperatures   []SensorTemperature
-	GPU            float64
+	GPU            []float64
 }
 
 func (s *HostState) PB() *pb.State {
