@@ -19,7 +19,7 @@ import (
 // @Description List server
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[[]*model.Server]
+// @Success 200 {object} model.CommonResponse[[]model.Server]
 // @Router /server [get]
 func listServer(c *gin.Context) ([]*model.Server, error) {
 	singleton.SortedServerLock.RLock()

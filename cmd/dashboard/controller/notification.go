@@ -18,7 +18,7 @@ import (
 // @Description List notification
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[[]*model.Notification]
+// @Success 200 {object} model.CommonResponse[[]model.Notification]
 // @Router /notification [get]
 func listNotification(c *gin.Context) ([]*model.Notification, error) {
 	singleton.NotificationsLock.RLock()

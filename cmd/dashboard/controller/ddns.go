@@ -21,7 +21,7 @@ import (
 // @Security BearerAuth
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[[]*model.DDNSProfile]
+// @Success 200 {object} model.CommonResponse[[]model.DDNSProfile]
 // @Router /ddns [get]
 func listDDNS(c *gin.Context) ([]*model.DDNSProfile, error) {
 	var ddnsProfiles []*model.DDNSProfile
