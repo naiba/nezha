@@ -136,6 +136,7 @@ jobs:
           wget https://github.com/nezhahq/nezha-dashboard/releases/download/v0.0.3/dist.zip
           unzip dist.zip
           mv dist admin-dist
+          mkdir user-dist
         
       - name: Download artifacts
         uses: actions/download-artifact@v4
