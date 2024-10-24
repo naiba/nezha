@@ -24,10 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: goreleaser/goreleaser-cross:v1.23
-    env:
-      GOOS: ${{ matrix.goos }}
-      GOARCH: ${{ matrix.goarch }}
-      GOARM: ${{ matrix.goarm }}
     steps:
       - run: git config --global --add safe.directory /__w/nezha/nezha
       - uses: actions/checkout@v4
@@ -46,14 +42,17 @@ jobs:
 
       - name: bootstrap
         run: |
-          ls `go env GOPATH`/bin/
           go install github.com/swaggo/swag/cmd/swag@latest
-          ls `go env GOPATH`/bin/
+          ls -al `go env GOPATH`/bin/
           `go env GOPATH`/bin/swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
      
       - name: Build with tag
         if: contains(github.ref, 'refs/tags/')
         uses: goreleaser/goreleaser-action@v6
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
           version: '~> v2'
@@ -62,6 +61,10 @@ jobs:
       - name: Build snapshot
         if: contains(github.ref, 'refs/tags/') == false
         uses: goreleaser/goreleaser-action@v6
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
           version: '~> v2'
@@ -70,7 +73,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dashboard-${{ env.GOOS }}-${{ env.GOARCH }}
+          name: dashboard-${{ matrix.goos }}-${{ matrix.goarch }}
           path: |
             ./dist/*/*
 
