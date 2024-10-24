@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -13,7 +15,6 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	docs "github.com/naiba/nezha/cmd/dashboard/docs"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -21,7 +22,7 @@ import (
 func ServeWeb() http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
-	docs.SwaggerInfo.BasePath = "/api/v1"
+
 	if singleton.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
 		pprof.Register(r)
@@ -90,6 +91,8 @@ func routers(r *gin.Engine) {
 	auth.POST("/ddns", commonHandler(createDDNS))
 	auth.PATCH("/ddns/:id", commonHandler(updateDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
+
+	r.NoRoute(fallbackToFrontend)
 }
 
 func recordPath(c *gin.Context) {
@@ -143,4 +146,27 @@ func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 			return
 		}
 	}
+}
+
+func fallbackToFrontend(c *gin.Context) {
+	if strings.HasPrefix(c.Request.URL.Path, "/api") {
+		c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
+		return
+	}
+	if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
+		stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
+		localFilePath := filepath.Join("./admin-dist", stripPath)
+		if _, err := os.Stat(localFilePath); err == nil {
+			c.File(localFilePath)
+			return
+		}
+		c.File("admin-dist/index.html")
+		return
+	}
+	localFilePath := filepath.Join("user-dist", c.Request.URL.Path)
+	if _, err := os.Stat(localFilePath); err == nil {
+		c.File(localFilePath)
+		return
+	}
+	c.File("user-dist/index.html")
 }

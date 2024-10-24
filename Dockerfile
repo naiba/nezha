@@ -7,6 +7,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 COPY --from=certs /etc/ssl/certs /etc/ssl/certs
+COPY ./frontend /dashboard/frontend
 COPY ./script/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
