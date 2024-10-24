@@ -110,7 +110,7 @@ func createNotificationGroup(c *gin.Context) (uint64, error) {
 // @Security BearerAuth
 // @Tags auth required
 // @Accept json
-// @Param id path string true "ID"
+// @Param id path uint true "ID"
 // @Param body body model.NotificationGroupForm true "NotificationGroupForm"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]

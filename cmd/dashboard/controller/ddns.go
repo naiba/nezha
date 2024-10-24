@@ -102,7 +102,7 @@ func createDDNS(c *gin.Context) (uint64, error) {
 // @Description Edit DDNS profile
 // @Tags auth required
 // @Accept json
-// @param id path string true "Profile ID"
+// @param id path uint true "Profile ID"
 // @param request body model.DDNSForm true "DDNS Request"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
