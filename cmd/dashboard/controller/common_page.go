@@ -8,7 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
-	"github.com/jinzhu/copier"
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
@@ -24,7 +23,6 @@ type commonPage struct {
 
 func (cp *commonPage) serve() {
 	cr := cp.r.Group("")
-	cr.GET("/service", cp.service)
 	// TODO: 界面直接跳转使用该接口
 	cr.GET("/network/:id", cp.network)
 	cr.GET("/network", cp.network)
@@ -32,34 +30,9 @@ func (cp *commonPage) serve() {
 	cr.GET("/file/:id", cp.fm)
 }
 
-func (p *commonPage) service(c *gin.Context) {
-	res, _, _ := requestGroup.Do("servicePage", func() (interface{}, error) {
-		singleton.AlertsLock.RLock()
-		defer singleton.AlertsLock.RUnlock()
-		var stats map[uint64]model.ServiceItemResponse
-		var statsStore map[uint64]model.CycleTransferStats
-		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
-		copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
-		for k, service := range stats {
-			if !service.Monitor.EnableShowInService {
-				delete(stats, k)
-			}
-		}
-		return []interface {
-		}{
-			stats, statsStore,
-		}, nil
-	})
-	c.HTML(http.StatusOK, "", gin.H{
-		// "Title":              singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "ServicesStatus"}),
-		"Services":           res.([]interface{})[0],
-		"CycleTransferStats": res.([]interface{})[1],
-	})
-}
-
 func (cp *commonPage) network(c *gin.Context) {
 	var (
-		monitorHistory       *model.MonitorHistory
+		monitorHistory       *model.ServiceHistory
 		servers              []model.Server
 		serverIdsWithMonitor []uint64
 		monitorInfos         = []byte("{}")
@@ -68,7 +41,7 @@ func (cp *commonPage) network(c *gin.Context) {
 	if len(singleton.SortedServerList) > 0 {
 		id = singleton.SortedServerList[0].ID
 	}
-	if err := singleton.DB.Model(&model.MonitorHistory{}).Select("monitor_id, server_id").
+	if err := singleton.DB.Model(&model.ServiceHistory{}).Select("monitor_id, server_id").
 		Where("monitor_id != 0 and server_id != 0").Limit(1).First(&monitorHistory).Error; err != nil {
 		// mygin.ShowErrorPage(c, mygin.ErrInfo{
 		// 	Code:  http.StatusForbidden,
@@ -114,12 +87,10 @@ func (cp *commonPage) network(c *gin.Context) {
 			return
 		}
 	}
-	monitorHistories := singleton.MonitorAPI.GetMonitorHistories(map[string]any{"server_id": id})
-	monitorInfos, _ = utils.Json.Marshal(monitorHistories)
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 	var isViewPasswordVerfied bool
 
-	if err := singleton.DB.Model(&model.MonitorHistory{}).
+	if err := singleton.DB.Model(&model.ServiceHistory{}).
 		Select("distinct(server_id)").
 		Where("server_id != 0").
 		Find(&serverIdsWithMonitor).

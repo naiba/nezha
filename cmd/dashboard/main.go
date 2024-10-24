@@ -71,7 +71,7 @@ func initSystem() {
 	singleton.LoadSingleton()
 
 	// 每天的3:30 对 监控记录 和 流量记录 进行清理
-	if _, err := singleton.Cron.AddFunc("0 30 3 * * *", singleton.CleanMonitorHistory); err != nil {
+	if _, err := singleton.Cron.AddFunc("0 30 3 * * *", singleton.CleanServiceHistory); err != nil {
 		panic(err)
 	}
 
@@ -113,8 +113,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	singleton.CleanMonitorHistory()
-	serviceSentinelDispatchBus := make(chan model.Monitor) // 用于传递服务监控任务信息的channel
+	singleton.CleanServiceHistory()
+	serviceSentinelDispatchBus := make(chan model.Service) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
 	go rpc.DispatchKeepalive()
 	go singleton.AlertSentinelStart()

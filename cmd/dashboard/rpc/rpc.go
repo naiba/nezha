@@ -22,7 +22,7 @@ func ServeRPC() *grpc.Server {
 	return server
 }
 
-func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
+func DispatchTask(serviceSentinelDispatchBus <-chan model.Service) {
 	workedServerIndex := 0
 	for task := range serviceSentinelDispatchBus {
 		round := 0
@@ -42,17 +42,17 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Monitor) {
 				continue
 			}
 			// 如果此任务不可使用此服务器请求，跳过这个服务器（有些 IPv6 only 开了 NAT64 的机器请求 IPv4 总会出问题）
-			if (task.Cover == model.MonitorCoverAll && task.SkipServers[singleton.SortedServerList[workedServerIndex].ID]) ||
-				(task.Cover == model.MonitorCoverIgnoreAll && !task.SkipServers[singleton.SortedServerList[workedServerIndex].ID]) {
+			if (task.Cover == model.ServiceCoverAll && task.SkipServers[singleton.SortedServerList[workedServerIndex].ID]) ||
+				(task.Cover == model.ServiceCoverIgnoreAll && !task.SkipServers[singleton.SortedServerList[workedServerIndex].ID]) {
 				workedServerIndex++
 				continue
 			}
-			if task.Cover == model.MonitorCoverIgnoreAll && task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
+			if task.Cover == model.ServiceCoverIgnoreAll && task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
 				singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
 				workedServerIndex++
 				continue
 			}
-			if task.Cover == model.MonitorCoverAll && !task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
+			if task.Cover == model.ServiceCoverAll && !task.SkipServers[singleton.SortedServerList[workedServerIndex].ID] {
 				singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
 				workedServerIndex++
 				continue

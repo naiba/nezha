@@ -40,11 +40,11 @@ type TaskFM struct {
 }
 
 const (
-	MonitorCoverAll = iota
-	MonitorCoverIgnoreAll
+	ServiceCoverAll = iota
+	ServiceCoverIgnoreAll
 )
 
-type Monitor struct {
+type Service struct {
 	Common
 	Name                string `json:"name,omitempty"`
 	Type                uint8  `json:"type,omitempty"`
@@ -71,7 +71,7 @@ type Monitor struct {
 	CronJobID   cron.EntryID    `gorm:"-" json:"-"`
 }
 
-func (m *Monitor) PB() *pb.Task {
+func (m *Service) PB() *pb.Task {
 	return &pb.Task{
 		Id:   m.ID,
 		Type: uint64(m.Type),
@@ -80,7 +80,7 @@ func (m *Monitor) PB() *pb.Task {
 }
 
 // CronSpec 返回服务监控请求间隔对应的 cron 表达式
-func (m *Monitor) CronSpec() string {
+func (m *Service) CronSpec() string {
 	if m.Duration == 0 {
 		// 默认间隔 30 秒
 		m.Duration = 30
@@ -88,7 +88,7 @@ func (m *Monitor) CronSpec() string {
 	return fmt.Sprintf("@every %ds", m.Duration)
 }
 
-func (m *Monitor) BeforeSave(tx *gorm.DB) error {
+func (m *Service) BeforeSave(tx *gorm.DB) error {
 	if data, err := utils.Json.Marshal(m.SkipServers); err != nil {
 		return err
 	} else {
@@ -107,10 +107,10 @@ func (m *Monitor) BeforeSave(tx *gorm.DB) error {
 	return nil
 }
 
-func (m *Monitor) AfterFind(tx *gorm.DB) error {
+func (m *Service) AfterFind(tx *gorm.DB) error {
 	m.SkipServers = make(map[uint64]bool)
 	if err := utils.Json.Unmarshal([]byte(m.SkipServersRaw), &m.SkipServers); err != nil {
-		log.Println("NEZHA>> Monitor.AfterFind:", err)
+		log.Println("NEZHA>> Service.AfterFind:", err)
 		return nil
 	}
 

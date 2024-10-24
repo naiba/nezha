@@ -63,10 +63,10 @@ func routers(r *gin.Engine) {
 	auth.POST("/user", commonHandler(createUser))
 	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
 
-	auth.GET("/monitor", commonHandler(listMonitor))
-	auth.POST("/monitor", commonHandler(createMonitor))
-	auth.PATCH("/monitor/:id", commonHandler(updateMonitor))
-	auth.POST("/batch-delete/monitor", commonHandler(batchDeleteMonitor))
+	auth.GET("/service", commonHandler(listService))
+	auth.POST("/service", commonHandler(createService))
+	auth.PATCH("/service/:id", commonHandler(updateService))
+	auth.POST("/batch-delete/service", commonHandler(batchDeleteService))
 
 	auth.POST("/server-group", commonHandler(createServerGroup))
 	auth.PATCH("/server-group/:id", commonHandler(updateServerGroup))

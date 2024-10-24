@@ -36,7 +36,6 @@ func LoadSingleton() {
 	loadNotifications() // 加载通知服务
 	loadServers()       // 加载服务器列表
 	loadCronTasks()     // 加载定时任务
-	loadAPI()
 	initNAT()
 	initDDNS()
 }
@@ -63,8 +62,8 @@ func InitDBFromPath(path string) {
 		DB = DB.Debug()
 	}
 	err = DB.AutoMigrate(model.Server{}, model.User{},
-		model.Notification{}, model.AlertRule{}, model.Monitor{},
-		model.MonitorHistory{}, model.Cron{}, model.Transfer{},
+		model.Notification{}, model.AlertRule{}, model.Service{},
+		model.ServiceHistory{}, model.Cron{}, model.Transfer{},
 		model.ApiToken{}, model.NAT{}, model.DDNSProfile{}, model.NotificationGroupNotification{})
 	if err != nil {
 		panic(err)
@@ -98,14 +97,14 @@ func RecordTransferHourlyUsage() {
 	log.Println("NEZHA>> Cron 流量统计入库", len(txs), DB.Create(txs).Error)
 }
 
-// CleanMonitorHistory 清理无效或过时的 监控记录 和 流量记录
-func CleanMonitorHistory() {
+// CleanServiceHistory 清理无效或过时的 监控记录 和 流量记录
+func CleanServiceHistory() {
 	// 清理已被删除的服务器的监控记录与流量记录
-	DB.Unscoped().Delete(&model.MonitorHistory{}, "created_at < ? OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -30))
+	DB.Unscoped().Delete(&model.ServiceHistory{}, "created_at < ? OR service_id NOT IN (SELECT `id` FROM services)", time.Now().AddDate(0, 0, -30))
 	// 由于网络监控记录的数据较多，并且前端仅使用了 1 天的数据
 	// 考虑到 sqlite 数据量问题，仅保留一天数据，
 	// server_id = 0 的数据会用于/service页面的可用性展示
-	DB.Unscoped().Delete(&model.MonitorHistory{}, "(created_at < ? AND server_id != 0) OR monitor_id NOT IN (SELECT `id` FROM monitors)", time.Now().AddDate(0, 0, -1))
+	DB.Unscoped().Delete(&model.ServiceHistory{}, "(created_at < ? AND server_id != 0) OR service_id NOT IN (SELECT `id` FROM services)", time.Now().AddDate(0, 0, -1))
 	DB.Unscoped().Delete(&model.Transfer{}, "server_id NOT IN (SELECT `id` FROM servers)")
 	// 计算可清理流量记录的时长
 	var allServerKeep time.Time
