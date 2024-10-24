@@ -46,7 +46,9 @@ jobs:
 
       - name: bootstrap
         run: |
+          ls `go env GOPATH`/bin/
           go install github.com/swaggo/swag/cmd/swag@latest
+          ls `go env GOPATH`/bin/
           `go env GOPATH`/bin/swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
      
       - name: Build with tag
