@@ -15,11 +15,13 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	docs "github.com/naiba/nezha/cmd/dashboard/docs"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 )
 
 func ServeWeb() http.Handler {
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -28,6 +30,7 @@ func ServeWeb() http.Handler {
 		pprof.Register(r)
 	}
 	if singleton.Conf.Debug {
+		log.Printf("NEZHA>> Swagger(%s) UI available at http://localhost:%d/swagger/index.html", docs.SwaggerInfo.Version, singleton.Conf.ListenPort)
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
