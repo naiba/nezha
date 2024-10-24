@@ -40,11 +40,10 @@ jobs:
         with:
           go-version: "1.23.x"
 
-      - name: bootstrap
+      - name: generate swagger docs
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
-          ls -al `go env GOPATH`/bin/
-          `go env GOPATH`/bin/swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
+          swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
      
       - name: Build with tag
         if: contains(github.ref, 'refs/tags/')
@@ -134,7 +133,7 @@ jobs:
 
       - name: prepare frontend dists
         run: |
-          wget https://github.com/nezhahq/nezha-dashboard/releases/download/v0.0.2/dist.zip
+          wget https://github.com/nezhahq/nezha-dashboard/releases/download/v0.0.3/dist.zip
           unzip dist.zip
           mv dist admin-dist
         
@@ -153,7 +152,7 @@ jobs:
         run: |
           export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
           if [ -z "$TAG_NAME" ]; then
-            export TAG_NAME=$(echo ${GITHUB_REF#refs/heads/})
+            export TAG_NAME=$(echo ${GITHUB_HEAD_REF})
           fi
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         id: extract_branch
