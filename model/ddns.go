@@ -32,7 +32,7 @@ type DDNSProfile struct {
 	WebhookRequestBody string   `json:"webhook_request_body,omitempty"`
 	WebhookHeaders     string   `json:"webhook_headers,omitempty"`
 	Domains            []string `json:"domains,omitempty" gorm:"-"`
-	DomainsRaw         string   `json:"domains_raw,omitempty"`
+	DomainsRaw         string   `json:"-"`
 }
 
 func (d DDNSProfile) TableName() string {

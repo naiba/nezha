@@ -175,85 +175,85 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 }
 
 // IsTransferDurationRule 判断该规则是否属于周期流量规则 属于则返回true
-func (rule Rule) IsTransferDurationRule() bool {
-	return strings.HasSuffix(rule.Type, "_cycle")
+func (u *Rule) IsTransferDurationRule() bool {
+	return strings.HasSuffix(u.Type, "_cycle")
 }
 
 // GetTransferDurationStart 获取周期流量的起始时间
-func (rule Rule) GetTransferDurationStart() time.Time {
+func (u *Rule) GetTransferDurationStart() time.Time {
 	// Accept uppercase and lowercase
-	unit := strings.ToLower(rule.CycleUnit)
-	startTime := *rule.CycleStart
+	unit := strings.ToLower(u.CycleUnit)
+	startTime := *u.CycleStart
 	var nextTime time.Time
 	switch unit {
 	case "year":
-		nextTime = startTime.AddDate(int(rule.CycleInterval), 0, 0)
+		nextTime = startTime.AddDate(int(u.CycleInterval), 0, 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(int(rule.CycleInterval), 0, 0)
+			nextTime = nextTime.AddDate(int(u.CycleInterval), 0, 0)
 		}
 	case "month":
-		nextTime = startTime.AddDate(0, int(rule.CycleInterval), 0)
+		nextTime = startTime.AddDate(0, int(u.CycleInterval), 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, int(rule.CycleInterval), 0)
+			nextTime = nextTime.AddDate(0, int(u.CycleInterval), 0)
 		}
 	case "week":
-		nextTime = startTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, 7*int(u.CycleInterval))
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, 7*int(u.CycleInterval))
 		}
 	case "day":
-		nextTime = startTime.AddDate(0, 0, int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, int(u.CycleInterval))
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, int(u.CycleInterval))
 		}
 	default:
 		// For hour unit or not set.
-		interval := 3600 * int64(rule.CycleInterval)
-		startTime = time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
+		interval := 3600 * int64(u.CycleInterval)
+		startTime = time.Unix(u.CycleStart.Unix()+(time.Now().Unix()-u.CycleStart.Unix())/interval*interval, 0)
 	}
 
 	return startTime
 }
 
 // GetTransferDurationEnd 获取周期流量结束时间
-func (rule Rule) GetTransferDurationEnd() time.Time {
+func (u *Rule) GetTransferDurationEnd() time.Time {
 	// Accept uppercase and lowercase
-	unit := strings.ToLower(rule.CycleUnit)
-	startTime := *rule.CycleStart
+	unit := strings.ToLower(u.CycleUnit)
+	startTime := *u.CycleStart
 	var nextTime time.Time
 	switch unit {
 	case "year":
-		nextTime = startTime.AddDate(int(rule.CycleInterval), 0, 0)
+		nextTime = startTime.AddDate(int(u.CycleInterval), 0, 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(int(rule.CycleInterval), 0, 0)
+			nextTime = nextTime.AddDate(int(u.CycleInterval), 0, 0)
 		}
 	case "month":
-		nextTime = startTime.AddDate(0, int(rule.CycleInterval), 0)
+		nextTime = startTime.AddDate(0, int(u.CycleInterval), 0)
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, int(rule.CycleInterval), 0)
+			nextTime = nextTime.AddDate(0, int(u.CycleInterval), 0)
 		}
 	case "week":
-		nextTime = startTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, 7*int(u.CycleInterval))
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, 7*int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, 7*int(u.CycleInterval))
 		}
 	case "day":
-		nextTime = startTime.AddDate(0, 0, int(rule.CycleInterval))
+		nextTime = startTime.AddDate(0, 0, int(u.CycleInterval))
 		for time.Now().After(nextTime) {
 			startTime = nextTime
-			nextTime = nextTime.AddDate(0, 0, int(rule.CycleInterval))
+			nextTime = nextTime.AddDate(0, 0, int(u.CycleInterval))
 		}
 	default:
 		// For hour unit or not set.
-		interval := 3600 * int64(rule.CycleInterval)
-		startTime = time.Unix(rule.CycleStart.Unix()+(time.Now().Unix()-rule.CycleStart.Unix())/interval*interval, 0)
+		interval := 3600 * int64(u.CycleInterval)
+		startTime = time.Unix(u.CycleStart.Unix()+(time.Now().Unix()-u.CycleStart.Unix())/interval*interval, 0)
 		nextTime = time.Unix(startTime.Unix()+interval, 0)
 	}
 

@@ -92,6 +92,11 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/notification/:id", commonHandler(updateNotification))
 	auth.POST("/batch-delete/notification", commonHandler(batchDeleteNotification))
 
+	auth.GET("/alert-rule", commonHandler(listAlertRule))
+	auth.POST("/alert-rule", commonHandler(createAlertRule))
+	auth.PATCH("/alert-rule/:id", commonHandler(updateAlertRule))
+	auth.POST("/batch-delete/alert-rule", commonHandler(batchDeleteAlertRule))
+
 	auth.GET("/ddns", commonHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))
 	auth.POST("/ddns", commonHandler(createDDNS))
