@@ -133,7 +133,7 @@ jobs:
 
       - name: prepare frontend dists
         run: |
-          wget https://github.com/nezhahq/nezha-dashboard/releases/download/v0.0.3/dist.zip
+          wget https://github.com/nezhahq/admin-frontend/releases/download/v0.0.2/dist.zip
           unzip dist.zip
           mv dist admin-dist
           mkdir user-dist
