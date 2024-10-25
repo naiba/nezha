@@ -136,6 +136,22 @@ func (ge *gormError) Error() string {
 	return fmt.Sprintf(ge.msg, ge.a...)
 }
 
+type wsError struct {
+	msg string
+	a   []interface{}
+}
+
+func newWsError(format string, args ...interface{}) error {
+	return &wsError{
+		msg: format,
+		a:   args,
+	}
+}
+
+func (we *wsError) Error() string {
+	return fmt.Sprintf(we.msg, we.a...)
+}
+
 func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	return func(c *gin.Context) {
 		data, err := handler(c)
@@ -143,11 +159,18 @@ func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 			c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
 			return
 		}
-		if _, ok := err.(*gormError); ok {
+		switch err.(type) {
+		case *gormError:
 			log.Printf("NEZHA>> gorm error: %v", err)
 			c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
 			return
-		} else {
+		case *wsError:
+			// Connection is upgraded to WebSocket, so c.Writer is no longer usable
+			if msg := err.Error(); msg != "" {
+				log.Printf("NEZHA>> websocket error: %v", err)
+			}
+			return
+		default:
 			c.JSON(http.StatusOK, newErrorResponse(err))
 			return
 		}

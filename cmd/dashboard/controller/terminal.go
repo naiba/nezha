@@ -92,8 +92,8 @@ func terminalStream(c *gin.Context) (any, error) {
 	}()
 
 	if err = rpc.NezhaHandlerSingleton.UserConnected(streamId, conn); err != nil {
-		return nil, err
+		return nil, newWsError("%v", err)
 	}
 
-	return nil, rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	return nil, newWsError("%v", rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10))
 }

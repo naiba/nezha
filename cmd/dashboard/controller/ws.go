@@ -51,7 +51,7 @@ func serverStream(c *gin.Context) (any, error) {
 		}
 		time.Sleep(time.Second * 2)
 	}
-	return nil, nil
+	return nil, newWsError("")
 }
 
 var requestGroup singleflight.Group
