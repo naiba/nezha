@@ -66,6 +66,7 @@ func createTerminal(c *gin.Context) (*model.CreateTerminalResponse, error) {
 // @Description Terminal stream
 // @Tags auth required
 // @Param id path string true "Stream UUID"
+// @Success 200 {object} model.CommonResponse[any]
 // @Router /ws/terminal/{id} [get]
 func terminalStream(c *gin.Context) (any, error) {
 	streamId := c.Param("id")
