@@ -66,6 +66,7 @@ func createTerminal(c *gin.Context) (*model.CreateTerminalResponse, error) {
 // @Description Terminal stream
 // @Tags auth required
 // @Param id path string true "Stream UUID"
+// @Success 200 {object} model.CommonResponse[any]
 // @Router /ws/terminal/{id} [get]
 func terminalStream(c *gin.Context) (any, error) {
 	streamId := c.Param("id")
@@ -92,8 +93,8 @@ func terminalStream(c *gin.Context) (any, error) {
 	}()
 
 	if err = rpc.NezhaHandlerSingleton.UserConnected(streamId, conn); err != nil {
-		return nil, err
+		return nil, newWsError("%v", err)
 	}
 
-	return nil, rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	return nil, newWsError("%v", rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10))
 }

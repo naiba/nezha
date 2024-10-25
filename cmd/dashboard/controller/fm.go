@@ -21,7 +21,7 @@ import (
 // @Description Create an "attached" FM. It is advised to only call this within a terminal session.
 // @Tags auth required
 // @Accept json
-// @Param id path uint true "Server ID"
+// @Param id query uint true "Server ID"
 // @Produce json
 // @Success 200 {object} model.CreateFMResponse
 // @Router /file [get]
@@ -66,6 +66,7 @@ func createFM(c *gin.Context) (*model.CreateFMResponse, error) {
 // @Description Start FM stream
 // @Tags auth required
 // @Param id path string true "Stream UUID"
+// @Success 200 {object} model.CommonResponse[any]
 // @Router /ws/file/{id} [get]
 func fmStream(c *gin.Context) (any, error) {
 	streamId := c.Param("id")
@@ -92,8 +93,8 @@ func fmStream(c *gin.Context) (any, error) {
 	}()
 
 	if err = rpc.NezhaHandlerSingleton.UserConnected(streamId, conn); err != nil {
-		return nil, err
+		return nil, newWsError("%v", err)
 	}
 
-	return nil, rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10)
+	return nil, newWsError("%v", rpc.NezhaHandlerSingleton.StartStream(streamId, time.Second*10))
 }
