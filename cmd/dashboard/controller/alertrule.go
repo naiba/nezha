@@ -10,7 +10,6 @@ import (
 	"github.com/jinzhu/copier"
 
 	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/service/singleton"
 )
 
@@ -53,31 +52,19 @@ func createAlertRule(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
-	if err := utils.Json.Unmarshal([]byte(arf.RulesRaw), &r.Rules); err != nil {
-		return 0, err
-	}
-
 	if err := validateRule(&r); err != nil {
 		return 0, err
 	}
 
 	r.Name = arf.Name
-	r.RulesRaw = arf.RulesRaw
-	r.FailTriggerTasksRaw = arf.FailTriggerTasksRaw
-	r.RecoverTriggerTasksRaw = arf.RecoverTriggerTasksRaw
+	r.Rules = arf.Rules
+	r.FailTriggerTasks = arf.FailTriggerTasks
+	r.RecoverTriggerTasks = arf.RecoverTriggerTasks
 	r.NotificationGroupID = arf.NotificationGroupID
 	enable := arf.Enable
 	r.TriggerMode = arf.TriggerMode
 	r.Enable = &enable
 	r.ID = arf.ID
-
-	if err := utils.Json.Unmarshal([]byte(arf.FailTriggerTasksRaw), &r.FailTriggerTasks); err != nil {
-		return 0, err
-	}
-
-	if err := utils.Json.Unmarshal([]byte(arf.RecoverTriggerTasksRaw), &r.RecoverTriggerTasks); err != nil {
-		return 0, err
-	}
 
 	if err := singleton.DB.Create(&r).Error; err != nil {
 		return 0, newGormError("%v", err)
@@ -116,31 +103,19 @@ func updateAlertRule(c *gin.Context) (any, error) {
 		return nil, fmt.Errorf("alert id %d does not exist", id)
 	}
 
-	if err := utils.Json.Unmarshal([]byte(arf.RulesRaw), &r.Rules); err != nil {
-		return 0, err
-	}
-
 	if err := validateRule(&r); err != nil {
 		return 0, err
 	}
 
 	r.Name = arf.Name
-	r.RulesRaw = arf.RulesRaw
-	r.FailTriggerTasksRaw = arf.FailTriggerTasksRaw
-	r.RecoverTriggerTasksRaw = arf.RecoverTriggerTasksRaw
+	r.Rules = arf.Rules
+	r.FailTriggerTasks = arf.FailTriggerTasks
+	r.RecoverTriggerTasks = arf.RecoverTriggerTasks
 	r.NotificationGroupID = arf.NotificationGroupID
 	enable := arf.Enable
 	r.TriggerMode = arf.TriggerMode
 	r.Enable = &enable
 	r.ID = arf.ID
-
-	if err := utils.Json.Unmarshal([]byte(arf.FailTriggerTasksRaw), &r.FailTriggerTasks); err != nil {
-		return 0, err
-	}
-
-	if err := utils.Json.Unmarshal([]byte(arf.RecoverTriggerTasksRaw), &r.RecoverTriggerTasks); err != nil {
-		return 0, err
-	}
 
 	if err := singleton.DB.Save(&r).Error; err != nil {
 		return 0, newGormError("%v", err)
@@ -181,7 +156,7 @@ func validateRule(r *model.AlertRule) error {
 		for _, rule := range r.Rules {
 			if !rule.IsTransferDurationRule() {
 				if rule.Duration < 3 {
-					return errors.New("错误：Duration 至少为 3")
+					return errors.New("错误: Duration 至少为 3")
 				}
 			} else {
 				if rule.CycleInterval < 1 {
