@@ -62,6 +62,9 @@ func routers(r *gin.Engine) {
 	auth.POST("/terminal", commonHandler(createTerminal))
 	auth.GET("/ws/terminal/:id", commonHandler(terminalStream))
 
+	auth.GET("/file", commonHandler(createFM))
+	auth.GET("/ws/file/:id", commonHandler(fmStream))
+
 	auth.GET("/user", commonHandler(listUser))
 	auth.POST("/user", commonHandler(createUser))
 	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))

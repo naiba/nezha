@@ -107,7 +107,7 @@ func createServerGroup(c *gin.Context) (uint64, error) {
 // @Security BearerAuth
 // @Tags auth required
 // @Accept json
-// @Param id path string true "ID"
+// @Param id path uint true "ID"
 // @Param body body model.ServerGroupForm true "ServerGroupForm"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[any]
