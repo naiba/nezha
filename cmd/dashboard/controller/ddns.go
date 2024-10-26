@@ -128,7 +128,6 @@ func updateDDNS(c *gin.Context) (any, error) {
 	}
 
 	p.Name = df.Name
-	p.ID = id
 	enableIPv4 := df.EnableIPv4
 	enableIPv6 := df.EnableIPv6
 	p.EnableIPv4 = &enableIPv4

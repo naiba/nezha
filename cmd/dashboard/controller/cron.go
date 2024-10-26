@@ -118,7 +118,6 @@ func updateCron(c *gin.Context) (any, error) {
 	cr.PushSuccessful = cf.PushSuccessful
 	cr.NotificationGroupID = cf.NotificationGroupID
 	cr.Cover = cf.Cover
-	cr.ID = id
 
 	if cr.TaskType == model.CronTypeCronTask && cr.Cover == model.CronCoverAlertTrigger {
 		return nil, errors.New("计划任务类型不得使用触发服务器执行方式")
