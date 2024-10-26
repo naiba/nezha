@@ -17,7 +17,7 @@ import (
 // @Schemes
 // @Description List notification group
 // @Security BearerAuth
-// @Tags common
+// @Tags auth required
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.NotificationGroupResponseItem]
 // @Router /notification-group [get]
