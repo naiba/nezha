@@ -97,11 +97,22 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/alert-rule/:id", commonHandler(updateAlertRule))
 	auth.POST("/batch-delete/alert-rule", commonHandler(batchDeleteAlertRule))
 
+	auth.GET("/cron", commonHandler(listCron))
+	auth.POST("/cron", commonHandler(createCron))
+	auth.PATCH("/cron/:id", commonHandler(updateCron))
+	auth.GET("/cron/:id/manual", commonHandler(manualTriggerCron))
+	auth.POST("/batch-delete/cron", commonHandler(batchDeleteCron))
+
 	auth.GET("/ddns", commonHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))
 	auth.POST("/ddns", commonHandler(createDDNS))
 	auth.PATCH("/ddns/:id", commonHandler(updateDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
+
+	auth.GET("/nat", commonHandler(listNAT))
+	auth.POST("/nat", commonHandler(createNAT))
+	auth.PATCH("/nat/:id", commonHandler(updateNAT))
+	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
 
 	r.NoRoute(fallbackToFrontend)
 }

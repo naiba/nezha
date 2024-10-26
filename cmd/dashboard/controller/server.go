@@ -62,7 +62,6 @@ func updateServer(c *gin.Context) (any, error) {
 
 	s.Name = sf.Name
 	s.DisplayIndex = sf.DisplayIndex
-	s.ID = id
 	s.Note = sf.Note
 	s.PublicNote = sf.PublicNote
 	s.HideForGuest = sf.HideForGuest

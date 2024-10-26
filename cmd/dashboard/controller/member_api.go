@@ -58,12 +58,6 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	var err error
 	switch c.Param("model") {
 
-	case "nat":
-		err = singleton.DB.Unscoped().Delete(&model.NAT{}, "id = ?", id).Error
-		if err == nil {
-			singleton.OnNATUpdate()
-		}
-
 	case "cron":
 		err = singleton.DB.Unscoped().Delete(&model.Cron{}, "id = ?", id).Error
 		if err == nil {
@@ -140,12 +134,6 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		}
 	}
 	if err == nil {
-		// 对于计划任务类型，需要更新CronJob
-		if cf.TaskType == model.CronTypeCronTask {
-			cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
-		}
-	}
-	if err == nil {
 		err = tx.Commit().Error
 	} else {
 		tx.Rollback()
@@ -183,7 +171,7 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 		return
 	}
 
-	singleton.ManualTrigger(cr)
+	//singleton.ManualTrigger(cr)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
@@ -452,7 +440,7 @@ func (ma *memberAPI) addOrEditNAT(c *gin.Context) {
 		})
 		return
 	}
-	singleton.OnNATUpdate()
+	//singleton.OnNATUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})
@@ -538,7 +526,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		})
 		return
 	}
-	singleton.OnRefreshOrAddAlert(r)
+	//singleton.OnRefreshOrAddAlert(r)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

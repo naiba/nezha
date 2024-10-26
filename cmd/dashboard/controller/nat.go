@@ -1,0 +1,138 @@
+package controller
+
+import (
+	"fmt"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
+
+	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/service/singleton"
+)
+
+// List NAT Profiles
+// @Summary List NAT profiles
+// @Schemes
+// @Description List NAT profiles
+// @Security BearerAuth
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[[]model.NAT]
+// @Router /nat [get]
+func listNAT(c *gin.Context) ([]*model.NAT, error) {
+	var n []*model.NAT
+
+	singleton.NATCacheRwLock.RLock()
+	defer singleton.NATCacheRwLock.RUnlock()
+
+	if err := copier.Copy(&n, &singleton.NATList); err != nil {
+		return nil, err
+	}
+
+	return n, nil
+}
+
+// Add NAT profile
+// @Summary Add NAT profile
+// @Security BearerAuth
+// @Schemes
+// @Description Add NAT profile
+// @Tags auth required
+// @Accept json
+// @param request body model.NATForm true "NAT Request"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[uint64]
+// @Router /nat [post]
+func createNAT(c *gin.Context) (uint64, error) {
+	var nf model.NATForm
+	var n model.NAT
+
+	if err := c.ShouldBindJSON(&nf); err != nil {
+		return 0, err
+	}
+
+	n.Name = nf.Name
+	n.Domain = nf.Domain
+	n.Host = nf.Host
+	n.ServerID = nf.ServerID
+
+	if err := singleton.DB.Create(&n).Error; err != nil {
+		return 0, newGormError("%v", err)
+	}
+
+	singleton.OnNATUpdate(&n)
+	singleton.UpdateNATList()
+	return n.ID, nil
+}
+
+// Edit NAT profile
+// @Summary Edit NAT profile
+// @Security BearerAuth
+// @Schemes
+// @Description Edit NAT profile
+// @Tags auth required
+// @Accept json
+// @param id path uint true "Profile ID"
+// @param request body model.NATForm true "NAT Request"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[any]
+// @Router /nat/{id} [patch]
+func updateNAT(c *gin.Context) (any, error) {
+	idStr := c.Param("id")
+
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	var nf model.NATForm
+	if err := c.ShouldBindJSON(&nf); err != nil {
+		return nil, err
+	}
+
+	var n model.NAT
+	if err = singleton.DB.First(&n, id).Error; err != nil {
+		return nil, fmt.Errorf("profile id %d does not exist", id)
+	}
+
+	n.Name = nf.Name
+	n.Domain = nf.Domain
+	n.Host = nf.Host
+	n.ServerID = nf.ServerID
+
+	if err := singleton.DB.Save(&n).Error; err != nil {
+		return 0, newGormError("%v", err)
+	}
+
+	singleton.OnNATUpdate(&n)
+	singleton.UpdateNATList()
+	return nil, nil
+}
+
+// Batch delete NAT configurations
+// @Summary Batch delete NAT configurations
+// @Security BearerAuth
+// @Schemes
+// @Description Batch delete NAT configurations
+// @Tags auth required
+// @Accept json
+// @param request body []uint64 true "id list"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[any]
+// @Router /batch-delete/nat [post]
+func batchDeleteNAT(c *gin.Context) (any, error) {
+	var n []uint64
+
+	if err := c.ShouldBindJSON(&n); err != nil {
+		return nil, err
+	}
+
+	if err := singleton.DB.Unscoped().Delete(&model.NAT{}, "id in (?)", n).Error; err != nil {
+		return nil, newGormError("%v", err)
+	}
+
+	singleton.OnNATDelete(n)
+	singleton.UpdateNATList()
+	return nil, nil
+}

@@ -1,7 +1,6 @@
 package model
 
 type DDNSForm struct {
-	ID                 uint64   `json:"id,omitempty"`
 	MaxRetries         uint64   `json:"max_retries,omitempty"`
 	EnableIPv4         bool     `json:"enable_ipv4,omitempty"`
 	EnableIPv6         bool     `json:"enable_ipv6,omitempty"`
