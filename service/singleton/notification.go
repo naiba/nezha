@@ -49,14 +49,13 @@ func loadNotifications() {
 		groupNotifications[n.NotificationGroupID] = append(groupNotifications[n.NotificationGroupID], n.NotificationID)
 	}
 
-	var notifications []model.Notification
-	if err := DB.Find(&notifications).Error; err != nil {
+	if err := DB.Find(&NotificationListSorted).Error; err != nil {
 		panic(err)
 	}
 
-	NotificationMap = make(map[uint64]*model.Notification, len(notifications))
-	for i := range notifications {
-		NotificationMap[notifications[i].ID] = &notifications[i]
+	NotificationMap = make(map[uint64]*model.Notification, len(NotificationListSorted))
+	for i := range NotificationListSorted {
+		NotificationMap[NotificationListSorted[i].ID] = NotificationListSorted[i]
 	}
 
 	for gid, nids := range groupNotifications {
@@ -75,7 +74,6 @@ func loadNotifications() {
 	}
 
 	NotificationsLock.Unlock()
-	UpdateNotificationList()
 }
 
 func UpdateNotificationList() {

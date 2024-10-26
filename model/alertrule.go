@@ -61,55 +61,55 @@ func (r *AlertRule) Enabled() bool {
 	return r.Enable != nil && *r.Enable
 }
 
-// Snapshot 对传入的Server进行该报警规则下所有type的检查 返回包含每项检查结果的空接口
-func (r *AlertRule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, db *gorm.DB) []interface{} {
-	var point []interface{}
-	for i := 0; i < len(r.Rules); i++ {
-		point = append(point, r.Rules[i].Snapshot(cycleTransferStats, server, db))
+// Snapshot 对传入的Server进行该报警规则下所有type的检查 返回每项检查结果
+func (r *AlertRule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, db *gorm.DB) []bool {
+	point := make([]bool, 0, len(r.Rules))
+	for _, rule := range r.Rules {
+		point = append(point, rule.Snapshot(cycleTransferStats, server, db))
 	}
 	return point
 }
 
-// Check 传入包含当前报警规则下所有type检查结果的空接口 返回报警持续时间与是否通过报警检查(通过则返回true)
-func (r *AlertRule) Check(points [][]interface{}) (int, bool) {
-	var maxNum int // 报警持续时间
-	var count int  // 检查未通过的个数
-	for i := 0; i < len(r.Rules); i++ {
-		if r.Rules[i].IsTransferDurationRule() {
+// Check 传入包含当前报警规则下所有type检查结果 返回报警持续时间与是否通过报警检查(通过则返回true)
+func (r *AlertRule) Check(points [][]bool) (maxDuration int, passed bool) {
+	failCount := 0 // 检查未通过的个数
+
+	for i, rule := range r.Rules {
+		if rule.IsTransferDurationRule() {
 			// 循环区间流量报警
-			if maxNum < 1 {
-				maxNum = 1
+			if maxDuration < 1 {
+				maxDuration = 1
 			}
 			for j := len(points[i]) - 1; j >= 0; j-- {
-				if points[i][j] != nil {
-					count++
+				if !points[i][j] {
+					failCount++
 					break
 				}
 			}
 		} else {
 			// 常规报警
-			total := 0.0
-			fail := 0.0
-			num := int(r.Rules[i].Duration)
-			if num > maxNum {
-				maxNum = num
+			duration := int(rule.Duration)
+			if duration > maxDuration {
+				maxDuration = duration
 			}
-			if len(points) < num {
+			if len(points) < duration {
 				continue
 			}
-			for j := len(points) - 1; j >= 0 && len(points)-num <= j; j-- {
+
+			total, fail := 0.0, 0.0
+			for j := len(points) - duration; j < len(points); j++ {
 				total++
-				if points[j][i] != nil {
+				if !points[j][i] {
 					fail++
 				}
 			}
 			// 当70%以上的采样点未通过规则判断时 才认为当前检查未通过
 			if fail/total > 0.7 {
-				count++
+				failCount++
 				break
 			}
 		}
 	}
 	// 仅当所有检查均未通过时 返回false
-	return maxNum, count != len(r.Rules)
+	return maxDuration, failCount != len(r.Rules)
 }

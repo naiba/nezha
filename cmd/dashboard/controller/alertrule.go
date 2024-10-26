@@ -64,13 +64,12 @@ func createAlertRule(c *gin.Context) (uint64, error) {
 	enable := arf.Enable
 	r.TriggerMode = arf.TriggerMode
 	r.Enable = &enable
-	r.ID = arf.ID
 
 	if err := singleton.DB.Create(&r).Error; err != nil {
 		return 0, newGormError("%v", err)
 	}
 
-	singleton.OnRefreshOrAddAlert(r)
+	singleton.OnRefreshOrAddAlert(&r)
 	return r.ID, nil
 }
 
@@ -115,13 +114,12 @@ func updateAlertRule(c *gin.Context) (any, error) {
 	enable := arf.Enable
 	r.TriggerMode = arf.TriggerMode
 	r.Enable = &enable
-	r.ID = arf.ID
 
 	if err := singleton.DB.Save(&r).Error; err != nil {
 		return 0, newGormError("%v", err)
 	}
 
-	singleton.OnRefreshOrAddAlert(r)
+	singleton.OnRefreshOrAddAlert(&r)
 	return r.ID, nil
 }
 
@@ -143,7 +141,7 @@ func batchDeleteAlertRule(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
-	if err := singleton.DB.Unscoped().Delete(&model.DDNSProfile{}, "id in (?)", ar).Error; err != nil {
+	if err := singleton.DB.Unscoped().Delete(&model.AlertRule{}, "id in (?)", ar).Error; err != nil {
 		return nil, newGormError("%v", err)
 	}
 

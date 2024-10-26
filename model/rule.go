@@ -34,8 +34,8 @@ type Rule struct {
 	Ignore        map[uint64]bool `json:"ignore,omitempty"`         // 覆盖范围的排除
 
 	// 只作为缓存使用，记录下次该检测的时间
-	NextTransferAt  map[uint64]time.Time   `json:"-"`
-	LastCycleStatus map[uint64]interface{} `json:"-"`
+	NextTransferAt  map[uint64]time.Time `json:"-"`
+	LastCycleStatus map[uint64]bool      `json:"-"`
 }
 
 func percentage(used, total uint64) float64 {
@@ -45,15 +45,15 @@ func percentage(used, total uint64) float64 {
 	return float64(used) * 100 / float64(total)
 }
 
-// Snapshot 未通过规则返回 struct{}{}, 通过返回 nil
-func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, db *gorm.DB) interface{} {
+// Snapshot 未通过规则返回 false, 通过返回 true
+func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, db *gorm.DB) bool {
 	// 监控全部但是排除了此服务器
 	if u.Cover == RuleCoverAll && u.Ignore[server.ID] {
-		return nil
+		return true
 	}
 	// 忽略全部但是指定监控了此服务器
 	if u.Cover == RuleCoverIgnoreAll && !u.Ignore[server.ID] {
-		return nil
+		return true
 	}
 
 	// 循环区间流量检测 · 短期无需重复检测
@@ -147,13 +147,13 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 			u.NextTransferAt = make(map[uint64]time.Time)
 		}
 		if u.LastCycleStatus == nil {
-			u.LastCycleStatus = make(map[uint64]interface{})
+			u.LastCycleStatus = make(map[uint64]bool)
 		}
 		u.NextTransferAt[server.ID] = time.Now().Add(time.Second * time.Duration(seconds))
 		if (u.Max > 0 && src > u.Max) || (u.Min > 0 && src < u.Min) {
-			u.LastCycleStatus[server.ID] = struct{}{}
+			u.LastCycleStatus[server.ID] = false
 		} else {
-			u.LastCycleStatus[server.ID] = nil
+			u.LastCycleStatus[server.ID] = true
 		}
 		if cycleTransferStats.ServerName[server.ID] != server.Name {
 			cycleTransferStats.ServerName[server.ID] = server.Name
@@ -166,12 +166,12 @@ func (u *Rule) Snapshot(cycleTransferStats *CycleTransferStats, server *Server, 
 	}
 
 	if u.Type == "offline" && float64(time.Now().Unix())-src > 6 {
-		return struct{}{}
+		return false
 	} else if (u.Max > 0 && src > u.Max) || (u.Min > 0 && src < u.Min) {
-		return struct{}{}
+		return false
 	}
 
-	return nil
+	return true
 }
 
 // IsTransferDurationRule 判断该规则是否属于周期流量规则 属于则返回true

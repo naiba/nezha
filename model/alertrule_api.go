@@ -1,7 +1,6 @@
 package model
 
 type AlertRuleForm struct {
-	ID                  uint64   `json:"id"`
 	Name                string   `json:"name"`
 	Rules               []Rule   `json:"rules"`
 	FailTriggerTasks    []uint64 `json:"fail_trigger_tasks"`    // 失败时触发的任务id

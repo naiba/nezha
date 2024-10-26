@@ -21,16 +21,14 @@ var (
 )
 
 func initDDNS() {
-	var ddns []*model.DDNSProfile
-	DB.Find(&ddns)
+	DB.Find(&DDNSList)
 	DDNSCacheLock.Lock()
 	DDNSCache = make(map[uint64]*model.DDNSProfile)
-	for i := 0; i < len(ddns); i++ {
-		DDNSCache[ddns[i].ID] = ddns[i]
+	for i := 0; i < len(DDNSList); i++ {
+		DDNSCache[DDNSList[i].ID] = DDNSList[i]
 	}
 	DDNSCacheLock.Unlock()
 
-	UpdateDDNSList()
 	OnNameserverUpdate()
 }
 

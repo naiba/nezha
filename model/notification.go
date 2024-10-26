@@ -41,18 +41,6 @@ type Notification struct {
 	VerifySSL     *bool  `json:"verify_ssl,omitempty"`
 }
 
-type NotificationForm struct {
-	ID            uint64 `json:"id,omitempty"`
-	Name          string `json:"name,omitempty"`
-	URL           string `json:"url,omitempty"`
-	RequestMethod int    `json:"request_method,omitempty"`
-	RequestType   int    `json:"request_type,omitempty"`
-	RequestHeader string `json:"request_header,omitempty"`
-	RequestBody   string `json:"request_body,omitempty"`
-	VerifySSL     bool   `json:"verify_ssl,omitempty"`
-	SkipCheck     bool   `json:"skip_check,omitempty"`
-}
-
 func (ns *NotificationServerBundle) reqURL(message string) string {
 	n := ns.Notification
 	return ns.replaceParamsInString(n.URL, message, func(msg string) string {

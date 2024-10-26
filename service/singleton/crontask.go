@@ -3,6 +3,7 @@ package singleton
 import (
 	"bytes"
 	"fmt"
+	"slices"
 	"sync"
 
 	"github.com/jinzhu/copier"
@@ -15,8 +16,10 @@ import (
 
 var (
 	Cron     *cron.Cron
-	Crons    map[uint64]*model.Cron // [CrondID] -> *model.Cron
+	Crons    map[uint64]*model.Cron // [CronID] -> *model.Cron
 	CronLock sync.RWMutex
+
+	CronList []*model.Cron
 )
 
 func InitCronTask() {
@@ -27,29 +30,28 @@ func InitCronTask() {
 // loadCronTasks 加载计划任务
 func loadCronTasks() {
 	InitCronTask()
-	var crons []model.Cron
-	DB.Find(&crons)
+	DB.Find(&CronList)
 	var err error
 	var notificationGroupList []uint64
 	notificationMsgMap := make(map[uint64]*bytes.Buffer)
-	for i := 0; i < len(crons); i++ {
+	for i := 0; i < len(CronList); i++ {
 		// 触发任务类型无需注册
-		if crons[i].TaskType == model.CronTypeTriggerTask {
-			Crons[crons[i].ID] = &crons[i]
+		if CronList[i].TaskType == model.CronTypeTriggerTask {
+			Crons[CronList[i].ID] = CronList[i]
 			continue
 		}
 		// 注册计划任务
-		crons[i].CronJobID, err = Cron.AddFunc(crons[i].Scheduler, CronTrigger(crons[i]))
+		CronList[i].CronJobID, err = Cron.AddFunc(CronList[i].Scheduler, CronTrigger(CronList[i]))
 		if err == nil {
-			Crons[crons[i].ID] = &crons[i]
+			Crons[CronList[i].ID] = CronList[i]
 		} else {
 			// 当前通知组首次出现 将其加入通知组列表并初始化通知组消息缓存
-			if _, ok := notificationMsgMap[crons[i].NotificationGroupID]; !ok {
-				notificationGroupList = append(notificationGroupList, crons[i].NotificationGroupID)
-				notificationMsgMap[crons[i].NotificationGroupID] = bytes.NewBufferString("")
-				notificationMsgMap[crons[i].NotificationGroupID].WriteString("调度失败的计划任务：[")
+			if _, ok := notificationMsgMap[CronList[i].NotificationGroupID]; !ok {
+				notificationGroupList = append(notificationGroupList, CronList[i].NotificationGroupID)
+				notificationMsgMap[CronList[i].NotificationGroupID] = bytes.NewBufferString("")
+				notificationMsgMap[CronList[i].NotificationGroupID].WriteString("调度失败的计划任务：[")
 			}
-			notificationMsgMap[crons[i].NotificationGroupID].WriteString(fmt.Sprintf("%d,", crons[i].ID))
+			notificationMsgMap[CronList[i].NotificationGroupID].WriteString(fmt.Sprintf("%d,", CronList[i].ID))
 		}
 	}
 	// 向注册错误的计划任务所在通知组发送通知
@@ -60,7 +62,49 @@ func loadCronTasks() {
 	Cron.Start()
 }
 
-func ManualTrigger(c model.Cron) {
+func OnRefreshOrAddCron(c *model.Cron) {
+	CronLock.Lock()
+	defer CronLock.Unlock()
+	crOld := Crons[c.ID]
+	if crOld != nil && crOld.CronJobID != 0 {
+		Cron.Remove(crOld.CronJobID)
+	}
+
+	delete(Crons, c.ID)
+	Crons[c.ID] = c
+}
+
+func UpdateCronList() {
+	CronLock.RLock()
+	defer CronLock.RUnlock()
+
+	CronList = make([]*model.Cron, 0, len(Crons))
+	for _, c := range Crons {
+		CronList = append(CronList, c)
+	}
+	slices.SortFunc(CronList, func(a, b *model.Cron) int {
+		if a.ID < b.ID {
+			return -1
+		} else if a.ID == b.ID {
+			return 0
+		}
+		return 1
+	})
+}
+
+func OnDeleteCron(id []uint64) {
+	CronLock.Lock()
+	defer CronLock.Unlock()
+	for _, i := range id {
+		cr := Crons[i]
+		if cr != nil && cr.CronJobID != 0 {
+			Cron.Remove(cr.CronJobID)
+		}
+		delete(Crons, i)
+	}
+}
+
+func ManualTrigger(c *model.Cron) {
 	CronTrigger(c)()
 }
 
@@ -76,11 +120,11 @@ func SendTriggerTasks(taskIDs []uint64, triggerServer uint64) {
 
 	// 依次调用CronTrigger发送任务
 	for _, c := range cronLists {
-		go CronTrigger(*c, triggerServer)()
+		go CronTrigger(c, triggerServer)()
 	}
 }
 
-func CronTrigger(cr model.Cron, triggerServer ...uint64) func() {
+func CronTrigger(cr *model.Cron, triggerServer ...uint64) func() {
 	crIgnoreMap := make(map[uint64]bool)
 	for j := 0; j < len(cr.Servers); j++ {
 		crIgnoreMap[cr.Servers[j]] = true

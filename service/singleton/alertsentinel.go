@@ -26,9 +26,9 @@ type NotificationHistory struct {
 var (
 	AlertsLock                    sync.RWMutex
 	Alerts                        []*model.AlertRule
-	alertsStore                   map[uint64]map[uint64][][]interface{} // [alert_id][server_id] -> 对应报警规则的检查结果
-	alertsPrevState               map[uint64]map[uint64]uint8           // [alert_id][server_id] -> 对应报警规则的上一次报警状态
-	AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats  // [alert_id] -> 对应报警规则的周期流量统计
+	alertsStore                   map[uint64]map[uint64][][]bool       // [alert_id][server_id] -> 对应报警规则的检查结果
+	alertsPrevState               map[uint64]map[uint64]uint8          // [alert_id][server_id] -> 对应报警规则的上一次报警状态
+	AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats // [alert_id] -> 对应报警规则的周期流量统计
 )
 
 // addCycleTransferStatsInfo 向AlertsCycleTransferStatsStore中添加周期流量报警统计信息
@@ -59,7 +59,7 @@ func addCycleTransferStatsInfo(alert *model.AlertRule) {
 
 // AlertSentinelStart 报警器启动
 func AlertSentinelStart() {
-	alertsStore = make(map[uint64]map[uint64][][]interface{})
+	alertsStore = make(map[uint64]map[uint64][][]bool)
 	alertsPrevState = make(map[uint64]map[uint64]uint8)
 	AlertsCycleTransferStatsStore = make(map[uint64]*model.CycleTransferStats)
 	AlertsLock.Lock()
@@ -67,7 +67,7 @@ func AlertSentinelStart() {
 		panic(err)
 	}
 	for _, alert := range Alerts {
-		alertsStore[alert.ID] = make(map[uint64][][]interface{})
+		alertsStore[alert.ID] = make(map[uint64][][]bool)
 		alertsPrevState[alert.ID] = make(map[uint64]uint8)
 		addCycleTransferStatsInfo(alert)
 	}
@@ -91,7 +91,7 @@ func AlertSentinelStart() {
 	}
 }
 
-func OnRefreshOrAddAlert(alert model.AlertRule) {
+func OnRefreshOrAddAlert(alert *model.AlertRule) {
 	AlertsLock.Lock()
 	defer AlertsLock.Unlock()
 	delete(alertsStore, alert.ID)
@@ -99,17 +99,17 @@ func OnRefreshOrAddAlert(alert model.AlertRule) {
 	var isEdit bool
 	for i := 0; i < len(Alerts); i++ {
 		if Alerts[i].ID == alert.ID {
-			Alerts[i] = &alert
+			Alerts[i] = alert
 			isEdit = true
 		}
 	}
 	if !isEdit {
-		Alerts = append(Alerts, &alert)
+		Alerts = append(Alerts, alert)
 	}
-	alertsStore[alert.ID] = make(map[uint64][][]interface{})
+	alertsStore[alert.ID] = make(map[uint64][][]bool)
 	alertsPrevState[alert.ID] = make(map[uint64]uint8)
 	delete(AlertsCycleTransferStatsStore, alert.ID)
-	addCycleTransferStatsInfo(&alert)
+	addCycleTransferStatsInfo(alert)
 }
 
 func OnDeleteAlert(id []uint64) {

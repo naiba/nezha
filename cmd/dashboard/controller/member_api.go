@@ -140,12 +140,6 @@ func (ma *memberAPI) addOrEditCron(c *gin.Context) {
 		}
 	}
 	if err == nil {
-		// 对于计划任务类型，需要更新CronJob
-		if cf.TaskType == model.CronTypeCronTask {
-			cr.CronJobID, err = singleton.Cron.AddFunc(cr.Scheduler, singleton.CronTrigger(cr))
-		}
-	}
-	if err == nil {
 		err = tx.Commit().Error
 	} else {
 		tx.Rollback()
@@ -183,7 +177,7 @@ func (ma *memberAPI) manualTrigger(c *gin.Context) {
 		return
 	}
 
-	singleton.ManualTrigger(cr)
+	//singleton.ManualTrigger(cr)
 
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
@@ -538,7 +532,7 @@ func (ma *memberAPI) addOrEditAlertRule(c *gin.Context) {
 		})
 		return
 	}
-	singleton.OnRefreshOrAddAlert(r)
+	//singleton.OnRefreshOrAddAlert(r)
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

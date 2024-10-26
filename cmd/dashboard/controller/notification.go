@@ -57,7 +57,7 @@ func createNotification(c *gin.Context) (uint64, error) {
 	n.URL = nf.URL
 	verifySSL := nf.VerifySSL
 	n.VerifySSL = &verifySSL
-	n.ID = nf.ID
+
 	ns := model.NotificationServerBundle{
 		Notification: &n,
 		Server:       nil,
@@ -115,7 +115,7 @@ func updateNotification(c *gin.Context) (any, error) {
 	n.URL = nf.URL
 	verifySSL := nf.VerifySSL
 	n.VerifySSL = &verifySSL
-	n.ID = nf.ID
+
 	ns := model.NotificationServerBundle{
 		Notification: &n,
 		Server:       nil,
