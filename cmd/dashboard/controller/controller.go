@@ -55,6 +55,10 @@ func routers(r *gin.Engine) {
 	optionalAuth.GET("/ws/server", commonHandler(serverStream))
 	optionalAuth.GET("/server-group", commonHandler(listServerGroup))
 
+	optionalAuth.GET("/service", commonHandler(listService))
+	optionalAuth.GET("/service/:id", commonHandler(listServiceHistory))
+	optionalAuth.GET("/service/server", commonHandler(listServerWithServices))
+
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
@@ -69,7 +73,6 @@ func routers(r *gin.Engine) {
 	auth.POST("/user", commonHandler(createUser))
 	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
 
-	auth.GET("/service", commonHandler(listService))
 	auth.POST("/service", commonHandler(createService))
 	auth.PATCH("/service/:id", commonHandler(updateService))
 	auth.POST("/batch-delete/service", commonHandler(batchDeleteService))
