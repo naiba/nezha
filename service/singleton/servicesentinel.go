@@ -602,14 +602,17 @@ func StatusCodeToString(statusCode int) string {
 	switch statusCode {
 	case StatusNoData:
 		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusNoData"})
+		return "No Data"
 	case StatusGood:
 		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusGood"})
+		return "Good"
 	case StatusLowAvailability:
 		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusLowAvailability"})
+		return "Low Availability"
 	case StatusDown:
 		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusDown"})
+		return "Down"
 	default:
 		return ""
 	}
-	return ""
 }
