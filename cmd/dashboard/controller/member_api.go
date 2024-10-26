@@ -58,12 +58,6 @@ func (ma *memberAPI) delete(c *gin.Context) {
 	var err error
 	switch c.Param("model") {
 
-	case "nat":
-		err = singleton.DB.Unscoped().Delete(&model.NAT{}, "id = ?", id).Error
-		if err == nil {
-			singleton.OnNATUpdate()
-		}
-
 	case "cron":
 		err = singleton.DB.Unscoped().Delete(&model.Cron{}, "id = ?", id).Error
 		if err == nil {
@@ -446,7 +440,7 @@ func (ma *memberAPI) addOrEditNAT(c *gin.Context) {
 		})
 		return
 	}
-	singleton.OnNATUpdate()
+	//singleton.OnNATUpdate()
 	c.JSON(http.StatusOK, model.Response{
 		Code: http.StatusOK,
 	})

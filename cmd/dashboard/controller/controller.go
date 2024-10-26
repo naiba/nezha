@@ -109,6 +109,11 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/ddns/:id", commonHandler(updateDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
 
+	auth.GET("/nat", commonHandler(listNAT))
+	auth.POST("/nat", commonHandler(createNAT))
+	auth.PATCH("/nat/:id", commonHandler(updateNAT))
+	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
+
 	r.NoRoute(fallbackToFrontend)
 }
 
