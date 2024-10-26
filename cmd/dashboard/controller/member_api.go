@@ -75,11 +75,6 @@ func (ma *memberAPI) delete(c *gin.Context) {
 			}
 			delete(singleton.Crons, id)
 		}
-	case "alert-rule":
-		err = singleton.DB.Unscoped().Delete(&model.AlertRule{}, "id = ?", id).Error
-		if err == nil {
-			singleton.OnDeleteAlert(id)
-		}
 	}
 	if err != nil {
 		c.JSON(http.StatusOK, model.Response{

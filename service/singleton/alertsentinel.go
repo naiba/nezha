@@ -27,7 +27,7 @@ var (
 	AlertsLock                    sync.RWMutex
 	Alerts                        []*model.AlertRule
 	alertsStore                   map[uint64]map[uint64][][]interface{} // [alert_id][server_id] -> 对应报警规则的检查结果
-	alertsPrevState               map[uint64]map[uint64]uint            // [alert_id][server_id] -> 对应报警规则的上一次报警状态
+	alertsPrevState               map[uint64]map[uint64]uint8           // [alert_id][server_id] -> 对应报警规则的上一次报警状态
 	AlertsCycleTransferStatsStore map[uint64]*model.CycleTransferStats  // [alert_id] -> 对应报警规则的周期流量统计
 )
 
@@ -60,7 +60,7 @@ func addCycleTransferStatsInfo(alert *model.AlertRule) {
 // AlertSentinelStart 报警器启动
 func AlertSentinelStart() {
 	alertsStore = make(map[uint64]map[uint64][][]interface{})
-	alertsPrevState = make(map[uint64]map[uint64]uint)
+	alertsPrevState = make(map[uint64]map[uint64]uint8)
 	AlertsCycleTransferStatsStore = make(map[uint64]*model.CycleTransferStats)
 	AlertsLock.Lock()
 	if err := DB.Find(&Alerts).Error; err != nil {
@@ -68,7 +68,7 @@ func AlertSentinelStart() {
 	}
 	for _, alert := range Alerts {
 		alertsStore[alert.ID] = make(map[uint64][][]interface{})
-		alertsPrevState[alert.ID] = make(map[uint64]uint)
+		alertsPrevState[alert.ID] = make(map[uint64]uint8)
 		addCycleTransferStatsInfo(alert)
 	}
 	AlertsLock.Unlock()
@@ -107,23 +107,26 @@ func OnRefreshOrAddAlert(alert model.AlertRule) {
 		Alerts = append(Alerts, &alert)
 	}
 	alertsStore[alert.ID] = make(map[uint64][][]interface{})
-	alertsPrevState[alert.ID] = make(map[uint64]uint)
+	alertsPrevState[alert.ID] = make(map[uint64]uint8)
 	delete(AlertsCycleTransferStatsStore, alert.ID)
 	addCycleTransferStatsInfo(&alert)
 }
 
-func OnDeleteAlert(id uint64) {
+func OnDeleteAlert(id []uint64) {
 	AlertsLock.Lock()
 	defer AlertsLock.Unlock()
-	delete(alertsStore, id)
-	delete(alertsPrevState, id)
-	for i := 0; i < len(Alerts); i++ {
-		if Alerts[i].ID == id {
-			Alerts = append(Alerts[:i], Alerts[i+1:]...)
-			i--
+	for _, i := range id {
+		delete(alertsStore, i)
+		delete(alertsPrevState, i)
+		currentAlerts := Alerts[:0]
+		for _, alert := range Alerts {
+			if alert.ID != i {
+				currentAlerts = append(currentAlerts, alert)
+			}
 		}
+		Alerts = currentAlerts
+		delete(AlertsCycleTransferStatsStore, i)
 	}
-	delete(AlertsCycleTransferStatsStore, id)
 }
 
 // checkStatus 检查报警规则并发送报警

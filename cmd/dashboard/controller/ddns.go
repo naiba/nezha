@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -66,8 +65,7 @@ func createDDNS(c *gin.Context) (uint64, error) {
 	p.EnableIPv6 = &enableIPv6
 	p.MaxRetries = df.MaxRetries
 	p.Provider = df.Provider
-	p.DomainsRaw = df.DomainsRaw
-	p.Domains = strings.Split(p.DomainsRaw, ",")
+	p.Domains = df.Domains
 	p.AccessID = df.AccessID
 	p.AccessSecret = df.AccessSecret
 	p.WebhookURL = df.WebhookURL
@@ -137,8 +135,7 @@ func updateDDNS(c *gin.Context) (any, error) {
 	p.EnableIPv6 = &enableIPv6
 	p.MaxRetries = df.MaxRetries
 	p.Provider = df.Provider
-	p.DomainsRaw = df.DomainsRaw
-	p.Domains = strings.Split(p.DomainsRaw, ",")
+	p.Domains = df.Domains
 	p.AccessID = df.AccessID
 	p.AccessSecret = df.AccessSecret
 	p.WebhookURL = df.WebhookURL
