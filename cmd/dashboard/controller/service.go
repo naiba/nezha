@@ -73,7 +73,6 @@ func listServiceHistory(c *gin.Context) ([]*model.ServiceInfos, error) {
 	if !ok {
 		return nil, errors.New("server not found")
 	}
-	singleton.ServerLock.RUnlock()
 
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 	authorized := isMember // TODO || isViewPasswordVerfied
@@ -81,6 +80,7 @@ func listServiceHistory(c *gin.Context) ([]*model.ServiceInfos, error) {
 	if server.HideForGuest && !authorized {
 		return nil, errors.New("unauthorized")
 	}
+	singleton.ServerLock.RUnlock()
 
 	serviceHistories, err := singleton.GetServiceHistories(id)
 	if err != nil {
