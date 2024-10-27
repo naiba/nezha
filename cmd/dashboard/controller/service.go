@@ -107,10 +107,10 @@ func listServiceHistory(c *gin.Context) ([]*model.ServiceInfos, error) {
 		infos, ok := resultMap[history.ServiceID]
 		if !ok {
 			infos = &model.ServiceInfos{
-				ServiceID: history.ServiceID,
-				ServerID:  history.ServerID,
-				// ServiceName: singleton.ServiceSentinel.Services[history.ServiceID].Name,
-				ServerName: singleton.ServerList[history.ServerID].Name,
+				ServiceID:   history.ServiceID,
+				ServerID:    history.ServerID,
+				ServiceName: singleton.ServiceSentinelShared.Services[history.ServiceID].Name,
+				ServerName:  singleton.ServerList[history.ServerID].Name,
 			}
 			resultMap[history.ServiceID] = infos
 			sortedServiceIDs = append(sortedServiceIDs, history.ServiceID)
