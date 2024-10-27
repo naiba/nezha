@@ -606,29 +606,31 @@ func (ma *memberAPI) updateSetting(c *gin.Context) {
 	// 	return
 	// }
 
-	singleton.Conf.Language = sf.Language
-	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
-	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
-	singleton.Conf.Cover = sf.Cover
-	singleton.Conf.InstallHost = sf.InstallHost
-	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
-	singleton.Conf.IPChangeNotificationTag = sf.IPChangeNotificationTag
-	singleton.Conf.SiteName = sf.SiteName
-	singleton.Conf.DNSServers = sf.CustomNameservers
-	// 保证NotificationTag不为空
-	if singleton.Conf.IPChangeNotificationTag == "" {
-		singleton.Conf.IPChangeNotificationTag = "default"
-	}
-	if err := singleton.Conf.Save(); err != nil {
+	/*
+		singleton.Conf.Language = sf.Language
+		singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification == "on"
+		singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification == "on"
+		singleton.Conf.Cover = sf.Cover
+		singleton.Conf.InstallHost = sf.InstallHost
+		singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
+		singleton.Conf.IPChangeNotificationTag = sf.IPChangeNotificationTag
+		singleton.Conf.SiteName = sf.SiteName
+		singleton.Conf.DNSServers = sf.CustomNameservers
+		// 保证NotificationTag不为空
+		if singleton.Conf.IPChangeNotificationTag == "" {
+			singleton.Conf.IPChangeNotificationTag = "default"
+		}
+		if err := singleton.Conf.Save(); err != nil {
+			c.JSON(http.StatusOK, model.Response{
+				Code:    http.StatusBadRequest,
+				Message: fmt.Sprintf("请求错误：%s", err),
+			})
+			return
+		}
+		// 更新DNS服务器
+		singleton.OnNameserverUpdate()
 		c.JSON(http.StatusOK, model.Response{
-			Code:    http.StatusBadRequest,
-			Message: fmt.Sprintf("请求错误：%s", err),
+			Code: http.StatusOK,
 		})
-		return
-	}
-	// 更新DNS服务器
-	singleton.OnNameserverUpdate()
-	c.JSON(http.StatusOK, model.Response{
-		Code: http.StatusOK,
-	})
+	*/
 }
