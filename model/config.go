@@ -10,38 +10,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-var Languages = map[string]string{
-	"zh-CN": "简体中文",
-	"zh-TW": "繁體中文",
-	"en-US": "English",
-	"es-ES": "Español",
-}
-
-var Themes = map[string]string{
-	"default":       "Default",
-	"daynight":      "JackieSung DayNight",
-	"mdui":          "Neko Mdui",
-	"hotaru":        "Hotaru",
-	"angel-kanade":  "AngelKanade",
-	"server-status": "ServerStatus",
-	"custom":        "Custom(local)",
-}
-
-var DashboardThemes = map[string]string{
-	"default": "Default",
-	"custom":  "Custom(local)",
-}
-
-const (
-	ConfigTypeGitHub     = "github"
-	ConfigTypeGitee      = "gitee"
-	ConfigTypeGitlab     = "gitlab"
-	ConfigTypeJihulab    = "jihulab"
-	ConfigTypeGitea      = "gitea"
-	ConfigTypeCloudflare = "cloudflare"
-	ConfigTypeOidc       = "oidc"
-)
-
 const (
 	ConfigCoverAll = iota
 	ConfigCoverIgnoreAll
@@ -62,16 +30,19 @@ type Config struct {
 	EnablePlainIPInNotification bool `mapstructure:"enable_plain_ip_in_notification" json:"enable_plain_ip_in_notification,omitempty"` // 通知信息IP不打码
 
 	// IP变更提醒
-	EnableIPChangeNotification bool   `mapstructure:"enable_ip_change_notification" json:"enable_ip_change_notification,omitempty"`
-	IPChangeNotificationTag    string `mapstructure:"ip_change_notification_tag" json:"ip_change_notification_tag,omitempty"`
-	Cover                      uint8  `mapstructure:"cover" json:"cover,omitempty"`                                     // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
-	IgnoredIPNotification      string `mapstructure:"ignored_ip_notification" json:"ignored_ip_notification,omitempty"` // 特定服务器IP（多个服务器用逗号分隔）
+	EnableIPChangeNotification  bool   `mapstructure:"enable_ip_change_notification" json:"enable_ip_change_notification,omitempty"`
+	IPChangeNotificationGroupID uint64 `mapstructure:"ip_change_notification_group_id" json:"ip_change_notification_group_id,omitempty"`
+	Cover                       uint8  `mapstructure:"cover" json:"cover,omitempty"`                                     // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
+	IgnoredIPNotification       string `mapstructure:"ignored_ip_notification" json:"ignored_ip_notification,omitempty"` // 特定服务器IP（多个服务器用逗号分隔）
 
-	IgnoredIPNotificationServerIDs map[uint64]bool `mapstructure:"ignored_ip_notification_server_i_ds" json:"ignored_ip_notification_server_i_ds,omitempty"` // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
+	IgnoredIPNotificationServerIDs map[uint64]bool `mapstructure:"ignored_ip_notification_server_ids" json:"ignored_ip_notification_server_ids,omitempty"` // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
 	AvgPingCount                   int             `mapstructure:"avg_ping_count" json:"avg_ping_count,omitempty"`
 	DNSServers                     string          `mapstructure:"dns_servers" json:"dns_servers,omitempty"`
 
-	v *viper.Viper
+	CustomCode          string `mapstructure:"custom_code" json:"custom_code,omitempty"`
+	CustomCodeDashboard string `mapstructure:"custom_code_dashboard" json:"custom_code_dashboard,omitempty"`
+
+	v *viper.Viper `json:"-"`
 }
 
 // Read 读取配置文件并应用
@@ -90,12 +61,6 @@ func (c *Config) Read(path string) error {
 
 	if c.ListenPort == 0 {
 		c.ListenPort = 8008
-	}
-	if c.Language == "" {
-		c.Language = "zh-CN"
-	}
-	if c.EnableIPChangeNotification && c.IPChangeNotificationTag == "" {
-		c.IPChangeNotificationTag = "default"
 	}
 	if c.Location == "" {
 		c.Location = "Asia/Shanghai"

@@ -54,18 +54,12 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			curServer := model.Server{}
 			copier.Copy(&curServer, singleton.ServerList[clientID])
 			if cr.PushSuccessful && r.GetSuccessful() {
-				// singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
-				// 	&i18n.LocalizeConfig{
-				// 		MessageID: "ScheduledTaskExecutedSuccessfully",
-				// 	},
-				// ), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
+				singleton.SendNotification(cr.NotificationGroupID, fmt.Sprintf("[%s] %s, %s\n%s", "Scheduled Task Executed Successfully",
+					cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			if !r.GetSuccessful() {
-				// singleton.SendNotification(cr.NotificationTag, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.MustLocalize(
-				// 	&i18n.LocalizeConfig{
-				// 		MessageID: "ScheduledTaskExecutedFailed",
-				// 	},
-				// ), cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
+				singleton.SendNotification(cr.NotificationGroupID, fmt.Sprintf("[%s] %s, %s\n%s", "Scheduled Task Executed Failed",
+					cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			singleton.DB.Model(cr).Updates(model.Cron{
 				LastExecutedAt: time.Now().Add(time.Second * -1 * time.Duration(r.GetDelay())),
@@ -156,16 +150,14 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		host.IP != "" &&
 		singleton.ServerList[clientID].Host.IP != host.IP {
 
-		// singleton.SendNotification(singleton.Conf.IPChangeNotificationTag,
-		// 	fmt.Sprintf(
-		// 		"[%s] %s, %s => %s",
-		// 		singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{
-		// 			MessageID: "IPChanged",
-		// 		}),
-		// 		singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP),
-		// 		singleton.IPDesensitize(host.IP),
-		// 	),
-		// 	nil)
+		singleton.SendNotification(singleton.Conf.IPChangeNotificationGroupID,
+			fmt.Sprintf(
+				"[%s] %s, %s => %s",
+				"IPChanged",
+				singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP),
+				singleton.IPDesensitize(host.IP),
+			),
+			nil)
 	}
 
 	/**

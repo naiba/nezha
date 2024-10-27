@@ -59,6 +59,8 @@ func routers(r *gin.Engine) {
 	optionalAuth.GET("/service/:id", commonHandler(listServiceHistory))
 	optionalAuth.GET("/service/server", commonHandler(listServerWithServices))
 
+	optionalAuth.GET("/setting", commonHandler(listConfig))
+
 	auth := api.Group("", authMiddleware.MiddlewareFunc())
 
 	auth.GET("/refresh_token", authMiddleware.RefreshHandler)
@@ -116,6 +118,8 @@ func routers(r *gin.Engine) {
 	auth.POST("/nat", commonHandler(createNAT))
 	auth.PATCH("/nat/:id", commonHandler(updateNAT))
 	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
+
+	auth.PATCH("/setting", commonHandler(updateConfig))
 
 	r.NoRoute(fallbackToFrontend)
 }

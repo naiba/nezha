@@ -72,7 +72,7 @@ func (mp *memberPage) nat(c *gin.Context) {
 func (mp *memberPage) setting(c *gin.Context) {
 	c.HTML(http.StatusOK, "dashboard-", gin.H{
 		// "Title":           singleton.Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "Settings"}),
-		"Languages":       model.Languages,
-		"DashboardThemes": model.DashboardThemes,
+		//"Languages":       model.Languages,
+		//"DashboardThemes": model.DashboardThemes,
 	})
 }
