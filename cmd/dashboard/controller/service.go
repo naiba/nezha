@@ -31,9 +31,15 @@ func listService(c *gin.Context) (*model.ServiceResponse, error) {
 		var statsStore map[uint64]model.CycleTransferStats
 		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
 		copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
+		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+		authorized := isMember // TODO || isViewPasswordVerfied
 		for k, service := range stats {
 			if !service.Service.EnableShowInService {
 				delete(stats, k)
+			}
+			if !authorized {
+				service.Service = &model.Service{Name: service.Service.Name}
+				stats[k] = service
 			}
 		}
 		return []interface {
