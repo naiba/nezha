@@ -42,7 +42,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Service) {
 		serviceResponseDataStoreCurrentDown:     make(map[uint64]uint64),
 		serviceResponseDataStoreCurrentAvgDelay: make(map[uint64]float32),
 		serviceResponsePing:                     make(map[uint64]map[uint64]*pingStore),
-		services:                                make(map[uint64]*model.Service),
+		Services:                                make(map[uint64]*model.Service),
 		sslCertCache:                            make(map[uint64]string),
 		// 30天数据缓存
 		monthlyStatus: make(map[uint64]*model.ServiceResponseItem),
@@ -104,8 +104,8 @@ type ServiceSentinel struct {
 	lastStatus                              map[uint64]int
 	sslCertCache                            map[uint64]string
 
-	servicesLock sync.RWMutex
-	services     map[uint64]*model.Service
+	ServicesLock sync.RWMutex
+	Services     map[uint64]*model.Service
 
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
@@ -157,11 +157,11 @@ func (ss *ServiceSentinel) Dispatch(r ReportData) {
 	ss.serviceReportChannel <- r
 }
 
-func (ss *ServiceSentinel) Services() []*model.Service {
-	ss.servicesLock.RLock()
-	defer ss.servicesLock.RUnlock()
+func (ss *ServiceSentinel) GetServiceList() []*model.Service {
+	ss.ServicesLock.RLock()
+	defer ss.ServicesLock.RUnlock()
 	var services []*model.Service
-	for _, v := range ss.services {
+	for _, v := range ss.Services {
 		services = append(services, v)
 	}
 	sort.SliceStable(services, func(i, j int) bool {
@@ -182,8 +182,8 @@ func (ss *ServiceSentinel) loadServiceHistory() {
 	defer ss.serviceResponseDataStoreLock.Unlock()
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
-	ss.servicesLock.Lock()
-	defer ss.servicesLock.Unlock()
+	ss.ServicesLock.Lock()
+	defer ss.ServicesLock.Unlock()
 
 	for i := 0; i < len(services); i++ {
 		task := *services[i]
@@ -194,7 +194,7 @@ func (ss *ServiceSentinel) loadServiceHistory() {
 		if err != nil {
 			panic(err)
 		}
-		ss.services[services[i].ID] = services[i]
+		ss.Services[services[i].ID] = services[i]
 		ss.serviceCurrentStatusData[services[i].ID] = make([]*pb.TaskResult, _CurrentStatusSize)
 		ss.serviceStatusToday[services[i].ID] = &_TodayStatsOfService{}
 	}
@@ -234,8 +234,8 @@ func (ss *ServiceSentinel) OnServiceUpdate(m model.Service) error {
 	defer ss.serviceResponseDataStoreLock.Unlock()
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
-	ss.servicesLock.Lock()
-	defer ss.servicesLock.Unlock()
+	ss.ServicesLock.Lock()
+	defer ss.ServicesLock.Unlock()
 
 	var err error
 	// 写入新任务
@@ -245,9 +245,9 @@ func (ss *ServiceSentinel) OnServiceUpdate(m model.Service) error {
 	if err != nil {
 		return err
 	}
-	if ss.services[m.ID] != nil {
+	if ss.Services[m.ID] != nil {
 		// 停掉旧任务
-		Cron.Remove(ss.services[m.ID].CronJobID)
+		Cron.Remove(ss.Services[m.ID].CronJobID)
 	} else {
 		// 新任务初始化数据
 		ss.monthlyStatus[m.ID] = &model.ServiceResponseItem{
@@ -260,7 +260,7 @@ func (ss *ServiceSentinel) OnServiceUpdate(m model.Service) error {
 		ss.serviceStatusToday[m.ID] = &_TodayStatsOfService{}
 	}
 	// 更新这个任务
-	ss.services[m.ID] = &m
+	ss.Services[m.ID] = &m
 	return nil
 }
 
@@ -269,8 +269,8 @@ func (ss *ServiceSentinel) OnServiceDelete(ids []uint64) {
 	defer ss.serviceResponseDataStoreLock.Unlock()
 	ss.monthlyStatusLock.Lock()
 	defer ss.monthlyStatusLock.Unlock()
-	ss.servicesLock.Lock()
-	defer ss.servicesLock.Unlock()
+	ss.ServicesLock.Lock()
+	defer ss.ServicesLock.Unlock()
 
 	for _, id := range ids {
 		delete(ss.serviceCurrentStatusIndex, id)
@@ -283,8 +283,8 @@ func (ss *ServiceSentinel) OnServiceDelete(ids []uint64) {
 		delete(ss.serviceStatusToday, id)
 
 		// 停掉定时任务
-		Cron.Remove(ss.services[id].CronJobID)
-		delete(ss.services, id)
+		Cron.Remove(ss.Services[id].CronJobID)
+		delete(ss.Services, id)
 
 		delete(ss.monthlyStatus, id)
 	}
@@ -297,8 +297,8 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceResponseItem {
 	defer ss.monthlyStatusLock.Unlock()
 
 	// 刷新最新一天的数据
-	for k := range ss.services {
-		ss.monthlyStatus[k].Service = ss.services[k]
+	for k := range ss.Services {
+		ss.monthlyStatus[k].Service = ss.Services[k]
 		v := ss.serviceStatusToday[k]
 
 		// 30 天在线率，
@@ -325,45 +325,11 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceResponseItem {
 	return ss.monthlyStatus
 }
 
-func (ss *ServiceSentinel) GetServiceHistories(serverID uint64) ([]*model.ServiceInfos, error) {
-	var serviceHistories []*model.ServiceHistory
-	if err := DB.Model(&model.ServiceHistory{}).Select("service_id, created_at, server_id, avg_delay").
-		Where("server_id = ?", serverID).Where("created_at >= ?", time.Now().Add(-24*time.Hour)).Order("service_id, created_at").
-		Scan(&serviceHistories).Error; err != nil {
-		return nil, err
-	}
-
-	var sortedServiceIDs []uint64
-	resultMap := make(map[uint64]*model.ServiceInfos)
-	for _, history := range serviceHistories {
-		infos, ok := resultMap[history.ServiceID]
-		if !ok {
-			infos = &model.ServiceInfos{
-				ServiceID:   history.ServiceID,
-				ServerID:    history.ServerID,
-				ServiceName: ss.services[history.ServiceID].Name,
-				ServerName:  ServerList[history.ServerID].Name,
-			}
-			resultMap[history.ServiceID] = infos
-			sortedServiceIDs = append(sortedServiceIDs, history.ServiceID)
-		}
-		infos.CreatedAt = append(infos.CreatedAt, history.CreatedAt.Truncate(time.Minute).Unix()*1000)
-		infos.AvgDelay = append(infos.AvgDelay, history.AvgDelay)
-	}
-
-	ret := make([]*model.ServiceInfos, 0, len(sortedServiceIDs))
-	for _, id := range sortedServiceIDs {
-		ret = append(ret, resultMap[id])
-	}
-
-	return ret, nil
-}
-
 // worker 服务监控的实际工作流程
 func (ss *ServiceSentinel) worker() {
 	// 从服务状态汇报管道获取汇报的服务数据
 	for r := range ss.serviceReportChannel {
-		if ss.services[r.Data.GetId()] == nil || ss.services[r.Data.GetId()].ID == 0 {
+		if ss.Services[r.Data.GetId()] == nil || ss.Services[r.Data.GetId()].ID == 0 {
 			log.Printf("NEZHA>> 错误的服务监控上报 %+v", r)
 			continue
 		}
@@ -461,23 +427,23 @@ func (ss *ServiceSentinel) worker() {
 
 		// 延迟报警
 		if mh.Delay > 0 {
-			ss.servicesLock.RLock()
-			if ss.services[mh.GetId()].LatencyNotify {
-				notificationGroupID := ss.services[mh.GetId()].NotificationGroupID
+			ss.ServicesLock.RLock()
+			if ss.Services[mh.GetId()].LatencyNotify {
+				notificationGroupID := ss.Services[mh.GetId()].NotificationGroupID
 				minMuteLabel := NotificationMuteLabel.ServiceLatencyMin(mh.GetId())
 				maxMuteLabel := NotificationMuteLabel.ServiceLatencyMax(mh.GetId())
-				if mh.Delay > ss.services[mh.GetId()].MaxLatency {
+				if mh.Delay > ss.Services[mh.GetId()].MaxLatency {
 					// 延迟超过最大值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
-					msg := fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.services[mh.GetId()].Name, mh.Delay, ss.services[mh.GetId()].MaxLatency, reporterServer.Name)
+					msg := fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.Services[mh.GetId()].Name, mh.Delay, ss.Services[mh.GetId()].MaxLatency, reporterServer.Name)
 					go SendNotification(notificationGroupID, msg, minMuteLabel)
 					ServerLock.RUnlock()
-				} else if mh.Delay < ss.services[mh.GetId()].MinLatency {
+				} else if mh.Delay < ss.Services[mh.GetId()].MinLatency {
 					// 延迟低于最小值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
-					msg := fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.services[mh.GetId()].Name, mh.Delay, ss.services[mh.GetId()].MinLatency, reporterServer.Name)
+					msg := fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.Services[mh.GetId()].Name, mh.Delay, ss.Services[mh.GetId()].MinLatency, reporterServer.Name)
 					go SendNotification(notificationGroupID, msg, maxMuteLabel)
 					ServerLock.RUnlock()
 				} else {
@@ -486,24 +452,24 @@ func (ss *ServiceSentinel) worker() {
 					UnMuteNotification(notificationGroupID, maxMuteLabel)
 				}
 			}
-			ss.servicesLock.RUnlock()
+			ss.ServicesLock.RUnlock()
 		}
 
 		// 状态变更报警+触发任务执行
 		if stateCode == StatusDown || stateCode != ss.lastStatus[mh.GetId()] {
-			ss.servicesLock.Lock()
+			ss.ServicesLock.Lock()
 			lastStatus := ss.lastStatus[mh.GetId()]
 			// 存储新的状态值
 			ss.lastStatus[mh.GetId()] = stateCode
 
 			// 判断是否需要发送通知
-			isNeedSendNotification := ss.services[mh.GetId()].Notify && (lastStatus != 0 || stateCode == StatusDown)
+			isNeedSendNotification := ss.Services[mh.GetId()].Notify && (lastStatus != 0 || stateCode == StatusDown)
 			if isNeedSendNotification {
 				ServerLock.RLock()
 
 				reporterServer := ServerList[r.Reporter]
-				notificationGroupID := ss.services[mh.GetId()].NotificationGroupID
-				notificationMsg := fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.services[mh.GetId()].Name, reporterServer.Name, mh.Data)
+				notificationGroupID := ss.Services[mh.GetId()].NotificationGroupID
+				notificationMsg := fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.Services[mh.GetId()].Name, reporterServer.Name, mh.Data)
 				muteLabel := NotificationMuteLabel.ServiceStateChanged(mh.GetId())
 
 				// 状态变更时，清除静音缓存
@@ -516,7 +482,7 @@ func (ss *ServiceSentinel) worker() {
 			}
 
 			// 判断是否需要触发任务
-			isNeedTriggerTask := ss.services[mh.GetId()].EnableTriggerTask && lastStatus != 0
+			isNeedTriggerTask := ss.Services[mh.GetId()].EnableTriggerTask && lastStatus != 0
 			if isNeedTriggerTask {
 				ServerLock.RLock()
 				reporterServer := ServerList[r.Reporter]
@@ -524,14 +490,14 @@ func (ss *ServiceSentinel) worker() {
 
 				if stateCode == StatusGood && lastStatus != stateCode {
 					// 当前状态正常 前序状态非正常时 触发恢复任务
-					go SendTriggerTasks(ss.services[mh.GetId()].RecoverTriggerTasks, reporterServer.ID)
+					go SendTriggerTasks(ss.Services[mh.GetId()].RecoverTriggerTasks, reporterServer.ID)
 				} else if lastStatus == StatusGood && lastStatus != stateCode {
 					// 前序状态正常 当前状态非正常时 触发失败任务
-					go SendTriggerTasks(ss.services[mh.GetId()].FailTriggerTasks, reporterServer.ID)
+					go SendTriggerTasks(ss.Services[mh.GetId()].FailTriggerTasks, reporterServer.ID)
 				}
 			}
 
-			ss.servicesLock.Unlock()
+			ss.ServicesLock.Unlock()
 		}
 		ss.serviceResponseDataStoreLock.Unlock()
 
@@ -543,22 +509,22 @@ func (ss *ServiceSentinel) worker() {
 				!strings.HasSuffix(mh.Data, "EOF") &&
 				!strings.HasSuffix(mh.Data, "timed out") {
 				errMsg = mh.Data
-				ss.servicesLock.RLock()
-				if ss.services[mh.GetId()].Notify {
+				ss.ServicesLock.RLock()
+				if ss.Services[mh.GetId()].Notify {
 					muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), "network")
-					go SendNotification(ss.services[mh.GetId()].NotificationGroupID, fmt.Sprintf("[SSL] Fetch cert info failed, %s %s", ss.services[mh.GetId()].Name, errMsg), muteLabel)
+					go SendNotification(ss.Services[mh.GetId()].NotificationGroupID, fmt.Sprintf("[SSL] Fetch cert info failed, %s %s", ss.Services[mh.GetId()].Name, errMsg), muteLabel)
 				}
-				ss.servicesLock.RUnlock()
+				ss.ServicesLock.RUnlock()
 
 			}
 		} else {
 			// 清除网络错误静音缓存
-			UnMuteNotification(ss.services[mh.GetId()].NotificationGroupID, NotificationMuteLabel.ServiceSSL(mh.GetId(), "network"))
+			UnMuteNotification(ss.Services[mh.GetId()].NotificationGroupID, NotificationMuteLabel.ServiceSSL(mh.GetId(), "network"))
 
 			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
-				ss.servicesLock.Lock()
-				enableNotify := ss.services[mh.GetId()].Notify
+				ss.ServicesLock.Lock()
+				enableNotify := ss.Services[mh.GetId()].Notify
 
 				// 首次获取证书信息时，缓存证书信息
 				if ss.sslCertCache[mh.GetId()] == "" {
@@ -576,9 +542,9 @@ func (ss *ServiceSentinel) worker() {
 					ss.sslCertCache[mh.GetId()] = mh.Data
 				}
 
-				notificationGroupID := ss.services[mh.GetId()].NotificationGroupID
-				serviceName := ss.services[mh.GetId()].Name
-				ss.servicesLock.Unlock()
+				notificationGroupID := ss.Services[mh.GetId()].NotificationGroupID
+				serviceName := ss.Services[mh.GetId()].Name
+				ss.ServicesLock.Unlock()
 
 				// 需要发送提醒
 				if enableNotify {

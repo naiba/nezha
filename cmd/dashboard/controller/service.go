@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
@@ -88,12 +89,42 @@ func listServiceHistory(c *gin.Context) ([]*model.ServiceInfos, error) {
 	}
 	singleton.ServerLock.RUnlock()
 
-	serviceHistories, err := singleton.ServiceSentinelShared.GetServiceHistories(id)
-	if err != nil {
-		return nil, newGormError("%v", err)
+	var serviceHistories []*model.ServiceHistory
+	if err := singleton.DB.Model(&model.ServiceHistory{}).Select("service_id, created_at, server_id, avg_delay").
+		Where("server_id = ?", id).Where("created_at >= ?", time.Now().Add(-24*time.Hour)).Order("service_id, created_at").
+		Scan(&serviceHistories).Error; err != nil {
+		return nil, err
 	}
 
-	return serviceHistories, nil
+	singleton.ServiceSentinelShared.ServicesLock.RLock()
+	defer singleton.ServiceSentinelShared.ServicesLock.RUnlock()
+	singleton.ServerLock.RLock()
+	defer singleton.ServerLock.RUnlock()
+
+	var sortedServiceIDs []uint64
+	resultMap := make(map[uint64]*model.ServiceInfos)
+	for _, history := range serviceHistories {
+		infos, ok := resultMap[history.ServiceID]
+		if !ok {
+			infos = &model.ServiceInfos{
+				ServiceID: history.ServiceID,
+				ServerID:  history.ServerID,
+				// ServiceName: singleton.ServiceSentinel.Services[history.ServiceID].Name,
+				ServerName: singleton.ServerList[history.ServerID].Name,
+			}
+			resultMap[history.ServiceID] = infos
+			sortedServiceIDs = append(sortedServiceIDs, history.ServiceID)
+		}
+		infos.CreatedAt = append(infos.CreatedAt, history.CreatedAt.Truncate(time.Minute).Unix()*1000)
+		infos.AvgDelay = append(infos.AvgDelay, history.AvgDelay)
+	}
+
+	ret := make([]*model.ServiceInfos, 0, len(sortedServiceIDs))
+	for _, id := range sortedServiceIDs {
+		ret = append(ret, resultMap[id])
+	}
+
+	return ret, nil
 }
 
 // List server with service
