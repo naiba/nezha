@@ -12,12 +12,24 @@ import (
 // @Schemes
 // @Description List settings
 // @Security BearerAuth
-// @Tags auth required
+// @Tags common
 // @Produce json
 // @Success 200 {object} model.CommonResponse[model.Config]
 // @Router /setting [get]
-func listConfig(c *gin.Context) (*model.Config, error) {
-	conf := singleton.Conf
+func listConfig(c *gin.Context) (model.Config, error) {
+	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+	authorized := isMember // TODO || isViewPasswordVerfied
+
+	conf := *singleton.Conf
+	if !authorized {
+		conf = model.Config{
+			SiteName:            conf.SiteName,
+			Language:            conf.Language,
+			CustomCode:          conf.CustomCode,
+			CustomCodeDashboard: conf.CustomCodeDashboard,
+		}
+	}
+
 	return conf, nil
 }
 
@@ -38,13 +50,17 @@ func updateConfig(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
+	singleton.Conf.Language = sf.Language
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification
 	singleton.Conf.Cover = sf.Cover
+	singleton.Conf.InstallHost = sf.InstallHost
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
 	singleton.Conf.IPChangeNotificationGroupID = sf.IPChangeNotificationGroupID
 	singleton.Conf.SiteName = sf.SiteName
 	singleton.Conf.DNSServers = sf.CustomNameservers
+	singleton.Conf.CustomCode = sf.CustomCode
+	singleton.Conf.CustomCodeDashboard = sf.CustomCodeDashboard
 
 	if err := singleton.Conf.Save(); err != nil {
 		return nil, err

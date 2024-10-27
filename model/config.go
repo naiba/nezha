@@ -18,10 +18,12 @@ const (
 type Config struct {
 	Debug bool `mapstructure:"debug" json:"debug,omitempty"` // debug模式开关
 
+	Language       string `mapstructure:"language" json:"language,omitempty"` // 系统语言，默认 zh-CN
 	SiteName       string `mapstructure:"site_name" json:"site_name,omitempty"`
 	JWTSecretKey   string `mapstructure:"jwt_secret_key" json:"jwt_secret_key,omitempty"`
 	AgentSecretKey string `mapstructure:"agent_secret_key" json:"agent_secret_key,omitempty"`
 	ListenPort     uint   `mapstructure:"listen_port" json:"listen_port,omitempty"`
+	InstallHost    string `mapstructure:"install_host" json:"install_host,omitempty"`
 	TLS            bool   `mapstructure:"tls" json:"tls,omitempty"`
 	Location       string `mapstructure:"location" json:"location,omitempty"` // 时区，默认为 Asia/Shanghai
 
@@ -36,6 +38,9 @@ type Config struct {
 	IgnoredIPNotificationServerIDs map[uint64]bool `mapstructure:"ignored_ip_notification_server_ids" json:"ignored_ip_notification_server_ids,omitempty"` // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
 	AvgPingCount                   int             `mapstructure:"avg_ping_count" json:"avg_ping_count,omitempty"`
 	DNSServers                     string          `mapstructure:"dns_servers" json:"dns_servers,omitempty"`
+
+	CustomCode          string `mapstructure:"custom_code" json:"custom_code,omitempty"`
+	CustomCodeDashboard string `mapstructure:"custom_code_dashboard" json:"custom_code_dashboard,omitempty"`
 
 	v *viper.Viper `json:"-"`
 }
