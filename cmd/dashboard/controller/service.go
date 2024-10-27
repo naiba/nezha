@@ -88,7 +88,7 @@ func listServiceHistory(c *gin.Context) ([]*model.ServiceInfos, error) {
 	}
 	singleton.ServerLock.RUnlock()
 
-	serviceHistories, err := singleton.GetServiceHistories(id)
+	serviceHistories, err := singleton.ServiceSentinelShared.GetServiceHistories(id)
 	if err != nil {
 		return nil, newGormError("%v", err)
 	}
