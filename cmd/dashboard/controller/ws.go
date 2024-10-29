@@ -73,12 +73,14 @@ func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 		var servers []model.StreamServer
 		for i := 0; i < len(serverList); i++ {
 			server := serverList[i]
+			host := *server.Host
+			host.IP = ""
 			servers = append(servers, model.StreamServer{
 				ID:           server.ID,
 				Name:         server.Name,
 				PublicNote:   utils.IfOr(withPublicNote, server.PublicNote, ""),
 				DisplayIndex: server.DisplayIndex,
-				Host:         server.Host,
+				Host:         &host,
 				State:        server.State,
 				LastActive:   server.LastActive,
 			})

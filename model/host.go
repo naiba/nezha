@@ -16,23 +16,23 @@ type SensorTemperature struct {
 }
 
 type HostState struct {
-	CPU            float64
-	MemUsed        uint64
-	SwapUsed       uint64
-	DiskUsed       uint64
-	NetInTransfer  uint64
-	NetOutTransfer uint64
-	NetInSpeed     uint64
-	NetOutSpeed    uint64
-	Uptime         uint64
-	Load1          float64
-	Load5          float64
-	Load15         float64
-	TcpConnCount   uint64
-	UdpConnCount   uint64
-	ProcessCount   uint64
-	Temperatures   []SensorTemperature
-	GPU            []float64
+	CPU            float64             `json:"cpu,omitempty"`
+	MemUsed        uint64              `json:"mem_used,omitempty"`
+	SwapUsed       uint64              `json:"swap_used,omitempty"`
+	DiskUsed       uint64              `json:"disk_used,omitempty"`
+	NetInTransfer  uint64              `json:"net_in_transfer,omitempty"`
+	NetOutTransfer uint64              `json:"net_out_transfer,omitempty"`
+	NetInSpeed     uint64              `json:"net_in_speed,omitempty"`
+	NetOutSpeed    uint64              `json:"net_out_speed,omitempty"`
+	Uptime         uint64              `json:"uptime,omitempty"`
+	Load1          float64             `json:"load_1,omitempty"`
+	Load5          float64             `json:"load_5,omitempty"`
+	Load15         float64             `json:"load_15,omitempty"`
+	TcpConnCount   uint64              `json:"tcp_conn_count,omitempty"`
+	UdpConnCount   uint64              `json:"udp_conn_count,omitempty"`
+	ProcessCount   uint64              `json:"process_count,omitempty"`
+	Temperatures   []SensorTemperature `json:"temperatures,omitempty"`
+	GPU            []float64           `json:"gpu,omitempty"`
 }
 
 func (s *HostState) PB() *pb.State {
@@ -96,19 +96,19 @@ func PB2State(s *pb.State) HostState {
 }
 
 type Host struct {
-	Platform        string
-	PlatformVersion string
-	CPU             []string
-	MemTotal        uint64
-	DiskTotal       uint64
-	SwapTotal       uint64
-	Arch            string
-	Virtualization  string
-	BootTime        uint64
-	IP              string `json:"-"`
-	CountryCode     string
-	Version         string
-	GPU             []string
+	Platform        string   `json:"platform,omitempty"`
+	PlatformVersion string   `json:"platform_version,omitempty"`
+	CPU             []string `json:"cpu,omitempty"`
+	MemTotal        uint64   `json:"mem_total,omitempty"`
+	DiskTotal       uint64   `json:"disk_total,omitempty"`
+	SwapTotal       uint64   `json:"swap_total,omitempty"`
+	Arch            string   `json:"arch,omitempty"`
+	Virtualization  string   `json:"virtualization,omitempty"`
+	BootTime        uint64   `json:"boot_time,omitempty"`
+	IP              string   `json:"ip,omitempty"`
+	CountryCode     string   `json:"country_code,omitempty"`
+	Version         string   `json:"version,omitempty"`
+	GPU             []string `json:"gpu,omitempty"`
 }
 
 func (h *Host) PB() *pb.Host {
