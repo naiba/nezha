@@ -167,6 +167,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Log in to the AliyunCS
+        if: contains(github.ref, 'refs/tags/')
         uses: docker/login-action@master
         with:
           registry: registry.cn-shanghai.aliyuncs.com
@@ -214,4 +215,3 @@ jobs:
           push: true
           tags: |
             ${{ steps.image-name.outputs.GHCR_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
-            ${{ steps.image-name.outputs.ALI_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
