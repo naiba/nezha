@@ -67,7 +67,7 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: build --single-target --clean --skip=validate --snapshot
+          args: build --single-target --clean --skip=validate --buildvcs=false --snapshot
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
