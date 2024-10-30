@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"context"
 	"fmt"
 	"log"
@@ -32,13 +33,6 @@ func init() {
 	flag.StringVarP(&dashboardCliParam.ConfigFile, "config", "c", "data/config.yaml", "配置文件路径")
 	flag.StringVar(&dashboardCliParam.DatebaseLocation, "db", "data/sqlite.db", "Sqlite3数据库文件路径")
 	flag.Parse()
-
-	// 初始化 dao 包
-	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
-	singleton.InitTimezoneAndCache()
-	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
-	singleton.InitLocalizer()
-	initSystem()
 }
 
 func initSystem() {
@@ -59,8 +53,15 @@ func initSystem() {
 func main() {
 	if dashboardCliParam.Version {
 		fmt.Println(singleton.Version)
-		return
+		os.Exit(0)
 	}
+
+	// 初始化 dao 包
+	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
+	singleton.InitTimezoneAndCache()
+	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
+	singleton.InitLocalizer()
+	initSystem()
 
 	// TODO 使用 cmux 在同一端口服务 HTTP 和 gRPC
 	singleton.CleanMonitorHistory()
