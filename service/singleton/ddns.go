@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/libdns/cloudflare"
-	"github.com/libdns/tencentcloud"
+	tencentcloud "github.com/nezhahq/libdns-tencentcloud"
 
 	"github.com/naiba/nezha/model"
 	ddns2 "github.com/naiba/nezha/pkg/ddns"
@@ -76,6 +76,7 @@ func GetDDNSProvidersFromProfiles(profileId []uint64, ip *ddns2.IP) ([]*ddns2.Pr
 		if profile, ok := DDNSCache[id]; ok {
 			profiles = append(profiles, profile)
 		} else {
+			DDNSCacheLock.RUnlock()
 			return nil, fmt.Errorf("无法找到DDNS配置 ID %d", id)
 		}
 	}

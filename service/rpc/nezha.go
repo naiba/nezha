@@ -212,10 +212,9 @@ func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, e
 	}
 
 	// 根据内置数据库查询 IP 地理位置
-	record := &geoip.IPInfo{}
 	ip := r.GetIp()
 	netIP := net.ParseIP(ip)
-	location, err := geoip.Lookup(netIP, record)
+	location, err := geoip.Lookup(netIP)
 	if err != nil {
 		return nil, err
 	}
