@@ -13,6 +13,7 @@ builds:
       - -extldflags "-static -fpic"
     flags:
       - -trimpath
+      - -buildvcs=true
     goos:
       - linux
     goarch:
@@ -29,6 +30,7 @@ builds:
       - -extldflags "-static -fpic"
     flags:
       - -trimpath
+      - -buildvcs=true
     goos:
       - linux
     goarch:
@@ -45,6 +47,7 @@ builds:
       - -extldflags "-static -fpic"
     flags:
       - -trimpath
+      - -buildvcs=true
     goos:
       - linux
     goarch:
@@ -61,6 +64,7 @@ builds:
       - -extldflags "-static -fpic"
     flags:
       - -trimpath
+      - -buildvcs=true
     goos:
       - windows
     goarch:
