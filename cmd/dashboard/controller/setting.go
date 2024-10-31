@@ -63,9 +63,10 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.CustomCodeDashboard = sf.CustomCodeDashboard
 
 	if err := singleton.Conf.Save(); err != nil {
-		return nil, err
+		return nil, newGormError("%v", err)
 	}
 
 	singleton.OnNameserverUpdate()
+	singleton.OnUpdateLang(singleton.Conf.Language)
 	return nil, nil
 }

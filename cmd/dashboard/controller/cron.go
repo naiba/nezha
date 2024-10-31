@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -61,7 +60,7 @@ func createCron(c *gin.Context) (uint64, error) {
 	cr.Cover = cf.Cover
 
 	if cr.TaskType == model.CronTypeCronTask && cr.Cover == model.CronCoverAlertTrigger {
-		return 0, errors.New("计划任务类型不得使用触发服务器执行方式")
+		return 0, singleton.Localizer.ErrorT("scheduled tasks cannot be triggered by alarms")
 	}
 
 	// 对于计划任务类型，需要更新CronJob
@@ -120,7 +119,7 @@ func updateCron(c *gin.Context) (any, error) {
 	cr.Cover = cf.Cover
 
 	if cr.TaskType == model.CronTypeCronTask && cr.Cover == model.CronCoverAlertTrigger {
-		return nil, errors.New("计划任务类型不得使用触发服务器执行方式")
+		return nil, singleton.Localizer.ErrorT("scheduled tasks cannot be triggered by alarms")
 	}
 
 	// 对于计划任务类型，需要更新CronJob
@@ -159,7 +158,7 @@ func manualTriggerCron(c *gin.Context) (any, error) {
 
 	var cr model.Cron
 	if err := singleton.DB.First(&cr, id).Error; err != nil {
-		return nil, fmt.Errorf("task id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("task id %d does not exist", id)
 	}
 
 	singleton.ManualTrigger(&cr)

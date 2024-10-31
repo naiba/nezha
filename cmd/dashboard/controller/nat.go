@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -93,7 +92,7 @@ func updateNAT(c *gin.Context) (any, error) {
 
 	var n model.NAT
 	if err = singleton.DB.First(&n, id).Error; err != nil {
-		return nil, fmt.Errorf("profile id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("profile id %d does not exist", id)
 	}
 
 	n.Name = nf.Name

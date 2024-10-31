@@ -6,6 +6,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"github.com/naiba/nezha/service/singleton"
 )
 
 type ioStreamContext struct {
@@ -117,13 +119,13 @@ LOOP:
 	}
 
 	if stream.userIo == nil && stream.agentIo == nil {
-		return errors.New("timeout: no connection established")
+		return singleton.Localizer.ErrorT("timeout: no connection established")
 	}
 	if stream.userIo == nil {
-		return errors.New("timeout: user connection not established")
+		return singleton.Localizer.ErrorT("timeout: user connection not established")
 	}
 	if stream.agentIo == nil {
-		return errors.New("timeout: agent connection not established")
+		return singleton.Localizer.ErrorT("timeout: agent connection not established")
 	}
 
 	isDone := new(atomic.Bool)

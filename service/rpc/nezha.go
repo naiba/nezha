@@ -54,11 +54,11 @@ func (s *NezhaHandler) ReportTask(c context.Context, r *pb.TaskResult) (*pb.Rece
 			curServer := model.Server{}
 			copier.Copy(&curServer, singleton.ServerList[clientID])
 			if cr.PushSuccessful && r.GetSuccessful() {
-				singleton.SendNotification(cr.NotificationGroupID, fmt.Sprintf("[%s] %s, %s\n%s", "Scheduled Task Executed Successfully",
+				singleton.SendNotification(cr.NotificationGroupID, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.T("Scheduled Task Executed Successfully"),
 					cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			if !r.GetSuccessful() {
-				singleton.SendNotification(cr.NotificationGroupID, fmt.Sprintf("[%s] %s, %s\n%s", "Scheduled Task Executed Failed",
+				singleton.SendNotification(cr.NotificationGroupID, fmt.Sprintf("[%s] %s, %s\n%s", singleton.Localizer.T("Scheduled Task Executed Failed"),
 					cr.Name, singleton.ServerList[clientID].Name, r.GetData()), nil, &curServer)
 			}
 			singleton.DB.Model(cr).Updates(model.Cron{
@@ -153,7 +153,7 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 		singleton.SendNotification(singleton.Conf.IPChangeNotificationGroupID,
 			fmt.Sprintf(
 				"[%s] %s, %s => %s",
-				"IPChanged",
+				singleton.Localizer.T("IP Changed"),
 				singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP),
 				singleton.IPDesensitize(host.IP),
 			),

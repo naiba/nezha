@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +40,7 @@ func createTerminal(c *gin.Context) (*model.CreateTerminalResponse, error) {
 	server := singleton.ServerList[createTerminalReq.ServerID]
 	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
-		return nil, errors.New("server not found or not connected")
+		return nil, singleton.Localizer.ErrorT("server not found or not connected")
 	}
 
 	terminalData, _ := utils.Json.Marshal(&model.TerminalTask{

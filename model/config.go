@@ -18,7 +18,7 @@ const (
 type Config struct {
 	Debug bool `mapstructure:"debug" json:"debug,omitempty"` // debug模式开关
 
-	Language       string `mapstructure:"language" json:"language,omitempty"` // 系统语言，默认 zh-CN
+	Language       string `mapstructure:"language" json:"language,omitempty"` // 系统语言，默认 zh_CN
 	SiteName       string `mapstructure:"site_name" json:"site_name,omitempty"`
 	JWTSecretKey   string `mapstructure:"jwt_secret_key" json:"jwt_secret_key,omitempty"`
 	AgentSecretKey string `mapstructure:"agent_secret_key" json:"agent_secret_key,omitempty"`

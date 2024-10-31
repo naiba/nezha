@@ -33,6 +33,7 @@ func InitTimezoneAndCache() {
 
 // LoadSingleton 加载子服务并执行
 func LoadSingleton() {
+	initI18n()          // 加载本地化服务
 	loadNotifications() // 加载通知服务
 	loadServers()       // 加载服务器列表
 	loadCronTasks()     // 加载定时任务

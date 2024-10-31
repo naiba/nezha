@@ -1,0 +1,220 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-01 05:06+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: cmd/dashboard/controller/alertrule.go:100
+#, c-format
+msgid "alert id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/alertrule.go:155
+msgid "duration need to be at least 3"
+msgstr ""
+
+#: cmd/dashboard/controller/alertrule.go:159
+msgid "cycle_interval need to be at least 1"
+msgstr ""
+
+#: cmd/dashboard/controller/alertrule.go:162
+msgid "cycle_start is not set"
+msgstr ""
+
+#: cmd/dashboard/controller/alertrule.go:165
+msgid "cycle_start is a future value"
+msgstr ""
+
+#: cmd/dashboard/controller/alertrule.go:170
+msgid "need to configure at least a single rule"
+msgstr ""
+
+#: cmd/dashboard/controller/controller.go:188
+msgid "database error"
+msgstr ""
+
+#: cmd/dashboard/controller/cron.go:63 cmd/dashboard/controller/cron.go:122
+msgid "scheduled tasks cannot be triggered by alarms"
+msgstr ""
+
+#: cmd/dashboard/controller/cron.go:161
+#, c-format
+msgid "task id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/ddns.go:56 cmd/dashboard/controller/ddns.go:120
+msgid "the retry count must be an integer between 1 and 10"
+msgstr ""
+
+#: cmd/dashboard/controller/ddns.go:79 cmd/dashboard/controller/ddns.go:148
+msgid "error parsing %s: %v"
+msgstr ""
+
+#: cmd/dashboard/controller/ddns.go:125 cmd/dashboard/controller/nat.go:95
+#, c-format
+msgid "profile id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/fm.go:45 cmd/dashboard/controller/terminal.go:43
+msgid "server not found or not connected"
+msgstr ""
+
+#: cmd/dashboard/controller/notification.go:67
+#: cmd/dashboard/controller/notification.go:125
+msgid "a test message"
+msgstr ""
+
+#: cmd/dashboard/controller/notification.go:106
+#, c-format
+msgid "notification id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/notification_group.go:80
+#: cmd/dashboard/controller/notification_group.go:142
+msgid "have invalid notification id"
+msgstr ""
+
+#: cmd/dashboard/controller/notification_group.go:131
+#: cmd/dashboard/controller/server_group.go:130
+#, c-format
+msgid "group id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/server.go:59
+#, c-format
+msgid "server id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/server_group.go:78
+#: cmd/dashboard/controller/server_group.go:139
+msgid "have invalid server id"
+msgstr ""
+
+#: cmd/dashboard/controller/service.go:79
+#: cmd/dashboard/controller/service.go:155
+msgid "server not found"
+msgstr ""
+
+#: cmd/dashboard/controller/service.go:86
+msgid "unauthorized"
+msgstr ""
+
+#: cmd/dashboard/controller/service.go:247
+#, c-format
+msgid "service id %d does not exist"
+msgstr ""
+
+#: cmd/dashboard/controller/user.go:45
+msgid "password length must be greater than 6"
+msgstr ""
+
+#: cmd/dashboard/controller/user.go:48
+msgid "username can't be empty"
+msgstr ""
+
+#: service/rpc/io_stream.go:122
+msgid "timeout: no connection established"
+msgstr ""
+
+#: service/rpc/io_stream.go:125
+msgid "timeout: user connection not established"
+msgstr ""
+
+#: service/rpc/io_stream.go:128
+msgid "timeout: agent connection not established"
+msgstr ""
+
+#: service/rpc/nezha.go:57
+msgid "Scheduled Task Executed Successfully"
+msgstr ""
+
+#: service/rpc/nezha.go:61
+msgid "Scheduled Task Executed Failed"
+msgstr ""
+
+#: service/rpc/nezha.go:156
+msgid "IP Changed"
+msgstr ""
+
+#: service/singleton/alertsentinel.go:159
+msgid "Incident"
+msgstr ""
+
+#: service/singleton/alertsentinel.go:169
+msgid "Resolved"
+msgstr ""
+
+#: service/singleton/crontask.go:52
+msgid "Tasks failed to register: ["
+msgstr ""
+
+#: service/singleton/crontask.go:59
+msgid ""
+"] These tasks will not execute properly. Fix them in the admin dashboard."
+msgstr ""
+
+#: service/singleton/crontask.go:150 service/singleton/crontask.go:175
+#, c-format
+msgid "[Task failed] %s: server %s is offline and cannot execute the task"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:439
+#, c-format
+msgid "[Latency] %s %2f > %2f, Reporter: %s"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:446
+#, c-format
+msgid "[Latency] %s %2f < %2f, Reporter: %s"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:472
+#, c-format
+msgid "[%s] %s Reporter: %s, Error: %s"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:515
+#, c-format
+msgid "[SSL] Fetch cert info failed, %s %s"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:555
+#, c-format
+msgid "The SSL certificate will expire within seven days. Expiration time: %s"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:568
+#, c-format
+msgid ""
+"SSL certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
+"expires at %s"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:604
+msgid "No Data"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:606
+msgid "Good"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:608
+msgid "Low Availability"
+msgstr ""
+
+#: service/singleton/servicesentinel.go:610
+msgid "Down"
+msgstr ""

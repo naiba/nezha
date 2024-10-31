@@ -34,29 +34,29 @@ func loadCronTasks() {
 	var err error
 	var notificationGroupList []uint64
 	notificationMsgMap := make(map[uint64]*bytes.Buffer)
-	for i := 0; i < len(CronList); i++ {
+	for _, cron := range CronList {
 		// 触发任务类型无需注册
-		if CronList[i].TaskType == model.CronTypeTriggerTask {
-			Crons[CronList[i].ID] = CronList[i]
+		if cron.TaskType == model.CronTypeTriggerTask {
+			Crons[cron.ID] = cron
 			continue
 		}
 		// 注册计划任务
-		CronList[i].CronJobID, err = Cron.AddFunc(CronList[i].Scheduler, CronTrigger(CronList[i]))
+		cron.CronJobID, err = Cron.AddFunc(cron.Scheduler, CronTrigger(cron))
 		if err == nil {
-			Crons[CronList[i].ID] = CronList[i]
+			Crons[cron.ID] = cron
 		} else {
 			// 当前通知组首次出现 将其加入通知组列表并初始化通知组消息缓存
-			if _, ok := notificationMsgMap[CronList[i].NotificationGroupID]; !ok {
-				notificationGroupList = append(notificationGroupList, CronList[i].NotificationGroupID)
-				notificationMsgMap[CronList[i].NotificationGroupID] = bytes.NewBufferString("")
-				notificationMsgMap[CronList[i].NotificationGroupID].WriteString("调度失败的计划任务：[")
+			if _, ok := notificationMsgMap[cron.NotificationGroupID]; !ok {
+				notificationGroupList = append(notificationGroupList, cron.NotificationGroupID)
+				notificationMsgMap[cron.NotificationGroupID] = bytes.NewBufferString("")
+				notificationMsgMap[cron.NotificationGroupID].WriteString(Localizer.T("Tasks failed to register: ["))
 			}
-			notificationMsgMap[CronList[i].NotificationGroupID].WriteString(fmt.Sprintf("%d,", CronList[i].ID))
+			notificationMsgMap[cron.NotificationGroupID].WriteString(fmt.Sprintf("%d,", cron.ID))
 		}
 	}
 	// 向注册错误的计划任务所在通知组发送通知
 	for _, gid := range notificationGroupList {
-		notificationMsgMap[gid].WriteString("] 这些任务将无法正常执行,请进入后点重新修改保存。")
+		notificationMsgMap[gid].WriteString(Localizer.T("] These tasks will not execute properly. Fix them in the admin dashboard."))
 		SendNotification(gid, notificationMsgMap[gid].String(), nil)
 	}
 	Cron.Start()
@@ -147,7 +147,7 @@ func CronTrigger(cr *model.Cron, triggerServer ...uint64) func() {
 					// 保存当前服务器状态信息
 					curServer := model.Server{}
 					copier.Copy(&curServer, s)
-					SendNotification(cr.NotificationGroupID, fmt.Sprintf("[任务失败] %s，服务器 %s 离线，无法执行。", cr.Name, s.Name), nil, &curServer)
+					SendNotification(cr.NotificationGroupID, Localizer.Tf("[Task failed] %s: server %s is offline and cannot execute the task", cr.Name, s.Name), nil, &curServer)
 				}
 			}
 			return
@@ -172,7 +172,7 @@ func CronTrigger(cr *model.Cron, triggerServer ...uint64) func() {
 				// 保存当前服务器状态信息
 				curServer := model.Server{}
 				copier.Copy(&curServer, s)
-				SendNotification(cr.NotificationGroupID, fmt.Sprintf("[任务失败] %s，服务器 %s 离线，无法执行。", cr.Name, s.Name), nil, &curServer)
+				SendNotification(cr.NotificationGroupID, Localizer.Tf("[Task failed] %s: server %s is offline and cannot execute the task", cr.Name, s.Name), nil, &curServer)
 			}
 		}
 	}

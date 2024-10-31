@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
 	"strconv"
 	"time"
 
@@ -99,7 +97,7 @@ func updateAlertRule(c *gin.Context) (any, error) {
 
 	var r model.AlertRule
 	if err := singleton.DB.First(&r, id).Error; err != nil {
-		return nil, fmt.Errorf("alert id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("alert id %d does not exist", id)
 	}
 
 	if err := validateRule(&r); err != nil {
@@ -154,22 +152,22 @@ func validateRule(r *model.AlertRule) error {
 		for _, rule := range r.Rules {
 			if !rule.IsTransferDurationRule() {
 				if rule.Duration < 3 {
-					return errors.New("错误: Duration 至少为 3")
+					return singleton.Localizer.ErrorT("duration need to be at least 3")
 				}
 			} else {
 				if rule.CycleInterval < 1 {
-					return errors.New("错误: cycle_interval 至少为 1")
+					return singleton.Localizer.ErrorT("cycle_interval need to be at least 1")
 				}
 				if rule.CycleStart == nil {
-					return errors.New("错误: cycle_start 未设置")
+					return singleton.Localizer.ErrorT("cycle_start is not set")
 				}
 				if rule.CycleStart.After(time.Now()) {
-					return errors.New("错误: cycle_start 是个未来值")
+					return singleton.Localizer.ErrorT("cycle_start is a future value")
 				}
 			}
 		}
 	} else {
-		return errors.New("至少定义一条规则")
+		return singleton.Localizer.ErrorT("need to configure at least a single rule")
 	}
 	return nil
 }

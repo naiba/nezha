@@ -185,7 +185,7 @@ func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 		switch err.(type) {
 		case *gormError:
 			log.Printf("NEZHA>> gorm error: %v", err)
-			c.JSON(http.StatusOK, newErrorResponse(errors.New("database error")))
+			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("database error")))
 			return
 		case *wsError:
 			// Connection is upgraded to WebSocket, so c.Writer is no longer usable
