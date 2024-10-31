@@ -1,9 +1,8 @@
 package geoip
 
 import (
-	"embed"
+	_ "embed"
 	"fmt"
-	"log"
 	"net"
 	"strings"
 
@@ -11,12 +10,7 @@ import (
 )
 
 //go:embed geoip.db
-var geoDBFS embed.FS
-
-var (
-	dbData []byte
-	err    error
-)
+var db []byte
 
 type IPInfo struct {
 	Country       string `maxminddb:"country"`
@@ -25,21 +19,15 @@ type IPInfo struct {
 	ContinentName string `maxminddb:"continent_name"`
 }
 
-func init() {
-	dbData, err = geoDBFS.ReadFile("geoip.db")
-	if err != nil {
-		log.Printf("NEZHA>> Failed to open geoip database: %v", err)
-	}
-}
-
-func Lookup(ip net.IP, record *IPInfo) (string, error) {
-	db, err := maxminddb.FromBytes(dbData)
+func Lookup(ip net.IP) (string, error) {
+	db, err := maxminddb.FromBytes(db)
 	if err != nil {
 		return "", err
 	}
 	defer db.Close()
 
-	err = db.Lookup(ip, record)
+	var record IPInfo
+	err = db.Lookup(ip, &record)
 	if err != nil {
 		return "", err
 	}

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 	_ "time/tzdata"
@@ -32,20 +33,6 @@ type DashboardCliParam struct {
 var (
 	dashboardCliParam DashboardCliParam
 )
-
-func init() {
-	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
-	flag.BoolVarP(&dashboardCliParam.Version, "version", "v", false, "查看当前版本号")
-	flag.StringVarP(&dashboardCliParam.ConfigFile, "config", "c", "data/config.yaml", "配置文件路径")
-	flag.StringVar(&dashboardCliParam.DatebaseLocation, "db", "data/sqlite.db", "Sqlite3数据库文件路径")
-	flag.Parse()
-
-	// 初始化 dao 包
-	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
-	singleton.InitTimezoneAndCache()
-	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
-	initSystem()
-}
 
 func initSystem() {
 	// 初始化管理员账户
@@ -103,10 +90,22 @@ func initSystem() {
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
+	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
+	flag.BoolVarP(&dashboardCliParam.Version, "version", "v", false, "查看当前版本号")
+	flag.StringVarP(&dashboardCliParam.ConfigFile, "config", "c", "data/config.yaml", "配置文件路径")
+	flag.StringVar(&dashboardCliParam.DatebaseLocation, "db", "data/sqlite.db", "Sqlite3数据库文件路径")
+	flag.Parse()
+
 	if dashboardCliParam.Version {
 		fmt.Println(singleton.Version)
-		return
+		os.Exit(0)
 	}
+
+	// 初始化 dao 包
+	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
+	singleton.InitTimezoneAndCache()
+	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
+	initSystem()
 
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", singleton.Conf.ListenPort))
 	if err != nil {
