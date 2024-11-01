@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
@@ -44,10 +42,10 @@ func createUser(c *gin.Context) (uint64, error) {
 	}
 
 	if len(uf.Password) < 6 {
-		return 0, errors.New("password length must be greater than 6")
+		return 0, singleton.Localizer.ErrorT("password length must be greater than 6")
 	}
 	if uf.Username == "" {
-		return 0, errors.New("username can't be empty")
+		return 0, singleton.Localizer.ErrorT("username can't be empty")
 	}
 
 	var u model.User

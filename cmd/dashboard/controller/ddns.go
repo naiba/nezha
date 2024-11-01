@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -55,7 +53,7 @@ func createDDNS(c *gin.Context) (uint64, error) {
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
-		return 0, errors.New("重试次数必须为大于 1 且不超过 10 的整数")
+		return 0, singleton.Localizer.ErrorT("the retry count must be an integer between 1 and 10")
 	}
 
 	p.Name = df.Name
@@ -78,7 +76,7 @@ func createDDNS(c *gin.Context) (uint64, error) {
 		// IDN to ASCII
 		domainValid, domainErr := idna.Lookup.ToASCII(domain)
 		if domainErr != nil {
-			return 0, fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
+			return 0, singleton.Localizer.ErrorT("error parsing %s: %v", domain, domainErr)
 		}
 		p.Domains[n] = domainValid
 	}
@@ -119,12 +117,12 @@ func updateDDNS(c *gin.Context) (any, error) {
 	}
 
 	if df.MaxRetries < 1 || df.MaxRetries > 10 {
-		return nil, errors.New("重试次数必须为大于 1 且不超过 10 的整数")
+		return nil, singleton.Localizer.ErrorT("the retry count must be an integer between 1 and 10")
 	}
 
 	var p model.DDNSProfile
 	if err = singleton.DB.First(&p, id).Error; err != nil {
-		return nil, fmt.Errorf("profile id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("profile id %d does not exist", id)
 	}
 
 	p.Name = df.Name
@@ -147,7 +145,7 @@ func updateDDNS(c *gin.Context) (any, error) {
 		// IDN to ASCII
 		domainValid, domainErr := idna.Lookup.ToASCII(domain)
 		if domainErr != nil {
-			return nil, fmt.Errorf("域名 %s 解析错误: %v", domain, domainErr)
+			return nil, singleton.Localizer.ErrorT("error parsing %s: %v", domain, domainErr)
 		}
 		p.Domains[n] = domainValid
 	}

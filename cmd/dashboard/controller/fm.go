@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"errors"
 	"strconv"
 	"time"
 
@@ -26,7 +25,7 @@ import (
 // @Success 200 {object} model.CreateFMResponse
 // @Router /file [get]
 func createFM(c *gin.Context) (*model.CreateFMResponse, error) {
-	idStr := c.Param("id")
+	idStr := c.Query("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
 		return nil, err
@@ -43,7 +42,7 @@ func createFM(c *gin.Context) (*model.CreateFMResponse, error) {
 	server := singleton.ServerList[id]
 	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
-		return nil, errors.New("server not found or not connected")
+		return nil, singleton.Localizer.ErrorT("server not found or not connected")
 	}
 
 	fmData, _ := utils.Json.Marshal(&model.TaskFM{

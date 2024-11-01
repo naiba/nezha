@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -55,8 +54,8 @@ func createNotification(c *gin.Context) (uint64, error) {
 	n.RequestHeader = nf.RequestHeader
 	n.RequestBody = nf.RequestBody
 	n.URL = nf.URL
-	verifySSL := nf.VerifySSL
-	n.VerifySSL = &verifySSL
+	verifyTLS := nf.VerifyTLS
+	n.VerifyTLS = &verifyTLS
 
 	ns := model.NotificationServerBundle{
 		Notification: &n,
@@ -65,7 +64,7 @@ func createNotification(c *gin.Context) (uint64, error) {
 	}
 	// 未勾选跳过检查
 	if !nf.SkipCheck {
-		if err := ns.Send("这是测试消息"); err != nil {
+		if err := ns.Send(singleton.Localizer.T("a test message")); err != nil {
 			return 0, err
 		}
 	}
@@ -104,7 +103,7 @@ func updateNotification(c *gin.Context) (any, error) {
 
 	var n model.Notification
 	if err := singleton.DB.First(&n, id).Error; err != nil {
-		return nil, fmt.Errorf("notification id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("notification id %d does not exist", id)
 	}
 
 	n.Name = nf.Name
@@ -113,8 +112,8 @@ func updateNotification(c *gin.Context) (any, error) {
 	n.RequestHeader = nf.RequestHeader
 	n.RequestBody = nf.RequestBody
 	n.URL = nf.URL
-	verifySSL := nf.VerifySSL
-	n.VerifySSL = &verifySSL
+	verifyTLS := nf.VerifyTLS
+	n.VerifyTLS = &verifyTLS
 
 	ns := model.NotificationServerBundle{
 		Notification: &n,
@@ -123,7 +122,7 @@ func updateNotification(c *gin.Context) (any, error) {
 	}
 	// 未勾选跳过检查
 	if !nf.SkipCheck {
-		if err := ns.Send("这是测试消息"); err != nil {
+		if err := ns.Send(singleton.Localizer.T("a test message")); err != nil {
 			return nil, err
 		}
 	}

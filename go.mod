@@ -6,6 +6,7 @@ toolchain go1.23.1
 
 require (
 	github.com/appleboy/gin-jwt/v2 v2.10.0
+	github.com/chai2010/gettext-go v1.0.3
 	github.com/gin-contrib/pprof v1.4.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gorilla/websocket v1.5.1

@@ -38,7 +38,7 @@ type Notification struct {
 	RequestType   int    `json:"request_type,omitempty"`
 	RequestHeader string `json:"request_header,omitempty" gorm:"type:longtext"`
 	RequestBody   string `json:"request_body,omitempty" gorm:"type:longtext"`
-	VerifySSL     *bool  `json:"verify_ssl,omitempty"`
+	VerifyTLS     *bool  `json:"verify_tls,omitempty"`
 }
 
 func (ns *NotificationServerBundle) reqURL(message string) string {
@@ -111,7 +111,7 @@ func (n *Notification) setRequestHeader(req *http.Request) error {
 func (ns *NotificationServerBundle) Send(message string) error {
 	var client *http.Client
 	n := ns.Notification
-	if n.VerifySSL != nil && *n.VerifySSL {
+	if n.VerifyTLS != nil && *n.VerifyTLS {
 		client = utils.HttpClient
 	} else {
 		client = utils.HttpClientSkipTlsVerify

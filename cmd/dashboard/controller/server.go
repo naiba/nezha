@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -57,7 +56,7 @@ func updateServer(c *gin.Context) (any, error) {
 
 	var s model.Server
 	if err := singleton.DB.First(&s, id).Error; err != nil {
-		return nil, fmt.Errorf("server id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("server id %d does not exist", id)
 	}
 
 	s.Name = sf.Name

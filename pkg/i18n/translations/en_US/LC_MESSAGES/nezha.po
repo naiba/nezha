@@ -1,0 +1,224 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-01 13:14+0800\n"
+"PO-Revision-Date: 2024-11-01 13:20+0800\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.5\n"
+
+#: cmd/dashboard/controller/alertrule.go:100
+#, c-format
+msgid "alert id %d does not exist"
+msgstr "alert id %d does not exist"
+
+#: cmd/dashboard/controller/alertrule.go:155
+msgid "duration need to be at least 3"
+msgstr "duration need to be at least 3"
+
+#: cmd/dashboard/controller/alertrule.go:159
+msgid "cycle_interval need to be at least 1"
+msgstr "cycle_interval need to be at least 1"
+
+#: cmd/dashboard/controller/alertrule.go:162
+msgid "cycle_start is not set"
+msgstr "cycle_start is not set"
+
+#: cmd/dashboard/controller/alertrule.go:165
+msgid "cycle_start is a future value"
+msgstr "cycle_start is a future value"
+
+#: cmd/dashboard/controller/alertrule.go:170
+msgid "need to configure at least a single rule"
+msgstr "need to configure at least a single rule"
+
+#: cmd/dashboard/controller/controller.go:188
+msgid "database error"
+msgstr "database error"
+
+#: cmd/dashboard/controller/cron.go:63 cmd/dashboard/controller/cron.go:122
+msgid "scheduled tasks cannot be triggered by alarms"
+msgstr "scheduled tasks cannot be triggered by alarms"
+
+#: cmd/dashboard/controller/cron.go:161
+#, c-format
+msgid "task id %d does not exist"
+msgstr "task id %d does not exist"
+
+#: cmd/dashboard/controller/ddns.go:56 cmd/dashboard/controller/ddns.go:120
+msgid "the retry count must be an integer between 1 and 10"
+msgstr "the retry count must be an integer between 1 and 10"
+
+#: cmd/dashboard/controller/ddns.go:79 cmd/dashboard/controller/ddns.go:148
+msgid "error parsing %s: %v"
+msgstr "error parsing %s: %v"
+
+#: cmd/dashboard/controller/ddns.go:125 cmd/dashboard/controller/nat.go:95
+#, c-format
+msgid "profile id %d does not exist"
+msgstr "profile id %d does not exist"
+
+#: cmd/dashboard/controller/fm.go:45 cmd/dashboard/controller/terminal.go:43
+msgid "server not found or not connected"
+msgstr "server not found or not connected"
+
+#: cmd/dashboard/controller/notification.go:67
+#: cmd/dashboard/controller/notification.go:125
+msgid "a test message"
+msgstr "a test message"
+
+#: cmd/dashboard/controller/notification.go:106
+#, c-format
+msgid "notification id %d does not exist"
+msgstr "notification id %d does not exist"
+
+#: cmd/dashboard/controller/notification_group.go:80
+#: cmd/dashboard/controller/notification_group.go:142
+msgid "have invalid notification id"
+msgstr "have invalid notification id"
+
+#: cmd/dashboard/controller/notification_group.go:131
+#: cmd/dashboard/controller/server_group.go:130
+#, c-format
+msgid "group id %d does not exist"
+msgstr "group id %d does not exist"
+
+#: cmd/dashboard/controller/server.go:59
+#, c-format
+msgid "server id %d does not exist"
+msgstr "server id %d does not exist"
+
+#: cmd/dashboard/controller/server_group.go:78
+#: cmd/dashboard/controller/server_group.go:139
+msgid "have invalid server id"
+msgstr "have invalid server id"
+
+#: cmd/dashboard/controller/service.go:79
+#: cmd/dashboard/controller/service.go:155
+msgid "server not found"
+msgstr "server not found"
+
+#: cmd/dashboard/controller/service.go:86
+msgid "unauthorized"
+msgstr "unauthorized"
+
+#: cmd/dashboard/controller/service.go:247
+#, c-format
+msgid "service id %d does not exist"
+msgstr "service id %d does not exist"
+
+#: cmd/dashboard/controller/user.go:45
+msgid "password length must be greater than 6"
+msgstr "password length must be greater than 6"
+
+#: cmd/dashboard/controller/user.go:48
+msgid "username can't be empty"
+msgstr "username can't be empty"
+
+#: service/rpc/io_stream.go:122
+msgid "timeout: no connection established"
+msgstr "timeout: no connection established"
+
+#: service/rpc/io_stream.go:125
+msgid "timeout: user connection not established"
+msgstr "timeout: user connection not established"
+
+#: service/rpc/io_stream.go:128
+msgid "timeout: agent connection not established"
+msgstr "timeout: agent connection not established"
+
+#: service/rpc/nezha.go:57
+msgid "Scheduled Task Executed Successfully"
+msgstr "Scheduled Task Executed Successfully"
+
+#: service/rpc/nezha.go:61
+msgid "Scheduled Task Executed Failed"
+msgstr "Scheduled Task Executed Failed"
+
+#: service/rpc/nezha.go:156
+msgid "IP Changed"
+msgstr "IP Changed"
+
+#: service/singleton/alertsentinel.go:159
+msgid "Incident"
+msgstr "Incident"
+
+#: service/singleton/alertsentinel.go:169
+msgid "Resolved"
+msgstr "Resolved"
+
+#: service/singleton/crontask.go:52
+msgid "Tasks failed to register: ["
+msgstr "Tasks failed to register: ["
+
+#: service/singleton/crontask.go:59
+msgid ""
+"] These tasks will not execute properly. Fix them in the admin dashboard."
+msgstr ""
+"] These tasks will not execute properly. Fix them in the admin dashboard."
+
+#: service/singleton/crontask.go:150 service/singleton/crontask.go:175
+#, c-format
+msgid "[Task failed] %s: server %s is offline and cannot execute the task"
+msgstr "[Task failed] %s: server %s is offline and cannot execute the task"
+
+#: service/singleton/servicesentinel.go:439
+#, c-format
+msgid "[Latency] %s %2f > %2f, Reporter: %s"
+msgstr "[Latency] %s %2f > %2f, Reporter: %s"
+
+#: service/singleton/servicesentinel.go:446
+#, c-format
+msgid "[Latency] %s %2f < %2f, Reporter: %s"
+msgstr "[Latency] %s %2f < %2f, Reporter: %s"
+
+#: service/singleton/servicesentinel.go:472
+#, c-format
+msgid "[%s] %s Reporter: %s, Error: %s"
+msgstr "[%s] %s Reporter: %s, Error: %s"
+
+#: service/singleton/servicesentinel.go:515
+#, c-format
+msgid "[TLS] Fetch cert info failed, Reporter: %s, Error: %s"
+msgstr "[TLS] Fetch cert info failed, Reporter: %s, Error: %s"
+
+#: service/singleton/servicesentinel.go:555
+#, c-format
+msgid "The TLS certificate will expire within seven days. Expiration time: %s"
+msgstr "The TLS certificate will expire within seven days. Expiration time: %s"
+
+#: service/singleton/servicesentinel.go:568
+#, c-format
+msgid ""
+"TLS certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
+"expires at %s"
+msgstr ""
+"TLS certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
+"expires at %s"
+
+#: service/singleton/servicesentinel.go:604
+msgid "No Data"
+msgstr "No Data"
+
+#: service/singleton/servicesentinel.go:606
+msgid "Good"
+msgstr "Good"
+
+#: service/singleton/servicesentinel.go:608
+msgid "Low Availability"
+msgstr "Low Availability"
+
+#: service/singleton/servicesentinel.go:610
+msgid "Down"
+msgstr "Down"

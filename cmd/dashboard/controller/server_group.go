@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"slices"
 	"strconv"
 
@@ -76,7 +75,7 @@ func createServerGroup(c *gin.Context) (uint64, error) {
 		return 0, newGormError("%v", err)
 	}
 	if count != int64(len(sgf.Servers)) {
-		return 0, fmt.Errorf("have invalid server id")
+		return 0, singleton.Localizer.ErrorT("have invalid server id")
 	}
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
@@ -128,7 +127,7 @@ func updateServerGroup(c *gin.Context) (any, error) {
 
 	var sgDB model.ServerGroup
 	if err := singleton.DB.First(&sgDB, id).Error; err != nil {
-		return nil, fmt.Errorf("group id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("group id %d does not exist", id)
 	}
 	sgDB.Name = sg.Name
 
@@ -137,7 +136,7 @@ func updateServerGroup(c *gin.Context) (any, error) {
 		return nil, err
 	}
 	if count != int64(len(sg.Servers)) {
-		return nil, fmt.Errorf("have invalid server id")
+		return nil, singleton.Localizer.ErrorT("have invalid server id")
 	}
 
 	err = singleton.DB.Transaction(func(tx *gorm.DB) error {

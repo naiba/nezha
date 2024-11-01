@@ -43,7 +43,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Service) {
 		serviceResponseDataStoreCurrentAvgDelay: make(map[uint64]float32),
 		serviceResponsePing:                     make(map[uint64]map[uint64]*pingStore),
 		Services:                                make(map[uint64]*model.Service),
-		sslCertCache:                            make(map[uint64]string),
+		tlsCertCache:                            make(map[uint64]string),
 		// 30天数据缓存
 		monthlyStatus: make(map[uint64]*model.ServiceResponseItem),
 		dispatchBus:   serviceSentinelDispatchBus,
@@ -102,7 +102,7 @@ type ServiceSentinel struct {
 	serviceResponseDataStoreCurrentAvgDelay map[uint64]float32               // [service_id] -> 当前服务离线计数
 	serviceResponsePing                     map[uint64]map[uint64]*pingStore // [service_id] -> ClientID -> delay
 	lastStatus                              map[uint64]int
-	sslCertCache                            map[uint64]string
+	tlsCertCache                            map[uint64]string
 
 	ServicesLock sync.RWMutex
 	Services     map[uint64]*model.Service
@@ -279,7 +279,7 @@ func (ss *ServiceSentinel) OnServiceDelete(ids []uint64) {
 		delete(ss.serviceResponseDataStoreCurrentUp, id)
 		delete(ss.serviceResponseDataStoreCurrentDown, id)
 		delete(ss.serviceResponseDataStoreCurrentAvgDelay, id)
-		delete(ss.sslCertCache, id)
+		delete(ss.tlsCertCache, id)
 		delete(ss.serviceStatusToday, id)
 
 		// 停掉定时任务
@@ -436,14 +436,14 @@ func (ss *ServiceSentinel) worker() {
 					// 延迟超过最大值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
-					msg := fmt.Sprintf("[Latency] %s %2f > %2f, Reporter: %s", ss.Services[mh.GetId()].Name, mh.Delay, ss.Services[mh.GetId()].MaxLatency, reporterServer.Name)
+					msg := Localizer.Tf("[Latency] %s %2f > %2f, Reporter: %s", ss.Services[mh.GetId()].Name, mh.Delay, ss.Services[mh.GetId()].MaxLatency, reporterServer.Name)
 					go SendNotification(notificationGroupID, msg, minMuteLabel)
 					ServerLock.RUnlock()
 				} else if mh.Delay < ss.Services[mh.GetId()].MinLatency {
 					// 延迟低于最小值
 					ServerLock.RLock()
 					reporterServer := ServerList[r.Reporter]
-					msg := fmt.Sprintf("[Latency] %s %2f < %2f, Reporter: %s", ss.Services[mh.GetId()].Name, mh.Delay, ss.Services[mh.GetId()].MinLatency, reporterServer.Name)
+					msg := Localizer.Tf("[Latency] %s %2f < %2f, Reporter: %s", ss.Services[mh.GetId()].Name, mh.Delay, ss.Services[mh.GetId()].MinLatency, reporterServer.Name)
 					go SendNotification(notificationGroupID, msg, maxMuteLabel)
 					ServerLock.RUnlock()
 				} else {
@@ -469,7 +469,7 @@ func (ss *ServiceSentinel) worker() {
 
 				reporterServer := ServerList[r.Reporter]
 				notificationGroupID := ss.Services[mh.GetId()].NotificationGroupID
-				notificationMsg := fmt.Sprintf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.Services[mh.GetId()].Name, reporterServer.Name, mh.Data)
+				notificationMsg := Localizer.Tf("[%s] %s Reporter: %s, Error: %s", StatusCodeToString(stateCode), ss.Services[mh.GetId()].Name, reporterServer.Name, mh.Data)
 				muteLabel := NotificationMuteLabel.ServiceStateChanged(mh.GetId())
 
 				// 状态变更时，清除静音缓存
@@ -501,7 +501,7 @@ func (ss *ServiceSentinel) worker() {
 		}
 		ss.serviceResponseDataStoreLock.Unlock()
 
-		// SSL 证书报警
+		// TLS 证书报警
 		var errMsg string
 		if strings.HasPrefix(mh.Data, "SSL证书错误：") {
 			// i/o timeout、connection timeout、EOF 错误
@@ -511,15 +511,15 @@ func (ss *ServiceSentinel) worker() {
 				errMsg = mh.Data
 				ss.ServicesLock.RLock()
 				if ss.Services[mh.GetId()].Notify {
-					muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), "network")
-					go SendNotification(ss.Services[mh.GetId()].NotificationGroupID, fmt.Sprintf("[SSL] Fetch cert info failed, %s %s", ss.Services[mh.GetId()].Name, errMsg), muteLabel)
+					muteLabel := NotificationMuteLabel.ServiceTLS(mh.GetId(), "network")
+					go SendNotification(ss.Services[mh.GetId()].NotificationGroupID, Localizer.Tf("[TLS] Fetch cert info failed, Reporter: %s, Error: %s", ss.Services[mh.GetId()].Name, errMsg), muteLabel)
 				}
 				ss.ServicesLock.RUnlock()
 
 			}
 		} else {
 			// 清除网络错误静音缓存
-			UnMuteNotification(ss.Services[mh.GetId()].NotificationGroupID, NotificationMuteLabel.ServiceSSL(mh.GetId(), "network"))
+			UnMuteNotification(ss.Services[mh.GetId()].NotificationGroupID, NotificationMuteLabel.ServiceTLS(mh.GetId(), "network"))
 
 			var newCert = strings.Split(mh.Data, "|")
 			if len(newCert) > 1 {
@@ -527,11 +527,11 @@ func (ss *ServiceSentinel) worker() {
 				enableNotify := ss.Services[mh.GetId()].Notify
 
 				// 首次获取证书信息时，缓存证书信息
-				if ss.sslCertCache[mh.GetId()] == "" {
-					ss.sslCertCache[mh.GetId()] = mh.Data
+				if ss.tlsCertCache[mh.GetId()] == "" {
+					ss.tlsCertCache[mh.GetId()] = mh.Data
 				}
 
-				oldCert := strings.Split(ss.sslCertCache[mh.GetId()], "|")
+				oldCert := strings.Split(ss.tlsCertCache[mh.GetId()], "|")
 				isCertChanged := false
 				expiresOld, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", oldCert[1])
 				expiresNew, _ := time.Parse("2006-01-02 15:04:05 -0700 MST", newCert[1])
@@ -539,7 +539,7 @@ func (ss *ServiceSentinel) worker() {
 				// 证书变更时，更新缓存
 				if oldCert[0] != newCert[0] && !expiresNew.Equal(expiresOld) {
 					isCertChanged = true
-					ss.sslCertCache[mh.GetId()] = mh.Data
+					ss.tlsCertCache[mh.GetId()] = mh.Data
 				}
 
 				notificationGroupID := ss.Services[mh.GetId()].NotificationGroupID
@@ -551,25 +551,25 @@ func (ss *ServiceSentinel) worker() {
 					// 证书过期提醒
 					if expiresNew.Before(time.Now().AddDate(0, 0, 7)) {
 						expiresTimeStr := expiresNew.Format("2006-01-02 15:04:05")
-						errMsg = fmt.Sprintf(
-							"The SSL certificate will expire within seven days. Expiration time: %s",
+						errMsg = Localizer.Tf(
+							"The TLS certificate will expire within seven days. Expiration time: %s",
 							expiresTimeStr,
 						)
 
 						// 静音规则： 服务id+证书过期时间
 						// 用于避免多个监测点对相同证书同时报警
-						muteLabel := NotificationMuteLabel.ServiceSSL(mh.GetId(), fmt.Sprintf("expire_%s", expiresTimeStr))
-						go SendNotification(notificationGroupID, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), muteLabel)
+						muteLabel := NotificationMuteLabel.ServiceTLS(mh.GetId(), fmt.Sprintf("expire_%s", expiresTimeStr))
+						go SendNotification(notificationGroupID, fmt.Sprintf("[TLS] %s %s", serviceName, errMsg), muteLabel)
 					}
 
 					// 证书变更提醒
 					if isCertChanged {
-						errMsg = fmt.Sprintf(
-							"SSL certificate changed, old: %s, %s expired; new: %s, %s expired.",
+						errMsg = Localizer.Tf(
+							"TLS certificate changed, old: issuer %s, expires at %s; new: issuer %s, expires at %s",
 							oldCert[0], expiresOld.Format("2006-01-02 15:04:05"), newCert[0], expiresNew.Format("2006-01-02 15:04:05"))
 
 						// 证书变更后会自动更新缓存，所以不需要静音
-						go SendNotification(notificationGroupID, fmt.Sprintf("[SSL] %s %s", serviceName, errMsg), nil)
+						go SendNotification(notificationGroupID, fmt.Sprintf("[TLS] %s %s", serviceName, errMsg), nil)
 					}
 				}
 			}
@@ -601,17 +601,13 @@ func GetStatusCode[T float32 | uint64](percent T) int {
 func StatusCodeToString(statusCode int) string {
 	switch statusCode {
 	case StatusNoData:
-		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusNoData"})
-		return "No Data"
+		return Localizer.T("No Data")
 	case StatusGood:
-		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusGood"})
-		return "Good"
+		return Localizer.T("Good")
 	case StatusLowAvailability:
-		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusLowAvailability"})
-		return "Low Availability"
+		return Localizer.T("Low Availability")
 	case StatusDown:
-		// return Localizer.MustLocalize(&i18n.LocalizeConfig{MessageID: "StatusDown"})
-		return "Down"
+		return Localizer.T("Down")
 	default:
 		return ""
 	}

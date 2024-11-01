@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"slices"
 	"strconv"
 
@@ -78,7 +77,7 @@ func createNotificationGroup(c *gin.Context) (uint64, error) {
 	}
 
 	if count != int64(len(ngf.Notifications)) {
-		return 0, fmt.Errorf("have invalid notification id")
+		return 0, singleton.Localizer.ErrorT("have invalid notification id")
 	}
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
@@ -129,7 +128,7 @@ func updateNotificationGroup(c *gin.Context) (any, error) {
 	}
 	var ngDB model.NotificationGroup
 	if err := singleton.DB.First(&ngDB, id).Error; err != nil {
-		return nil, fmt.Errorf("group id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("group id %d does not exist", id)
 	}
 
 	ngDB.Name = ngf.Name
@@ -140,7 +139,7 @@ func updateNotificationGroup(c *gin.Context) (any, error) {
 		return nil, newGormError("%v", err)
 	}
 	if count != int64(len(ngf.Notifications)) {
-		return nil, fmt.Errorf("have invalid notification id")
+		return nil, singleton.Localizer.ErrorT("have invalid notification id")
 	}
 
 	err = singleton.DB.Transaction(func(tx *gorm.DB) error {

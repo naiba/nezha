@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -78,14 +76,14 @@ func listServiceHistory(c *gin.Context) ([]*model.ServiceInfos, error) {
 	singleton.ServerLock.RLock()
 	server, ok := singleton.ServerList[id]
 	if !ok {
-		return nil, errors.New("server not found")
+		return nil, singleton.Localizer.ErrorT("server not found")
 	}
 
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 	authorized := isMember // TODO || isViewPasswordVerfied
 
 	if server.HideForGuest && !authorized {
-		return nil, errors.New("unauthorized")
+		return nil, singleton.Localizer.ErrorT("unauthorized")
 	}
 	singleton.ServerLock.RUnlock()
 
@@ -154,7 +152,7 @@ func listServerWithServices(c *gin.Context) ([]uint64, error) {
 		server, ok := singleton.ServerList[id]
 		if !ok {
 			singleton.ServerLock.RUnlock()
-			return nil, errors.New("server not found")
+			return nil, singleton.Localizer.ErrorT("server not found")
 		}
 
 		if !server.HideForGuest || authorized {
@@ -201,7 +199,7 @@ func createService(c *gin.Context) (uint64, error) {
 	m.FailTriggerTasks = mf.FailTriggerTasks
 
 	if err := singleton.DB.Create(&m).Error; err != nil {
-		return 0, err
+		return 0, newGormError("%v", err)
 	}
 
 	var skipServers []uint64
@@ -246,7 +244,7 @@ func updateService(c *gin.Context) (any, error) {
 	}
 	var m model.Service
 	if err := singleton.DB.First(&m, id).Error; err != nil {
-		return nil, fmt.Errorf("service id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("service id %d does not exist", id)
 	}
 	m.Name = mf.Name
 	m.Target = strings.TrimSpace(mf.Target)
@@ -265,7 +263,7 @@ func updateService(c *gin.Context) (any, error) {
 	m.FailTriggerTasks = mf.FailTriggerTasks
 
 	if err := singleton.DB.Save(&m).Error; err != nil {
-		return nil, err
+		return nil, newGormError("%v", err)
 	}
 
 	var skipServers []uint64
