@@ -104,6 +104,11 @@ body[theme="light"] .table > tbody > tr.expandRow.odd > td:before {
 body[theme="light"] .table > tbody > tr.expandRow.even > td:before {
     background-color: unset;
 }
+
+body[theme="light"] .plan {
+    background-image: none;
+    background-color: rgba(0, 0, 0, 0.015); 
+}
 /* expandRow展开部分样式结束 */
 
 body[theme="light"] .progress {

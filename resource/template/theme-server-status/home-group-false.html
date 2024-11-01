@@ -35,8 +35,8 @@
                 <span class="node-cell-os-text">@#getPlatformName(node.os) === '' && node.stateuptime > 0 ? 'linux' : getPlatformName(node.os)#@</span>
             </td>
             <td class="node-cell location center">
-                <i :class="'fi fi-' + (node.stateuptime > 0 ? (node.location || 'rb') : '')"></i>
-                <span class="node-cell-location-text text-uppercase">@#node.stateuptime > 0 ? (node.location || 'RB') : ''#@</span>
+                <i :class="'fi fi-' + (node.stateuptime > 0 ? (node.location || 'un') : '')"></i>
+                <span class="node-cell-location-text text-uppercase">@#node.stateuptime > 0 ? (node.location || 'UN') : ''#@</span>
             </td>
             <td v-if="nodesNoTag.some(item => item.additional && item.additional.price && Object.keys(item.additional.price).length > 0)" class="node-cell price center">
                 <template v-if="node.additional && node.additional.price">
@@ -88,6 +88,45 @@
             <td colspan="16">
                 <div class="accordian-body collapse" :id="'rt'+node.ID">
                     <div style="display: flex;left-items: center;justify-content: center;flex-direction: column; max-width: 89vw">
+                        <span v-if="node.additional && Object.keys(node.additional.plan).length > 0" class="node-cell-expand">
+                            <span class="node-cell-expand-label">{{tr "Plan"}}:</span>
+                            <span v-if="node.additional && Object.keys(node.additional.price).length > 0" class="plan price">
+                                <span v-if="node.additional.price.amount == 0">FREE</span>
+                                <span v-else-if="node.additional.price.amount == -1">PAYG</span>
+                                <span v-else><i class="bi bi-cash-stack"></i> @#node.additional.price.amount#@@#(node.additional.price.cycle ? '/' + node.additional.price.cycle : '')#@</span>           
+                            </span>
+                            <span v-if="node.additional && node.additional.remaining.endDate" class="plan enddate">
+                                <i class="bi bi-clock-history"></i>
+                                <span v-if="node.additional.remaining.days == 'lifetime'">{{tr "Lifetime"}}</span>
+                                <span v-else-if="node.additional.remaining.days < 0">{{tr "Expired"}}</span>
+                                <span v-else>@#node.additional.remaining.endDate.toISOString().split('T')[0]#@</span>
+                            </span>
+                            <span v-if="node.additional && node.additional.plan.bandwidth" class="plan bandwidth">
+                                <i class="bi bi-speedometer2"></i>
+                                <span>@#node.additional.plan.bandwidth#@</span>
+                            </span>
+                            <span v-if="node.additional && node.additional.plan.trafficVol" class="plan traffic">
+                                <i v-if="node.additional && node.additional.plan.trafficType == 1" class="bi bi-arrow-up"></i>
+                                <i v-else class="bi bi-arrow-down-up"></i>
+                                <span>@#node.additional.plan.trafficVol#@</span>
+                            </span>
+                            <span v-if="node.additional && node.additional.plan.ipv4" class="plan ipv4">
+                                <span>IPv4</span>
+                            </span>
+                            <span v-if="node.additional && node.additional.plan.ipv6" class="plan ipv6">
+                                <span>IPv6</span>
+                            </span>
+                            <template v-if="node.additional && node.additional.plan.networkRoute.length>0" v-for="(item, index) in node.additional.plan.networkRoute" :key="index">
+                                <span class="plan network-route" :class="{ last: index === node.additional.plan.networkRoute.length - 1 }">
+                                    <span>@#item#@</span>
+                                </span>
+                            </template>
+                            <template v-if="node.additional && node.additional.plan.extra.length>0" v-for="(item, index) in node.additional.plan.extra" :key="index">
+                                <span class="plan extra" :class="{ last: index === node.additional.plan.extra.length - 1 }">
+                                    <span>@#item#@</span>
+                                </span>
+                            </template>
+                        </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "Platform"}}:</span>
                             <span v-if="node.host.Platform">@#node.host.Platform#@@#node.host.PlatformVersion ? '-' + node.host.PlatformVersion : ''#@</span>

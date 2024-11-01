@@ -90,6 +90,11 @@ body[theme="dark"] .table > tbody > tr.expandRow.odd > td:before {
 body[theme="dark"] .table > tbody > tr.expandRow.even > td:before {
     background-color: rgba(28, 29, 38, 1);
 }
+
+body[theme="dark"] .plan {
+    background-image: none;
+    background-color: rgba(255, 255, 255, 0.075); 
+}
 /* expandRow展开部分样式结束 */
 
 body[theme="dark"] .progress {
