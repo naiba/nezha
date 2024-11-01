@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-01 04:58+0800\n"
-"PO-Revision-Date: 2024-11-01 05:05+0800\n"
+"POT-Creation-Date: 2024-11-01 13:14+0800\n"
+"PO-Revision-Date: 2024-11-01 13:20+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -190,22 +190,21 @@ msgstr "[%s] %s Reporter: %s, Error: %s"
 
 #: service/singleton/servicesentinel.go:515
 #, c-format
-msgid "[SSL] Fetch cert info failed, %s %s"
-msgstr "[SSL] Fetch cert info failed, %s %s"
+msgid "[TLS] Fetch cert info failed, Reporter: %s, Error: %s"
+msgstr "[TLS] Fetch cert info failed, Reporter: %s, Error: %s"
 
 #: service/singleton/servicesentinel.go:555
 #, c-format
-msgid "The SSL certificate will expire within seven days. Expiration time: %s"
-msgstr "The SSL certificate will expire within seven days. Expiration time: %s"
+msgid "The TLS certificate will expire within seven days. Expiration time: %s"
+msgstr "The TLS certificate will expire within seven days. Expiration time: %s"
 
 #: service/singleton/servicesentinel.go:568
 #, c-format
-#| msgid "SSL certificate changed, old: %s, %s expired; new: %s, %s expired."
 msgid ""
-"SSL certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
+"TLS certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
 "expires at %s"
 msgstr ""
-"SSL certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
+"TLS certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
 "expires at %s"
 
 #: service/singleton/servicesentinel.go:604

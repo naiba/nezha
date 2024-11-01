@@ -7,6 +7,6 @@ type NotificationForm struct {
 	RequestType   int    `json:"request_type,omitempty"`
 	RequestHeader string `json:"request_header,omitempty"`
 	RequestBody   string `json:"request_body,omitempty"`
-	VerifySSL     bool   `json:"verify_ssl,omitempty"`
+	VerifyTLS     bool   `json:"verify_tls,omitempty"`
 	SkipCheck     bool   `json:"skip_check,omitempty"`
 }

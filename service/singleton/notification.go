@@ -322,7 +322,7 @@ func (_NotificationMuteLabel) ServiceStateChanged(serviceId uint64) *string {
 	return &label
 }
 
-func (_NotificationMuteLabel) ServiceSSL(serviceId uint64, extraInfo string) *string {
-	label := fmt.Sprintf("bf::sssl-%d-%s", serviceId, extraInfo)
+func (_NotificationMuteLabel) ServiceTLS(serviceId uint64, extraInfo string) *string {
+	label := fmt.Sprintf("bf::stls-%d-%s", serviceId, extraInfo)
 	return &label
 }

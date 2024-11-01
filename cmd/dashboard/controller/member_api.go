@@ -299,8 +299,8 @@ func (ma *memberAPI) addOrEditNotification(c *gin.Context) {
 		n.RequestHeader = nf.RequestHeader
 		n.RequestBody = nf.RequestBody
 		n.URL = nf.URL
-		verifySSL := nf.VerifySSL == "on"
-		n.VerifySSL = &verifySSL
+		//verifySSL := nf.VerifySSL == "on"
+		//n.VerifySSL = &verifySSL
 		n.ID = nf.ID
 		ns := model.NotificationServerBundle{
 			Notification: &n,

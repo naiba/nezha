@@ -19,10 +19,6 @@ var (
 	DNSServers = []string{"1.1.1.1:53", "223.5.5.5:53"}
 )
 
-func IsWindows() bool {
-	return os.PathSeparator == '\\' && os.PathListSeparator == ';'
-}
-
 var ipv4Re = regexp.MustCompile(`(\d*\.).*(\.\d*)`)
 
 func ipv4Desensitize(ipv4Addr string) string {
