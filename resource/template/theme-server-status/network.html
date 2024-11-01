@@ -11,7 +11,7 @@
                 <input type="text" id="dropdown-search" class="form-control" placeholder="Search...">
             </li>
             <li class="dropdown-item" v-for="server in servers" @click="showCharts(server.ID)">
-                <a><i :class="'fi fi-' + (server.Host.CountryCode || 'rb')"></i> @#server.Name#@ <i v-if="server.ID == currentServerId" class="check icon"></i></a>
+                <a><i :class="'fi fi-' + (server.Host.CountryCode || 'un')"></i> @#server.Name#@ <i v-if="server.ID == currentServerId" class="check icon"></i></a>
             </li>
         </ul>
     </div>
@@ -332,7 +332,7 @@
             },
             getServerCountryCode(id){
                 const result = this.servers.find(item => item.ID == id);
-                return result.Host.CountryCode ? result.Host.CountryCode : 'rb';
+                return result.Host.CountryCode ? result.Host.CountryCode : 'un';
             },
             getNextServerId(id) {
                 const currentIndex = this.servers.findIndex(item => item.ID === id);

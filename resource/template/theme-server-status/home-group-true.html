@@ -38,8 +38,8 @@
                 <span class="node-cell-os-text">@#getPlatformName(node.os) === '' && node.stateuptime > 0 ? 'linux' : getPlatformName(node.os)#@</span>
             </td>
             <td class="node-cell location center">
-                <i :class="'fi fi-' + (node.stateuptime > 0 ? (node.location || 'rb') : '')"></i>
-                <span class="node-cell-location-text text-uppercase">@#node.stateuptime > 0 ? (node.location || 'RB') : ''#@</span>
+                <i :class="'fi fi-' + (node.stateuptime > 0 ? (node.location || 'un') : '')"></i>
+                <span class="node-cell-location-text text-uppercase">@#node.stateuptime > 0 ? (node.location || 'UN') : ''#@</span>
             </td>
             <td v-if="group.data.some(item => item.additional && item.additional.price && Object.keys(item.additional.price).length > 0)" class="node-cell price center">
                 <template v-if="node.additional && node.additional.price">
