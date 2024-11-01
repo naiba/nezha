@@ -117,43 +117,54 @@
             initAdditional(servers) {
                 let nodes = {};
                 servers?.forEach(server => {
-                    if (server.PublicNote) {
-                        const remainingFormat = this.getRemainingFormat(server.live, server.PublicNote);
-                        const remainingDays = this.getRemainingDays(this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"), server.PublicNote);
-                        const remainingPercent = this.getRemainingPercent(
-                            this.getNoteElementValue(server.PublicNote, "billingDataMod", "startDate"),
-                            this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"),
-                            server.PublicNote
-                        );
-                        const priceAmount = this.getNoteElementValue(server.PublicNote, "billingDataMod", "amount");
-                        const priceCycle = this.getNoteElementValue(server.PublicNote, "billingDataMod", "cycle");
+                    //处理异常
+                    if (!server.PublicNote) return;
 
-                        // 初始化节点
-                        nodes[server.ID] = {
-                            "remaining": {},
-                            "price": {}
-                        };
+                    // 初始化节点
+                    nodes[server.ID] = {
+                        "remaining": {},
+                        "price": {},
+                        "plan": {}
+                    };
 
-                        if (remainingFormat) {
-                            nodes[server.ID].remaining.format = remainingFormat;
-                        }
+                    // 处理 billingDataMod 的 remaining 配置
+                    const remainingEndDate = this.getRemainingDays(this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"), server.PublicNote, 1);
+                    const remainingFormat = this.getRemainingFormat(server.live, server.PublicNote);
+                    const remainingDays = this.getRemainingDays(this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"), server.PublicNote);
+                    const remainingPercent = this.getRemainingPercent(
+                        this.getNoteElementValue(server.PublicNote, "billingDataMod", "startDate"),
+                        this.getNoteElementValue(server.PublicNote, "billingDataMod", "endDate"),
+                        server.PublicNote
+                    );
+                    // 设置 remaining 属性
+                    if (remainingEndDate) nodes[server.ID].remaining.endDate = remainingEndDate;
+                    if (remainingFormat) nodes[server.ID].remaining.format = remainingFormat;
+                    if (remainingDays) nodes[server.ID].remaining.days = remainingDays;
+                    if (remainingPercent) nodes[server.ID].remaining.percent = this.toFixed2(100 - remainingPercent);
 
-                        if (remainingDays) {
-                            nodes[server.ID].remaining.days = remainingDays;
-                        }
-
-                        if (remainingPercent) {
-                            nodes[server.ID].remaining.percent = this.toFixed2(100 - remainingPercent);
-                        }
-
-                        if (priceAmount) {
-                            nodes[server.ID].price.amount = priceAmount;
-                        }
-
-                        if (priceCycle && priceAmount) {
-                            nodes[server.ID].price.cycle = priceCycle;
-                        }
-                    }
+                    // 处理 billingDataMod 的 price 配置
+                    const priceAmount = this.getNoteElementValue(server.PublicNote, "billingDataMod", "amount");
+                    const priceCycle = this.getNoteElementValue(server.PublicNote, "billingDataMod", "cycle");
+                    // 设置 price 属性
+                    if (priceAmount) nodes[server.ID].price.amount = priceAmount;
+                    if (priceCycle && priceAmount) nodes[server.ID].price.cycle = priceCycle;
+                    
+                    // 处理 planDataMod 配置
+                    const planBandwidth = this.getNoteElementValue(server.PublicNote, "planDataMod", "bandwidth");
+                    const planTrafficVol = this.getNoteElementValue(server.PublicNote, "planDataMod", "trafficVol");
+                    const planTrafficType = this.getNoteElementValue(server.PublicNote, "planDataMod", "trafficType");
+                    const planIPv4 = this.getNoteElementValue(server.PublicNote, "planDataMod", "IPv4");
+                    const planIPv6 = this.getNoteElementValue(server.PublicNote, "planDataMod", "IPv6");
+                    const planNetworkRoute = this.getNoteElementValue(server.PublicNote, "planDataMod", "networkRoute");
+                    const planExtra = this.getNoteElementValue(server.PublicNote, "planDataMod", "extra");
+                    // 设置 plan 属性
+                    if (planBandwidth) nodes[server.ID].plan.bandwidth = planBandwidth;
+                    if (planTrafficVol) nodes[server.ID].plan.trafficVol = planTrafficVol;
+                    if (planTrafficType) nodes[server.ID].plan.trafficType = planTrafficType;
+                    if (planIPv4) nodes[server.ID].plan.ipv4 = planIPv4 >= 1;
+                    if (planIPv6) nodes[server.ID].plan.ipv6 = planIPv6 >= 1;
+                    if (planNetworkRoute) nodes[server.ID].plan.networkRoute = planNetworkRoute.split(',');
+                    if (planExtra) nodes[server.ID].plan.extra = planExtra.split(',');
                 });
                 return nodes;
             },
@@ -859,7 +870,7 @@
                 const expiration = new Date(endDate);
                 const current = this.getAdjustTimezone(new Date(endDate), new Date());
 
-                // 如果 expiration 无效，返回 null 并记录日志
+                // 如果 expiration 无效，记录日志
                 if (isNaN(expiration.getTime())) {
                     console.log("getAutoRenewalEndDate: Invalid expiration format");
                 }
@@ -1055,7 +1066,7 @@
                 return this.formatPercents(online, this.toFixed2(percent));                    
                 
             },
-            getRemainingDays(endDate, note) {
+            getRemainingDays(endDate, note, type) {
                 // 检查 endDate 是否有效
                 if (!endDate || typeof endDate !== 'string') {
                     return null;
@@ -1066,9 +1077,9 @@
                     return "lifetime";
                 }
 
-                // 检查 startDate 和 endDate 是否为合法的Date
+                // 检查 endDate 是否为合法的Date
                 if (isNaN(new Date(endDate).getTime())) {
-                    return "NaN";
+                    return  type === 1 ? null : "NaN";
                 }
                 
                 // 获取当前时间，并调整时区
@@ -1086,6 +1097,9 @@
 
                 // 确定到期时间
                 const end = autoRenewal ? autoEndDate.date : new Date(endDate);
+
+                // 直接返回处理后的到期时间
+                if (type === 1) return end;
 
                 // 计算剩余天数
                 const timeDiff = end - currentTime;

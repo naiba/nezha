@@ -750,3 +750,6 @@ other = "天"
 
 [CustomNameservers]
 other = "自定义DDNS使用的公共DNS服务器（逗号分隔）"
+
+[Plan]
+other = "套餐"

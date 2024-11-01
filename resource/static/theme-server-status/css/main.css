@@ -268,6 +268,22 @@ tr.accordion-toggle{
     font-size: 80%;
 }
 
+.plan {
+    display: inline-block;
+    font-size: 85%;
+    margin-right: 2px;
+    padding: 2px 5px;
+    border-radius: 2px;
+}
+
+.network-route, .extra {
+    margin-right: 6px;
+}
+
+.last {
+    margin-right: 2px;
+}
+
 .temp-detail {
     cursor: pointer;
 }
@@ -556,6 +572,9 @@ footer p {
     .node-cell.remaining {
         min-width: 75px;
         max-width: 75px;    
+    }
+    .plan {
+        display: inline;
     }
     .accordian-body {
         margin: 5px 0px 5px 10px;        

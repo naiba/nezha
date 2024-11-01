@@ -750,3 +750,6 @@ other = "d"
 
 [CustomNameservers]
 other = "Servidores DNS públicos personalizados para DDNS (separar con coma)"
+
+[Plan]
+other = "Plan"
