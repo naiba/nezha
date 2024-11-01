@@ -62,6 +62,9 @@ func (c *Config) Read(path string) error {
 	if c.ListenPort == 0 {
 		c.ListenPort = 8008
 	}
+	if c.Language == "" {
+		c.Language = "zh_CN"
+	}
 	if c.Location == "" {
 		c.Location = "Asia/Shanghai"
 	}
