@@ -133,9 +133,10 @@ jobs:
 
       - name: prepare frontend dists
         run: |
-          wget https://github.com/nezhahq/admin-frontend/releases/download/v0.0.2/dist.zip
-          unzip dist.zip
-          mv dist admin-dist
+          # wget https://github.com/nezhahq/admin-frontend/releases/download/v0.0.2/dist.zip
+          # unzip dist.zip
+          # mv dist admin-dist
+          mkdir admin-dist
           mkdir user-dist
         
       - name: Download artifacts
