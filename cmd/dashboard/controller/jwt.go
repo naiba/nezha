@@ -19,6 +19,7 @@ func initParams() *jwt.GinJWTMiddleware {
 		Realm:       singleton.Conf.SiteName,
 		Key:         []byte(singleton.Conf.JWTSecretKey),
 		CookieName:  "nz-jwt",
+		SendCookie:  true,
 		Timeout:     time.Hour,
 		MaxRefresh:  time.Hour,
 		IdentityKey: model.CtxKeyAuthorizedUser,

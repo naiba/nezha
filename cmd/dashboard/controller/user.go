@@ -7,6 +7,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Get profile
+// @Summary Get profile
+// @Security BearerAuth
+// @Schemes
+// @Description Get profile
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[model.User]
+// @Router /profile [get]
+func getProfile(c *gin.Context) (*model.User, error) {
+	auth, ok := c.Get(model.CtxKeyAuthorizedUser)
+	if !ok {
+		return nil, singleton.Localizer.ErrorT("unauthorized")
+	}
+	return auth.(*model.User), nil
+}
+
 // List user
 // @Summary List user
 // @Security BearerAuth
