@@ -46,7 +46,6 @@ func ReSortServer() {
 	defer SortedServerLock.Unlock()
 
 	SortedServerList = make([]*model.Server, 0, len(ServerList))
-	var SortedServerListForGuest []*model.Server
 	for _, s := range ServerList {
 		SortedServerList = append(SortedServerList, s)
 		if !s.HideForGuest {
