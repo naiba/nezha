@@ -159,10 +159,7 @@
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "NetTransfer"}}:</span>
-                            <i class="arrow alternate circle down outline icon"
-                               style="margin: 0"></i>@#formatByteSize(node.state.NetInTransfer)#@
-                            <i class="arrow alternate circle up outline icon"
-                               style="margin: 0"></i>@#formatByteSize(node.state.NetOutTransfer)#@
+                            IN @#formatByteSize(node.state.NetInTransfer)#@ / OUT @#formatByteSize(node.state.NetOutTransfer)#@
                         </span>
                         <span class="node-cell-expand load">
                             <span class="node-cell-expand-label">{{tr "Load"}}:</span>
