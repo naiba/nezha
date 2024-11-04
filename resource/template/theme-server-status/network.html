@@ -15,7 +15,7 @@
             </li>
         </ul>
     </div>
-    <div class="chartTitle" @click="showCharts(nextServerId)"><i class="chartCountryCode" :class="'fi fi-' + chartCountryCode"></i> @#chartTitle#@</div>
+    <div v-if="chartTitle" class="chartTitle" @click="showCharts(nextServerId)"><i class="chartCountryCode" :class="'fi fi-' + chartCountryCode"></i> @#chartTitle#@</div>
     <div id="chartbox" style="width:100%;height:auto;"></div>
 </div>
 {{template "theme-server-status/footer" .}}
