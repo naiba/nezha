@@ -237,8 +237,8 @@ tr.accordion-toggle{
 }
 
 .node-cell.network {
-    min-width: 100px;
-    max-width: 100px;
+    min-width: 110px;
+    max-width: 110px;
 }
 
 .node-cell.traffic {

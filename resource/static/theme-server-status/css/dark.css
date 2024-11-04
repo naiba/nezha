@@ -46,8 +46,6 @@ body[theme="dark"] .content {
     background-color: rgba(28, 29, 38, 1);
     border: none;
     box-shadow: rgba(0, 0, 0, 0.5) 0 0.625em 2em;
-    -webkit-box-shadow: rgba(0, 0, 0, 0.5) 0 0.625em 2em;
-    box-shadow: rgba(0, 0, 0, 0.5) 0 0.625em 2em;
 }
 
 body[theme="dark"] .table {

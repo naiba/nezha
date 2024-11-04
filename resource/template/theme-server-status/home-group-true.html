@@ -99,17 +99,17 @@
                                 <span v-else><i class="bi bi-cash-stack"></i> @#node.additional.price.amount#@@#(node.additional.price.cycle ? '/' + node.additional.price.cycle : '')#@</span>           
                             </span>
                             <span v-if="node.additional && node.additional.remaining.endDate" class="plan enddate">
-                                <i class="bi bi-clock-history"></i>
                                 <span v-if="node.additional.remaining.days == 'lifetime'">{{tr "Lifetime"}}</span>
                                 <span v-else-if="node.additional.remaining.days < 0">{{tr "Expired"}}</span>
-                                <span v-else>@#node.additional.remaining.endDate.toISOString().split('T')[0]#@</span>
+                                <span v-else><i class="bi bi-clock-history"></i> @#node.additional.remaining.endDate.toISOString().split('T')[0]#@</span>
                             </span>
                             <span v-if="node.additional && node.additional.plan.bandwidth" class="plan bandwidth">
                                 <i class="bi bi-speedometer2"></i>
                                 <span>@#node.additional.plan.bandwidth#@</span>
                             </span>
-                            <span v-if="node.additional && node.additional.plan.trafficVol" class="plan traffic">
+                            <span v-if="node.additional && node.additional.plan.trafficVol" class="plan traffics">
                                 <i v-if="node.additional && node.additional.plan.trafficType == 1" class="bi bi-arrow-up"></i>
+                                <i v-else-if="node.additional && node.additional.plan.trafficType == 3" class="bi bi-arrows-collapse"></i>
                                 <i v-else class="bi bi-arrow-down-up"></i>
                                 <span>@#node.additional.plan.trafficVol#@</span>
                             </span>
@@ -162,10 +162,7 @@
                         </span>
                         <span class="node-cell-expand">
                             <span class="node-cell-expand-label">{{tr "NetTransfer"}}:</span>
-                            <i class="arrow alternate circle down outline icon"
-                               style="margin: 0"></i>@#formatByteSize(node.state.NetInTransfer)#@
-                            <i class="arrow alternate circle up outline icon"
-                               style="margin: 0"></i>@#formatByteSize(node.state.NetOutTransfer)#@
+                            IN @#formatByteSize(node.state.NetInTransfer)#@ / OUT @#formatByteSize(node.state.NetOutTransfer)#@
                         </span>
                         <span class="node-cell-expand load">
                             <span class="node-cell-expand-label">{{tr "Load"}}:</span>
