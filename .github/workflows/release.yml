@@ -17,7 +17,7 @@ jobs:
             goarch: s390x
           - goos: linux
             goarch: arm64
-            
+
     name: Build artifacts
     runs-on: ubuntu-latest
     container:
@@ -44,12 +44,12 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: "1.23.x"
-     
+
       - name: Build
         uses: goreleaser/goreleaser-action@v6
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: "~> v2"
           args: build --single-target --clean --skip=validate
 
       - name: Upload artifacts
@@ -72,12 +72,11 @@ jobs:
 
       - name: Archive and compress binaries
         run: |
-          for file in assets/*/*/*; do
-            if [ -f "$file" ]; then
-              chmod +x "$file"
-              export fileWithoutExt=${file%.*}
-              zip -jr "$fileWithoutExt.zip" "$file"
-            fi
+          find assets/*/*/* -type f | while read -r file; do
+            dir=$(dirname "$file")
+            filename=$(basename "$file")
+            fileWithoutExt="${filename%.*}"
+            zip -jr "$dir/$fileWithoutExt.zip" "$file"
           done
 
       - name: Release
@@ -113,7 +112,7 @@ jobs:
     name: Release Docker images
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -130,7 +129,7 @@ jobs:
           export TAG_NAME=$(echo ${GITHUB_REF#refs/tags/})
           echo "tag=$TAG_NAME" >> $GITHUB_OUTPUT
         id: extract_branch
-         
+
       - name: Log into GHCR
         uses: docker/login-action@master
         with:
