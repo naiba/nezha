@@ -73,6 +73,7 @@ jobs:
       - name: Archive and compress binaries
         run: |
           find assets/*/*/* -type f | while read -r file; do
+            chmod +x $file
             dir=$(dirname "$file")
             filename=$(basename "$file")
             fileWithoutExt="${filename%.*}"
