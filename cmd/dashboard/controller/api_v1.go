@@ -28,6 +28,7 @@ func (v *apiV1) serve() {
 	}))
 	r.GET("/server/list", v.serverList)
 	r.GET("/server/details", v.serverDetails)
+	r.POST("/server/register", v.RegisterServer)
 	// 不强制认证的 API
 	mr := v.r.Group("monitor")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
@@ -82,6 +83,45 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 	}
 	c.JSON(200, singleton.ServerAPI.GetAllStatus())
 }
+
+// RegisterServer adds a server and responds with the full ServerRegisterResponse
+// header: Authorization: Token
+// body: RegisterServer
+// response: ServerRegisterResponse or Secret string
+func (v *apiV1) RegisterServer(c *gin.Context) {
+	var rs singleton.RegisterServer
+	// Attempt to bind JSON to RegisterServer struct
+	if err := c.ShouldBindJSON(&rs); err != nil {
+		c.JSON(400, singleton.ServerRegisterResponse{
+			CommonResponse: singleton.CommonResponse{
+				Code:    400,
+				Message: "Parse JSON failed",
+			},
+		})
+		return
+	}
+	// Check if simple mode is requested
+	simple := c.Query("simple") == "true" || c.Query("simple") == "1"
+	// Set defaults if fields are empty
+	if rs.Name == "" {
+		rs.Name = c.ClientIP()
+	}
+	if rs.Tag == "" {
+		rs.Tag = "AutoRegister"
+	}
+	if rs.HideForGuest == "" {
+		rs.HideForGuest = "on"
+	}
+	// Call the Register function and get the response
+	response := singleton.ServerAPI.Register(&rs)
+	// Respond with Secret only if in simple mode, otherwise full response
+	if simple {
+		c.JSON(response.Code, response.Secret)
+	} else {
+		c.JSON(response.Code, response)
+	}
+}
+
 
 func (v *apiV1) monitorHistoriesById(c *gin.Context) {
 	idStr := c.Param("id")
