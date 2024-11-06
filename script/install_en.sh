@@ -220,7 +220,11 @@ update_script() {
     #    return 1
     #fi
     #echo "The current latest version is: ${new_version}"
-    curl -sL https://raw.githubusercontent.com/nezhahq/scripts/main/install_en.sh -o /tmp/nezha.sh
+    if [ -z "$CN" ]; then
+        curl -sL https://raw.githubusercontent.com/nezhahq/scripts/main/install_en.sh -o /tmp/nezha.sh
+    else
+        curl -sL https://gitee.com/naibahq/scripts/raw/main/install_en.sh -o /tmp/nezha.sh
+    fi
     mv -f /tmp/nezha.sh ./nezha.sh && chmod a+x ./nezha.sh
 
     echo "Execute new script after 3s"

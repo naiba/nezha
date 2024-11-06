@@ -221,7 +221,11 @@ update_script() {
     #    return 1
     #fi
     #echo "当前最新版本为: ${new_version}"
-    curl -sL https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o /tmp/nezha.sh
+    if [ -z "$CN" ]; then
+        curl -sL https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o /tmp/nezha.sh
+    else
+        curl -sL https://gitee.com/naibahq/scripts/raw/main/install.sh -o /tmp/nezha.sh
+    fi
     mv -f /tmp/nezha.sh ./nezha.sh && chmod a+x ./nezha.sh
 
     echo "3s后执行新脚本"
