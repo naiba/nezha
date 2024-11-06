@@ -1,0 +1,63 @@
+# Use build arguments for Go version and architecture
+ARG GO_VERSION=1.22
+ARG BUILDARCH=amd64
+
+# Stage 1: Builder Stage
+# FROM golang:${GO_VERSION}-alpine AS builder
+FROM crazymax/xgo:${GO_VERSION} AS builder
+
+# Set up working directory
+WORKDIR /app
+
+# Step 1: Copy the source code
+COPY . .
+
+# use --mount=type=cache,target=/go/pkg/mod to cache the go mod
+# Step 2: Download dependencies
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod tidy && go mod download
+
+# Step 3: Build the Go application with CGO enabled and specified ldflags
+RUN --mount=type=cache,target=/go/pkg/mod \
+    CGO_ENABLED=1 GOOS=linux go build -a \
+    -ldflags "-s -w --extldflags '-static -fpic'" \
+    -installsuffix cgo -o dashboard cmd/dashboard/main.go
+
+
+# Stage 2: Create the final image
+FROM alpine:latest
+
+ARG COUNTRY
+# Install required tools without caching index to minimize image size
+RUN if [ "$COUNTRY" = "CN" ] ; then \
+        echo "It is in China, updating the repositories"; \
+        sed -i 's#https\?://dl-cdn.alpinelinux.org/alpine#https://mirrors.tuna.tsinghua.edu.cn/alpine#g' /etc/apk/repositories; \
+    fi && \
+    apk update && apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo 'Asia/Shanghai' >/etc/timezone && \
+    rm -rf /var/cache/apk/* && \
+    mkdir -p /dashboard/data
+
+
+# Copy the entrypoint script and ensure it is executable
+COPY ./script/entrypoint.sh /entrypoint.sh
+
+# Set up the entrypoint script
+RUN chmod +x /entrypoint.sh 
+
+WORKDIR /dashboard
+
+# Copy the statically linked binary from the builder stage
+COPY --from=builder /app/dashboard ./app
+# Copy the configuration file and the resource directory
+COPY ./script/config.yaml ./data/config.yaml
+COPY ./resource ./resource
+
+
+# Set up volume and expose ports
+VOLUME ["/dashboard/data"]
+EXPOSE 80 5555 443
+
+# Define the entrypoint
+ENTRYPOINT ["/entrypoint.sh"]
