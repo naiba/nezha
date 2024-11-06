@@ -12,7 +12,7 @@ NZ_DASHBOARD_PATH="${NZ_BASE_PATH}/dashboard"
 NZ_AGENT_PATH="${NZ_BASE_PATH}/agent"
 NZ_DASHBOARD_SERVICE="/etc/systemd/system/nezha-dashboard.service"
 NZ_DASHBOARD_SERVICERC="/etc/init.d/nezha-dashboard"
-NZ_VERSION="v0.20.2"
+NZ_VERSION="v0.20.3"
 
 red='\033[0;31m'
 green='\033[0;32m'
@@ -214,13 +214,18 @@ select_version() {
 update_script() {
     echo "> 更新脚本"
 
-    curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
-    new_version=$(grep "NZ_VERSION" /tmp/nezha.sh | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
-    if [ -z "$new_version" ]; then
-        echo "脚本获取失败，请检查本机能否链接 https://${GITHUB_RAW_URL}/script/install.sh"
-        return 1
+    #curl -sL https://${GITHUB_RAW_URL}/script/install.sh -o /tmp/nezha.sh
+    #new_version=$(grep "NZ_VERSION" /tmp/nezha.sh | head -n 1 | awk -F "=" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g')
+    #if [ -z "$new_version" ]; then
+    #    echo "脚本获取失败，请检查本机能否链接 https://${GITHUB_RAW_URL}/script/install.sh"
+    #    return 1
+    #fi
+    #echo "当前最新版本为: ${new_version}"
+    if [ -z "$CN" ]; then
+        curl -sL https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o /tmp/nezha.sh
+    else
+        curl -sL https://gitee.com/naibahq/scripts/raw/main/install.sh -o /tmp/nezha.sh
     fi
-    echo "当前最新版本为: ${new_version}"
     mv -f /tmp/nezha.sh ./nezha.sh && chmod a+x ./nezha.sh
 
     echo "3s后执行新脚本"
@@ -621,6 +626,7 @@ restart_and_update_standalone() {
     fi
 
     sudo wget -qO $NZ_DASHBOARD_PATH/app.zip "$NZ_DASHBOARD_URL" >/dev/null 2>&1 && sudo unzip -qq -o $NZ_DASHBOARD_PATH/app.zip -d $NZ_DASHBOARD_PATH && sudo mv $NZ_DASHBOARD_PATH/dashboard-linux-$os_arch $NZ_DASHBOARD_PATH/app && sudo rm $NZ_DASHBOARD_PATH/app.zip
+    sudo chmod +x $NZ_DASHBOARD_PATH/app
 
     if [ "$os_alpine" != 1 ]; then
         sudo systemctl enable nezha-dashboard

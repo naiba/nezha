@@ -53,7 +53,7 @@
                 <label>{{tr "LinuxOneKeyInstall"}}</label>
                 <div class="ui message">
                     {{if .Conf.GRPCHost}}
-                    curl -L https://raw.githubusercontent.com/naiba/nezha/master/script/install.sh -o nezha.sh && chmod
+                    curl -L https://raw.githubusercontent.com/nezhahq/scripts/main/install.sh -o nezha.sh && chmod
                     +x nezha.sh && ./nezha.sh install_agent <code class="command">{{.Conf.GRPCHost}}</code> <code
                         class="command">{{if .Conf.ProxyGRPCPort}}{{.Conf.ProxyGRPCPort}}{{else}}{{.Conf.GRPCPort}}{{end}}</code> <code
                         class="command hostSecret"></code> <code class="command">{{if .Conf.TLS}}--tls{{end}}</code>
