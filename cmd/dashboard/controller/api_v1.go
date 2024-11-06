@@ -29,7 +29,6 @@ func (v *apiV1) serve() {
 	r.GET("/server/list", v.serverList)
 	r.GET("/server/details", v.serverDetails)
 	r.POST("/server/register", v.RegisterServer)
-	r.POST("/server/register2", v.RegisterServer2)
 	// 不强制认证的 API
 	mr := v.r.Group("monitor")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
@@ -84,20 +83,25 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 	}
 	c.JSON(200, singleton.ServerAPI.GetAllStatus())
 }
-// registerServerLogic handles the server registration logic and returns a ServerRegisterResponse
-func (v *apiV1) registerServerLogic(c *gin.Context) *singleton.ServerRegisterResponse {
-	var rs singleton.RegisterServer
 
+// RegisterServer adds a server and responds with the full ServerRegisterResponse
+// header: Authorization: Token
+// body: RegisterServer
+// response: ServerRegisterResponse or Secret string
+func (v *apiV1) RegisterServer(c *gin.Context) {
+	var rs singleton.RegisterServer
 	// Attempt to bind JSON to RegisterServer struct
 	if err := c.ShouldBindJSON(&rs); err != nil {
-		return &singleton.ServerRegisterResponse{
+		c.JSON(400, singleton.ServerRegisterResponse{
 			CommonResponse: singleton.CommonResponse{
 				Code:    400,
 				Message: "Parse JSON failed",
 			},
-		}
+		})
+		return
 	}
-
+	// Check if simple mode is requested
+	simple := c.Query("simple") == "true" || c.Query("simple") == "1"
 	// Set defaults if fields are empty
 	if rs.Name == "" {
 		rs.Name = c.ClientIP()
@@ -108,29 +112,16 @@ func (v *apiV1) registerServerLogic(c *gin.Context) *singleton.ServerRegisterRes
 	if rs.HideForGuest == "" {
 		rs.HideForGuest = "on"
 	}
-
-	// Call the Register function and return the response
-	return singleton.ServerAPI.Register(&rs)
-}
-
-// RegisterServer adds a server and responds with the full ServerRegisterResponse
-// header: Authorization: Token
-// body: RegisterServer
-// response: ServerRegisterResponse
-func (v *apiV1) RegisterServer(c *gin.Context) {
-	response := v.registerServerLogic(c)
-	c.JSON(response.Code, response)
-}
-
-// RegisterServer2 adds a server and responds only with the secret if successful, else an empty string
-func (v *apiV1) RegisterServer2(c *gin.Context) {
-	response := v.registerServerLogic(c)
-	if response.Code == 200 {
-		c.JSON(200, response.Secret)
+	// Call the Register function and get the response
+	response := singleton.ServerAPI.Register(&rs)
+	// Respond with Secret only if in simple mode, otherwise full response
+	if simple {
+		c.JSON(response.Code, response.Secret)
 	} else {
-		c.JSON(response.Code, "")
+		c.JSON(response.Code, response)
 	}
 }
+
 
 func (v *apiV1) monitorHistoriesById(c *gin.Context) {
 	idStr := c.Param("id")
