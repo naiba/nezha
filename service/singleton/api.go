@@ -25,6 +25,19 @@ type CommonResponse struct {
 	Message string `json:"message"`
 }
 
+type RegisterServer struct {
+	Name		 string
+	Tag			 string
+	Note		 string
+	HideForGuest string
+}
+
+type ServerRegisterResponse struct {
+	CommonResponse
+	Secret 			string `json:"secret"`
+}
+
+
 type CommonServerInfo struct {
 	ID           uint64 `json:"id"`
 	Name         string `json:"name"`
@@ -226,6 +239,55 @@ func (s *ServerAPIService) GetAllList() *ServerInfoResponse {
 		Message: "success",
 	}
 	return res
+}
+func (s *ServerAPIService) Register(rs *RegisterServer) *ServerRegisterResponse {
+	var serverInfo model.Server
+	var err error
+	// Populate serverInfo fields
+	serverInfo.Name = rs.Name
+	serverInfo.Tag = rs.Tag
+	serverInfo.Note = rs.Note
+	serverInfo.HideForGuest = rs.HideForGuest == "on"
+	// Generate a random secret
+	serverInfo.Secret, err = utils.GenerateRandomString(18)
+	if err != nil {
+		return &ServerRegisterResponse{
+			CommonResponse: CommonResponse{
+				Code:    500,
+				Message: "Generate secret failed: " + err.Error(),
+			},
+			Secret: "",
+		}
+	}
+	// Attempt to save serverInfo in the database
+	err = DB.Create(&serverInfo).Error
+	if err != nil {
+		return &ServerRegisterResponse{
+			CommonResponse: CommonResponse{
+				Code:    500,
+				Message: "Database error: " + err.Error(),
+			},
+			Secret: "",
+		}
+	}
+
+	serverInfo.Host = &model.Host{}
+	serverInfo.State = &model.HostState{}
+	serverInfo.TaskCloseLock = new(sync.Mutex)
+	ServerLock.Lock()
+	SecretToID[serverInfo.Secret] = serverInfo.ID
+	ServerList[serverInfo.ID] = &serverInfo
+	ServerTagToIDList[serverInfo.Tag] = append(ServerTagToIDList[serverInfo.Tag], serverInfo.ID)
+	ServerLock.Unlock()
+	ReSortServer()
+	// Successful response
+	return &ServerRegisterResponse{
+		CommonResponse: CommonResponse{
+			Code:    200,
+			Message: "Server created successfully",
+		},
+		Secret: serverInfo.Secret,
+	}
 }
 
 func (m *MonitorAPIService) GetMonitorHistories(query map[string]any) *MonitorInfoResponse {

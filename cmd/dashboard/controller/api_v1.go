@@ -28,6 +28,7 @@ func (v *apiV1) serve() {
 	}))
 	r.GET("/server/list", v.serverList)
 	r.GET("/server/details", v.serverDetails)
+	r.POST("/server/register", v.RegisterServer)
 	// 不强制认证的 API
 	mr := v.r.Group("monitor")
 	mr.Use(mygin.Authorize(mygin.AuthorizeOption{
@@ -81,6 +82,40 @@ func (v *apiV1) serverDetails(c *gin.Context) {
 		return
 	}
 	c.JSON(200, singleton.ServerAPI.GetAllStatus())
+}
+// RegisterServer adds a server
+// header: Authorization: Token
+// body: RegisterServer
+// response: ServerRegisterResponse
+func (v *apiV1) RegisterServer(c *gin.Context) {
+	var rs singleton.RegisterServer
+	var response *singleton.ServerRegisterResponse
+	// Bind JSON to RegisterServer struct
+	if err := c.ShouldBindJSON(&rs); err != nil {
+		response = &singleton.ServerRegisterResponse{
+			CommonResponse: singleton.CommonResponse{
+				Code:    400,
+				Message: "Parse JSON failed",
+			},
+		}
+		c.JSON(response.Code, response)
+		return
+	}
+	// Default to client IP if Name is empty
+	if rs.Name == "" {
+		rs.Name = c.ClientIP()
+	}
+	// Set default tag if empty
+	if rs.Tag == "" {
+		rs.Tag = "AutoRegister"
+	}
+	if rs.HideForGuest == "" {
+		rs.HideForGuest = "on"
+	}
+	// Call the Register function and get response
+	response = singleton.ServerAPI.Register(&rs)
+	// Send response as JSON
+	c.JSON(response.Code, response)
 }
 
 func (v *apiV1) monitorHistoriesById(c *gin.Context) {
