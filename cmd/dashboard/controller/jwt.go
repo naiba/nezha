@@ -122,7 +122,7 @@ func unauthorized() func(c *gin.Context, code int, message string) {
 // @Tags auth required
 // @Produce json
 // @Success 200 {object} model.CommonResponse[model.LoginResponse]
-// @Router /refresh_token [get]
+// @Router /refresh-token [get]
 func refreshResponse(c *gin.Context, code int, token string, expire time.Time) {
 	c.JSON(http.StatusOK, model.CommonResponse[model.LoginResponse]{
 		Success: true,
