@@ -12,20 +12,23 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        goos: [linux, windows]
+        goos: [
+            linux,
+            #windows
+          ]
         goarch: [amd64]
-        include:
-          - goos: linux
-            goarch: s390x
-          - goos: linux
-            goarch: arm64
-            
+        #include:
+        #  - goos: linux
+        #    goarch: s390x
+        #  - goos: linux
+        #    goarch: arm64
+
     name: Build artifacts
     runs-on: ubuntu-latest
-    container:
-      image: goreleaser/goreleaser-cross:v1.23
+    #container:
+    #  image: goreleaser/goreleaser-cross:v1.23
     steps:
-      - run: git config --global --add safe.directory /__w/nezha/nezha
+    #  - run: git config --global --add safe.directory /__w/nezha/nezha
       - uses: actions/checkout@v4
 
       - name: Fetch IPInfo GeoIP Database
@@ -44,17 +47,16 @@ jobs:
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
           swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
-     
+
       - name: Build with tag
         if: contains(github.ref, 'refs/tags/')
         uses: goreleaser/goreleaser-action@v6
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: "~> v2"
           args: build --single-target --clean --skip=validate
 
       - name: Build snapshot
@@ -63,10 +65,9 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-          GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: "~> v2"
           args: build --single-target --clean --skip=validate --snapshot
 
       - name: Upload artifacts
@@ -138,7 +139,7 @@ jobs:
           # mv dist admin-dist
           mkdir admin-dist
           mkdir user-dist
-        
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -212,7 +213,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/s390x
+          platforms: linux/amd64
           push: true
           tags: |
             ${{ steps.image-name.outputs.GHCR_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
