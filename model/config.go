@@ -46,35 +46,6 @@ const (
 	ConfigCoverIgnoreAll
 )
 
-type AgentConfig struct {
-	HardDrivePartitionAllowlist []string
-	NICAllowlist                map[string]bool
-	v                           *viper.Viper
-}
-
-// Read 从给定的文件目录加载配置文件
-func (c *AgentConfig) Read(path string) error {
-	c.v = viper.New()
-	c.v.SetConfigFile(path)
-	err := c.v.ReadInConfig()
-	if err != nil {
-		return err
-	}
-	err = c.v.Unmarshal(c)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (c *AgentConfig) Save() error {
-	data, err := yaml.Marshal(c)
-	if err != nil {
-		return err
-	}
-	return os.WriteFile(c.v.ConfigFileUsed(), data, 0600)
-}
-
 // Config 站点配置
 type Config struct {
 	Debug    bool   // debug模式开关
