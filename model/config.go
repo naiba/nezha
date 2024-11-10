@@ -1,12 +1,15 @@
 package model
 
 import (
+	"errors"
 	"os"
 	"strconv"
 	"strings"
 
-	"github.com/spf13/viper"
-	"sigs.k8s.io/yaml"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/env"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
 )
 
 var Languages = map[string]string{
@@ -93,28 +96,50 @@ type Config struct {
 
 	Location string // 时区，默认为 Asia/Shanghai
 
-	v                              *viper.Viper
 	IgnoredIPNotificationServerIDs map[uint64]bool // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
 	MaxTCPPingValue                int32
 	AvgPingCount                   int
 
 	DNSServers string
+
+	k        *koanf.Koanf
+	filePath string
 }
 
 // Read 读取配置文件并应用
 func (c *Config) Read(path string) error {
-	c.v = viper.New()
-	c.v.SetConfigFile(path)
-	err := c.v.ReadInConfig()
+	c.k = koanf.New(".")
+	c.filePath = path
+
+	if _, err := os.Stat(path); err == nil {
+		err = c.k.Load(file.Provider(path), yaml.Parser())
+		if err != nil {
+			return err
+		}
+	}
+
+	err := c.k.Load(env.Provider("NZ_", ".", func(s string) string {
+		return strings.Replace(strings.ToLower(strings.TrimPrefix(s, "NZ_")), "_", ".", -1)
+	}), nil)
 	if err != nil {
 		return err
 	}
 
-	err = c.v.Unmarshal(c)
+	err = c.k.Unmarshal("", c)
 	if err != nil {
 		return err
 	}
 
+	if c.Oauth2.Type == "" || c.Oauth2.Admin == "" || c.Oauth2.ClientID == "" || c.Oauth2.ClientSecret == "" {
+		return errors.New("missing oauth2 config")
+	}
+
+	if c.Site.Brand == "" {
+		c.Site.Brand = "NeZha"
+	}
+	if c.Site.CookieName == "" {
+		c.Site.CookieName = "nezha-dashboard"
+	}
 	if c.Site.Theme == "" {
 		c.Site.Theme = "default"
 	}
@@ -123,6 +148,9 @@ func (c *Config) Read(path string) error {
 	}
 	if c.Language == "" {
 		c.Language = "zh-CN"
+	}
+	if c.HTTPPort == 0 {
+		c.HTTPPort = 80
 	}
 	if c.GRPCPort == 0 {
 		c.GRPCPort = 5555
@@ -171,9 +199,9 @@ func (c *Config) updateIgnoredIPNotificationID() {
 // Save 保存配置文件
 func (c *Config) Save() error {
 	c.updateIgnoredIPNotificationID()
-	data, err := yaml.Marshal(c)
+	data, err := c.k.Marshal(yaml.Parser())
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(c.v.ConfigFileUsed(), data, 0600)
+	return os.WriteFile(c.filePath, data, 0600)
 }
