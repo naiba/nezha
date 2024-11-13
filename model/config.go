@@ -182,7 +182,6 @@ func (c *Config) Read(path string) error {
 		c.Oauth2.OidcGroupClaim = "groups"
 	}
 
-	panic(1)
 	c.updateIgnoredIPNotificationID()
 	return nil
 }
