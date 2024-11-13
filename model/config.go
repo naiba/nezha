@@ -111,18 +111,20 @@ func (c *Config) Read(path string) error {
 	c.k = koanf.New(".")
 	c.filePath = path
 
-	if _, err := os.Stat(path); err == nil {
-		err = c.k.Load(file.Provider(path), yaml.Parser())
-		if err != nil {
-			return err
-		}
-	}
+	// 先读取环境变量，然后读取配置文件；后者可以覆盖前者，因为哪吒支持在线修改配置
 
 	err := c.k.Load(env.Provider("NZ_", ".", func(s string) string {
 		return strings.Replace(strings.ToLower(strings.TrimPrefix(s, "NZ_")), "_", ".", -1)
 	}), nil)
 	if err != nil {
 		return err
+	}
+
+	if _, err := os.Stat(path); err == nil {
+		err = c.k.Load(file.Provider(path), yaml.Parser())
+		if err != nil {
+			return err
+		}
 	}
 
 	err = c.k.Unmarshal("", c)
@@ -180,6 +182,7 @@ func (c *Config) Read(path string) error {
 		c.Oauth2.OidcGroupClaim = "groups"
 	}
 
+	panic(1)
 	c.updateIgnoredIPNotificationID()
 	return nil
 }
