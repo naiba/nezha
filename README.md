@@ -94,7 +94,8 @@ You can change the dashboard language in the settings page (`/setting`) after th
 <a href="https://github.com/GreenTeodoro839" title="GreenTeodoro839"><img src="https://avatars.githubusercontent.com/u/77104800?v=4" width="50;" alt="GreenTeodoro839"/></a>
 <a href="https://github.com/Es-dese" title="Esdese"><img src="https://avatars.githubusercontent.com/u/71542548?v=4" width="50;" alt="Esdese"/></a>
 <a href="https://github.com/wwng2333" title=":D"><img src="https://avatars.githubusercontent.com/u/17147265?v=4" width="50;" alt=":D"/></a>
-<a href="https://github.com/wellcoming" title="Coming"><img src="https://avatars.githubusercontent.com/u/74850890?v=4" width="50;" alt="Coming"/></a><!--GAMFC_DELIMITER_END-->
+<a href="https://github.com/wellcoming" title="Coming"><img src="https://avatars.githubusercontent.com/u/74850890?v=4" width="50;" alt="Coming"/></a>
+<a href="https://github.com/006lp" title="006lp"><img src="https://avatars.githubusercontent.com/u/144674902?v=4" width="50;" alt="006lp"/></a><!--GAMFC_DELIMITER_END-->
 
 ## Special Thanks
 - [IPInfo](https://ipinfo.io/) for providing an accurate GeoIP Database.
