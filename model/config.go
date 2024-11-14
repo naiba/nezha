@@ -6,10 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/knadh/koanf/parsers/yaml"
+	kyaml "github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+	"gopkg.in/yaml.v3"
 )
 
 var Languages = map[string]string{
@@ -121,7 +122,7 @@ func (c *Config) Read(path string) error {
 	}
 
 	if _, err := os.Stat(path); err == nil {
-		err = c.k.Load(file.Provider(path), yaml.Parser())
+		err = c.k.Load(file.Provider(path), kyaml.Parser())
 		if err != nil {
 			return err
 		}
@@ -137,7 +138,7 @@ func (c *Config) Read(path string) error {
 	}
 
 	if c.Site.Brand == "" {
-		c.Site.Brand = "NeZha"
+		c.Site.Brand = "Nezha Monitoring"
 	}
 	if c.Site.CookieName == "" {
 		c.Site.CookieName = "nezha-dashboard"
@@ -201,7 +202,7 @@ func (c *Config) updateIgnoredIPNotificationID() {
 // Save 保存配置文件
 func (c *Config) Save() error {
 	c.updateIgnoredIPNotificationID()
-	data, err := c.k.Marshal(yaml.Parser())
+	data, err := yaml.Marshal(c)
 	if err != nil {
 		return err
 	}
