@@ -18,8 +18,8 @@ const (
 type Config struct {
 	Debug bool `mapstructure:"debug" json:"debug,omitempty"` // debug模式开关
 
-	Language       string `mapstructure:"language" json:"language,omitempty"` // 系统语言，默认 zh_CN
-	SiteName       string `mapstructure:"site_name" json:"site_name,omitempty"`
+	Language       string `mapstructure:"language" json:"language"` // 系统语言，默认 zh_CN
+	SiteName       string `mapstructure:"site_name" json:"site_name"`
 	JWTSecretKey   string `mapstructure:"jwt_secret_key" json:"jwt_secret_key,omitempty"`
 	AgentSecretKey string `mapstructure:"agent_secret_key" json:"agent_secret_key,omitempty"`
 	ListenPort     uint   `mapstructure:"listen_port" json:"listen_port,omitempty"`
@@ -31,8 +31,8 @@ type Config struct {
 
 	// IP变更提醒
 	EnableIPChangeNotification  bool   `mapstructure:"enable_ip_change_notification" json:"enable_ip_change_notification,omitempty"`
-	IPChangeNotificationGroupID uint64 `mapstructure:"ip_change_notification_group_id" json:"ip_change_notification_group_id,omitempty"`
-	Cover                       uint8  `mapstructure:"cover" json:"cover,omitempty"`                                     // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
+	IPChangeNotificationGroupID uint64 `mapstructure:"ip_change_notification_group_id" json:"ip_change_notification_group_id"`
+	Cover                       uint8  `mapstructure:"cover" json:"cover"`                                               // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
 	IgnoredIPNotification       string `mapstructure:"ignored_ip_notification" json:"ignored_ip_notification,omitempty"` // 特定服务器IP（多个服务器用逗号分隔）
 
 	IgnoredIPNotificationServerIDs map[uint64]bool `mapstructure:"ignored_ip_notification_server_ids" json:"ignored_ip_notification_server_ids,omitempty"` // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）

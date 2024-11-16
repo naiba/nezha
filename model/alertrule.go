@@ -12,11 +12,11 @@ const (
 
 type AlertRule struct {
 	Common
-	Name                   string   `json:"name,omitempty"`
+	Name                   string   `json:"name"`
 	RulesRaw               string   `json:"-"`
 	Enable                 *bool    `json:"enable,omitempty"`
-	TriggerMode            int      `gorm:"default:0" json:"trigger_mode,omitempty"` // 触发模式: 0-始终触发(默认) 1-单次触发
-	NotificationGroupID    uint64   `json:"notification_group_id,omitempty"`         // 该报警规则所在的通知组
+	TriggerMode            uint8    `gorm:"default:0" json:"trigger_mode"` // 触发模式: 0-始终触发(默认) 1-单次触发
+	NotificationGroupID    uint64   `json:"notification_group_id"`         // 该报警规则所在的通知组
 	FailTriggerTasksRaw    string   `gorm:"default:'[]'" json:"-"`
 	RecoverTriggerTasksRaw string   `gorm:"default:'[]'" json:"-"`
 	Rules                  []Rule   `gorm:"-" json:"rules"`

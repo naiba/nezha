@@ -63,8 +63,8 @@ type Service struct {
 	FailTriggerTasks    []uint64 `gorm:"-" json:"fail_trigger_tasks"`    // 失败时执行的触发任务id
 	RecoverTriggerTasks []uint64 `gorm:"-" json:"recover_trigger_tasks"` // 恢复时执行的触发任务id
 
-	MinLatency    float32 `json:"min_latency,omitempty"`
-	MaxLatency    float32 `json:"max_latency,omitempty"`
+	MinLatency    float32 `json:"min_latency"`
+	MaxLatency    float32 `json:"max_latency"`
 	LatencyNotify bool    `json:"latency_notify,omitempty"`
 
 	SkipServers map[uint64]bool `gorm:"-" json:"skip_servers"`

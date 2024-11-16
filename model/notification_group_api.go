@@ -1,7 +1,7 @@
 package model
 
 type NotificationGroupForm struct {
-	Name          string   `json:"name"`
+	Name          string   `json:"name" minLength:"1"`
 	Notifications []uint64 `json:"notifications"`
 }
 

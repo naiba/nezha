@@ -3,17 +3,17 @@ package model
 import "time"
 
 type ServiceForm struct {
-	Name                string          `json:"name,omitempty"`
+	Name                string          `json:"name,omitempty" minLength:"1"`
 	Target              string          `json:"target,omitempty"`
 	Type                uint8           `json:"type,omitempty"`
 	Cover               uint8           `json:"cover,omitempty"`
-	Notify              bool            `json:"notify,omitempty"`
+	Notify              bool            `json:"notify,omitempty" validate:"optional"`
 	Duration            uint64          `json:"duration,omitempty"`
-	MinLatency          float32         `json:"min_latency,omitempty"`
-	MaxLatency          float32         `json:"max_latency,omitempty"`
-	LatencyNotify       bool            `json:"latency_notify,omitempty"`
-	EnableTriggerTask   bool            `json:"enable_trigger_task,omitempty"`
-	EnableShowInService bool            `json:"enable_show_in_service,omitempty"`
+	MinLatency          float32         `json:"min_latency,omitempty" default:"0.0"`
+	MaxLatency          float32         `json:"max_latency,omitempty" default:"0.0"`
+	LatencyNotify       bool            `json:"latency_notify,omitempty" validate:"optional"`
+	EnableTriggerTask   bool            `json:"enable_trigger_task,omitempty" validate:"optional"`
+	EnableShowInService bool            `json:"enable_show_in_service,omitempty" validate:"optional"`
 	FailTriggerTasks    []uint64        `json:"fail_trigger_tasks,omitempty"`
 	RecoverTriggerTasks []uint64        `json:"recover_trigger_tasks,omitempty"`
 	SkipServers         map[uint64]bool `json:"skip_servers,omitempty"`

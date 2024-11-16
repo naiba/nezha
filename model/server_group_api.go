@@ -1,7 +1,7 @@
 package model
 
 type ServerGroupForm struct {
-	Name    string   `json:"name"`
+	Name    string   `json:"name" minLength:"1"`
 	Servers []uint64 `json:"servers"`
 }
 

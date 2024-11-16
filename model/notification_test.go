@@ -17,8 +17,8 @@ type testSt struct {
 	url               string
 	body              string
 	header            string
-	reqType           int
-	reqMethod         int
+	reqType           uint8
+	reqMethod         uint8
 	expectURL         string
 	expectBody        string
 	expectMethod      string
