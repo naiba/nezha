@@ -21,14 +21,14 @@ type ServiceForm struct {
 }
 
 type ServiceResponseItem struct {
-	Service     *Service
-	CurrentUp   uint64
-	CurrentDown uint64
-	TotalUp     uint64
-	TotalDown   uint64
-	Delay       *[30]float32
-	Up          *[30]int
-	Down        *[30]int
+	Service     *Service     `json:"service,omitempty"`
+	CurrentUp   uint64       `json:"current_up"`
+	CurrentDown uint64       `json:"current_down"`
+	TotalUp     uint64       `json:"total_up"`
+	TotalDown   uint64       `json:"total_down"`
+	Delay       *[30]float32 `json:"delay,omitempty"`
+	Up          *[30]int     `json:"up,omitempty"`
+	Down        *[30]int     `json:"down,omitempty"`
 }
 
 func (r ServiceResponseItem) TotalUptime() float32 {
@@ -39,17 +39,17 @@ func (r ServiceResponseItem) TotalUptime() float32 {
 }
 
 type CycleTransferStats struct {
-	Name       string
-	From       time.Time
-	To         time.Time
-	Max        uint64
-	Min        uint64
-	ServerName map[uint64]string
-	Transfer   map[uint64]uint64
-	NextUpdate map[uint64]time.Time
+	Name       string               `json:"name"`
+	From       time.Time            `json:"from"`
+	To         time.Time            `json:"to"`
+	Max        uint64               `json:"max"`
+	Min        uint64               `json:"min"`
+	ServerName map[uint64]string    `json:"server_name,omitempty"`
+	Transfer   map[uint64]uint64    `json:"transfer,omitempty"`
+	NextUpdate map[uint64]time.Time `json:"next_update,omitempty"`
 }
 
 type ServiceResponse struct {
-	Services           map[uint64]ServiceResponseItem
-	CycleTransferStats map[uint64]CycleTransferStats
+	Services           map[uint64]ServiceResponseItem `json:"services,omitempty"`
+	CycleTransferStats map[uint64]CycleTransferStats  `json:"cycle_transfer_stats,omitempty"`
 }

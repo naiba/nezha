@@ -33,10 +33,10 @@ func listService(c *gin.Context) (*model.ServiceResponse, error) {
 		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 		authorized := isMember // TODO || isViewPasswordVerfied
 		for k, service := range stats {
-			if !service.Service.EnableShowInService {
-				delete(stats, k)
-			}
 			if !authorized {
+				if !service.Service.EnableShowInService {
+					delete(stats, k)
+				}
 				service.Service = &model.Service{Name: service.Service.Name}
 				stats[k] = service
 			}
