@@ -46,14 +46,14 @@ const (
 
 type Service struct {
 	Common
-	Name                string `json:"name,omitempty"`
-	Type                uint8  `json:"type,omitempty"`
-	Target              string `json:"target,omitempty"`
+	Name                string `json:"name"`
+	Type                uint8  `json:"type"`
+	Target              string `json:"target"`
 	SkipServersRaw      string `json:"-"`
-	Duration            uint64 `json:"duration,omitempty"`
+	Duration            uint64 `json:"duration"`
 	Notify              bool   `json:"notify,omitempty"`
-	NotificationGroupID uint64 `json:"notification_group_id,omitempty"` // 当前服务监控所属的通知组 ID
-	Cover               uint8  `json:"cover,omitempty"`
+	NotificationGroupID uint64 `json:"notification_group_id"` // 当前服务监控所属的通知组 ID
+	Cover               uint8  `json:"cover"`
 
 	EnableTriggerTask      bool   `gorm:"default: false" json:"enable_trigger_task,omitempty"`
 	EnableShowInService    bool   `gorm:"default: false" json:"enable_show_in_service,omitempty"`
