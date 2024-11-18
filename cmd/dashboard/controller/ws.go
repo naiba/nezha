@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"net"
+	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,9 +15,43 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  32768,
-	WriteBufferSize: 32768,
+var upgrader *websocket.Upgrader
+
+func InitUpgrader() {
+	var checkOrigin func(r *http.Request) bool
+
+	// Allow CORS from loopback addresses in debug mode
+	if singleton.Conf.Debug {
+		checkOrigin = func(r *http.Request) bool {
+			hostAddr := r.Host
+			host, _, err := net.SplitHostPort(hostAddr)
+			if err != nil {
+				return false
+			}
+			if ip := net.ParseIP(host); ip != nil {
+				if ip.IsLoopback() {
+					return true
+				}
+			} else {
+				// Handle domains like "localhost"
+				ip, err := net.LookupHost(host)
+				if err != nil || len(ip) == 0 {
+					return false
+				}
+				if netIP := net.ParseIP(ip[0]); netIP != nil && netIP.IsLoopback() {
+					return true
+				}
+			}
+
+			return false
+		}
+	}
+
+	upgrader = &websocket.Upgrader{
+		ReadBufferSize:  32768,
+		WriteBufferSize: 32768,
+		CheckOrigin:     checkOrigin,
+	}
 }
 
 // Websocket server stream
@@ -30,7 +66,7 @@ var upgrader = websocket.Upgrader{
 func serverStream(c *gin.Context) (any, error) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		return nil, err
+		return nil, newWsError("%v", err)
 	}
 	defer conn.Close()
 	count := 0

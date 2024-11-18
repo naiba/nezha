@@ -76,7 +76,7 @@ func terminalStream(c *gin.Context) (any, error) {
 
 	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		return nil, err
+		return nil, newWsError("%v", err)
 	}
 	defer wsConn.Close()
 	conn := websocketx.NewConn(wsConn)

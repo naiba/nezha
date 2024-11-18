@@ -121,6 +121,7 @@ func main() {
 
 	grpcHandler := rpc.ServeRPC()
 	httpHandler := controller.ServeWeb()
+	controller.InitUpgrader()
 
 	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
 	http2Server := &http2.Server{}
