@@ -146,7 +146,7 @@ func updateNotificationGroup(c *gin.Context) (any, error) {
 		if err := tx.Save(&ngDB).Error; err != nil {
 			return err
 		}
-		if err := tx.Delete(&model.NotificationGroupNotification{}, "notification_group_id = ?", id).Error; err != nil {
+		if err := tx.Unscoped().Delete(&model.NotificationGroupNotification{}, "notification_group_id = ?", id).Error; err != nil {
 			return err
 		}
 

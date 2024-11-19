@@ -143,7 +143,7 @@ func updateServerGroup(c *gin.Context) (any, error) {
 		if err := tx.Save(&sgDB).Error; err != nil {
 			return err
 		}
-		if err := tx.Delete(&model.ServerGroupServer{}, "server_group_id = ?", id).Error; err != nil {
+		if err := tx.Unscoped().Delete(&model.ServerGroupServer{}, "server_group_id = ?", id).Error; err != nil {
 			return err
 		}
 
