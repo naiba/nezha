@@ -1,8 +1,6 @@
 package model
 
 import (
-	"strings"
-
 	"github.com/naiba/nezha/pkg/utils"
 	"gorm.io/gorm"
 )
@@ -50,8 +48,5 @@ func (d *DDNSProfile) BeforeSave(tx *gorm.DB) error {
 }
 
 func (d *DDNSProfile) AfterFind(tx *gorm.DB) error {
-	if d.DomainsRaw != "" {
-		d.Domains = strings.Split(d.DomainsRaw, ",")
-	}
-	return nil
+	return utils.Json.Unmarshal([]byte(d.DomainsRaw), &d.Domains)
 }

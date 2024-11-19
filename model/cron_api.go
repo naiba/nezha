@@ -1,7 +1,6 @@
 package model
 
 type CronForm struct {
-	ID                  uint64   `json:"id,omitempty"`
 	TaskType            uint8    `json:"task_type,omitempty" default:"0"` // 0:计划任务 1:触发任务
 	Name                string   `json:"name,omitempty" minLength:"1"`
 	Scheduler           string   `json:"scheduler,omitempty"`

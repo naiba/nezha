@@ -188,5 +188,6 @@ func batchDeleteCron(c *gin.Context) (any, error) {
 	}
 
 	singleton.OnDeleteCron(cr)
+	singleton.UpdateCronList()
 	return nil, nil
 }

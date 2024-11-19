@@ -33,6 +33,15 @@ type Cron struct {
 	ServersRaw string       `json:"-"`
 }
 
+func (c *Cron) BeforeSave(tx *gorm.DB) error {
+	if data, err := utils.Json.Marshal(c.Servers); err != nil {
+		return err
+	} else {
+		c.ServersRaw = string(data)
+	}
+	return nil
+}
+
 func (c *Cron) AfterFind(tx *gorm.DB) error {
 	return utils.Json.Unmarshal([]byte(c.ServersRaw), &c.Servers)
 }
