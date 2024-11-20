@@ -144,7 +144,6 @@ jobs:
         run: |
           ls -al
           mv dist admin-dist
-          mkdir admin-dist
           mkdir user-dist
 
       - name: Download artifacts
