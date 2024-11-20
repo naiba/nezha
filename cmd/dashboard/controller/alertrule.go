@@ -50,10 +50,6 @@ func createAlertRule(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
-	if err := validateRule(&r); err != nil {
-		return 0, err
-	}
-
 	r.Name = arf.Name
 	r.Rules = arf.Rules
 	r.FailTriggerTasks = arf.FailTriggerTasks
@@ -62,6 +58,10 @@ func createAlertRule(c *gin.Context) (uint64, error) {
 	enable := arf.Enable
 	r.TriggerMode = arf.TriggerMode
 	r.Enable = &enable
+
+	if err := validateRule(&r); err != nil {
+		return 0, err
+	}
 
 	if err := singleton.DB.Create(&r).Error; err != nil {
 		return 0, newGormError("%v", err)
@@ -100,10 +100,6 @@ func updateAlertRule(c *gin.Context) (any, error) {
 		return nil, singleton.Localizer.ErrorT("alert id %d does not exist", id)
 	}
 
-	if err := validateRule(&r); err != nil {
-		return 0, err
-	}
-
 	r.Name = arf.Name
 	r.Rules = arf.Rules
 	r.FailTriggerTasks = arf.FailTriggerTasks
@@ -112,6 +108,10 @@ func updateAlertRule(c *gin.Context) (any, error) {
 	enable := arf.Enable
 	r.TriggerMode = arf.TriggerMode
 	r.Enable = &enable
+
+	if err := validateRule(&r); err != nil {
+		return 0, err
+	}
 
 	if err := singleton.DB.Save(&r).Error; err != nil {
 		return 0, newGormError("%v", err)

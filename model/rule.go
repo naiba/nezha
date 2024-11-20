@@ -23,15 +23,15 @@ type Rule struct {
 	// 指标类型，cpu、memory、swap、disk、net_in_speed、net_out_speed
 	// net_all_speed、transfer_in、transfer_out、transfer_all、offline
 	// transfer_in_cycle、transfer_out_cycle、transfer_all_cycle
-	Type          string          `json:"type,omitempty"`
-	Min           float64         `json:"min,omitempty"`            // 最小阈值 (百分比、字节 kb ÷ 1024)
-	Max           float64         `json:"max,omitempty"`            // 最大阈值 (百分比、字节 kb ÷ 1024)
-	CycleStart    *time.Time      `json:"cycle_start,omitempty"`    // 流量统计的开始时间
-	CycleInterval uint64          `json:"cycle_interval,omitempty"` // 流量统计周期
-	CycleUnit     string          `json:"cycle_unit,omitempty"`     // 流量统计周期单位，默认hour,可选(hour, day, week, month, year)
-	Duration      uint64          `json:"duration,omitempty"`       // 持续时间 (秒)
-	Cover         uint64          `json:"cover,omitempty"`          // 覆盖范围 RuleCoverAll/IgnoreAll
-	Ignore        map[uint64]bool `json:"ignore,omitempty"`         // 覆盖范围的排除
+	Type          string          `json:"type"`
+	Min           float64         `json:"min,omitempty" validate:"optional"`                                                        // 最小阈值 (百分比、字节 kb ÷ 1024)
+	Max           float64         `json:"max,omitempty" validate:"optional"`                                                        // 最大阈值 (百分比、字节 kb ÷ 1024)
+	CycleStart    *time.Time      `json:"cycle_start,omitempty" validate:"optional"`                                                // 流量统计的开始时间
+	CycleInterval uint64          `json:"cycle_interval,omitempty" validate:"optional"`                                             // 流量统计周期
+	CycleUnit     string          `json:"cycle_unit,omitempty" enums:"hour,day,week,month,year" validate:"optional" default:"hour"` // 流量统计周期单位，默认hour,可选(hour, day, week, month, year)
+	Duration      uint64          `json:"duration,omitempty" validate:"optional"`                                                   // 持续时间 (秒)
+	Cover         uint64          `json:"cover"`                                                                                    // 覆盖范围 RuleCoverAll/IgnoreAll
+	Ignore        map[uint64]bool `json:"ignore,omitempty" validate:"optional"`                                                     // 覆盖范围的排除
 
 	// 只作为缓存使用，记录下次该检测的时间
 	NextTransferAt  map[uint64]time.Time `json:"-"`
