@@ -132,10 +132,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: robinraju/release-downloader@v1
+        with:
+          repo: nezhahq/admin-frontend
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fileName: dist.zip
+          latest: true
+          extract: true
+
       - name: prepare frontend dists
         run: |
-          wget https://github.com/nezhahq/admin-frontend/releases/latest/download/dist.zip
-          unzip dist.zip
+          ls -al
           mv dist admin-dist
           mkdir admin-dist
           mkdir user-dist
