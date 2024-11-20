@@ -8,6 +8,7 @@ import (
 
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
+	pb "github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
 )
 
@@ -128,4 +129,43 @@ func batchDeleteServer(c *gin.Context) (any, error) {
 	singleton.ReSortServer()
 
 	return nil, nil
+}
+
+// Force update Agent
+// @Summary Force update Agent
+// @Security BearerAuth
+// @Schemes
+// @Description Force update Agent
+// @Tags auth required
+// @Accept json
+// @param request body []uint64 true "id list"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[model.ForceUpdateResponse]
+// @Router /force-update/server [post]
+func forceUpdateServer(c *gin.Context) (*model.ForceUpdateResponse, error) {
+	var forceUpdateServers []uint64
+	if err := c.ShouldBindJSON(&forceUpdateServers); err != nil {
+		return nil, err
+	}
+
+	forceUpdateResp := new(model.ForceUpdateResponse)
+
+	for _, sid := range forceUpdateServers {
+		singleton.ServerLock.RLock()
+		server := singleton.ServerList[sid]
+		singleton.ServerLock.RUnlock()
+		if server != nil && server.TaskStream != nil {
+			if err := server.TaskStream.Send(&pb.Task{
+				Type: model.TaskTypeUpgrade,
+			}); err != nil {
+				forceUpdateResp.Failure = append(forceUpdateResp.Failure, sid)
+			} else {
+				forceUpdateResp.Success = append(forceUpdateResp.Success, sid)
+			}
+		} else {
+			forceUpdateResp.Offline = append(forceUpdateResp.Offline, sid)
+		}
+	}
+
+	return forceUpdateResp, nil
 }

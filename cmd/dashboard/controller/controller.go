@@ -92,6 +92,7 @@ func routers(r *gin.Engine) {
 	auth.GET("/server", commonHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
+	auth.POST("/force-update/server", commonHandler(forceUpdateServer))
 
 	auth.GET("/notification", commonHandler(listNotification))
 	auth.POST("/notification", commonHandler(createNotification))

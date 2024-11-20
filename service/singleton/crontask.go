@@ -1,9 +1,9 @@
 package singleton
 
 import (
-	"bytes"
 	"fmt"
 	"slices"
+	"strings"
 	"sync"
 
 	"github.com/jinzhu/copier"
@@ -33,7 +33,7 @@ func loadCronTasks() {
 	DB.Find(&CronList)
 	var err error
 	var notificationGroupList []uint64
-	notificationMsgMap := make(map[uint64]*bytes.Buffer)
+	notificationMsgMap := make(map[uint64]*strings.Builder)
 	for _, cron := range CronList {
 		// 触发任务类型无需注册
 		if cron.TaskType == model.CronTypeTriggerTask {
@@ -48,7 +48,7 @@ func loadCronTasks() {
 			// 当前通知组首次出现 将其加入通知组列表并初始化通知组消息缓存
 			if _, ok := notificationMsgMap[cron.NotificationGroupID]; !ok {
 				notificationGroupList = append(notificationGroupList, cron.NotificationGroupID)
-				notificationMsgMap[cron.NotificationGroupID] = bytes.NewBufferString("")
+				notificationMsgMap[cron.NotificationGroupID] = new(strings.Builder)
 				notificationMsgMap[cron.NotificationGroupID].WriteString(Localizer.T("Tasks failed to register: ["))
 			}
 			notificationMsgMap[cron.NotificationGroupID].WriteString(fmt.Sprintf("%d,", cron.ID))

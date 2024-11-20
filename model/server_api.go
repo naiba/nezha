@@ -27,3 +27,9 @@ type ServerForm struct {
 	EnableDDNS   bool     `json:"enable_ddns,omitempty" validate:"optional"`    // 启用DDNS
 	DDNSProfiles []uint64 `gorm:"-" json:"ddns_profiles,omitempty"`             // DDNS配置
 }
+
+type ForceUpdateResponse struct {
+	Success []uint64 `json:"success,omitempty" validate:"optional"`
+	Failure []uint64 `json:"failure,omitempty" validate:"optional"`
+	Offline []uint64 `json:"offline,omitempty" validate:"optional"`
+}
