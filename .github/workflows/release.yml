@@ -134,7 +134,7 @@ jobs:
 
       - uses: robinraju/release-downloader@v1
         with:
-          repo: nezhahq/admin-frontend
+          repository: nezhahq/admin-frontend
           token: ${{ secrets.GITHUB_TOKEN }}
           fileName: dist.zip
           latest: true
