@@ -11,12 +11,14 @@ import (
 )
 
 const (
-	ConfigCoverAll = iota
+	ConfigUsePeerIP = "NZ::Use-Peer-IP"
+	ConfigCoverAll  = iota
 	ConfigCoverIgnoreAll
 )
 
 type Config struct {
-	Debug bool `mapstructure:"debug" json:"debug,omitempty"` // debug模式开关
+	Debug        bool   `mapstructure:"debug" json:"debug,omitempty"`                   // debug模式开关
+	RealIPHeader string `mapstructure:"real_ip_header" json:"real_ip_header,omitempty"` // 真实IP
 
 	Language       string `mapstructure:"language" json:"language"` // 系统语言，默认 zh_CN
 	SiteName       string `mapstructure:"site_name" json:"site_name"`

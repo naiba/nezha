@@ -1,11 +1,15 @@
 package rpc
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"net/netip"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/peer"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/naiba/nezha/model"
@@ -16,10 +20,40 @@ import (
 )
 
 func ServeRPC() *grpc.Server {
-	server := grpc.NewServer()
+	server := grpc.NewServer(grpc.UnaryInterceptor(getRealIp))
 	rpcService.NezhaHandlerSingleton = rpcService.NewNezhaHandler()
 	proto.RegisterNezhaServiceServer(server, rpcService.NezhaHandlerSingleton)
 	return server
+}
+
+func getRealIp(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	if singleton.Conf.RealIPHeader == "" {
+		return handler(ctx, req)
+	}
+
+	if singleton.Conf.RealIPHeader == model.ConfigUsePeerIP {
+		p, ok := peer.FromContext(ctx)
+		if !ok {
+			return nil, fmt.Errorf("peer not found")
+		}
+		addrPort, err := netip.ParseAddrPort(p.Addr.String())
+		if err != nil {
+			return nil, err
+		}
+		ctx = context.WithValue(ctx, model.CtxKeyRealIP{}, addrPort.Addr().String())
+		return handler(ctx, req)
+	}
+
+	vals := metadata.ValueFromIncomingContext(ctx, singleton.Conf.RealIPHeader)
+	if len(vals) == 0 {
+		return nil, fmt.Errorf("real ip header not found")
+	}
+	ip, err := netip.ParseAddr(vals[0])
+	if err != nil {
+		return nil, err
+	}
+	ctx = context.WithValue(ctx, model.CtxKeyRealIP{}, ip.String())
+	return handler(ctx, req)
 }
 
 func DispatchTask(serviceSentinelDispatchBus <-chan model.Service) {

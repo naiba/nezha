@@ -4,7 +4,12 @@ import (
 	"time"
 )
 
-const CtxKeyAuthorizedUser = "ckau"
+const (
+	CtxKeyAuthorizedUser = "ckau"
+	CtxKeyRealIPStr      = "ckri"
+)
+
+type CtxKeyRealIP struct{}
 
 type Common struct {
 	ID        uint64    `gorm:"primaryKey" json:"id,omitempty"`
