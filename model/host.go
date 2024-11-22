@@ -1,6 +1,8 @@
 package model
 
 import (
+	"fmt"
+
 	pb "github.com/naiba/nezha/proto"
 )
 
@@ -105,8 +107,6 @@ type Host struct {
 	Arch            string   `json:"arch,omitempty"`
 	Virtualization  string   `json:"virtualization,omitempty"`
 	BootTime        uint64   `json:"boot_time,omitempty"`
-	IP              string   `json:"ip,omitempty"`
-	CountryCode     string   `json:"country_code,omitempty"`
 	Version         string   `json:"version,omitempty"`
 	GPU             []string `json:"gpu,omitempty"`
 }
@@ -122,8 +122,6 @@ func (h *Host) PB() *pb.Host {
 		Arch:            h.Arch,
 		Virtualization:  h.Virtualization,
 		BootTime:        h.BootTime,
-		Ip:              h.IP,
-		CountryCode:     h.CountryCode,
 		Version:         h.Version,
 		Gpu:             h.GPU,
 	}
@@ -140,9 +138,36 @@ func PB2Host(h *pb.Host) Host {
 		Arch:            h.GetArch(),
 		Virtualization:  h.GetVirtualization(),
 		BootTime:        h.GetBootTime(),
-		IP:              h.GetIp(),
-		CountryCode:     h.GetCountryCode(),
 		Version:         h.GetVersion(),
 		GPU:             h.GetGpu(),
+	}
+}
+
+type IP struct {
+	IPv4Addr string `json:"ipv4_addr,omitempty"`
+	IPv6Addr string `json:"ipv6_addr,omitempty"`
+}
+
+func (p *IP) Join() string {
+	if p.IPv4Addr != "" && p.IPv6Addr != "" {
+		return fmt.Sprintf("%s/%s", p.IPv4Addr, p.IPv6Addr)
+	} else if p.IPv4Addr != "" {
+		return p.IPv4Addr
+	}
+	return p.IPv6Addr
+}
+
+type GeoIP struct {
+	IP          IP     `json:"ip,omitempty"`
+	CountryCode string `json:"country_code,omitempty"`
+}
+
+func PB2GeoIP(p *pb.GeoIP) GeoIP {
+	pbIP := p.GetIp()
+	return GeoIP{
+		IP: IP{
+			IPv4Addr: pbIP.GetIpv4(),
+			IPv6Addr: pbIP.GetIpv6(),
+		},
 	}
 }

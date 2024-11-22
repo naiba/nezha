@@ -27,6 +27,7 @@ type Server struct {
 
 	Host       *Host      `gorm:"-" json:"host,omitempty"`
 	State      *HostState `gorm:"-" json:"state,omitempty"`
+	GeoIP      *GeoIP     `gorm:"-" json:"geoip,omitempty"`
 	LastActive time.Time  `gorm:"-" json:"last_active,omitempty"`
 
 	TaskClose     chan error                        `gorm:"-" json:"-"`
@@ -40,6 +41,7 @@ type Server struct {
 func (s *Server) CopyFromRunningServer(old *Server) {
 	s.Host = old.Host
 	s.State = old.State
+	s.GeoIP = old.GeoIP
 	s.LastActive = old.LastActive
 	s.TaskClose = old.TaskClose
 	s.TaskCloseLock = old.TaskCloseLock

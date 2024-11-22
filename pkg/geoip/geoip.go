@@ -5,12 +5,23 @@ import (
 	"fmt"
 	"net"
 	"strings"
+	"sync"
 
 	maxminddb "github.com/oschwald/maxminddb-golang"
 )
 
 //go:embed geoip.db
 var db []byte
+
+var (
+	dbOnce = sync.OnceValues(func() (*maxminddb.Reader, error) {
+		db, err := maxminddb.FromBytes(db)
+		if err != nil {
+			return nil, err
+		}
+		return db, nil
+	})
+)
 
 type IPInfo struct {
 	Country       string `maxminddb:"country"`
@@ -20,11 +31,10 @@ type IPInfo struct {
 }
 
 func Lookup(ip net.IP) (string, error) {
-	db, err := maxminddb.FromBytes(db)
+	db, err := dbOnce()
 	if err != nil {
 		return "", err
 	}
-	defer db.Close()
 
 	var record IPInfo
 	err = db.Lookup(ip, &record)

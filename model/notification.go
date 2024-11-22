@@ -193,7 +193,7 @@ func (ns *NotificationServerBundle) replaceParamsInString(str string, message st
 		str = strings.ReplaceAll(str, "#SERVER.UDPCONNCOUNT#", mod(fmt.Sprintf("%d", ns.Server.State.UdpConnCount)))
 
 		var ipv4, ipv6, validIP string
-		ipList := strings.Split(ns.Server.Host.IP, "/")
+		ipList := strings.Split(ns.Server.GeoIP.IP.Join(), "/")
 		if len(ipList) > 1 {
 			// 双栈
 			ipv4 = ipList[0]
@@ -201,7 +201,7 @@ func (ns *NotificationServerBundle) replaceParamsInString(str string, message st
 			validIP = ipv4
 		} else if len(ipList) == 1 {
 			// 仅ipv4|ipv6
-			if strings.Contains(ipList[0], ":") {
+			if strings.IndexByte(ipList[0], ':') != -1 {
 				ipv6 = ipList[0]
 				validIP = ipv6
 			} else {

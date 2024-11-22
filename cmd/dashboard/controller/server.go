@@ -107,25 +107,20 @@ func batchDeleteServer(c *gin.Context) (any, error) {
 		return nil, newGormError("%v", err)
 	}
 
-	singleton.ServerLock.Lock()
-	for i := 0; i < len(servers); i++ {
-		id := servers[i]
-		delete(singleton.ServerList, id)
-
-		singleton.AlertsLock.Lock()
-		for i := 0; i < len(singleton.Alerts); i++ {
-			if singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID] != nil {
-				delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].ServerName, id)
-				delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].Transfer, id)
-				delete(singleton.AlertsCycleTransferStatsStore[singleton.Alerts[i].ID].NextUpdate, id)
+	singleton.AlertsLock.Lock()
+	for _, sid := range servers {
+		for _, alert := range singleton.Alerts {
+			if singleton.AlertsCycleTransferStatsStore[alert.ID] != nil {
+				delete(singleton.AlertsCycleTransferStatsStore[alert.ID].ServerName, sid)
+				delete(singleton.AlertsCycleTransferStatsStore[alert.ID].Transfer, sid)
+				delete(singleton.AlertsCycleTransferStatsStore[alert.ID].NextUpdate, sid)
 			}
 		}
-		singleton.AlertsLock.Unlock()
-
-		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", id)
+		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", sid)
 	}
-	singleton.ServerLock.Unlock()
+	singleton.AlertsLock.Unlock()
 
+	singleton.OnServerDelete(servers)
 	singleton.ReSortServer()
 
 	return nil, nil
