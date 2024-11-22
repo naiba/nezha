@@ -2,18 +2,14 @@ package waf
 
 import (
 	_ "embed"
-	"errors"
-	"log"
-	"math/big"
 	"net/http"
 	"net/netip"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
-	"gorm.io/gorm"
 )
 
 //go:embed waf.html
@@ -55,31 +51,11 @@ func Waf(c *gin.Context) {
 		c.Next()
 		return
 	}
-	var w model.WAF
-	if err := singleton.DB.First(&w, "ip = ?", realipAddr).Error; err != nil {
-		if err != gorm.ErrRecordNotFound {
-			ShowBlockPage(c, err)
-			return
-		}
-	}
-	now := time.Now().Unix()
-	if w.LastBlockTimestamp+pow(w.Count, 4) > uint64(now) {
-		log.Println(w.Count, w.LastBlockTimestamp+pow(w.Count, 4)-uint64(now))
-		ShowBlockPage(c, errors.New("you are blocked by nezha WAF"))
+	if err := model.CheckIP(singleton.DB, realipAddr); err != nil {
+		ShowBlockPage(c, err)
 		return
 	}
 	c.Next()
-}
-
-func pow(x, y uint64) uint64 {
-	base := big.NewInt(0).SetUint64(x)
-	exp := big.NewInt(0).SetUint64(y)
-	result := big.NewInt(1)
-	result.Exp(base, exp, nil)
-	if !result.IsUint64() {
-		return ^uint64(0) // return max uint64 value on overflow
-	}
-	return result.Uint64()
 }
 
 func ShowBlockPage(c *gin.Context, err error) {
