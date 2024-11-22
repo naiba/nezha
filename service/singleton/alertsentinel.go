@@ -157,7 +157,7 @@ func checkStatus() {
 				if alert.TriggerMode == model.ModeAlwaysTrigger || alertsPrevState[alert.ID][server.ID] != _RuleCheckFail {
 					alertsPrevState[alert.ID][server.ID] = _RuleCheckFail
 					message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.T("Incident"),
-						server.Name, IPDesensitize(server.Host.IP), alert.Name)
+						server.Name, IPDesensitize(server.GeoIP.IP.Join()), alert.Name)
 					go SendTriggerTasks(alert.FailTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationGroupID, message, NotificationMuteLabel.ServerIncident(server.ID, alert.ID), &curServer)
 					// 清除恢复通知的静音缓存
@@ -167,7 +167,7 @@ func checkStatus() {
 				// 本次通过检查但上一次的状态为失败，则发送恢复通知
 				if alertsPrevState[alert.ID][server.ID] == _RuleCheckFail {
 					message := fmt.Sprintf("[%s] %s(%s) %s", Localizer.T("Resolved"),
-						server.Name, IPDesensitize(server.Host.IP), alert.Name)
+						server.Name, IPDesensitize(server.GeoIP.IP.Join()), alert.Name)
 					go SendTriggerTasks(alert.RecoverTriggerTasks, curServer.ID)
 					go SendNotification(alert.NotificationGroupID, message, NotificationMuteLabel.ServerIncidentResolved(server.ID, alert.ID), &curServer)
 					// 清除失败通知的静音缓存

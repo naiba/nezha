@@ -4,11 +4,12 @@ import (
 	"context"
 	"sync"
 
+	petname "github.com/dustinkirkland/golang-petname"
+	"github.com/hashicorp/go-uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
 )
@@ -30,7 +31,7 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 	}
 
 	if clientSecret != singleton.Conf.AgentSecretKey {
-		return 0, status.Errorf(codes.Unauthenticated, "客户端认证失败")
+		return 0, status.Error(codes.Unauthenticated, "客户端认证失败")
 	}
 
 	var clientUUID string
@@ -39,22 +40,25 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 	}
 
 	if _, err := uuid.ParseUUID(clientUUID); err != nil {
-		return 0, status.Errorf(codes.Unauthenticated, "客户端 UUID 不合法")
+		return 0, status.Error(codes.Unauthenticated, "客户端 UUID 不合法")
 	}
 
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
+
 	clientID, hasID := singleton.ServerUUIDToID[clientUUID]
 	if !hasID {
-		s := model.Server{UUID: clientUUID}
+		s := model.Server{UUID: clientUUID, Name: petname.Generate(2, "-")}
 		if err := singleton.DB.Create(&s).Error; err != nil {
-			return 0, status.Errorf(codes.Unauthenticated, err.Error())
+			return 0, status.Error(codes.Unauthenticated, err.Error())
 		}
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}
 		s.TaskCloseLock = new(sync.Mutex)
+		// generate a random silly server name
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerUUIDToID[clientUUID] = s.ID
+		singleton.ReSortServer()
 		clientID = s.ID
 	}
 

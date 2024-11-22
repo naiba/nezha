@@ -68,3 +68,13 @@ func ReSortServer() {
 		return SortedServerListForGuest[i].DisplayIndex > SortedServerListForGuest[j].DisplayIndex
 	})
 }
+
+func OnServerDelete(sid []uint64) {
+	ServerLock.Lock()
+	defer ServerLock.Unlock()
+	for _, id := range sid {
+		serverUUID := ServerList[id].UUID
+		delete(ServerUUIDToID, serverUUID)
+		delete(ServerList, id)
+	}
+}

@@ -9,9 +9,8 @@ import (
 	"time"
 
 	"github.com/naiba/nezha/pkg/ddns"
-	"github.com/naiba/nezha/pkg/geoip"
+	geoipx "github.com/naiba/nezha/pkg/geoip"
 	"github.com/naiba/nezha/pkg/grpcx"
-	"github.com/naiba/nezha/pkg/utils"
 
 	"github.com/jinzhu/copier"
 
@@ -126,40 +125,6 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	singleton.ServerLock.RLock()
 	defer singleton.ServerLock.RUnlock()
 
-	// 检查并更新DDNS
-	if singleton.ServerList[clientID].EnableDDNS && host.IP != "" &&
-		(singleton.ServerList[clientID].Host == nil || singleton.ServerList[clientID].Host.IP != host.IP) {
-		ipv4, ipv6, _ := utils.SplitIPAddr(host.IP)
-		providers, err := singleton.GetDDNSProvidersFromProfiles(singleton.ServerList[clientID].DDNSProfiles, &ddns.IP{Ipv4Addr: ipv4, Ipv6Addr: ipv6})
-		if err == nil {
-			for _, provider := range providers {
-				go func(provider *ddns.Provider) {
-					provider.UpdateDomain(context.Background())
-				}(provider)
-			}
-		} else {
-			log.Printf("NEZHA>> 获取DDNS配置时发生错误: %v", err)
-		}
-	}
-
-	// 发送IP变动通知
-	if singleton.ServerList[clientID].Host != nil && singleton.Conf.EnableIPChangeNotification &&
-		((singleton.Conf.Cover == model.ConfigCoverAll && !singleton.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
-			(singleton.Conf.Cover == model.ConfigCoverIgnoreAll && singleton.Conf.IgnoredIPNotificationServerIDs[clientID])) &&
-		singleton.ServerList[clientID].Host.IP != "" &&
-		host.IP != "" &&
-		singleton.ServerList[clientID].Host.IP != host.IP {
-
-		singleton.SendNotification(singleton.Conf.IPChangeNotificationGroupID,
-			fmt.Sprintf(
-				"[%s] %s, %s => %s",
-				singleton.Localizer.T("IP Changed"),
-				singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].Host.IP),
-				singleton.IPDesensitize(host.IP),
-			),
-			nil)
-	}
-
 	/**
 	 * 这里的 singleton 中的数据都是关机前的旧数据
 	 * 当 agent 重启时，bootTime 变大，agent 端会先上报 host 信息，然后上报 state 信息
@@ -168,11 +133,6 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	if singleton.ServerList[clientID].Host != nil && singleton.ServerList[clientID].Host.BootTime < host.BootTime {
 		singleton.ServerList[clientID].PrevTransferInSnapshot = singleton.ServerList[clientID].PrevTransferInSnapshot - int64(singleton.ServerList[clientID].State.NetInTransfer)
 		singleton.ServerList[clientID].PrevTransferOutSnapshot = singleton.ServerList[clientID].PrevTransferOutSnapshot - int64(singleton.ServerList[clientID].State.NetOutTransfer)
-	}
-
-	// 不要冲掉国家码
-	if singleton.ServerList[clientID].Host != nil {
-		host.CountryCode = singleton.ServerList[clientID].Host.CountryCode
 	}
 
 	singleton.ServerList[clientID].Host = &host
@@ -204,28 +164,73 @@ func (s *NezhaHandler) IOStream(stream pb.NezhaService_IOStreamServer) error {
 	return nil
 }
 
-func (s *NezhaHandler) LookupGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, error) {
+func (s *NezhaHandler) ReportGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, error) {
 	var clientID uint64
 	var err error
 	if clientID, err = s.Auth.Check(c); err != nil {
 		return nil, err
 	}
 
-	// 根据内置数据库查询 IP 地理位置
-	ip := r.GetIp()
-	netIP := net.ParseIP(ip)
-	location, err := geoip.Lookup(netIP)
-	if err != nil {
-		return nil, err
+	geoip := model.PB2GeoIP(r)
+	joinedIP := geoip.IP.Join()
+	use6 := r.GetUse6()
+
+	singleton.ServerLock.RLock()
+	// 检查并更新DDNS
+	if singleton.ServerList[clientID].EnableDDNS && joinedIP != "" &&
+		(singleton.ServerList[clientID].GeoIP == nil || singleton.ServerList[clientID].GeoIP.IP != geoip.IP) {
+		ipv4 := geoip.IP.IPv4Addr
+		ipv6 := geoip.IP.IPv6Addr
+		providers, err := singleton.GetDDNSProvidersFromProfiles(singleton.ServerList[clientID].DDNSProfiles, &ddns.IP{Ipv4Addr: ipv4, Ipv6Addr: ipv6})
+		if err == nil {
+			for _, provider := range providers {
+				go func(provider *ddns.Provider) {
+					provider.UpdateDomain(context.Background())
+				}(provider)
+			}
+		} else {
+			log.Printf("NEZHA>> 获取DDNS配置时发生错误: %v", err)
+		}
 	}
+
+	// 发送IP变动通知
+	if singleton.ServerList[clientID].GeoIP != nil && singleton.Conf.EnableIPChangeNotification &&
+		((singleton.Conf.Cover == model.ConfigCoverAll && !singleton.Conf.IgnoredIPNotificationServerIDs[clientID]) ||
+			(singleton.Conf.Cover == model.ConfigCoverIgnoreAll && singleton.Conf.IgnoredIPNotificationServerIDs[clientID])) &&
+		singleton.ServerList[clientID].GeoIP.IP.Join() != "" &&
+		joinedIP != "" &&
+		singleton.ServerList[clientID].GeoIP.IP != geoip.IP {
+
+		singleton.SendNotification(singleton.Conf.IPChangeNotificationGroupID,
+			fmt.Sprintf(
+				"[%s] %s, %s => %s",
+				singleton.Localizer.T("IP Changed"),
+				singleton.ServerList[clientID].Name, singleton.IPDesensitize(singleton.ServerList[clientID].GeoIP.IP.Join()),
+				singleton.IPDesensitize(joinedIP),
+			),
+			nil)
+	}
+	singleton.ServerLock.RUnlock()
+
+	// 根据内置数据库查询 IP 地理位置
+	var ip string
+	if geoip.IP.IPv6Addr != "" && (use6 || geoip.IP.IPv4Addr == "") {
+		ip = geoip.IP.IPv6Addr
+	} else {
+		ip = geoip.IP.IPv4Addr
+	}
+
+	netIP := net.ParseIP(ip)
+	location, err := geoipx.Lookup(netIP)
+	if err != nil {
+		log.Printf("NEZHA>> geoip.Lookup: %v", err)
+	}
+	geoip.CountryCode = location
 
 	// 将地区码写入到 Host
-	singleton.ServerLock.RLock()
-	defer singleton.ServerLock.RUnlock()
-	if singleton.ServerList[clientID].Host == nil {
-		return nil, fmt.Errorf("host not found")
-	}
-	singleton.ServerList[clientID].Host.CountryCode = location
+	singleton.ServerLock.Lock()
+	defer singleton.ServerLock.Unlock()
+	singleton.ServerList[clientID].GeoIP = &geoip
 
-	return &pb.GeoIP{Ip: ip, CountryCode: location}, nil
+	return &pb.GeoIP{Ip: nil, CountryCode: location}, err
 }
