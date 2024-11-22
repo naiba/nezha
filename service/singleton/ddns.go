@@ -12,6 +12,7 @@ import (
 	ddns2 "github.com/naiba/nezha/pkg/ddns"
 	"github.com/naiba/nezha/pkg/ddns/dummy"
 	"github.com/naiba/nezha/pkg/ddns/webhook"
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 var (
@@ -56,12 +57,7 @@ func UpdateDDNSList() {
 		DDNSList = append(DDNSList, p)
 	}
 	slices.SortFunc(DDNSList, func(a, b *model.DDNSProfile) int {
-		if a.ID < b.ID {
-			return -1
-		} else if a.ID == b.ID {
-			return 0
-		}
-		return 1
+		return utils.Compare(a.ID, b.ID)
 	})
 }
 

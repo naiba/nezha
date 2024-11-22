@@ -106,9 +106,8 @@ func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 			serverList = singleton.SortedServerListForGuest
 		}
 
-		var servers []model.StreamServer
-		for i := 0; i < len(serverList); i++ {
-			server := serverList[i]
+		servers := make([]model.StreamServer, 0, len(serverList))
+		for _, server := range serverList {
 			servers = append(servers, model.StreamServer{
 				ID:           server.ID,
 				Name:         server.Name,
@@ -125,5 +124,6 @@ func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 			Servers: servers,
 		})
 	})
+
 	return v.([]byte), err
 }

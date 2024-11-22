@@ -11,6 +11,7 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 	pb "github.com/naiba/nezha/proto"
 )
 
@@ -83,12 +84,7 @@ func UpdateCronList() {
 		CronList = append(CronList, c)
 	}
 	slices.SortFunc(CronList, func(a, b *model.Cron) int {
-		if a.ID < b.ID {
-			return -1
-		} else if a.ID == b.ID {
-			return 0
-		}
-		return 1
+		return utils.Compare(a.ID, b.ID)
 	})
 }
 

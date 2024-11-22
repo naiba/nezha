@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 var (
@@ -59,12 +60,7 @@ func UpdateNATList() {
 		NATList = append(NATList, n)
 	}
 	slices.SortFunc(NATList, func(a, b *model.NAT) int {
-		if a.ID < b.ID {
-			return -1
-		} else if a.ID == b.ID {
-			return 0
-		}
-		return 1
+		return utils.Compare(a.ID, b.ID)
 	})
 }
 

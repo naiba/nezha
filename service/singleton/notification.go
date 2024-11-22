@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 )
 
 const (
@@ -85,12 +86,7 @@ func UpdateNotificationList() {
 		NotificationListSorted = append(NotificationListSorted, n)
 	}
 	slices.SortFunc(NotificationListSorted, func(a, b *model.Notification) int {
-		if a.ID < b.ID {
-			return -1
-		} else if a.ID == b.ID {
-			return 0
-		}
-		return 1
+		return utils.Compare(a.ID, b.ID)
 	})
 }
 
