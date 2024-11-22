@@ -2,7 +2,6 @@ package rpc
 
 import (
 	"context"
-	"log"
 	"sync"
 
 	"google.golang.org/grpc/codes"
@@ -24,9 +23,6 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 	if !ok {
 		return 0, status.Errorf(codes.Unauthenticated, "获取 metaData 失败")
 	}
-
-	realIp := ctx.Value(model.CtxKeyRealIP{})
-	log.Printf("bingo rpc realIp: %s, metadata: %v", realIp, md)
 
 	var clientSecret string
 	if value, ok := md["client_secret"]; ok {

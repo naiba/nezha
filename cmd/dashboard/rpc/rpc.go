@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/netip"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -48,7 +49,9 @@ func getRealIp(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 	if len(vals) == 0 {
 		return nil, fmt.Errorf("real ip header not found")
 	}
-	ip, err := netip.ParseAddr(vals[0])
+	a := strings.Split(vals[0], ",")
+	h := strings.TrimSpace(a[len(a)-1])
+	ip, err := netip.ParseAddr(h)
 	if err != nil {
 		return nil, err
 	}

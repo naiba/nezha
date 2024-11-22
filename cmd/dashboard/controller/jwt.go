@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
+	"github.com/naiba/nezha/cmd/dashboard/controller/waf"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/service/singleton"
@@ -87,10 +88,12 @@ func authenticator() func(c *gin.Context) (interface{}, error) {
 
 		var user model.User
 		if err := singleton.DB.Select("id", "password").Where("username = ?", loginVals.Username).First(&user).Error; err != nil {
+			model.BlockIP(singleton.DB, c.GetString(model.CtxKeyRealIPStr), model.WAFBlockReasonTypeLoginFail)
 			return nil, jwt.ErrFailedAuthentication
 		}
 
 		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginVals.Password)); err != nil {
+			model.BlockIP(singleton.DB, c.GetString(model.CtxKeyRealIPStr), model.WAFBlockReasonTypeLoginFail)
 			return nil, jwt.ErrFailedAuthentication
 		}
 
@@ -163,6 +166,10 @@ func optionalAuthMiddleware(mw *jwt.GinJWTMiddleware) func(c *gin.Context) {
 		identity := mw.IdentityHandler(c)
 
 		if identity != nil {
+			if err := model.BlockIP(singleton.DB, c.GetString(model.CtxKeyRealIPStr), model.WAFBlockReasonTypeBruteForceToken); err != nil {
+				waf.ShowBlockPage(c, err)
+				return
+			}
 			c.Set(mw.IdentityKey, identity)
 		}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/netip"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"github.com/naiba/nezha/cmd/dashboard/controller/waf"
 	docs "github.com/naiba/nezha/cmd/dashboard/docs"
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
@@ -34,37 +34,12 @@ func ServeWeb() http.Handler {
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
-	r.Use(realIp)
+	r.Use(waf.RealIp)
+	r.Use(waf.Waf)
 	r.Use(recordPath)
 	routers(r)
 
 	return r
-}
-
-func realIp(c *gin.Context) {
-	if singleton.Conf.RealIPHeader == "" {
-		c.Next()
-		return
-	}
-
-	if singleton.Conf.RealIPHeader == model.ConfigUsePeerIP {
-		c.Set(model.CtxKeyRealIPStr, c.RemoteIP())
-		c.Next()
-		return
-	}
-
-	vals := c.Request.Header.Get(singleton.Conf.RealIPHeader)
-	if vals == "" {
-		c.AbortWithStatusJSON(http.StatusOK, model.CommonResponse[any]{Success: false, Error: "real ip header not found"})
-		return
-	}
-	ip, err := netip.ParseAddr(vals)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusOK, model.CommonResponse[any]{Success: false, Error: err.Error()})
-		return
-	}
-	c.Set(model.CtxKeyRealIPStr, ip.String())
-	c.Next()
 }
 
 func routers(r *gin.Engine) {
@@ -154,7 +129,6 @@ func routers(r *gin.Engine) {
 }
 
 func recordPath(c *gin.Context) {
-	log.Printf("bingo web real ip: %s", c.GetString(model.CtxKeyRealIPStr))
 	url := c.Request.URL.String()
 	for _, p := range c.Params {
 		url = strings.Replace(url, p.Value, ":"+p.Key, 1)
