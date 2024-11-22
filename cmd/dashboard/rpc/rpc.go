@@ -51,11 +51,11 @@ func getRealIp(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 	}
 	a := strings.Split(vals[0], ",")
 	h := strings.TrimSpace(a[len(a)-1])
-	ip, err := netip.ParseAddr(h)
+	ip, err := netip.ParseAddrPort(h)
 	if err != nil {
 		return nil, err
 	}
-	ctx = context.WithValue(ctx, model.CtxKeyRealIP{}, ip.String())
+	ctx = context.WithValue(ctx, model.CtxKeyRealIP{}, ip.Addr().String())
 	return handler(ctx, req)
 }
 

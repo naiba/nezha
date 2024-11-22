@@ -36,12 +36,12 @@ func RealIp(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusOK, model.CommonResponse[any]{Success: false, Error: "real ip header not found"})
 		return
 	}
-	ip, err := netip.ParseAddr(vals)
+	ip, err := netip.ParseAddrPort(vals)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, model.CommonResponse[any]{Success: false, Error: err.Error()})
 		return
 	}
-	c.Set(model.CtxKeyRealIPStr, ip.String())
+	c.Set(model.CtxKeyRealIPStr, ip.Addr().String())
 	c.Next()
 }
 
