@@ -116,8 +116,8 @@ func batchDeleteServer(c *gin.Context) (any, error) {
 				delete(singleton.AlertsCycleTransferStatsStore[alert.ID].NextUpdate, sid)
 			}
 		}
-		singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id = ?", sid)
 	}
+	singleton.DB.Unscoped().Delete(&model.Transfer{}, "server_id in (?)", servers)
 	singleton.AlertsLock.Unlock()
 
 	singleton.OnServerDelete(servers)

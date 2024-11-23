@@ -2,9 +2,10 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
+
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/service/singleton"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // Get profile
@@ -14,14 +15,17 @@ import (
 // @Description Get profile
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[model.User]
+// @Success 200 {object} model.CommonResponse[model.Profile]
 // @Router /profile [get]
-func getProfile(c *gin.Context) (*model.User, error) {
+func getProfile(c *gin.Context) (*model.Profile, error) {
 	auth, ok := c.Get(model.CtxKeyAuthorizedUser)
 	if !ok {
 		return nil, singleton.Localizer.ErrorT("unauthorized")
 	}
-	return auth.(*model.User), nil
+	return &model.Profile{
+		User:    *auth.(*model.User),
+		LoginIP: c.GetString(model.CtxKeyRealIPStr),
+	}, nil
 }
 
 // List user

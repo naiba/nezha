@@ -27,7 +27,8 @@ func ServeRPC() *grpc.Server {
 }
 
 func waf(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	if err := model.CheckIP(singleton.DB, ctx.Value(model.CtxKeyRealIP{}).(string)); err != nil {
+	realip, _ := ctx.Value(model.CtxKeyRealIP{}).(string)
+	if err := model.CheckIP(singleton.DB, realip); err != nil {
 		return nil, err
 	}
 	return handler(ctx, req)

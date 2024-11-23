@@ -123,6 +123,9 @@ func routers(r *gin.Engine) {
 	auth.PATCH("/nat/:id", commonHandler(updateNAT))
 	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
 
+	auth.GET("/waf", commonHandler(listBlockedAddress))
+	auth.POST("/batch-delete/waf", commonHandler(batchDeleteBlockedAddress))
+
 	auth.PATCH("/setting", commonHandler(updateConfig))
 
 	r.NoRoute(fallbackToFrontend)

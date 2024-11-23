@@ -56,7 +56,22 @@ func ClearIP(db *gorm.DB, ip string) error {
 	if err != nil {
 		return err
 	}
-	return db.Delete(&WAF{}, "ip = ?", ipBinary).Error
+	return db.Unscoped().Delete(&WAF{}, "ip = ?", ipBinary).Error
+}
+
+func BatchClearIP(db *gorm.DB, ip []string) error {
+	if len(ip) < 1 {
+		return nil
+	}
+	ips := make([][]byte, 0, len(ip))
+	for _, s := range ip {
+		ipBinary, err := utils.IPStringToBinary(s)
+		if err != nil {
+			continue
+		}
+		ips = append(ips, ipBinary)
+	}
+	return db.Unscoped().Delete(&WAF{}, "ip in (?)", ips).Error
 }
 
 func BlockIP(db *gorm.DB, ip string, reason uint8) error {
