@@ -2,7 +2,9 @@ package utils
 
 import (
 	"crypto/rand"
+	"errors"
 	"math/big"
+	"net/netip"
 	"os"
 	"regexp"
 	"strconv"
@@ -35,6 +37,35 @@ func IPDesensitize(ipAddr string) string {
 	ipAddr = ipv4Desensitize(ipAddr)
 	ipAddr = ipv6Desensitize(ipAddr)
 	return ipAddr
+}
+
+func IPStringToBinary(ip string) ([]byte, error) {
+	addr, err := netip.ParseAddr(ip)
+	if err != nil {
+		return nil, err
+	}
+	b := addr.As16()
+	return b[:], nil
+}
+
+func BinaryToIPString(b []byte) string {
+	var addr16 [16]byte
+	copy(addr16[:], b)
+	addr := netip.AddrFrom16(addr16)
+	return addr.Unmap().String()
+}
+
+func GetIPFromHeader(headerValue string) (string, error) {
+	a := strings.Split(headerValue, ",")
+	h := strings.TrimSpace(a[len(a)-1])
+	ip, err := netip.ParseAddrPort(h)
+	if err != nil {
+		return "", err
+	}
+	if !ip.IsValid() {
+		return "", errors.New("invalid ip")
+	}
+	return ip.Addr().String(), nil
 }
 
 // SplitIPAddr 传入/分割的v4v6混合地址，返回v4和v6地址与有效地址

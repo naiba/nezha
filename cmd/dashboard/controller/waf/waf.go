@@ -3,12 +3,12 @@ package waf
 import (
 	_ "embed"
 	"net/http"
-	"net/netip"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 
 	"github.com/naiba/nezha/model"
+	"github.com/naiba/nezha/pkg/utils"
 	"github.com/naiba/nezha/service/singleton"
 )
 
@@ -32,26 +32,17 @@ func RealIp(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusOK, model.CommonResponse[any]{Success: false, Error: "real ip header not found"})
 		return
 	}
-	ip, err := netip.ParseAddrPort(vals)
+	ip, err := utils.GetIPFromHeader(vals)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusOK, model.CommonResponse[any]{Success: false, Error: err.Error()})
 		return
 	}
-	c.Set(model.CtxKeyRealIPStr, ip.Addr().String())
+	c.Set(model.CtxKeyRealIPStr, ip)
 	c.Next()
 }
 
 func Waf(c *gin.Context) {
-	if singleton.Conf.RealIPHeader == "" {
-		c.Next()
-		return
-	}
-	realipAddr := c.GetString(model.CtxKeyRealIPStr)
-	if realipAddr == "" {
-		c.Next()
-		return
-	}
-	if err := model.CheckIP(singleton.DB, realipAddr); err != nil {
+	if err := model.CheckIP(singleton.DB, c.GetString(model.CtxKeyRealIPStr)); err != nil {
 		ShowBlockPage(c, err)
 		return
 	}

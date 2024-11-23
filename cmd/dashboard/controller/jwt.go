@@ -166,11 +166,13 @@ func optionalAuthMiddleware(mw *jwt.GinJWTMiddleware) func(c *gin.Context) {
 		identity := mw.IdentityHandler(c)
 
 		if identity != nil {
+			model.ClearIP(singleton.DB, c.GetString(model.CtxKeyRealIPStr))
+			c.Set(mw.IdentityKey, identity)
+		} else {
 			if err := model.BlockIP(singleton.DB, c.GetString(model.CtxKeyRealIPStr), model.WAFBlockReasonTypeBruteForceToken); err != nil {
 				waf.ShowBlockPage(c, err)
 				return
 			}
-			c.Set(mw.IdentityKey, identity)
 		}
 
 		c.Next()
