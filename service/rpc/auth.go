@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"context"
+	"strings"
 	"sync"
 
 	petname "github.com/dustinkirkland/golang-petname"
@@ -27,12 +28,21 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 
 	var clientSecret string
 	if value, ok := md["client_secret"]; ok {
-		clientSecret = value[0]
+		clientSecret = strings.TrimSpace(value[0])
 	}
 
-	if clientSecret != singleton.Conf.AgentSecretKey {
+	if clientSecret == "" {
 		return 0, status.Error(codes.Unauthenticated, "客户端认证失败")
 	}
+
+	ip, _ := ctx.Value(model.CtxKeyRealIP{}).(string)
+
+	if clientSecret != singleton.Conf.AgentSecretKey {
+		model.BlockIP(singleton.DB, ip, model.WAFBlockReasonTypeAgentAuthFail)
+		return 0, status.Error(codes.Unauthenticated, "客户端认证失败")
+	}
+
+	model.ClearIP(singleton.DB, ip)
 
 	var clientUUID string
 	if value, ok := md["client_uuid"]; ok {

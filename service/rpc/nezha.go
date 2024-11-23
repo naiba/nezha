@@ -19,6 +19,8 @@ import (
 	"github.com/naiba/nezha/service/singleton"
 )
 
+var _ pb.NezhaServiceServer = (*NezhaHandler)(nil)
+
 var NezhaHandlerSingleton *NezhaHandler
 
 type NezhaHandler struct {
@@ -94,25 +96,33 @@ func (s *NezhaHandler) RequestTask(h *pb.Host, stream pb.NezhaService_RequestTas
 	return <-closeCh
 }
 
-func (s *NezhaHandler) ReportSystemState(c context.Context, r *pb.State) (*pb.Receipt, error) {
-	var clientID uint64
+func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStateServer) error {
 	var err error
-	if clientID, err = s.Auth.Check(c); err != nil {
-		return nil, err
+	var clientID uint64
+	if clientID, err = s.Auth.Check(stream.Context()); err != nil {
+		return err
 	}
-	state := model.PB2State(r)
-	singleton.ServerLock.RLock()
-	defer singleton.ServerLock.RUnlock()
-	singleton.ServerList[clientID].LastActive = time.Now()
-	singleton.ServerList[clientID].State = &state
+	var state *pb.State
+	for {
+		state, err = stream.Recv()
+		if err != nil {
+			log.Printf("NEZHA>> ReportSystemState eror: %v, clientID: %d\n", err, clientID)
+			return nil
+		}
+		state := model.PB2State(state)
 
-	// 应对 dashboard 重启的情况，如果从未记录过，先打点，等到小时时间点时入库
-	if singleton.ServerList[clientID].PrevTransferInSnapshot == 0 || singleton.ServerList[clientID].PrevTransferOutSnapshot == 0 {
-		singleton.ServerList[clientID].PrevTransferInSnapshot = int64(state.NetInTransfer)
-		singleton.ServerList[clientID].PrevTransferOutSnapshot = int64(state.NetOutTransfer)
+		singleton.ServerLock.RLock()
+		singleton.ServerList[clientID].LastActive = time.Now()
+		singleton.ServerList[clientID].State = &state
+		// 应对 dashboard 重启的情况，如果从未记录过，先打点，等到小时时间点时入库
+		if singleton.ServerList[clientID].PrevTransferInSnapshot == 0 || singleton.ServerList[clientID].PrevTransferOutSnapshot == 0 {
+			singleton.ServerList[clientID].PrevTransferInSnapshot = int64(state.NetInTransfer)
+			singleton.ServerList[clientID].PrevTransferOutSnapshot = int64(state.NetOutTransfer)
+		}
+		singleton.ServerLock.RUnlock()
+
+		stream.Send(&pb.Receipt{Proced: true})
 	}
-
-	return &pb.Receipt{Proced: true}, nil
 }
 
 func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Receipt, error) {
@@ -232,5 +242,5 @@ func (s *NezhaHandler) ReportGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, e
 	defer singleton.ServerLock.Unlock()
 	singleton.ServerList[clientID].GeoIP = &geoip
 
-	return &pb.GeoIP{Ip: nil, CountryCode: location}, err
+	return &pb.GeoIP{Ip: nil, CountryCode: location}, nil
 }

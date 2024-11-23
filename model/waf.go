@@ -13,6 +13,7 @@ const (
 	_ uint8 = iota
 	WAFBlockReasonTypeLoginFail
 	WAFBlockReasonTypeBruteForceToken
+	WAFBlockReasonTypeAgentAuthFail
 )
 
 type WAF struct {

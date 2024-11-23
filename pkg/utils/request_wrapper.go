@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-var _ io.ReadWriteCloser = &RequestWrapper{}
+var _ io.ReadWriteCloser = (*RequestWrapper)(nil)
 
 type RequestWrapper struct {
 	req    *http.Request

@@ -4,7 +4,7 @@ option go_package = "./proto";
 package proto;
 
 service NezhaService {
-  rpc ReportSystemState(State) returns (Receipt) {}
+  rpc ReportSystemState(stream State) returns (stream Receipt) {}
   rpc ReportSystemInfo(Host) returns (Receipt) {}
   rpc ReportTask(TaskResult) returns (Receipt) {}
   rpc RequestTask(Host) returns (stream Task) {}

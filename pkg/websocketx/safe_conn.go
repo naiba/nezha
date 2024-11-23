@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var _ io.ReadWriteCloser = &Conn{}
+var _ io.ReadWriteCloser = (*Conn)(nil)
 
 type Conn struct {
 	*websocket.Conn
