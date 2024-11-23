@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-01 13:32+0800\n"
+"POT-Creation-Date: 2024-11-23 23:56+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgstr ""
 msgid "need to configure at least a single rule"
 msgstr ""
 
-#: cmd/dashboard/controller/controller.go:188
+#: cmd/dashboard/controller/controller.go:195
 msgid "database error"
 msgstr ""
 
@@ -93,7 +93,7 @@ msgstr ""
 msgid "group id %d does not exist"
 msgstr ""
 
-#: cmd/dashboard/controller/server.go:59
+#: cmd/dashboard/controller/server.go:60
 #, c-format
 msgid "server id %d does not exist"
 msgstr ""
@@ -108,7 +108,7 @@ msgstr ""
 msgid "server not found"
 msgstr ""
 
-#: cmd/dashboard/controller/service.go:86
+#: cmd/dashboard/controller/service.go:86 cmd/dashboard/controller/user.go:23
 msgid "unauthorized"
 msgstr ""
 
@@ -117,11 +117,11 @@ msgstr ""
 msgid "service id %d does not exist"
 msgstr ""
 
-#: cmd/dashboard/controller/user.go:45
+#: cmd/dashboard/controller/user.go:66
 msgid "password length must be greater than 6"
 msgstr ""
 
-#: cmd/dashboard/controller/user.go:48
+#: cmd/dashboard/controller/user.go:69
 msgid "username can't be empty"
 msgstr ""
 
@@ -137,15 +137,15 @@ msgstr ""
 msgid "timeout: agent connection not established"
 msgstr ""
 
-#: service/rpc/nezha.go:57
+#: service/rpc/nezha.go:58
 msgid "Scheduled Task Executed Successfully"
 msgstr ""
 
-#: service/rpc/nezha.go:61
+#: service/rpc/nezha.go:62
 msgid "Scheduled Task Executed Failed"
 msgstr ""
 
-#: service/rpc/nezha.go:156
+#: service/rpc/nezha.go:217
 msgid "IP Changed"
 msgstr ""
 
@@ -157,16 +157,16 @@ msgstr ""
 msgid "Resolved"
 msgstr ""
 
-#: service/singleton/crontask.go:52
+#: service/singleton/crontask.go:53
 msgid "Tasks failed to register: ["
 msgstr ""
 
-#: service/singleton/crontask.go:59
+#: service/singleton/crontask.go:60
 msgid ""
 "] These tasks will not execute properly. Fix them in the admin dashboard."
 msgstr ""
 
-#: service/singleton/crontask.go:150 service/singleton/crontask.go:175
+#: service/singleton/crontask.go:146 service/singleton/crontask.go:171
 #, c-format
 msgid "[Task failed] %s: server %s is offline and cannot execute the task"
 msgstr ""

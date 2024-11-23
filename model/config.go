@@ -5,9 +5,13 @@ import (
 	"strconv"
 	"strings"
 
+	kyaml "github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/env"
+	"github.com/knadh/koanf/providers/file"
+	"github.com/knadh/koanf/v2"
+	"gopkg.in/yaml.v3"
+
 	"github.com/naiba/nezha/pkg/utils"
-	"github.com/spf13/viper"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -44,19 +48,30 @@ type Config struct {
 	CustomCode          string `mapstructure:"custom_code" json:"custom_code,omitempty"`
 	CustomCodeDashboard string `mapstructure:"custom_code_dashboard" json:"custom_code_dashboard,omitempty"`
 
-	v *viper.Viper `json:"-"`
+	k        *koanf.Koanf `json:"-"`
+	filePath string       `json:"-"`
 }
 
 // Read 读取配置文件并应用
 func (c *Config) Read(path string) error {
-	c.v = viper.New()
-	c.v.SetConfigFile(path)
-	err := c.v.ReadInConfig()
+	c.k = koanf.New(".")
+	c.filePath = path
+
+	err := c.k.Load(env.Provider("NZ_", ".", func(s string) string {
+		return strings.Replace(strings.ToLower(strings.TrimPrefix(s, "NZ_")), "_", ".", -1)
+	}), nil)
 	if err != nil {
 		return err
 	}
 
-	err = c.v.Unmarshal(c)
+	if _, err := os.Stat(path); err == nil {
+		err = c.k.Load(file.Provider(path), kyaml.Parser())
+		if err != nil {
+			return err
+		}
+	}
+
+	err = c.k.Unmarshal("", c)
 	if err != nil {
 		return err
 	}
@@ -116,5 +131,5 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(c.v.ConfigFileUsed(), data, 0600)
+	return os.WriteFile(c.filePath, data, 0600)
 }

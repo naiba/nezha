@@ -1,7 +1,6 @@
 #!/bin/bash
 
-LANG=()
-while IFS='' read -r line; do LANG+=("$line"); done < <(ls pkg/i18n/translations)
+mapfile -t LANG < <(ls pkg/i18n/translations)
 TEMPLATE="pkg/i18n/template.pot"
 PODIR="pkg/i18n/translations/%s/LC_MESSAGES"
 GIT_ROOT=$(git rev-parse --show-toplevel)
@@ -38,7 +37,7 @@ generate() {
 }
 
 generate_template() {
-	read -ra src < <(find . -name "*.go" | sort)
+	mapfile -t src < <(find . -name "*.go" | sort)
 	xgettext -C --add-comments=TRANSLATORS: -kErrorT -kT -kTf -kN:1,2 --from-code=UTF-8 -o $TEMPLATE "${src[@]}"
 }
 
@@ -52,7 +51,7 @@ generate_en() {
 }
 
 compile() {
-	if [[ $# != 0 ]]; then
+	if [[ $# != 0 && "$1" != "" ]]; then
 		compile_single "$1"
 	else
 		compile_all
@@ -95,7 +94,7 @@ compile_all() {
 }
 
 update() {
-	if [[ $# != 0 ]]; then
+	if [[ $# != 0 && "$1" != "" ]]; then
 		update_single "$1"
 	else
 		update_all
@@ -148,7 +147,14 @@ show_help() {
 	echo "  $0 generate en       # Generate en_US locale"
 }
 
+version() { echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; }
+
 main() {
+	if [[ $(version "$BASH_VERSION") < $(version "4.0") ]]; then
+  		err "This version of bash does not support mapfile"
+		exit 1
+	fi
+
 	if [[ $PWD != "$GIT_ROOT" ]]; then
 		err "Must execute in the project root"
 		exit 1

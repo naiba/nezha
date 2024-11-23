@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-01 13:14+0800\n"
+"POT-Creation-Date: 2024-11-23 23:56+0800\n"
 "PO-Revision-Date: 2024-11-01 13:20+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -43,7 +43,7 @@ msgstr "cycle_start 是未来值"
 msgid "need to configure at least a single rule"
 msgstr "需要至少定义一条规则"
 
-#: cmd/dashboard/controller/controller.go:188
+#: cmd/dashboard/controller/controller.go:195
 msgid "database error"
 msgstr "数据库错误"
 
@@ -94,7 +94,7 @@ msgstr "通知方式 id 无效"
 msgid "group id %d does not exist"
 msgstr "组 id %d 不存在"
 
-#: cmd/dashboard/controller/server.go:59
+#: cmd/dashboard/controller/server.go:60
 #, c-format
 msgid "server id %d does not exist"
 msgstr "服务器 id %d 不存在"
@@ -109,7 +109,7 @@ msgstr "服务器 id 无效"
 msgid "server not found"
 msgstr "未找到服务器"
 
-#: cmd/dashboard/controller/service.go:86
+#: cmd/dashboard/controller/service.go:86 cmd/dashboard/controller/user.go:23
 msgid "unauthorized"
 msgstr "未授权"
 
@@ -118,11 +118,11 @@ msgstr "未授权"
 msgid "service id %d does not exist"
 msgstr "服务 id %d 不存在"
 
-#: cmd/dashboard/controller/user.go:45
+#: cmd/dashboard/controller/user.go:66
 msgid "password length must be greater than 6"
 msgstr "密码长度必须大于 6"
 
-#: cmd/dashboard/controller/user.go:48
+#: cmd/dashboard/controller/user.go:69
 msgid "username can't be empty"
 msgstr "用户名不能为空"
 
@@ -138,15 +138,15 @@ msgstr "超时：用户连接未建立"
 msgid "timeout: agent connection not established"
 msgstr "超时：agent 连接未建立"
 
-#: service/rpc/nezha.go:57
+#: service/rpc/nezha.go:58
 msgid "Scheduled Task Executed Successfully"
 msgstr "计划任务执行成功"
 
-#: service/rpc/nezha.go:61
+#: service/rpc/nezha.go:62
 msgid "Scheduled Task Executed Failed"
 msgstr "计划任务执行失败"
 
-#: service/rpc/nezha.go:156
+#: service/rpc/nezha.go:217
 msgid "IP Changed"
 msgstr "IP 变更"
 
@@ -158,16 +158,16 @@ msgstr "事件"
 msgid "Resolved"
 msgstr "恢复"
 
-#: service/singleton/crontask.go:52
+#: service/singleton/crontask.go:53
 msgid "Tasks failed to register: ["
 msgstr "注册失败的任务：["
 
-#: service/singleton/crontask.go:59
+#: service/singleton/crontask.go:60
 msgid ""
 "] These tasks will not execute properly. Fix them in the admin dashboard."
 msgstr "这些任务将无法正常执行,请进入后台重新修改保存。"
 
-#: service/singleton/crontask.go:150 service/singleton/crontask.go:175
+#: service/singleton/crontask.go:146 service/singleton/crontask.go:171
 #, c-format
 msgid "[Task failed] %s: server %s is offline and cannot execute the task"
 msgstr "[任务失败] %s，服务器 %s 离线，无法执行"

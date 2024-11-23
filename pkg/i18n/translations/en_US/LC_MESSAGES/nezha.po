@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-01 13:14+0800\n"
+"POT-Creation-Date: 2024-11-23 23:56+0800\n"
 "PO-Revision-Date: 2024-11-01 13:20+0800\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -43,7 +43,7 @@ msgstr "cycle_start is a future value"
 msgid "need to configure at least a single rule"
 msgstr "need to configure at least a single rule"
 
-#: cmd/dashboard/controller/controller.go:188
+#: cmd/dashboard/controller/controller.go:195
 msgid "database error"
 msgstr "database error"
 
@@ -94,7 +94,7 @@ msgstr "have invalid notification id"
 msgid "group id %d does not exist"
 msgstr "group id %d does not exist"
 
-#: cmd/dashboard/controller/server.go:59
+#: cmd/dashboard/controller/server.go:60
 #, c-format
 msgid "server id %d does not exist"
 msgstr "server id %d does not exist"
@@ -109,7 +109,7 @@ msgstr "have invalid server id"
 msgid "server not found"
 msgstr "server not found"
 
-#: cmd/dashboard/controller/service.go:86
+#: cmd/dashboard/controller/service.go:86 cmd/dashboard/controller/user.go:23
 msgid "unauthorized"
 msgstr "unauthorized"
 
@@ -118,11 +118,11 @@ msgstr "unauthorized"
 msgid "service id %d does not exist"
 msgstr "service id %d does not exist"
 
-#: cmd/dashboard/controller/user.go:45
+#: cmd/dashboard/controller/user.go:66
 msgid "password length must be greater than 6"
 msgstr "password length must be greater than 6"
 
-#: cmd/dashboard/controller/user.go:48
+#: cmd/dashboard/controller/user.go:69
 msgid "username can't be empty"
 msgstr "username can't be empty"
 
@@ -138,15 +138,15 @@ msgstr "timeout: user connection not established"
 msgid "timeout: agent connection not established"
 msgstr "timeout: agent connection not established"
 
-#: service/rpc/nezha.go:57
+#: service/rpc/nezha.go:58
 msgid "Scheduled Task Executed Successfully"
 msgstr "Scheduled Task Executed Successfully"
 
-#: service/rpc/nezha.go:61
+#: service/rpc/nezha.go:62
 msgid "Scheduled Task Executed Failed"
 msgstr "Scheduled Task Executed Failed"
 
-#: service/rpc/nezha.go:156
+#: service/rpc/nezha.go:217
 msgid "IP Changed"
 msgstr "IP Changed"
 
@@ -158,17 +158,17 @@ msgstr "Incident"
 msgid "Resolved"
 msgstr "Resolved"
 
-#: service/singleton/crontask.go:52
+#: service/singleton/crontask.go:53
 msgid "Tasks failed to register: ["
 msgstr "Tasks failed to register: ["
 
-#: service/singleton/crontask.go:59
+#: service/singleton/crontask.go:60
 msgid ""
 "] These tasks will not execute properly. Fix them in the admin dashboard."
 msgstr ""
 "] These tasks will not execute properly. Fix them in the admin dashboard."
 
-#: service/singleton/crontask.go:150 service/singleton/crontask.go:175
+#: service/singleton/crontask.go:146 service/singleton/crontask.go:171
 #, c-format
 msgid "[Task failed] %s: server %s is offline and cannot execute the task"
 msgstr "[Task failed] %s: server %s is offline and cannot execute the task"
