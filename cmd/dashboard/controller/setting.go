@@ -61,6 +61,7 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.DNSServers = sf.CustomNameservers
 	singleton.Conf.CustomCode = sf.CustomCode
 	singleton.Conf.CustomCodeDashboard = sf.CustomCodeDashboard
+	singleton.Conf.RealIPHeader = sf.RealIPHeader
 
 	if err := singleton.Conf.Save(); err != nil {
 		return nil, newGormError("%v", err)
