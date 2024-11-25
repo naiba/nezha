@@ -146,7 +146,7 @@ jobs:
 
       - uses: robinraju/release-downloader@v1
         with:
-          repository: hamster1963/nezha-dash-react
+          repository: nezhahq/user-frontend
           fileName: dist.zip
           latest: true
           extract: true

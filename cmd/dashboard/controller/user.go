@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"slices"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
@@ -97,9 +99,14 @@ func createUser(c *gin.Context) (uint64, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/user [post]
 func batchDeleteUser(c *gin.Context) (any, error) {
-	var ids []uint
+	var ids []uint64
 	if err := c.ShouldBindJSON(&ids); err != nil {
 		return nil, err
 	}
+	auth := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	if slices.Contains(ids, auth.ID) {
+		return nil, singleton.Localizer.ErrorT("can't delete yourself")
+	}
+
 	return nil, singleton.DB.Where("id IN (?)", ids).Delete(&model.User{}).Error
 }
