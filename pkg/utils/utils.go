@@ -58,14 +58,14 @@ func BinaryToIPString(b []byte) string {
 func GetIPFromHeader(headerValue string) (string, error) {
 	a := strings.Split(headerValue, ",")
 	h := strings.TrimSpace(a[len(a)-1])
-	ip, err := netip.ParseAddrPort(h)
+	ip, err := netip.ParseAddr(h)
 	if err != nil {
 		return "", err
 	}
 	if !ip.IsValid() {
 		return "", errors.New("invalid ip")
 	}
-	return ip.Addr().String(), nil
+	return ip.String(), nil
 }
 
 // SplitIPAddr 传入/分割的v4v6混合地址，返回v4和v6地址与有效地址
