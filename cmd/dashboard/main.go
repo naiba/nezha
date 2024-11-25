@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"net"
@@ -12,7 +13,6 @@ import (
 	_ "time/tzdata"
 
 	"github.com/ory/graceful"
-	flag "github.com/spf13/pflag"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -90,9 +90,8 @@ func initSystem() {
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 func main() {
-	flag.CommandLine.ParseErrorsWhitelist.UnknownFlags = true
-	flag.BoolVarP(&dashboardCliParam.Version, "version", "v", false, "查看当前版本号")
-	flag.StringVarP(&dashboardCliParam.ConfigFile, "config", "c", "data/config.yaml", "配置文件路径")
+	flag.BoolVar(&dashboardCliParam.Version, "v", false, "查看当前版本号")
+	flag.StringVar(&dashboardCliParam.ConfigFile, "c", "data/config.yaml", "配置文件路径")
 	flag.StringVar(&dashboardCliParam.DatebaseLocation, "db", "data/sqlite.db", "Sqlite3数据库文件路径")
 	flag.Parse()
 
