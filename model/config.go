@@ -2,6 +2,7 @@ package model
 
 import (
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -131,5 +132,11 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
+
+	dir := filepath.Dir(c.filePath)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+
 	return os.WriteFile(c.filePath, data, 0600)
 }
