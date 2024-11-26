@@ -15,6 +15,8 @@ type ioStreamContext struct {
 	agentIo          io.ReadWriteCloser
 	userIoConnectCh  chan struct{}
 	agentIoConnectCh chan struct{}
+	userIoChOnce     sync.Once
+	agentIoChOnce    sync.Once
 }
 
 type bp struct {
@@ -74,7 +76,9 @@ func (s *NezhaHandler) UserConnected(streamId string, userIo io.ReadWriteCloser)
 	}
 
 	stream.userIo = userIo
-	close(stream.userIoConnectCh)
+	stream.userIoChOnce.Do(func() {
+		close(stream.userIoConnectCh)
+	})
 
 	return nil
 }
@@ -86,7 +90,9 @@ func (s *NezhaHandler) AgentConnected(streamId string, agentIo io.ReadWriteClose
 	}
 
 	stream.agentIo = agentIo
-	close(stream.agentIoConnectCh)
+	stream.agentIoChOnce.Do(func() {
+		close(stream.agentIoConnectCh)
+	})
 
 	return nil
 }
