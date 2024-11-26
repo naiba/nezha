@@ -30,6 +30,46 @@ func getProfile(c *gin.Context) (*model.Profile, error) {
 	}, nil
 }
 
+// Update password for current user
+// @Summary Update password for current user
+// @Security BearerAuth
+// @Schemes
+// @Description Update password for current user
+// @Tags auth required
+// @Accept json
+// @param request body model.ProfileForm true "password"
+// @Produce json
+// @Success 200 {object} model.CommonResponse[any]
+// @Router /profile [post]
+func updateProfile(c *gin.Context) (any, error) {
+	var pf model.ProfileForm
+	if err := c.ShouldBindJSON(&pf); err != nil {
+		return 0, err
+	}
+
+	auth, ok := c.Get(model.CtxKeyAuthorizedUser)
+	if !ok {
+		return nil, singleton.Localizer.ErrorT("unauthorized")
+	}
+
+	user := *auth.(*model.User)
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(pf.OriginalPassword)); err != nil {
+		return nil, singleton.Localizer.ErrorT("incorrect password")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(pf.NewPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Password = string(hash)
+	if err := singleton.DB.Save(&user).Error; err != nil {
+		return nil, newGormError("%v", err)
+	}
+
+	return nil, nil
+}
+
 // List user
 // @Summary List user
 // @Security BearerAuth

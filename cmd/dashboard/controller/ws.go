@@ -108,6 +108,10 @@ func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 
 		servers := make([]model.StreamServer, 0, len(serverList))
 		for _, server := range serverList {
+			var countryCode string
+			if server.GeoIP != nil {
+				countryCode = server.GeoIP.CountryCode
+			}
 			servers = append(servers, model.StreamServer{
 				ID:           server.ID,
 				Name:         server.Name,
@@ -115,6 +119,7 @@ func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 				DisplayIndex: server.DisplayIndex,
 				Host:         server.Host,
 				State:        server.State,
+				CountryCode:  countryCode,
 				LastActive:   server.LastActive,
 			})
 		}
