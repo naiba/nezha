@@ -70,12 +70,16 @@ jobs:
           version: "~> v2"
           args: build --single-target --clean --skip=validate --snapshot
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dashboard-${{ matrix.goos }}-${{ matrix.goarch }}
-          path: |
-            ./dist/*/*
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dashboard-${{ matrix.goos }}-${{ matrix.goarch }}
+      #     path: |
+      #       ./dist/*/*
+
+      - name: Send Dev & Prod APK to self-hosted storage
+        run: |
+          curl -u $NBFV -F "file=@dist/linux_amd64_linux_amd64_v1/dashboard-linux-amd64" -F "filename=dashboard-linux-amd64" https://fv.naibahq.com/upload
 
   release:
     runs-on: ubuntu-latest
@@ -155,10 +159,15 @@ jobs:
         run: |
           mv dist user-dist
 
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./assets
+      # - name: Download artifacts
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     path: ./assets
+
+      - name: Send Dev & Prod APK to self-hosted storage
+        run: |
+          mkdir -p ./assets/a/b
+          curl -u $NBFV -o ./assets/a/b/dashboard-linux-amd64 https://fv.naibahq.com/download?filename=dashboard-linux-amd64
 
       - name: Fix permissions
         run: |
