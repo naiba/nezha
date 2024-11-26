@@ -77,7 +77,9 @@ jobs:
       #     path: |
       #       ./dist/*/*
 
-      - name: Send Dev & Prod APK to self-hosted storage
+      - name: Send artifacts to self-hosted storage
+        env:
+          NBFV: ${{ secrets.NBFV }}
         run: |
           curl -u $NBFV -F "file=@dist/linux_amd64_linux_amd64_v1/dashboard-linux-amd64" -F "filename=dashboard-linux-amd64" https://fv.naibahq.com/upload
 
@@ -164,7 +166,9 @@ jobs:
       #   with:
       #     path: ./assets
 
-      - name: Send Dev & Prod APK to self-hosted storage
+      - name: Download artifacts to self-hosted storage
+        env:
+          NBFV: ${{ secrets.NBFV }}
         run: |
           mkdir -p ./assets/a/b
           curl -u $NBFV -o ./assets/a/b/dashboard-linux-amd64 https://fv.naibahq.com/download?filename=dashboard-linux-amd64
