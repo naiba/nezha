@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/naiba/nezha/model"
-	pb "github.com/naiba/nezha/proto"
+	"github.com/nezhahq/nezha/model"
+	pb "github.com/nezhahq/nezha/proto"
 )
 
 const (

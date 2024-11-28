@@ -8,11 +8,11 @@ import (
 	"github.com/libdns/cloudflare"
 	tencentcloud "github.com/nezhahq/libdns-tencentcloud"
 
-	"github.com/naiba/nezha/model"
-	ddns2 "github.com/naiba/nezha/pkg/ddns"
-	"github.com/naiba/nezha/pkg/ddns/dummy"
-	"github.com/naiba/nezha/pkg/ddns/webhook"
-	"github.com/naiba/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/model"
+	ddns2 "github.com/nezhahq/nezha/pkg/ddns"
+	"github.com/nezhahq/nezha/pkg/ddns/dummy"
+	"github.com/nezhahq/nezha/pkg/ddns/webhook"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 var (

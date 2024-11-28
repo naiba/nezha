@@ -10,9 +10,9 @@ import (
 	"github.com/gorilla/websocket"
 	"golang.org/x/sync/singleflight"
 
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 var upgrader *websocket.Upgrader

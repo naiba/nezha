@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/naiba/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/pkg/utils"
 	"gorm.io/gorm"
 )
 

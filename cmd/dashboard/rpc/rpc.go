@@ -12,11 +12,11 @@ import (
 	"google.golang.org/grpc/peer"
 
 	"github.com/hashicorp/go-uuid"
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/proto"
-	rpcService "github.com/naiba/nezha/service/rpc"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/proto"
+	rpcService "github.com/nezhahq/nezha/service/rpc"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 func ServeRPC() *grpc.Server {

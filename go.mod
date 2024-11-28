@@ -1,4 +1,4 @@
-module github.com/naiba/nezha
+module github.com/nezhahq/nezha
 
 go 1.21.0
 

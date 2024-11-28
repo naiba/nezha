@@ -6,12 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/pkg/websocketx"
-	"github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/rpc"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/pkg/websocketx"
+	"github.com/nezhahq/nezha/proto"
+	"github.com/nezhahq/nezha/service/rpc"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 // Create web ssh terminal

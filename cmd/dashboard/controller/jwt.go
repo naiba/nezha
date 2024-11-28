@@ -9,10 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 
-	"github.com/naiba/nezha/cmd/dashboard/controller/waf"
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/pkg/utils"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/cmd/dashboard/controller/waf"
+	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 func initParams() *jwt.GinJWTMiddleware {

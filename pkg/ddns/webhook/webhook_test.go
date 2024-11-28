@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/naiba/nezha/model"
+	"github.com/nezhahq/nezha/model"
 )
 
 var (

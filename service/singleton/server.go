@@ -4,7 +4,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/naiba/nezha/model"
+	"github.com/nezhahq/nezha/model"
 )
 
 var (

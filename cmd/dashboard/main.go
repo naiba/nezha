@@ -17,11 +17,11 @@ import (
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 
-	"github.com/naiba/nezha/cmd/dashboard/controller"
-	"github.com/naiba/nezha/cmd/dashboard/rpc"
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/cmd/dashboard/controller"
+	"github.com/nezhahq/nezha/cmd/dashboard/rpc"
+	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/proto"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 type DashboardCliParam struct {

@@ -8,15 +8,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/naiba/nezha/pkg/ddns"
-	geoipx "github.com/naiba/nezha/pkg/geoip"
-	"github.com/naiba/nezha/pkg/grpcx"
+	"github.com/nezhahq/nezha/pkg/ddns"
+	geoipx "github.com/nezhahq/nezha/pkg/geoip"
+	"github.com/nezhahq/nezha/pkg/grpcx"
 
 	"github.com/jinzhu/copier"
 
-	"github.com/naiba/nezha/model"
-	pb "github.com/naiba/nezha/proto"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/model"
+	pb "github.com/nezhahq/nezha/proto"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 var _ pb.NezhaServiceServer = (*NezhaHandler)(nil)

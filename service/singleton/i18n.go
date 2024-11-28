@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/naiba/nezha/pkg/i18n"
+	"github.com/nezhahq/nezha/pkg/i18n"
 )
 
 const domain = "nezha"

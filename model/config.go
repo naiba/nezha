@@ -12,7 +12,7 @@ import (
 	"github.com/knadh/koanf/v2"
 	"gopkg.in/yaml.v3"
 
-	"github.com/naiba/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/naiba/nezha/pkg/utils"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 const (

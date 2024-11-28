@@ -15,10 +15,10 @@ import (
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/naiba/nezha/cmd/dashboard/controller/waf"
-	docs "github.com/naiba/nezha/cmd/dashboard/docs"
-	"github.com/naiba/nezha/model"
-	"github.com/naiba/nezha/service/singleton"
+	"github.com/nezhahq/nezha/cmd/dashboard/controller/waf"
+	docs "github.com/nezhahq/nezha/cmd/dashboard/docs"
+	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/service/singleton"
 )
 
 func ServeWeb() http.Handler {
