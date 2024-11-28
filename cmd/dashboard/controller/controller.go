@@ -213,20 +213,33 @@ func fallbackToFrontend(c *gin.Context) {
 		c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
 		return
 	}
+	const safeDirAdmin = "./admin-dist"
+	const safeDirUser = "user-dist"
+
 	if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
 		stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
-		localFilePath := filepath.Join("./admin-dist", stripPath)
-		if _, err := os.Stat(localFilePath); err == nil {
-			c.File(localFilePath)
+		localFilePath := filepath.Join(safeDirAdmin, stripPath)
+		absPath, err := filepath.Abs(localFilePath)
+		if err != nil || !strings.HasPrefix(absPath, safeDirAdmin) {
+			c.JSON(http.StatusBadRequest, newErrorResponse(errors.New("Invalid file path")))
 			return
 		}
-		c.File("admin-dist/index.html")
+		if _, err := os.Stat(absPath); err == nil {
+			c.File(absPath)
+			return
+		}
+		c.File(filepath.Join(safeDirAdmin, "index.html"))
 		return
 	}
-	localFilePath := filepath.Join("user-dist", c.Request.URL.Path)
-	if _, err := os.Stat(localFilePath); err == nil {
-		c.File(localFilePath)
+	localFilePath := filepath.Join(safeDirUser, c.Request.URL.Path)
+	absPath, err := filepath.Abs(localFilePath)
+	if err != nil || !strings.HasPrefix(absPath, safeDirUser) {
+		c.JSON(http.StatusBadRequest, newErrorResponse(errors.New("Invalid file path")))
 		return
 	}
-	c.File("user-dist/index.html")
+	if _, err := os.Stat(absPath); err == nil {
+		c.File(absPath)
+		return
+	}
+	c.File(filepath.Join(safeDirUser, "index.html"))
 }
