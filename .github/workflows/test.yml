@@ -1,13 +1,13 @@
 name: Run Tests
 
 on:
-  #push:
-  #  paths:
-  #    - "**.go"
-  #    - "go.mod"
-  #    - "go.sum"
-  #    - "resource/**"
-  #    - ".github/workflows/test.yml"
+  push:
+    paths:
+      - "**.go"
+      - "go.mod"
+      - "go.sum"
+      - "resource/**"
+      - ".github/workflows/test.yml"
   pull_request:
     branches:
       - master

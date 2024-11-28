@@ -12,23 +12,20 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        goos: [
-            linux,
-            #windows
-          ]
+        goos: [linux, windows]
         goarch: [amd64]
-        #include:
-        #  - goos: linux
-        #    goarch: s390x
-        #  - goos: linux
-        #    goarch: arm64
-
+        include:
+          - goos: linux
+            goarch: s390x
+          - goos: linux
+            goarch: arm64
+            
     name: Build artifacts
     runs-on: ubuntu-latest
-    #container:
-    #  image: goreleaser/goreleaser-cross:v1.23
+    container:
+      image: goreleaser/goreleaser-cross:v1.23
     steps:
-    #  - run: git config --global --add safe.directory /__w/nezha/nezha
+      - run: git config --global --add safe.directory /__w/nezha/nezha
       - uses: actions/checkout@v4
 
       - name: Fetch IPInfo GeoIP Database
@@ -47,16 +44,17 @@ jobs:
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
           swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
-
+     
       - name: Build with tag
         if: contains(github.ref, 'refs/tags/')
         uses: goreleaser/goreleaser-action@v6
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
-          version: "~> v2"
+          version: '~> v2'
           args: build --single-target --clean --skip=validate
 
       - name: Build snapshot
@@ -65,23 +63,18 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
-          version: "~> v2"
+          version: '~> v2'
           args: build --single-target --clean --skip=validate --snapshot
 
-      # - name: Upload artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: dashboard-${{ matrix.goos }}-${{ matrix.goarch }}
-      #     path: |
-      #       ./dist/*/*
-
-      - name: Send artifacts to self-hosted storage
-        env:
-          NBFV: ${{ secrets.NBFV }}
-        run: |
-          curl -u $NBFV -F "file=@dist/linux_amd64_linux_amd64_v1/dashboard-linux-amd64" -F "filename=dashboard-linux-amd64" https://fv.naibahq.com/upload
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            ./dist/*/*
 
   release:
     runs-on: ubuntu-latest
@@ -141,7 +134,6 @@ jobs:
       - uses: robinraju/release-downloader@v1
         with:
           repository: nezhahq/admin-frontend
-          token: ${{ secrets.PAT }}
           fileName: dist.zip
           latest: true
           extract: true
@@ -161,17 +153,10 @@ jobs:
         run: |
           mv dist user-dist
 
-      # - name: Download artifacts
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     path: ./assets
-
-      - name: Download artifacts to self-hosted storage
-        env:
-          NBFV: ${{ secrets.NBFV }}
-        run: |
-          mkdir -p ./assets/a/b
-          curl -u $NBFV -o ./assets/a/b/dashboard-linux-amd64 https://fv.naibahq.com/download?filename=dashboard-linux-amd64
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./assets
 
       - name: Fix permissions
         run: |
@@ -212,8 +197,8 @@ jobs:
 
       - name: Set up image name
         run: |
-          GHCR_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
-          if [ ${{ github.repository_owner }} = "naiba" ]
+          GHCR_IMAGE_NAME=$(echo "ghcr.io/${{ github.repository_owner }}/nezha" | tr '[:upper:]' '[:lower:]')
+          if [ ${{ github.repository_owner }} = "nezhahq" ]
             then ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/nezhahq/nezha-dashboard")
             else ALI_IMAGE_NAME=$(echo "registry.cn-shanghai.aliyuncs.com/${{ github.repository_owner }}/nezha-dashboard" | tr '[:upper:]' '[:lower:]')
           fi
@@ -241,7 +226,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64,linux/s390x
           push: true
           tags: |
             ${{ steps.image-name.outputs.GHCR_IMAGE_NAME }}:${{ steps.extract_branch.outputs.tag }}
