@@ -19,7 +19,7 @@ jobs:
             goarch: s390x
           - goos: linux
             goarch: arm64
-            
+
     name: Build artifacts
     runs-on: ubuntu-latest
     container:
@@ -44,7 +44,7 @@ jobs:
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
           swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
-     
+
       - name: Build with tag
         if: contains(github.ref, 'refs/tags/')
         uses: goreleaser/goreleaser-action@v6
@@ -54,7 +54,7 @@ jobs:
           GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: "~> v2"
           args: build --single-target --clean --skip=validate
 
       - name: Build snapshot
@@ -66,7 +66,7 @@ jobs:
           GOARM: ${{ matrix.goarm }}
         with:
           distribution: goreleaser
-          version: '~> v2'
+          version: "~> v2"
           args: build --single-target --clean --skip=validate --snapshot
 
       - name: Upload artifacts
@@ -89,12 +89,11 @@ jobs:
 
       - name: Archive and compress binaries
         run: |
-          for file in assets/*/*/*; do
-            if [ -f "$file" ]; then
-              chmod +x "$file"
-              export fileWithoutExt=${file%.*}
-              zip -jr "$fileWithoutExt.zip" "$file"
-            fi
+          find assets/*/*/* -type f | while read -r file; do
+            dir=$(dirname "$file")
+            filename=$(basename "$file")
+            fileWithoutExt="${filename%.*}"
+            zip -jr "$dir/$fileWithoutExt.zip" "$file"
           done
 
       - name: Release

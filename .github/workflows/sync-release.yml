@@ -6,6 +6,7 @@ on:
 jobs:
   sync-release-to-gitee:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
     steps:
