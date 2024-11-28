@@ -26,7 +26,7 @@
 
 | 用户前台 [@hamster1963](https://github.com/hamster1963) | 管理后台 [@uubulb](https://github.com/uubulb) |
 |---|---|
-| ![admin](.github/user-frontend.20241128.png)  | ![user](.github/admin-frontend.20241128.png)  |
+| ![user](.github/user-frontend.20241128.png)  | ![admin](.github/admin-frontend.20241128.png)  |
 | [hamster1963/nezha-dash-react](https://github.com/hamster1963/nezha-dashboard-react)  | [nezhahq/admin-frontend](https://github.com/nezhahq/admin-frontend)  |
 
 ## Supported Languages
