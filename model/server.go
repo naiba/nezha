@@ -23,7 +23,7 @@ type Server struct {
 	EnableDDNS      bool   `json:"enable_ddns,omitempty"`    // 启用DDNS
 	DDNSProfilesRaw string `gorm:"default:'[]';column:ddns_profiles_raw" json:"-"`
 
-	DDNSProfiles []uint64 `gorm:"-" json:"ddns_profiles,omitempty"` // DDNS配置
+	DDNSProfiles []uint64 `gorm:"-" json:"ddns_profiles,omitempty" validate:"optional"` // DDNS配置
 
 	Host       *Host      `gorm:"-" json:"host,omitempty"`
 	State      *HostState `gorm:"-" json:"state,omitempty"`
