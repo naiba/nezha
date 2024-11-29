@@ -8,7 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
+	"path"
 	"strings"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -239,7 +239,7 @@ func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
 		}
 		if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
 			stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
-			localFilePath := filepath.Join("admin-dist", stripPath)
+			localFilePath := path.Join("admin-dist", stripPath)
 			if checkLocalFileOrFs(c, adminFrontend, localFilePath) {
 				return
 			}
@@ -248,7 +248,7 @@ func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
 			}
 			return
 		}
-		localFilePath := filepath.Join("user-dist", c.Request.URL.Path)
+		localFilePath := path.Join("user-dist", c.Request.URL.Path)
 		if checkLocalFileOrFs(c, userFrontend, localFilePath) {
 			return
 		}
