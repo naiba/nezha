@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"embed"
+	_ "embed"
 	"flag"
 	"fmt"
 	"log"
@@ -32,6 +34,10 @@ type DashboardCliParam struct {
 
 var (
 	dashboardCliParam DashboardCliParam
+	//go:embed admin-dist
+	adminFrontend embed.FS
+	//go:embed user-dist
+	userFrontend embed.FS
 )
 
 func initSystem() {
@@ -119,7 +125,7 @@ func main() {
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
 
 	grpcHandler := rpc.ServeRPC()
-	httpHandler := controller.ServeWeb()
+	httpHandler := controller.ServeWeb(adminFrontend, userFrontend)
 	controller.InitUpgrader()
 
 	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)

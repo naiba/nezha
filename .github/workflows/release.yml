@@ -26,7 +26,34 @@ jobs:
       image: goreleaser/goreleaser-cross:v1.23
     steps:
       - run: git config --global --add safe.directory /__w/nezha/nezha
+
       - uses: actions/checkout@v4
+
+      - uses: robinraju/release-downloader@v1
+        with:
+          repository: nezhahq/admin-frontend
+          tag: v1.0.4
+          fileName: dist.zip
+          latest: true
+          extract: true
+
+      - name: prepare admin-frontend dists
+        run: |
+          rm -rf cmd/dashboard/admin-dist
+          mv dist cmd/dashboard/admin-dist
+
+      - uses: robinraju/release-downloader@v1
+        with:
+          repository: nezhahq/user-frontend
+          tag: v1.0.3
+          fileName: dist.zip
+          latest: true
+          extract: true
+
+      - name: prepare admin-frontend dists
+        run: |
+          rm -rf cmd/dashboard/user-dist
+          mv dist cmd/dashboard/user-dist
 
       - name: Fetch IPInfo GeoIP Database
         env:
@@ -129,30 +156,6 @@ jobs:
     name: Release Docker images
     steps:
       - uses: actions/checkout@v4
-
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: nezhahq/admin-frontend
-          tag: v1.0.3
-          fileName: dist.zip
-          latest: true
-          extract: true
-
-      - name: prepare admin-frontend dists
-        run: |
-          mv dist admin-dist
-
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: nezhahq/user-frontend
-          tag: v1.0.2
-          fileName: dist.zip
-          latest: true
-          extract: true
-
-      - name: prepare admin-frontend dists
-        run: |
-          mv dist user-dist
 
       - name: Download artifacts
         uses: actions/download-artifact@v4

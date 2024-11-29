@@ -17,8 +17,10 @@
 .DS_Store
 /cmd/dashboard/data
 /cmd/dashboard/main
-/cmd/dashboard/admin-dist
-/cmd/dashboard/user-dist
+/cmd/dashboard/admin-dist/*
+/cmd/dashboard/user-dist/*
+!/cmd/dashboard/admin-dist/.gitkeep
+!/cmd/dashboard/user-dist/.gitkeep
 /config.yml
 /resource/template/theme-custom
 /resource/static/custom

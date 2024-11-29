@@ -3,6 +3,8 @@ package controller
 import (
 	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +23,7 @@ import (
 	"github.com/nezhahq/nezha/service/singleton"
 )
 
-func ServeWeb() http.Handler {
+func ServeWeb(adminFrontend, userFrontend fs.FS) http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -37,12 +39,13 @@ func ServeWeb() http.Handler {
 	r.Use(waf.RealIp)
 	r.Use(waf.Waf)
 	r.Use(recordPath)
-	routers(r)
+
+	routers(r, adminFrontend, userFrontend)
 
 	return r
 }
 
-func routers(r *gin.Engine) {
+func routers(r *gin.Engine, adminFrontend, userFrontend fs.FS) {
 	authMiddleware, err := jwt.New(initParams())
 	if err != nil {
 		log.Fatal("JWT Error:" + err.Error())
@@ -129,7 +132,7 @@ func routers(r *gin.Engine) {
 
 	auth.PATCH("/setting", commonHandler(updateConfig))
 
-	r.NoRoute(fallbackToFrontend)
+	r.NoRoute(fallbackToFrontend(adminFrontend, userFrontend))
 }
 
 func recordPath(c *gin.Context) {
@@ -208,25 +211,46 @@ func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	}
 }
 
-func fallbackToFrontend(c *gin.Context) {
-	if strings.HasPrefix(c.Request.URL.Path, "/api") {
-		c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
-		return
+func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
+	checkLocalFileOrFs := func(c *gin.Context, fs fs.FS, path string) bool {
+		if _, err := os.Stat(path); err == nil {
+			c.File(path)
+			return true
+		}
+		f, err := fs.Open(path)
+		if err != nil {
+			return false
+		}
+		defer f.Close()
+		fileStat, err := f.Stat()
+		if err != nil {
+			return false
+		}
+		http.ServeContent(c.Writer, c.Request, path, fileStat.ModTime(), f.(io.ReadSeeker))
+		return true
 	}
-	if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
-		stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
-		localFilePath := filepath.Join("./admin-dist", stripPath)
-		if _, err := os.Stat(localFilePath); err == nil {
-			c.File(localFilePath)
+	return func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, "/api") {
+			c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
 			return
 		}
-		c.File("admin-dist/index.html")
-		return
+		if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
+			stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
+			localFilePath := filepath.Join("admin-dist", stripPath)
+			if checkLocalFileOrFs(c, adminFrontend, localFilePath) {
+				return
+			}
+			if !checkLocalFileOrFs(c, adminFrontend, "admin-dist/index.html") {
+				c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
+			}
+			return
+		}
+		localFilePath := filepath.Join("user-dist", c.Request.URL.Path)
+		if checkLocalFileOrFs(c, userFrontend, localFilePath) {
+			return
+		}
+		if !checkLocalFileOrFs(c, userFrontend, "user-dist/index.html") {
+			c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
+		}
 	}
-	localFilePath := filepath.Join("user-dist", c.Request.URL.Path)
-	if _, err := os.Stat(localFilePath); err == nil {
-		c.File(localFilePath)
-		return
-	}
-	c.File("user-dist/index.html")
 }
