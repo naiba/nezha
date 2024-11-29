@@ -1,3 +1,5 @@
+touch ./cmd/dashboard/user-dist/a
+touch ./cmd/dashboard/admin-dist/a
 swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --requiredByDefault
 protoc --go-grpc_out="require_unimplemented_servers=false:." --go_out="." proto/*.proto
 rm -rf ../agent/proto

@@ -70,7 +70,9 @@ jobs:
       - name: generate swagger docs
         run: |
           go install github.com/swaggo/swag/cmd/swag@latest
-          swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --exclude ./cmd/dashboard/user-dist --exclude ./cmd/dashboard/admin-dist --parseGoList=false
+          touch ./cmd/dashboard/user-dist/a
+          touch ./cmd/dashboard/admin-dist/a
+          swag init --pd -d . -g ./cmd/dashboard/main.go -o ./cmd/dashboard/docs --parseGoList=false
 
       - name: Build with tag
         if: contains(github.ref, 'refs/tags/')
