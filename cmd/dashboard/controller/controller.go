@@ -226,6 +226,9 @@ func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
 		if err != nil {
 			return false
 		}
+		if fileStat.IsDir() {
+			return false
+		}
 		http.ServeContent(c.Writer, c.Request, path, fileStat.ModTime(), f.(io.ReadSeeker))
 		return true
 	}
