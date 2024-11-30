@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"net/url"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -23,6 +25,9 @@ func InitUpgrader() {
 	// Allow CORS from loopback addresses in debug mode
 	if singleton.Conf.Debug {
 		checkOrigin = func(r *http.Request) bool {
+			if checkSameOrigin(r) {
+				return true
+			}
 			hostAddr := r.Host
 			host, _, err := net.SplitHostPort(hostAddr)
 			if err != nil {
@@ -42,7 +47,6 @@ func InitUpgrader() {
 					return true
 				}
 			}
-
 			return false
 		}
 	}
@@ -52,6 +56,40 @@ func InitUpgrader() {
 		WriteBufferSize: 32768,
 		CheckOrigin:     checkOrigin,
 	}
+}
+
+func equalASCIIFold(s, t string) bool {
+	for s != "" && t != "" {
+		sr, size := utf8.DecodeRuneInString(s)
+		s = s[size:]
+		tr, size := utf8.DecodeRuneInString(t)
+		t = t[size:]
+		if sr == tr {
+			continue
+		}
+		if 'A' <= sr && sr <= 'Z' {
+			sr = sr + 'a' - 'A'
+		}
+		if 'A' <= tr && tr <= 'Z' {
+			tr = tr + 'a' - 'A'
+		}
+		if sr != tr {
+			return false
+		}
+	}
+	return s == t
+}
+
+func checkSameOrigin(r *http.Request) bool {
+	origin := r.Header["Origin"]
+	if len(origin) == 0 {
+		return true
+	}
+	u, err := url.Parse(origin[0])
+	if err != nil {
+		return false
+	}
+	return equalASCIIFold(u.Host, r.Host)
 }
 
 // Websocket server stream
