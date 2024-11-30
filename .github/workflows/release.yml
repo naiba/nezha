@@ -32,7 +32,7 @@ jobs:
       - uses: robinraju/release-downloader@v1
         with:
           repository: nezhahq/admin-frontend
-          tag: v1.0.7
+          tag: v1.0.8
           fileName: dist.zip
           latest: true
           extract: true
