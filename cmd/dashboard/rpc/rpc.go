@@ -3,6 +3,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"net/netip"
 	"time"
@@ -61,6 +62,10 @@ func getRealIp(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	if singleton.Conf.Debug {
+		log.Printf("NEZHA>> gRPC Real IP: %s", ip)
 	}
 
 	ctx = context.WithValue(ctx, model.CtxKeyRealIP{}, ip)

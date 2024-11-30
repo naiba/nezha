@@ -16,6 +16,13 @@ const (
 	WAFBlockReasonTypeAgentAuthFail
 )
 
+type WAFApiMock struct {
+	IP                 string `json:"ip,omitempty"`
+	Count              uint64 `json:"count,omitempty"`
+	LastBlockReason    uint8  `json:"last_block_reason,omitempty"`
+	LastBlockTimestamp uint64 `json:"last_block_timestamp,omitempty"`
+}
+
 type WAF struct {
 	IP                 []byte `gorm:"type:binary(16);primaryKey" json:"ip,omitempty"`
 	Count              uint64 `json:"count,omitempty"`

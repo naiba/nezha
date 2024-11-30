@@ -14,7 +14,7 @@ import (
 // @Description List server
 // @Tags auth required
 // @Produce json
-// @Success 200 {object} model.CommonResponse[[]model.WAF]
+// @Success 200 {object} model.CommonResponse[[]model.WAFApiMock]
 // @Router /waf [get]
 func listBlockedAddress(c *gin.Context) ([]*model.WAF, error) {
 	var waf []*model.WAF
