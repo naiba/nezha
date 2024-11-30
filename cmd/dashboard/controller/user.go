@@ -62,6 +62,7 @@ func updateProfile(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
+	user.Username = pf.NewUsername
 	user.Password = string(hash)
 	if err := singleton.DB.Save(&user).Error; err != nil {
 		return nil, newGormError("%v", err)
