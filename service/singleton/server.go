@@ -31,6 +31,7 @@ func loadServers() {
 		innerS := s
 		innerS.Host = &model.Host{}
 		innerS.State = &model.HostState{}
+		innerS.GeoIP = new(model.GeoIP)
 		innerS.TaskCloseLock = new(sync.Mutex)
 		ServerList[innerS.ID] = &innerS
 		ServerUUIDToID[innerS.UUID] = innerS.ID
