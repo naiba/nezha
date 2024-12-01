@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/nezhahq/nezha/pkg/i18n"
 )
@@ -25,6 +26,7 @@ func loadTranslation() error {
 		lang = "zh_CN"
 	}
 
+	lang = strings.Replace(lang, "-", "_", 1)
 	data, err := getTranslationArchive(lang)
 	if err != nil {
 		return err
@@ -35,6 +37,7 @@ func loadTranslation() error {
 }
 
 func OnUpdateLang(lang string) error {
+	lang = strings.Replace(lang, "-", "_", 1)
 	if Localizer.Exists(lang) {
 		Localizer.SetLanguage(lang)
 		return nil
