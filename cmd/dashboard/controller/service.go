@@ -27,15 +27,16 @@ func listService(c *gin.Context) (*model.ServiceResponse, error) {
 		singleton.AlertsLock.RLock()
 		defer singleton.AlertsLock.RUnlock()
 		var stats map[uint64]model.ServiceResponseItem
-		var statsStore map[uint64]model.CycleTransferStats
+		var cycleTransferStats map[uint64]model.CycleTransferStats
 		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
-		copier.Copy(&statsStore, singleton.AlertsCycleTransferStatsStore)
+		copier.Copy(&cycleTransferStats, singleton.AlertsCycleTransferStatsStore)
 		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 		authorized := isMember // TODO || isViewPasswordVerfied
 		for k, service := range stats {
 			if !authorized {
 				if !service.Service.EnableShowInService {
 					delete(stats, k)
+					continue
 				}
 				service.Service = &model.Service{Name: service.Service.Name}
 				stats[k] = service
@@ -43,7 +44,7 @@ func listService(c *gin.Context) (*model.ServiceResponse, error) {
 		}
 		return []interface {
 		}{
-			stats, statsStore,
+			stats, cycleTransferStats,
 		}, nil
 	})
 	if err != nil {
