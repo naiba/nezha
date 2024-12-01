@@ -52,7 +52,10 @@ def delete_gitee_releases(latest_id, client, uri, token):
     print(f'Current release ids: {release_ids}')
     release_ids.remove(latest_id)
 
+    # 2024.12.01 保留 v0 开头的 Release
     for id in release_ids:
+        if id.startswith('v0'):
+            continue
         release_uri = f"{uri}/{id}"
         delete_data = {
             'access_token': token
