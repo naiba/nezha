@@ -1,0 +1,7 @@
+contact_links:
+  - name: Report nezha-agent issues / 反馈 nezha-agent 问题
+    url: https://github.com/nezhahq/agent/issues
+    about: 请在这里创建 nezha-agent 的问题反馈。
+  - name: Report frontend issues / 反馈前端问题
+    url: https://github.com/nezhahq/admin-frontend/issues
+    about: 请在这里创建前端的问题反馈。
