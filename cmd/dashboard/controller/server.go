@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 
 	"github.com/nezhahq/nezha/model"
 	"github.com/nezhahq/nezha/pkg/utils"
@@ -103,7 +104,17 @@ func batchDeleteServer(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
-	if err := singleton.DB.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {
+	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {
+			return err
+		}
+		if err := tx.Unscoped().Delete(&model.ServerGroupServer{}, "server_id in (?)", servers).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
 		return nil, newGormError("%v", err)
 	}
 
