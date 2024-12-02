@@ -11,7 +11,7 @@ body:
       required: true
   - type: input
     attributes:
-      label: Agent Version
+      label: Nezha Version
       description: Input the version of your copy of nezha here.
     validations:
       required: true
