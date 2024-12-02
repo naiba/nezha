@@ -89,6 +89,9 @@ func (c *Config) Read(path string) error {
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2
 	}
+	if c.Cover == 0 {
+		c.Cover = 1
+	}
 	if c.JWTSecretKey == "" {
 		c.JWTSecretKey, err = utils.GenerateRandomString(1024)
 		if err != nil {

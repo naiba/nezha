@@ -27,9 +27,9 @@ type HostState struct {
 	NetInSpeed     uint64              `json:"net_in_speed,omitempty"`
 	NetOutSpeed    uint64              `json:"net_out_speed,omitempty"`
 	Uptime         uint64              `json:"uptime,omitempty"`
-	Load1          float64             `json:"load_1,omitempty"`
-	Load5          float64             `json:"load_5,omitempty"`
-	Load15         float64             `json:"load_15,omitempty"`
+	Load1          float64             `json:"load_1"`
+	Load5          float64             `json:"load_5"`
+	Load15         float64             `json:"load_15"`
 	TcpConnCount   uint64              `json:"tcp_conn_count,omitempty"`
 	UdpConnCount   uint64              `json:"udp_conn_count,omitempty"`
 	ProcessCount   uint64              `json:"process_count,omitempty"`
