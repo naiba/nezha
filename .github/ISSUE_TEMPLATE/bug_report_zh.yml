@@ -11,7 +11,7 @@ body:
       required: true
   - type: input
     attributes:
-      label: Agent 版本
+      label: Nezha 版本
       description: 在这里输入你的 nezha 版本号
     validations:
       required: true
