@@ -43,10 +43,12 @@ func CheckIP(db *gorm.DB, ip string) error {
 		return err
 	}
 	var w WAF
-	if err := db.First(&w, "ip = ?", ipBinary).Error; err != nil {
-		if err != gorm.ErrRecordNotFound {
-			return err
-		}
+	result := db.Limit(1).Find(&w, "ip = ?", ipBinary)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 { // 检查是否未找到记录
+		return nil
 	}
 	now := time.Now().Unix()
 	if powAdd(w.Count, 4, w.LastBlockTimestamp) > uint64(now) {
