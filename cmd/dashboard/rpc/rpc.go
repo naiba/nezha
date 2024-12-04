@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/peer"
 
@@ -22,14 +21,7 @@ import (
 )
 
 func ServeRPC() *grpc.Server {
-	server := grpc.NewServer(grpc.KeepaliveEnforcementPolicy(
-		keepalive.EnforcementPolicy{
-			MinTime:             time.Second * 20,
-			PermitWithoutStream: true,
-		}), grpc.KeepaliveParams(
-		keepalive.ServerParameters{
-			Time: time.Second * 30,
-		}), grpc.ChainUnaryInterceptor(getRealIp, waf))
+	server := grpc.NewServer(grpc.ChainUnaryInterceptor(getRealIp, waf))
 	rpcService.NezhaHandlerSingleton = rpcService.NewNezhaHandler()
 	proto.RegisterNezhaServiceServer(server, rpcService.NezhaHandlerSingleton)
 	return server
@@ -122,6 +114,20 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Service) {
 		}
 		singleton.SortedServerLock.RUnlock()
 	}
+}
+
+func DispatchKeepalive() {
+	singleton.Cron.AddFunc("@every 60s", func() {
+		singleton.SortedServerLock.RLock()
+		defer singleton.SortedServerLock.RUnlock()
+		for i := 0; i < len(singleton.SortedServerList); i++ {
+			if singleton.SortedServerList[i] == nil || singleton.SortedServerList[i].TaskStream == nil {
+				continue
+			}
+
+			singleton.SortedServerList[i].TaskStream.Send(&proto.Task{Type: model.TaskTypeKeepalive})
+		}
+	})
 }
 
 func ServeNAT(w http.ResponseWriter, r *http.Request, natConfig *model.NAT) {
