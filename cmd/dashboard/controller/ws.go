@@ -155,7 +155,7 @@ func getServerStat(c *gin.Context, withPublicNote bool) ([]byte, error) {
 				Name:         server.Name,
 				PublicNote:   utils.IfOr(withPublicNote, server.PublicNote, ""),
 				DisplayIndex: server.DisplayIndex,
-				Host:         server.Host,
+				Host:         utils.IfOr(authorized, server.Host, server.Host.Filter()),
 				State:        server.State,
 				CountryCode:  countryCode,
 				LastActive:   server.LastActive,
