@@ -120,7 +120,6 @@ func main() {
 	singleton.CleanServiceHistory()
 	serviceSentinelDispatchBus := make(chan model.Service) // 用于传递服务监控任务信息的channel
 	go rpc.DispatchTask(serviceSentinelDispatchBus)
-	go rpc.DispatchKeepalive()
 	go singleton.AlertSentinelStart()
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
 
