@@ -14,19 +14,25 @@ import (
 // @Security BearerAuth
 // @Tags common
 // @Produce json
-// @Success 200 {object} model.CommonResponse[model.Config]
+// @Success 200 {object} model.CommonResponse[model.SettingResponse]
 // @Router /setting [get]
-func listConfig(c *gin.Context) (model.Config, error) {
+func listConfig(c *gin.Context) (model.SettingResponse, error) {
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 	authorized := isMember // TODO || isViewPasswordVerfied
 
-	conf := *singleton.Conf
+	conf := model.SettingResponse{
+		Config:  *singleton.Conf,
+		Version: singleton.Version,
+	}
+
 	if !authorized {
-		conf = model.Config{
-			SiteName:            conf.SiteName,
-			Language:            conf.Language,
-			CustomCode:          conf.CustomCode,
-			CustomCodeDashboard: conf.CustomCodeDashboard,
+		conf = model.SettingResponse{
+			Config: model.Config{
+				SiteName:            conf.SiteName,
+				Language:            conf.Language,
+				CustomCode:          conf.CustomCode,
+				CustomCodeDashboard: conf.CustomCodeDashboard,
+			},
 		}
 	}
 
@@ -62,6 +68,7 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.CustomCode = sf.CustomCode
 	singleton.Conf.CustomCodeDashboard = sf.CustomCodeDashboard
 	singleton.Conf.RealIPHeader = sf.RealIPHeader
+	singleton.Conf.TLS = sf.TLS
 
 	if err := singleton.Conf.Save(); err != nil {
 		return nil, newGormError("%v", err)

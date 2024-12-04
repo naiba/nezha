@@ -127,6 +127,21 @@ func (h *Host) PB() *pb.Host {
 	}
 }
 
+// Filter returns a new instance of Host with some fields redacted.
+func (h *Host) Filter() *Host {
+	return &Host{
+		Platform:       h.Platform,
+		CPU:            h.CPU,
+		MemTotal:       h.MemTotal,
+		DiskTotal:      h.DiskTotal,
+		SwapTotal:      h.SwapTotal,
+		Arch:           h.Arch,
+		Virtualization: h.Virtualization,
+		BootTime:       h.BootTime,
+		GPU:            h.GPU,
+	}
+}
+
 func PB2Host(h *pb.Host) Host {
 	return Host{
 		Platform:        h.GetPlatform(),

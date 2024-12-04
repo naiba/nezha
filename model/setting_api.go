@@ -12,6 +12,13 @@ type SettingForm struct {
 	CustomCodeDashboard         string `json:"custom_code_dashboard,omitempty" validate:"optional"`
 	RealIPHeader                string `json:"real_ip_header,omitempty" validate:"optional"` // 真实IP
 
+	TLS                         bool `json:"tls,omitempty" validate:"optional"`
 	EnableIPChangeNotification  bool `json:"enable_ip_change_notification,omitempty" validate:"optional"`
 	EnablePlainIPInNotification bool `json:"enable_plain_ip_in_notification,omitempty" validate:"optional"`
+}
+
+type SettingResponse struct {
+	Config
+
+	Version string `json:"version,omitempty"`
 }
