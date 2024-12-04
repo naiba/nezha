@@ -3,7 +3,6 @@ package rpc
 import (
 	"context"
 	"strings"
-	"sync"
 
 	petname "github.com/dustinkirkland/golang-petname"
 	"github.com/hashicorp/go-uuid"
@@ -64,7 +63,6 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 		}
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}
-		s.TaskCloseLock = new(sync.Mutex)
 		// generate a random silly server name
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerUUIDToID[clientUUID] = s.ID

@@ -107,24 +107,19 @@ func DispatchTask(serviceSentinelDispatchBus <-chan model.Service) {
 				workedServerIndex++
 				continue
 			}
-			// 找到合适机器执行任务，跳出循环
-			// singleton.SortedServerList[workedServerIndex].TaskStream.Send(task.PB())
-			// workedServerIndex++
-			// break
 		}
 		singleton.SortedServerLock.RUnlock()
 	}
 }
 
 func DispatchKeepalive() {
-	singleton.Cron.AddFunc("@every 60s", func() {
+	singleton.Cron.AddFunc("@every 30s", func() {
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
 		for i := 0; i < len(singleton.SortedServerList); i++ {
 			if singleton.SortedServerList[i] == nil || singleton.SortedServerList[i].TaskStream == nil {
 				continue
 			}
-
 			singleton.SortedServerList[i].TaskStream.Send(&proto.Task{Type: model.TaskTypeKeepalive})
 		}
 	})

@@ -6,8 +6,7 @@ package proto;
 service NezhaService {
   rpc ReportSystemState(stream State) returns (stream Receipt) {}
   rpc ReportSystemInfo(Host) returns (Receipt) {}
-  rpc ReportTask(TaskResult) returns (Receipt) {}
-  rpc RequestTask(Host) returns (stream Task) {}
+  rpc RequestTask(stream TaskResult) returns (stream Task) {}
   rpc IOStream(stream IOStreamData) returns (stream IOStreamData) {}
   rpc ReportGeoIP(GeoIP) returns (GeoIP) {}
 }

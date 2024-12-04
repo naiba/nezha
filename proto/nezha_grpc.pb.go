@@ -21,7 +21,6 @@ const _ = grpc.SupportPackageIsVersion7
 const (
 	NezhaService_ReportSystemState_FullMethodName = "/proto.NezhaService/ReportSystemState"
 	NezhaService_ReportSystemInfo_FullMethodName  = "/proto.NezhaService/ReportSystemInfo"
-	NezhaService_ReportTask_FullMethodName        = "/proto.NezhaService/ReportTask"
 	NezhaService_RequestTask_FullMethodName       = "/proto.NezhaService/RequestTask"
 	NezhaService_IOStream_FullMethodName          = "/proto.NezhaService/IOStream"
 	NezhaService_ReportGeoIP_FullMethodName       = "/proto.NezhaService/ReportGeoIP"
@@ -33,8 +32,7 @@ const (
 type NezhaServiceClient interface {
 	ReportSystemState(ctx context.Context, opts ...grpc.CallOption) (NezhaService_ReportSystemStateClient, error)
 	ReportSystemInfo(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Receipt, error)
-	ReportTask(ctx context.Context, in *TaskResult, opts ...grpc.CallOption) (*Receipt, error)
-	RequestTask(ctx context.Context, in *Host, opts ...grpc.CallOption) (NezhaService_RequestTaskClient, error)
+	RequestTask(ctx context.Context, opts ...grpc.CallOption) (NezhaService_RequestTaskClient, error)
 	IOStream(ctx context.Context, opts ...grpc.CallOption) (NezhaService_IOStreamClient, error)
 	ReportGeoIP(ctx context.Context, in *GeoIP, opts ...grpc.CallOption) (*GeoIP, error)
 }
@@ -87,37 +85,27 @@ func (c *nezhaServiceClient) ReportSystemInfo(ctx context.Context, in *Host, opt
 	return out, nil
 }
 
-func (c *nezhaServiceClient) ReportTask(ctx context.Context, in *TaskResult, opts ...grpc.CallOption) (*Receipt, error) {
-	out := new(Receipt)
-	err := c.cc.Invoke(ctx, NezhaService_ReportTask_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *nezhaServiceClient) RequestTask(ctx context.Context, in *Host, opts ...grpc.CallOption) (NezhaService_RequestTaskClient, error) {
+func (c *nezhaServiceClient) RequestTask(ctx context.Context, opts ...grpc.CallOption) (NezhaService_RequestTaskClient, error) {
 	stream, err := c.cc.NewStream(ctx, &NezhaService_ServiceDesc.Streams[1], NezhaService_RequestTask_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
 	x := &nezhaServiceRequestTaskClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
 	return x, nil
 }
 
 type NezhaService_RequestTaskClient interface {
+	Send(*TaskResult) error
 	Recv() (*Task, error)
 	grpc.ClientStream
 }
 
 type nezhaServiceRequestTaskClient struct {
 	grpc.ClientStream
+}
+
+func (x *nezhaServiceRequestTaskClient) Send(m *TaskResult) error {
+	return x.ClientStream.SendMsg(m)
 }
 
 func (x *nezhaServiceRequestTaskClient) Recv() (*Task, error) {
@@ -174,8 +162,7 @@ func (c *nezhaServiceClient) ReportGeoIP(ctx context.Context, in *GeoIP, opts ..
 type NezhaServiceServer interface {
 	ReportSystemState(NezhaService_ReportSystemStateServer) error
 	ReportSystemInfo(context.Context, *Host) (*Receipt, error)
-	ReportTask(context.Context, *TaskResult) (*Receipt, error)
-	RequestTask(*Host, NezhaService_RequestTaskServer) error
+	RequestTask(NezhaService_RequestTaskServer) error
 	IOStream(NezhaService_IOStreamServer) error
 	ReportGeoIP(context.Context, *GeoIP) (*GeoIP, error)
 }
@@ -190,10 +177,7 @@ func (UnimplementedNezhaServiceServer) ReportSystemState(NezhaService_ReportSyst
 func (UnimplementedNezhaServiceServer) ReportSystemInfo(context.Context, *Host) (*Receipt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportSystemInfo not implemented")
 }
-func (UnimplementedNezhaServiceServer) ReportTask(context.Context, *TaskResult) (*Receipt, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReportTask not implemented")
-}
-func (UnimplementedNezhaServiceServer) RequestTask(*Host, NezhaService_RequestTaskServer) error {
+func (UnimplementedNezhaServiceServer) RequestTask(NezhaService_RequestTaskServer) error {
 	return status.Errorf(codes.Unimplemented, "method RequestTask not implemented")
 }
 func (UnimplementedNezhaServiceServer) IOStream(NezhaService_IOStreamServer) error {
@@ -258,34 +242,13 @@ func _NezhaService_ReportSystemInfo_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NezhaService_ReportTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(TaskResult)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NezhaServiceServer).ReportTask(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: NezhaService_ReportTask_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NezhaServiceServer).ReportTask(ctx, req.(*TaskResult))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _NezhaService_RequestTask_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(Host)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
-	}
-	return srv.(NezhaServiceServer).RequestTask(m, &nezhaServiceRequestTaskServer{stream})
+	return srv.(NezhaServiceServer).RequestTask(&nezhaServiceRequestTaskServer{stream})
 }
 
 type NezhaService_RequestTaskServer interface {
 	Send(*Task) error
+	Recv() (*TaskResult, error)
 	grpc.ServerStream
 }
 
@@ -295,6 +258,14 @@ type nezhaServiceRequestTaskServer struct {
 
 func (x *nezhaServiceRequestTaskServer) Send(m *Task) error {
 	return x.ServerStream.SendMsg(m)
+}
+
+func (x *nezhaServiceRequestTaskServer) Recv() (*TaskResult, error) {
+	m := new(TaskResult)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func _NezhaService_IOStream_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -353,10 +324,6 @@ var NezhaService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NezhaService_ReportSystemInfo_Handler,
 		},
 		{
-			MethodName: "ReportTask",
-			Handler:    _NezhaService_ReportTask_Handler,
-		},
-		{
 			MethodName: "ReportGeoIP",
 			Handler:    _NezhaService_ReportGeoIP_Handler,
 		},
@@ -372,6 +339,7 @@ var NezhaService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "RequestTask",
 			Handler:       _NezhaService_RequestTask_Handler,
 			ServerStreams: true,
+			ClientStreams: true,
 		},
 		{
 			StreamName:    "IOStream",
