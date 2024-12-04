@@ -30,6 +30,7 @@ type Config struct {
 	JWTSecretKey   string `mapstructure:"jwt_secret_key" json:"jwt_secret_key,omitempty"`
 	AgentSecretKey string `mapstructure:"agent_secret_key" json:"agent_secret_key,omitempty"`
 	ListenPort     uint   `mapstructure:"listen_port" json:"listen_port,omitempty"`
+	ListenHost     string `mapstructure:"listen_host" json:"listen_host,omitempty"`
 	InstallHost    string `mapstructure:"install_host" json:"install_host,omitempty"`
 	TLS            bool   `mapstructure:"tls" json:"tls,omitempty"`
 	Location       string `mapstructure:"location" json:"location,omitempty"` // 时区，默认为 Asia/Shanghai
