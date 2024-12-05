@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/jinzhu/copier"
 	"github.com/nezhahq/nezha/model"
 	"github.com/nezhahq/nezha/pkg/utils"
 	pb "github.com/nezhahq/nezha/proto"
@@ -18,6 +19,12 @@ const (
 )
 
 var ServiceSentinelShared *ServiceSentinel
+
+type serviceResponseItem struct {
+	model.ServiceResponseItem
+
+	service *model.Service
+}
 
 type ReportData struct {
 	Data     *pb.TaskResult
@@ -46,7 +53,7 @@ func NewServiceSentinel(serviceSentinelDispatchBus chan<- model.Service) {
 		Services:                                make(map[uint64]*model.Service),
 		tlsCertCache:                            make(map[uint64]string),
 		// 30天数据缓存
-		monthlyStatus: make(map[uint64]*model.ServiceResponseItem),
+		monthlyStatus: make(map[uint64]*serviceResponseItem),
 		dispatchBus:   serviceSentinelDispatchBus,
 	}
 	// 加载历史记录
@@ -112,7 +119,7 @@ type ServiceSentinel struct {
 
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
-	monthlyStatus     map[uint64]*model.ServiceResponseItem
+	monthlyStatus     map[uint64]*serviceResponseItem
 }
 
 type indexStore struct {
@@ -211,11 +218,13 @@ func (ss *ServiceSentinel) loadServiceHistory() {
 	today := time.Date(year, month, day, 0, 0, 0, 0, Loc)
 
 	for i := 0; i < len(services); i++ {
-		ServiceSentinelShared.monthlyStatus[services[i].ID] = &model.ServiceResponseItem{
-			Service: services[i],
-			Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		ServiceSentinelShared.monthlyStatus[services[i].ID] = &serviceResponseItem{
+			service: services[i],
+			ServiceResponseItem: model.ServiceResponseItem{
+				Delay: &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				Up:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				Down:  &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			},
 		}
 	}
 
@@ -258,11 +267,13 @@ func (ss *ServiceSentinel) OnServiceUpdate(m model.Service) error {
 		Cron.Remove(ss.Services[m.ID].CronJobID)
 	} else {
 		// 新任务初始化数据
-		ss.monthlyStatus[m.ID] = &model.ServiceResponseItem{
-			Service: &m,
-			Delay:   &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			Up:      &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-			Down:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+		ss.monthlyStatus[m.ID] = &serviceResponseItem{
+			service: &m,
+			ServiceResponseItem: model.ServiceResponseItem{
+				Delay: &[30]float32{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				Up:    &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+				Down:  &[30]int{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+			},
 		}
 		ss.serviceCurrentStatusData[m.ID] = make([]*pb.TaskResult, _CurrentStatusSize)
 		ss.serviceStatusToday[m.ID] = &_TodayStatsOfService{}
@@ -298,7 +309,7 @@ func (ss *ServiceSentinel) OnServiceDelete(ids []uint64) {
 	}
 }
 
-func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceResponseItem {
+func (ss *ServiceSentinel) LoadStats() map[uint64]*serviceResponseItem {
 	ss.ServicesLock.RLock()
 	defer ss.ServicesLock.RUnlock()
 	ss.serviceResponseDataStoreLock.RLock()
@@ -308,7 +319,7 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceResponseItem {
 
 	// 刷新最新一天的数据
 	for k := range ss.Services {
-		ss.monthlyStatus[k].Service = ss.Services[k]
+		ss.monthlyStatus[k].service = ss.Services[k]
 		v := ss.serviceStatusToday[k]
 
 		// 30 天在线率，
@@ -333,6 +344,24 @@ func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceResponseItem {
 	}
 
 	return ss.monthlyStatus
+}
+
+func (ss *ServiceSentinel) CopyStats() map[uint64]model.ServiceResponseItem {
+	var stats map[uint64]*serviceResponseItem
+	copier.Copy(&stats, ss.LoadStats())
+
+	sri := make(map[uint64]model.ServiceResponseItem)
+	for k, service := range stats {
+		if !service.service.EnableShowInService {
+			delete(stats, k)
+			continue
+		}
+
+		service.ServiceName = service.service.Name
+		sri[k] = service.ServiceResponseItem
+	}
+
+	return sri
 }
 
 // worker 服务监控的实际工作流程

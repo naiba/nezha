@@ -26,18 +26,9 @@ func showService(c *gin.Context) (*model.ServiceResponse, error) {
 	res, err, _ := requestGroup.Do("list-service", func() (interface{}, error) {
 		singleton.AlertsLock.RLock()
 		defer singleton.AlertsLock.RUnlock()
-		var stats map[uint64]model.ServiceResponseItem
+		stats := singleton.ServiceSentinelShared.CopyStats()
 		var cycleTransferStats map[uint64]model.CycleTransferStats
-		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
 		copier.Copy(&cycleTransferStats, singleton.AlertsCycleTransferStatsStore)
-		for k, service := range stats {
-			if !service.Service.EnableShowInService {
-				delete(stats, k)
-				continue
-			}
-			service.Service = &model.Service{Name: service.Service.Name}
-			stats[k] = service
-		}
 		return []interface {
 		}{
 			stats, cycleTransferStats,
