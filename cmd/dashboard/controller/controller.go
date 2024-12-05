@@ -60,7 +60,7 @@ func routers(r *gin.Engine, adminFrontend, userFrontend fs.FS) {
 	optionalAuth.GET("/ws/server", commonHandler(serverStream))
 	optionalAuth.GET("/server-group", commonHandler(listServerGroup))
 
-	optionalAuth.GET("/service", commonHandler(listService))
+	optionalAuth.GET("/service", commonHandler(showService))
 	optionalAuth.GET("/service/:id", commonHandler(listServiceHistory))
 	optionalAuth.GET("/service/server", commonHandler(listServerWithServices))
 
@@ -82,6 +82,7 @@ func routers(r *gin.Engine, adminFrontend, userFrontend fs.FS) {
 	auth.POST("/user", commonHandler(createUser))
 	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
 
+	auth.GET("/service/list", commonHandler(listService))
 	auth.POST("/service", commonHandler(createService))
 	auth.PATCH("/service/:id", commonHandler(updateService))
 	auth.POST("/batch-delete/service", commonHandler(batchDeleteService))

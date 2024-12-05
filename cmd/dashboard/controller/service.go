@@ -13,16 +13,16 @@ import (
 	"gorm.io/gorm"
 )
 
-// List service
-// @Summary List service
+// Show service
+// @Summary Show service
 // @Security BearerAuth
 // @Schemes
-// @Description List service
+// @Description Show service
 // @Tags common
 // @Produce json
 // @Success 200 {object} model.CommonResponse[model.ServiceResponse]
 // @Router /service [get]
-func listService(c *gin.Context) (*model.ServiceResponse, error) {
+func showService(c *gin.Context) (*model.ServiceResponse, error) {
 	res, err, _ := requestGroup.Do("list-service", func() (interface{}, error) {
 		singleton.AlertsLock.RLock()
 		defer singleton.AlertsLock.RUnlock()
@@ -30,17 +30,13 @@ func listService(c *gin.Context) (*model.ServiceResponse, error) {
 		var cycleTransferStats map[uint64]model.CycleTransferStats
 		copier.Copy(&stats, singleton.ServiceSentinelShared.LoadStats())
 		copier.Copy(&cycleTransferStats, singleton.AlertsCycleTransferStatsStore)
-		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
-		authorized := isMember // TODO || isViewPasswordVerfied
 		for k, service := range stats {
-			if !authorized {
-				if !service.Service.EnableShowInService {
-					delete(stats, k)
-					continue
-				}
-				service.Service = &model.Service{Name: service.Service.Name}
-				stats[k] = service
+			if !service.Service.EnableShowInService {
+				delete(stats, k)
+				continue
 			}
+			service.Service = &model.Service{Name: service.Service.Name}
+			stats[k] = service
 		}
 		return []interface {
 		}{
@@ -55,6 +51,27 @@ func listService(c *gin.Context) (*model.ServiceResponse, error) {
 		Services:           res.([]interface{})[0].(map[uint64]model.ServiceResponseItem),
 		CycleTransferStats: res.([]interface{})[1].(map[uint64]model.CycleTransferStats),
 	}, nil
+}
+
+// List service
+// @Summary List service
+// @Security BearerAuth
+// @Schemes
+// @Description List service
+// @Tags auth required
+// @Produce json
+// @Success 200 {object} model.CommonResponse[[]model.Service]
+// @Router /service [get]
+func listService(c *gin.Context) ([]*model.Service, error) {
+	singleton.ServiceSentinelShared.ServicesLock.RLock()
+	defer singleton.ServiceSentinelShared.ServicesLock.RUnlock()
+
+	var ss []*model.Service
+	if err := copier.Copy(&ss, singleton.ServiceSentinelShared.ServiceList); err != nil {
+		return nil, err
+	}
+
+	return ss, nil
 }
 
 // List service histories by server id
@@ -218,7 +235,12 @@ func createService(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
-	return m.ID, singleton.ServiceSentinelShared.OnServiceUpdate(m)
+	if err := singleton.ServiceSentinelShared.OnServiceUpdate(m); err != nil {
+		return 0, err
+	}
+
+	singleton.ServiceSentinelShared.UpdateServiceList()
+	return m.ID, nil
 }
 
 // Update service
@@ -281,7 +303,12 @@ func updateService(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
-	return nil, singleton.ServiceSentinelShared.OnServiceUpdate(m)
+	if err := singleton.ServiceSentinelShared.OnServiceUpdate(m); err != nil {
+		return nil, err
+	}
+
+	singleton.ServiceSentinelShared.UpdateServiceList()
+	return nil, nil
 }
 
 // Batch delete service
@@ -310,5 +337,6 @@ func batchDeleteService(c *gin.Context) (any, error) {
 		return nil, err
 	}
 	singleton.ServiceSentinelShared.OnServiceDelete(ids)
+	singleton.ServiceSentinelShared.UpdateServiceList()
 	return nil, nil
 }

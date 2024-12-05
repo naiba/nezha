@@ -3,12 +3,13 @@ package singleton
 import (
 	"fmt"
 	"log"
-	"sort"
+	"slices"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 	pb "github.com/nezhahq/nezha/proto"
 )
 
@@ -104,8 +105,10 @@ type ServiceSentinel struct {
 	lastStatus                              map[uint64]int
 	tlsCertCache                            map[uint64]string
 
-	ServicesLock sync.RWMutex
-	Services     map[uint64]*model.Service
+	ServicesLock    sync.RWMutex
+	ServiceListLock sync.RWMutex
+	Services        map[uint64]*model.Service
+	ServiceList     []*model.Service
 
 	// 30天数据缓存
 	monthlyStatusLock sync.Mutex
@@ -157,17 +160,21 @@ func (ss *ServiceSentinel) Dispatch(r ReportData) {
 	ss.serviceReportChannel <- r
 }
 
-func (ss *ServiceSentinel) GetServiceList() []*model.Service {
+func (ss *ServiceSentinel) UpdateServiceList() {
 	ss.ServicesLock.RLock()
 	defer ss.ServicesLock.RUnlock()
-	var services []*model.Service
+
+	ss.ServiceListLock.Lock()
+	defer ss.ServiceListLock.Unlock()
+
+	ss.ServiceList = make([]*model.Service, 0, len(ss.Services))
 	for _, v := range ss.Services {
-		services = append(services, v)
+		ss.ServiceList = append(ss.ServiceList, v)
 	}
-	sort.SliceStable(services, func(i, j int) bool {
-		return services[i].ID < services[j].ID
+
+	slices.SortFunc(ss.ServiceList, func(a, b *model.Service) int {
+		return utils.Compare(a.ID, b.ID)
 	})
-	return services
 }
 
 // loadServiceHistory 加载服务监控器的历史状态信息
@@ -198,6 +205,7 @@ func (ss *ServiceSentinel) loadServiceHistory() {
 		ss.serviceCurrentStatusData[services[i].ID] = make([]*pb.TaskResult, _CurrentStatusSize)
 		ss.serviceStatusToday[services[i].ID] = &_TodayStatsOfService{}
 	}
+	ss.ServiceList = services
 
 	year, month, day := time.Now().Date()
 	today := time.Date(year, month, day, 0, 0, 0, 0, Loc)
@@ -291,6 +299,8 @@ func (ss *ServiceSentinel) OnServiceDelete(ids []uint64) {
 }
 
 func (ss *ServiceSentinel) LoadStats() map[uint64]*model.ServiceResponseItem {
+	ss.ServicesLock.RLock()
+	defer ss.ServicesLock.RUnlock()
 	ss.serviceResponseDataStoreLock.RLock()
 	defer ss.serviceResponseDataStoreLock.RUnlock()
 	ss.monthlyStatusLock.Lock()
