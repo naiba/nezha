@@ -20,8 +20,8 @@ import (
 // @Success 200 {object} model.CommonResponse[[]model.Notification]
 // @Router /notification [get]
 func listNotification(c *gin.Context) ([]*model.Notification, error) {
-	singleton.NotificationsLock.RLock()
-	defer singleton.NotificationsLock.RUnlock()
+	singleton.NotificationSortedLock.RLock()
+	defer singleton.NotificationSortedLock.RUnlock()
 
 	var notifications []*model.Notification
 	if err := copier.Copy(&notifications, &singleton.NotificationListSorted); err != nil {

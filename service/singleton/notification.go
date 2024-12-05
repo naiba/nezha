@@ -24,8 +24,9 @@ var (
 	NotificationListSorted []*model.Notification
 	NotificationGroup      map[uint64]string // [NotificationGroupID] -> [NotificationGroupName]
 
-	NotificationsLock     sync.RWMutex
-	NotificationGroupLock sync.RWMutex
+	NotificationsLock      sync.RWMutex
+	NotificationSortedLock sync.RWMutex
+	NotificationGroupLock  sync.RWMutex
 )
 
 // InitNotification 初始化 GroupID <-> ID <-> Notification 的映射
@@ -80,6 +81,9 @@ func loadNotifications() {
 func UpdateNotificationList() {
 	NotificationsLock.RLock()
 	defer NotificationsLock.RUnlock()
+
+	NotificationSortedLock.Lock()
+	defer NotificationSortedLock.Unlock()
 
 	NotificationListSorted = make([]*model.Notification, 0, len(NotificationMap))
 	for _, n := range NotificationMap {

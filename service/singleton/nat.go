@@ -14,6 +14,7 @@ var (
 
 	NATIDToDomain = make(map[uint64]string)
 	NATList       []*model.NAT
+	NATListLock   sync.RWMutex
 )
 
 func initNAT() {
@@ -54,6 +55,9 @@ func OnNATDelete(id []uint64) {
 func UpdateNATList() {
 	NATCacheRwLock.RLock()
 	defer NATCacheRwLock.RUnlock()
+
+	NATListLock.Lock()
+	defer NATListLock.Unlock()
 
 	NATList = make([]*model.NAT, 0, len(NATCache))
 	for _, n := range NATCache {

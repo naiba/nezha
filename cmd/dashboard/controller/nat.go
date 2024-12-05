@@ -22,8 +22,8 @@ import (
 func listNAT(c *gin.Context) ([]*model.NAT, error) {
 	var n []*model.NAT
 
-	singleton.NATCacheRwLock.RLock()
-	defer singleton.NATCacheRwLock.RUnlock()
+	singleton.NATListLock.RLock()
+	defer singleton.NATListLock.RUnlock()
 
 	if err := copier.Copy(&n, &singleton.NATList); err != nil {
 		return nil, err

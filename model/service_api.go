@@ -21,7 +21,7 @@ type ServiceForm struct {
 }
 
 type ServiceResponseItem struct {
-	Service     *Service     `json:"service,omitempty"`
+	ServiceName string       `json:"service_name,omitempty"`
 	CurrentUp   uint64       `json:"current_up"`
 	CurrentDown uint64       `json:"current_down"`
 	TotalUp     uint64       `json:"total_up"`

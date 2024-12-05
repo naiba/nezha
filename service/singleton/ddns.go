@@ -19,6 +19,7 @@ var (
 	DDNSCache     map[uint64]*model.DDNSProfile
 	DDNSCacheLock sync.RWMutex
 	DDNSList      []*model.DDNSProfile
+	DDNSListLock  sync.RWMutex
 )
 
 func initDDNS() {
@@ -51,6 +52,9 @@ func OnDDNSDelete(id []uint64) {
 func UpdateDDNSList() {
 	DDNSCacheLock.RLock()
 	defer DDNSCacheLock.RUnlock()
+
+	DDNSListLock.Lock()
+	defer DDNSListLock.Unlock()
 
 	DDNSList = make([]*model.DDNSProfile, 0, len(DDNSCache))
 	for _, p := range DDNSCache {
