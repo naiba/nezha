@@ -22,6 +22,7 @@ jobs:
         uses: jaywcjlove/github-action-modify-file-content@main
         with:
           message: update contributors[no ci]
+          token: ${{ secrets.NAIBA_PAT }}
           openDelimiter: '<!--GAMFC_DELIMITER-->'
           closeDelimiter: '<!--GAMFC_DELIMITER_END-->'
           path: README.md
