@@ -23,8 +23,8 @@ import (
 func listDDNS(c *gin.Context) ([]*model.DDNSProfile, error) {
 	var ddnsProfiles []*model.DDNSProfile
 
-	singleton.DDNSListLock.Lock()
-	defer singleton.DDNSListLock.Unlock()
+	singleton.DDNSListLock.RLock()
+	defer singleton.DDNSListLock.RUnlock()
 
 	if err := copier.Copy(&ddnsProfiles, &singleton.DDNSList); err != nil {
 		return nil, err
