@@ -63,6 +63,7 @@ func (a *authHandler) Check(ctx context.Context) (uint64, error) {
 		}
 		s.Host = &model.Host{}
 		s.State = &model.HostState{}
+		s.GeoIP = &model.GeoIP{}
 		// generate a random silly server name
 		singleton.ServerList[s.ID] = &s
 		singleton.ServerUUIDToID[clientUUID] = s.ID
