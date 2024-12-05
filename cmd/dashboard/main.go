@@ -112,7 +112,7 @@ func main() {
 	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)
 	initSystem()
 
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", singleton.Conf.ListenPort))
+	l, err := net.Listen("tcp", fmt.Sprintf("%s:%d", singleton.Conf.ListenHost, singleton.Conf.ListenPort))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +135,7 @@ func main() {
 	go dispatchReportInfoTask()
 
 	if err := graceful.Graceful(func() error {
-		log.Println("NEZHA>> Dashboard::START", singleton.Conf.ListenPort)
+		log.Printf("NEZHA>> Dashboard::START ON %s:%d", singleton.Conf.ListenHost, singleton.Conf.ListenPort)
 		return muxServer.Serve(l)
 	}, func(c context.Context) error {
 		log.Println("NEZHA>> Graceful::START")
