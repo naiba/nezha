@@ -19,11 +19,11 @@ type SettingForm struct {
 }
 
 type UserTemplate struct {
-	Path      string `json:"path,omitempty"`
-	Name      string `json:"name,omitempty"`
-	GitHub    string `json:"github,omitempty"`
-	Author    string `json:"author,omitempty"`
-	Community bool   `json:"community,omitempty"`
+	Path       string `json:"path,omitempty"`
+	Name       string `json:"name,omitempty"`
+	Repository string `json:"repository,omitempty"`
+	Author     string `json:"author,omitempty"`
+	Community  bool   `json:"community,omitempty"`
 }
 
 type SettingResponse struct {
