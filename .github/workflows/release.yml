@@ -32,7 +32,7 @@ jobs:
       - uses: robinraju/release-downloader@v1
         with:
           repository: nezhahq/admin-frontend
-          tag: v1.0.20
+          tag: v1.0.21
           fileName: dist.zip
           latest: true
           extract: true
@@ -45,7 +45,7 @@ jobs:
       - uses: robinraju/release-downloader@v1
         with:
           repository: nezhahq/user-frontend
-          tag: v1.0.11
+          tag: v1.0.12
           fileName: dist.zip
           latest: true
           extract: true
@@ -54,6 +54,19 @@ jobs:
         run: |
           rm -rf cmd/dashboard/user-dist
           mv dist cmd/dashboard/user-dist
+
+      - uses: robinraju/release-downloader@v1
+        with:
+          repository: hi2shark/nazhua
+          tag: v0.4.2
+          fileName: dist.zip
+          latest: true
+          extract: true
+
+      - name: prepare nazhua-frontend dists
+        run: |
+          rm -rf cmd/dashboard/nazhua-dist
+          mv dist cmd/dashboard/nazhua-dist
 
       - name: Fetch IPInfo GeoIP Database
         env:
