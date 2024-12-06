@@ -21,16 +21,16 @@ var (
 	Loc           *time.Location
 	UserTemplates = []model.UserTemplate{
 		{
-			Path:   "user-dist",
-			Name:   "Official",
-			GitHub: "https://github.com/hamster1963/nezha-dash",
-			Author: "hamster1963",
+			Path:       "user-dist",
+			Name:       "Official",
+			Repository: "https://github.com/hamster1963/nezha-dash",
+			Author:     "hamster1963",
 		}, {
-			Path:      "nazhua-dist",
-			Name:      "Nazhua",
-			GitHub:    "https://github.com/hi2shark/nazhua",
-			Author:    "hi2hi",
-			Community: true,
+			Path:       "nazhua-dist",
+			Name:       "Nazhua",
+			Repository: "https://github.com/hi2shark/nazhua",
+			Author:     "hi2hi",
+			Community:  true,
 		},
 	}
 )
