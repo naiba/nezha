@@ -34,10 +34,8 @@ type DashboardCliParam struct {
 
 var (
 	dashboardCliParam DashboardCliParam
-	//go:embed admin-dist
-	adminFrontend embed.FS
-	//go:embed user-dist
-	userFrontend embed.FS
+	//go:embed *-dist
+	frontendDist embed.FS
 )
 
 func initSystem() {
@@ -125,7 +123,7 @@ func main() {
 	singleton.NewServiceSentinel(serviceSentinelDispatchBus)
 
 	grpcHandler := rpc.ServeRPC()
-	httpHandler := controller.ServeWeb(adminFrontend, userFrontend)
+	httpHandler := controller.ServeWeb(frontendDist)
 	controller.InitUpgrader()
 
 	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)

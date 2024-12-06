@@ -23,7 +23,7 @@ import (
 	"github.com/nezhahq/nezha/service/singleton"
 )
 
-func ServeWeb(adminFrontend, userFrontend fs.FS) http.Handler {
+func ServeWeb(frontendDist fs.FS) http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
@@ -40,12 +40,12 @@ func ServeWeb(adminFrontend, userFrontend fs.FS) http.Handler {
 	r.Use(waf.Waf)
 	r.Use(recordPath)
 
-	routers(r, adminFrontend, userFrontend)
+	routers(r, frontendDist)
 
 	return r
 }
 
-func routers(r *gin.Engine, adminFrontend, userFrontend fs.FS) {
+func routers(r *gin.Engine, frontendDist fs.FS) {
 	authMiddleware, err := jwt.New(initParams())
 	if err != nil {
 		log.Fatal("JWT Error:" + err.Error())
@@ -133,7 +133,7 @@ func routers(r *gin.Engine, adminFrontend, userFrontend fs.FS) {
 
 	auth.PATCH("/setting", commonHandler(updateConfig))
 
-	r.NoRoute(fallbackToFrontend(adminFrontend, userFrontend))
+	r.NoRoute(fallbackToFrontend(frontendDist))
 }
 
 func recordPath(c *gin.Context) {
@@ -212,7 +212,7 @@ func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	}
 }
 
-func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
+func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
 	checkLocalFileOrFs := func(c *gin.Context, fs fs.FS, path string) bool {
 		if _, err := os.Stat(path); err == nil {
 			c.File(path)
@@ -241,19 +241,19 @@ func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
 			stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
 			localFilePath := path.Join("admin-dist", stripPath)
-			if checkLocalFileOrFs(c, adminFrontend, localFilePath) {
+			if checkLocalFileOrFs(c, frontendDist, localFilePath) {
 				return
 			}
-			if !checkLocalFileOrFs(c, adminFrontend, "admin-dist/index.html") {
+			if !checkLocalFileOrFs(c, frontendDist, "admin-dist/index.html") {
 				c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
 			}
 			return
 		}
 		localFilePath := path.Join(singleton.Conf.UserTemplate, c.Request.URL.Path)
-		if checkLocalFileOrFs(c, userFrontend, localFilePath) {
+		if checkLocalFileOrFs(c, frontendDist, localFilePath) {
 			return
 		}
-		if !checkLocalFileOrFs(c, userFrontend, singleton.Conf.UserTemplate+"/index.html") {
+		if !checkLocalFileOrFs(c, frontendDist, singleton.Conf.UserTemplate+"/index.html") {
 			c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
 		}
 	}
