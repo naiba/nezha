@@ -15,10 +15,24 @@ import (
 var Version = "debug"
 
 var (
-	Conf  *model.Config
-	Cache *cache.Cache
-	DB    *gorm.DB
-	Loc   *time.Location
+	Conf          *model.Config
+	Cache         *cache.Cache
+	DB            *gorm.DB
+	Loc           *time.Location
+	UserTemplates = []model.UserTemplate{
+		{
+			Path:   "user-dist",
+			Name:   "Official",
+			GitHub: "https://github.com/hamster1963/nezha-dash",
+			Author: "hamster1963",
+		}, {
+			Path:      "nazhua-dist",
+			Name:      "Nazhua",
+			GitHub:    "https://github.com/hi2shark/nazhua",
+			Author:    "hi2hi",
+			Community: true,
+		},
+	}
 )
 
 func InitTimezoneAndCache() {
@@ -44,7 +58,7 @@ func LoadSingleton() {
 // InitConfigFromPath 从给出的文件路径中加载配置
 func InitConfigFromPath(path string) {
 	Conf = &model.Config{}
-	err := Conf.Read(path)
+	err := Conf.Read(path, UserTemplates)
 	if err != nil {
 		panic(err)
 	}

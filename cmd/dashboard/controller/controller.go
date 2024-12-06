@@ -249,11 +249,11 @@ func fallbackToFrontend(adminFrontend, userFrontend fs.FS) func(*gin.Context) {
 			}
 			return
 		}
-		localFilePath := path.Join("user-dist", c.Request.URL.Path)
+		localFilePath := path.Join(singleton.Conf.UserTemplate, c.Request.URL.Path)
 		if checkLocalFileOrFs(c, userFrontend, localFilePath) {
 			return
 		}
-		if !checkLocalFileOrFs(c, userFrontend, "user-dist/index.html") {
+		if !checkLocalFileOrFs(c, userFrontend, singleton.Conf.UserTemplate+"/index.html") {
 			c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
 		}
 	}

@@ -82,7 +82,7 @@ func updateProfile(c *gin.Context) (any, error) {
 // @Router /user [get]
 func listUser(c *gin.Context) ([]model.User, error) {
 	var users []model.User
-	if err := singleton.DB.Find(&users).Error; err != nil {
+	if err := singleton.DB.Omit("password").Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

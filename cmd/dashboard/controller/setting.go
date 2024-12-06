@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"errors"
+
 	"github.com/gin-gonic/gin"
 
 	"github.com/nezhahq/nezha/model"
@@ -21,8 +23,9 @@ func listConfig(c *gin.Context) (model.SettingResponse, error) {
 	authorized := isMember // TODO || isViewPasswordVerfied
 
 	conf := model.SettingResponse{
-		Config:  *singleton.Conf,
-		Version: singleton.Version,
+		Config:        *singleton.Conf,
+		Version:       singleton.Version,
+		UserTemplates: singleton.UserTemplates,
 	}
 
 	if !authorized {
@@ -55,7 +58,16 @@ func updateConfig(c *gin.Context) (any, error) {
 	if err := c.ShouldBindJSON(&sf); err != nil {
 		return nil, err
 	}
-
+	var userTemplateValid bool
+	for _, v := range singleton.UserTemplates {
+		if v.Path == sf.UserTemplate {
+			userTemplateValid = true
+			break
+		}
+	}
+	if !userTemplateValid {
+		return nil, errors.New("invalid user template")
+	}
 	singleton.Conf.Language = sf.Language
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification
@@ -69,6 +81,7 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.CustomCodeDashboard = sf.CustomCodeDashboard
 	singleton.Conf.RealIPHeader = sf.RealIPHeader
 	singleton.Conf.TLS = sf.TLS
+	singleton.Conf.UserTemplate = sf.UserTemplate
 
 	if err := singleton.Conf.Save(); err != nil {
 		return nil, newGormError("%v", err)

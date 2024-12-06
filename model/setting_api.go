@@ -11,14 +11,24 @@ type SettingForm struct {
 	CustomCode                  string `json:"custom_code,omitempty" validate:"optional"`
 	CustomCodeDashboard         string `json:"custom_code_dashboard,omitempty" validate:"optional"`
 	RealIPHeader                string `json:"real_ip_header,omitempty" validate:"optional"` // 真实IP
+	UserTemplate                string `json:"user_template,omitempty" validate:"optional"`
 
 	TLS                         bool `json:"tls,omitempty" validate:"optional"`
 	EnableIPChangeNotification  bool `json:"enable_ip_change_notification,omitempty" validate:"optional"`
 	EnablePlainIPInNotification bool `json:"enable_plain_ip_in_notification,omitempty" validate:"optional"`
 }
 
+type UserTemplate struct {
+	Path      string `json:"path,omitempty"`
+	Name      string `json:"name,omitempty"`
+	GitHub    string `json:"github,omitempty"`
+	Author    string `json:"author,omitempty"`
+	Community bool   `json:"community,omitempty"`
+}
+
 type SettingResponse struct {
 	Config
 
-	Version string `json:"version,omitempty"`
+	Version       string         `json:"version,omitempty"`
+	UserTemplates []UserTemplate `json:"user_templates,omitempty"`
 }
