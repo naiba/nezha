@@ -97,6 +97,12 @@ def sync_to_gitee(tag: str, body: str, files: slice):
             f"Request failed with status code {release_api_response.status_code}")
 
     print(f"Gitee release id: {release_id}")
+    
+    # 仅保留最新 Release 以防超出 Gitee 仓库配额
+    try:
+        delete_gitee_releases(release_id, api_client,
+                              release_api_uri, access_token)
+
     asset_api_uri = f"{release_api_uri}/{release_id}/attach_files"
 
     for file_path in files:
@@ -119,10 +125,6 @@ def sync_to_gitee(tag: str, body: str, files: slice):
                 print(
                     f"Request failed with status code {asset_api_response.status_code}")
 
-    # 仅保留最新 Release 以防超出 Gitee 仓库配额
-    try:
-        delete_gitee_releases(release_id, api_client,
-                              release_api_uri, access_token)
     except ValueError as e:
         print(e)
 

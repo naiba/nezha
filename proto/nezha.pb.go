@@ -566,7 +566,7 @@ func (x *Receipt) GetProced() bool {
 	return false
 }
 
-type Unit64Receipt struct {
+type Uint64Receipt struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -574,8 +574,8 @@ type Unit64Receipt struct {
 	Data uint64 `protobuf:"varint,1,opt,name=data,proto3" json:"data,omitempty"`
 }
 
-func (x *Unit64Receipt) Reset() {
-	*x = Unit64Receipt{}
+func (x *Uint64Receipt) Reset() {
+	*x = Uint64Receipt{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_proto_nezha_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -583,13 +583,13 @@ func (x *Unit64Receipt) Reset() {
 	}
 }
 
-func (x *Unit64Receipt) String() string {
+func (x *Uint64Receipt) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Unit64Receipt) ProtoMessage() {}
+func (*Uint64Receipt) ProtoMessage() {}
 
-func (x *Unit64Receipt) ProtoReflect() protoreflect.Message {
+func (x *Uint64Receipt) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_nezha_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -601,12 +601,12 @@ func (x *Unit64Receipt) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Unit64Receipt.ProtoReflect.Descriptor instead.
-func (*Unit64Receipt) Descriptor() ([]byte, []int) {
+// Deprecated: Use Uint64Receipt.ProtoReflect.Descriptor instead.
+func (*Uint64Receipt) Descriptor() ([]byte, []int) {
 	return file_proto_nezha_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *Unit64Receipt) GetData() uint64 {
+func (x *Uint64Receipt) GetData() uint64 {
 	if x != nil {
 		return x.Data
 	}
@@ -856,7 +856,7 @@ var file_proto_nezha_proto_rawDesc = []byte{
 	0x66, 0x75, 0x6c, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0a, 0x73, 0x75, 0x63, 0x63, 0x65,
 	0x73, 0x73, 0x66, 0x75, 0x6c, 0x22, 0x21, 0x0a, 0x07, 0x52, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74,
 	0x12, 0x16, 0x0a, 0x06, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08,
-	0x52, 0x06, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x64, 0x22, 0x23, 0x0a, 0x0d, 0x55, 0x6e, 0x69, 0x74,
+	0x52, 0x06, 0x70, 0x72, 0x6f, 0x63, 0x65, 0x64, 0x22, 0x23, 0x0a, 0x0d, 0x55, 0x69, 0x6e, 0x74,
 	0x36, 0x34, 0x52, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x64, 0x61, 0x74,
 	0x61, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x04, 0x64, 0x61, 0x74, 0x61, 0x22, 0x22, 0x0a,
 	0x0c, 0x49, 0x4f, 0x53, 0x74, 0x72, 0x65, 0x61, 0x6d, 0x44, 0x61, 0x74, 0x61, 0x12, 0x12, 0x0a,
@@ -890,7 +890,7 @@ var file_proto_nezha_proto_rawDesc = []byte{
 	0x6f, 0x49, 0x50, 0x22, 0x00, 0x12, 0x38, 0x0a, 0x11, 0x52, 0x65, 0x70, 0x6f, 0x72, 0x74, 0x53,
 	0x79, 0x73, 0x74, 0x65, 0x6d, 0x49, 0x6e, 0x66, 0x6f, 0x32, 0x12, 0x0b, 0x2e, 0x70, 0x72, 0x6f,
 	0x74, 0x6f, 0x2e, 0x48, 0x6f, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e,
-	0x55, 0x6e, 0x69, 0x74, 0x36, 0x34, 0x52, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74, 0x22, 0x00, 0x42,
+	0x55, 0x69, 0x6e, 0x74, 0x36, 0x34, 0x52, 0x65, 0x63, 0x65, 0x69, 0x70, 0x74, 0x22, 0x00, 0x42,
 	0x09, 0x5a, 0x07, 0x2e, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x33,
 }
@@ -915,7 +915,7 @@ var file_proto_nezha_proto_goTypes = []any{
 	(*Task)(nil),                    // 3: proto.Task
 	(*TaskResult)(nil),              // 4: proto.TaskResult
 	(*Receipt)(nil),                 // 5: proto.Receipt
-	(*Unit64Receipt)(nil),           // 6: proto.Unit64Receipt
+	(*Uint64Receipt)(nil),           // 6: proto.Uint64Receipt
 	(*IOStreamData)(nil),            // 7: proto.IOStreamData
 	(*GeoIP)(nil),                   // 8: proto.GeoIP
 	(*IP)(nil),                      // 9: proto.IP
@@ -934,7 +934,7 @@ var file_proto_nezha_proto_depIdxs = []int32{
 	3, // 10: proto.NezhaService.RequestTask:output_type -> proto.Task
 	7, // 11: proto.NezhaService.IOStream:output_type -> proto.IOStreamData
 	8, // 12: proto.NezhaService.ReportGeoIP:output_type -> proto.GeoIP
-	6, // 13: proto.NezhaService.ReportSystemInfo2:output_type -> proto.Unit64Receipt
+	6, // 13: proto.NezhaService.ReportSystemInfo2:output_type -> proto.Uint64Receipt
 	8, // [8:14] is the sub-list for method output_type
 	2, // [2:8] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
@@ -1021,7 +1021,7 @@ func file_proto_nezha_proto_init() {
 			}
 		}
 		file_proto_nezha_proto_msgTypes[6].Exporter = func(v any, i int) any {
-			switch v := v.(*Unit64Receipt); i {
+			switch v := v.(*Uint64Receipt); i {
 			case 0:
 				return &v.state
 			case 1:

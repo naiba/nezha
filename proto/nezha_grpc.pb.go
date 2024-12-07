@@ -36,7 +36,7 @@ type NezhaServiceClient interface {
 	RequestTask(ctx context.Context, opts ...grpc.CallOption) (NezhaService_RequestTaskClient, error)
 	IOStream(ctx context.Context, opts ...grpc.CallOption) (NezhaService_IOStreamClient, error)
 	ReportGeoIP(ctx context.Context, in *GeoIP, opts ...grpc.CallOption) (*GeoIP, error)
-	ReportSystemInfo2(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Unit64Receipt, error)
+	ReportSystemInfo2(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Uint64Receipt, error)
 }
 
 type nezhaServiceClient struct {
@@ -158,8 +158,8 @@ func (c *nezhaServiceClient) ReportGeoIP(ctx context.Context, in *GeoIP, opts ..
 	return out, nil
 }
 
-func (c *nezhaServiceClient) ReportSystemInfo2(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Unit64Receipt, error) {
-	out := new(Unit64Receipt)
+func (c *nezhaServiceClient) ReportSystemInfo2(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Uint64Receipt, error) {
+	out := new(Uint64Receipt)
 	err := c.cc.Invoke(ctx, NezhaService_ReportSystemInfo2_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ type NezhaServiceServer interface {
 	RequestTask(NezhaService_RequestTaskServer) error
 	IOStream(NezhaService_IOStreamServer) error
 	ReportGeoIP(context.Context, *GeoIP) (*GeoIP, error)
-	ReportSystemInfo2(context.Context, *Host) (*Unit64Receipt, error)
+	ReportSystemInfo2(context.Context, *Host) (*Uint64Receipt, error)
 }
 
 // UnimplementedNezhaServiceServer should be embedded to have forward compatible implementations.
@@ -198,7 +198,7 @@ func (UnimplementedNezhaServiceServer) IOStream(NezhaService_IOStreamServer) err
 func (UnimplementedNezhaServiceServer) ReportGeoIP(context.Context, *GeoIP) (*GeoIP, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportGeoIP not implemented")
 }
-func (UnimplementedNezhaServiceServer) ReportSystemInfo2(context.Context, *Host) (*Unit64Receipt, error) {
+func (UnimplementedNezhaServiceServer) ReportSystemInfo2(context.Context, *Host) (*Uint64Receipt, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportSystemInfo2 not implemented")
 }
 

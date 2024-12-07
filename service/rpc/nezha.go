@@ -145,9 +145,9 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	return &pb.Receipt{Proced: true}, nil
 }
 
-func (s *NezhaHandler) ReportSystemInfo2(c context.Context, r *pb.Host) (*pb.Unit64Receipt, error) {
+func (s *NezhaHandler) ReportSystemInfo2(c context.Context, r *pb.Host) (*pb.Uint64Receipt, error) {
 	s.onReportSystemInfo(c, r)
-	return &pb.Unit64Receipt{Data: singleton.DashboardBootTime}, nil
+	return &pb.Uint64Receipt{Data: singleton.DashboardBootTime}, nil
 }
 
 func (s *NezhaHandler) IOStream(stream pb.NezhaService_IOStreamServer) error {
