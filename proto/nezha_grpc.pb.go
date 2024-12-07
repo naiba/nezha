@@ -24,6 +24,7 @@ const (
 	NezhaService_RequestTask_FullMethodName       = "/proto.NezhaService/RequestTask"
 	NezhaService_IOStream_FullMethodName          = "/proto.NezhaService/IOStream"
 	NezhaService_ReportGeoIP_FullMethodName       = "/proto.NezhaService/ReportGeoIP"
+	NezhaService_ReportSystemInfo2_FullMethodName = "/proto.NezhaService/ReportSystemInfo2"
 )
 
 // NezhaServiceClient is the client API for NezhaService service.
@@ -35,6 +36,7 @@ type NezhaServiceClient interface {
 	RequestTask(ctx context.Context, opts ...grpc.CallOption) (NezhaService_RequestTaskClient, error)
 	IOStream(ctx context.Context, opts ...grpc.CallOption) (NezhaService_IOStreamClient, error)
 	ReportGeoIP(ctx context.Context, in *GeoIP, opts ...grpc.CallOption) (*GeoIP, error)
+	ReportSystemInfo2(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Unit64Receipt, error)
 }
 
 type nezhaServiceClient struct {
@@ -156,6 +158,15 @@ func (c *nezhaServiceClient) ReportGeoIP(ctx context.Context, in *GeoIP, opts ..
 	return out, nil
 }
 
+func (c *nezhaServiceClient) ReportSystemInfo2(ctx context.Context, in *Host, opts ...grpc.CallOption) (*Unit64Receipt, error) {
+	out := new(Unit64Receipt)
+	err := c.cc.Invoke(ctx, NezhaService_ReportSystemInfo2_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NezhaServiceServer is the server API for NezhaService service.
 // All implementations should embed UnimplementedNezhaServiceServer
 // for forward compatibility
@@ -165,6 +176,7 @@ type NezhaServiceServer interface {
 	RequestTask(NezhaService_RequestTaskServer) error
 	IOStream(NezhaService_IOStreamServer) error
 	ReportGeoIP(context.Context, *GeoIP) (*GeoIP, error)
+	ReportSystemInfo2(context.Context, *Host) (*Unit64Receipt, error)
 }
 
 // UnimplementedNezhaServiceServer should be embedded to have forward compatible implementations.
@@ -185,6 +197,9 @@ func (UnimplementedNezhaServiceServer) IOStream(NezhaService_IOStreamServer) err
 }
 func (UnimplementedNezhaServiceServer) ReportGeoIP(context.Context, *GeoIP) (*GeoIP, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReportGeoIP not implemented")
+}
+func (UnimplementedNezhaServiceServer) ReportSystemInfo2(context.Context, *Host) (*Unit64Receipt, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ReportSystemInfo2 not implemented")
 }
 
 // UnsafeNezhaServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -312,6 +327,24 @@ func _NezhaService_ReportGeoIP_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NezhaService_ReportSystemInfo2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Host)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NezhaServiceServer).ReportSystemInfo2(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NezhaService_ReportSystemInfo2_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NezhaServiceServer).ReportSystemInfo2(ctx, req.(*Host))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NezhaService_ServiceDesc is the grpc.ServiceDesc for NezhaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -326,6 +359,10 @@ var NezhaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ReportGeoIP",
 			Handler:    _NezhaService_ReportGeoIP_Handler,
+		},
+		{
+			MethodName: "ReportSystemInfo2",
+			Handler:    _NezhaService_ReportSystemInfo2_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

@@ -33,6 +33,7 @@ var (
 			Community:  true,
 		},
 	}
+	DashboardBootTime = uint64(time.Now().Unix())
 )
 
 func InitTimezoneAndCache() {

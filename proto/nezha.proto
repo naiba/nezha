@@ -9,6 +9,7 @@ service NezhaService {
   rpc RequestTask(stream TaskResult) returns (stream Task) {}
   rpc IOStream(stream IOStreamData) returns (stream IOStreamData) {}
   rpc ReportGeoIP(GeoIP) returns (GeoIP) {}
+  rpc ReportSystemInfo2(Host) returns (Unit64Receipt) {}
 }
 
 message Host {
@@ -65,6 +66,8 @@ message TaskResult {
 }
 
 message Receipt { bool proced = 1; }
+
+message Unit64Receipt { uint64 data = 1; }
 
 message IOStreamData { bytes data = 1; }
 

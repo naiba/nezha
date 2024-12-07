@@ -116,11 +116,11 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 	}
 }
 
-func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Receipt, error) {
+func (s *NezhaHandler) onReportSystemInfo(c context.Context, r *pb.Host) error {
 	var clientID uint64
 	var err error
 	if clientID, err = s.Auth.Check(c); err != nil {
-		return nil, err
+		return err
 	}
 	host := model.PB2Host(r)
 	singleton.ServerLock.RLock()
@@ -137,7 +137,17 @@ func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Rece
 	}
 
 	singleton.ServerList[clientID].Host = &host
+	return nil
+}
+
+func (s *NezhaHandler) ReportSystemInfo(c context.Context, r *pb.Host) (*pb.Receipt, error) {
+	s.onReportSystemInfo(c, r)
 	return &pb.Receipt{Proced: true}, nil
+}
+
+func (s *NezhaHandler) ReportSystemInfo2(c context.Context, r *pb.Host) (*pb.Unit64Receipt, error) {
+	s.onReportSystemInfo(c, r)
+	return &pb.Unit64Receipt{Data: singleton.DashboardBootTime}, nil
 }
 
 func (s *NezhaHandler) IOStream(stream pb.NezhaService_IOStreamServer) error {

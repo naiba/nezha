@@ -22,7 +22,7 @@ const (
 	TaskTypeKeepalive
 	TaskTypeTerminalGRPC
 	TaskTypeNAT
-	TaskTypeReportHostInfo
+	TaskTypeReportHostInfoDeprecated
 	TaskTypeFM
 )
 

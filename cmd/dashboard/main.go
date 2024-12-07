@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"embed"
-	_ "embed"
 	"flag"
 	"fmt"
 	"log"
@@ -130,8 +129,6 @@ func main() {
 	http2Server := &http2.Server{}
 	muxServer := &http.Server{Handler: h2c.NewHandler(muxHandler, http2Server), ReadHeaderTimeout: time.Second * 5}
 
-	go dispatchReportInfoTask()
-
 	if err := graceful.Graceful(func() error {
 		log.Printf("NEZHA>> Dashboard::START ON %s:%d", singleton.Conf.ListenHost, singleton.Conf.ListenPort)
 		return muxServer.Serve(l)
@@ -142,21 +139,6 @@ func main() {
 		return muxServer.Shutdown(c)
 	}); err != nil {
 		log.Printf("NEZHA>> ERROR: %v", err)
-	}
-}
-
-func dispatchReportInfoTask() {
-	time.Sleep(time.Second * 15)
-	singleton.ServerLock.RLock()
-	defer singleton.ServerLock.RUnlock()
-	for _, server := range singleton.ServerList {
-		if server == nil || server.TaskStream == nil {
-			continue
-		}
-		server.TaskStream.Send(&proto.Task{
-			Type: model.TaskTypeReportHostInfo,
-			Data: "",
-		})
 	}
 }
 
