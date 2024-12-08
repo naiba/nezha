@@ -3,20 +3,21 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-11-23 23:56+0800\n"
-"PO-Revision-Date: 2024-11-01 13:19+0800\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"PO-Revision-Date: 2024-12-08 13:27+0000\n"
+"Last-Translator: UUBulb <uub@kuzu.uk>\n"
+"Language-Team: Chinese (Traditional Han script) <https://hosted.weblate.org/"
+"projects/nezha/nezha-dashboard/zh_Hant/>\n"
 "Language: zh_TW\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 3.5\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Weblate 5.9-dev\n"
 
 #: cmd/dashboard/controller/alertrule.go:100
 #, c-format
@@ -165,7 +166,7 @@ msgstr "註冊失敗的任務：["
 #: service/singleton/crontask.go:60
 msgid ""
 "] These tasks will not execute properly. Fix them in the admin dashboard."
-msgstr "這些任務將無法正常執行,請進入後台重新修改儲存。"
+msgstr "] 這些任務將無法正常執行,請進入後台重新修改儲存。"
 
 #: service/singleton/crontask.go:146 service/singleton/crontask.go:171
 #, c-format
