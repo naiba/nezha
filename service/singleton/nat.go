@@ -1,11 +1,11 @@
 package singleton
 
 import (
+	"cmp"
 	"slices"
 	"sync"
 
 	"github.com/nezhahq/nezha/model"
-	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 var (
@@ -64,7 +64,7 @@ func UpdateNATList() {
 		NATList = append(NATList, n)
 	}
 	slices.SortFunc(NATList, func(a, b *model.NAT) int {
-		return utils.Compare(a.ID, b.ID)
+		return cmp.Compare(a.ID, b.ID)
 	})
 }
 

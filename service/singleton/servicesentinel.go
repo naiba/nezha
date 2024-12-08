@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"cmp"
 	"fmt"
 	"log"
 	"slices"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/jinzhu/copier"
 	"github.com/nezhahq/nezha/model"
-	"github.com/nezhahq/nezha/pkg/utils"
 	pb "github.com/nezhahq/nezha/proto"
 )
 
@@ -180,7 +180,7 @@ func (ss *ServiceSentinel) UpdateServiceList() {
 	}
 
 	slices.SortFunc(ss.ServiceList, func(a, b *model.Service) int {
-		return utils.Compare(a.ID, b.ID)
+		return cmp.Compare(a.ID, b.ID)
 	})
 }
 
