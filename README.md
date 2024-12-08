@@ -35,14 +35,6 @@ Is Nezha not in your language, or the translation is incorrect or incomplete? Ge
 | ![user](.github/user-frontend.20241128.png)  | ![admin](.github/admin-frontend.20241128.png)  |
 | [hamster1963/nezha-dash](https://github.com/hamster1963/nezha-dash)  | [nezhahq/admin-frontend](https://github.com/nezhahq/admin-frontend)  |
 
-## Supported Languages
-
-- English
-- 中文
-- Español
-
-You can change the dashboard language in the settings page (`/setting`) after the dashboard is installed.
-
 ## Contributors
 
 <!--GAMFC_DELIMITER--><a href="https://github.com/naiba" title="naiba"><img src="https://avatars.githubusercontent.com/u/29243953?v=4" width="50;" alt="naiba"/></a>
