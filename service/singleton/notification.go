@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"cmp"
 	"fmt"
 	"log"
 	"slices"
@@ -8,7 +9,6 @@ import (
 	"time"
 
 	"github.com/nezhahq/nezha/model"
-	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 const (
@@ -90,7 +90,7 @@ func UpdateNotificationList() {
 		NotificationListSorted = append(NotificationListSorted, n)
 	}
 	slices.SortFunc(NotificationListSorted, func(a, b *model.Notification) int {
-		return utils.Compare(a.ID, b.ID)
+		return cmp.Compare(a.ID, b.ID)
 	})
 }
 

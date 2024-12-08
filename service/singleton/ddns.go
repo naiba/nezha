@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"sync"
@@ -12,7 +13,6 @@ import (
 	ddns2 "github.com/nezhahq/nezha/pkg/ddns"
 	"github.com/nezhahq/nezha/pkg/ddns/dummy"
 	"github.com/nezhahq/nezha/pkg/ddns/webhook"
-	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 var (
@@ -61,7 +61,7 @@ func UpdateDDNSList() {
 		DDNSList = append(DDNSList, p)
 	}
 	slices.SortFunc(DDNSList, func(a, b *model.DDNSProfile) int {
-		return utils.Compare(a.ID, b.ID)
+		return cmp.Compare(a.ID, b.ID)
 	})
 }
 

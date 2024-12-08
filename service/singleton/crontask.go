@@ -1,6 +1,7 @@
 package singleton
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/nezhahq/nezha/model"
-	"github.com/nezhahq/nezha/pkg/utils"
 	pb "github.com/nezhahq/nezha/proto"
 )
 
@@ -84,7 +84,7 @@ func UpdateCronList() {
 		CronList = append(CronList, c)
 	}
 	slices.SortFunc(CronList, func(a, b *model.Cron) int {
-		return utils.Compare(a.ID, b.ID)
+		return cmp.Compare(a.ID, b.ID)
 	})
 }
 
