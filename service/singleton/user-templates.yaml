@@ -1,0 +1,9 @@
+  - path: "user-dist"
+    name: "Official"
+    repository: "https://github.com/hamster1963/nezha-dash"
+    author: "hamster1963"
+  - path: "nazhua-dist"
+    name: "Nazhua"
+    repository: "https://github.com/hi2shark/nazhua"
+    author: "hi2hi"
+    community: true
