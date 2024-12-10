@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
-TEMPLATES_FILE="$ROOT_DIR/service/singleton/user-templates.yaml"
+TEMPLATES_FILE="$ROOT_DIR/service/singleton/frontend-templates.yaml"
 
 download_and_extract() {
   local repository="$1"

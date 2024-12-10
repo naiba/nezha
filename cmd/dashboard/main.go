@@ -104,7 +104,7 @@ func main() {
 	}
 
 	// 初始化 dao 包
-	singleton.InitUserTemplates()
+	singleton.InitFrontendTemplates()
 	singleton.InitConfigFromPath(dashboardCliParam.ConfigFile)
 	singleton.InitTimezoneAndCache()
 	singleton.InitDBFromPath(dashboardCliParam.DatebaseLocation)

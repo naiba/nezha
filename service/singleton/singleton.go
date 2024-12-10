@@ -21,12 +21,12 @@ var (
 	Cache             *cache.Cache
 	DB                *gorm.DB
 	Loc               *time.Location
-	UserTemplates     []model.UserTemplate
+	FrontendTemplates []model.FrontendTemplate
 	DashboardBootTime = uint64(time.Now().Unix())
 )
 
-//go:embed user-templates.yaml
-var userTemplatesYAML []byte
+//go:embed frontend-templates.yaml
+var frontendTemplatesYAML []byte
 
 func InitTimezoneAndCache() {
 	var err error
@@ -48,9 +48,9 @@ func LoadSingleton() {
 	initDDNS()
 }
 
-// InitUserTemplates 从内置文件中加载UserTemplates
-func InitUserTemplates() {
-	err := yaml.Unmarshal(userTemplatesYAML, &UserTemplates)
+// InitFrontendTemplates 从内置文件中加载FrontendTemplates
+func InitFrontendTemplates() {
+	err := yaml.Unmarshal(frontendTemplatesYAML, &FrontendTemplates)
 	if err != nil {
 		panic(err)
 	}
@@ -59,7 +59,7 @@ func InitUserTemplates() {
 // InitConfigFromPath 从给出的文件路径中加载配置
 func InitConfigFromPath(path string) {
 	Conf = &model.Config{}
-	err := Conf.Read(path, UserTemplates)
+	err := Conf.Read(path, FrontendTemplates)
 	if err != nil {
 		panic(err)
 	}
