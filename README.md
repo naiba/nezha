@@ -26,6 +26,10 @@
 
 ### Translation
 
+<a href="https://hosted.weblate.org/engage/nezha/">
+<img src="https://hosted.weblate.org/widget/nezha/multi-blue.svg" alt="Translation status" />
+</a>
+
 Is Nezha not in your language, or the translation is incorrect or incomplete? Get involved in the translations on [Hosted Weblate](https://hosted.weblate.org/engage/nezha/).
 
 ## Screenshots
@@ -34,6 +38,8 @@ Is Nezha not in your language, or the translation is incorrect or incomplete? Ge
 |---|---|
 | ![user](.github/user-frontend.20241128.png)  | ![admin](.github/admin-frontend.20241128.png)  |
 | [hamster1963/nezha-dash](https://github.com/hamster1963/nezha-dash)  | [nezhahq/admin-frontend](https://github.com/nezhahq/admin-frontend)  |
+
+add your theme to [service/singleton/frontend-templates.yaml](service/singleton/frontend-templates.yaml)
 
 ## Contributors
 

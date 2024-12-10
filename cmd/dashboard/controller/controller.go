@@ -240,11 +240,11 @@ func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
 		}
 		if strings.HasPrefix(c.Request.URL.Path, "/dashboard") {
 			stripPath := strings.TrimPrefix(c.Request.URL.Path, "/dashboard")
-			localFilePath := path.Join("admin-dist", stripPath)
+			localFilePath := path.Join(singleton.Conf.AdminTemplate, stripPath)
 			if checkLocalFileOrFs(c, frontendDist, localFilePath) {
 				return
 			}
-			if !checkLocalFileOrFs(c, frontendDist, "admin-dist/index.html") {
+			if !checkLocalFileOrFs(c, frontendDist, singleton.Conf.AdminTemplate+"/index.html") {
 				c.JSON(http.StatusOK, newErrorResponse(errors.New("404 Not Found")))
 			}
 			return

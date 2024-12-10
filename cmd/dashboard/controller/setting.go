@@ -60,8 +60,10 @@ func updateConfig(c *gin.Context) (any, error) {
 	}
 	var userTemplateValid bool
 	for _, v := range singleton.FrontendTemplates {
-		if v.Path == sf.UserTemplate && sf.UserTemplate != "admin-dist" {
+		if !userTemplateValid && v.Path == sf.UserTemplate && !v.IsAdmin {
 			userTemplateValid = true
+		}
+		if userTemplateValid {
 			break
 		}
 	}

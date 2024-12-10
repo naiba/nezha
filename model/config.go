@@ -28,6 +28,7 @@ type Config struct {
 	Language       string `mapstructure:"language" json:"language"` // 系统语言，默认 zh_CN
 	SiteName       string `mapstructure:"site_name" json:"site_name"`
 	UserTemplate   string `mapstructure:"user_template" json:"user_template,omitempty"`
+	AdminTemplate  string `mapstructure:"admin_template" json:"admin_template,omitempty"`
 	JWTSecretKey   string `mapstructure:"jwt_secret_key" json:"jwt_secret_key,omitempty"`
 	AgentSecretKey string `mapstructure:"agent_secret_key" json:"agent_secret_key,omitempty"`
 	ListenPort     uint   `mapstructure:"listen_port" json:"listen_port,omitempty"`
@@ -88,15 +89,23 @@ func (c *Config) Read(path string, frontendTemplates []FrontendTemplate) error {
 	if c.Location == "" {
 		c.Location = "Asia/Shanghai"
 	}
-	var userTemplateValid bool
+	var userTemplateValid, adminTemplateValid bool
 	for _, v := range frontendTemplates {
-		if v.Path == c.UserTemplate && c.UserTemplate != "admin-dist" {
+		if !userTemplateValid && v.Path == c.UserTemplate && !v.IsAdmin {
 			userTemplateValid = true
+		}
+		if !adminTemplateValid && v.Path == c.AdminTemplate && v.IsAdmin {
+			adminTemplateValid = true
+		}
+		if userTemplateValid && adminTemplateValid {
 			break
 		}
 	}
 	if c.UserTemplate == "" || !userTemplateValid {
 		c.UserTemplate = "user-dist"
+	}
+	if c.AdminTemplate == "" || !adminTemplateValid {
+		c.AdminTemplate = "admin-dist"
 	}
 	if c.AvgPingCount == 0 {
 		c.AvgPingCount = 2

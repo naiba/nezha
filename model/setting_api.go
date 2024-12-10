@@ -23,9 +23,9 @@ type FrontendTemplate struct {
 	Name       string `json:"name,omitempty"`
 	Repository string `json:"repository,omitempty"`
 	Author     string `json:"author,omitempty"`
-	Community  bool   `json:"community,omitempty"`
 	Version    string `json:"version,omitempty"`
-	IsAdmin    string `json:"is_admin,omitempty"`
+	IsAdmin    bool   `json:"is_admin,omitempty"`
+	IsOfficial bool   `json:"is_official,omitempty"`
 }
 
 type SettingResponse struct {
