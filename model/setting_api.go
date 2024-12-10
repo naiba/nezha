@@ -18,17 +18,19 @@ type SettingForm struct {
 	EnablePlainIPInNotification bool `json:"enable_plain_ip_in_notification,omitempty" validate:"optional"`
 }
 
-type UserTemplate struct {
+type FrontendTemplate struct {
 	Path       string `json:"path,omitempty"`
 	Name       string `json:"name,omitempty"`
 	Repository string `json:"repository,omitempty"`
 	Author     string `json:"author,omitempty"`
 	Community  bool   `json:"community,omitempty"`
+	Version    string `json:"version,omitempty"`
+	IsAdmin    string `json:"is_admin,omitempty"`
 }
 
 type SettingResponse struct {
 	Config
 
-	Version       string         `json:"version,omitempty"`
-	UserTemplates []UserTemplate `json:"user_templates,omitempty"`
+	Version           string             `json:"version,omitempty"`
+	FrontendTemplates []FrontendTemplate `json:"frontend_templates,omitempty"`
 }

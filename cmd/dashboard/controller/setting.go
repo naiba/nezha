@@ -23,9 +23,9 @@ func listConfig(c *gin.Context) (model.SettingResponse, error) {
 	authorized := isMember // TODO || isViewPasswordVerfied
 
 	conf := model.SettingResponse{
-		Config:        *singleton.Conf,
-		Version:       singleton.Version,
-		UserTemplates: singleton.UserTemplates,
+		Config:            *singleton.Conf,
+		Version:           singleton.Version,
+		FrontendTemplates: singleton.FrontendTemplates,
 	}
 
 	if !authorized {
@@ -59,8 +59,8 @@ func updateConfig(c *gin.Context) (any, error) {
 		return nil, err
 	}
 	var userTemplateValid bool
-	for _, v := range singleton.UserTemplates {
-		if v.Path == sf.UserTemplate {
+	for _, v := range singleton.FrontendTemplates {
+		if v.Path == sf.UserTemplate && sf.UserTemplate != "admin-dist" {
 			userTemplateValid = true
 			break
 		}

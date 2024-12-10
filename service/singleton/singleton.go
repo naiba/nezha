@@ -1,10 +1,12 @@
 package singleton
 
 import (
+	_ "embed"
 	"log"
 	"time"
 
 	"github.com/patrickmn/go-cache"
+	"gopkg.in/yaml.v3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 
@@ -15,26 +17,16 @@ import (
 var Version = "debug"
 
 var (
-	Conf          *model.Config
-	Cache         *cache.Cache
-	DB            *gorm.DB
-	Loc           *time.Location
-	UserTemplates = []model.UserTemplate{
-		{
-			Path:       "user-dist",
-			Name:       "Official",
-			Repository: "https://github.com/hamster1963/nezha-dash",
-			Author:     "hamster1963",
-		}, {
-			Path:       "nazhua-dist",
-			Name:       "Nazhua",
-			Repository: "https://github.com/hi2shark/nazhua",
-			Author:     "hi2hi",
-			Community:  true,
-		},
-	}
+	Conf              *model.Config
+	Cache             *cache.Cache
+	DB                *gorm.DB
+	Loc               *time.Location
+	FrontendTemplates []model.FrontendTemplate
 	DashboardBootTime = uint64(time.Now().Unix())
 )
+
+//go:embed frontend-templates.yaml
+var frontendTemplatesYAML []byte
 
 func InitTimezoneAndCache() {
 	var err error
@@ -56,10 +48,18 @@ func LoadSingleton() {
 	initDDNS()
 }
 
+// InitFrontendTemplates 从内置文件中加载FrontendTemplates
+func InitFrontendTemplates() {
+	err := yaml.Unmarshal(frontendTemplatesYAML, &FrontendTemplates)
+	if err != nil {
+		panic(err)
+	}
+}
+
 // InitConfigFromPath 从给出的文件路径中加载配置
 func InitConfigFromPath(path string) {
 	Conf = &model.Config{}
-	err := Conf.Read(path, UserTemplates)
+	err := Conf.Read(path, FrontendTemplates)
 	if err != nil {
 		panic(err)
 	}

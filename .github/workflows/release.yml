@@ -25,49 +25,18 @@ jobs:
     container:
       image: goreleaser/goreleaser-cross:v1.23
     steps:
+      - run: |
+          apt update && apt install unzip curl -y
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          chmod +x /usr/bin/yq
+
       - run: git config --global --add safe.directory /__w/nezha/nezha
 
       - uses: actions/checkout@v4
 
-      - name: clean cache
+      - name: Prepare frontends' dists
         run: |
-          rm -rf cmd/dashboard/*-dist
-
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: nezhahq/admin-frontend
-          tag: v1.1.1
-          fileName: dist.zip
-          latest: true
-          extract: true
-
-      - name: prepare admin-frontend dists
-        run: |
-          mv dist cmd/dashboard/admin-dist
-
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: nezhahq/user-frontend
-          tag: v1.1.1
-          fileName: dist.zip
-          latest: true
-          extract: true
-
-      - name: prepare admin-frontend dists
-        run: |
-          mv dist cmd/dashboard/user-dist
-
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: hi2shark/nazhua
-          tag: v0.4.9
-          fileName: dist.zip
-          latest: true
-          extract: true
-
-      - name: prepare nazhua-frontend dists
-        run: |
-          mv dist cmd/dashboard/nazhua-dist
+          chmod +x ./script/fetch-frontends.sh && ./script/fetch-frontends.sh
 
       - name: Fetch IPInfo GeoIP Database
         env:

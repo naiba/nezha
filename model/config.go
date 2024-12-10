@@ -56,7 +56,7 @@ type Config struct {
 }
 
 // Read 读取配置文件并应用
-func (c *Config) Read(path string, userTemplates []UserTemplate) error {
+func (c *Config) Read(path string, frontendTemplates []FrontendTemplate) error {
 	c.k = koanf.New(".")
 	c.filePath = path
 
@@ -89,8 +89,8 @@ func (c *Config) Read(path string, userTemplates []UserTemplate) error {
 		c.Location = "Asia/Shanghai"
 	}
 	var userTemplateValid bool
-	for _, v := range userTemplates {
-		if v.Path == c.UserTemplate {
+	for _, v := range frontendTemplates {
+		if v.Path == c.UserTemplate && c.UserTemplate != "admin-dist" {
 			userTemplateValid = true
 			break
 		}
