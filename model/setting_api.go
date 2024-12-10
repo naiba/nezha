@@ -24,6 +24,7 @@ type UserTemplate struct {
 	Repository string `json:"repository,omitempty"`
 	Author     string `json:"author,omitempty"`
 	Community  bool   `json:"community,omitempty"`
+	Version    string `json:"version,omitempty"`
 }
 
 type SettingResponse struct {
