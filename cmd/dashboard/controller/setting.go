@@ -78,7 +78,7 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.IgnoredIPNotification = sf.IgnoredIPNotification
 	singleton.Conf.IPChangeNotificationGroupID = sf.IPChangeNotificationGroupID
 	singleton.Conf.SiteName = sf.SiteName
-	singleton.Conf.DNSServers = sf.CustomNameservers
+	singleton.Conf.DNSServers = sf.DNSServers
 	singleton.Conf.CustomCode = sf.CustomCode
 	singleton.Conf.CustomCodeDashboard = sf.CustomCodeDashboard
 	singleton.Conf.RealIPHeader = sf.RealIPHeader
