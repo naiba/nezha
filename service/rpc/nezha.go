@@ -110,9 +110,11 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 			singleton.ServerList[clientID].PrevTransferInSnapshot = int64(state.NetInTransfer)
 			singleton.ServerList[clientID].PrevTransferOutSnapshot = int64(state.NetOutTransfer)
 		}
+
+		geoIPNotReported := singleton.ServerList[clientID].GeoIP.IP.Join() == ""
 		singleton.ServerLock.RUnlock()
 
-		stream.Send(&pb.Receipt{Proced: true})
+		stream.Send(&pb.Receipt{Proced: true, GeoipNotReported: geoIPNotReported})
 	}
 }
 

@@ -65,7 +65,10 @@ message TaskResult {
   bool successful = 5;
 }
 
-message Receipt { bool proced = 1; }
+message Receipt {
+  bool proced = 1;
+  bool geoip_not_reported = 2;
+}
 
 message Uint64Receipt { uint64 data = 1; }
 
