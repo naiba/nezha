@@ -103,6 +103,12 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 		state := model.PB2State(state)
 
 		singleton.ServerLock.RLock()
+
+		if singleton.ServerList[clientID] == nil {
+			singleton.ServerLock.RUnlock()
+			return nil
+		}
+
 		singleton.ServerList[clientID].LastActive = time.Now()
 		singleton.ServerList[clientID].State = &state
 		// 应对 dashboard 重启的情况，如果从未记录过，先打点，等到小时时间点时入库
