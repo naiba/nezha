@@ -1,7 +1,7 @@
 package model
 
 type SettingForm struct {
-	CustomNameservers           string `json:"custom_nameservers,omitempty" validate:"optional"`
+	DNSServers                  string `json:"dns_servers,omitempty" validate:"optional"`
 	IgnoredIPNotification       string `json:"ignored_ip_notification,omitempty" validate:"optional"`
 	IPChangeNotificationGroupID uint64 `json:"ip_change_notification_group_id,omitempty"` // IP变更提醒的通知组
 	Cover                       uint8  `json:"cover,omitempty"`
