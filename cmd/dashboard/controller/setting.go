@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -39,6 +40,8 @@ func listConfig(c *gin.Context) (model.SettingResponse, error) {
 		}
 	}
 
+	conf.Config.Language = strings.Replace(conf.Config.Language, "_", "-", -1)
+
 	return conf, nil
 }
 
@@ -70,7 +73,9 @@ func updateConfig(c *gin.Context) (any, error) {
 	if !userTemplateValid {
 		return nil, errors.New("invalid user template")
 	}
-	singleton.Conf.Language = sf.Language
+
+	singleton.Conf.Language = strings.Replace(sf.Language, "-", "_", -1)
+
 	singleton.Conf.EnableIPChangeNotification = sf.EnableIPChangeNotification
 	singleton.Conf.EnablePlainIPInNotification = sf.EnablePlainIPInNotification
 	singleton.Conf.Cover = sf.Cover

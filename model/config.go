@@ -79,12 +79,11 @@ func (c *Config) Read(path string, frontendTemplates []FrontendTemplate) error {
 	if err != nil {
 		return err
 	}
-
 	if c.ListenPort == 0 {
 		c.ListenPort = 8008
 	}
 	if c.Language == "" {
-		c.Language = "zh_CN"
+		c.Language = "en_US"
 	}
 	if c.Location == "" {
 		c.Location = "Asia/Shanghai"
