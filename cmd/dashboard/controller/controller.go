@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"slices"
 	"strings"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -58,7 +59,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 
 	optionalAuth := api.Group("", optionalAuthMiddleware(authMiddleware))
 	optionalAuth.GET("/ws/server", commonHandler(serverStream))
-	optionalAuth.GET("/server-group", commonHandler(listServerGroup))
+	optionalAuth.GET("/server-group", listHandler(listServerGroup))
 
 	optionalAuth.GET("/service", commonHandler(showService))
 	optionalAuth.GET("/service/:id", commonHandler(listServiceHistory))
@@ -111,19 +112,19 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/alert-rule/:id", commonHandler(updateAlertRule))
 	auth.POST("/batch-delete/alert-rule", commonHandler(batchDeleteAlertRule))
 
-	auth.GET("/cron", commonHandler(listCron))
+	auth.GET("/cron", listHandler(listCron))
 	auth.POST("/cron", commonHandler(createCron))
 	auth.PATCH("/cron/:id", commonHandler(updateCron))
 	auth.GET("/cron/:id/manual", commonHandler(manualTriggerCron))
 	auth.POST("/batch-delete/cron", commonHandler(batchDeleteCron))
 
-	auth.GET("/ddns", commonHandler(listDDNS))
+	auth.GET("/ddns", listHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))
 	auth.POST("/ddns", commonHandler(createDDNS))
 	auth.PATCH("/ddns/:id", commonHandler(updateDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
 
-	auth.GET("/nat", commonHandler(listNAT))
+	auth.GET("/nat", listHandler(listNAT))
 	auth.POST("/nat", commonHandler(createNAT))
 	auth.PATCH("/nat/:id", commonHandler(updateNAT))
 	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
@@ -210,6 +211,24 @@ func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 			return
 		}
 	}
+}
+
+func listHandler[S ~[]E, E model.CommonInterface](handler handlerFunc[S]) func(*gin.Context) {
+	return func(c *gin.Context) {
+		data, err := handler(c)
+		if err != nil {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
+		}
+
+		c.JSON(http.StatusOK, filter(c, data))
+	}
+}
+
+func filter[S ~[]E, E model.CommonInterface](ctx *gin.Context, s S) S {
+	return slices.DeleteFunc(s, func(e E) bool {
+		return e.HasPermission(ctx)
+	})
 }
 
 func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {

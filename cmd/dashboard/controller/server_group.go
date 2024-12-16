@@ -20,7 +20,7 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.ServerGroupResponseItem]
 // @Router /server-group [get]
-func listServerGroup(c *gin.Context) ([]model.ServerGroupResponseItem, error) {
+func listServerGroup(c *gin.Context) ([]*model.ServerGroupResponseItem, error) {
 	var sg []model.ServerGroup
 	if err := singleton.DB.Find(&sg).Error; err != nil {
 		return nil, err
@@ -38,9 +38,9 @@ func listServerGroup(c *gin.Context) ([]model.ServerGroupResponseItem, error) {
 		groupServers[s.ServerGroupId] = append(groupServers[s.ServerGroupId], s.ServerId)
 	}
 
-	var sgRes []model.ServerGroupResponseItem
+	var sgRes []*model.ServerGroupResponseItem
 	for _, s := range sg {
-		sgRes = append(sgRes, model.ServerGroupResponseItem{
+		sgRes = append(sgRes, &model.ServerGroupResponseItem{
 			Group:   s,
 			Servers: groupServers[s.ID],
 		})
