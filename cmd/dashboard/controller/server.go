@@ -61,6 +61,10 @@ func updateServer(c *gin.Context) (any, error) {
 		return nil, singleton.Localizer.ErrorT("server id %d does not exist", id)
 	}
 
+	if !s.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("unauthorized")
+	}
+
 	s.Name = sf.Name
 	s.DisplayIndex = sf.DisplayIndex
 	s.Note = sf.Note
@@ -99,10 +103,22 @@ func updateServer(c *gin.Context) (any, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/server [post]
 func batchDeleteServer(c *gin.Context) (any, error) {
-	var servers []uint64
-	if err := c.ShouldBindJSON(&servers); err != nil {
+	var serversRaw []uint64
+	if err := c.ShouldBindJSON(&serversRaw); err != nil {
 		return nil, err
 	}
+
+	var servers []uint64
+	singleton.ServerLock.RLock()
+	for _, sid := range serversRaw {
+		if s, ok := singleton.ServerList[sid]; ok {
+			if !s.HasPermission(c) {
+				return nil, singleton.Localizer.ErrorT("permission denied")
+			}
+			servers = append(servers, s.ID)
+		}
+	}
+	singleton.ServerLock.RUnlock()
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Unscoped().Delete(&model.Server{}, "id in (?)", servers).Error; err != nil {

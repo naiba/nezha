@@ -190,7 +190,10 @@ func createService(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
+	uid := getUid(c)
+
 	var m model.Service
+	m.UserID = uid
 	m.Name = mf.Name
 	m.Target = strings.TrimSpace(mf.Target)
 	m.Type = mf.Type

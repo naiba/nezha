@@ -23,6 +23,10 @@ type Common struct {
 	UserID uint64 `json:"user_id,omitempty"`
 }
 
+func (c *Common) GetID() uint64 {
+	return c.ID
+}
+
 func (c *Common) HasPermission(ctx *gin.Context) bool {
 	auth, ok := ctx.Get(CtxKeyAuthorizedUser)
 	if !ok {
@@ -38,6 +42,7 @@ func (c *Common) HasPermission(ctx *gin.Context) bool {
 }
 
 type CommonInterface interface {
+	GetID() uint64
 	HasPermission(*gin.Context) bool
 }
 

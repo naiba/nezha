@@ -59,7 +59,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 
 	optionalAuth := api.Group("", optionalAuthMiddleware(authMiddleware))
 	optionalAuth.GET("/ws/server", commonHandler(serverStream))
-	optionalAuth.GET("/server-group", listHandler(listServerGroup))
+	optionalAuth.GET("/server-group", commonHandler(listServerGroup))
 
 	optionalAuth.GET("/service", commonHandler(showService))
 	optionalAuth.GET("/service/:id", commonHandler(listServiceHistory))
@@ -83,7 +83,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/user", commonHandler(createUser))
 	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
 
-	auth.GET("/service/list", commonHandler(listService))
+	auth.GET("/service/list", listHandler(listService))
 	auth.POST("/service", commonHandler(createService))
 	auth.PATCH("/service/:id", commonHandler(updateService))
 	auth.POST("/batch-delete/service", commonHandler(batchDeleteService))
@@ -97,17 +97,17 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/notification-group/:id", commonHandler(updateNotificationGroup))
 	auth.POST("/batch-delete/notification-group", commonHandler(batchDeleteNotificationGroup))
 
-	auth.GET("/server", commonHandler(listServer))
+	auth.GET("/server", listHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 	auth.POST("/force-update/server", commonHandler(forceUpdateServer))
 
-	auth.GET("/notification", commonHandler(listNotification))
+	auth.GET("/notification", listHandler(listNotification))
 	auth.POST("/notification", commonHandler(createNotification))
 	auth.PATCH("/notification/:id", commonHandler(updateNotification))
 	auth.POST("/batch-delete/notification", commonHandler(batchDeleteNotification))
 
-	auth.GET("/alert-rule", commonHandler(listAlertRule))
+	auth.GET("/alert-rule", listHandler(listAlertRule))
 	auth.POST("/alert-rule", commonHandler(createAlertRule))
 	auth.PATCH("/alert-rule/:id", commonHandler(updateAlertRule))
 	auth.POST("/batch-delete/alert-rule", commonHandler(batchDeleteAlertRule))
@@ -229,6 +229,11 @@ func filter[S ~[]E, E model.CommonInterface](ctx *gin.Context, s S) S {
 	return slices.DeleteFunc(s, func(e E) bool {
 		return e.HasPermission(ctx)
 	})
+}
+
+func getUid(c *gin.Context) uint64 {
+	user, _ := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	return user.ID
 }
 
 func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {

@@ -20,7 +20,7 @@ import (
 // @Produce json
 // @Success 200 {object} model.CommonResponse[[]model.NotificationGroupResponseItem]
 // @Router /notification-group [get]
-func listNotificationGroup(c *gin.Context) ([]model.NotificationGroupResponseItem, error) {
+func listNotificationGroup(c *gin.Context) ([]*model.NotificationGroupResponseItem, error) {
 	var ng []model.NotificationGroup
 	if err := singleton.DB.Find(&ng).Error; err != nil {
 		return nil, err
@@ -39,9 +39,9 @@ func listNotificationGroup(c *gin.Context) ([]model.NotificationGroupResponseIte
 		groupNotifications[n.NotificationGroupID] = append(groupNotifications[n.NotificationGroupID], n.NotificationID)
 	}
 
-	ngRes := make([]model.NotificationGroupResponseItem, 0, len(ng))
+	ngRes := make([]*model.NotificationGroupResponseItem, 0, len(ng))
 	for _, n := range ng {
-		ngRes = append(ngRes, model.NotificationGroupResponseItem{
+		ngRes = append(ngRes, &model.NotificationGroupResponseItem{
 			Group:         n,
 			Notifications: groupNotifications[n.ID],
 		})
