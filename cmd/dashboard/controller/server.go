@@ -62,7 +62,7 @@ func updateServer(c *gin.Context) (any, error) {
 	}
 
 	if !s.HasPermission(c) {
-		return nil, singleton.Localizer.ErrorT("unauthorized")
+		return nil, singleton.Localizer.ErrorT("permission denied")
 	}
 
 	s.Name = sf.Name
@@ -113,6 +113,7 @@ func batchDeleteServer(c *gin.Context) (any, error) {
 	for _, sid := range serversRaw {
 		if s, ok := singleton.ServerList[sid]; ok {
 			if !s.HasPermission(c) {
+				singleton.ServerLock.RUnlock()
 				return nil, singleton.Localizer.ErrorT("permission denied")
 			}
 			servers = append(servers, s.ID)

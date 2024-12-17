@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -50,6 +49,7 @@ func createCron(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
+	cr.UserID = getUid(c)
 	cr.TaskType = cf.TaskType
 	cr.Name = cf.Name
 	cr.Scheduler = cf.Scheduler
@@ -106,7 +106,11 @@ func updateCron(c *gin.Context) (any, error) {
 
 	var cr model.Cron
 	if err := singleton.DB.First(&cr, id).Error; err != nil {
-		return nil, fmt.Errorf("task id %d does not exist", id)
+		return nil, singleton.Localizer.ErrorT("task id %d does not exist", id)
+	}
+
+	if !cr.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("permission denied")
 	}
 
 	cr.TaskType = cf.TaskType
@@ -156,12 +160,15 @@ func manualTriggerCron(c *gin.Context) (any, error) {
 		return nil, err
 	}
 
-	var cr model.Cron
-	if err := singleton.DB.First(&cr, id).Error; err != nil {
+	singleton.CronLock.RLock()
+	cr, ok := singleton.Crons[id]
+	if !ok {
+		singleton.CronLock.RUnlock()
 		return nil, singleton.Localizer.ErrorT("task id %d does not exist", id)
 	}
+	singleton.CronLock.RUnlock()
 
-	singleton.ManualTrigger(&cr)
+	singleton.ManualTrigger(cr)
 	return nil, nil
 }
 
@@ -177,11 +184,23 @@ func manualTriggerCron(c *gin.Context) (any, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/cron [post]
 func batchDeleteCron(c *gin.Context) (any, error) {
-	var cr []uint64
-
-	if err := c.ShouldBindJSON(&cr); err != nil {
+	var crr []uint64
+	if err := c.ShouldBindJSON(&crr); err != nil {
 		return nil, err
 	}
+
+	var cr []uint64
+	singleton.CronLock.RLock()
+	for _, crID := range crr {
+		if crn, ok := singleton.Crons[crID]; ok {
+			if !crn.HasPermission(c) {
+				singleton.CronLock.RUnlock()
+				return nil, singleton.Localizer.ErrorT("permission denied")
+			}
+			cr = append(cr, crn.ID)
+		}
+	}
+	singleton.CronLock.RUnlock()
 
 	if err := singleton.DB.Unscoped().Delete(&model.Cron{}, "id in (?)", cr).Error; err != nil {
 		return nil, newGormError("%v", err)

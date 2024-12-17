@@ -67,8 +67,11 @@ func createServerGroup(c *gin.Context) (uint64, error) {
 	}
 	sgf.Servers = slices.Compact(sgf.Servers)
 
+	uid := getUid(c)
+
 	var sg model.ServerGroup
 	sg.Name = sgf.Name
+	sg.UserID = uid
 
 	var count int64
 	if err := singleton.DB.Model(&model.Server{}).Where("id in (?)", sgf.Servers).Count(&count).Error; err != nil {
@@ -84,6 +87,9 @@ func createServerGroup(c *gin.Context) (uint64, error) {
 		}
 		for _, s := range sgf.Servers {
 			if err := tx.Create(&model.ServerGroupServer{
+				Common: model.Common{
+					UserID: uid,
+				},
 				ServerGroupId: sg.ID,
 				ServerId:      s,
 			}).Error; err != nil {
@@ -129,6 +135,11 @@ func updateServerGroup(c *gin.Context) (any, error) {
 	if err := singleton.DB.First(&sgDB, id).Error; err != nil {
 		return nil, singleton.Localizer.ErrorT("group id %d does not exist", id)
 	}
+
+	if !sgDB.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("unauthorized")
+	}
+
 	sgDB.Name = sg.Name
 
 	var count int64
@@ -138,6 +149,8 @@ func updateServerGroup(c *gin.Context) (any, error) {
 	if count != int64(len(sg.Servers)) {
 		return nil, singleton.Localizer.ErrorT("have invalid server id")
 	}
+
+	uid := getUid(c)
 
 	err = singleton.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(&sgDB).Error; err != nil {
@@ -149,6 +162,9 @@ func updateServerGroup(c *gin.Context) (any, error) {
 
 		for _, s := range sg.Servers {
 			if err := tx.Create(&model.ServerGroupServer{
+				Common: model.Common{
+					UserID: uid,
+				},
 				ServerGroupId: sgDB.ID,
 				ServerId:      s,
 			}).Error; err != nil {
@@ -176,9 +192,22 @@ func updateServerGroup(c *gin.Context) (any, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/server-group [post]
 func batchDeleteServerGroup(c *gin.Context) (any, error) {
-	var sgs []uint64
-	if err := c.ShouldBindJSON(&sgs); err != nil {
+	var sgsr []uint64
+	if err := c.ShouldBindJSON(&sgsr); err != nil {
 		return nil, err
+	}
+
+	var sg []model.ServerGroup
+	if err := singleton.DB.Where("id in (?)", sgsr).Find(&sg).Error; err != nil {
+		return nil, err
+	}
+
+	var sgs []uint64
+	for _, s := range sg {
+		if !s.HasPermission(c) {
+			return nil, singleton.Localizer.ErrorT("permission denied")
+		}
+		sgs = append(sgs, s.ID)
 	}
 
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
