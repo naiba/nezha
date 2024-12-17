@@ -16,6 +16,7 @@ var Languages = map[string]string{
 	"zh_TW": "繁體中文",
 	"en_US": "English",
 	"es_ES": "Español",
+	"de_DE": "Deutsch",
 }
 
 type Localizer struct {

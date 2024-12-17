@@ -1,0 +1,228 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-11-23 23:56+0800\n"
+"PO-Revision-Date: 2024-12-17 04:52+0000\n"
+"Last-Translator: UUBulb <uub@kuzu.uk>\n"
+"Language-Team: German <https://hosted.weblate.org/projects/nezha/"
+"nezha-dashboard/de/>\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 5.9\n"
+
+#: cmd/dashboard/controller/alertrule.go:100
+#, c-format
+msgid "alert id %d does not exist"
+msgstr "benachrichtigungs ID %d existiert nicht"
+
+#: cmd/dashboard/controller/alertrule.go:155
+msgid "duration need to be at least 3"
+msgstr "dauer muss mindestens 3 sein"
+
+#: cmd/dashboard/controller/alertrule.go:159
+msgid "cycle_interval need to be at least 1"
+msgstr "cycle_interval muss mindestens 1 sein"
+
+#: cmd/dashboard/controller/alertrule.go:162
+msgid "cycle_start is not set"
+msgstr "cycle_start ist nicht eingestellt"
+
+#: cmd/dashboard/controller/alertrule.go:165
+msgid "cycle_start is a future value"
+msgstr "cycle_start ist ein zukünftiger wert"
+
+#: cmd/dashboard/controller/alertrule.go:170
+msgid "need to configure at least a single rule"
+msgstr "mindestens eine Regel muss konfiguriert sein"
+
+#: cmd/dashboard/controller/controller.go:195
+msgid "database error"
+msgstr "datenbankfehler"
+
+#: cmd/dashboard/controller/cron.go:63 cmd/dashboard/controller/cron.go:122
+msgid "scheduled tasks cannot be triggered by alarms"
+msgstr "geplante aufgaben können nicht durch Alarme ausgelöst werden"
+
+#: cmd/dashboard/controller/cron.go:161
+#, c-format
+msgid "task id %d does not exist"
+msgstr "task ID %d existiert nicht"
+
+#: cmd/dashboard/controller/ddns.go:56 cmd/dashboard/controller/ddns.go:120
+msgid "the retry count must be an integer between 1 and 10"
+msgstr "der retry_count muss eine Zahl zwischen 1 und 10 sein"
+
+#: cmd/dashboard/controller/ddns.go:79 cmd/dashboard/controller/ddns.go:148
+msgid "error parsing %s: %v"
+msgstr "fehler beim parsen von %s: %v"
+
+#: cmd/dashboard/controller/ddns.go:125 cmd/dashboard/controller/nat.go:95
+#, c-format
+msgid "profile id %d does not exist"
+msgstr "profil ID %d existiert nicht"
+
+#: cmd/dashboard/controller/fm.go:45 cmd/dashboard/controller/terminal.go:43
+msgid "server not found or not connected"
+msgstr "server nicht gefunden oder nicht verbunden"
+
+#: cmd/dashboard/controller/notification.go:67
+#: cmd/dashboard/controller/notification.go:125
+msgid "a test message"
+msgstr "testnachricht"
+
+#: cmd/dashboard/controller/notification.go:106
+#, c-format
+msgid "notification id %d does not exist"
+msgstr "benachrichtigung ID %d existiert nicht"
+
+#: cmd/dashboard/controller/notification_group.go:80
+#: cmd/dashboard/controller/notification_group.go:142
+msgid "have invalid notification id"
+msgstr "haben ungültige Benachrichtigungs ID"
+
+#: cmd/dashboard/controller/notification_group.go:131
+#: cmd/dashboard/controller/server_group.go:130
+#, c-format
+msgid "group id %d does not exist"
+msgstr "gruppen ID %d existiert nicht"
+
+#: cmd/dashboard/controller/server.go:60
+#, c-format
+msgid "server id %d does not exist"
+msgstr "server ID %d existiert nicht"
+
+#: cmd/dashboard/controller/server_group.go:78
+#: cmd/dashboard/controller/server_group.go:139
+msgid "have invalid server id"
+msgstr "haben ungültige Server ID"
+
+#: cmd/dashboard/controller/service.go:79
+#: cmd/dashboard/controller/service.go:155
+msgid "server not found"
+msgstr "server nicht gefunden"
+
+#: cmd/dashboard/controller/service.go:86 cmd/dashboard/controller/user.go:23
+msgid "unauthorized"
+msgstr "nicht autorisiert"
+
+#: cmd/dashboard/controller/service.go:247
+#, c-format
+msgid "service id %d does not exist"
+msgstr "service ID %d existiert nicht"
+
+#: cmd/dashboard/controller/user.go:66
+msgid "password length must be greater than 6"
+msgstr "passwort muss länger als 6 Zeichen sein"
+
+#: cmd/dashboard/controller/user.go:69
+msgid "username can't be empty"
+msgstr "benutzername darf nicht leer sein"
+
+#: service/rpc/io_stream.go:122
+msgid "timeout: no connection established"
+msgstr "timeout: Keine Verbindung hergestellt"
+
+#: service/rpc/io_stream.go:125
+msgid "timeout: user connection not established"
+msgstr "timeout: Benutzerverbindung nicht etabliert"
+
+#: service/rpc/io_stream.go:128
+msgid "timeout: agent connection not established"
+msgstr "timeout: Agent-Verbindung nicht etabliert"
+
+#: service/rpc/nezha.go:58
+msgid "Scheduled Task Executed Successfully"
+msgstr "geplante Aufgabe erfolgreich ausgeführt"
+
+#: service/rpc/nezha.go:62
+msgid "Scheduled Task Executed Failed"
+msgstr "geplante Aufgabe fehlgeschlagen"
+
+#: service/rpc/nezha.go:217
+msgid "IP Changed"
+msgstr "IP geändert"
+
+#: service/singleton/alertsentinel.go:159
+msgid "Incident"
+msgstr "Vorfall"
+
+#: service/singleton/alertsentinel.go:169
+msgid "Resolved"
+msgstr "Gelöst"
+
+#: service/singleton/crontask.go:53
+msgid "Tasks failed to register: ["
+msgstr "Aufgaben konnten nicht registriert werden: ["
+
+#: service/singleton/crontask.go:60
+msgid ""
+"] These tasks will not execute properly. Fix them in the admin dashboard."
+msgstr ""
+"] Diese Aufgaben werden nicht korrekt ausgeführt. Reparieren Sie diese im "
+"Admin-Dashboard."
+
+#: service/singleton/crontask.go:146 service/singleton/crontask.go:171
+#, c-format
+msgid "[Task failed] %s: server %s is offline and cannot execute the task"
+msgstr ""
+"[Aufgabe fehlgeschlagen] %s: Server %s ist offline und kann die Aufgabe "
+"nicht ausführen"
+
+#: service/singleton/servicesentinel.go:439
+#, c-format
+msgid "[Latency] %s %2f > %2f, Reporter: %s"
+msgstr "[Latency] %s %2f > %2f, Reporter: %s"
+
+#: service/singleton/servicesentinel.go:446
+#, c-format
+msgid "[Latency] %s %2f < %2f, Reporter: %s"
+msgstr "[Latency] %s %2f < %2f, Reporter: %s"
+
+#: service/singleton/servicesentinel.go:472
+#, c-format
+msgid "[%s] %s Reporter: %s, Error: %s"
+msgstr "[%s] %s Reporter: %s, Fehler: %s"
+
+#: service/singleton/servicesentinel.go:515
+#, c-format
+msgid "[TLS] Fetch cert info failed, Reporter: %s, Error: %s"
+msgstr "[TLS] Fetch cert info gescheitert, Reporter: %s, Fehler: %s"
+
+#: service/singleton/servicesentinel.go:555
+#, c-format
+msgid "The TLS certificate will expire within seven days. Expiration time: %s"
+msgstr "Das TLS-Zertifikat läuft innerhalb von sieben Tagen ab. Ablaufzeit: %s"
+
+#: service/singleton/servicesentinel.go:568
+#, c-format
+msgid ""
+"TLS certificate changed, old: issuer %s, expires at %s; new: issuer %s, "
+"expires at %s"
+msgstr ""
+"TLS-Zertifikat geändert, alt: Emittent %s, läuft ab bei %s; neu: Emittent "
+"%s, läuft ab bei %s"
+
+#: service/singleton/servicesentinel.go:604
+msgid "No Data"
+msgstr "Keine Daten"
+
+#: service/singleton/servicesentinel.go:606
+msgid "Good"
+msgstr "Gut"
+
+#: service/singleton/servicesentinel.go:608
+msgid "Low Availability"
+msgstr "Niedere Verfügbarkeit"
+
+#: service/singleton/servicesentinel.go:610
+msgid "Down"
+msgstr "Unten"
