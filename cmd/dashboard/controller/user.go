@@ -114,6 +114,7 @@ func createUser(c *gin.Context) (uint64, error) {
 
 	var u model.User
 	u.Username = uf.Username
+	u.Role = model.RoleMember
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(uf.Password), bcrypt.DefaultCost)
 	if err != nil {

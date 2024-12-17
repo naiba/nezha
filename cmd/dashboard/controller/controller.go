@@ -80,8 +80,8 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.GET("/profile", commonHandler(getProfile))
 	auth.POST("/profile", commonHandler(updateProfile))
 	auth.GET("/user", commonHandler(listUser))
-	auth.POST("/user", commonHandler(createUser))
-	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
+	auth.POST("/user", adminHandler(createUser))
+	auth.POST("/batch-delete/user", adminHandler(batchDeleteUser))
 
 	auth.GET("/service/list", listHandler(listService))
 	auth.POST("/service", commonHandler(createService))
@@ -130,9 +130,9 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
 
 	auth.GET("/waf", commonHandler(listBlockedAddress))
-	auth.POST("/batch-delete/waf", commonHandler(batchDeleteBlockedAddress))
+	auth.POST("/batch-delete/waf", adminHandler(batchDeleteBlockedAddress))
 
-	auth.PATCH("/setting", commonHandler(updateConfig))
+	auth.PATCH("/setting", adminHandler(updateConfig))
 
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }
@@ -190,26 +190,48 @@ func (we *wsError) Error() string {
 
 func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	return func(c *gin.Context) {
-		data, err := handler(c)
-		if err == nil {
-			c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
+		handle(c, handler)
+	}
+}
+
+func adminHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
+	return func(c *gin.Context) {
+		auth, ok := c.Get(model.CtxKeyAuthorizedUser)
+		if !ok {
+			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("unauthorized")))
 			return
 		}
-		switch err.(type) {
-		case *gormError:
-			log.Printf("NEZHA>> gorm error: %v", err)
-			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("database error")))
-			return
-		case *wsError:
-			// Connection is upgraded to WebSocket, so c.Writer is no longer usable
-			if msg := err.Error(); msg != "" {
-				log.Printf("NEZHA>> websocket error: %v", err)
-			}
-			return
-		default:
-			c.JSON(http.StatusOK, newErrorResponse(err))
+
+		user := *auth.(*model.User)
+		if user.Role != model.RoleAdmin {
+			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("permission denied")))
 			return
 		}
+
+		handle(c, handler)
+	}
+}
+
+func handle[T any](c *gin.Context, handler handlerFunc[T]) {
+	data, err := handler(c)
+	if err == nil {
+		c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
+		return
+	}
+	switch err.(type) {
+	case *gormError:
+		log.Printf("NEZHA>> gorm error: %v", err)
+		c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("database error")))
+		return
+	case *wsError:
+		// Connection is upgraded to WebSocket, so c.Writer is no longer usable
+		if msg := err.Error(); msg != "" {
+			log.Printf("NEZHA>> websocket error: %v", err)
+		}
+		return
+	default:
+		c.JSON(http.StatusOK, newErrorResponse(err))
+		return
 	}
 }
 
