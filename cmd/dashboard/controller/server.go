@@ -178,6 +178,9 @@ func forceUpdateServer(c *gin.Context) (*model.ForceUpdateResponse, error) {
 		server := singleton.ServerList[sid]
 		singleton.ServerLock.RUnlock()
 		if server != nil && server.TaskStream != nil {
+			if !server.HasPermission(c) {
+				return nil, singleton.Localizer.ErrorT("permission denied")
+			}
 			if err := server.TaskStream.Send(&pb.Task{
 				Type: model.TaskTypeUpgrade,
 			}); err != nil {

@@ -168,6 +168,10 @@ func manualTriggerCron(c *gin.Context) (any, error) {
 	}
 	singleton.CronLock.RUnlock()
 
+	if !cr.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("permission denied")
+	}
+
 	singleton.ManualTrigger(cr)
 	return nil, nil
 }

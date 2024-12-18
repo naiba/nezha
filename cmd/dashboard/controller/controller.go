@@ -97,7 +97,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/notification-group/:id", commonHandler(updateNotificationGroup))
 	auth.POST("/batch-delete/notification-group", commonHandler(batchDeleteNotificationGroup))
 
-	auth.GET("/server", listHandler(listServer))
+	auth.GET("/server", commonHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 	auth.POST("/force-update/server", commonHandler(forceUpdateServer))
@@ -243,13 +243,13 @@ func listHandler[S ~[]E, E model.CommonInterface](handler handlerFunc[S]) func(*
 			return
 		}
 
-		c.JSON(http.StatusOK, filter(c, data))
+		c.JSON(http.StatusOK, model.CommonResponse[S]{Success: true, Data: filter(c, data)})
 	}
 }
 
 func filter[S ~[]E, E model.CommonInterface](ctx *gin.Context, s S) S {
 	return slices.DeleteFunc(s, func(e E) bool {
-		return e.HasPermission(ctx)
+		return !e.HasPermission(ctx)
 	})
 }
 

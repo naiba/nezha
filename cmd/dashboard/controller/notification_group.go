@@ -201,7 +201,7 @@ func batchDeleteNotificationGroup(c *gin.Context) (any, error) {
 	}
 
 	var ng []model.NotificationGroup
-	if err := singleton.DB.Where("id in (?)", ng).Find(&ng).Error; err != nil {
+	if err := singleton.DB.Where("id in (?)", ngnr).Find(&ng).Error; err != nil {
 		return nil, err
 	}
 
