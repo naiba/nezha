@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/hashicorp/go-uuid"
+
 	"github.com/nezhahq/nezha/model"
 	"github.com/nezhahq/nezha/pkg/utils"
 	"github.com/nezhahq/nezha/pkg/websocketx"
@@ -31,19 +32,23 @@ func createFM(c *gin.Context) (*model.CreateFMResponse, error) {
 		return nil, err
 	}
 
-	streamId, err := uuid.GenerateUUID()
-	if err != nil {
-		return nil, err
-	}
-
-	rpc.NezhaHandlerSingleton.CreateStream(streamId)
-
 	singleton.ServerLock.RLock()
 	server := singleton.ServerList[id]
 	singleton.ServerLock.RUnlock()
 	if server == nil || server.TaskStream == nil {
 		return nil, singleton.Localizer.ErrorT("server not found or not connected")
 	}
+
+	if !server.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("permission denied")
+	}
+
+	streamId, err := uuid.GenerateUUID()
+	if err != nil {
+		return nil, err
+	}
+
+	rpc.NezhaHandlerSingleton.CreateStream(streamId)
 
 	fmData, _ := utils.Json.Marshal(&model.TaskFM{
 		StreamID: streamId,

@@ -192,13 +192,6 @@ func (ss *ServiceSentinel) loadServiceHistory() {
 		panic(err)
 	}
 
-	ss.serviceResponseDataStoreLock.Lock()
-	defer ss.serviceResponseDataStoreLock.Unlock()
-	ss.monthlyStatusLock.Lock()
-	defer ss.monthlyStatusLock.Unlock()
-	ss.ServicesLock.Lock()
-	defer ss.ServicesLock.Unlock()
-
 	for i := 0; i < len(services); i++ {
 		task := *services[i]
 		// 通过cron定时将服务监控任务传递给任务调度管道

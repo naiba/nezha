@@ -50,6 +50,9 @@ func createAlertRule(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
+	uid := getUid(c)
+
+	r.UserID = uid
 	r.Name = arf.Name
 	r.Rules = arf.Rules
 	r.FailTriggerTasks = arf.FailTriggerTasks
@@ -100,6 +103,10 @@ func updateAlertRule(c *gin.Context) (any, error) {
 		return nil, singleton.Localizer.ErrorT("alert id %d does not exist", id)
 	}
 
+	if !r.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("permission denied")
+	}
+
 	r.Name = arf.Name
 	r.Rules = arf.Rules
 	r.FailTriggerTasks = arf.FailTriggerTasks
@@ -133,10 +140,22 @@ func updateAlertRule(c *gin.Context) (any, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/alert-rule [post]
 func batchDeleteAlertRule(c *gin.Context) (any, error) {
-	var ar []uint64
-
-	if err := c.ShouldBindJSON(&ar); err != nil {
+	var arr []uint64
+	if err := c.ShouldBindJSON(&arr); err != nil {
 		return nil, err
+	}
+
+	var ars []model.AlertRule
+	if err := singleton.DB.Where("id in (?)", arr).Find(&ars).Error; err != nil {
+		return nil, err
+	}
+
+	var ar []uint64
+	for _, a := range ars {
+		if !a.HasPermission(c) {
+			return nil, singleton.Localizer.ErrorT("permission denied")
+		}
+		ar = append(ar, a.ID)
 	}
 
 	if err := singleton.DB.Unscoped().Delete(&model.AlertRule{}, "id in (?)", ar).Error; err != nil {

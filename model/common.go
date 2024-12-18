@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 const (
@@ -17,6 +19,31 @@ type Common struct {
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at,omitempty"`
 	// Do not use soft deletion
 	// DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+
+	UserID uint64 `json:"-"`
+}
+
+func (c *Common) GetID() uint64 {
+	return c.ID
+}
+
+func (c *Common) HasPermission(ctx *gin.Context) bool {
+	auth, ok := ctx.Get(CtxKeyAuthorizedUser)
+	if !ok {
+		return false
+	}
+
+	user := *auth.(*User)
+	if user.Role == RoleAdmin {
+		return true
+	}
+
+	return user.ID == c.UserID
+}
+
+type CommonInterface interface {
+	GetID() uint64
+	HasPermission(*gin.Context) bool
 }
 
 type Response struct {

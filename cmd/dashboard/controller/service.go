@@ -190,7 +190,10 @@ func createService(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
+	uid := getUid(c)
+
 	var m model.Service
+	m.UserID = uid
 	m.Name = mf.Name
 	m.Target = strings.TrimSpace(mf.Target)
 	m.Type = mf.Type
@@ -260,6 +263,11 @@ func updateService(c *gin.Context) (any, error) {
 	if err := singleton.DB.First(&m, id).Error; err != nil {
 		return nil, singleton.Localizer.ErrorT("service id %d does not exist", id)
 	}
+
+	if !m.HasPermission(c) {
+		return nil, singleton.Localizer.ErrorT("permission denied")
+	}
+
 	m.Name = mf.Name
 	m.Target = strings.TrimSpace(mf.Target)
 	m.Type = mf.Type
@@ -314,10 +322,24 @@ func updateService(c *gin.Context) (any, error) {
 // @Success 200 {object} model.CommonResponse[any]
 // @Router /batch-delete/service [post]
 func batchDeleteService(c *gin.Context) (any, error) {
-	var ids []uint64
-	if err := c.ShouldBindJSON(&ids); err != nil {
+	var idsr []uint64
+	if err := c.ShouldBindJSON(&idsr); err != nil {
 		return nil, err
 	}
+
+	var ids []uint64
+	singleton.ServiceSentinelShared.ServicesLock.RLock()
+	for _, id := range idsr {
+		if ss, ok := singleton.ServiceSentinelShared.Services[id]; ok {
+			if !ss.HasPermission(c) {
+				singleton.ServiceSentinelShared.ServicesLock.RUnlock()
+				return nil, singleton.Localizer.ErrorT("permission denied")
+			}
+			ids = append(ids, ss.ID)
+		}
+	}
+	singleton.ServiceSentinelShared.ServicesLock.RUnlock()
+
 	err := singleton.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Unscoped().Delete(&model.Service{}, "id in (?)", ids).Error; err != nil {
 			return err
