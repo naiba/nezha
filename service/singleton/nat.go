@@ -19,8 +19,6 @@ var (
 
 func initNAT() {
 	DB.Find(&NATList)
-	NATCacheRwLock.Lock()
-	defer NATCacheRwLock.Unlock()
 	NATCache = make(map[string]*model.NAT)
 	for i := 0; i < len(NATList); i++ {
 		NATCache[NATList[i].Domain] = NATList[i]

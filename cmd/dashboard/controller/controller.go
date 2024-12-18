@@ -79,7 +79,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 
 	auth.GET("/profile", commonHandler(getProfile))
 	auth.POST("/profile", commonHandler(updateProfile))
-	auth.GET("/user", commonHandler(listUser))
+	auth.GET("/user", adminHandler(listUser))
 	auth.POST("/user", adminHandler(createUser))
 	auth.POST("/batch-delete/user", adminHandler(batchDeleteUser))
 

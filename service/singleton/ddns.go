@@ -24,12 +24,10 @@ var (
 
 func initDDNS() {
 	DB.Find(&DDNSList)
-	DDNSCacheLock.Lock()
 	DDNSCache = make(map[uint64]*model.DDNSProfile)
 	for i := 0; i < len(DDNSList); i++ {
 		DDNSCache[DDNSList[i].ID] = DDNSList[i]
 	}
-	DDNSCacheLock.Unlock()
 
 	OnNameserverUpdate()
 }

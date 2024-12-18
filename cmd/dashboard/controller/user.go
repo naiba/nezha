@@ -126,6 +126,7 @@ func createUser(c *gin.Context) (uint64, error) {
 		return 0, err
 	}
 
+	singleton.OnUserUpdate(&u)
 	return u.ID, nil
 }
 
@@ -150,5 +151,6 @@ func batchDeleteUser(c *gin.Context) (any, error) {
 		return nil, singleton.Localizer.ErrorT("can't delete yourself")
 	}
 
+	singleton.OnUserDelete(ids)
 	return nil, singleton.DB.Where("id IN (?)", ids).Delete(&model.User{}).Error
 }

@@ -40,6 +40,7 @@ func InitTimezoneAndCache() {
 
 // LoadSingleton 加载子服务并执行
 func LoadSingleton() {
+	initUser()          // 加载用户ID绑定表
 	initI18n()          // 加载本地化服务
 	loadNotifications() // 加载通知服务
 	loadServers()       // 加载服务器列表

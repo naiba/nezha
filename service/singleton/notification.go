@@ -30,7 +30,7 @@ var (
 )
 
 // InitNotification 初始化 GroupID <-> ID <-> Notification 的映射
-func InitNotification() {
+func initNotification() {
 	NotificationList = make(map[uint64]map[uint64]*model.Notification)
 	NotificationIDToGroups = make(map[uint64]map[uint64]struct{})
 	NotificationGroup = make(map[uint64]string)
@@ -38,9 +38,7 @@ func InitNotification() {
 
 // loadNotifications 从 DB 初始化通知方式相关参数
 func loadNotifications() {
-	InitNotification()
-	NotificationsLock.Lock()
-
+	initNotification()
 	groupNotifications := make(map[uint64][]uint64)
 	var ngn []model.NotificationGroupNotification
 	if err := DB.Find(&ngn).Error; err != nil {
@@ -74,8 +72,6 @@ func loadNotifications() {
 			}
 		}
 	}
-
-	NotificationsLock.Unlock()
 }
 
 func UpdateNotificationList() {

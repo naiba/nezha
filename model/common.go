@@ -20,7 +20,7 @@ type Common struct {
 	// Do not use soft deletion
 	// DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
-	UserID uint64 `json:"user_id,omitempty"`
+	UserID uint64 `json:"-"`
 }
 
 func (c *Common) GetID() uint64 {
