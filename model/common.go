@@ -27,6 +27,10 @@ func (c *Common) GetID() uint64 {
 	return c.ID
 }
 
+func (c *Common) GetUserID() uint64 {
+	return c.UserID
+}
+
 func (c *Common) HasPermission(ctx *gin.Context) bool {
 	auth, ok := ctx.Get(CtxKeyAuthorizedUser)
 	if !ok {
@@ -43,7 +47,19 @@ func (c *Common) HasPermission(ctx *gin.Context) bool {
 
 type CommonInterface interface {
 	GetID() uint64
+	GetUserID() uint64
 	HasPermission(*gin.Context) bool
+}
+
+func FindUserID[S ~[]E, E CommonInterface](s S, uid uint64) []uint64 {
+	var list []uint64
+	for _, v := range s {
+		if v.GetUserID() == uid {
+			list = append(list, v.GetID())
+		}
+	}
+
+	return list
 }
 
 type Response struct {
