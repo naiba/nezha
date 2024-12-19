@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 const (
@@ -81,10 +82,7 @@ func UpdateNotificationList() {
 	NotificationSortedLock.Lock()
 	defer NotificationSortedLock.Unlock()
 
-	NotificationListSorted = make([]*model.Notification, 0, len(NotificationMap))
-	for _, n := range NotificationMap {
-		NotificationListSorted = append(NotificationListSorted, n)
-	}
+	NotificationListSorted = utils.MapValuesToSlice(NotificationMap)
 	slices.SortFunc(NotificationListSorted, func(a, b *model.Notification) int {
 		return cmp.Compare(a.ID, b.ID)
 	})

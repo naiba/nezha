@@ -97,7 +97,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/notification-group/:id", commonHandler(updateNotificationGroup))
 	auth.POST("/batch-delete/notification-group", commonHandler(batchDeleteNotificationGroup))
 
-	auth.GET("/server", commonHandler(listServer))
+	auth.GET("/server", listHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 	auth.POST("/force-update/server", commonHandler(forceUpdateServer))

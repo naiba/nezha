@@ -12,6 +12,7 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 	pb "github.com/nezhahq/nezha/proto"
 )
 
@@ -79,10 +80,7 @@ func UpdateCronList() {
 	CronLock.RLock()
 	defer CronLock.RUnlock()
 
-	CronList = make([]*model.Cron, 0, len(Crons))
-	for _, c := range Crons {
-		CronList = append(CronList, c)
-	}
+	CronList = utils.MapValuesToSlice(Crons)
 	slices.SortFunc(CronList, func(a, b *model.Cron) int {
 		return cmp.Compare(a.ID, b.ID)
 	})
