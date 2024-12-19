@@ -9,10 +9,10 @@
   name: "Official"
   repository: "https://github.com/hamster1963/nezha-dash-v1"
   author: "hamster1963"
-  version: "v1.4.5"
+  version: "v1.6.1"
   isofficial: true
 - path: "nazhua-dist"
   name: "Nazhua"
   repository: "https://github.com/hi2shark/nazhua"
   author: "hi2hi"
-  version: "v0.4.20"
+  version: "v0.4.22"

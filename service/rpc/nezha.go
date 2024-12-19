@@ -201,8 +201,17 @@ func (s *NezhaHandler) ReportGeoIP(c context.Context, r *pb.GeoIP) (*pb.GeoIP, e
 	}
 
 	geoip := model.PB2GeoIP(r)
-	joinedIP := geoip.IP.Join()
 	use6 := r.GetUse6()
+
+	if geoip.IP.IPv4Addr == "" && geoip.IP.IPv6Addr == "" {
+		ip, _ := c.Value(model.CtxKeyRealIP{}).(string)
+		if ip == "" {
+			ip, _ = c.Value(model.CtxKeyConnectingIP{}).(string)
+		}
+		geoip.IP.IPv4Addr = ip
+	}
+
+	joinedIP := geoip.IP.Join()
 
 	singleton.ServerLock.RLock()
 	// 检查并更新DDNS

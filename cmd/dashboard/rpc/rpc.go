@@ -36,22 +36,24 @@ func waf(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handl
 }
 
 func getRealIp(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	var ip, connectingIp string
+	p, ok := peer.FromContext(ctx)
+	if ok {
+		addrPort, err := netip.ParseAddrPort(p.Addr.String())
+		if err == nil {
+			connectingIp = addrPort.Addr().String()
+		}
+	}
+	ctx = context.WithValue(ctx, model.CtxKeyConnectingIP{}, connectingIp)
+
 	if singleton.Conf.RealIPHeader == "" {
 		return handler(ctx, req)
 	}
 
-	var ip string
-
 	if singleton.Conf.RealIPHeader == model.ConfigUsePeerIP {
-		p, ok := peer.FromContext(ctx)
-		if !ok {
-			return nil, fmt.Errorf("peer not found")
+		if connectingIp == "" {
+			return nil, fmt.Errorf("connecting ip not found")
 		}
-		addrPort, err := netip.ParseAddrPort(p.Addr.String())
-		if err != nil {
-			return nil, err
-		}
-		ip = addrPort.Addr().String()
 	} else {
 		vals := metadata.ValueFromIncomingContext(ctx, singleton.Conf.RealIPHeader)
 		if len(vals) == 0 {
@@ -65,7 +67,7 @@ func getRealIp(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo,
 	}
 
 	if singleton.Conf.Debug {
-		log.Printf("NEZHA>> gRPC Real IP: %s", ip)
+		log.Printf("NEZHA>> gRPC Agent Real IP: %s, connecting IP: %s\n", ip, connectingIp)
 	}
 
 	ctx = context.WithValue(ctx, model.CtxKeyRealIP{}, ip)
