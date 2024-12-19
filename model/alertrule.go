@@ -19,7 +19,7 @@ type AlertRule struct {
 	NotificationGroupID    uint64   `json:"notification_group_id"`         // 该报警规则所在的通知组
 	FailTriggerTasksRaw    string   `gorm:"default:'[]'" json:"-"`
 	RecoverTriggerTasksRaw string   `gorm:"default:'[]'" json:"-"`
-	Rules                  []Rule   `gorm:"-" json:"rules"`
+	Rules                  []*Rule  `gorm:"-" json:"rules"`
 	FailTriggerTasks       []uint64 `gorm:"-" json:"fail_trigger_tasks"`    // 失败时执行的触发任务id
 	RecoverTriggerTasks    []uint64 `gorm:"-" json:"recover_trigger_tasks"` // 恢复时执行的触发任务id
 }

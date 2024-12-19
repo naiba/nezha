@@ -12,6 +12,7 @@ const (
 )
 
 type CtxKeyRealIP struct{}
+type CtxKeyConnectingIP struct{}
 
 type Common struct {
 	ID        uint64    `gorm:"primaryKey" json:"id,omitempty"`
