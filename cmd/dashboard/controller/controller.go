@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"slices"
 	"strings"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
@@ -78,11 +79,11 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 
 	auth.GET("/profile", commonHandler(getProfile))
 	auth.POST("/profile", commonHandler(updateProfile))
-	auth.GET("/user", commonHandler(listUser))
-	auth.POST("/user", commonHandler(createUser))
-	auth.POST("/batch-delete/user", commonHandler(batchDeleteUser))
+	auth.GET("/user", adminHandler(listUser))
+	auth.POST("/user", adminHandler(createUser))
+	auth.POST("/batch-delete/user", adminHandler(batchDeleteUser))
 
-	auth.GET("/service/list", commonHandler(listService))
+	auth.GET("/service/list", listHandler(listService))
 	auth.POST("/service", commonHandler(createService))
 	auth.PATCH("/service/:id", commonHandler(updateService))
 	auth.POST("/batch-delete/service", commonHandler(batchDeleteService))
@@ -96,42 +97,42 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/notification-group/:id", commonHandler(updateNotificationGroup))
 	auth.POST("/batch-delete/notification-group", commonHandler(batchDeleteNotificationGroup))
 
-	auth.GET("/server", commonHandler(listServer))
+	auth.GET("/server", listHandler(listServer))
 	auth.PATCH("/server/:id", commonHandler(updateServer))
 	auth.POST("/batch-delete/server", commonHandler(batchDeleteServer))
 	auth.POST("/force-update/server", commonHandler(forceUpdateServer))
 
-	auth.GET("/notification", commonHandler(listNotification))
+	auth.GET("/notification", listHandler(listNotification))
 	auth.POST("/notification", commonHandler(createNotification))
 	auth.PATCH("/notification/:id", commonHandler(updateNotification))
 	auth.POST("/batch-delete/notification", commonHandler(batchDeleteNotification))
 
-	auth.GET("/alert-rule", commonHandler(listAlertRule))
+	auth.GET("/alert-rule", listHandler(listAlertRule))
 	auth.POST("/alert-rule", commonHandler(createAlertRule))
 	auth.PATCH("/alert-rule/:id", commonHandler(updateAlertRule))
 	auth.POST("/batch-delete/alert-rule", commonHandler(batchDeleteAlertRule))
 
-	auth.GET("/cron", commonHandler(listCron))
+	auth.GET("/cron", listHandler(listCron))
 	auth.POST("/cron", commonHandler(createCron))
 	auth.PATCH("/cron/:id", commonHandler(updateCron))
 	auth.GET("/cron/:id/manual", commonHandler(manualTriggerCron))
 	auth.POST("/batch-delete/cron", commonHandler(batchDeleteCron))
 
-	auth.GET("/ddns", commonHandler(listDDNS))
+	auth.GET("/ddns", listHandler(listDDNS))
 	auth.GET("/ddns/providers", commonHandler(listProviders))
 	auth.POST("/ddns", commonHandler(createDDNS))
 	auth.PATCH("/ddns/:id", commonHandler(updateDDNS))
 	auth.POST("/batch-delete/ddns", commonHandler(batchDeleteDDNS))
 
-	auth.GET("/nat", commonHandler(listNAT))
+	auth.GET("/nat", listHandler(listNAT))
 	auth.POST("/nat", commonHandler(createNAT))
 	auth.PATCH("/nat/:id", commonHandler(updateNAT))
 	auth.POST("/batch-delete/nat", commonHandler(batchDeleteNAT))
 
 	auth.GET("/waf", commonHandler(listBlockedAddress))
-	auth.POST("/batch-delete/waf", commonHandler(batchDeleteBlockedAddress))
+	auth.POST("/batch-delete/waf", adminHandler(batchDeleteBlockedAddress))
 
-	auth.PATCH("/setting", commonHandler(updateConfig))
+	auth.PATCH("/setting", adminHandler(updateConfig))
 
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }
@@ -189,27 +190,72 @@ func (we *wsError) Error() string {
 
 func commonHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
 	return func(c *gin.Context) {
-		data, err := handler(c)
-		if err == nil {
-			c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
+		handle(c, handler)
+	}
+}
+
+func adminHandler[T any](handler handlerFunc[T]) func(*gin.Context) {
+	return func(c *gin.Context) {
+		auth, ok := c.Get(model.CtxKeyAuthorizedUser)
+		if !ok {
+			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("unauthorized")))
 			return
 		}
-		switch err.(type) {
-		case *gormError:
-			log.Printf("NEZHA>> gorm error: %v", err)
-			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("database error")))
+
+		user := *auth.(*model.User)
+		if user.Role != model.RoleAdmin {
+			c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("permission denied")))
 			return
-		case *wsError:
-			// Connection is upgraded to WebSocket, so c.Writer is no longer usable
-			if msg := err.Error(); msg != "" {
-				log.Printf("NEZHA>> websocket error: %v", err)
-			}
-			return
-		default:
+		}
+
+		handle(c, handler)
+	}
+}
+
+func handle[T any](c *gin.Context, handler handlerFunc[T]) {
+	data, err := handler(c)
+	if err == nil {
+		c.JSON(http.StatusOK, model.CommonResponse[T]{Success: true, Data: data})
+		return
+	}
+	switch err.(type) {
+	case *gormError:
+		log.Printf("NEZHA>> gorm error: %v", err)
+		c.JSON(http.StatusOK, newErrorResponse(singleton.Localizer.ErrorT("database error")))
+		return
+	case *wsError:
+		// Connection is upgraded to WebSocket, so c.Writer is no longer usable
+		if msg := err.Error(); msg != "" {
+			log.Printf("NEZHA>> websocket error: %v", err)
+		}
+		return
+	default:
+		c.JSON(http.StatusOK, newErrorResponse(err))
+		return
+	}
+}
+
+func listHandler[S ~[]E, E model.CommonInterface](handler handlerFunc[S]) func(*gin.Context) {
+	return func(c *gin.Context) {
+		data, err := handler(c)
+		if err != nil {
 			c.JSON(http.StatusOK, newErrorResponse(err))
 			return
 		}
+
+		c.JSON(http.StatusOK, model.CommonResponse[S]{Success: true, Data: filter(c, data)})
 	}
+}
+
+func filter[S ~[]E, E model.CommonInterface](ctx *gin.Context, s S) S {
+	return slices.DeleteFunc(s, func(e E) bool {
+		return !e.HasPermission(ctx)
+	})
+}
+
+func getUid(c *gin.Context) uint64 {
+	user, _ := c.MustGet(model.CtxKeyAuthorizedUser).(*model.User)
+	return user.ID
 }
 
 func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 const (
@@ -30,7 +31,7 @@ var (
 )
 
 // InitNotification 初始化 GroupID <-> ID <-> Notification 的映射
-func InitNotification() {
+func initNotification() {
 	NotificationList = make(map[uint64]map[uint64]*model.Notification)
 	NotificationIDToGroups = make(map[uint64]map[uint64]struct{})
 	NotificationGroup = make(map[uint64]string)
@@ -38,9 +39,7 @@ func InitNotification() {
 
 // loadNotifications 从 DB 初始化通知方式相关参数
 func loadNotifications() {
-	InitNotification()
-	NotificationsLock.Lock()
-
+	initNotification()
 	groupNotifications := make(map[uint64][]uint64)
 	var ngn []model.NotificationGroupNotification
 	if err := DB.Find(&ngn).Error; err != nil {
@@ -74,8 +73,6 @@ func loadNotifications() {
 			}
 		}
 	}
-
-	NotificationsLock.Unlock()
 }
 
 func UpdateNotificationList() {
@@ -85,10 +82,7 @@ func UpdateNotificationList() {
 	NotificationSortedLock.Lock()
 	defer NotificationSortedLock.Unlock()
 
-	NotificationListSorted = make([]*model.Notification, 0, len(NotificationMap))
-	for _, n := range NotificationMap {
-		NotificationListSorted = append(NotificationListSorted, n)
-	}
+	NotificationListSorted = utils.MapValuesToSlice(NotificationMap)
 	slices.SortFunc(NotificationListSorted, func(a, b *model.Notification) int {
 		return cmp.Compare(a.ID, b.ID)
 	})

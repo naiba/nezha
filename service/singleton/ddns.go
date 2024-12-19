@@ -13,6 +13,7 @@ import (
 	ddns2 "github.com/nezhahq/nezha/pkg/ddns"
 	"github.com/nezhahq/nezha/pkg/ddns/dummy"
 	"github.com/nezhahq/nezha/pkg/ddns/webhook"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 var (
@@ -24,12 +25,10 @@ var (
 
 func initDDNS() {
 	DB.Find(&DDNSList)
-	DDNSCacheLock.Lock()
 	DDNSCache = make(map[uint64]*model.DDNSProfile)
 	for i := 0; i < len(DDNSList); i++ {
 		DDNSCache[DDNSList[i].ID] = DDNSList[i]
 	}
-	DDNSCacheLock.Unlock()
 
 	OnNameserverUpdate()
 }
@@ -56,10 +55,7 @@ func UpdateDDNSList() {
 	DDNSListLock.Lock()
 	defer DDNSListLock.Unlock()
 
-	DDNSList = make([]*model.DDNSProfile, 0, len(DDNSCache))
-	for _, p := range DDNSCache {
-		DDNSList = append(DDNSList, p)
-	}
+	DDNSList = utils.MapValuesToSlice(DDNSCache)
 	slices.SortFunc(DDNSList, func(a, b *model.DDNSProfile) int {
 		return cmp.Compare(a.ID, b.ID)
 	})

@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 var (
@@ -19,8 +20,6 @@ var (
 
 func initNAT() {
 	DB.Find(&NATList)
-	NATCacheRwLock.Lock()
-	defer NATCacheRwLock.Unlock()
 	NATCache = make(map[string]*model.NAT)
 	for i := 0; i < len(NATList); i++ {
 		NATCache[NATList[i].Domain] = NATList[i]
@@ -59,10 +58,7 @@ func UpdateNATList() {
 	NATListLock.Lock()
 	defer NATListLock.Unlock()
 
-	NATList = make([]*model.NAT, 0, len(NATCache))
-	for _, n := range NATCache {
-		NATList = append(NATList, n)
-	}
+	NATList = utils.MapValuesToSlice(NATCache)
 	slices.SortFunc(NATList, func(a, b *model.NAT) int {
 		return cmp.Compare(a.ID, b.ID)
 	})

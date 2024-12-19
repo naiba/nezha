@@ -1,10 +1,12 @@
 package singleton
 
 import (
-	"sort"
+	"cmp"
+	"slices"
 	"sync"
 
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 )
 
 var (
@@ -45,29 +47,21 @@ func ReSortServer() {
 	SortedServerLock.Lock()
 	defer SortedServerLock.Unlock()
 
-	SortedServerList = make([]*model.Server, 0, len(ServerList))
-	SortedServerListForGuest = make([]*model.Server, 0)
-	for _, s := range ServerList {
-		SortedServerList = append(SortedServerList, s)
+	SortedServerList = utils.MapValuesToSlice(ServerList)
+	// 按照服务器 ID 排序的具体实现（ID越大越靠前）
+	slices.SortStableFunc(SortedServerList, func(a, b *model.Server) int {
+		if a.DisplayIndex == b.DisplayIndex {
+			return cmp.Compare(a.ID, b.ID)
+		}
+		return cmp.Compare(b.DisplayIndex, a.DisplayIndex)
+	})
+
+	SortedServerListForGuest = make([]*model.Server, 0, len(SortedServerList))
+	for _, s := range SortedServerList {
 		if !s.HideForGuest {
 			SortedServerListForGuest = append(SortedServerListForGuest, s)
 		}
 	}
-
-	// 按照服务器 ID 排序的具体实现（ID越大越靠前）
-	sort.SliceStable(SortedServerList, func(i, j int) bool {
-		if SortedServerList[i].DisplayIndex == SortedServerList[j].DisplayIndex {
-			return SortedServerList[i].ID < SortedServerList[j].ID
-		}
-		return SortedServerList[i].DisplayIndex > SortedServerList[j].DisplayIndex
-	})
-
-	sort.SliceStable(SortedServerListForGuest, func(i, j int) bool {
-		if SortedServerListForGuest[i].DisplayIndex == SortedServerListForGuest[j].DisplayIndex {
-			return SortedServerListForGuest[i].ID < SortedServerListForGuest[j].ID
-		}
-		return SortedServerListForGuest[i].DisplayIndex > SortedServerListForGuest[j].DisplayIndex
-	})
 }
 
 func OnServerDelete(sid []uint64) {

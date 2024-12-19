@@ -11,6 +11,7 @@ import (
 
 	"github.com/jinzhu/copier"
 	"github.com/nezhahq/nezha/model"
+	"github.com/nezhahq/nezha/pkg/utils"
 	pb "github.com/nezhahq/nezha/proto"
 )
 
@@ -174,11 +175,7 @@ func (ss *ServiceSentinel) UpdateServiceList() {
 	ss.ServiceListLock.Lock()
 	defer ss.ServiceListLock.Unlock()
 
-	ss.ServiceList = make([]*model.Service, 0, len(ss.Services))
-	for _, v := range ss.Services {
-		ss.ServiceList = append(ss.ServiceList, v)
-	}
-
+	ss.ServiceList = utils.MapValuesToSlice(ss.Services)
 	slices.SortFunc(ss.ServiceList, func(a, b *model.Service) int {
 		return cmp.Compare(a.ID, b.ID)
 	})
@@ -191,13 +188,6 @@ func (ss *ServiceSentinel) loadServiceHistory() {
 	if err != nil {
 		panic(err)
 	}
-
-	ss.serviceResponseDataStoreLock.Lock()
-	defer ss.serviceResponseDataStoreLock.Unlock()
-	ss.monthlyStatusLock.Lock()
-	defer ss.monthlyStatusLock.Unlock()
-	ss.ServicesLock.Lock()
-	defer ss.ServicesLock.Unlock()
 
 	for i := 0; i < len(services); i++ {
 		task := *services[i]

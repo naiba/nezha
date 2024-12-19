@@ -3,10 +3,12 @@ package utils
 import (
 	"crypto/rand"
 	"errors"
+	"maps"
 	"math/big"
 	"net/netip"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -144,4 +146,9 @@ func Itoa[T constraints.Integer](i T) string {
 	default:
 		return ""
 	}
+}
+
+func MapValuesToSlice[Map ~map[K]V, K comparable, V any](m Map) []V {
+	s := make([]V, 0, len(m))
+	return slices.AppendSeq(s, maps.Values(m))
 }

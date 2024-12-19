@@ -1,9 +1,31 @@
 package model
 
+import (
+	"github.com/nezhahq/nezha/pkg/utils"
+	"gorm.io/gorm"
+)
+
+const (
+	RoleAdmin uint8 = iota
+	RoleMember
+)
+
 type User struct {
 	Common
-	Username string `json:"username,omitempty" gorm:"uniqueIndex"`
-	Password string `json:"password,omitempty" gorm:"type:char(72)"`
+	Username    string `json:"username,omitempty" gorm:"uniqueIndex"`
+	Password    string `json:"password,omitempty" gorm:"type:char(72)"`
+	Role        uint8  `json:"role,omitempty"`
+	AgentSecret string `json:"agent_secret,omitempty" gorm:"type:char(32)"`
+}
+
+func (u *User) BeforeSave(tx *gorm.DB) error {
+	key, err := utils.GenerateRandomString(32)
+	if err != nil {
+		return err
+	}
+
+	u.AgentSecret = key
+	return nil
 }
 
 type Profile struct {
