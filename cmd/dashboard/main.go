@@ -78,6 +78,16 @@ func initSystem(bus chan<- *model.Service) error {
 		return err
 	}
 
+	// 在线会话兜底清扫：状态流异常断开（失联）时由这里关闭进行中的会话
+	if _, err := singleton.CronShared.AddFunc("@every 30s", singleton.SweepOnlineSessions); err != nil {
+		return err
+	}
+
+	// 在线会话保留清理：超出后台设置的统计窗口后删除
+	if _, err := singleton.CronShared.AddFunc("0 30 4 * * *", singleton.PruneOnlineSessions); err != nil {
+		return err
+	}
+
 	if err := singleton.StartJWTSessionGC(); err != nil {
 		return err
 	}

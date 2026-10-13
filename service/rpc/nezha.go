@@ -202,7 +202,13 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 		return errors.New("server not found")
 	}
 	lease := server.AttachStateStream(stream)
-	defer lease.Clear()
+	defer func() {
+		// Clear 返回 true 表示断开的是当前生效的状态流；此时关闭在线会话。
+		// 重连/转移导致旧流被替代时（返回 false）会话由新流继续，避免误关。
+		if lease.Clear() && singleton.OnlineHistoryShared != nil {
+			singleton.OnlineHistoryShared.RecordOffline(clientID, time.Now())
+		}
+	}()
 	var state *pb.State
 	var stateCount uint64
 	for {
@@ -257,6 +263,10 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 		})
 		if !accepted {
 			return errors.New("state stream superseded")
+		}
+
+		if singleton.OnlineHistoryShared != nil {
+			singleton.OnlineHistoryShared.RecordOnline(clientID, lastActive)
 		}
 
 		if err := notifyStateReceived(clientID, server.UUID, lease.Generation(), stateCount); err != nil {

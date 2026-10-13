@@ -21,6 +21,11 @@ type SettingForm struct {
 	EnablePlainIPInNotification bool  `json:"enable_plain_ip_in_notification,omitempty" validate:"optional"`
 	AllowJWTIPChange            *bool `json:"allow_jwt_ip_change,omitempty" validate:"optional"`
 	EnableMCP                   *bool `json:"enable_mcp,omitempty" validate:"optional"`
+
+	// OnlineStatsDays 设备在线时间段统计范围（天），指针语义：nil 表示本次
+	// PATCH 未提供该字段（保留现值），显式值必须在 [MinOnlineStatsDays,
+	// MaxOnlineStatsDays] 内，越界整体拒绝。
+	OnlineStatsDays *int `json:"online_stats_days,omitempty" validate:"optional"`
 }
 
 type Setting struct {

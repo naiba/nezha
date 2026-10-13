@@ -20,6 +20,8 @@
 /cmd/dashboard/*-dist
 !/cmd/dashboard/admin-dist/.gitkeep
 !/cmd/dashboard/user-dist/.gitkeep
+!/cmd/dashboard/online-stats-dist/
+!/cmd/dashboard/online-stats-dist/**
 /config.yml
 /resource/template/theme-custom
 /resource/static/custom

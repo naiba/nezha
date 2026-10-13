@@ -114,6 +114,12 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.AgentRealIPHeader = sf.AgentRealIPHeader
 	singleton.Conf.AgentTLS = sf.AgentTLS
 	singleton.Conf.UserTemplate = sf.UserTemplate
+	if sf.OnlineStatsDays != nil {
+		if *sf.OnlineStatsDays < model.MinOnlineStatsDays || *sf.OnlineStatsDays > model.MaxOnlineStatsDays {
+			return nil, errors.New("online_stats_days must be between 7 and 3650")
+		}
+		singleton.Conf.OnlineStatsDays = *sf.OnlineStatsDays
+	}
 	mcpWasEnabled := singleton.Conf.MCPEnabled()
 	mcpNext := resolveSettingEnableMCP(sf.EnableMCP, mcpWasEnabled)
 

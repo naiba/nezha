@@ -79,6 +79,10 @@ type ConfigDashboard struct {
 	IgnoredIPNotification       string `koanf:"ignored_ip_notification" json:"ignored_ip_notification,omitempty"` // 特定服务器IP（多个服务器用逗号分隔）
 
 	DNSServers string `koanf:"dns_servers" json:"dns_servers,omitempty"`
+
+	// OnlineStatsDays 设备在线时间段统计的保留与查询窗口（天）。
+	// 取值范围 [MinOnlineStatsDays, MaxOnlineStatsDays]，默认 DefaultOnlineStatsDays。
+	OnlineStatsDays int `koanf:"online_stats_days" json:"online_stats_days,omitempty"`
 }
 
 type Config struct {
@@ -230,6 +234,13 @@ func (c *Config) Read(path string, frontendTemplates []FrontendTemplate) error {
 	// Add JWTTimeout default check
 	if c.JWTTimeout == 0 {
 		c.JWTTimeout = 1
+	}
+
+	if c.OnlineStatsDays == 0 {
+		c.OnlineStatsDays = DefaultOnlineStatsDays
+	} else if c.OnlineStatsDays < MinOnlineStatsDays || c.OnlineStatsDays > MaxOnlineStatsDays {
+		log.Printf("NEZHA>> online_stats_days %d out of range [%d, %d], reset to %d", c.OnlineStatsDays, MinOnlineStatsDays, MaxOnlineStatsDays, DefaultOnlineStatsDays)
+		c.OnlineStatsDays = DefaultOnlineStatsDays
 	}
 
 	c.jwtIPChangeAllowed.Store(c.AllowJWTIPChange)
