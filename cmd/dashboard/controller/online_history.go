@@ -81,6 +81,10 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 
 	runtime := server.RuntimeSnapshot()
 	currentlyOnline := !runtime.LastActive.IsZero() && now.Sub(runtime.LastActive) <= model.OnlineActiveWindow
+	var lastActive *time.Time
+	if !runtime.LastActive.IsZero() {
+		lastActive = &runtime.LastActive
+	}
 
 	return &model.OnlineHistoryResponse{
 		ServerID:           serverID,
@@ -92,7 +96,7 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 		TotalOnlineSeconds: totalSeconds,
 		OnlineRate:         onlineRate,
 		CurrentlyOnline:    currentlyOnline,
-		LastActive:         runtime.LastActive,
+		LastActive:         lastActive,
 		Periods:            periods,
 		Daily:              model.DailyOnlineBreakdown(periods, windowStart, windowEnd, singleton.Loc),
 	}, nil

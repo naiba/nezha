@@ -48,18 +48,19 @@ type DailyOnlineStat struct {
 
 // OnlineHistoryResponse 是单台服务器在线时间段统计的聚合结果。
 type OnlineHistoryResponse struct {
-	ServerID           uint64            `json:"server_id"`
-	ServerName         string            `json:"server_name"`
-	Days               int               `json:"days"`
-	MaxDays            int               `json:"max_days"`
-	WindowStart        time.Time         `json:"window_start"`
-	WindowEnd          time.Time         `json:"window_end"`
-	TotalOnlineSeconds uint64            `json:"total_online_seconds"`
-	OnlineRate         float64           `json:"online_rate"`
-	CurrentlyOnline    bool              `json:"currently_online"`
-	LastActive         time.Time         `json:"last_active,omitempty"`
-	Periods            []OnlinePeriod    `json:"periods"`
-	Daily              []DailyOnlineStat `json:"daily"`
+	ServerID           uint64    `json:"server_id"`
+	ServerName         string    `json:"server_name"`
+	Days               int       `json:"days"`
+	MaxDays            int       `json:"max_days"`
+	WindowStart        time.Time `json:"window_start"`
+	WindowEnd          time.Time `json:"window_end"`
+	TotalOnlineSeconds uint64    `json:"total_online_seconds"`
+	OnlineRate         float64   `json:"online_rate"`
+	CurrentlyOnline    bool      `json:"currently_online"`
+	// 从未上报过的服务器该值为 nil；指针避免把 Go 零值时间序列化成 0001-01-01
+	LastActive *time.Time        `json:"last_active,omitempty"`
+	Periods    []OnlinePeriod    `json:"periods"`
+	Daily      []DailyOnlineStat `json:"daily"`
 }
 
 // ClipOnlineSessions 把与窗口 [windowStart, windowEnd) 相交的会话裁剪成
