@@ -101,9 +101,8 @@ func TestRecordOnlineContinuesSessionAfterRestart(t *testing.T) {
 	legacy := model.OnlineSession{ServerID: 1, StartedAt: now.Add(-time.Minute), LastActiveAt: now.Add(-5 * time.Second), Ongoing: true}
 	require.NoError(t, DB.Create(&legacy).Error)
 
-	// 新 recorder（内存为空）恢复：新近会话应保留并续接，不产生新会话
+	// 新 recorder（构造时从库恢复）：新近会话应保留并续接，不产生新会话
 	r := NewOnlineHistoryRecorder()
-	r.InitFromDB()
 	r.RecordOnline(1, now)
 
 	require.Equal(t, int64(1), countOnlineSessions(t, "server_id = ?", 1))
@@ -112,7 +111,7 @@ func TestRecordOnlineContinuesSessionAfterRestart(t *testing.T) {
 	require.WithinDuration(t, now.Add(-time.Minute), continued.StartedAt, time.Second)
 }
 
-func TestInitFromDBClosesStaleSessions(t *testing.T) {
+func TestRestoreOngoingSessionsClosesStaleSessions(t *testing.T) {
 	setupOnlineHistoryTestDB(t)
 
 	// 上次活跃时间远早于在线窗口：重启恢复时按最后已知活跃时刻结转
@@ -121,7 +120,6 @@ func TestInitFromDBClosesStaleSessions(t *testing.T) {
 	require.NoError(t, DB.Create(&stale).Error)
 
 	r := NewOnlineHistoryRecorder()
-	r.InitFromDB()
 	r.RecordOnline(1, time.Now())
 
 	closed := getOnlineSession(t, stale.ID)
@@ -180,11 +178,11 @@ func TestPruneOnlineSessions(t *testing.T) {
 	now := time.Now()
 	old := now.AddDate(0, 0, -30)
 	rows := []model.OnlineSession{
-		{ServerID: 1, StartedAt: old, EndedAt: old.Add(time.Hour), LastActiveAt: old.Add(time.Hour)},        // 超窗口 → 清理
-		{ServerID: 1, StartedAt: old, EndedAt: now.Add(-time.Hour), LastActiveAt: now.Add(-time.Hour)},      // 跨窗口边界 → 保留
-		{ServerID: 1, StartedAt: now.Add(-time.Hour), EndedAt: now, LastActiveAt: now},                      // 窗口内 → 保留
-		{ServerID: 1, StartedAt: now, Ongoing: true, LastActiveAt: now},                                     // 进行中 → 保留
-		{ServerID: 99, StartedAt: now.Add(-time.Hour), EndedAt: now, LastActiveAt: now},                     // 服务器已删除 → 清理
+		{ServerID: 1, StartedAt: old, EndedAt: old.Add(time.Hour), LastActiveAt: old.Add(time.Hour)},   // 超窗口 → 清理
+		{ServerID: 1, StartedAt: old, EndedAt: now.Add(-time.Hour), LastActiveAt: now.Add(-time.Hour)}, // 跨窗口边界 → 保留
+		{ServerID: 1, StartedAt: now.Add(-time.Hour), EndedAt: now, LastActiveAt: now},                 // 窗口内 → 保留
+		{ServerID: 1, StartedAt: now, Ongoing: true, LastActiveAt: now},                                // 进行中 → 保留
+		{ServerID: 99, StartedAt: now.Add(-time.Hour), EndedAt: now, LastActiveAt: now},                // 服务器已删除 → 清理
 	}
 	for i := range rows {
 		require.NoError(t, DB.Create(&rows[i]).Error)

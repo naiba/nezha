@@ -77,6 +77,13 @@ func onlineHistoryCtx(t *testing.T, serverID string, query string) *gin.Context 
 	return c
 }
 
+func onlineHistoryCtxAsMember(t *testing.T, serverID string, query string) *gin.Context {
+	t.Helper()
+	c := onlineHistoryCtx(t, serverID, query)
+	c.Set(model.CtxKeyAuthorizedUser, &model.User{Common: model.Common{ID: 100}, Role: model.RoleMember})
+	return c
+}
+
 func seedOnlineSessions(t *testing.T, serverID uint64, now time.Time) []model.OnlineSession {
 	t.Helper()
 	now = now.Truncate(time.Second)
@@ -99,7 +106,7 @@ func TestGetServerOnlineHistoryDefaultsToConfiguredWindow(t *testing.T) {
 	seedOnlineSessions(t, visible.ID, now)
 
 	// 不带 days 参数：使用后台设置的统计范围（30 天）
-	c := onlineHistoryCtx(t, "1", "")
+	c := onlineHistoryCtxAsMember(t, "1", "")
 	resp, err := getServerOnlineHistory(c)
 	require.NoError(t, err)
 	require.Equal(t, 30, resp.Days)
@@ -116,7 +123,7 @@ func TestGetServerOnlineHistoryDefaultIsSevenDays(t *testing.T) {
 
 	// 出厂默认统计范围为 7 天
 	singleton.Conf.OnlineStatsDays = model.DefaultOnlineStatsDays
-	c := onlineHistoryCtx(t, "1", "")
+	c := onlineHistoryCtxAsMember(t, "1", "")
 	resp, err := getServerOnlineHistory(c)
 	require.NoError(t, err)
 	require.Equal(t, 7, resp.Days)
@@ -129,7 +136,7 @@ func TestGetServerOnlineHistoryAggregatesAndClampsWindow(t *testing.T) {
 	now := time.Now()
 	seedOnlineSessions(t, visible.ID, now)
 
-	c := onlineHistoryCtx(t, "1", "days=9999")
+	c := onlineHistoryCtxAsMember(t, "1", "days=9999")
 	resp, err := getServerOnlineHistory(c)
 	require.NoError(t, err)
 	// 请求超出后台设置窗口时收敛到设置值
@@ -171,11 +178,36 @@ func TestGetServerOnlineHistoryUnknownServer(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestGetServerOnlineHistoryGuestLimitedToOneDay(t *testing.T) {
+	visible, _ := setupOnlineHistoryControllerTest(t)
+	now := time.Now()
+	seedOnlineSessions(t, visible.ID, now)
+
+	// 游客不带 days 参数时默认为配置窗口（>1 天），与 metrics 的游客语义一致被拒绝
+	_, err := getServerOnlineHistory(onlineHistoryCtx(t, "1", ""))
+	require.Error(t, err)
+
+	// 游客显式请求多天被拒绝，1 天可用
+	_, err = getServerOnlineHistory(onlineHistoryCtx(t, "1", "days=3"))
+	require.Error(t, err)
+	resp, err := getServerOnlineHistory(onlineHistoryCtx(t, "1", "days=1"))
+	require.NoError(t, err)
+	require.Equal(t, 1, resp.Days)
+	// 与 1 天窗口相交的两个会话：一个被裁剪到窗口起点，一个进行中
+	require.Len(t, resp.Periods, 2)
+
+	// 登录用户不受游客窗口限制
+	resp, err = getServerOnlineHistory(onlineHistoryCtxAsMember(t, "1", "days=30"))
+	require.NoError(t, err)
+	require.Equal(t, 30, resp.Days)
+	require.Len(t, resp.Periods, 4)
+}
+
 func TestGetServerOnlineHistoryPermission(t *testing.T) {
 	visible, _ := setupOnlineHistoryControllerTest(t)
 
-	// 游客可以查看未隐藏服务器
-	guest := onlineHistoryCtx(t, "1", "days=7")
+	// 游客可以查看未隐藏服务器（窗口受限于 1 天）
+	guest := onlineHistoryCtx(t, "1", "days=1")
 	resp, err := getServerOnlineHistory(guest)
 	require.NoError(t, err)
 	require.Equal(t, visible.ID, resp.ServerID)

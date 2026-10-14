@@ -28,13 +28,18 @@ type onlineSessionRuntime struct {
 var OnlineHistoryShared *OnlineHistoryRecorder
 
 func NewOnlineHistoryRecorder() *OnlineHistoryRecorder {
-	return &OnlineHistoryRecorder{open: make(map[uint64]*onlineSessionRuntime)}
+	r := &OnlineHistoryRecorder{open: make(map[uint64]*onlineSessionRuntime)}
+	r.restoreOngoingSessions()
+	return r
 }
 
-// InitFromDB 在启动时恢复进行中的会话：LastActiveAt 距今超过在线窗口的，
+// restoreOngoingSessions 在启动时恢复进行中的会话：LastActiveAt 距今超过在线窗口的，
 // 按最后一次已知活跃时刻结转关闭；仍在窗口内的保持打开，agent 重连后无缝
 // 续接（RecordOnline 走数据库查找命中现有会话）。
-func (r *OnlineHistoryRecorder) InitFromDB() {
+func (r *OnlineHistoryRecorder) restoreOngoingSessions() {
+	if DB == nil {
+		return
+	}
 	var ongoing []model.OnlineSession
 	if err := DB.Where("ongoing = ?", true).Find(&ongoing).Error; err != nil {
 		log.Printf("NEZHA>> Failed to load ongoing online sessions: %v", err)

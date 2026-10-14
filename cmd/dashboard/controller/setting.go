@@ -2,6 +2,7 @@ package controller
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -116,7 +117,7 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.UserTemplate = sf.UserTemplate
 	if sf.OnlineStatsDays != nil {
 		if *sf.OnlineStatsDays < model.MinOnlineStatsDays || *sf.OnlineStatsDays > model.MaxOnlineStatsDays {
-			return nil, errors.New("online_stats_days must be between 7 and 3650")
+			return nil, fmt.Errorf("online_stats_days must be between %d and %d", model.MinOnlineStatsDays, model.MaxOnlineStatsDays)
 		}
 		singleton.Conf.OnlineStatsDays = *sf.OnlineStatsDays
 	}

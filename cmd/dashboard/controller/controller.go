@@ -195,9 +195,6 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.PATCH("/setting", restScopeMiddleware(model.ScopeAdminAll), adminHandler(updateConfig))
 	auth.POST("/maintenance", restScopeMiddleware(model.ScopeAdminAll), adminHandler(runMaintenance))
 
-	// 内置设备在线统计页：自包含静态页，数据走 /api/v1 既有鉴权接口
-	r.GET("/online-stats", serveOnlineStatsPage(frontendDist))
-
 	r.NoRoute(fallbackToFrontend(frontendDist))
 }
 

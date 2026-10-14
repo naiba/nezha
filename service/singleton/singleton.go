@@ -64,7 +64,6 @@ func LoadSingleton(bus chan<- *model.Service) (err error) {
 	CronShared = NewCronClass()
 	ServerTransferShared = NewServerTransferClass()
 	OnlineHistoryShared = NewOnlineHistoryRecorder()
-	OnlineHistoryShared.InitFromDB()
 	// 最后初始化 ServiceSentinel
 	ServiceSentinelShared, err = NewServiceSentinel(bus)
 	return

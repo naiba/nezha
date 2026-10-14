@@ -21,12 +21,15 @@ const OnlineActiveWindow = 30 * time.Second
 // LastActiveAt 由上报侧节流持久化，用于 dashboard 异常停机后把进行中的会话
 // 结转到最后一次已知活跃时刻。
 type OnlineSession struct {
-	Common
-	ServerID     uint64    `gorm:"index:idx_online_sessions_server_started,priority:1" json:"server_id"`
-	StartedAt    time.Time `gorm:"index:idx_online_sessions_server_started,priority:2" json:"started_at"`
-	EndedAt      time.Time `gorm:"index" json:"ended_at,omitempty"`
+	ID        uint64    `gorm:"primaryKey" json:"id,omitempty"`
+	CreatedAt time.Time `gorm:"index;<-:create" json:"created_at,omitempty"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at,omitempty"`
+	ServerID  uint64    `gorm:"index:idx_online_sessions_server_started" json:"server_id,omitempty"`
+	StartedAt time.Time `gorm:"index:idx_online_sessions_server_started" json:"started_at,omitempty"`
+	EndedAt   time.Time `gorm:"index" json:"ended_at,omitempty"` // 会话结束时刻，进行中为零值
+	// 上报侧节流持久化的最后活跃时刻（≥OnlineActiveWindow 间隔写一次）
 	LastActiveAt time.Time `json:"last_active_at,omitempty"`
-	Ongoing      bool      `gorm:"index" json:"ongoing"`
+	Ongoing      bool      `json:"ongoing"`
 }
 
 // OnlinePeriod 是裁剪到查询窗口后的在线时间段，供前端时间轴直接渲染。

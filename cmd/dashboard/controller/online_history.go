@@ -1,10 +1,6 @@
 package controller
 
 import (
-	"errors"
-	"io"
-	"io/fs"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -17,12 +13,11 @@ import (
 // Get server online history
 // @Summary Get server online history
 // @Security BearerAuth
-// @Security APITokenAuth
 // @Schemes
-// @Description Get online periods and aggregated uptime statistics of a server. PAT scope required: nezha:server:read.
+// @Description Get online periods and aggregated uptime statistics of a specific server
 // @Tags common
 // @Param id path uint true "Server ID"
-// @Param days query int false "Query window in days; defaults to the configured statistics range and is clamped to it"
+// @Param days query int false "Query window in days (default: configured online_stats_days, clamped to it)"
 // @Produce json
 // @Success 200 {object} model.CommonResponse[model.OnlineHistoryResponse]
 // @Router /server/{id}/online-history [get]
@@ -40,6 +35,7 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	if !userCanViewServer(c, server) {
 		return nil, singleton.Localizer.ErrorT("unauthorized")
 	}
+	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 
 	maxDays := singleton.Conf.OnlineStatsDays
 	if maxDays < model.MinOnlineStatsDays || maxDays > model.MaxOnlineStatsDays {
@@ -49,13 +45,17 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	if daysStr := c.Query("days"); daysStr != "" {
 		d, err := strconv.Atoi(daysStr)
 		if err != nil || d < 1 {
-			return nil, errors.New("invalid days parameter")
+			return nil, singleton.Localizer.ErrorT("invalid days parameter")
 		}
 		// 查询窗口收敛到后台设置的统计范围内
 		if d > maxDays {
 			d = maxDays
 		}
 		days = d
+	}
+
+	if !isMember && days > 1 {
+		return nil, singleton.Localizer.ErrorT("unauthorized: only 1d data available for guests")
 	}
 
 	now := time.Now()
@@ -96,42 +96,4 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 		Periods:            periods,
 		Daily:              model.DailyOnlineBreakdown(periods, windowStart, windowEnd, singleton.Loc),
 	}, nil
-}
-
-// serveOnlineStatsPage 提供内置的设备在线统计页面（/online-stats）。页面为
-// 自包含静态 HTML，数据全部来自 /api/v1 既有鉴权接口，与主题前端解耦。
-func serveOnlineStatsPage(frontendDist fs.FS) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if !serveOnlineStatsAsset(c, frontendDist, "index.html") {
-			c.JSON(http.StatusNotFound, newErrorResponse(errors.New("online stats page not found")))
-		}
-	}
-}
-
-// serveOnlineStatsAsset 从嵌入的 online-stats-dist 中读取静态资源，供页面
-// 及其同目录引用（css/js）使用。
-func serveOnlineStatsAsset(c *gin.Context, frontendDist fs.FS, name string) bool {
-	if !fs.ValidPath(name) {
-		return false
-	}
-	assetFS, err := fs.Sub(frontendDist, "online-stats-dist")
-	if err != nil {
-		return false
-	}
-	file, err := assetFS.Open(name)
-	if err != nil {
-		return false
-	}
-	defer file.Close()
-	fileStat, err := file.Stat()
-	if err != nil || fileStat.IsDir() {
-		return false
-	}
-	readSeeker, ok := file.(io.ReadSeeker)
-	if !ok {
-		return false
-	}
-	c.Header("Cache-Control", "no-store")
-	http.ServeContent(c.Writer, c.Request, name, fileStat.ModTime(), readSeeker)
-	return true
 }
