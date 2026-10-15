@@ -93,6 +93,12 @@ func updateConfig(c *gin.Context) (any, error) {
 	if !userTemplateValid {
 		return nil, errors.New("invalid user template")
 	}
+	// 全部输入校验必须先于任何对 singleton.Conf 的写入：任一字段非法都应
+	// 整体拒绝，避免"请求以错误收场、先处理的字段却已生效"的半提交状态
+	if sf.OnlineStatsDays != nil &&
+		(*sf.OnlineStatsDays < model.MinOnlineStatsDays || *sf.OnlineStatsDays > model.MaxOnlineStatsDays) {
+		return nil, fmt.Errorf("online_stats_days must be between %d and %d", model.MinOnlineStatsDays, model.MaxOnlineStatsDays)
+	}
 
 	singleton.Conf.Language = strings.ReplaceAll(sf.Language, "-", "_")
 
@@ -116,9 +122,6 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.AgentTLS = sf.AgentTLS
 	singleton.Conf.UserTemplate = sf.UserTemplate
 	if sf.OnlineStatsDays != nil {
-		if *sf.OnlineStatsDays < model.MinOnlineStatsDays || *sf.OnlineStatsDays > model.MaxOnlineStatsDays {
-			return nil, fmt.Errorf("online_stats_days must be between %d and %d", model.MinOnlineStatsDays, model.MaxOnlineStatsDays)
-		}
 		singleton.Conf.OnlineStatsDays = *sf.OnlineStatsDays
 	}
 	mcpWasEnabled := singleton.Conf.MCPEnabled()

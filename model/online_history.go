@@ -92,17 +92,11 @@ func ClipOnlineSessions(sessions []OnlineSession, windowStart, windowEnd time.Ti
 	return periods
 }
 
-// SumOnlinePeriods 返回在线时间段的总时长（秒），向下取整。
-func SumOnlinePeriods(periods []OnlinePeriod) uint64 {
-	var total time.Duration
-	for _, p := range periods {
-		total += p.End.Sub(p.Start)
-	}
-	return uint64(total.Seconds())
-}
-
 // DailyOnlineBreakdown 把在线时间段按面板时区的自然日拆分，返回窗口覆盖的
 // 每一天的在线秒数（含在线为 0 秒的日期），按日期升序。
+// 取整口径：每天先累计原始时长（日界切分不损失精度），仅在每日汇总时向下
+// 取整一次；调用方以各日之和作为总时长，保证响应内部 total 与 daily[] 严格
+// 对账，不与"逐段截断再累加"的口径混用（亚秒会话会让后者系统性偏小）。
 // 时段二分定位起始日界后逐日推进，复杂度 O(P·log D + D)；单服务器的会话
 // 互不重叠，内层推进总量受窗口天数约束，长窗口（如 days=3650）下不会出现
 // 时段数×天数的双重循环。
@@ -121,6 +115,7 @@ func DailyOnlineBreakdown(periods []OnlinePeriod, windowStart, windowEnd time.Ti
 		return days
 	}
 
+	dayDurations := make([]time.Duration, len(days))
 	for _, p := range periods {
 		// 该时段覆盖的第一天：不晚于时段开始的最后一个日界
 		i := sort.Search(len(dayStarts), func(i int) bool {
@@ -134,9 +129,12 @@ func DailyOnlineBreakdown(periods []OnlinePeriod, windowStart, windowEnd time.Ti
 			overlapStart := maxTime(p.Start, dayStarts[i])
 			overlapEnd := minTime(p.End, dayStarts[i].AddDate(0, 0, 1))
 			if overlapStart.Before(overlapEnd) {
-				days[i].OnlineSeconds += uint64(overlapEnd.Sub(overlapStart).Seconds())
+				dayDurations[i] += overlapEnd.Sub(overlapStart)
 			}
 		}
+	}
+	for i := range days {
+		days[i].OnlineSeconds = uint64(dayDurations[i].Seconds())
 	}
 	return days
 }

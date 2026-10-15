@@ -67,16 +67,6 @@ func TestClipOnlineSessions(t *testing.T) {
 	})
 }
 
-func TestSumOnlinePeriods(t *testing.T) {
-	periods := []OnlinePeriod{
-		{Start: ts(2026, 10, 1, 8, 0, 0), End: ts(2026, 10, 1, 9, 0, 0)},                 // 1h
-		{Start: ts(2026, 10, 2, 0, 0, 0), End: ts(2026, 10, 2, 0, 30, 30)},               // 30m30s
-		{Start: ts(2026, 10, 3, 23, 0, 0), End: ts(2026, 10, 4, 0, 0, 0), Ongoing: true}, // 1h
-	}
-	require.Equal(t, uint64(3600+1830+3600), SumOnlinePeriods(periods))
-	require.Equal(t, uint64(0), SumOnlinePeriods(nil))
-}
-
 func TestDailyOnlineBreakdown(t *testing.T) {
 	loc := time.FixedZone("UTC+8", 8*3600)
 	windowStart := time.Date(2026, 10, 1, 10, 0, 0, 0, loc)
@@ -100,12 +90,42 @@ func TestDailyOnlineBreakdown(t *testing.T) {
 	require.Equal(t, uint64(3600), daily[1].OnlineSeconds)
 	require.Equal(t, uint64(3600), daily[2].OnlineSeconds)
 
-	// 每日合计与总时长一致
+	// 每日合计即总时长（口径：每日累计原始时长后统一取整）
 	var sum uint64
 	for _, d := range daily {
 		sum += d.OnlineSeconds
 	}
-	require.Equal(t, SumOnlinePeriods(periods), sum)
+	require.Equal(t, uint64(7200+3600+3600), sum)
+}
+
+// 评审回归：取整必须按日累计原始时长后统一转换。逐段截断再累加会让亚秒
+// 会话系统性偏小——同一天两个 1.5s 的会话应得 3s，而不是 1+1=2s
+func TestDailyOnlineBreakdownSubSecond(t *testing.T) {
+	loc := testZone
+	windowStart := ts(2026, 10, 1, 0, 0, 0)
+	windowEnd := ts(2026, 10, 2, 0, 0, 0)
+	periods := []OnlinePeriod{
+		{Start: windowStart.Add(100 * time.Millisecond), End: windowStart.Add(1600 * time.Millisecond)},
+		{Start: windowStart.Add(2 * time.Second), End: windowStart.Add(3500 * time.Millisecond)},
+	}
+	daily := DailyOnlineBreakdown(periods, windowStart, windowEnd, loc)
+	require.Len(t, daily, 1)
+	require.Equal(t, uint64(3), daily[0].OnlineSeconds)
+}
+
+// 跨日时段按日界切分不损失精度：各日分别累计原始时长后各自取整
+func TestDailyOnlineBreakdownCrossDayFraction(t *testing.T) {
+	loc := testZone
+	windowStart := ts(2026, 10, 1, 0, 0, 0)
+	windowEnd := ts(2026, 10, 3, 0, 0, 0)
+	periods := []OnlinePeriod{{
+		Start: time.Date(2026, 10, 1, 23, 59, 59, 250000000, loc),
+		End:   time.Date(2026, 10, 2, 0, 0, 2, 750000000, loc),
+	}}
+	daily := DailyOnlineBreakdown(periods, windowStart, windowEnd, loc)
+	require.Len(t, daily, 2)
+	require.Equal(t, uint64(0), daily[0].OnlineSeconds) // 0.75s → 0
+	require.Equal(t, uint64(2), daily[1].OnlineSeconds) // 2.75s → 2
 }
 
 func TestDailyOnlineBreakdownZeroOnline(t *testing.T) {
@@ -136,8 +156,9 @@ func TestDailyOnlineBreakdownEquivalence(t *testing.T) {
 	var periods []OnlinePeriod
 	cursor := windowStart
 	for cursor.Before(windowEnd) {
-		start := cursor.Add(time.Duration(rng.Intn(4*3600)) * time.Second)
-		end := start.Add(time.Duration(1+rng.Intn(6*3600)) * time.Second)
+		// 起止带亚秒抖动：让逐段截断与按日累计两种口径可区分
+		start := cursor.Add(time.Duration(rng.Intn(4*3600))*time.Second + time.Duration(rng.Int63n(int64(time.Second))))
+		end := start.Add(time.Duration(1+rng.Intn(6*3600))*time.Second + time.Duration(rng.Int63n(int64(time.Second))))
 		if end.After(windowEnd) {
 			end = windowEnd
 		}
@@ -147,18 +168,19 @@ func TestDailyOnlineBreakdownEquivalence(t *testing.T) {
 
 	days := DailyOnlineBreakdown(periods, windowStart, windowEnd, loc)
 
-	reference := map[string]uint64{}
+	// 参考实现与生产同一口径：每日累计原始时长、汇总时向下取整一次
+	reference := map[string]time.Duration{}
 	for _, p := range periods {
 		for d := windowStart; d.Before(windowEnd); d = d.AddDate(0, 0, 1) {
 			overlapStart := maxTime(p.Start, d)
 			overlapEnd := minTime(p.End, d.AddDate(0, 0, 1))
 			if overlapStart.Before(overlapEnd) {
-				reference[d.Format("2006-01-02")] += uint64(overlapEnd.Sub(overlapStart).Seconds())
+				reference[d.Format("2006-01-02")] += overlapEnd.Sub(overlapStart)
 			}
 		}
 	}
 	require.Len(t, days, 90)
 	for _, day := range days {
-		require.Equal(t, reference[day.Date], day.OnlineSeconds, "date %s", day.Date)
+		require.Equal(t, uint64(reference[day.Date].Seconds()), day.OnlineSeconds, "date %s", day.Date)
 	}
 }

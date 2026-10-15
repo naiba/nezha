@@ -268,6 +268,13 @@ func TestUpdateConfigOnlineStatsDaysRange(t *testing.T) {
 		require.Equal(t, model.MaxOnlineStatsDays, conf.OnlineStatsDays)
 	}
 
+	// 非法值必须整体拒绝：校验先于任何对 Conf 的写入完成，其他字段不得
+	// 半提交（评审复现场景：错误返回后 SiteName 不能被请求内容覆盖）
+	conf.SiteName = "existing-site"
+	require.Error(t, patchOnlineStatsDays(t, 6))
+	require.Equal(t, "existing-site", conf.SiteName)
+	conf.SiteName = ""
+
 	// 字段缺省时保留现值（部分 PATCH 语义）
 	require.NoError(t, patchOnlineStatsDays(t, nil))
 	require.Equal(t, model.MaxOnlineStatsDays, conf.OnlineStatsDays)

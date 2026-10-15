@@ -45,6 +45,64 @@ func countOnlineSessions(t *testing.T, cond string, args ...any) int64 {
 	return count
 }
 
+// brokenDB 返回一个必然写失败的 gorm 句柄（底层连接已关闭的独立 sqlite）。
+// 返回前已完成迁移的调用方数据不受影响，仅用于让 singleton.DB 上的操作报错。
+func brokenDB(t *testing.T) *gorm.DB {
+	t.Helper()
+	broken, err := gorm.Open(openSQLiteDialector(filepath.Join(t.TempDir(), "broken.sqlite")), &gorm.Config{})
+	require.NoError(t, err)
+	sqlDB, err := broken.DB()
+	require.NoError(t, err)
+	require.NoError(t, sqlDB.Close())
+	return broken
+}
+
+// 评审回归（关库失败脱管）：RecordOffline 必须在关库成功后才移除内存条目。
+// 写库失败时保留条目交给清扫周期重试，否则数据库里的 Ongoing 行会把离线
+// 时间持续计作在线，且永远无人重试。
+func TestRecordOfflineCloseFailureKeepsSessionTracked(t *testing.T) {
+	setupOnlineHistoryTestDB(t)
+	r := NewOnlineHistoryRecorder()
+
+	start := time.Now()
+	r.RecordOnline(1, start)
+	goodDB := DB
+
+	DB = brokenDB(t)
+	r.RecordOffline(1, start.Add(10*time.Minute))
+	require.Contains(t, r.open, uint64(1), "关库失败的会话必须保留在内存等待重试")
+
+	// 重试窗口内 agent 重连：按既有逻辑续接同一会话，不产生新行
+	r.RecordOnline(1, start.Add(10*time.Minute+model.OnlineActiveWindow))
+	require.Len(t, r.open, 1)
+
+	// 恢复数据库后，清扫周期重试关闭成功
+	DB = goodDB
+	r.SweepStale(start.Add(2*model.OnlineActiveWindow), func(uint64) (time.Time, bool) {
+		return time.Time{}, false
+	})
+	require.NotContains(t, r.open, uint64(1))
+	require.Equal(t, int64(0), countOnlineSessions(t, "server_id = ? AND ongoing = ?", 1, true))
+}
+
+// 评审回归（启动恢复路径同款脱管）：restoreOngoingSessions 结转关库失败时
+// 保留的条目，必须能被随后的清扫周期关闭。
+func TestRestoreCloseFailureSessionRetriedBySweep(t *testing.T) {
+	setupOnlineHistoryTestDB(t)
+
+	// 模拟恢复结转失败后的状态：行仍 Ongoing，内存按修复后行为保留条目
+	staleAt := time.Now().Add(-model.OnlineActiveWindow - 2*time.Hour)
+	s := model.OnlineSession{ServerID: 1, StartedAt: staleAt.Add(-time.Hour), LastActiveAt: staleAt, Ongoing: true}
+	require.NoError(t, DB.Create(&s).Error)
+	r := &OnlineHistoryRecorder{open: map[uint64]*onlineSessionRuntime{
+		1: {id: s.ID, lastPersist: staleAt},
+	}}
+
+	r.SweepStale(time.Now(), func(uint64) (time.Time, bool) { return time.Time{}, false })
+	require.NotContains(t, r.open, uint64(1))
+	require.Equal(t, int64(0), countOnlineSessions(t, "ongoing = ?", true))
+}
+
 func TestRecordOnlineOpensSingleSession(t *testing.T) {
 	setupOnlineHistoryTestDB(t)
 	r := NewOnlineHistoryRecorder()

@@ -74,7 +74,13 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	}
 
 	periods := model.ClipOnlineSessions(sessions, windowStart, windowEnd)
-	totalSeconds := model.SumOnlinePeriods(periods)
+	daily := model.DailyOnlineBreakdown(periods, windowStart, windowEnd, singleton.Loc)
+	// 总时长取各日之和，与 daily[] 严格对账（每日累计原始时长后统一取整，
+	// 口径见 DailyOnlineBreakdown）
+	var totalSeconds uint64
+	for _, d := range daily {
+		totalSeconds += d.OnlineSeconds
+	}
 	windowSeconds := uint64(windowEnd.Sub(windowStart).Seconds())
 	onlineRate := 0.0
 	if windowSeconds > 0 {
@@ -110,7 +116,7 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 		CurrentlyOnline:    currentlyOnline,
 		LastActive:         lastActive,
 		Periods:            utcPeriods,
-		Daily:              model.DailyOnlineBreakdown(periods, windowStart, windowEnd, singleton.Loc),
+		Daily:              daily,
 	}, nil
 }
 
