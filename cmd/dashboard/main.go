@@ -185,7 +185,7 @@ func main() {
 	// ReadHeaderTimeout 施加到 h2 的流上：设 5s 会让 agent 的状态流每 5 秒
 	// 被 context canceled 掐断一次。这里必须保持 0，由 gRPC keepalive 负责
 	// 死连接回收。
-	muxServerHTTP := &http.Server{
+	muxServerHTTP := &http.Server{ // #nosec G112 -- ReadHeaderTimeout 必须保持 0，原因见上注
 		Handler: muxHandler,
 	}
 	muxServerHTTP.Protocols = new(http.Protocols)
@@ -194,7 +194,7 @@ func main() {
 
 	var muxServerHTTPS *http.Server
 	if singleton.Conf.HTTPS.ListenPort != 0 {
-		muxServerHTTPS = &http.Server{
+		muxServerHTTPS = &http.Server{ // #nosec G112 -- ReadHeaderTimeout 必须保持 0，原因见上注
 			Addr:    fmt.Sprintf("%s:%d", singleton.Conf.ListenHost, singleton.Conf.HTTPS.ListenPort),
 			Handler: muxHandler,
 			TLSConfig: &tls.Config{
