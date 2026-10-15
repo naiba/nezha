@@ -248,7 +248,8 @@ func TestUpdateConfigOnlineStatsDaysRange(t *testing.T) {
 	singleton.FrontendTemplates = templates
 	t.Cleanup(func() { singleton.FrontendTemplates = originalFrontendTemplates })
 	conf := &singleton.ConfigClass{Config: &model.Config{}}
-	require.NoError(t, conf.Read(filepath.Join(t.TempDir(), "config.yaml"), templates))
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	require.NoError(t, conf.Read(configPath, templates))
 	originalConf := singleton.Conf
 	singleton.Conf = conf
 	t.Cleanup(func() { singleton.Conf = originalConf })
@@ -270,6 +271,12 @@ func TestUpdateConfigOnlineStatsDaysRange(t *testing.T) {
 	// 字段缺省时保留现值（部分 PATCH 语义）
 	require.NoError(t, patchOnlineStatsDays(t, nil))
 	require.Equal(t, model.MaxOnlineStatsDays, conf.OnlineStatsDays)
+
+	// 重启持久化断言：updateConfig 显式 Save 后，重新从磁盘读取的配置
+	// 必须带上刚写入的值（持久化不再依赖 MCP 过渡块的副作用）
+	reloaded := &singleton.ConfigClass{Config: &model.Config{}}
+	require.NoError(t, reloaded.Read(configPath, templates))
+	require.Equal(t, model.MaxOnlineStatsDays, reloaded.OnlineStatsDays)
 }
 
 func TestSettingFormOnlineStatsDaysDecode(t *testing.T) {

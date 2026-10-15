@@ -63,8 +63,10 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	windowStart := now.AddDate(0, 0, -days)
 
 	var sessions []model.OnlineSession
+	// 时间列直接比较（与写入时的绑定格式同构），让 (server_id, started_at)
+	// 索引可以完成范围扫描，days=1 也不会退化为该设备全部历史行的扫描
 	if err := singleton.DB.
-		Where("server_id = ? AND datetime(started_at) < datetime(?) AND (ongoing = ? OR datetime(ended_at) > datetime(?))",
+		Where("server_id = ? AND started_at < ? AND (ongoing = ? OR ended_at > ?)",
 			serverID, windowEnd, true, windowStart).
 		Order("started_at ASC").
 		Find(&sessions).Error; err != nil {
@@ -83,7 +85,15 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	currentlyOnline := !runtime.LastActive.IsZero() && now.Sub(runtime.LastActive) <= model.OnlineActiveWindow
 	var lastActive *time.Time
 	if !runtime.LastActive.IsZero() {
-		lastActive = &runtime.LastActive
+		lastActiveUTC := runtime.LastActive.UTC()
+		lastActive = &lastActiveUTC
+	}
+
+	// 响应统一以 UTC 序列化，避免窗口时间与库中读回的会话时间混用
+	// 本地偏移与 Z 两种写法（时段为值拷贝，不影响调用方）
+	utcPeriods := make([]model.OnlinePeriod, len(periods))
+	for i, p := range periods {
+		utcPeriods[i] = model.OnlinePeriod{Start: p.Start.UTC(), End: p.End.UTC(), Ongoing: p.Ongoing}
 	}
 
 	return &model.OnlineHistoryResponse{
@@ -91,13 +101,21 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 		ServerName:         server.Name,
 		Days:               days,
 		MaxDays:            maxDays,
-		WindowStart:        windowStart,
-		WindowEnd:          windowEnd,
+		Timezone:           singleton.Loc.String(),
+		TzOffset:           tzOffsetSeconds(now, singleton.Loc),
+		WindowStart:        windowStart.UTC(),
+		WindowEnd:          windowEnd.UTC(),
 		TotalOnlineSeconds: totalSeconds,
 		OnlineRate:         onlineRate,
 		CurrentlyOnline:    currentlyOnline,
 		LastActive:         lastActive,
-		Periods:            periods,
+		Periods:            utcPeriods,
 		Daily:              model.DailyOnlineBreakdown(periods, windowStart, windowEnd, singleton.Loc),
 	}, nil
+}
+
+// tzOffsetSeconds 返回指定时区在给定时刻相对 UTC 的偏移秒数。
+func tzOffsetSeconds(at time.Time, loc *time.Location) int {
+	_, offset := at.In(loc).Zone()
+	return offset
 }

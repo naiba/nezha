@@ -1,12 +1,9 @@
 package singleton
 
 import (
-	"errors"
 	"log"
 	"sync"
 	"time"
-
-	"gorm.io/gorm"
 
 	"github.com/nezhahq/nezha/model"
 )
@@ -80,13 +77,17 @@ func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 	}
 
 	var existing model.OnlineSession
-	err := DB.Where("server_id = ? AND ongoing = ?", serverID, true).First(&existing).Error
-	if err == nil {
-		r.open[serverID] = &onlineSessionRuntime{id: existing.ID, lastPersist: at}
+	// Select("id")+Limit(1)+Find 查无行时不返回 ErrRecordNotFound：gorm 默认
+	// logger 会把每次设备首报的"查无会话"打成 Warn+完整 SQL，噪音与设备
+	// 重连次数成正比
+	if err := DB.Model(&model.OnlineSession{}).
+		Where("server_id = ? AND ongoing = ?", serverID, true).
+		Select("id").Limit(1).Find(&existing).Error; err != nil {
+		log.Printf("NEZHA>> Failed to look up ongoing online session: %v", err)
 		return
 	}
-	if !errors.Is(err, gorm.ErrRecordNotFound) {
-		log.Printf("NEZHA>> Failed to look up ongoing online session: %v", err)
+	if existing.ID > 0 {
+		r.open[serverID] = &onlineSessionRuntime{id: existing.ID, lastPersist: at}
 		return
 	}
 
@@ -163,6 +164,8 @@ func onlineServerLastActive(serverID uint64) (time.Time, bool) {
 }
 
 // PruneOnlineSessions 清理超出统计窗口的已结束会话与已删除服务器的残留记录。
+// 时间列直接比较（与写入时的绑定格式同构）以走 ended_at 索引，并用分批
+// DELETE 替换单条巨型删除，避免大表上长时间占用 sqlite 写锁、阻塞上报路径。
 func PruneOnlineSessions() {
 	if DB == nil {
 		return
@@ -172,11 +175,30 @@ func PruneOnlineSessions() {
 		keepDays = model.DefaultOnlineStatsDays
 	}
 	cutoff := time.Now().AddDate(0, 0, -keepDays)
-	if err := DB.Unscoped().Delete(&model.OnlineSession{}, "ongoing = ? AND datetime(ended_at) < datetime(?)", false, cutoff).Error; err != nil {
-		log.Printf("NEZHA>> Failed to prune online sessions: %v", err)
-	}
-	if err := DB.Unscoped().Delete(&model.OnlineSession{}, "server_id NOT IN (SELECT `id` FROM servers)").Error; err != nil {
-		log.Printf("NEZHA>> Failed to prune online sessions of deleted servers: %v", err)
+	pruneOnlineSessionsBatch("ongoing = ? AND ended_at < ?", false, cutoff)
+	pruneOnlineSessionsBatch("server_id NOT IN (SELECT `id` FROM servers)")
+}
+
+// pruneOnlineSessionsBatch 按主键分批删除匹配的行，每批之间释放写锁。
+func pruneOnlineSessionsBatch(where string, args ...any) {
+	const batchSize = 10000
+	for {
+		var ids []uint64
+		if err := DB.Model(&model.OnlineSession{}).Unscoped().
+			Where(where, args...).Limit(batchSize).Pluck("id", &ids).Error; err != nil {
+			log.Printf("NEZHA>> Failed to select online sessions for pruning: %v", err)
+			return
+		}
+		if len(ids) == 0 {
+			return
+		}
+		if err := DB.Unscoped().Delete(&model.OnlineSession{}, ids).Error; err != nil {
+			log.Printf("NEZHA>> Failed to prune online sessions: %v", err)
+			return
+		}
+		if len(ids) < batchSize {
+			return
+		}
 	}
 }
 

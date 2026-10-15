@@ -1,6 +1,7 @@
 package model
 
 import (
+	"math/rand"
 	"testing"
 	"time"
 
@@ -122,4 +123,42 @@ func TestOnlineStatsDaysBounds(t *testing.T) {
 	require.Equal(t, 7, DefaultOnlineStatsDays)
 	require.Equal(t, 7, MinOnlineStatsDays)
 	require.Equal(t, 3650, MaxOnlineStatsDays)
+}
+
+// F1 回归保护：指针推进实现必须与逐日朴素实现对任意不相交时段集合等价
+// （单服务器会话互不重叠的约束一致），长窗口大量时段下不再随时段数平方放大。
+func TestDailyOnlineBreakdownEquivalence(t *testing.T) {
+	loc := testZone
+	windowStart := ts(2026, 1, 1, 0, 0, 0)
+	windowEnd := windowStart.AddDate(0, 0, 90)
+
+	rng := rand.New(rand.NewSource(42))
+	var periods []OnlinePeriod
+	cursor := windowStart
+	for cursor.Before(windowEnd) {
+		start := cursor.Add(time.Duration(rng.Intn(4*3600)) * time.Second)
+		end := start.Add(time.Duration(1+rng.Intn(6*3600)) * time.Second)
+		if end.After(windowEnd) {
+			end = windowEnd
+		}
+		periods = append(periods, OnlinePeriod{Start: start, End: end})
+		cursor = end.Add(time.Duration(1+rng.Intn(3600)) * time.Second)
+	}
+
+	days := DailyOnlineBreakdown(periods, windowStart, windowEnd, loc)
+
+	reference := map[string]uint64{}
+	for _, p := range periods {
+		for d := windowStart; d.Before(windowEnd); d = d.AddDate(0, 0, 1) {
+			overlapStart := maxTime(p.Start, d)
+			overlapEnd := minTime(p.End, d.AddDate(0, 0, 1))
+			if overlapStart.Before(overlapEnd) {
+				reference[d.Format("2006-01-02")] += uint64(overlapEnd.Sub(overlapStart).Seconds())
+			}
+		}
+	}
+	require.Len(t, days, 90)
+	for _, day := range days {
+		require.Equal(t, reference[day.Date], day.OnlineSeconds, "date %s", day.Date)
+	}
 }

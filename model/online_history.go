@@ -1,6 +1,7 @@
 package model
 
 import (
+	"sort"
 	"time"
 )
 
@@ -48,10 +49,14 @@ type DailyOnlineStat struct {
 
 // OnlineHistoryResponse 是单台服务器在线时间段统计的聚合结果。
 type OnlineHistoryResponse struct {
-	ServerID           uint64    `json:"server_id"`
-	ServerName         string    `json:"server_name"`
-	Days               int       `json:"days"`
-	MaxDays            int       `json:"max_days"`
+	ServerID   uint64 `json:"server_id"`
+	ServerName string `json:"server_name"`
+	Days       int    `json:"days"`
+	MaxDays    int    `json:"max_days"`
+	// Daily 拆日所用面板时区：IANA 名与窗口末端相对 UTC 的偏移秒数，
+	// 前端按同一时区渲染，保证跨时区访客的图形与数字一致
+	Timezone           string    `json:"timezone"`
+	TzOffset           int       `json:"tz_offset"`
 	WindowStart        time.Time `json:"window_start"`
 	WindowEnd          time.Time `json:"window_end"`
 	TotalOnlineSeconds uint64    `json:"total_online_seconds"`
@@ -98,13 +103,18 @@ func SumOnlinePeriods(periods []OnlinePeriod) uint64 {
 
 // DailyOnlineBreakdown 把在线时间段按面板时区的自然日拆分，返回窗口覆盖的
 // 每一天的在线秒数（含在线为 0 秒的日期），按日期升序。
+// 时段二分定位起始日界后逐日推进，复杂度 O(P·log D + D)；单服务器的会话
+// 互不重叠，内层推进总量受窗口天数约束，长窗口（如 days=3650）下不会出现
+// 时段数×天数的双重循环。
 func DailyOnlineBreakdown(periods []OnlinePeriod, windowStart, windowEnd time.Time, loc *time.Location) []DailyOnlineStat {
 	first := windowStart.In(loc)
 	baseDay := time.Date(first.Year(), first.Month(), first.Day(), 0, 0, 0, 0, loc)
 	last := windowEnd.In(loc)
 
 	var days []DailyOnlineStat
+	var dayStarts []time.Time
 	for d := baseDay; d.Before(last); d = d.AddDate(0, 0, 1) {
+		dayStarts = append(dayStarts, d)
 		days = append(days, DailyOnlineStat{Date: d.Format("2006-01-02")})
 	}
 	if len(days) == 0 {
@@ -112,23 +122,23 @@ func DailyOnlineBreakdown(periods []OnlinePeriod, windowStart, windowEnd time.Ti
 	}
 
 	for _, p := range periods {
-		// 逐日推进，累加该会话与每一天 [dayStart, nextDay) 的交集
-		for i := range days {
-			dayStart := dayStartAt(baseDay, i)
-			nextDay := dayStartAt(baseDay, i+1)
-			overlapStart := maxTime(p.Start, dayStart)
-			overlapEnd := minTime(p.End, nextDay)
+		// 该时段覆盖的第一天：不晚于时段开始的最后一个日界
+		i := sort.Search(len(dayStarts), func(i int) bool {
+			return dayStarts[i].After(p.Start)
+		}) - 1
+		if i < 0 {
+			i = 0
+		}
+		// 逐日推进，累加该时段与每一天 [dayStart, nextDay) 的交集
+		for ; i < len(dayStarts) && dayStarts[i].Before(p.End); i++ {
+			overlapStart := maxTime(p.Start, dayStarts[i])
+			overlapEnd := minTime(p.End, dayStarts[i].AddDate(0, 0, 1))
 			if overlapStart.Before(overlapEnd) {
 				days[i].OnlineSeconds += uint64(overlapEnd.Sub(overlapStart).Seconds())
 			}
 		}
 	}
 	return days
-}
-
-func dayStartAt(baseDay time.Time, offset int) time.Time {
-	y, m, d := baseDay.AddDate(0, 0, offset).Date()
-	return time.Date(y, m, d, 0, 0, 0, 0, baseDay.Location())
 }
 
 func maxTime(a, b time.Time) time.Time {

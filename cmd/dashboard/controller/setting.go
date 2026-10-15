@@ -133,6 +133,12 @@ func updateConfig(c *gin.Context) (any, error) {
 		return nil, newGormError("%v", err)
 	}
 
+	// 显式保存，设置字段的持久化不再依赖上方 MCP 过渡块的副作用；
+	// 重复落盘内容一致，仅多一次顺序写
+	if err := singleton.Conf.Save(); err != nil {
+		return nil, newGormError("%v", err)
+	}
+
 	singleton.OnUpdateLang(singleton.Conf.Language)
 	return nil, nil
 }
