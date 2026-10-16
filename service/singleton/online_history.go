@@ -1,7 +1,9 @@
 package singleton
 
 import (
+	"fmt"
 	"log"
+	"sort"
 	"sync"
 	"time"
 
@@ -12,8 +14,9 @@ import (
 // 关闭由 agent 状态流的建立/断开驱动（service/rpc），并由定时清扫兜底关闭
 // 失联（未正常断流）的会话；dashboard 重启时通过数据库中 Ongoing 会话恢复。
 type OnlineHistoryRecorder struct {
-	mu   sync.Mutex
-	open map[uint64]*onlineSessionRuntime
+	mu       sync.Mutex
+	restored bool
+	open     map[uint64]*onlineSessionRuntime
 	// closing 是关库失败后的待关闭状态：断线边界已被观察到，会话 ID 与
 	// 结束时间在此固定、不可被后续上报覆盖；重试只为旧会话完成持久化，
 	// 重连不得把它续接成活跃会话（同服务器可能同时有多条待关闭会话）。
@@ -21,7 +24,9 @@ type OnlineHistoryRecorder struct {
 }
 
 type onlineSessionRuntime struct {
-	id uint64
+	id           uint64
+	lastObserved time.Time
+	revision     uint64
 	// lastPersist 是 LastActiveAt 最近一次落库时间，用于节流写库。
 	lastPersist time.Time
 }
@@ -39,26 +44,26 @@ func NewOnlineHistoryRecorder() *OnlineHistoryRecorder {
 		open:    make(map[uint64]*onlineSessionRuntime),
 		closing: make(map[uint64][]*onlineSessionClosing),
 	}
+	r.mu.Lock()
 	r.restoreOngoingSessions()
+	r.mu.Unlock()
 	return r
 }
 
 // restoreOngoingSessions 每台服务器仅允许最新且仍在在线窗口内的会话续接，
 // 其余会话按最后持久化的活跃时间结转。崩溃会丢失内存中的待关闭边界，
 // 恢复时采用 LastActiveAt 保守结转，不推测未持久化的断线时间。
-func (r *OnlineHistoryRecorder) restoreOngoingSessions() {
+func (r *OnlineHistoryRecorder) restoreOngoingSessions() bool {
 	if DB == nil {
-		return
+		return false
 	}
 	var ongoing []model.OnlineSession
 	if err := DB.Where("ongoing = ?", true).
 		Order("server_id ASC").Order("started_at DESC").Order("id DESC").Find(&ongoing).Error; err != nil {
 		log.Printf("NEZHA>> Failed to load ongoing online sessions: %v", err)
-		return
+		return false
 	}
 	now := time.Now()
-	r.mu.Lock()
-	defer r.mu.Unlock()
 	seenServers := make(map[uint64]bool)
 	for _, s := range ongoing {
 		// 关闭失败后重连可留下同服务器多条 Ongoing 行；直接赋值 open 会覆盖
@@ -81,8 +86,10 @@ func (r *OnlineHistoryRecorder) restoreOngoingSessions() {
 			}
 			continue
 		}
-		r.open[s.ServerID] = &onlineSessionRuntime{id: s.ID, lastPersist: s.LastActiveAt}
+		r.open[s.ServerID] = &onlineSessionRuntime{id: s.ID, lastPersist: s.LastActiveAt, lastObserved: s.LastActiveAt}
 	}
+	r.restored = true
+	return true
 }
 
 // flushClosing 尽力重试关闭该服务器的待关闭会话：按入列时固定的结束时间
@@ -111,49 +118,35 @@ func (r *OnlineHistoryRecorder) flushClosing(serverID uint64) {
 func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	// A failed startup read is not an empty history: retry before accepting reports.
+	if !r.restored && !r.restoreOngoingSessions() {
+		return
+	}
+	at = at.UTC()
 	r.flushClosing(serverID)
 
 	if rt, ok := r.open[serverID]; ok {
+		rt.lastObserved = at
+		rt.revision++
 		if at.Sub(rt.lastPersist) >= model.OnlineActiveWindow {
-			rt.lastPersist = at
 			if err := DB.Model(&model.OnlineSession{}).Where("id = ?", rt.id).Update("last_active_at", at).Error; err != nil {
 				log.Printf("NEZHA>> Failed to persist online session last_active_at: %v", err)
+			} else {
+				// Only committed writes advance the throttle; failures retry on the next report.
+				rt.lastPersist = at
 			}
 		}
 		return
 	}
 
-	var existing model.OnlineSession
-	// Select("id")+Limit(1)+Find 查无行时不返回 ErrRecordNotFound：gorm 默认
-	// logger 会把每次设备首报的"查无会话"打成 Warn+完整 SQL，噪音与设备
-	// 重连次数成正比
-	q := DB.Model(&model.OnlineSession{}).
-		Where("server_id = ? AND ongoing = ?", serverID, true).
-		Select("id").Limit(1)
-	// 待关闭会话即使行仍为 Ongoing 也必须排除：其结束时间已观察到并固定，
-	// 续接会把断线后的离线间隔计作在线
-	if pendings := r.closing[serverID]; len(pendings) > 0 {
-		ids := make([]uint64, 0, len(pendings))
-		for _, pc := range pendings {
-			ids = append(ids, pc.id)
-		}
-		q = q.Where("id NOT IN ?", ids)
-	}
-	if err := q.Find(&existing).Error; err != nil {
-		log.Printf("NEZHA>> Failed to look up ongoing online session: %v", err)
-		return
-	}
-	if existing.ID > 0 {
-		r.open[serverID] = &onlineSessionRuntime{id: existing.ID, lastPersist: at}
-		return
-	}
+	// All ongoing rows are owned by open or closing after successful recovery.
 
 	s := model.OnlineSession{ServerID: serverID, StartedAt: at, LastActiveAt: at, Ongoing: true}
 	if err := DB.Create(&s).Error; err != nil {
 		log.Printf("NEZHA>> Failed to create online session: %v", err)
 		return
 	}
-	r.open[serverID] = &onlineSessionRuntime{id: s.ID, lastPersist: at}
+	r.open[serverID] = &onlineSessionRuntime{id: s.ID, lastPersist: at, lastObserved: at}
 }
 
 // RecordOffline 关闭该服务器当前进行中的会话。at 是会话结束时刻：正常断流
@@ -164,6 +157,10 @@ func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 func (r *OnlineHistoryRecorder) RecordOffline(serverID uint64, at time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	r.recordOfflineLocked(serverID, at)
+}
+
+func (r *OnlineHistoryRecorder) recordOfflineLocked(serverID uint64, at time.Time) {
 	rt, ok := r.open[serverID]
 	if !ok {
 		return
@@ -186,45 +183,36 @@ func (r *OnlineHistoryRecorder) RecordOffline(serverID uint64, at time.Time) {
 // SweepStale 关闭超过在线窗口仍无状态上报的进行中会话。lastActiveFn 返回
 // 服务器的运行时最后活跃时间与是否存在。
 func (r *OnlineHistoryRecorder) SweepStale(now time.Time, lastActiveFn func(serverID uint64) (time.Time, bool)) {
-	type staleSession struct {
-		serverID uint64
-		at       time.Time
-	}
-	var stale []staleSession
-
+	// Never call the runtime observer while holding mu: reports acquire the
+	// runtime lease before this mutex. Snapshot identities, then revalidate them.
 	r.mu.Lock()
-	for serverID, rt := range r.open {
-		lastActive, ok := lastActiveFn(serverID)
-		if ok && !lastActive.Before(now.Add(-model.OnlineActiveWindow)) {
-			continue
-		}
-		at := lastActive
-		if !ok || at.Before(rt.lastPersist) {
-			at = rt.lastPersist
-		}
-		stale = append(stale, staleSession{serverID: serverID, at: at})
+	if !r.restored && !r.restoreOngoingSessions() {
+		r.mu.Unlock()
+		return
 	}
-	// 待关闭会话已脱离 r.open，其边界时刻也已固定，与服务器当前活跃状态
-	// 无关——无条件重试，避免依赖服务器活跃度才推进
-	for serverID, pendings := range r.closing {
-		kept := pendings[:0]
-		for _, pc := range pendings {
-			if err := closeOnlineSessionRow(pc.id, pc.end); err != nil {
-				log.Printf("NEZHA>> Failed to retry closing online session %d: %v", pc.id, err)
-				kept = append(kept, pc)
-			}
-		}
-		if len(kept) == 0 {
-			delete(r.closing, serverID)
-		} else {
-			r.closing[serverID] = kept
-		}
+	candidates := make(map[uint64]onlineSessionRuntime, len(r.open))
+	for id, rt := range r.open {
+		candidates[id] = *rt
+	}
+	for id := range r.closing {
+		r.flushClosing(id)
 	}
 	r.mu.Unlock()
-
-	for _, s := range stale {
-		r.RecordOffline(s.serverID, s.at)
+	for id, candidate := range candidates {
+		lastActive, ok := lastActiveFn(id)
+		r.mu.Lock()
+		rt := r.open[id]
+		if rt != nil && rt.id == candidate.id && rt.revision == candidate.revision {
+			if lastActive.Before(rt.lastObserved) {
+				lastActive = rt.lastObserved
+			}
+			if (!ok || lastActive.Before(now.Add(-model.OnlineActiveWindow))) && rt.lastObserved.Before(now.Add(-model.OnlineActiveWindow)) {
+				r.recordOfflineLocked(id, lastActive)
+			}
+		}
+		r.mu.Unlock()
 	}
+
 }
 
 // SweepOnlineSessions 是定时清扫入口，接上服务器运行时的最后活跃时间。
@@ -255,7 +243,7 @@ func PruneOnlineSessions() {
 	if keepDays < model.MinOnlineStatsDays || keepDays > model.MaxOnlineStatsDays {
 		keepDays = model.DefaultOnlineStatsDays
 	}
-	cutoff := time.Now().AddDate(0, 0, -keepDays)
+	cutoff := time.Now().AddDate(0, 0, -keepDays).UTC()
 	pruneOnlineSessionsBatch("ongoing = ? AND ended_at < ?", false, cutoff)
 	pruneOnlineSessionsBatch("server_id NOT IN (SELECT `id` FROM servers)")
 }
@@ -285,7 +273,50 @@ func pruneOnlineSessionsBatch(where string, args ...any) {
 
 func closeOnlineSessionRow(id uint64, end time.Time) error {
 	return DB.Model(&model.OnlineSession{}).Where("id = ?", id).Updates(map[string]any{
-		"ended_at": end,
+		"ended_at": end.UTC(),
 		"ongoing":  false,
 	}).Error
+}
+
+// Sessions snapshots rows and volatile close boundaries under the same lock.
+// Otherwise a failed close can count confirmed offline time as ongoing, or a
+// successful retry can remove the boundary after the reader fetched a stale row.
+func (r *OnlineHistoryRecorder) Sessions(serverID uint64, start, end time.Time) ([]model.OnlineSession, error) {
+	if r != nil {
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		if !r.restored && !r.restoreOngoingSessions() {
+			return nil, fmt.Errorf("online history recovery unavailable")
+		}
+	}
+	var sessions []model.OnlineSession
+	// Separate branches use (server_id, ongoing, ended_at) and
+	// (server_id, ongoing, started_at), avoiding a scan of retained closed rows.
+	for _, ongoing := range []bool{false, true} {
+		var rows []model.OnlineSession
+		q := DB.Where("server_id = ? AND ongoing = ?", serverID, ongoing)
+		if ongoing {
+			q = q.Where("started_at < ?", end.UTC())
+		} else {
+			q = q.Where("ended_at > ?", start.UTC())
+		}
+		if err := q.Find(&rows).Error; err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, rows...)
+	}
+	if r != nil {
+		endings := make(map[uint64]time.Time)
+		for _, pending := range r.closing[serverID] {
+			endings[pending.id] = pending.end
+		}
+		for i := range sessions {
+			if end, ok := endings[sessions[i].ID]; ok {
+				sessions[i].Ongoing = false
+				sessions[i].EndedAt = end
+			}
+		}
+	}
+	sort.Slice(sessions, func(i, j int) bool { return sessions[i].StartedAt.Before(sessions[j].StartedAt) })
+	return sessions, nil
 }

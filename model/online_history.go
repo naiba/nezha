@@ -1,6 +1,7 @@
 package model
 
 import (
+	"gorm.io/gorm"
 	"sort"
 	"time"
 )
@@ -25,12 +26,21 @@ type OnlineSession struct {
 	ID        uint64    `gorm:"primaryKey" json:"id,omitempty"`
 	CreatedAt time.Time `gorm:"index;<-:create" json:"created_at,omitempty"`
 	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updated_at,omitempty"`
-	ServerID  uint64    `gorm:"index:idx_online_sessions_server_started" json:"server_id,omitempty"`
-	StartedAt time.Time `gorm:"index:idx_online_sessions_server_started" json:"started_at,omitempty"`
-	EndedAt   time.Time `gorm:"index" json:"ended_at,omitempty"` // 会话结束时刻，进行中为零值
+	ServerID  uint64    `gorm:"index:idx_online_sessions_server_started;index:idx_online_sessions_server_closed,priority:1;index:idx_online_sessions_server_open,priority:1" json:"server_id,omitempty"`
+	StartedAt time.Time `gorm:"index:idx_online_sessions_server_started;index:idx_online_sessions_server_open,priority:3" json:"started_at,omitempty"`
+	EndedAt   time.Time `gorm:"index;index:idx_online_sessions_server_closed,priority:3" json:"ended_at,omitempty"` // 会话结束时刻，进行中为零值
 	// 上报侧节流持久化的最后活跃时刻（≥OnlineActiveWindow 间隔写一次）
 	LastActiveAt time.Time `json:"last_active_at,omitempty"`
-	Ongoing      bool      `json:"ongoing"`
+	Ongoing      bool      `gorm:"index:idx_online_sessions_server_closed,priority:2;index:idx_online_sessions_server_open,priority:2" json:"ongoing"`
+}
+
+// BeforeSave keeps SQLite's lexicographic timestamp comparisons chronological.
+// Query parameters and map-based updates must use UTC as well.
+func (s *OnlineSession) BeforeSave(_ *gorm.DB) error {
+	s.StartedAt = s.StartedAt.UTC()
+	s.EndedAt = s.EndedAt.UTC()
+	s.LastActiveAt = s.LastActiveAt.UTC()
+	return nil
 }
 
 // OnlinePeriod 是裁剪到查询窗口后的在线时间段，供前端时间轴直接渲染。
@@ -102,15 +112,26 @@ func ClipOnlineSessions(sessions []OnlineSession, windowStart, windowEnd time.Ti
 // 时段数×天数的双重循环。
 func DailyOnlineBreakdown(periods []OnlinePeriod, windowStart, windowEnd time.Time, loc *time.Location) []DailyOnlineStat {
 	first := windowStart.In(loc)
-	baseDay := time.Date(first.Year(), first.Month(), first.Day(), 0, 0, 0, 0, loc)
-	last := windowEnd.In(loc)
-
+	// Advance a timezone-independent calendar, not a normalized local midnight:
+	// midnight DST gaps can normalize into the previous day and repeat dates.
+	date := time.Date(first.Year(), first.Month(), first.Day(), 0, 0, 0, 0, time.UTC)
 	var days []DailyOnlineStat
-	var dayStarts []time.Time
-	for d := baseDay; d.Before(last); d = d.AddDate(0, 0, 1) {
-		dayStarts = append(dayStarts, d)
-		days = append(days, DailyOnlineStat{Date: d.Format("2006-01-02")})
+	var dayStarts, dayEnds []time.Time
+	for {
+		start := onlineCalendarBoundary(date, loc)
+		if !start.Before(windowEnd) {
+			break
+		}
+		nextDate := date.AddDate(0, 0, 1)
+		end := onlineCalendarBoundary(nextDate, loc)
+		if start.Before(end) {
+			dayStarts = append(dayStarts, start)
+			dayEnds = append(dayEnds, end)
+			days = append(days, DailyOnlineStat{Date: date.Format("2006-01-02")})
+		}
+		date = nextDate
 	}
+
 	if len(days) == 0 {
 		return days
 	}
@@ -127,7 +148,7 @@ func DailyOnlineBreakdown(periods []OnlinePeriod, windowStart, windowEnd time.Ti
 		// 逐日推进，累加该时段与每一天 [dayStart, nextDay) 的交集
 		for ; i < len(dayStarts) && dayStarts[i].Before(p.End); i++ {
 			overlapStart := maxTime(p.Start, dayStarts[i])
-			overlapEnd := minTime(p.End, dayStarts[i].AddDate(0, 0, 1))
+			overlapEnd := minTime(p.End, dayEnds[i])
 			if overlapStart.Before(overlapEnd) {
 				dayDurations[i] += overlapEnd.Sub(overlapStart)
 			}
@@ -151,4 +172,17 @@ func minTime(a, b time.Time) time.Time {
 		return a
 	}
 	return b
+}
+
+// A missing midnight (or an entirely skipped date) starts at the timezone
+// transition, not at the previous date returned by time.Date normalization.
+func onlineCalendarBoundary(date time.Time, loc *time.Location) time.Time {
+	boundary := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, loc)
+	if boundary.Format("2006-01-02") < date.Format("2006-01-02") {
+		_, end := boundary.ZoneBounds()
+		if !end.IsZero() {
+			return end
+		}
+	}
+	return boundary
 }

@@ -181,22 +181,18 @@ func main() {
 	wireNATDashboardCredentialGate()
 
 	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
-	// gRPC 长连接与 HTTP 共用这两个 Server（原生 h2）。新版 Go 工具链会把
-	// ReadHeaderTimeout 施加到 h2 的流上：设 5s 会让 agent 的状态流每 5 秒
-	// 被 context canceled 掐断一次。这里必须保持 0，由 gRPC keepalive 负责
-	// 死连接回收。
-	muxServerHTTP := &http.Server{ // #nosec G112 -- ReadHeaderTimeout 必须保持 0，原因见上注
-		Handler: muxHandler,
-	}
+	muxServerHTTP := newDashboardHTTPServer(muxHandler)
+
 	muxServerHTTP.Protocols = new(http.Protocols)
 	muxServerHTTP.Protocols.SetHTTP1(true)
 	muxServerHTTP.Protocols.SetUnencryptedHTTP2(true)
 
 	var muxServerHTTPS *http.Server
 	if singleton.Conf.HTTPS.ListenPort != 0 {
-		muxServerHTTPS = &http.Server{ // #nosec G112 -- ReadHeaderTimeout 必须保持 0，原因见上注
-			Addr:    fmt.Sprintf("%s:%d", singleton.Conf.ListenHost, singleton.Conf.HTTPS.ListenPort),
-			Handler: muxHandler,
+		muxServerHTTPS = &http.Server{
+			ReadHeaderTimeout: dashboardReadHeaderTimeout,
+			Addr:              fmt.Sprintf("%s:%d", singleton.Conf.ListenHost, singleton.Conf.HTTPS.ListenPort),
+			Handler:           muxHandler,
 			TLSConfig: &tls.Config{
 				InsecureSkipVerify: singleton.Conf.HTTPS.InsecureTLS,
 			},

@@ -165,9 +165,9 @@ func TestGetServerOnlineHistoryAggregatesAndClampsWindow(t *testing.T) {
 func TestGetServerOnlineHistoryInvalidDays(t *testing.T) {
 	setupOnlineHistoryControllerTest(t)
 	for _, q := range []string{"days=abc", "days=0", "days=-1"} {
-		c := onlineHistoryCtx(t, "1", q)
+		c := onlineHistoryCtxAsMember(t, "1", q)
 		_, err := getServerOnlineHistory(c)
-		require.Error(t, err, "query %q should be rejected", q)
+		require.EqualError(t, err, singleton.Localizer.ErrorT("invalid days parameter").Error(), "query %q should be rejected", q)
 	}
 }
 
@@ -213,9 +213,9 @@ func TestGetServerOnlineHistoryPermission(t *testing.T) {
 	require.Equal(t, visible.ID, resp.ServerID)
 
 	// 游客不能查看 HideForGuest 服务器
-	guestHidden := onlineHistoryCtx(t, "2", "days=7")
+	guestHidden := onlineHistoryCtx(t, "2", "days=1")
 	_, err = getServerOnlineHistory(guestHidden)
-	require.Error(t, err)
+	require.EqualError(t, err, singleton.Localizer.ErrorT("unauthorized").Error())
 
 	// 成员不能查看他人隐藏服务器
 	member := onlineHistoryCtx(t, "2", "days=7")
@@ -295,4 +295,36 @@ func TestSettingFormOnlineStatsDaysDecode(t *testing.T) {
 	require.NoError(t, json.NewDecoder(bytes.NewReader([]byte(`{"online_stats_days":3650}`))).Decode(&explicit))
 	require.NotNil(t, explicit.OnlineStatsDays)
 	require.Equal(t, 3650, *explicit.OnlineStatsDays)
+}
+
+func TestOnlineHistoryReadsPendingCloseBoundary(t *testing.T) {
+	setupOnlineHistoryControllerTest(t)
+	previous := singleton.OnlineHistoryShared
+	t.Cleanup(func() { singleton.OnlineHistoryShared = previous })
+	r := singleton.NewOnlineHistoryRecorder()
+	singleton.OnlineHistoryShared = r
+	start := time.Now().UTC().Add(-time.Hour).Truncate(time.Second)
+	r.RecordOnline(1, start)
+	require.NoError(t, singleton.DB.Exec(`CREATE TRIGGER reject_close BEFORE UPDATE ON online_sessions WHEN NEW.ongoing = 0 BEGIN SELECT RAISE(ABORT, 'close failure'); END`).Error)
+	r.RecordOffline(1, start.Add(time.Minute))
+	r.RecordOnline(1, start.Add(30*time.Minute))
+	resp, err := getServerOnlineHistory(onlineHistoryCtx(t, "1", "days=1"))
+	require.NoError(t, err)
+	require.Len(t, resp.Periods, 2)
+	require.False(t, resp.Periods[0].Ongoing)
+	require.True(t, resp.Periods[0].End.Equal(start.Add(time.Minute)))
+	require.Less(t, resp.TotalOnlineSeconds, uint64(1900))
+}
+
+func TestOnlineHistoryQueryWithNonUTCSession(t *testing.T) {
+	setupOnlineHistoryControllerTest(t)
+	now := time.Now()
+	offset := time.FixedZone("UTC+12", 12*3600)
+	session := model.OnlineSession{ServerID: 1, StartedAt: now.Add(-time.Hour).In(offset), LastActiveAt: now.Add(-time.Minute).In(offset), Ongoing: true}
+	require.NoError(t, singleton.DB.Create(&session).Error)
+	resp, err := getServerOnlineHistory(onlineHistoryCtx(t, "1", "days=1"))
+	require.NoError(t, err)
+	require.Len(t, resp.Periods, 1)
+	require.True(t, resp.Periods[0].Start.Equal(session.StartedAt))
+	require.InDelta(t, 3600, resp.TotalOnlineSeconds, 2)
 }

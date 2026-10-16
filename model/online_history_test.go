@@ -184,3 +184,12 @@ func TestDailyOnlineBreakdownEquivalence(t *testing.T) {
 		require.Equal(t, uint64(reference[day.Date].Seconds()), day.OnlineSeconds, "date %s", day.Date)
 	}
 }
+
+func TestDailyOnlineBreakdownMidnightDSTTransition(t *testing.T) {
+	loc, err := time.LoadLocation("America/Sao_Paulo")
+	require.NoError(t, err)
+	start := time.Date(2018, 11, 3, 0, 0, 0, 0, loc)
+	end := time.Date(2018, 11, 6, 0, 0, 0, 0, loc)
+	days := DailyOnlineBreakdown([]OnlinePeriod{{Start: start, End: end}}, start, end, loc)
+	require.Equal(t, []DailyOnlineStat{{Date: "2018-11-03", OnlineSeconds: 86400}, {Date: "2018-11-04", OnlineSeconds: 82800}, {Date: "2018-11-05", OnlineSeconds: 86400}}, days)
+}

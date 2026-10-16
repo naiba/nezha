@@ -203,11 +203,13 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 	}
 	lease := server.AttachStateStream(stream)
 	defer func() {
-		// Clear 返回 true 表示断开的是当前生效的状态流；此时关闭在线会话。
-		// 重连/转移导致旧流被替代时（返回 false）会话由新流继续，避免误关。
-		if lease.Clear() && singleton.OnlineHistoryShared != nil {
-			singleton.OnlineHistoryShared.RecordOffline(clientID, time.Now())
-		}
+		// Persist while owning the lease; a replaced stream must never close a
+		// newer stream's session between Clear and RecordOffline.
+		lease.ClearWithSideEffect(func() {
+			if singleton.OnlineHistoryShared != nil {
+				singleton.OnlineHistoryShared.RecordOffline(clientID, time.Now())
+			}
+		})
 	}()
 	var state *pb.State
 	var stateCount uint64
@@ -259,14 +261,13 @@ func (s *NezhaHandler) ReportSystemState(stream pb.NezhaService_ReportSystemStat
 					log.Printf("NEZHA>> Failed to write server metrics to TSDB: %v", err)
 				}
 			}
+			if singleton.OnlineHistoryShared != nil {
+				singleton.OnlineHistoryShared.RecordOnline(clientID, lastActive)
+			}
 			return nil
 		})
 		if !accepted {
 			return errors.New("state stream superseded")
-		}
-
-		if singleton.OnlineHistoryShared != nil {
-			singleton.OnlineHistoryShared.RecordOnline(clientID, lastActive)
 		}
 
 		if err := notifyStateReceived(clientID, server.UUID, lease.Generation(), stateCount); err != nil {

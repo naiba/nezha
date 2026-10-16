@@ -211,10 +211,16 @@ func (lease StateStreamLease) updateState(receiver *Server, state *HostState, la
 }
 
 func (lease StateStreamLease) Clear() bool {
-	return lease.clear(nil)
+	return lease.clear(nil, nil)
 }
 
-func (lease StateStreamLease) clear(receiver *Server) bool {
+// ClearWithSideEffect serializes disconnect persistence with replacement streams.
+// The callback must not acquire the runtime holder again.
+func (lease StateStreamLease) ClearWithSideEffect(sideEffect func()) bool {
+	return lease.clear(nil, sideEffect)
+}
+
+func (lease StateStreamLease) clear(receiver *Server, sideEffect func()) bool {
 	if lease.holder == nil {
 		return false
 	}
@@ -226,6 +232,9 @@ func (lease StateStreamLease) clear(receiver *Server) bool {
 	lease.holder.stream = nil
 	lease.holder.lastActive = time.Time{}
 	lease.holder.canonical.LastActive = time.Time{}
+	if sideEffect != nil {
+		sideEffect()
+	}
 	return true
 }
 
@@ -329,7 +338,7 @@ func (s *Server) UpdateStateIfCurrentWithSideEffect(lease StateStreamLease, stat
 }
 
 func (s *Server) ClearStateStreamIfCurrent(lease StateStreamLease) bool {
-	return lease.clear(s)
+	return lease.clear(s, nil)
 }
 
 // RuntimeSnapshot is a deep copy of the mutable runtime state.

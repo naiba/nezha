@@ -62,14 +62,8 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	windowEnd := now
 	windowStart := now.AddDate(0, 0, -days)
 
-	var sessions []model.OnlineSession
-	// 时间列直接比较（与写入时的绑定格式同构），让 (server_id, started_at)
-	// 索引可以完成范围扫描，days=1 也不会退化为该设备全部历史行的扫描
-	if err := singleton.DB.
-		Where("server_id = ? AND started_at < ? AND (ongoing = ? OR ended_at > ?)",
-			serverID, windowEnd, true, windowStart).
-		Order("started_at ASC").
-		Find(&sessions).Error; err != nil {
+	sessions, err := singleton.OnlineHistoryShared.Sessions(serverID, windowStart, windowEnd)
+	if err != nil {
 		return nil, newGormError("%v", err)
 	}
 
