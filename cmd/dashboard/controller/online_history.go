@@ -37,7 +37,7 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 	}
 	_, isMember := c.Get(model.CtxKeyAuthorizedUser)
 
-	maxDays := singleton.Conf.OnlineStatsDays
+	maxDays := singleton.Conf.OnlineHistoryRetentionDays()
 	if maxDays < model.MinOnlineStatsDays || maxDays > model.MaxOnlineStatsDays {
 		maxDays = model.DefaultOnlineStatsDays
 	}

@@ -21,6 +21,8 @@ type OnlineHistoryRecorder struct {
 	// 结束时间在此固定、不可被后续上报覆盖；重试只为旧会话完成持久化，
 	// 重连不得把它续接成活跃会话（同服务器可能同时有多条待关闭会话）。
 	closing map[uint64][]*onlineSessionClosing
+	// Preserve the first disconnect while startup reads are unavailable.
+	recoveryDisconnects map[uint64]time.Time
 }
 
 type onlineSessionRuntime struct {
@@ -41,8 +43,9 @@ var OnlineHistoryShared *OnlineHistoryRecorder
 
 func NewOnlineHistoryRecorder() *OnlineHistoryRecorder {
 	r := &OnlineHistoryRecorder{
-		open:    make(map[uint64]*onlineSessionRuntime),
-		closing: make(map[uint64][]*onlineSessionClosing),
+		open:                make(map[uint64]*onlineSessionRuntime),
+		closing:             make(map[uint64][]*onlineSessionClosing),
+		recoveryDisconnects: make(map[uint64]time.Time),
 	}
 	r.mu.Lock()
 	r.restoreOngoingSessions()
@@ -71,8 +74,13 @@ func (r *OnlineHistoryRecorder) restoreOngoingSessions() bool {
 		// 必须关闭或进入 closing 重试，即使最新行本身已经过期也不能复活旧行。
 		duplicate := seenServers[s.ServerID]
 		seenServers[s.ServerID] = true
-		if duplicate || s.LastActiveAt.Before(now.Add(-model.OnlineActiveWindow)) {
+		disconnect, observedDisconnect := r.recoveryDisconnects[s.ServerID]
+		observedDisconnect = observedDisconnect && !duplicate && !disconnect.Before(s.StartedAt)
+		if observedDisconnect || duplicate || s.LastActiveAt.Before(now.Add(-model.OnlineActiveWindow)) {
 			end := s.LastActiveAt
+			if observedDisconnect && disconnect.After(end) {
+				end = disconnect
+			}
 			if end.Before(s.StartedAt) {
 				end = s.StartedAt
 			}
@@ -88,6 +96,7 @@ func (r *OnlineHistoryRecorder) restoreOngoingSessions() bool {
 		}
 		r.open[s.ServerID] = &onlineSessionRuntime{id: s.ID, lastPersist: s.LastActiveAt, lastObserved: s.LastActiveAt}
 	}
+	clear(r.recoveryDisconnects)
 	r.restored = true
 	return true
 }
@@ -164,6 +173,14 @@ func (r *OnlineHistoryRecorder) RecordOffline(serverID uint64, at time.Time) {
 	defer r.mu.Unlock()
 	// Disconnect may be the first event after startup storage recovers.
 	if !r.restored && !r.restoreOngoingSessions() {
+		// Retrying SELECT alone loses confirmed offline gaps on a quick reconnect.
+		// Keep the first boundary; subsequent disconnected streams cannot extend it.
+		if r.recoveryDisconnects == nil {
+			r.recoveryDisconnects = make(map[uint64]time.Time)
+		}
+		if _, exists := r.recoveryDisconnects[serverID]; !exists {
+			r.recoveryDisconnects[serverID] = at.UTC()
+		}
 		return
 	}
 	r.recordOfflineLocked(serverID, at)
@@ -248,7 +265,7 @@ func PruneOnlineSessions() {
 	if DB == nil {
 		return
 	}
-	keepDays := Conf.OnlineStatsDays
+	keepDays := Conf.OnlineHistoryRetentionDays()
 	if keepDays < model.MinOnlineStatsDays || keepDays > model.MaxOnlineStatsDays {
 		keepDays = model.DefaultOnlineStatsDays
 	}

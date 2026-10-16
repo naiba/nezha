@@ -4,6 +4,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/nezhahq/nezha/model"
 	"github.com/nezhahq/nezha/pkg/utils"
@@ -13,6 +14,8 @@ var Conf *ConfigClass
 
 type ConfigClass struct {
 	*model.Config
+
+	onlineHistoryRetentionMu sync.RWMutex
 
 	IgnoredIPNotificationServerIDs map[uint64]bool `json:"ignored_ip_notification_server_ids,omitempty"`
 	Oauth2Providers                []string        `json:"oauth2_providers,omitempty"`
@@ -57,5 +60,41 @@ func (c *ConfigClass) updateIgnoredIPNotificationID() {
 		if id > 0 {
 			c.IgnoredIPNotificationServerIDs[id] = true
 		}
+	}
+}
+
+// OnlineHistoryRetentionDays returns the retention policy visible to queries and pruning.
+func (c *ConfigClass) OnlineHistoryRetentionDays() int {
+	c.onlineHistoryRetentionMu.RLock()
+	defer c.onlineHistoryRetentionMu.RUnlock()
+	return c.OnlineStatsDays
+}
+
+// CommitOnlineHistoryRetention applies a retention change with the settings save.
+func (c *ConfigClass) CommitOnlineHistoryRetention(days *int, persist func() error) error {
+	// Readers must not capture a shorter cutoff while Save can still fail.
+	// Serialize assignment, persistence and rollback with the policy snapshot.
+	c.onlineHistoryRetentionMu.Lock()
+	defer c.onlineHistoryRetentionMu.Unlock()
+	previous := c.OnlineStatsDays
+	if days != nil {
+		c.OnlineStatsDays = *days
+	}
+	if err := persist(); err != nil {
+		c.OnlineStatsDays = previous
+		return err
+	}
+	return nil
+}
+
+// SettingsSnapshot copies response fields without copying the retention mutex.
+func (c *ConfigClass) SettingsSnapshot() model.Setting {
+	c.onlineHistoryRetentionMu.RLock()
+	defer c.onlineHistoryRetentionMu.RUnlock()
+	return model.Setting{
+		ConfigForGuests:                c.ConfigForGuests,
+		ConfigDashboard:                c.ConfigDashboard,
+		IgnoredIPNotificationServerIDs: c.IgnoredIPNotificationServerIDs,
+		Oauth2Providers:                c.Oauth2Providers,
 	}
 }

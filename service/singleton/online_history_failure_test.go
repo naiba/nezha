@@ -183,3 +183,42 @@ func TestOnlineHistoryReportAfterTimeoutSplitsBeforeSweep(t *testing.T) {
 		})
 	}
 }
+
+func TestOnlineHistoryDisconnectSurvivesUnavailableRecovery(t *testing.T) {
+	for _, failClose := range []bool{false, true} {
+		t.Run(map[bool]string{false: "close_success", true: "close_retry"}[failClose], func(t *testing.T) {
+			setupOnlineHistoryTestDB(t)
+			start := time.Now().UTC().Add(-10 * time.Second)
+			old := model.OnlineSession{ServerID: 1, StartedAt: start, LastActiveAt: start, Ongoing: true}
+			require.NoError(t, DB.Create(&old).Error)
+			require.NoError(t, DB.Callback().Query().Before("gorm:query").Register("unavailable_disconnect_restore", func(db *gorm.DB) { db.AddError(errors.New("restore unavailable")) }))
+			r := NewOnlineHistoryRecorder()
+			end := start.Add(time.Second)
+			r.RecordOffline(1, end)
+			// Later disconnects while recovery is unavailable must not extend the first session.
+			r.RecordOffline(1, end.Add(time.Second))
+			require.NoError(t, DB.Callback().Query().Remove("unavailable_disconnect_restore"))
+			if failClose {
+				injectCloseUpdateFailure(t)
+			}
+			reconnect := start.Add(5 * time.Second)
+			r.RecordOnline(1, reconnect)
+			require.NotEqual(t, old.ID, r.open[1].id)
+			rows, err := r.Sessions(1, start, reconnect.Add(time.Second))
+			require.NoError(t, err)
+			require.Len(t, rows, 2)
+			require.False(t, rows[0].Ongoing)
+			require.True(t, rows[0].EndedAt.Equal(end))
+			require.True(t, rows[1].StartedAt.Equal(reconnect))
+			if failClose {
+				require.Len(t, r.closing[1], 1)
+				dropCloseUpdateFailure(t)
+			}
+			r.SweepStale(reconnect.Add(time.Second), func(uint64) (time.Time, bool) { return reconnect, true })
+			require.Empty(t, r.closing)
+			require.False(t, getOnlineSession(t, old.ID).Ongoing)
+			require.True(t, getOnlineSession(t, old.ID).EndedAt.Equal(end))
+			require.True(t, getOnlineSession(t, r.open[1].id).Ongoing)
+		})
+	}
+}
