@@ -45,62 +45,125 @@ func countOnlineSessions(t *testing.T, cond string, args ...any) int64 {
 	return count
 }
 
-// brokenDB 返回一个必然写失败的 gorm 句柄（底层连接已关闭的独立 sqlite）。
-// 返回前已完成迁移的调用方数据不受影响，仅用于让 singleton.DB 上的操作报错。
-func brokenDB(t *testing.T) *gorm.DB {
+// injectCloseUpdateFailure 用 SQLite 触发器注入"SELECT 正常、仅关闭 UPDATE 失败"：
+// 只拦截把 ongoing 置 0 的更新，LastActiveAt 节流写与 INSERT 均不受影响，
+// 使后续 RecordOnline/恢复/清扫全部走真实执行路径。
+func injectCloseUpdateFailure(t *testing.T) {
 	t.Helper()
-	broken, err := gorm.Open(openSQLiteDialector(filepath.Join(t.TempDir(), "broken.sqlite")), &gorm.Config{})
-	require.NoError(t, err)
-	sqlDB, err := broken.DB()
-	require.NoError(t, err)
-	require.NoError(t, sqlDB.Close())
-	return broken
+	require.NoError(t, DB.Exec(`CREATE TRIGGER fail_online_session_close
+BEFORE UPDATE ON online_sessions
+WHEN NEW.ongoing = 0
+BEGIN
+    SELECT RAISE(ABORT, 'injected close failure');
+END`).Error)
+	t.Cleanup(func() { dropCloseUpdateFailure(t) })
 }
 
-// 评审回归（关库失败脱管）：RecordOffline 必须在关库成功后才移除内存条目。
-// 写库失败时保留条目交给清扫周期重试，否则数据库里的 Ongoing 行会把离线
-// 时间持续计作在线，且永远无人重试。
-func TestRecordOfflineCloseFailureKeepsSessionTracked(t *testing.T) {
+func dropCloseUpdateFailure(t *testing.T) {
+	t.Helper()
+	require.NoError(t, DB.Exec("DROP TRIGGER IF EXISTS fail_online_session_close").Error)
+}
+
+// 评审回归（P2：关库失败丢边界/重连续接待关闭会话）：RecordOffline 关库失败时
+// 必须转入待关闭状态——会话 ID 与已观察到的断线时刻固定、后续上报不得覆盖；
+// 重连开启的是新会话而非续接旧行；失败恢复后由清扫周期按固定边界完成持久化，
+// 离线间隔不计入在线。时间自单一基准单调推进。
+func TestRecordOfflineCloseFailurePreservesBoundary(t *testing.T) {
 	setupOnlineHistoryTestDB(t)
 	r := NewOnlineHistoryRecorder()
 
-	start := time.Now()
-	r.RecordOnline(1, start)
-	goodDB := DB
+	base := time.Now().Add(-time.Hour).Truncate(time.Second)
+	atStart := base
+	atLastActive := atStart.Add(model.OnlineActiveWindow) // 恰好达到节流窗口，触发落库
+	atOffline := atLastActive.Add(15 * time.Second)       // 观察到的断线时刻
+	atReconnect := atOffline.Add(10 * time.Minute)
 
-	DB = brokenDB(t)
-	r.RecordOffline(1, start.Add(10*time.Minute))
-	require.Contains(t, r.open, uint64(1), "关库失败的会话必须保留在内存等待重试")
-
-	// 重试窗口内 agent 重连：按既有逻辑续接同一会话，不产生新行
-	r.RecordOnline(1, start.Add(10*time.Minute+model.OnlineActiveWindow))
+	r.RecordOnline(1, atStart)
+	r.RecordOnline(1, atLastActive)
 	require.Len(t, r.open, 1)
+	first := getOnlineSession(t, r.open[1].id)
+	require.WithinDuration(t, atLastActive, first.LastActiveAt, time.Second)
 
-	// 恢复数据库后，清扫周期重试关闭成功
-	DB = goodDB
-	r.SweepStale(start.Add(2*model.OnlineActiveWindow), func(uint64) (time.Time, bool) {
-		return time.Time{}, false
-	})
+	// 注入关闭失败：行保持 Ongoing 等待重试，会话转入待关闭而非继续当活跃会话
+	injectCloseUpdateFailure(t)
+	r.RecordOffline(1, atOffline)
 	require.NotContains(t, r.open, uint64(1))
-	require.Equal(t, int64(0), countOnlineSessions(t, "server_id = ? AND ongoing = ?", 1, true))
+	stuck := getOnlineSession(t, first.ID)
+	require.True(t, stuck.Ongoing)
+	require.True(t, stuck.EndedAt.IsZero(), "关库失败时旧行必须保持未闭合等待重试")
+
+	// 失败未恢复时 agent 重连：旧行不得被续接，必须开启新会话
+	r.RecordOnline(1, atReconnect)
+	require.Contains(t, r.open, uint64(1))
+	require.NotEqual(t, first.ID, r.open[1].id, "待关闭会话不得被续接为活跃会话")
+	afterRetry := getOnlineSession(t, first.ID)
+	require.True(t, afterRetry.Ongoing, "失败未恢复时重试仍失败，旧行保持待关闭")
+	second := getOnlineSession(t, r.open[1].id)
+	require.True(t, second.Ongoing)
+	require.WithinDuration(t, atReconnect, second.StartedAt, time.Second)
+
+	// 失败恢复后清扫：旧行按观察到的断线时刻闭合，新会话仍活跃不受影响
+	dropCloseUpdateFailure(t)
+	r.SweepStale(atReconnect.Add(time.Second), func(uint64) (time.Time, bool) {
+		return atReconnect, true
+	})
+
+	closed := getOnlineSession(t, first.ID)
+	require.False(t, closed.Ongoing)
+	require.WithinDuration(t, atOffline, closed.EndedAt, time.Second, "旧行必须按观察到的断线时刻闭合")
+	require.WithinDuration(t, atStart, closed.StartedAt, time.Second)
+	stillOngoing := getOnlineSession(t, second.ID)
+	require.True(t, stillOngoing.Ongoing)
+
+	// 离线间隔不计入在线：两行在 [atStart, atReconnect) 内的在线合计止于断线时刻
+	var rows []model.OnlineSession
+	require.NoError(t, DB.Where("server_id = ?", 1).Order("id").Find(&rows).Error)
+	require.Len(t, rows, 2)
+	var online time.Duration
+	for _, s := range rows {
+		end := s.EndedAt
+		if s.Ongoing {
+			end = atReconnect
+		}
+		online += end.Sub(s.StartedAt)
+	}
+	require.Equal(t, atOffline.Sub(atStart), online, "离线间隔不得计作在线")
 }
 
-// 评审回归（启动恢复路径同款脱管）：restoreOngoingSessions 结转关库失败时
-// 保留的条目，必须能被随后的清扫周期关闭。
-func TestRestoreCloseFailureSessionRetriedBySweep(t *testing.T) {
+// 评审回归（P2 启动恢复路径）：重启恢复对超窗会话结转关库失败时，条目必须
+// 进入待关闭状态（经真实 NewOnlineHistoryRecorder 恢复路径验证，而非手工
+// 构造内存状态）；重连不得续接该行，清扫周期按固定边界时刻完成持久化。
+func TestRestoreStaleCloseFailureEntersPendingClose(t *testing.T) {
 	setupOnlineHistoryTestDB(t)
 
-	// 模拟恢复结转失败后的状态：行仍 Ongoing，内存按修复后行为保留条目
-	staleAt := time.Now().Add(-model.OnlineActiveWindow - 2*time.Hour)
-	s := model.OnlineSession{ServerID: 1, StartedAt: staleAt.Add(-time.Hour), LastActiveAt: staleAt, Ongoing: true}
-	require.NoError(t, DB.Create(&s).Error)
-	r := &OnlineHistoryRecorder{open: map[uint64]*onlineSessionRuntime{
-		1: {id: s.ID, lastPersist: staleAt},
-	}}
+	// 预置一条超窗 Ongoing 行（dashboard 停机前遗留），时间自单一基准单调推进
+	base := time.Now().Add(-3 * time.Hour).Truncate(time.Second)
+	staleAt := base.Add(time.Hour)
+	atReconnect := base.Add(2 * time.Hour)
+	legacy := model.OnlineSession{ServerID: 1, StartedAt: base, LastActiveAt: staleAt, Ongoing: true}
+	require.NoError(t, DB.Create(&legacy).Error)
 
-	r.SweepStale(time.Now(), func(uint64) (time.Time, bool) { return time.Time{}, false })
-	require.NotContains(t, r.open, uint64(1))
-	require.Equal(t, int64(0), countOnlineSessions(t, "ongoing = ?", true))
+	injectCloseUpdateFailure(t)
+	r := NewOnlineHistoryRecorder()
+
+	stuck := getOnlineSession(t, legacy.ID)
+	require.True(t, stuck.Ongoing, "恢复结转关库失败时行必须保持 Ongoing 等待重试")
+
+	// 重连：待关闭的超窗会话不得被续接，开启新会话
+	r.RecordOnline(1, atReconnect)
+	require.Contains(t, r.open, uint64(1))
+	require.NotEqual(t, legacy.ID, r.open[1].id, "待关闭会话不得被续接为活跃会话")
+
+	dropCloseUpdateFailure(t)
+	r.SweepStale(atReconnect.Add(time.Second), func(uint64) (time.Time, bool) {
+		return atReconnect, true
+	})
+
+	closed := getOnlineSession(t, legacy.ID)
+	require.False(t, closed.Ongoing)
+	require.WithinDuration(t, staleAt, closed.EndedAt, time.Second, "旧行必须按恢复时观察到的边界闭合")
+	require.Equal(t, int64(2), countOnlineSessions(t, "server_id = ?", 1))
+	require.Equal(t, int64(1), countOnlineSessions(t, "server_id = ? AND ongoing = ?", 1, true))
 }
 
 func TestRecordOnlineOpensSingleSession(t *testing.T) {

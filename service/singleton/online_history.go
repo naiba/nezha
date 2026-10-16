@@ -14,6 +14,10 @@ import (
 type OnlineHistoryRecorder struct {
 	mu   sync.Mutex
 	open map[uint64]*onlineSessionRuntime
+	// closing 是关库失败后的待关闭状态：断线边界已被观察到，会话 ID 与
+	// 结束时间在此固定、不可被后续上报覆盖；重试只为旧会话完成持久化，
+	// 重连不得把它续接成活跃会话（同服务器可能同时有多条待关闭会话）。
+	closing map[uint64][]*onlineSessionClosing
 }
 
 type onlineSessionRuntime struct {
@@ -22,10 +26,19 @@ type onlineSessionRuntime struct {
 	lastPersist time.Time
 }
 
+type onlineSessionClosing struct {
+	id uint64
+	// end 是已观察到的会话结束时刻，重试持久化时原样使用。
+	end time.Time
+}
+
 var OnlineHistoryShared *OnlineHistoryRecorder
 
 func NewOnlineHistoryRecorder() *OnlineHistoryRecorder {
-	r := &OnlineHistoryRecorder{open: make(map[uint64]*onlineSessionRuntime)}
+	r := &OnlineHistoryRecorder{
+		open:    make(map[uint64]*onlineSessionRuntime),
+		closing: make(map[uint64][]*onlineSessionClosing),
+	}
 	r.restoreOngoingSessions()
 	return r
 }
@@ -54,8 +67,10 @@ func (r *OnlineHistoryRecorder) restoreOngoingSessions() {
 			if err := closeOnlineSessionRow(s.ID, end); err != nil {
 				log.Printf("NEZHA>> Failed to close stale online session %d: %v", s.ID, err)
 				// 关库失败不能跳过，否则会留下永不闭合、也无人重试的
-				// Ongoing 行；保留条目交给清扫周期重试
-				r.open[s.ServerID] = &onlineSessionRuntime{id: s.ID, lastPersist: s.LastActiveAt}
+				// Ongoing 行；进入待关闭状态交由清扫周期重试。该行已
+				// 失联超窗，同样不得被重连续接为活跃会话
+				r.closing[s.ServerID] = append(r.closing[s.ServerID],
+					&onlineSessionClosing{id: s.ID, end: end})
 			}
 			continue
 		}
@@ -63,11 +78,34 @@ func (r *OnlineHistoryRecorder) restoreOngoingSessions() {
 	}
 }
 
-// RecordOnline 记录一次状态上报：无进行中会话时开启新会话（重启遗留的
-// Ongoing 会话直接续接）；已有会话时节流落库 LastActiveAt。
+// flushClosing 尽力重试关闭该服务器的待关闭会话：按入列时固定的结束时间
+// 持久化，成功才移除；失败的条目原样保留，结束时间不得被后续上报改写。
+func (r *OnlineHistoryRecorder) flushClosing(serverID uint64) {
+	pendings, ok := r.closing[serverID]
+	if !ok {
+		return
+	}
+	kept := pendings[:0]
+	for _, pc := range pendings {
+		if err := closeOnlineSessionRow(pc.id, pc.end); err != nil {
+			log.Printf("NEZHA>> Failed to retry closing online session %d: %v", pc.id, err)
+			kept = append(kept, pc)
+		}
+	}
+	if len(kept) == 0 {
+		delete(r.closing, serverID)
+	} else {
+		r.closing[serverID] = kept
+	}
+}
+
+// RecordOnline 记录一次状态上报：无进行中会话时开启新会话（重启遗留且仍在
+// 窗口内的 Ongoing 会话直接续接）；已有会话时节流落库 LastActiveAt。
 func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	r.flushClosing(serverID)
+
 	if rt, ok := r.open[serverID]; ok {
 		if at.Sub(rt.lastPersist) >= model.OnlineActiveWindow {
 			rt.lastPersist = at
@@ -82,9 +120,19 @@ func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 	// Select("id")+Limit(1)+Find 查无行时不返回 ErrRecordNotFound：gorm 默认
 	// logger 会把每次设备首报的"查无会话"打成 Warn+完整 SQL，噪音与设备
 	// 重连次数成正比
-	if err := DB.Model(&model.OnlineSession{}).
+	q := DB.Model(&model.OnlineSession{}).
 		Where("server_id = ? AND ongoing = ?", serverID, true).
-		Select("id").Limit(1).Find(&existing).Error; err != nil {
+		Select("id").Limit(1)
+	// 待关闭会话即使行仍为 Ongoing 也必须排除：其结束时间已观察到并固定，
+	// 续接会把断线后的离线间隔计作在线
+	if pendings := r.closing[serverID]; len(pendings) > 0 {
+		ids := make([]uint64, 0, len(pendings))
+		for _, pc := range pendings {
+			ids = append(ids, pc.id)
+		}
+		q = q.Where("id NOT IN ?", ids)
+	}
+	if err := q.Find(&existing).Error; err != nil {
 		log.Printf("NEZHA>> Failed to look up ongoing online session: %v", err)
 		return
 	}
@@ -103,10 +151,9 @@ func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 
 // RecordOffline 关闭该服务器当前进行中的会话。at 是会话结束时刻：正常断流
 // 为当前时间，清扫/结转为最后一次已知活跃时间。
-// 必须先关库、成功后才移除内存条目：写库失败时保留条目交给清扫周期重试，
-// 否则会话将永久脱离清扫管理，数据库里的 Ongoing 行会把离线时间持续计作
-// 在线；重试窗口内若 agent 重连，RecordOnline 会按既有逻辑续接这条尚未
-// 闭合的会话，语义自洽。
+// 关库失败时把会话转入待关闭状态而非保留为活跃条目：会话 ID 与已观察到的
+// 结束时刻（at 与 lastPersist 的较大者）就此固定，后续上报不得覆盖；重试
+// 只为旧会话完成持久化，重连则开启新会话——断线后的离线间隔不得计作在线。
 func (r *OnlineHistoryRecorder) RecordOffline(serverID uint64, at time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -120,6 +167,10 @@ func (r *OnlineHistoryRecorder) RecordOffline(serverID uint64, at time.Time) {
 	}
 	if err := closeOnlineSessionRow(rt.id, end); err != nil {
 		log.Printf("NEZHA>> Failed to close online session %d: %v", rt.id, err)
+		// 结束时刻已观察到，不能因写库失败丢失，也不能把行继续当活跃
+		// 会话：转待关闭状态，由 RecordOnline 冲洗与清扫周期重试
+		r.closing[serverID] = append(r.closing[serverID], &onlineSessionClosing{id: rt.id, end: end})
+		delete(r.open, serverID)
 		return
 	}
 	delete(r.open, serverID)
@@ -145,6 +196,22 @@ func (r *OnlineHistoryRecorder) SweepStale(now time.Time, lastActiveFn func(serv
 			at = rt.lastPersist
 		}
 		stale = append(stale, staleSession{serverID: serverID, at: at})
+	}
+	// 待关闭会话已脱离 r.open，其边界时刻也已固定，与服务器当前活跃状态
+	// 无关——无条件重试，避免依赖服务器活跃度才推进
+	for serverID, pendings := range r.closing {
+		kept := pendings[:0]
+		for _, pc := range pendings {
+			if err := closeOnlineSessionRow(pc.id, pc.end); err != nil {
+				log.Printf("NEZHA>> Failed to retry closing online session %d: %v", pc.id, err)
+				kept = append(kept, pc)
+			}
+		}
+		if len(kept) == 0 {
+			delete(r.closing, serverID)
+		} else {
+			r.closing[serverID] = kept
+		}
 	}
 	r.mu.Unlock()
 
