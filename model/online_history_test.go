@@ -202,3 +202,19 @@ func TestDailyOnlineBreakdownRepeatedMidnight(t *testing.T) {
 	days := DailyOnlineBreakdown([]OnlinePeriod{{Start: start, End: end}}, start, end, loc)
 	require.Equal(t, []DailyOnlineStat{{Date: "2021-10-29", OnlineSeconds: 90000}}, days)
 }
+
+func TestOnlineHistoryWindowUsesDashboardCalendar(t *testing.T) {
+	loc, err := time.LoadLocation("America/New_York")
+	require.NoError(t, err)
+	for _, test := range []struct {
+		month      time.Month
+		day, hours int
+	}{{time.March, 9, 23}, {time.November, 2, 25}} {
+		end := time.Date(2026, test.month, test.day, 0, 30, 0, 0, loc)
+		start := OnlineHistoryWindowStart(end.UTC(), 1, loc)
+		require.True(t, start.Equal(time.Date(2026, test.month, test.day-1, 0, 30, 0, 0, loc)))
+		require.Equal(t, time.Duration(test.hours)*time.Hour, end.Sub(start))
+		require.Len(t, DailyOnlineBreakdown(nil, start, end, loc), 2)
+		require.True(t, OnlineHistoryWindowStart(end.UTC(), 7, loc).Equal(end.In(loc).AddDate(0, 0, -7)))
+	}
+}

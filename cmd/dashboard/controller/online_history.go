@@ -60,7 +60,7 @@ func getServerOnlineHistory(c *gin.Context) (*model.OnlineHistoryResponse, error
 
 	now := time.Now()
 	windowEnd := now
-	windowStart := now.AddDate(0, 0, -days)
+	windowStart := model.OnlineHistoryWindowStart(now, days, singleton.Loc)
 
 	sessions, err := singleton.OnlineHistoryShared.Sessions(serverID, windowStart, windowEnd)
 	if err != nil {

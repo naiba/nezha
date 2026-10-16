@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -327,4 +328,29 @@ func TestOnlineHistoryQueryWithNonUTCSession(t *testing.T) {
 	require.Len(t, resp.Periods, 1)
 	require.True(t, resp.Periods[0].Start.Equal(session.StartedAt))
 	require.InDelta(t, 3600, resp.TotalOnlineSeconds, 2)
+}
+
+func TestUpdateConfigFailedSavePreservesRetention(t *testing.T) {
+	server, _ := setupOnlineHistoryControllerTest(t)
+	require.NoError(t, singleton.DB.Create(server).Error)
+	templates := []model.FrontendTemplate{{Path: "user-dist"}}
+	previous := singleton.FrontendTemplates
+	singleton.FrontendTemplates = templates
+	t.Cleanup(func() { singleton.FrontendTemplates = previous })
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	require.NoError(t, singleton.Conf.Read(path, templates))
+	singleton.Conf.OnlineStatsDays = 30
+	require.NoError(t, singleton.Conf.Save())
+	// Replacing the destination with a directory deterministically fails Save even as root.
+	require.NoError(t, os.Remove(path))
+	require.NoError(t, os.Mkdir(path, 0700))
+	now := time.Now().UTC()
+	old := model.OnlineSession{ServerID: 1, StartedAt: now.AddDate(0, 0, -15), EndedAt: now.AddDate(0, 0, -14)}
+	require.NoError(t, singleton.DB.Create(&old).Error)
+	require.Error(t, patchOnlineStatsDays(t, 7))
+	require.Equal(t, 30, singleton.Conf.OnlineStatsDays)
+	singleton.PruneOnlineSessions()
+	var retained model.OnlineSession
+	require.NoError(t, singleton.DB.First(&retained, old.ID).Error)
+	require.Equal(t, old.ID, retained.ID)
 }

@@ -125,6 +125,11 @@ func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 	at = at.UTC()
 	r.flushClosing(serverID)
 
+	// A report can arrive after expiry but before the next sweep. Close at the
+	// previous observation before overwriting it, preserving failed-close retries.
+	if rt := r.open[serverID]; rt != nil && at.Sub(rt.lastObserved) > model.OnlineActiveWindow {
+		r.recordOfflineLocked(serverID, rt.lastObserved)
+	}
 	if rt, ok := r.open[serverID]; ok {
 		rt.lastObserved = at
 		rt.revision++
@@ -247,7 +252,7 @@ func PruneOnlineSessions() {
 	if keepDays < model.MinOnlineStatsDays || keepDays > model.MaxOnlineStatsDays {
 		keepDays = model.DefaultOnlineStatsDays
 	}
-	cutoff := time.Now().AddDate(0, 0, -keepDays).UTC()
+	cutoff := model.OnlineHistoryWindowStart(time.Now(), keepDays, Loc)
 	pruneOnlineSessionsBatch("ongoing = ? AND ended_at < ?", false, cutoff)
 	pruneOnlineSessionsBatch("server_id NOT IN (SELECT `id` FROM servers)")
 }

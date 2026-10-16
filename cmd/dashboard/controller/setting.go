@@ -121,6 +121,7 @@ func updateConfig(c *gin.Context) (any, error) {
 	singleton.Conf.AgentRealIPHeader = sf.AgentRealIPHeader
 	singleton.Conf.AgentTLS = sf.AgentTLS
 	singleton.Conf.UserTemplate = sf.UserTemplate
+	previousOnlineStatsDays := singleton.Conf.OnlineStatsDays
 	if sf.OnlineStatsDays != nil {
 		singleton.Conf.OnlineStatsDays = *sf.OnlineStatsDays
 	}
@@ -133,6 +134,9 @@ func updateConfig(c *gin.Context) (any, error) {
 		singleton.Conf.Save,
 		fireMCPKillSwitch,
 	); err != nil {
+		// A rejected save must not leave a shorter retention policy active:
+		// the scheduled prune would otherwise irreversibly delete history.
+		singleton.Conf.OnlineStatsDays = previousOnlineStatsDays
 		return nil, newGormError("%v", err)
 	}
 

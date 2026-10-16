@@ -199,3 +199,13 @@ func onlineCalendarBoundary(date time.Time, loc *time.Location) time.Time {
 	}
 	return boundary
 }
+
+// OnlineHistoryWindowStart defines the shared query and retention calendar window.
+func OnlineHistoryWindowStart(now time.Time, days int, loc *time.Location) time.Time {
+	// Calendar days follow the dashboard timezone, not the host timezone;
+	// DST days can contain 23 or 25 hours. Queries and pruning must agree.
+	if loc == nil {
+		loc = time.UTC
+	}
+	return now.In(loc).AddDate(0, 0, -days).UTC()
+}

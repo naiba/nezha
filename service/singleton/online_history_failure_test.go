@@ -109,8 +109,10 @@ func TestOnlineHistorySweepKeepsReportReceivedDuringObservation(t *testing.T) {
 		return start, true
 	})
 	require.Contains(t, r.open, uint64(1))
-	require.Equal(t, id, r.open[1].id)
-	require.True(t, getOnlineSession(t, id).Ongoing)
+	// A report after an hour starts a new session; the stale sweep must not close it.
+	require.NotEqual(t, id, r.open[1].id)
+	require.False(t, getOnlineSession(t, id).Ongoing)
+	require.True(t, getOnlineSession(t, r.open[1].id).Ongoing)
 }
 
 func TestOnlineHistoryStartupReadFailureBlocksQueryAndSweepRetries(t *testing.T) {
@@ -144,4 +146,40 @@ func TestOnlineHistoryDisconnectRetriesStartupRead(t *testing.T) {
 	require.True(t, getOnlineSession(t, old.ID).EndedAt.Equal(end))
 	r.RecordOnline(1, time.Now())
 	require.NotEqual(t, old.ID, r.open[1].id)
+}
+
+func TestOnlineHistoryReportAfterTimeoutSplitsBeforeSweep(t *testing.T) {
+	for _, failClose := range []bool{false, true} {
+		t.Run(map[bool]string{false: "persisted", true: "retry_close"}[failClose], func(t *testing.T) {
+			setupOnlineHistoryTestDB(t)
+			r := NewOnlineHistoryRecorder()
+			start := time.Now().UTC().Truncate(time.Second)
+			r.RecordOnline(1, start)
+			r.RecordOnline(1, start.Add(time.Second))
+			first := r.open[1].id
+			r.SweepStale(start.Add(30*time.Second), func(uint64) (time.Time, bool) { return start.Add(time.Second), true })
+			require.Equal(t, first, r.open[1].id)
+			if failClose {
+				injectCloseUpdateFailure(t)
+			}
+			r.RecordOnline(1, start.Add(45*time.Second))
+			require.NotEqual(t, first, r.open[1].id)
+			second := r.open[1].id
+			rows, err := r.Sessions(1, start, start.Add(46*time.Second))
+			require.NoError(t, err)
+			require.Len(t, rows, 2)
+			require.False(t, rows[0].Ongoing)
+			require.True(t, rows[0].EndedAt.Equal(start.Add(time.Second)))
+			require.True(t, rows[1].StartedAt.Equal(start.Add(45*time.Second)))
+			if failClose {
+				require.Len(t, r.closing[1], 1)
+				dropCloseUpdateFailure(t)
+			}
+			r.SweepStale(start.Add(46*time.Second), func(uint64) (time.Time, bool) { return start.Add(45 * time.Second), true })
+			require.Empty(t, r.closing)
+			require.False(t, getOnlineSession(t, first).Ongoing)
+			require.True(t, getOnlineSession(t, first).EndedAt.Equal(start.Add(time.Second)))
+			require.True(t, getOnlineSession(t, second).Ongoing)
+		})
+	}
 }
