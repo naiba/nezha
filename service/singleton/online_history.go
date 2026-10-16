@@ -43,32 +43,39 @@ func NewOnlineHistoryRecorder() *OnlineHistoryRecorder {
 	return r
 }
 
-// restoreOngoingSessions 在启动时恢复进行中的会话：LastActiveAt 距今超过在线窗口的，
-// 按最后一次已知活跃时刻结转关闭；仍在窗口内的保持打开，agent 重连后无缝
-// 续接（RecordOnline 走数据库查找命中现有会话）。
+// restoreOngoingSessions 每台服务器仅允许最新且仍在在线窗口内的会话续接，
+// 其余会话按最后持久化的活跃时间结转。崩溃会丢失内存中的待关闭边界，
+// 恢复时采用 LastActiveAt 保守结转，不推测未持久化的断线时间。
 func (r *OnlineHistoryRecorder) restoreOngoingSessions() {
 	if DB == nil {
 		return
 	}
 	var ongoing []model.OnlineSession
-	if err := DB.Where("ongoing = ?", true).Find(&ongoing).Error; err != nil {
+	if err := DB.Where("ongoing = ?", true).
+		Order("server_id ASC").Order("started_at DESC").Order("id DESC").Find(&ongoing).Error; err != nil {
 		log.Printf("NEZHA>> Failed to load ongoing online sessions: %v", err)
 		return
 	}
 	now := time.Now()
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	seenServers := make(map[uint64]bool)
 	for _, s := range ongoing {
-		if s.LastActiveAt.Before(now.Add(-model.OnlineActiveWindow)) {
+		// 关闭失败后重连可留下同服务器多条 Ongoing 行；直接赋值 open 会覆盖
+		// 旧 ID，导致其永久脱管。按开始时间（同时间按 ID）选最新行，其余
+		// 必须关闭或进入 closing 重试，即使最新行本身已经过期也不能复活旧行。
+		duplicate := seenServers[s.ServerID]
+		seenServers[s.ServerID] = true
+		if duplicate || s.LastActiveAt.Before(now.Add(-model.OnlineActiveWindow)) {
 			end := s.LastActiveAt
 			if end.Before(s.StartedAt) {
 				end = s.StartedAt
 			}
 			if err := closeOnlineSessionRow(s.ID, end); err != nil {
-				log.Printf("NEZHA>> Failed to close stale online session %d: %v", s.ID, err)
+				log.Printf("NEZHA>> Failed to close recovered online session %d: %v", s.ID, err)
 				// 关库失败不能跳过，否则会留下永不闭合、也无人重试的
-				// Ongoing 行；进入待关闭状态交由清扫周期重试。该行已
-				// 失联超窗，同样不得被重连续接为活跃会话
+				// Ongoing 行；进入待关闭状态交由清扫周期重试。过期或
+				// 被更新会话替代的行均不得被重连续接为活跃会话
 				r.closing[s.ServerID] = append(r.closing[s.ServerID],
 					&onlineSessionClosing{id: s.ID, end: end})
 			}
