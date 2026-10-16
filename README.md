@@ -119,6 +119,7 @@ add your theme to [service/singleton/frontend-templates.yaml](service/singleton/
 <a href="https://github.com/railzen" title="Chra"><img src="https://avatars.githubusercontent.com/u/48409318?v=4" width="50;" alt="Chra"/></a>
 <a href="https://github.com/Mubelotix" title="Mubelotix"><img src="https://avatars.githubusercontent.com/u/42696684?v=4" width="50;" alt="Mubelotix"/></a>
 <a href="https://github.com/ryrenz" title="Ryrenz"><img src="https://avatars.githubusercontent.com/u/163799701?v=4" width="50;" alt="Ryrenz"/></a>
+<a href="https://github.com/Sam5440" title="Sam5440"><img src="https://avatars.githubusercontent.com/u/47051833?v=4" width="50;" alt="Sam5440"/></a>
 <a href="https://github.com/zhdsmy" title="zhdsmy"><img src="https://avatars.githubusercontent.com/u/8348149?v=4" width="50;" alt="zhdsmy"/></a><!--GAMFC_DELIMITER_END-->
 
 ## Special Thanks
