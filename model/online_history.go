@@ -184,5 +184,18 @@ func onlineCalendarBoundary(date time.Time, loc *time.Location) time.Time {
 			return end
 		}
 	}
+	// time.Date may choose the second midnight in a rollback. Recover the
+	// earlier occurrence using the offset on the preceding side of the transition.
+	zoneStart, _ := boundary.ZoneBounds()
+	if !zoneStart.IsZero() {
+		_, currentOffset := boundary.Zone()
+		_, previousOffset := zoneStart.Add(-time.Nanosecond).Zone()
+		if previousOffset > currentOffset {
+			earlier := boundary.Add(-time.Duration(previousOffset-currentOffset) * time.Second)
+			if earlier.Format("2006-01-02 15:04:05") == boundary.Format("2006-01-02 15:04:05") {
+				boundary = earlier
+			}
+		}
+	}
 	return boundary
 }

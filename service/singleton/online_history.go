@@ -157,6 +157,10 @@ func (r *OnlineHistoryRecorder) RecordOnline(serverID uint64, at time.Time) {
 func (r *OnlineHistoryRecorder) RecordOffline(serverID uint64, at time.Time) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	// Disconnect may be the first event after startup storage recovers.
+	if !r.restored && !r.restoreOngoingSessions() {
+		return
+	}
 	r.recordOfflineLocked(serverID, at)
 }
 

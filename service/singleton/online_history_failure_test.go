@@ -129,3 +129,19 @@ func TestOnlineHistoryStartupReadFailureBlocksQueryAndSweepRetries(t *testing.T)
 	require.False(t, getOnlineSession(t, old.ID).Ongoing)
 	require.Equal(t, int64(0), countOnlineSessions(t, "ongoing = ?", true))
 }
+
+func TestOnlineHistoryDisconnectRetriesStartupRead(t *testing.T) {
+	setupOnlineHistoryTestDB(t)
+	start := time.Now().Add(-10 * time.Second)
+	old := model.OnlineSession{ServerID: 1, StartedAt: start, LastActiveAt: start, Ongoing: true}
+	require.NoError(t, DB.Create(&old).Error)
+	require.NoError(t, DB.Callback().Query().Before("gorm:query").Register("reject_history_restore", func(db *gorm.DB) { db.AddError(errors.New("restore unavailable")) }))
+	r := NewOnlineHistoryRecorder()
+	require.NoError(t, DB.Callback().Query().Remove("reject_history_restore"))
+	end := start.Add(time.Second)
+	r.RecordOffline(1, end)
+	require.False(t, getOnlineSession(t, old.ID).Ongoing)
+	require.True(t, getOnlineSession(t, old.ID).EndedAt.Equal(end))
+	r.RecordOnline(1, time.Now())
+	require.NotEqual(t, old.ID, r.open[1].id)
+}
