@@ -367,3 +367,30 @@ func TestServerRuntimeOwnership_failedRestartAllowsHourlyRecordThenRetry(t *test
 	require.Equal(t, uint64(0), result.Transfer.In)
 	require.Equal(t, uint64(0), result.Transfer.Out)
 }
+
+func TestStateStreamDisconnectSideEffectSerializesReplacement(t *testing.T) {
+	server := &Server{}
+	old := server.AttachStateStream(runtimeOwnershipStream{})
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	cleared := make(chan bool, 1)
+	go func() { cleared <- old.ClearWithSideEffect(func() { close(entered); <-release }) }()
+	<-entered
+	attached := make(chan StateStreamLease, 1)
+	go func() { attached <- server.AttachStateStream(runtimeOwnershipStream{}) }()
+	select {
+	case <-attached:
+		close(release)
+		t.Fatal("replacement attached before disconnect persistence finished")
+	case <-time.After(20 * time.Millisecond):
+	}
+	close(release)
+	require.True(t, <-cleared)
+	next := <-attached
+	require.True(t, next.UpdateState(&HostState{}, time.Now()))
+	called := false
+	require.False(t, old.ClearWithSideEffect(func() { called = true }))
+	require.False(t, called)
+	require.False(t, old.UpdateStateWithSideEffect(&HostState{}, time.Now(), func() error { called = true; return nil }))
+	require.False(t, called)
+}

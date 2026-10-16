@@ -12,7 +12,6 @@ import (
 	"os"
 	"runtime/debug"
 	"strings"
-	"time"
 	_ "time/tzdata"
 
 	"github.com/gin-gonic/gin"
@@ -75,6 +74,16 @@ func initSystem(bus chan<- *model.Service) error {
 	}
 
 	if _, err := singleton.CronShared.AddFunc("0 0 * * * *", func() { singleton.RecordTransferHourlyUsage() }); err != nil {
+		return err
+	}
+
+	// 在线会话兜底清扫：状态流异常断开（失联）时由这里关闭进行中的会话
+	if _, err := singleton.CronShared.AddFunc("@every 30s", singleton.SweepOnlineSessions); err != nil {
+		return err
+	}
+
+	// 在线会话保留清理：超出后台设置的统计窗口后删除
+	if _, err := singleton.CronShared.AddFunc("0 30 4 * * *", singleton.PruneOnlineSessions); err != nil {
 		return err
 	}
 
@@ -172,10 +181,8 @@ func main() {
 	wireNATDashboardCredentialGate()
 
 	muxHandler := newHTTPandGRPCMux(httpHandler, grpcHandler)
-	muxServerHTTP := &http.Server{
-		Handler:           muxHandler,
-		ReadHeaderTimeout: time.Second * 5,
-	}
+	muxServerHTTP := newDashboardHTTPServer(muxHandler)
+
 	muxServerHTTP.Protocols = new(http.Protocols)
 	muxServerHTTP.Protocols.SetHTTP1(true)
 	muxServerHTTP.Protocols.SetUnencryptedHTTP2(true)
@@ -183,9 +190,9 @@ func main() {
 	var muxServerHTTPS *http.Server
 	if singleton.Conf.HTTPS.ListenPort != 0 {
 		muxServerHTTPS = &http.Server{
+			ReadHeaderTimeout: dashboardReadHeaderTimeout,
 			Addr:              fmt.Sprintf("%s:%d", singleton.Conf.ListenHost, singleton.Conf.HTTPS.ListenPort),
 			Handler:           muxHandler,
-			ReadHeaderTimeout: time.Second * 5,
 			TLSConfig: &tls.Config{
 				InsecureSkipVerify: singleton.Conf.HTTPS.InsecureTLS,
 			},
