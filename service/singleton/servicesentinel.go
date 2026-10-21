@@ -431,10 +431,18 @@ func (ss *ServiceSentinel) loadTodayStats(today time.Time) {
 		totalDelay := make(map[uint64]float64)
 		totalDelayCount := make(map[uint64]int)
 		for _, mh := range mhs {
-			ss.serviceStatusToday[mh.ServiceID].Up += mh.Up
-			ss.monthlyStatus[mh.ServiceID].TotalUp += mh.Up
-			ss.serviceStatusToday[mh.ServiceID].Down += mh.Down
-			ss.monthlyStatus[mh.ServiceID].TotalDown += mh.Down
+			todayStats := ss.serviceStatusToday[mh.ServiceID]
+			monthlyStats := ss.monthlyStatus[mh.ServiceID]
+			// History can outlive a deleted service or belong to a quarantined
+			// service. Neither has startup status entries; skip its rows before
+			// accumulating counts or delays so retained history cannot panic startup.
+			if todayStats == nil || monthlyStats == nil {
+				continue
+			}
+			todayStats.Up += mh.Up
+			monthlyStats.TotalUp += mh.Up
+			todayStats.Down += mh.Down
+			monthlyStats.TotalDown += mh.Down
 			totalDelay[mh.ServiceID] += mh.AvgDelay
 			totalDelayCount[mh.ServiceID]++
 		}
