@@ -4,6 +4,7 @@ import (
 	"errors"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -29,16 +30,53 @@ import (
 // @Success 200 {object} model.CommonResponse[[]model.Server]
 // @Router /server [get]
 func listServer(c *gin.Context) ([]*model.Server, error) {
-	slist := singleton.ServerShared.GetSortedList()
-	ssl := make([]*model.Server, 0, len(slist))
-	for _, server := range slist {
-		if server == nil {
-			continue
+	// Every dashboard tab polls this endpoint; without singleflight a burst of
+	// viewers arriving together each deep-copies the full runtime snapshot of
+	// every server. Collapse concurrent callers that would see the same
+	// inventory. No TTL: the result is shared only for the duration of the
+	// in-flight call, so there is nothing that could go stale.
+	res, err, _ := requestGroup.Do(serverListRequestKey(c), func() (any, error) {
+		slist := singleton.ServerShared.GetSortedList()
+		ssl := make([]*model.Server, 0, len(slist))
+		for _, server := range slist {
+			if server == nil {
+				continue
+			}
+			runtime := server.RuntimeSnapshot()
+			ssl = append(ssl, server.RuntimeCopy(runtime))
 		}
-		runtime := server.RuntimeSnapshot()
-		ssl = append(ssl, server.RuntimeCopy(runtime))
+		return ssl, nil
+	})
+	if err != nil {
+		return nil, err
 	}
-	return ssl, nil
+	return res.([]*model.Server), nil
+}
+
+// serverListRequestKey scopes singleflight sharing to viewers that would see
+// the same inventory. It mirrors serviceResponseCacheKey: sharing across users,
+// or across PATs with different server whitelists, would leak servers.
+func serverListRequestKey(c *gin.Context) string {
+	auth, ok := c.Get(model.CtxKeyAuthorizedUser)
+	if !ok {
+		return "list-server::guest"
+	}
+	user, ok := auth.(*model.User)
+	if !ok || user == nil {
+		return "list-server::guest"
+	}
+	base := "list-server::" + strconv.FormatBool(user.Role.IsAdmin()) + "::" + strconv.FormatUint(user.ID, 10)
+	tok := APITokenFromContext(c)
+	if tok == nil {
+		return base + "::jwt"
+	}
+	ids := tok.ServerIDs()
+	slices.Sort(ids)
+	parts := make([]string, 0, len(ids))
+	for _, id := range ids {
+		parts = append(parts, strconv.FormatUint(id, 10))
+	}
+	return base + "::pat:" + strconv.FormatUint(tok.ID, 10) + "::servers:" + strings.Join(parts, ",")
 }
 
 // Edit server

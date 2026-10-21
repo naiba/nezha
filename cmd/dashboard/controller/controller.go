@@ -1,9 +1,10 @@
 package controller
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+
+	"github.com/goccy/go-json"
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-contrib/pprof"
@@ -27,7 +30,18 @@ import (
 
 func ServeWeb(frontendDist fs.FS) http.Handler {
 	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
+	r := gin.New()
+	r.Use(gin.Recovery())
+	// Hashed assets are requested on every cold navigation and say nothing
+	// useful in the log; keep Logger for pages and API calls.
+	requestLogger := gin.Logger()
+	r.Use(func(c *gin.Context) {
+		if isStaticAssetPath(c.Request.URL.Path) {
+			c.Next()
+			return
+		}
+		requestLogger(c)
+	})
 
 	if singleton.Conf.Debug {
 		gin.SetMode(gin.DebugMode)
@@ -95,7 +109,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	optionalAuth.GET("/ws/server", restScopeMiddleware(model.ScopeInventoryRead), commonHandler(serverStream))
 	optionalAuth.GET("/server-group", restScopeMiddleware(model.ScopeInventoryRead), commonHandler(listServerGroup))
 
-	optionalAuth.GET("/service", restScopeMiddleware(model.ScopeServiceRead), commonHandler(showService))
+	optionalAuth.GET("/service", restScopeMiddleware(model.ScopeServiceRead), commonHandlerWithETag(showService))
 	optionalAuth.GET("/service/server", restScopeMiddleware(model.ScopeServiceRead), commonHandler(listServerWithServices))
 	optionalAuth.GET("/service/:id/history", restScopeMiddleware(model.ScopeServiceRead), commonHandler(getServiceHistory))
 	optionalAuth.GET("/server/:id/service", restScopeMiddleware(model.ScopeServiceRead), commonHandler(listServerServices))
@@ -126,7 +140,7 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.GET("/ws/terminal/:id", restScopeMiddleware(model.ScopeServerExec), commonHandler(terminalStream))
 	auth.POST("/file", restScopeAllOf(model.ScopeServerRead, model.ScopeServerWrite, model.ScopeServerDelete), commonHandler(createFM))
 	auth.GET("/ws/file/:id", restScopeAllOf(model.ScopeServerRead, model.ScopeServerWrite, model.ScopeServerDelete), commonHandler(fmStream))
-	auth.GET("/server", restScopeMiddleware(model.ScopeInventoryRead), listHandler(listServer))
+	auth.GET("/server", restScopeMiddleware(model.ScopeInventoryRead), listHandlerWithETag(listServer))
 	auth.PATCH("/server/:id", restScopeMiddleware(model.ScopeServerWrite), commonHandler(updateServer))
 	auth.GET("/server/config/:id", restScopeMiddleware(serverConfigSensitiveScope()), commonHandler(getServerConfig))
 	auth.POST("/server/config", restScopeMiddleware(model.ScopeServerWrite), commonHandler(setServerConfig))
@@ -196,6 +210,13 @@ func routers(r *gin.Engine, frontendDist fs.FS) {
 	auth.POST("/maintenance", restScopeMiddleware(model.ScopeAdminAll), adminHandler(runMaintenance))
 
 	r.NoRoute(fallbackToFrontend(frontendDist))
+}
+
+// isStaticAssetPath reports whether p addresses a build artifact rather than a
+// page or API endpoint. Admin assets live under /dashboard/assets/, the user
+// frontend's under /assets/.
+func isStaticAssetPath(p string) bool {
+	return strings.HasPrefix(p, "/assets/") || strings.HasPrefix(p, "/dashboard/assets/")
 }
 
 func recordPath(c *gin.Context) {
@@ -314,6 +335,89 @@ func listHandler[S ~[]E, E model.CommonInterface](handler handlerFunc[S]) func(*
 	}
 }
 
+// listHandlerWithETag is listHandler plus a content hash ETag. Endpoints that
+// clients poll on a timer (the dashboard refreshes the service list every few
+// seconds) spend most of their bytes re-sending a body the browser already has;
+// a 304 turns that into a couple of hundred bytes of headers.
+//
+// The ETag is computed from the post-filter body, so it is per-viewer by
+// construction. Responses must stay uncacheable by shared caches: no
+// Cache-Control is emitted beyond the validator, and Vary keeps any
+// intermediary from mixing viewers.
+func listHandlerWithETag[S ~[]E, E model.CommonInterface](handler handlerFunc[S]) func(*gin.Context) {
+	return func(c *gin.Context) {
+		data, err := handler(c)
+		if err != nil {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
+		}
+
+		filtered := filter(c, data)
+		body, err := json.Marshal(model.CommonResponse[S]{
+			Success: true,
+			Data:    model.SearchByIDCtx(c, filtered),
+		})
+		if err != nil {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
+		}
+
+		etag := weakETag(body)
+		c.Header("ETag", etag)
+		c.Header("Vary", "Authorization, Cookie")
+		if etagMatches(c.Request.Header.Get("If-None-Match"), etag) {
+			c.Status(http.StatusNotModified)
+			return
+		}
+		c.Data(http.StatusOK, "application/json; charset=utf-8", body)
+	}
+}
+
+// commonHandlerWithETag is commonHandler plus an ETag/304 short-circuit. Use it
+// for read-only endpoints that browsers poll (see listHandlerWithETag).
+func commonHandlerWithETag[T any](handler handlerFunc[T]) func(*gin.Context) {
+	return func(c *gin.Context) {
+		data, err := handler(c)
+		if err != nil {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
+		}
+		body, err := json.Marshal(model.CommonResponse[T]{Success: true, Data: data})
+		if err != nil {
+			c.JSON(http.StatusOK, newErrorResponse(err))
+			return
+		}
+		etag := weakETag(body)
+		c.Header("ETag", etag)
+		c.Header("Vary", "Authorization, Cookie")
+		if etagMatches(c.Request.Header.Get("If-None-Match"), etag) {
+			c.Status(http.StatusNotModified)
+			return
+		}
+		c.Data(http.StatusOK, "application/json; charset=utf-8", body)
+	}
+}
+
+func weakETag(body []byte) string {
+	sum := sha256.Sum256(body)
+	return `W/"` + hex.EncodeToString(sum[:16]) + `"`
+}
+
+// etagMatches implements the If-None-Match comparison for the subset of syntax
+// that matters here: a single weak or strong validator, or "*".
+func etagMatches(header, etag string) bool {
+	if header == "" {
+		return false
+	}
+	for _, candidate := range strings.Split(header, ",") {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "*" || strings.TrimPrefix(candidate, "W/") == strings.TrimPrefix(etag, "W/") {
+			return true
+		}
+	}
+	return false
+}
+
 func pCommonHandler[S ~[]E, E any](handler pHandlerFunc[S, E]) func(*gin.Context) {
 	return func(c *gin.Context) {
 		data, err := handler(c)
@@ -361,7 +465,7 @@ func getUid(c *gin.Context) uint64 {
 }
 
 func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
-	serveFile := func(c *gin.Context, name string, file fs.File, customStatusCode int) bool {
+	serveFile := func(c *gin.Context, cacheKey, name string, file fs.File, customStatusCode int) bool {
 		defer file.Close()
 		fileStat, err := file.Stat()
 		if err != nil {
@@ -370,11 +474,24 @@ func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
 		if fileStat.IsDir() {
 			return false
 		}
-		readSeeker, ok := file.(io.ReadSeeker)
-		if !ok {
+		// Vite/Rolldown emit content-hashed filenames under assets/, so those can
+		// be cached forever. Everything else (index.html, manifest, favicon) may
+		// change without a name change: no-cache still allows a 304 via the ETag.
+		if strings.HasPrefix(name, "assets/") {
+			c.Header("Cache-Control", "public, max-age=31536000, immutable")
+		} else {
+			c.Header("Cache-Control", "no-cache")
+		}
+		c.Header("ETag", staticETag(name, fileStat.Size(), fileStat.ModTime()))
+		body, _ := serveCompressed(c, cacheKey+name, name, pickEncoding(c.Request), file, fileStat.ModTime())
+		if body == nil {
 			return false
 		}
-		http.ServeContent(utils.NewGinCustomWriter(c, customStatusCode), c.Request, name, fileStat.ModTime(), readSeeker)
+		// Seed the status ServeContent will find when it decides not to write
+		// one itself (200 for a full response, 206 for a range). GinCustomWriter
+		// pins the code, which would otherwise turn its 304 into a 200.
+		c.Status(customStatusCode)
+		http.ServeContent(c.Writer, c.Request, name, fileStat.ModTime(), body)
 		return true
 	}
 
@@ -384,7 +501,7 @@ func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
 			if err == nil {
 				defer localRoot.Close()
 				// URL paths must stay inside the selected template root; never join them against the process cwd.
-				if file, err := localRoot.Open(filePath); err == nil && serveFile(c, filePath, file, customStatusCode) {
+				if file, err := localRoot.Open(filePath); err == nil && serveFile(c, templateRoot+"|local|", filePath, file, customStatusCode) {
 					return true
 				}
 			}
@@ -401,7 +518,7 @@ func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
 		if err != nil {
 			return false
 		}
-		if serveFile(c, filePath, file, customStatusCode) {
+		if serveFile(c, templateRoot+"|embed|", filePath, file, customStatusCode) {
 			return true
 		}
 		return false

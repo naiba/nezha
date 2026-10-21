@@ -4,6 +4,7 @@ go 1.26.6
 
 require (
 	github.com/VictoriaMetrics/VictoriaMetrics v1.151.0
+	github.com/andybalholm/brotli v1.2.6
 	github.com/appleboy/gin-jwt/v2 v2.10.3
 	github.com/dustinkirkland/golang-petname v0.0.0-20260215035315-f0c533e9ce9b
 	github.com/gin-contrib/pprof v1.5.4
