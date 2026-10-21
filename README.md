@@ -40,6 +40,11 @@
 - [English](https://nezhahq.github.io/en_US/index.html)
 - [中文文档](https://nezhahq.github.io/index.html)
 
+## One-Click Deploy
+
+<a href="https://repocloud.io/details/Nezha%20Monitoring/"><img src="https://d16t0pc4846x52.cloudfront.net/deploylobe.svg" alt="Deploy on RepoCloud" height="42"></a>
+<a href="https://railway.com/deploy/nezha"><img src="https://railway.com/button.svg" alt="Deploy on Railway" height="42"></a>
+
 ## Contributing
 
 ### Translation
