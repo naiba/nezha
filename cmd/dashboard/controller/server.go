@@ -50,7 +50,14 @@ func listServer(c *gin.Context) ([]*model.Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	return res.([]*model.Server), nil
+	// Clone before returning: listHandlerWithETag's filter uses
+	// slices.DeleteFunc in place. Concurrent same-key callers would otherwise
+	// share the singleflight slice's backing array and race / panic on a nilled
+	// tail entry inside HasPermission.
+	shared := res.([]*model.Server)
+	out := make([]*model.Server, len(shared))
+	copy(out, shared)
+	return out, nil
 }
 
 // serverListRequestKey scopes singleflight sharing to viewers that would see

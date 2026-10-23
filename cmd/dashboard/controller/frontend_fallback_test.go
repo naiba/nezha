@@ -131,3 +131,22 @@ func TestFallbackToFrontendPreservesDashboardRoutes(t *testing.T) {
 		t.Fatalf("/dashboard/assets/app.js status = %d body = %q, want admin asset", w.Code, w.Body.String())
 	}
 }
+
+func TestFallbackToFrontendUnknownPathKeeps404(t *testing.T) {
+	t.Chdir(t.TempDir())
+	router := newFrontendFallbackTestRouter(t)
+
+	w := performFrontendFallbackRequest(t, router, "/dashboard/this-route-is-not-registered")
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("unknown SPA path status = %d, want 404 (ServeContent must not rewrite to 200)", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), "admin index") {
+		t.Fatalf("unknown SPA path should still serve index.html, body = %q", w.Body.String())
+	}
+
+	// Registered dashboard routes still get 200 with the same index.html.
+	w = performFrontendFallbackRequest(t, router, "/dashboard/service")
+	if w.Code != http.StatusOK {
+		t.Fatalf("registered SPA path status = %d, want 200", w.Code)
+	}
+}

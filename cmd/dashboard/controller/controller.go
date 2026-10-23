@@ -482,16 +482,22 @@ func fallbackToFrontend(frontendDist fs.FS) func(*gin.Context) {
 		} else {
 			c.Header("Cache-Control", "no-cache")
 		}
-		c.Header("ETag", staticETag(name, fileStat.Size(), fileStat.ModTime()))
-		body, _ := serveCompressed(c, cacheKey+name, name, pickEncoding(c.Request), file, fileStat.ModTime())
-		if body == nil {
+		body, etag, ok := serveCompressed(c, cacheKey+name, name, pickEncoding(c.Request), file, fileStat.ModTime())
+		if !ok {
 			return false
 		}
-		// Seed the status ServeContent will find when it decides not to write
-		// one itself (200 for a full response, 206 for a range). GinCustomWriter
-		// pins the code, which would otherwise turn its 304 into a 200.
-		c.Status(customStatusCode)
-		http.ServeContent(c.Writer, c.Request, name, fileStat.ModTime(), body)
+		c.Header("ETag", etag)
+		// Real assets (customStatusCode == 200): let ServeContent emit 200/206/304.
+		// SPA fallback unknown routes need the error status preserved — ServeContent
+		// always WriteHeader(200) on a full GET, which used to wipe the 404 that
+		// GinCustomWriter pinned before this PR.
+		writer := http.ResponseWriter(c.Writer)
+		if customStatusCode != http.StatusOK {
+			writer = utils.NewGinCustomWriter(c, customStatusCode)
+		} else {
+			c.Status(customStatusCode)
+		}
+		http.ServeContent(writer, c.Request, name, fileStat.ModTime(), body)
 		return true
 	}
 

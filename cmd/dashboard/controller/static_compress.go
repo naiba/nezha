@@ -136,52 +136,67 @@ func acceptEncodingQ(values []string) string {
 // serveCompressed serves name through http.ServeContent with a compressed body.
 // The returned io.ReadSeeker is the compressed body when sent is true, and the
 // original bytes (fully buffered) otherwise, so the caller has a single serve
-// path for both the compressed and the plain case.
+// path for both the compressed and the plain case. etag is a content-digest
+// validator (independent of encoding) so equal-length embed upgrades still bust
+// stale 304s.
 //
 // Files opened from an embedded fs.FS are not io.ReadSeekers, so the body is
 // always fully read here; for the dashboard's a few-MB dists that is cheap and
 // only happens on the first request per asset, after which the encoded bytes
 // come from the cache.
 //
-// cacheKey must uniquely identify the *content* (template root + path + mod
-// time); the mod time doubles as a cheap version token for both the embedded FS
-// (zero) and local overrides (file mtime, bumped whenever fetch-frontends.sh or
-// build-frontends.sh rewrites the dist).
-func serveCompressed(c *gin.Context, cacheKey, name, encoding string, src io.Reader, modTime time.Time) (io.ReadSeeker, bool) {
+// The compress cache key includes a content+mtime version so rewriting a local
+// index.html (or any same-path asset) cannot return a stale gzip/br body while
+// the ETag already reflects the new bytes.
+func serveCompressed(c *gin.Context, cacheKey, name, encoding string, src io.Reader, modTime time.Time) (body io.ReadSeeker, etag string, ok bool) {
 	raw, err := io.ReadAll(src)
 	if err != nil {
-		return nil, false
+		return nil, "", false
 	}
+	etag = staticETag(name, raw, modTime)
+	version := assetCacheVersion(raw, modTime)
 
 	if encoding != "" && compressible(name) && len(raw) >= minCompressSize {
-		asset := lookupEncodedAsset(cacheKey + "|" + encoding)
+		key := cacheKey + "|" + version + "|" + encoding
+		asset := lookupEncodedAsset(key)
 		if asset == nil {
-			if body, encErr := encodeAsset(encoding, raw); encErr == nil && len(body) < len(raw) {
-				asset = &encodedAsset{body: body}
-				storeEncodedAsset(cacheKey+"|"+encoding, asset)
+			if encoded, encErr := encodeAsset(encoding, raw); encErr == nil && len(encoded) < len(raw) {
+				asset = &encodedAsset{body: encoded}
+				storeEncodedAsset(key, asset)
 			}
 		}
 		if asset != nil {
 			c.Header("Content-Encoding", encoding)
 			c.Header("Vary", "Accept-Encoding")
-			return bytes.NewReader(asset.body), true
+			return bytes.NewReader(asset.body), etag, true
 		}
 	}
 
 	// Still advertise the negotiation dimension on the identity response,
 	// otherwise a shared cache may hand a plain body to a gzip-capable client.
 	c.Header("Vary", "Accept-Encoding")
-	return bytes.NewReader(raw), false
+	return bytes.NewReader(raw), etag, true
 }
 
-// staticETag derives an ETag for a frontend template file. It deliberately
-// ignores the compression variant: browsers send the same If-None-Match value
-// back regardless of what they negotiated, and a 304 is valid for any encoding
-// of the same representation.
-func staticETag(name string, size int64, modTime time.Time) string {
+// assetCacheVersion identifies the uncompressed bytes for the compress cache.
+// Content digest covers embed.FS (mtime always zero); mtime covers local
+// overrides that may be rewritten in place.
+func assetCacheVersion(raw []byte, modTime time.Time) string {
+	h := fnv.New64a()
+	_, _ = h.Write(raw)
+	return fmt.Sprintf("%x-%x", h.Sum64(), modTime.UnixNano())
+}
+
+// staticETag derives an ETag for a frontend template file from the actual
+// bytes. Filename+length+mtime is not enough: embed.FS reports a zero mtime, so
+// two releases that replace an equal-length file would keep the old validator
+// and clients would incorrectly 304. Compression variant is deliberately
+// ignored — browsers reuse If-None-Match across encodings.
+func staticETag(name string, raw []byte, modTime time.Time) string {
 	h := fnv.New64a()
 	_, _ = h.Write([]byte(name))
-	return fmt.Sprintf(`W/"%x-%x-%x"`, h.Sum64(), size, modTime.UnixNano())
+	_, _ = h.Write(raw)
+	return fmt.Sprintf(`W/"%x-%x-%x"`, h.Sum64(), len(raw), modTime.UnixNano())
 }
 
 func encodeAsset(encoding string, raw []byte) ([]byte, error) {

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/andybalholm/brotli"
 	"github.com/gin-gonic/gin"
@@ -199,5 +200,60 @@ func TestAcceptEncodingQValues(t *testing.T) {
 		if got := acceptEncodingQ([]string{tt.header}); got != tt.want {
 			t.Fatalf("%q => %q, want %q", tt.header, got, tt.want)
 		}
+	}
+}
+
+func TestStaticAssetCompressCacheInvalidatesOnContentUpdate(t *testing.T) {
+	router := newStaticCompressTestRouter(t)
+
+	firstBody := strings.Repeat("console.log('nezha asset bundle v1');\n", 400)
+	writeFrontendFallbackTestFile(t, "admin-dist/assets/app.js", firstBody)
+
+	first := requestWithEncoding(t, router, "/dashboard/assets/app.js", "gzip", nil)
+	if first.Code != http.StatusOK {
+		t.Fatalf("status = %d", first.Code)
+	}
+	if got := first.Header().Get("Content-Encoding"); got != "gzip" {
+		t.Fatalf("Content-Encoding = %q", got)
+	}
+	etag1 := first.Header().Get("ETag")
+	decoded1 := decodeBody(t, "gzip", first.Body.Bytes())
+	if !strings.Contains(decoded1, "v1") {
+		t.Fatalf("first body missing v1: %q", decoded1[:64])
+	}
+
+	// Same path, same approximate length, new content — must bust both the
+	// compress cache and the ETag (this is the local-override rewrite case).
+	secondBody := strings.Repeat("console.log('nezha asset bundle v2');\n", 400)
+	if len(secondBody) != len(firstBody) {
+		t.Fatalf("fixture lengths must match for the equal-length upgrade case: %d vs %d", len(firstBody), len(secondBody))
+	}
+	writeFrontendFallbackTestFile(t, "admin-dist/assets/app.js", secondBody)
+
+	second := requestWithEncoding(t, router, "/dashboard/assets/app.js", "gzip", nil)
+	if second.Code != http.StatusOK {
+		t.Fatalf("status = %d", second.Code)
+	}
+	decoded2 := decodeBody(t, "gzip", second.Body.Bytes())
+	if !strings.Contains(decoded2, "v2") {
+		t.Fatalf("compress cache returned stale body: %q", decoded2[:64])
+	}
+	etag2 := second.Header().Get("ETag")
+	if etag2 == "" || etag2 == etag1 {
+		t.Fatalf("ETag did not change after content update: %q -> %q", etag1, etag2)
+	}
+}
+
+func TestStaticETagChangesForEqualLengthDifferentContent(t *testing.T) {
+	// embed.FS reports a zero mtime; filename+length alone would collide.
+	a := []byte(strings.Repeat("a", 2048))
+	b := []byte(strings.Repeat("b", 2048))
+	etagA := staticETag("index.html", a, time.Time{})
+	etagB := staticETag("index.html", b, time.Time{})
+	if etagA == etagB {
+		t.Fatalf("equal-length different content must not share ETag: %q", etagA)
+	}
+	if etagA != staticETag("index.html", a, time.Time{}) {
+		t.Fatal("ETag must be stable for identical bytes")
 	}
 }
